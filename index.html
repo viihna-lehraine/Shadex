@@ -2,23 +2,31 @@
 <html lang="en">
     <head>
         <title>Palette Generator</title>
-        <link rel="stylesheet" href="src/palette.css">
+        <link rel="stylesheet" href="src/pallete.css">
         <meta charset="UTF-8">
         <meta name="viewport", content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     </head>
     <body>
         <div id="container">
-            <div id="title">
-                <h2>Palette Generator</h2>
-                <form id="paletteForm">
+            <div id="theBox">
+                <h3>Palette Generator</h3>
+                <form id="palleteForm">
                     <label></label>
-                    <select>
-                        <option id="option-1" value="monochromatic">monochromatic</option>
+                    <select id="pallete-type-options">
+                        <option value="0">monochromatic</option>
                     </select>
                     <button id="generateButton" type="submit">Generate</button>
                 </form>  
             </div>
+            <div id="pallete-row">
+                <div class="pallete-box">
+                    <div class="pallete-box-half">
+                        <input class="color-text-output-box"></input>
+                    </div>
+                    <div class="pallete-box-half"></div>
+                </div>
+            </div>
         </div>
-        <script src="src/palette.js"></script>
+        <script src="src/pallete.js"></script>
     </body>
 <html>

@@ -1,0 +1,78 @@
+* {
+    box-sizing: border-box;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+#container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    align-items: center;
+}
+
+#theBox {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid black;
+    padding: 10px 12px;
+    margin-top: 3vh;
+    justify-content: center;
+    text-align: center;
+    border-radius: 5px;
+}
+
+#palette-row {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    top: 12vh;
+    height: fit-content;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px 0;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.palette-box {
+    position: relative;
+    display: flex;
+    height: 55vh;
+    width: 15vw;
+    flex-direction: column;
+    border: 2px solid black;
+}
+
+.palette-half {
+    height: fit-content;
+    width: fit-content;
+}
+
+.palette-box-half {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.palette-box-half:first-of-type {
+    height: 20%;
+    border-bottom: 1px solid black;
+}
+
+.palette-box-half:nth-of-type(2) {
+    height: 75%;
+    border-top: 1px solid black;
+}
+
+.color-text-output-box {
+    height: 60%;
+    width: 90%;
+    border: 1px solid black;
+}
