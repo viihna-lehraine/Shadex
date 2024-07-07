@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <title>Palette Generator</title>
-        <link rel="stylesheet" href="src/pallete.css">
+        <link rel="stylesheet" href="src/palette.css">
         <meta charset="UTF-8">
         <meta name="viewport", content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     </head>
@@ -10,23 +10,35 @@
         <div id="container">
             <div id="theBox">
                 <h3>Palette Generator</h3>
-                <form id="palleteForm">
-                    <label></label>
-                    <select id="pallete-type-options">
-                        <option value="0">monochromatic</option>
-                    </select>
-                    <button id="generateButton" type="submit">Generate</button>
+                <form id="palette-form">
+                    <div class="palette-form-row">
+                        <div class="palette-form-column">
+                            <label for="palette-type-options">Palette Type</label>
+                            <select id="palette-type-options">
+                                <option value="1">Random Color</option>
+                                <option value="2">Complementary</option>
+                                <option value="3">Triadic</option>
+                                <option value="4">Tetradic</option>
+                                <option value="5">Split Complementary</option>
+                            </select>
+                        </div>
+                        <div class="palette-form-column">
+                            <label># of Colors</label>
+                            <select id="palette-number-options">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="palette-form-row">
+                        <button id="generateButton" type="submit">Generate</button>
+                    </div>
                 </form>  
             </div>
-            <div id="pallete-row">
-                <div class="pallete-box">
-                    <div class="pallete-box-half">
-                        <input class="color-text-output-box"></input>
-                    </div>
-                    <div class="pallete-box-half"></div>
-                </div>
-            </div>
+            <div id="palette-row"></div>
         </div>
-        <script src="src/pallete.js"></script>
+        <script src="src/palette.js"></script>
     </body>
 <html>
