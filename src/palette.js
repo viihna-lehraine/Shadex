@@ -98,7 +98,7 @@ function handleGenerateButtonClick() {
 
     if (selectedPaletteTypeOptionValue == "1") {
         if (numBoxes == 1) {
-            colors = generateColor1(limitGrayAndBlack, limitLight);
+            colors = [generateColor1(limitGrayAndBlack, limitLight)];
             generatePaletteBox(colors, numBoxes);
         } else {
             window.alert('Please select "1" for "# of colors" to generate a single random color');
