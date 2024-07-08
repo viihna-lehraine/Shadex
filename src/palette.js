@@ -30,13 +30,15 @@
 
 // DEV NOTES
 
+//  * at least one palette type is spitting out non-integer results
+
 //  * try to spread value attributes apart across palettes for more variation
 
 //  * random color should be able to generate a true random palette for any numBoxes value
 
 //  * color stripe generation function stops palette box generation from working at all. Palette box elements fail to populate despite console logs pointing to the opposite
 
-//  * implement monochromatic, double-complementary, square, neutral, warm, cool, pastel, high-contrast, retro, gradient, muted, jewel-tone, warm analogous, cool analogous, minimalist, earth-tone, greyscale, floral, sunset, ocean, bright-and-bold, gradient, neon, seasons (each), metallic, primary, secondary, low contrast, candy, desert, tropical, cosmic, forest, compound, flipped analogous, clash, custom interval, equidistant, complementary gradient, tonal, fluorescent
+//  * possible other palette types - monochromatic, double-complementary, square (tetradic at 90 degrees), neutral, warm, cool, pastel, high-contrast, retro, gradient, muted, jewel-tone, warm analogous, cool analogous, minimalist, earth-tone, greyscale, floral, sunset, ocean, bright-and-bold, gradient, neon, seasons (each), metallic, primary, secondary, low contrast, candy, desert, tropical, cosmic, forest, compound, flipped analogous, clash, custom interval, equidistant, complementary gradient, tonal, fluorescent
 
 //  * collapsable color square, interactive
 
@@ -54,7 +56,9 @@
 
 //  * tooltips
 
-//  * FAQ / About top bar
+//  * button animations
+
+//  * top bar with FAQ & About
 
 
 // BEGIN
@@ -212,6 +216,7 @@ function populateColorTextOutputBox(color, boxNumber) {
     }
 }
 
+
 /*
 // Populates #palette-row with .color-stripe elements
 function populatePaletteRow(colors) {
@@ -314,7 +319,6 @@ function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight) {
     }
     // populatePaletteRow(colors);
 }
-
 
 
 // Generate triadic hues
@@ -559,7 +563,6 @@ function generateDyadicHues(color, numBoxes) {
 
 
 // Generate dyadic color palette
-
 function generateDyadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
     generatePaletteBox(numBoxes);
     let colors = [];
