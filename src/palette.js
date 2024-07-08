@@ -9,7 +9,7 @@
 
 // the maximum number of swatches is 6
 
-// the saturation and value attributes of all colors are completely random, with outputs evenly distributed from 0 to 100, There is no further mathematical manipulation applied to these attributes at this time
+// the saturation and lightness attributes of all colors are completely random, with outputs evenly distributed from 0 to 100, There is no further mathematical manipulation applied to these attributes at this time
 
 // generateComplementaryPalette() will always generate a palette with swatch #1 having a perfectly complementary hue to swatches 2, 3, and 4
 
@@ -23,16 +23,16 @@
 
 // generateDyadicPalette() works for exactly 2 swatches. The distance between both hues is a randomly generated number between 45 and 75 (specifically, a multiple of 5). This number has weighted probability, with the greatest weights on 40 and 45 degrees
 
-// limitGrayAndDark will set minimum saturation at 20 and value at 25
+// limitGrayAndDark will set minimum saturation at 20 and lightness at 25
 
-// limitLight functions the same as limitGray, while also limiting the maximum value to 75
+// limitLight functions the same as limitGray, while also limiting the maximum lightness to 75
 
 
 // DEV NOTES
 
 //  * at least one palette type is spitting out non-integer results
 
-//  * try to spread value attributes apart across palettes for more variation
+//  * try to spread lightness attributes apart across palettes for more variation
 
 //  * random color should be able to generate a true random palette for any numBoxes value
 
@@ -40,11 +40,9 @@
 
 //  * possible other palette types - monochromatic, double-complementary, square (tetradic at 90 degrees), neutral, warm, cool, pastel, high-contrast, retro, gradient, muted, jewel-tone, warm analogous, cool analogous, minimalist, earth-tone, greyscale, floral, sunset, ocean, bright-and-bold, gradient, neon, seasons (each), metallic, primary, secondary, low contrast, candy, desert, tropical, cosmic, forest, compound, flipped analogous, clash, custom interval, equidistant, complementary gradient, tonal, fluorescent
 
-//  * collapsable color square, interactive
+//  * collapsable color square, interactive (top left side of page. When clicking color swatch, it populates with a color square displaying the swatch's color
 
-//  * HSL -> RGB/Hex/HSV/CIELab/CMYK/LCH conversions
-
-//  * GODDAMNIT I LABELLED ALL THE LIGHTNESS ATTRIBUTES AS VALUE ATTRIBUTES
+//  * HSL -> RGB/Hex/HSV conv
 
 //  * save color palettes (export as text file?)
 
@@ -208,11 +206,11 @@ function generatePaletteBox(numBoxes) {
 }
 
 
-// Populates .color-text-output-box with the HSL value
+// Populates .color-text-output-box with the HSL attribute
 function populateColorTextOutputBox(color, boxNumber) {
     let colorTextOutputBox = document.getElementById(`color-text-output-box-${boxNumber}`);
     if (colorTextOutputBox) {
-        colorTextOutputBox.value = `hsl(${color.hue}, ${color.saturation}%, ${color.value}%)`;
+        colorTextOutputBox.value = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
     }
 }
 
@@ -225,7 +223,7 @@ function populatePaletteRow(colors) {
     colors.forEach(color => {
         const colorStripe = document.createElement('div');
         colorStripe.className = 'color-stripe';
-        colorStripe.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.value}%)`;
+        colorStripe.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
         colorStripe.style.flex = '1';
         paletteRow.appendChild(colorStripe);
     });
@@ -237,36 +235,36 @@ function populatePaletteRow(colors) {
 function randomHSL(limitGrayAndBlack, limitLight) {
     let hue = Math.floor(Math.random() * 360);
     let saturation = Math.floor(Math.random() * 101);
-    let value = Math.floor(Math.random() * 101);
+    let lightness = Math.floor(Math.random() * 101);
 
     if ((limitGrayAndBlack === 1) || (limitLight === 1)) {
         saturation = Math.max(saturation, 20);
-        value = Math.max(value, 25);
+        lightness = Math.max(lightness, 25);
     }
 
     if (limitLight === 1) {
-        value = Math.min(value, 75);
+        lightness = Math.min(lightness, 75);
     }
 
-    return { hue, saturation, value };
+    return { hue, saturation, lightness };
 }
 
 
-// Random saturation and value attributes of new HSL
+// Random saturation and lightness attributes of new HSL
 function randomSL(limitGrayAndBlack, limitLight) {
     let saturation = Math.floor(Math.random() * 101);
-    let value = Math.floor(Math.random() * 101);
+    let lightness = Math.floor(Math.random() * 101);
 
     if ((limitGrayAndBlack === 1) || (limitLight === 1)) {
         saturation = Math.max(saturation, 20);
-        value = Math.max(value, 25);
+        lightness = Math.max(lightness, 25);
     }
 
     if (limitLight === 1) {
-        value = Math.min(value, 75);
+        lightness = Math.min(lightness, 75);
     }
 
-    return { saturation, value };
+    return { saturation, lightness };
 }
 
 
@@ -275,7 +273,7 @@ function generateColor1(limitGrayAndBlack, limitLight) {
     let color = randomHSL(limitGrayAndBlack, limitLight);
     const colorBox1 = document.getElementById('color-box-1');
     if (colorBox1) {
-        colorBox1.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.value}%)`;
+        colorBox1.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
         populateColorTextOutputBox(color, 1);
     } 
     return color;
@@ -303,17 +301,17 @@ function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight) {
     colors.push(color);
 
     for (let i = 2; i <= numBoxes; i++) {
-        let complementarySatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let complementarySatAndLightness = randomSL(limitGrayAndBlack, limitLight);
         let complementaryColor = {
             hue: complementaryHue,
-            saturation: complementarySatAndValue.saturation,
-            value: complementarySatAndValue.value
+            saturation: complementarySatAndLightness.saturation,
+            lightness: complementarySatAndLightness.lightness
         };
         colors.push(complementaryColor);
 
         let colorBox = document.getElementById(`color-box-${i}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${complementaryColor.hue}, ${complementaryColor.saturation}%, ${complementaryColor.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${complementaryColor.hue}, ${complementaryColor.saturation}%, ${complementaryColor.lightness}%)`;
             populateColorTextOutputBox(complementaryColor, i);
         }
     }
@@ -343,17 +341,17 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
 
     for (let i = 0; i < numBoxes - 1; i++) {
         let triadicHue = triadicHues[i];
-        let triadicSatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let triadicSatAndLightness = randomSL(limitGrayAndBlack, limitLight);
         let triadicColor = {
             hue: triadicHue,
-            saturation: triadicSatAndValue.saturation,
-            value: triadicSatAndValue.value
+            saturation: triadicSatAndLightness.saturation,
+            lightness: triadicSatAndLightness.lightness
         };
         colors.push(triadicColor);
 
         let colorBox = document.getElementById(`color-box-${i + 2}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${triadicColor.hue}, ${triadicColor.saturation}%, ${triadicColor.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${triadicColor.hue}, ${triadicColor.saturation}%, ${triadicColor.lightness}%)`;
             populateColorTextOutputBox(triadicColor, i + 2);
         }
     }
@@ -389,17 +387,17 @@ function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight) {
 
     for (let i = 0; i < tetradicHues.length; i++) {
         let tetradicHue = tetradicHues[i];
-        let tetradicSatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let tetradicSatAndLightness = randomSL(limitGrayAndBlack, limitLight);
         let tetradicColor = {
             hue: tetradicHue,
-            saturation: tetradicSatAndValue.saturation,
-            value: tetradicSatAndValue.value
+            saturation: tetradicSatAndLightness.saturation,
+            lightness: tetradicSatAndLightness.lightness
         };
         colors.push(tetradicColor);
 
         let colorBox = document.getElementById(`color-box-${i + 1}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${tetradicColor.hue}, ${tetradicColor.saturation}%, ${tetradicColor.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${tetradicColor.hue}, ${tetradicColor.saturation}%, ${tetradicColor.lightness}%)`;
             populateColorTextOutputBox(tetradicColor, i + 1);
         }
     }
@@ -436,18 +434,18 @@ function generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
 
     for (let i = 0; i < hexadicHues.length; i++) {
         let hexadicHue = hexadicHues[i];
-        let hexadicSatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let hexadicSatAndLightness = randomSL(limitGrayAndBlack, limitLight);
         let hexadicColor = {
             hue: hexadicHue,
-            saturation: hexadicSatAndValue.saturation,
-            value: hexadicSatAndValue.value
+            saturation: hexadicSatAndLightness.saturation,
+            lightness: hexadicSatAndLightness.lightness
         };
         colors.push(hexadicColor);
 
         let colorBox = document.getElementById(`color-box-${i + 1}`);
 
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${hexadicColor.hue}, ${hexadicColor.saturation}%, ${hexadicColor.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${hexadicColor.hue}, ${hexadicColor.saturation}%, ${hexadicColor.lightness}%)`;
             populateColorTextOutputBox(hexadicColor, i + 1);
         }
     }
@@ -484,17 +482,17 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
 
     for (let i = 0; i < splitComplementaryHues.length; i++) {
         let splitComplementaryHue = splitComplementaryHues[i];
-        let splitComplementarySatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let splitComplementarySatAndLightness = randomSL(limitGrayAndBlack, limitLight);
         let splitComplementaryColor = {
             hue: splitComplementaryHue,
-            saturation: splitComplementarySatAndValue.saturation,
-            value: splitComplementarySatAndValue.value
+            saturation: splitComplementarySatAndLightness.saturation,
+            lightness: splitComplementarySatAndLightness.lightness
         };
         colors.push(splitComplementaryColor);
 
         let colorBox = document.getElementById(`color-box-${i + 2}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${splitComplementaryColor.hue}, ${splitComplementaryColor.saturation}%, ${splitComplementaryColor.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${splitComplementaryColor.hue}, ${splitComplementaryColor.saturation}%, ${splitComplementaryColor.lightness}%)`;
             populateColorTextOutputBox(splitComplementaryColor, i + 2);
         }
     }
@@ -530,17 +528,17 @@ function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight) {
 
     for (let i = 0; i < analogousHues.length; i++) {
         let analogousHue = analogousHues[i];
-        let analogousSatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let analogousSatAndLightness = randomSL(limitGrayAndBlack, limitLight);
         let analogousColor = {
             hue: analogousHue,
-            saturation: analogousSatAndValue.saturation,
-            value: analogousSatAndValue.value
+            saturation: analogousSatAndLightness.saturation,
+            lightness: analogousSatAndLightness.lightness
         };
         colors.push(analogousColor);
 
         let colorBox = document.getElementById(`color-box-${i + 2}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${analogousColor.hue}, ${analogousColor.saturation}%, ${analogousColor.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${analogousColor.hue}, ${analogousColor.saturation}%, ${analogousColor.lightness}%)`;
             populateColorTextOutputBox(analogousColor, i + 2);
         }
     }
@@ -573,16 +571,16 @@ function generateDyadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
 
     for (let i = 0; i < dyadicHues.length; i++) {
         let dyadicHue = dyadicHues[i];
-        let dyadicSatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let dyadicSatAndLightness = randomSL(limitGrayAndBlack, limitLight);
         let dyadicColor = {
             hue: dyadicHue,
-            saturation: dyadicSatAndValue.saturation,
-            value: dyadicSatAndValue.value
+            saturation: dyadicSatAndLightness.saturation,
+            lightness: dyadicSatAndLightness.lightness
         };
         let colorBox = document.getElementById(`color-box-${i + 1}`);
 
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${dyadicColor.hue}, ${dyadicColor.saturation}%, ${dyadicColor.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${dyadicColor.hue}, ${dyadicColor.saturation}%, ${dyadicColor.lightness}%)`;
             populateColorTextOutputBox(dyadicColor, i + 1);
         }
     }
