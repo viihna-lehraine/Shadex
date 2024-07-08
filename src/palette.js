@@ -21,7 +21,7 @@
 
 // generateAnalogousPalette() works for a number of swatches between 2 and 6 (inclusive). First and last swatch are a maximum distance of 60 degrees apart, while individual swatches are a minimum of 10 degrees apart
 
-// generateDyadicPalette() works for exactly 2 swatches. The distance between both hues is a randomly generated number between 45 and 75 (specifically, a multiple of 5). This number has weighted probability, with the greatest weights on 40 and 45 degrees
+// generateDiadicPalette() works for exactly 2 swatches. The distance between both hues is a randomly generated number between 45 and 75 (specifically, a multiple of 5). This number has weighted probability, with the greatest weights on 40 and 45 degrees
 
 // limitGrayAndDark will set minimum saturation at 20 and lightness at 25
 
@@ -131,9 +131,9 @@ function handleGenerateButtonClick() {
         }
     } else if (selectedPaletteTypeOptionValue == "8") {
         if (numBoxes == 2) {
-            generateDyadicPalette(numBoxes, limitGrayAndBlack, limitLight);
+            generateDiadic(numBoxes, limitGrayAndBlack, limitLight);
         } else {
-            window.alert('Please select the number "2" for "# of colors" to generate a dyadic palette');
+            window.alert('Please select the number "2" for "# of colors" to generate a diadic palette');
         }
     }
 }
@@ -544,49 +544,49 @@ function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight) {
 }
 
 
-// Generate dyadic hues
-function generateDyadicHues(color, numBoxes) {
-    const dyadicHues = [];
+// Generate diadic hues
+function generateDiadicHues(color, numBoxes) {
+    const diadicHues = [];
     const baseHue = color.hue;
     const randomDistance = getWeightedRandomInterval();
     const hue1 = baseHue;
     const hue2 = (hue1 + randomDistance) % 360;
 
-    dyadicHues.push(hue1, hue2);
+    diadicHues.push(hue1, hue2);
 
-    return dyadicHues;
+    return diadicHues;
 }
 
 
-// Generate dyadic color palette
-function generateDyadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
+// Generate disdic color palette
+function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
     generatePaletteBox(numBoxes);
     let colors = [];
     const color = generateColor1(limitGrayAndBlack, limitLight);
-    const dyadicHues = generateDyadicHues(color, numBoxes);
+    const diadicHues = generateDiadicHues(color, numBoxes);
 
     colors.push(color);
 
-    for (let i = 0; i < dyadicHues.length; i++) {
-        let dyadicHue = dyadicHues[i];
-        let dyadicSatAndLightness = randomSL(limitGrayAndBlack, limitLight);
-        let dyadicColor = {
-            hue: dyadicHue,
-            saturation: dyadicSatAndLightness.saturation,
-            lightness: dyadicSatAndLightness.lightness
+    for (let i = 0; i < diadicHues.length; i++) {
+        let diadicHue = diadicHues[i];
+        let diadicSatAndLightness = randomSL(limitGrayAndBlack, limitLight);
+        let diadicColor = {
+            hue: diadicHue,
+            saturation: diadicSatAndLightness.saturation,
+            lightness: diadicSatAndLightness.lightness
         };
         let colorBox = document.getElementById(`color-box-${i + 1}`);
 
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${dyadicColor.hue}, ${dyadicColor.saturation}%, ${dyadicColor.lightness}%)`;
-            populateColorTextOutputBox(dyadicColor, i + 1);
+            colorBox.style.backgroundColor = `hsl(${diadicColor.hue}, ${diadicColor.saturation}%, ${diadicColor.lightness}%)`;
+            populateColorTextOutputBox(diadicColor, i + 1);
         }
     }
     populatePaletteRow(colors);
 }
 
 
-// generate random weighted interval (for dyadic palette)
+// generate random weighted interval (for diadic palette)
 function getWeightedRandomInterval() {
     const weights = [40, 45, 50, 55, 60, 65, 70];
     const probabilities = [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05]; // Sum should be 1
