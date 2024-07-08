@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.0.1 (pre-alpha, early development)
+// Color Palette Generator - version 0.0.2 (pre-alpha [1st working build])
 // Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal))
 // License -  GPU GPLv3
 // this is STRICTLY free JavaScript. No outside calls are made and all code herein is COMPLETELY free and open-source
@@ -7,7 +7,7 @@
 
 // CURRENT IMPLEMENTATION
 
-// the maximum number of swatches is 4
+// the maximum number of swatches is 6
 
 // the saturation and value attributes of all colors are completely random, with outputs evenly distributed from 0 to 100, There is no further mathematical manipulation applied to these attributes at this time
 
@@ -20,6 +20,12 @@
 // generateSplitComplementaryPalette() only works for a set of exactly 3 swatches. Swatches 2 and 3 are at 180 degrees +/- a random  number of degrees between 20 and 30
 
 // generateAnalogousPalette() works for a number of swatches between 2 and 6 (inclusive). First and last swatch are a maximum distance of 60 degrees apart, while individual swatches are a minimum of 10 degrees apart
+
+// generateDiadicPalette() works for exactly 2 swatches. The distance between both hues is a randomly generated number between 30 and 60 (specifically, a multiple of 5). This number has weighted probability, with the greatest weights on 40 and 45 degrees
+
+// limitGrayAndDark will set minimum saturation at 20 and value at 25
+
+// limitLight functions the same as limitGray, while also limiting the maximum value to 75
 
 
 // BEGIN
@@ -41,52 +47,56 @@ generateButton.addEventListener('click', function(e) {
 function handleGenerateButtonClick() {
     let numBoxes = parseInt(paletteNumberOptions.value, 10);
     let selectedPaletteTypeOptionValue = paletteTypeOptions.value;
+    let limitGrayAndBlackCheckbox = document.getElementById('limitGrayAndBlackCheckbox');
+    let limitLightCheckbox = document.getElementById('limitLightCheckbox');
+    let limitGrayAndBlack = limitGrayAndBlackCheckbox.checked ? 1 : 0;
+    let limitLight = limitLightCheckbox.checked ? 1: 0;
 
     if (selectedPaletteTypeOptionValue == "1") {
         if (numBoxes == 1) {
-            generateRandomColor(numBoxes);
+            generateRandomColor(numBoxes, limitGrayAndBlack, limitLight);
         } else {
             window.alert('Please select "1" for "# of colors" to generate a single random color');
         }
     } else if (selectedPaletteTypeOptionValue == "2") {
         if (numBoxes !== 1) {
-            generateComplementaryPalette(numBoxes);
+            generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight);
         } else {
             window.alert('Please select a number greater than "1" for "# of colors" to generate a complementary palette');
         }
     } else if (selectedPaletteTypeOptionValue == "3") {
         if (numBoxes == 3) {
-            generateTriadicPalette(numBoxes);
+            generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight);
         } else {
             window.alert('Please select the number "3" for "# of colors" to generate a triadic color palette');
         }
     } else if (selectedPaletteTypeOptionValue == "4") {
         if (numBoxes == 4) {
-            generateTetradicPalette(numBoxes);
+            generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight);
         } else {
             window.alert('Please select the number "4" for "# of colors" to generate a tetradic color palette');
         }
     } else if (selectedPaletteTypeOptionValue == "5") {
         if (numBoxes == 3) {
-            generateSplitComplementaryPalette(numBoxes);
+            generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight);
         } else {
             window.alert('Please select the number "3" for "# of colors" to generate a split complementary color palette');
         }
     } else if (selectedPaletteTypeOptionValue == "6") {
         if (numBoxes !== 1) {
-            generateAnalogousPalette(numBoxes);
+            generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight);
         } else {
             window.alert('Please select a number greater than "1" for "# of colors" to generate a split complementary color palette');
         }
     } else if (selectedPaletteTypeOptionValue == "7") {
         if (numBoxes == 6) {
-            generateHexadicPalette(numBoxes);
+            generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight);
         } else {
             window.alert('Please select the number "6" for "# of colors" to generate a hexadic palette');
         }
     } else if (selectedPaletteTypeOptionValue == "8") {
         if (numBoxes == 2) {
-            generateDiadicPalette(numBoxes);
+            generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight);
         } else {
             window.alert('Please select the number "2" for "# of colors" to generate a diadic palette');
         }
@@ -105,7 +115,7 @@ function makePaletteBox() {
 
     let colorTextOutputBox = document.createElement('input');
     colorTextOutputBox.className = 'color-text-output-box';
-    colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
+    colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`; // Ensure this matches
 
     paletteBoxTopHalf.appendChild(colorTextOutputBox);
 
@@ -121,9 +131,14 @@ function makePaletteBox() {
     paletteBox.appendChild(paletteBoxTopHalf);
     paletteBox.appendChild(paletteBoxBottomHalf);
 
+    console.log(`Created paletteBox with ID: ${paletteBox.id}`);
+    console.log(`Created colorTextOutputBox with ID: ${colorTextOutputBox.id}`);
+    console.log(`Created colorBox with ID: ${colorBox.id}`);
+
     paletteBoxCount++;
     return paletteBox;
 }
+
 
 // Generate paletteBox {numBoxes} number of times 
 function generatePaletteBox(numBoxes) {
@@ -136,46 +151,90 @@ function generatePaletteBox(numBoxes) {
     }
 }
 
+
+// populates .color-text-output-box with the HSL value
+function populateColorTextOutputBox(color, boxNumber) {
+    let colorTextOutputBox = document.getElementById(`color-text-output-box-${boxNumber}`);
+    if (colorTextOutputBox) {
+        colorTextOutputBox.value = `hsl(${color.hue}, ${color.saturation}%, ${color.value}%)`;
+        console.log(`Populated colorTextOutputBox-${boxNumber} with value: hsl(${color.hue}, ${color.saturation}%, ${color.value}%)`);
+    } else {
+        console.log(`colorTextOutputBox with ID color-text-output-box-${boxNumber} is null`);
+    }
+}
+
+
 // Random HSL generation for Color #1
-function randomHSL() {
+function randomHSL(limitGrayAndBlack, limitLight) {
     let hue = Math.floor(Math.random() * 360);
     let saturation = Math.floor(Math.random() * 101);
     let value = Math.floor(Math.random() * 101);
-    return { hue, saturation, value }; // Returns h, s, and l as an object
+
+    if ((limitGrayAndBlack === 1) || (limitLight === 1)) {
+        saturation = Math.max(saturation, 20);
+        value = Math.max(value, 25);
+    }
+
+    if (limitLight === 1) {
+        value = Math.min(value, 75);
+    }
+
+    return { hue, saturation, value };
 }
 
 // Random saturation and value attributes of new HSL
-function randomSL() {
+function randomSL(limitGrayAndBlack, limitLight) {
     let saturation = Math.floor(Math.random() * 101);
     let value = Math.floor(Math.random() * 101);
+
+    if (limitGrayAndBlack === 1) {
+        saturation = Math.max(saturation, 20);
+        value = Math.max(value, 25);
+    }
+
     return { saturation, value };
 }
 
-// Generates a randomized first color
-function generateColor1() {
-    let color = randomHSL();
+// Generates a randomized 1st color
+function generateColor1(limitGrayAndBlack, limitLight) {
+    let color = randomHSL(limitGrayAndBlack, limitLight);
     const colorBox1 = document.getElementById('color-box-1');
-    colorBox1.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.value}%)`;
+    if (colorBox1) {
+        colorBox1.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.value}%)`;
+        console.log(`Populated color-box-1 with value: hsl(${color.hue}, ${color.saturation}%, ${color.value}%)`);
+        populateColorTextOutputBox(color, 1); // Populate the first color text output box
+    } else {
+        console.log("colorBox1 is null");
+    }
     return color;
 }
 
+
 // Generate random color
-function generateRandomColor(numBoxes) {
+function generateRandomColor(numBoxes, limitGrayAndBlack, limitLight) {
     generatePaletteBox(numBoxes);
-    generateColor1();
+    const color = generateColor1(limitGrayAndBlack, limitLight);
+    populateColorTextOutputBox(color, 1);
 }
 
+
 // Generate complementary palette
-function generateComplementaryPalette(numBoxes) {
+function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight) {
     generatePaletteBox(numBoxes);
-    const color = generateColor1();
+    const color = generateColor1(limitGrayAndBlack, limitLight);
     const complementaryHue = (color.hue + 180) % 360;
     
     for (let i =2; i <= numBoxes; i++) {
-        const complementarySatAndValue = randomSL();;
-        const colorBox = document.getElementById(`color-box-${i}`);
+        let complementarySatAndValue = randomSL(limitGrayAndBlack, limitLight);;
+        let complementaryColor = {
+            hue: complementaryHue,
+            saturation: complementarySatAndValue.saturation,
+            value: complementarySatAndValue.value
+        };
+        let colorBox = document.getElementById(`color-box-${i}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl${complementaryHue}, ${complementarySatAndValue.saturation}%, ${complementarySatAndValue.value}%`;
+            colorBox.style.backgroundColor = `hsl(${complementaryColor.hue}, ${complementaryColor.saturation}%, ${complementaryColor.value}%)`;
+            populateColorTextOutputBox(complementaryColor, i);
         }
     }
 }
@@ -191,17 +250,23 @@ function generateTriadicHues(color) {
 }
 
 // Generate triadic palette
-function generateTriadicPalette(numBoxes) {
+function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
     generatePaletteBox(numBoxes);
-    const color = generateColor1();
+    const color = generateColor1(limitGrayAndBlack, limitLight);
     const triadicHues = generateTriadicHues(color);
 
     for (let i = 0; i < numBoxes - 1; i++) {
-        const triadicHue = triadicHues[i];
-        const triadicSatAndValue = randomSL();
-        const colorBox = document.getElementById(`color-box-${i + 2}`);
+        let triadicHue = triadicHues[i];
+        let triadicSatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let triadicColor = {
+            hue: triadicHue,
+            saturation: triadicSatAndValue.saturation,
+            value: triadicSatAndValue.value
+        };
+        let colorBox = document.getElementById(`color-box-${i + 2}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${triadicHue}, ${triadicSatAndValue.saturation}%, ${triadicSatAndValue.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${triadicColor.hue}, ${triadicColor.saturation}%, ${triadicColor.value}%)`;
+            populateColorTextOutputBox(triadicColor, i + 2);
         }
     }
 }
@@ -224,17 +289,23 @@ function generateTetradicHues(color) {
 
 
 // Generate tetradic palette
-function generateTetradicPalette(numBoxes) {
+function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight) {
     generatePaletteBox(numBoxes);
-    const color = generateColor1();
+    const color = generateColor1(limitGrayAndBlack, limitLight);
     const tetradicHues = generateTetradicHues(color);
 
     for (let i = 0; i < tetradicHues.length; i++) {
-        const hue = tetradicHues[i];
-        const satAndValue = randomSL();
-        const colorBox = document.getElementById(`color-box-${i + 1}`);
+        let tetradicHue = tetradicHues[i];
+        let tetradicSatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let tetradicColor = {
+            hue: tetradicHue,
+            saturation: tetradicSatAndValue.saturation,
+            value: tetradicSatAndValue.value
+        };
+        let colorBox = document.getElementById(`color-box-${i + 1}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${hue}, ${satAndValue.saturation}%, ${satAndValue.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${tetradicColor.hue}, ${tetradicColor.saturation}%, ${tetradicColor.value}%)`;
+            populateColorTextOutputBox(tetradicColor, i + 1);
         }
     }
 }
@@ -259,18 +330,24 @@ function generateHexadicHues(color) {
 
 
 // Generate hexadic palette
-function generateHexadicPalette(numBoxes) {
-    generatePaletteBox(numBox);
-    const color = generateColor1();
+function generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
+    generatePaletteBox(numBoxes);
+    const color = generateColor1(limitGrayAndBlack, limitLight);
     const hexadicHues = generateHexadicHues(color);
 
     for (let i = 0; i < hexadicHues.length; i++) {
-        const hue = hexadicHues[i];
-        const satAndValue = randomSL();
-        const colorBox = document.getElementById(`color-box-${i + 1}`);
+        let hexadicHue = hexadicHues[i];
+        let hexadicSatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let hexadicColor = {
+            hue: hexadicHue,
+            saturation: hexadicSatAndValue.saturation,
+            value: hexadicSatAndValue.value
+        };
+        let colorBox = document.getElementById(`color-box-${i + 1}`);
 
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${hue}, ${satAndValue.saturation}%, ${satAndValue.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${hexadicColor.hue}, ${hexadicColor.saturation}%, ${hexadicColor.value}%)`;
+            populateColorTextOutputBox(hexadicColor, i + 1);
         }
     }
 }
@@ -294,17 +371,24 @@ function generateSplitComplementaryHues(color, numBoxes) {
 }
 
 // Generate split complementary palette
-function generateSplitComplementaryPalette(numBoxes) {
+function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight) {
     generatePaletteBox(numBoxes);
-    const color = generateColor1();
+    const color = generateColor1(limitGrayAndBlack, limitLight);
     const splitComplementaryHues = generateSplitComplementaryHues(color, numBoxes);
 
     for (let i = 0; i < splitComplementaryHues.length; i++) {
-        const hue = splitComplementaryHues[i];
-        const satAndValue = randomSL();
-        const colorBox = document.getElementById(`color-box-${i + 2}`);
+        let splitComplementaryHue = splitComplementaryHues[i];
+        let splitComplementarySatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let splitComplementaryColor = {
+            hue: splitComplementaryHue,
+            saturation: splitComplementarySatAndValue.saturation,
+            value: splitComplementarySatAndValue.value
+        };
+        let colorBox = document.getElementById(`color-box-${i + 2}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${hue}, ${satAndValue.saturation}%, ${satAndValue.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${splitComplementaryColor.hue}, ${splitComplementaryColor.saturation}%, ${splitComplementaryColor.value}%)`;
+            console.log(`Populated color-box-${i + 2} with value: hsl(${splitComplementaryColor.hue}, ${splitComplementaryColor.saturation}%, ${splitComplementaryColor.value}%)`);
+            populateColorTextOutputBox(splitComplementaryColor, i + 2);
         }
     }
 }
@@ -328,17 +412,23 @@ function generateAnalogousHues(color, numBoxes) {
 
 
 // Generate analogous palette
-function generateAnalogousPalette(numBoxes) {
+function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight) {
     generatePaletteBox(numBoxes);
-    const color = generateColor1();
+    const color = generateColor1(limitGrayAndBlack, limitLight);
     const analogousHues = generateAnalogousHues(color, numBoxes);
 
     for (let i = 0; i < analogousHues.length; i++) {
-        const hue = analogousHues[i];
-        const satAndValue = randomSL();
-        const colorBox = document.getElementById(`color-box-${i + 2}`);
+        let analogousHue = analogousHues[i];
+        let analogousSatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let analogousColor = {
+            hue: analogousHue,
+            saturation: analogousSatAndValue.saturation,
+            value: analogousSatAndValue.value
+        };
+        let colorBox = document.getElementById(`color-box-${i + 2}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${hue}, ${satAndValue.saturation}%, ${satAndValue.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${analogousColor.hue}, ${analogousColor.saturation}%, ${analogousColor.value}%)`;
+            populateColorTextOutputBox(analogousColor, i + 2);
         }
     }
 }
@@ -348,7 +438,7 @@ function generateAnalogousPalette(numBoxes) {
 function generateDiadicHues(color, numBoxes) {
     const diadicHues = [];
     const baseHue = color.hue;
-    const randomDistance = Math.floor(Math.random() * 31) + 30;
+    const randomDistance = getWeightedRandomInterval();
     const hue1 = baseHue;
     const hue2 = (hue1 + randomDistance) % 360;
 
@@ -360,18 +450,45 @@ function generateDiadicHues(color, numBoxes) {
 
 // Generate diadic color palette
 
-function generateDiadicPalette(numBoxes) {
+function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
     generatePaletteBox(numBoxes);
-    const color = generateColor1();
-    const diadicHues = generateDiadicHues(color);
+    const color = generateColor1(limitGrayAndBlack, limitLight);
+    const diadicHues = generateDiadicHues(color, numBoxes);
 
     for (let i = 0; i < diadicHues.length; i++) {
-        const hue = diadicHues[i];
-        const satAndValue = randomSL();
-        const colorBox = document.getElementById(`color-box-${i + 1}`);
+        let diadicHue = diadicHues[i];
+        let diadicSatAndValue = randomSL(limitGrayAndBlack, limitLight);
+        let diadicColor = {
+            hue: diadicHue,
+            saturation: diadicSatAndValue.saturation,
+            value: diadicSatAndValue.value
+        };
+        let colorBox = document.getElementById(`color-box-${i + 1}`);
 
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${hue}, ${satAndValue.saturation}%, ${satAndValue.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${diadicColor.hue}, ${diadicColor.saturation}%, ${diadicColor.value}%)`;
+            populateColorTextOutputBox(diadicColor, i + 1);
         }
     }
+}
+
+
+// generate random weighted interval (for diadic palette)
+function getWeightedRandomInterval() {
+    const weights = [30, 35, 40, 45, 50, 55, 60];
+    const probabilities = [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05]; // Sum should be 1
+    const cumulativeProbabilities = probabilities.reduce((acc, prob, i) => {
+        acc[i] = (acc[i - 1] || 0) + prob;
+        return acc;
+    }, []);
+
+    const random = Math.random();
+    for (let i = 0; i < cumulativeProbabilities.length; i++) {
+        if (random < cumulativeProbabilities[i]) {
+            return weights[i];
+        }
+    }
+
+    // executes in case of rounding errors
+    return weights[weights.length - 1];
 }

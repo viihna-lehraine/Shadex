@@ -1,6 +1,11 @@
 * {
     box-sizing: border-box;
-    font-family: 'Courier New', Courier, monospace;
+}
+
+body {
+    background-color: #F5F5F5;
+    color: #333333;
+    font-family: Arial, sans-serif;
 }
 
 #container {
@@ -22,12 +27,40 @@ label {
 #theBox {
     display: flex;
     flex-direction: column;
-    border: 2px solid black;
     padding: 10px 25px;
     margin-top: 3vh;
     justify-content: center;
     text-align: center;
+    background-color: #FFFFFF;
+    border: 2px solid #707070;
     border-radius: 5px;
+    box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.8);
+}
+
+h3 {
+    color: #333333;
+}
+
+label {
+    color: #555555;
+}
+
+button {
+    background-color: #4CAF50;
+    color: #EDEDFA;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border: 1px solid #1f1f21;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #3c803f;
 }
 
 #palette-row {
@@ -40,17 +73,18 @@ label {
     justify-content: space-around;
     align-items: center;
     padding: 5px 0;
-    border-top: 1px solid black;
-    border-bottom: 1px solid black;
 }
 
 .palette-box {
+    background-color: #F9F9F9;
     position: relative;
     display: flex;
-    height: 40vh;
-    width: 18vw;
+    height: 25vh;
+    width: 15vw;
     flex-direction: column;
-    border: 2px solid black;
+    border: 2px solid #707070;
+    border-radius: 5px;
+    box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.75);
 }
 
 .palette-half {
@@ -61,18 +95,21 @@ label {
 .palette-box-half {
     display: flex;
     flex-direction: column;
+    width: 100%;
     justify-content: center;
     align-items: center;
-    width: 100%;
 }
 
 .palette-box-top-half {
-    height: 20%;
+    height: 25%;
     border-bottom: 1px solid black;
 }
 
 .palette-box-bottom-half {
     height: 75%;
+    justify-content: center;
+    align-items: center;
+    padding: 7px;
     border-top: 1px solid black;
 }
 
@@ -80,6 +117,8 @@ label {
     display: flex;
     height: fit-content;
     width: 100%;
+    justify-content: center;
+    margin-bottom: 10px;
     padding: 5px;
 }
 
@@ -89,19 +128,29 @@ label {
     flex: 1;
     justify-content: center;
     align-items: center;
+    margin-right: 10px;
     padding: 5px;
 }
 
+.palette-form-column:last-child {
+    margin-right: 0;
+}
+
 .color-text-output-box {
-    height: 60%;
-    width: 75%;
-    border: 1px solid black;
+    height: 70%;
+    width: 80%;
+    border: 1px solid #DDDDDD;
+    border-radius: 3px;
+    text-align: center;
 }
 
 .color-box {
     height: 95%;
     width: 95%;
-    margin-top: auto;
-    margin-bottom: auto;
     border: 1px solid black;
+    border-radius: 3px;
+}
+
+.checkbox-label {
+    font-size: 0.75em;
 }
