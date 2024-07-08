@@ -19,7 +19,7 @@
 
 // generateSplitComplementaryPalette() only works for a set of exactly 3 swatches. Swatches 2 and 3 are at 180 degrees +/- a random  number of degrees between 20 and 30
 
-// generateAnalogousPalette() works for a number of swatches between 2 and 6 (inclusive). First and last swatch are a maximum distance of 90 degrees apart
+// generateAnalogousPalette() works for a number of swatches between 2 and 6 (inclusive). First and last swatch are a maximum distance of 60 degrees apart, while individual swatches are a minimum of 10 degrees apart
 
 
 // BEGIN
@@ -58,25 +58,37 @@ function handleGenerateButtonClick() {
         if (numBoxes == 3) {
             generateTriadicPalette(numBoxes);
         } else {
-            window.alert('Please select the number "3" to generate a triadic color palette');
+            window.alert('Please select the number "3" for "# of colors" to generate a triadic color palette');
         }
     } else if (selectedPaletteTypeOptionValue == "4") {
         if (numBoxes == 4) {
             generateTetradicPalette(numBoxes);
         } else {
-            window.alert('Please select the number "4" to generate a tetradic color palette');
+            window.alert('Please select the number "4" for "# of colors" to generate a tetradic color palette');
         }
     } else if (selectedPaletteTypeOptionValue == "5") {
         if (numBoxes == 3) {
             generateSplitComplementaryPalette(numBoxes);
         } else {
-            window.alert('Please select the number "3" to generate a split complementary color palette');
+            window.alert('Please select the number "3" for "# of colors" to generate a split complementary color palette');
         }
     } else if (selectedPaletteTypeOptionValue == "6") {
         if (numBoxes !== 1) {
             generateAnalogousPalette(numBoxes);
         } else {
-            window.alert('Please select a number greater than "1" to generate a split complementary color palette');
+            window.alert('Please select a number greater than "1" for "# of colors" to generate a split complementary color palette');
+        }
+    } else if (selectedPaletteTypeOptionValue == "7") {
+        if (numBoxes == 6) {
+            generateHexadicPalette(numBoxes);
+        } else {
+            window.alert('Please select the number "6" for "# of colors" to generate a hexadic palette');
+        }
+    } else if (selectedPaletteTypeOptionValue == "8") {
+        if (numBoxes == 2) {
+            generateDiadicPalette(numBoxes);
+        } else {
+            window.alert('Please select the number "2" for "# of colors" to generate a diadic palette');
         }
     }
 } 
@@ -158,20 +170,13 @@ function generateComplementaryPalette(numBoxes) {
     generatePaletteBox(numBoxes);
     const color = generateColor1();
     const complementaryHue = (color.hue + 180) % 360;
-    const complementarySatAndValue = randomSL();
-    const colorBox2 = document.getElementById('color-box-2');
-
-    colorBox2.style.backgroundColor = `hsl(${complementaryHue}, ${complementarySatAndValue.saturation}%, ${complementarySatAndValue.value}%)`;
-
-    if (numBoxes >= 3) {
-        const complementarySatAndValue2 = randomSL();
-        const colorBox3 = document.getElementById('color-box-3');
-        colorBox3.style.backgroundColor = `hsl(${complementaryHue}, ${complementarySatAndValue2.saturation}%, ${complementarySatAndValue2.value}%)`;
-    }
-    if (numBoxes >= 4) {
-        const complementarySatAndValue3 = randomSL();
-        const colorBox4 = document.getElementById('color-box-4');
-        colorBox4.style.backgroundColor = `hsl(${complementaryHue}, ${complementarySatAndValue3.saturation}%, ${complementarySatAndValue3.value}%)`;
+    
+    for (let i =2; i <= numBoxes; i++) {
+        const complementarySatAndValue = randomSL();;
+        const colorBox = document.getElementById(`color-box-${i}`);
+        if (colorBox) {
+            colorBox.style.backgroundColor = `hsl${complementaryHue}, ${complementarySatAndValue.saturation}%, ${complementarySatAndValue.value}%`;
+        }
     }
 }
 
@@ -204,12 +209,19 @@ function generateTriadicPalette(numBoxes) {
 // Generate tetradic hues
 function generateTetradicHues(color) {
     const tetradicHues = [];
-    const increments = [90, 180, 270];
-    increments.forEach(increment => {
-        tetradicHues.push((color.hue + increment) % 360);
-    });
+    const baseHue = color.hue;
+    const hue1 = baseHue;
+    const hue2 = (hue1 + 180) % 360;
+    const randomOffset = Math.floor(Math.random() * 46) + 20;
+    const distance = 90 + (Math.random() < 0.5 ? -randomOffset : randomOffset);
+    const hue3 = (hue1 + distance) % 360;
+    const hue4 = (hue3 + 180) % 360;
+
+    tetradicHues.push(hue1, hue2, hue3, hue4);
+
     return tetradicHues;
 }
+
 
 // Generate tetradic palette
 function generateTetradicPalette(numBoxes) {
@@ -217,15 +229,52 @@ function generateTetradicPalette(numBoxes) {
     const color = generateColor1();
     const tetradicHues = generateTetradicHues(color);
 
-    for (let i = 0; i < numBoxes - 1; i++) {
-        const tetradicHue = tetradicHues[i];
-        const tetradicSatAndValue = randomSL();
-        const colorBox = document.getElementById(`color-box-${i + 2}`);
+    for (let i = 0; i < tetradicHues.length; i++) {
+        const hue = tetradicHues[i];
+        const satAndValue = randomSL();
+        const colorBox = document.getElementById(`color-box-${i + 1}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${tetradicHue}, ${tetradicSatAndValue.saturation}%, ${tetradicSatAndValue.value}%)`;
+            colorBox.style.backgroundColor = `hsl(${hue}, ${satAndValue.saturation}%, ${satAndValue.value}%)`;
         }
     }
 }
+
+
+// Generate hexadic hues
+function generateHexadicHues(color) {
+    const hexadicHues = [];
+    const baseHue = color.hue;
+    const hue1 = baseHue;
+    const hue2 = (hue1 + 180) % 360;
+    const randomDistance = Math.floor(Math.random() * 71 + 10);
+    const hue3 = (hue1 + randomDistance) % 360;
+    const hue4 = (hue3 + 180) % 360;
+    const hue5 = (hue1 - randomDistance) % 360;
+    const hue6 = (hue5 + 180) % 360;
+
+    hexadicHues.push(hue1, hue2, hue3, hue4, hue5, hue6);
+
+    return hexadicHues;
+}
+
+
+// Generate hexadic palette
+function generateHexadicPalette(numBoxes) {
+    generatePaletteBox(numBox);
+    const color = generateColor1();
+    const hexadicHues = generateHexadicHues(color);
+
+    for (let i = 0; i < hexadicHues.length; i++) {
+        const hue = hexadicHues[i];
+        const satAndValue = randomSL();
+        const colorBox = document.getElementById(`color-box-${i + 1}`);
+
+        if (colorBox) {
+            colorBox.style.backgroundColor = `hsl(${hue}, ${satAndValue.saturation}%, ${satAndValue.value}%)`;
+        }
+    }
+}
+
 
 // Generate split complementary hues
 function generateSplitComplementaryHues(color, numBoxes) {
@@ -260,11 +309,14 @@ function generateSplitComplementaryPalette(numBoxes) {
     }
 }
 
+
 // Generate analogous hues
 function generateAnalogousHues(color, numBoxes) {
     const analogousHues = [];
-    let baseHue = color.hue;
-    const totalIncrement = Math.floor(Math.random() * 46) + 45;
+    const baseHue = color.hue;
+    const maxTotalDistance = 60;
+    const minTotalDistance = 10 + (numBoxes - 2) * 9;
+    const totalIncrement = Math.floor(Math.random() * (maxTotalDistance - minTotalDistance + 1)) + minTotalDistance;
     const increment = totalIncrement / (numBoxes - 1);
 
     for (let i = 1; i < numBoxes; i++) {
@@ -285,6 +337,39 @@ function generateAnalogousPalette(numBoxes) {
         const hue = analogousHues[i];
         const satAndValue = randomSL();
         const colorBox = document.getElementById(`color-box-${i + 2}`);
+        if (colorBox) {
+            colorBox.style.backgroundColor = `hsl(${hue}, ${satAndValue.saturation}%, ${satAndValue.value}%)`;
+        }
+    }
+}
+
+
+// Generate diadic hues
+function generateDiadicHues(color, numBoxes) {
+    const diadicHues = [];
+    const baseHue = color.hue;
+    const randomDistance = Math.floor(Math.random() * 31) + 30;
+    const hue1 = baseHue;
+    const hue2 = (hue1 + randomDistance) % 360;
+
+    diadicHues.push(hue1, hue2);
+
+    return diadicHues;
+}
+
+
+// Generate diadic color palette
+
+function generateDiadicPalette(numBoxes) {
+    generatePaletteBox(numBoxes);
+    const color = generateColor1();
+    const diadicHues = generateDiadicHues(color);
+
+    for (let i = 0; i < diadicHues.length; i++) {
+        const hue = diadicHues[i];
+        const satAndValue = randomSL();
+        const colorBox = document.getElementById(`color-box-${i + 1}`);
+
         if (colorBox) {
             colorBox.style.backgroundColor = `hsl(${hue}, ${satAndValue.saturation}%, ${satAndValue.value}%)`;
         }
