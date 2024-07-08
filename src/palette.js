@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.0.1
+// Color Palette Generator - version 0.0.1 (pre-alpha, early development)
 // Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal))
 // License -  GPU GPLv3
 // this is STRICTLY free JavaScript. No outside calls are made and all code herein is COMPLETELY free and open-source
@@ -13,9 +13,13 @@
 
 // generateComplementaryPalette() will always generate a palette with swatch #1 having a perfectly complementary hue to swatches 2, 3, and 4
 
-// genrateTriadicPalette() only works for a set of exactly 3 swatches
+// genrateTriadicPalette() only works for a set of exactly 3 swatches. Swatches are 120 degrees apart on the color wheel
 
-// generateTetradic() only works for a set of exactly 4 swatches
+// generateTetradicPalette() only works for a set of exactly 4 swatches. Swatches are 90 degrees apart on the color wheel
+
+// generateSplitComplementaryPalette() only works for a set of exactly 3 swatches. Swatches 2 and 3 are at 180 degrees +/- a random  number of degrees between 20 and 30
+
+// generateAnalogousPalette() works for a number of swatches between 2 and 6 (inclusive). First and last swatch are a maximum distance of 90 degrees apart
 
 
 // BEGIN
@@ -27,15 +31,13 @@ let paletteNumberOptions = document.getElementById('palette-number-options');
 let paletteTypeOptions = document.getElementById('palette-type-options');
 let paletteBoxCount = 1;
 
-
-// prevent default click event and define intended click event
+// Prevent default click event and define intended click event
 generateButton.addEventListener('click', function(e) {
     e.preventDefault();
     handleGenerateButtonClick();
 });
 
-
-// define button click behavior in terms of selected palette type
+// Define button click behavior in terms of selected palette type
 function handleGenerateButtonClick() {
     let numBoxes = parseInt(paletteNumberOptions.value, 10);
     let selectedPaletteTypeOptionValue = paletteTypeOptions.value;
@@ -62,19 +64,24 @@ function handleGenerateButtonClick() {
         if (numBoxes == 4) {
             generateTetradicPalette(numBoxes);
         } else {
-            window.alert('Please select the number "4" to generate a triadic color palette');
+            window.alert('Please select the number "4" to generate a tetradic color palette');
         }
-    } else if (slectedPaletteTypeOptionValue == "5") {
+    } else if (selectedPaletteTypeOptionValue == "5") {
         if (numBoxes == 3) {
             generateSplitComplementaryPalette(numBoxes);
         } else {
             window.alert('Please select the number "3" to generate a split complementary color palette');
         }
+    } else if (selectedPaletteTypeOptionValue == "6") {
+        if (numBoxes !== 1) {
+            generateAnalogousPalette(numBoxes);
+        } else {
+            window.alert('Please select a number greater than "1" to generate a split complementary color palette');
+        }
     }
-};
+} 
 
-
-// generate a palleteBox element with all child elements
+// Generate a paletteBox element with all child elements
 function makePaletteBox() {
     let paletteBox = document.createElement('div');
     paletteBox.className = 'palette-box';
@@ -99,16 +106,14 @@ function makePaletteBox() {
     colorBox.id = `color-box-${paletteBoxCount}`;
 
     paletteBoxBottomHalf.appendChild(colorBox);
-
     paletteBox.appendChild(paletteBoxTopHalf);
     paletteBox.appendChild(paletteBoxBottomHalf);
 
     paletteBoxCount++;
     return paletteBox;
-};
+}
 
-
-// generate palleteBox {numBoxes} number of times 
+// Generate paletteBox {numBoxes} number of times 
 function generatePaletteBox(numBoxes) {
     paletteRow.innerHTML = '';
     paletteBoxCount = 1;
@@ -117,151 +122,171 @@ function generatePaletteBox(numBoxes) {
         const paletteBox = makePaletteBox();
         paletteRow.appendChild(paletteBox);
     }
-};
-
-
-// random HSL generation for Color #1
-function randomHSL() {
-    let hue = Math.floor((Math.random() * 360));
-    let saturation = Math.floor((Math.random() * 101));
-    let value = Math.floor((Math.random() * 101));
-    return {hue, saturation, value};            // returns h, s, and l as an object
-};
-
-// random saturation and value attributes of new HSL
-function random_SL() {
-    let saturation = Math.floor((Math.random() * 101));
-    let value = Math.floor((Math.random() * 101));
-    return {saturation, value}
 }
 
-// generates a randomized first color
+// Random HSL generation for Color #1
+function randomHSL() {
+    let hue = Math.floor(Math.random() * 360);
+    let saturation = Math.floor(Math.random() * 101);
+    let value = Math.floor(Math.random() * 101);
+    return { hue, saturation, value }; // Returns h, s, and l as an object
+}
+
+// Random saturation and value attributes of new HSL
+function randomSL() {
+    let saturation = Math.floor(Math.random() * 101);
+    let value = Math.floor(Math.random() * 101);
+    return { saturation, value };
+}
+
+// Generates a randomized first color
 function generateColor1() {
     let color = randomHSL();
-
-    colorBox1 = document.getElementById('color-box-1');
+    const colorBox1 = document.getElementById('color-box-1');
     colorBox1.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.value}%)`;
-    
     return color;
-};
+}
 
-
-// generate random color
+// Generate random color
 function generateRandomColor(numBoxes) {
     generatePaletteBox(numBoxes);
     generateColor1();
-};
+}
 
-
-// generate complementary palette
+// Generate complementary palette
 function generateComplementaryPalette(numBoxes) {
     generatePaletteBox(numBoxes);
-    generateColor1();
-    let color = generateColor1();
-    generateComplementaryColors(numBoxes, color);
-};
-
-
-// generate colors for complementary palette
-function generateComplementaryColors(numBoxes, color) {
-    let complementaryHue = ((color.hue + 180) % 360);
-    let complementarySatAndValue = random_SL();
-    let colorBox2 = document.getElementById('color-box-2');
+    const color = generateColor1();
+    const complementaryHue = (color.hue + 180) % 360;
+    const complementarySatAndValue = randomSL();
+    const colorBox2 = document.getElementById('color-box-2');
 
     colorBox2.style.backgroundColor = `hsl(${complementaryHue}, ${complementarySatAndValue.saturation}%, ${complementarySatAndValue.value}%)`;
 
     if (numBoxes >= 3) {
-        let complementarySatAndValue2 = random_SL();
-        let colorBox3 = document.getElementById('color-box-3');
-
+        const complementarySatAndValue2 = randomSL();
+        const colorBox3 = document.getElementById('color-box-3');
         colorBox3.style.backgroundColor = `hsl(${complementaryHue}, ${complementarySatAndValue2.saturation}%, ${complementarySatAndValue2.value}%)`;
     }
     if (numBoxes >= 4) {
-        let complementarySatAndValue3 = random_SL();
-        let colorBox4 = document.getElementById('color-box-4');
+        const complementarySatAndValue3 = randomSL();
+        const colorBox4 = document.getElementById('color-box-4');
+        colorBox4.style.backgroundColor = `hsl(${complementaryHue}, ${complementarySatAndValue3.saturation}%, ${complementarySatAndValue3.value}%)`;
+    }
+}
 
-        colorBox4.style.backgroundColor = `hsl(${complementaryHue}, ${complementarySatAndValue3.saturation}%, ${complementarySatAndValue3.value}%)`
-    } 
-};
-
-
-// generate triadic hues from color1
+// Generate triadic hues
 function generateTriadicHues(color) {
     const triadicHues = [];
     const increments = [120, 240];
-
     increments.forEach(increment => {
         triadicHues.push((color.hue + increment) % 360);
     });
-
     return triadicHues;
-};
+}
 
-
-// generate colors for triadic palette
-function generateTriadicColors(numBoxes, color) {
+// Generate triadic palette
+function generateTriadicPalette(numBoxes) {
+    generatePaletteBox(numBoxes);
+    const color = generateColor1();
     const triadicHues = generateTriadicHues(color);
 
     for (let i = 0; i < numBoxes - 1; i++) {
         const triadicHue = triadicHues[i];
-        const triadicSatAndValue = random_SL();
+        const triadicSatAndValue = randomSL();
         const colorBox = document.getElementById(`color-box-${i + 2}`);
-
         if (colorBox) {
             colorBox.style.backgroundColor = `hsl(${triadicHue}, ${triadicSatAndValue.saturation}%, ${triadicSatAndValue.value}%)`;
         }
     }
-};
+}
 
-
-// generate triadic palette
-function generateTriadicPalette(numBoxes) {
-    generatePaletteBox(numBoxes);
-    generateColor1();
-    let color = generateColor1();
-    generateTriadicColors(numBoxes, color);
-};
-
-
-// generate tetradic hues
+// Generate tetradic hues
 function generateTetradicHues(color) {
     const tetradicHues = [];
     const increments = [90, 180, 270];
-
     increments.forEach(increment => {
         tetradicHues.push((color.hue + increment) % 360);
     });
-
     return tetradicHues;
-};
+}
 
-
-// generate colors for tetradic palette
+// Generate tetradic palette
 function generateTetradicPalette(numBoxes) {
     generatePaletteBox(numBoxes);
-    generateColor1();
-    let color = generateColor1();
-    generateTetradicColors(numBoxes, color);
-};
-
-
-// generate colors for tetradic palette
-function generateTetradicColors(numBoxes, color) {
+    const color = generateColor1();
     const tetradicHues = generateTetradicHues(color);
 
     for (let i = 0; i < numBoxes - 1; i++) {
         const tetradicHue = tetradicHues[i];
-        const tetradicSatAndValue = random_SL();
+        const tetradicSatAndValue = randomSL();
         const colorBox = document.getElementById(`color-box-${i + 2}`);
-
         if (colorBox) {
             colorBox.style.backgroundColor = `hsl(${tetradicHue}, ${tetradicSatAndValue.saturation}%, ${tetradicSatAndValue.value}%)`;
         }
     }
-};
+}
+
+// Generate split complementary hues
+function generateSplitComplementaryHues(color, numBoxes) {
+    const splitComplementaryHues = [];
+    const baseHue = color.hue;
+    const baseComplementaryHue = (baseHue + 180) % 360;
+    const modifier = Math.floor(Math.random() * 11) + 20;
+
+    if (numBoxes >= 2) {
+        splitComplementaryHues.push((baseComplementaryHue + modifier) % 360);
+    }
+    if (numBoxes >= 3) {
+        splitComplementaryHues.push((baseComplementaryHue - modifier + 360) % 360);
+    }
+
+    return splitComplementaryHues;
+}
+
+// Generate split complementary palette
+function generateSplitComplementaryPalette(numBoxes) {
+    generatePaletteBox(numBoxes);
+    const color = generateColor1();
+    const splitComplementaryHues = generateSplitComplementaryHues(color, numBoxes);
+
+    for (let i = 0; i < splitComplementaryHues.length; i++) {
+        const hue = splitComplementaryHues[i];
+        const satAndValue = randomSL();
+        const colorBox = document.getElementById(`color-box-${i + 2}`);
+        if (colorBox) {
+            colorBox.style.backgroundColor = `hsl(${hue}, ${satAndValue.saturation}%, ${satAndValue.value}%)`;
+        }
+    }
+}
+
+// Generate analogous hues
+function generateAnalogousHues(color, numBoxes) {
+    const analogousHues = [];
+    let baseHue = color.hue;
+    const totalIncrement = Math.floor(Math.random() * 46) + 45;
+    const increment = totalIncrement / (numBoxes - 1);
+
+    for (let i = 1; i < numBoxes; i++) {
+        analogousHues.push((baseHue + increment * i) % 360);
+    }
+
+    return analogousHues;
+}
 
 
-// generate colors for split complementary palette
-function generateSplitComplementaryHues(color) {
-    // for 7/7/24
+// Generate analogous palette
+function generateAnalogousPalette(numBoxes) {
+    generatePaletteBox(numBoxes);
+    const color = generateColor1();
+    const analogousHues = generateAnalogousHues(color, numBoxes);
+
+    for (let i = 0; i < analogousHues.length; i++) {
+        const hue = analogousHues[i];
+        const satAndValue = randomSL();
+        const colorBox = document.getElementById(`color-box-${i + 2}`);
+        if (colorBox) {
+            colorBox.style.backgroundColor = `hsl(${hue}, ${satAndValue.saturation}%, ${satAndValue.value}%)`;
+        }
+    }
 }
