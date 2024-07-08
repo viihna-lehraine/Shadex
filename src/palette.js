@@ -4,13 +4,14 @@
 
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 
-// All code herein is STRICTLY free (as in freedom) and will always remain that way. You may use this code for any purpose except to create proprietary derivatives. I encourage you to improve on my code or to include it in other projects if you find it helpful! I only ask that you show me what you did so I can observe and learn.
+// All code herein is STRICTLY free (as in freedom) and will always remain that way. You may use this code for any purpose EXCEPT for the creation of proprietary derivatives. I encourage you to improve on my code or to include it in other projects if you find it helpful! I only ask that you show me what you did so that I can observe and learn.
 
 // This program comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND
 
 
 
 // CURRENT IMPLEMENTATION
+
 
 // the maximum number of swatches is 6
 
