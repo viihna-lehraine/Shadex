@@ -75,6 +75,11 @@ button:hover {
     padding: 5px 0;
 }
 
+.color-stripe {
+    flex: 1;
+    height: 100%;
+}
+
 .palette-box {
     background-color: #F9F9F9;
     position: relative;
