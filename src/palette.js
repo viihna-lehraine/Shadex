@@ -36,7 +36,7 @@
 
 //  * color stripe generation function stops palette box generation from working at all. Palette box elements fail to populate despite console logs pointing to the opposite
 
-//  * still need to implement monochromatic pallete gen
+//  * implement monochromatic, double-complementary, square, neutral, warm, cool, pastel, high-contrast, retro, and gradient palettes
 
 
 // BEGIN
