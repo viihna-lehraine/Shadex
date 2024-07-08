@@ -215,7 +215,6 @@ function populateColorTextOutputBox(color, boxNumber) {
 }
 
 
-/*
 // Populates #palette-row with .color-stripe elements
 function populatePaletteRow(colors) {
     paletteRow.innerHTML = '';
@@ -228,7 +227,6 @@ function populatePaletteRow(colors) {
         paletteRow.appendChild(colorStripe);
     });
 }
-*/
 
 
 // Random HSL generation for Color #1
@@ -287,7 +285,7 @@ function generateRandomColor(numBoxes, limitGrayAndBlack, limitLight) {
     const colors = [color];
 
     populateColorTextOutputBox(color, 1);
-//  populatePaletteRow(colors);
+    populatePaletteRow(colors);
 }
 
 
@@ -315,7 +313,7 @@ function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(complementaryColor, i);
         }
     }
-    // populatePaletteRow(colors);
+    populatePaletteRow(colors);
 }
 
 
@@ -355,7 +353,7 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(triadicColor, i + 2);
         }
     }
-//  populatePaletteRow(colors);
+    populatePaletteRow(colors);
 }
 
 
@@ -401,7 +399,7 @@ function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(tetradicColor, i + 1);
         }
     }
-//  populatePaletteRow(colors);
+    populatePaletteRow(colors);
 }
 
 
@@ -449,7 +447,7 @@ function generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(hexadicColor, i + 1);
         }
     }
-//  populatePaletteRow(colors);
+    populatePaletteRow(colors);
 }
 
 
@@ -496,7 +494,7 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
             populateColorTextOutputBox(splitComplementaryColor, i + 2);
         }
     }
-//  populatePaletteRow(colors);
+    populatePaletteRow(colors);
 }
 
 
@@ -542,7 +540,7 @@ function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(analogousColor, i + 2);
         }
     }
-//  populatePaletteRow(colors);
+    populatePaletteRow(colors);
 }
 
 
@@ -584,7 +582,7 @@ function generateDyadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(dyadicColor, i + 1);
         }
     }
-//  populatePaletteRow(colors);
+    populatePaletteRow(colors);
 }
 
 
