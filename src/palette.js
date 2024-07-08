@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.0.2 (pre-alpha [1st working build])
+// Color Palette Generator - version 0.0.21 (pre-alpha [non-working build])
 // Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal))
 // License -  GPU GPLv3
 // this is STRICTLY free JavaScript. No outside calls are made and all code herein is COMPLETELY free and open-source
@@ -33,6 +33,8 @@
 //  * try to spread value attributes apart across palettes for more variation
 
 //  * random color should be able to generate a true random palette for any numBoxes value
+
+//  * color stripe generation function stops palette box generation from working at all. Palette box elements fail to populate despite console logs pointing to the opposite
 
 
 // BEGIN
@@ -262,7 +264,7 @@ function generateRandomColor(numBoxes, limitGrayAndBlack, limitLight) {
     const colors = [color];
 
     populateColorTextOutputBox(color, 1);
-    populatePaletteRow(colors);
+//  populatePaletteRow(colors);
 }
 
 
@@ -331,7 +333,7 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(triadicColor, i + 2);
         }
     }
-    populatePaletteRow(colors);
+//  populatePaletteRow(colors);
 }
 
 
@@ -377,7 +379,7 @@ function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(tetradicColor, i + 1);
         }
     }
-    populatePaletteRow(colors);
+//  populatePaletteRow(colors);
 }
 
 
@@ -425,7 +427,7 @@ function generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(hexadicColor, i + 1);
         }
     }
-    populatePaletteRow(colors);
+//  populatePaletteRow(colors);
 }
 
 
@@ -472,7 +474,7 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
             populateColorTextOutputBox(splitComplementaryColor, i + 2);
         }
     }
-    populatePaletteRow(colors);
+//  populatePaletteRow(colors);
 }
 
 
@@ -518,7 +520,7 @@ function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(analogousColor, i + 2);
         }
     }
-    populatePaletteRow(colors);
+//  populatePaletteRow(colors);
 }
 
 
@@ -561,7 +563,7 @@ function generateDyadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(dyadicColor, i + 1);
         }
     }
-    populatePaletteRow(colors);
+//  populatePaletteRow(colors);
 }
 
 
