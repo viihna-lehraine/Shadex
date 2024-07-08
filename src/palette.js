@@ -65,7 +65,7 @@
 
 // BUGS
 
-//  * colors aren't populating as intended on a consistent basis. Not sure why yet
+//  None that I've observed at the time of this commit
 
 
 
