@@ -36,7 +36,25 @@
 
 //  * color stripe generation function stops palette box generation from working at all. Palette box elements fail to populate despite console logs pointing to the opposite
 
-//  * implement monochromatic, double-complementary, square, neutral, warm, cool, pastel, high-contrast, retro, and gradient palettes
+//  * implement monochromatic, double-complementary, square, neutral, warm, cool, pastel, high-contrast, retro, gradient, muted, jewel-tone, warm analogous, cool analogous, minimalist, earth-tone, greyscale, floral, sunset, ocean, bright-and-bold, gradient, neon, seasons (each), metallic, primary, secondary, low contrast, candy, desert, tropical, cosmic, forest, compound, flipped analogous, clash, custom interval, equidistant, complementary gradient, tonal, fluorescent
+
+//  * collapsable color square, interactive
+
+//  * HSL -> RGB/Hex/HSV/CIELab/CMYK/LCH conversions
+
+//  * GODDAMNIT I LABELLED ALL THE LIGHTNESS ATTRIBUTES AS VALUE ATTRIBUTES
+
+//  * save color palettes (export as text file?)
+
+//  * copy palette to clipboard
+
+//  * drag and drop color swatches
+
+//  * drag and drop color stripes
+
+//  * tooltips
+
+//  * FAQ / About top bar
 
 
 // BEGIN
