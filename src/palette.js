@@ -222,10 +222,21 @@ function makePaletteBox(color, paletteBoxCount) {
     paletteBoxTopHalf.className = 'palette-box-half palette-box-top-half';
     paletteBoxTopHalf.id = `palette-box-top-half-${paletteBoxCount}`;
 
-    let colorTextOutputBox = document.createElement('input');
-    colorTextOutputBox.className = 'color-text-output-box';
+    let colorTextOutputBox = document.createElement('div');
+    colorTextOutputBox.className = 'color-text-output-box tooltip';
     colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
     colorTextOutputBox.setAttribute('data-format', 'hsl');
+    colorTextOutputBox.textContent = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
+
+    let tooltipText = document.createElement('span');
+    tooltipText.className = 'tooltiptext';
+    tooltipText.textContent = 'Copied to clipboard!';
+
+    colorTextOutputBox.appendChild(tooltipText);
+
+    colorTextOutputBox.addEventListener('click', () => {
+        copyToClipboard(colorTextOutputBox.textContent, colorTextOutputBox);
+    });
 
     paletteBoxTopHalf.appendChild(colorTextOutputBox);
 
@@ -1216,7 +1227,15 @@ function convertColors(targetFormat) {
 
     colorTextOutputBoxes.forEach(box => {
         const currentFormat = box.getAttribute('data-format');
-        const color = currentFormat === 'hex' ? box.value : box.value.match(/-?\d*\.?\d+/g).map(Number);
+        let color;
+
+        if (currentFormat === 'hex') {
+            color = box.textContent;
+        } else {
+            color = box.textContent.match(/-?\d*\.?\d+/g).map(Number);
+        }
+
+        console.log(`Converting from ${currentFormat} to ${targetFormat}:`, color);
 
         const conversionFn = conversionMap[currentFormat][targetFormat];
 
@@ -1225,10 +1244,18 @@ function convertColors(targetFormat) {
             return;
         }
 
-        const newColor = Array.isArray(color) ? conversionFn(...color) : conversionFn(color);
+        let newColor;
+        if (Array.isArray(color)) {
+            newColor = conversionFn(...color);
+        } else {
+            newColor = conversionFn(color);
+        }
 
-        box.value = formatColor(newColor, targetFormat);
+        console.log(`Converted color:`, newColor);
+
+        box.textContent = formatColor(newColor, targetFormat);
         box.setAttribute('data-format', targetFormat);
+        console.log(`Updated box textContent:`, box.textContent);
     });
 }
 
@@ -1249,4 +1276,30 @@ function formatColor(color, format) {
         return `lab(${color.l.toFixed(2)}, ${color.a.toFixed(2)}, ${color.b.toFixed(2)})`;
     }
     return color;
+}
+
+
+
+// Copy Color Values to Clipboard on Click
+function copyToClipboard(text, tooltipElement) {
+    navigator.clipboard.writeText(text).then(() => {
+        console.log('Copied to clipboard:', text);
+        showTooltip(tooltipElement);
+    }).catch(err => {
+        console.error('Error copying to clipboard:', err);
+    });
+}
+
+
+// Show Tooltip for Copy to Clipbaoard
+function showTooltip(tooltipElement) {
+    const tooltip = tooltipElement.querySelector('.tooltiptext');
+    if (tooltip) {
+        tooltip.style.visibility = 'visible';
+        tooltip.style.opacity = '1';
+        setTimeout(() => {
+            tooltip.style.visibility = 'hidden';
+            tooltip.style.opacity = '0';
+        }, 1000);
+    }
 }
