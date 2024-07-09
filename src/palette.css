@@ -83,6 +83,10 @@ button:hover {
     align-items: center;
 }
 
+.color-stripe.dragging {
+    opacity: 0.5;
+}
+
 .palette-box {
     background-color: #F9F9F9;
     position: relative;

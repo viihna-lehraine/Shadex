@@ -52,10 +52,6 @@
 
 //  * copy palette to clipboard
 
-//  * drag and drop color swatches
-
-//  * drag and drop color stripes
-
 //  * tooltips
 
 //  * button animations
@@ -66,11 +62,19 @@
 
 // BUGS
 
-//  None that I've observed at the time of this commit
+//  * HSL text values aren't preserved when dragging and dropping color swatches 
+
+
+
+
+// IN PROGRESS
+
+// Drag and Drop functionality
 
 
 
 // BEGIN
+
 
 
 const generateButton = document.getElementById('generateButton');
@@ -78,6 +82,7 @@ const paletteRow = document.getElementById('palette-row');
 let paletteNumberOptions = document.getElementById('palette-number-options');
 let paletteTypeOptions = document.getElementById('palette-type-options');
 let paletteBoxCount = 1;
+let dragSrcEl = null;
 
 
 // Prevent default click event and define intended click event
@@ -191,6 +196,9 @@ function makePaletteBox(color, paletteBoxCount) {
     colorStripe.id = `color-stripe-${paletteBoxCount}`;
     colorStripe.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
 
+    colorStripe.setAttribute('draggable', true);
+    attachEventListeners(colorStripe);
+
     colorStripe.appendChild(paletteBox);
 
     return { colorStripe, paletteBoxCount: paletteBoxCount + 1 };
@@ -200,6 +208,7 @@ function makePaletteBox(color, paletteBoxCount) {
 // Generate paletteBox {numBoxes} number of times 
 function generatePaletteBox(colors, numBoxes) {
     const paletteRow = document.getElementById('palette-row');
+
     paletteRow.innerHTML = '';
     paletteBoxCount = 1;
 
@@ -208,11 +217,13 @@ function generatePaletteBox(colors, numBoxes) {
             console.error(`Color at index ${i} is undefined.`);
             continue;
         }
+
         const { colorStripe, paletteBoxCount: newPaletteBoxCount } = makePaletteBox(colors[i], paletteBoxCount);
 
         paletteRow.appendChild(colorStripe);
 
         populateColorTextOutputBox(colors[i], paletteBoxCount);
+
         paletteBoxCount = newPaletteBoxCount;
     }
 }
@@ -615,7 +626,7 @@ function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
 // generate random weighted interval (for diadic palette)
 function getWeightedRandomInterval() {
     const weights = [40, 45, 50, 55, 60, 65, 70];
-    const probabilities = [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05]; // Sum should be 1
+    const probabilities = [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05];
     const cumulativeProbabilities = probabilities.reduce((acc, prob, i) => {
         acc[i] = (acc[i - 1] || 0) + prob;
         return acc;
@@ -630,4 +641,71 @@ function getWeightedRandomInterval() {
     }
 
     return weights[weights.length - 1];
+}
+
+
+// Drag and Drop - 1st function
+function handleDragStart(e) {
+    dragSrcEl = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+    this.classList.add('dragging');
+}
+
+
+// Drag and Drop - 2nd function
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+
+    e.dataTransfer.dropEffect = 'move';
+
+    return false;
+}
+
+
+// Drag and Drop - 3rd function
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+
+    if (dragSrcEl !== this) {
+        const dragSrcId = dragSrcEl.id;
+        const dropTargetId = this.id;
+        const dragSrcOuterHTML = dragSrcEl.outerHTML;
+        const dropTargetOuterHTML = this.outerHTML;
+
+        dragSrcEl.outerHTML = dropTargetOuterHTML;
+        this.outerHTML = dragSrcOuterHTML;
+
+        const newDragSrcEl = document.getElementById(dropTargetId);
+        const newDropTargetEl = document.getElementById(dragSrcId);
+
+        attachEventListeners(newDragSrcEl);
+        attachEventListeners(newDropTargetEl);
+    }
+    
+    return false;
+}
+
+
+// Drag and Drop - 4th function
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.color-stripe').forEach((el) => {
+        el.classList.remove('dragging');
+    });
+}
+
+
+// Drag and Drop - attach drag and drop event listeners to elements
+function attachEventListeners(element) {
+    if (element) {
+        element.addEventListener('dragstart', handleDragStart);
+        element.addEventListener('dragover', handleDragOver);
+        element.addEventListener('drop', handleDrop);
+        element.addEventListener('dragend', handleDragEnd);
+    }
 }
