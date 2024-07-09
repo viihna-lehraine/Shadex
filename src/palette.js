@@ -84,6 +84,51 @@ let paletteTypeOptions = document.getElementById('palette-type-options');
 let paletteBoxCount = 1;
 let dragSrcEl = null;
 
+const conversionMap = {
+    hsl: {
+        rgb: hslToRGB,
+        hex: (hue, saturation, lightness) => rgbToHex(...Object.values(hslToRGB(hue, saturation, lightness))),
+        hsv: hslToHSV,
+        cmyk: (hue, saturation, lightness) => rgbToCMYK(...Object.values(hslToRGB(hue, saturation, lightness))),
+        lab: (hue, saturation, lightness) => rgbToLab(...Object.values(hslToRGB(hue, saturation, lightness)))
+    },
+    rgb: {
+        hsl: rgbToHSL,
+        hex: rgbToHex,
+        hsv: rgbToHSV,
+        cmyk: rgbToCMYK,
+        lab: rgbToLab
+    },
+    hex: {
+        rgb: hexToRGB,
+        hsl: (hex) => rgbToHSL(...Object.values(hexToRGB(hex))),
+        hsv: (hex) => rgbToHSV(...Object.values(hexToRGB(hex))),
+        cmyk: (hex) => rgbToCMYK(...Object.values(hexToRGB(hex))),
+        lab: (hex) => rgbToLab(...Object.values(hexToRGB(hex)))
+    },
+    hsv: {
+        rgb: hsvToRGB,
+        hex: (hue, saturation, value) => rgbToHex(...Object.values(hsvToRGB(hue, saturation, value))),
+        hsl: hsvToHSL,
+        cmyk: (hue, saturation, value) => rgbToCMYK(...Object.values(hsvToRGB(hue, saturation, value))),
+        lab: (hue, saturation, value) => rgbToLab(...Object.values(hsvToRGB(hue, saturation, value)))
+    },
+    cmyk: {
+        rgb: cmykToRGB,
+        hex: (cyan, magenta, yellow, key) => rgbToHex(...Object.values(cmykToRGB(cyan, magenta, yellow, key))),
+        hsl: (cyan, magenta, yellow, key) => rgbToHSL(...Object.values(cmykToRGB(cyan, magenta, yellow, key))),
+        hsv: (cyan, magenta, yellow, key) => rgbToHSV(...Object.values(cmykToRGB(cyan, magenta, yellow, key))),
+        lab: (cyan, magenta, yellow, key) => rgbToLab(...Object.values(cmykToRGB(cyan, magenta, yellow, key)))
+    },
+    lab: {
+        rgb: labToRGB,
+        hex: (l, a, b) => rgbToHex(...Object.values(labToRGB(l, a, b))),
+        hsl: (l, a, b) => rgbToHSL(...Object.values(labToRGB(l, a, b))),
+        hsv: (l, a, b) => rgbToHSV(...Object.values(labToRGB(l, a, b))),
+        cmyk: (l, a, b) => rgbToCMYK(...Object.values(labToRGB(l, a, b)))
+    }
+};
+
 document.getElementById('hex-conversion-button').addEventListener('click', () => convertColors('hex'));
 document.getElementById('rgb-conversion-button').addEventListener('click', () => convertColors('rgb'));
 document.getElementById('hsv-conversion-button').addEventListener('click', () => convertColors('hsv'));
@@ -786,7 +831,7 @@ function hslToRGB(hue, saturation, lightness) {
     green = Math.round(green * 255);
     blue = Math.round(blue * 255);
     
-    return {red, green, blue};
+    return { red, green, blue };
 }
 
 
@@ -845,7 +890,11 @@ function rgbToHSL(red, green, blue) {
         }
         hue = hue * 60;
     }
-    return { h: Math.round(hue), saturation: Math.round(saturation * 100), lightness: Math.round(lightness * 100) };
+    return {
+        h: Math.round(hue), 
+        saturation: Math.round(saturation * 100),
+        lightness: Math.round(lightness * 100)
+    };
 }
 
 
@@ -878,7 +927,11 @@ function rgbToHSV(red, green, blue) {
         }
         hue = hue * 60;
     }
-    return { hue: Math.round(hue), saturation: Math.round(saturation * 100), value: Math.round(value * 100) };
+    return {
+        hue: Math.round(hue), 
+        saturation: Math.round(saturation * 100),
+        value: Math.round(value * 100) 
+    };
 }
 
 
@@ -1065,118 +1118,42 @@ function xyzToLab(x, y, z) {
 }
 
 
-// Defines functionality for color format conversion buttons
-function convertColors(format) {
+// Master Color Conversion Function
+function convertColors(targetFormat) {
     const colorTextOutputBoxes = document.querySelectorAll('.color-text-output-box');
 
     colorTextOutputBoxes.forEach(box => {
         const currentFormat = box.getAttribute('data-format');
-        let color = box.value;
-        let newColor;
+        const color = box.value.match(/-?\d*\.?\d+/g).map(Number);
+        const conversionFn = conversionMap[currentFormat][targetFormat];
 
-        if (currentFormat === 'hsl') {
-            const hsl = color.match(/\d+g/).map(Number);
-            const rgb = hslToRGB(hsl[0], hsl[1], hsl[2]);
-            if (format === 'rgb') {
-                newColor = `rgb(${rgb.red}, ${rgb.green}, ${rgb.blue})`;
-            } else if (format === 'hex') {
-                newColor = rgbToHex(rgb.red, rgb.green, rgb.blue);
-            } else if (format === 'hsv') {
-                const hsv = rgbToHSV(rgb.red, rgb.green, rgb.blue);
-                newColor = `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
-            } else if (format === 'cmyk') {
-                const cmyk = `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
-            } else if (format === 'lab') {
-                const lab = rgbToLab(rgb.red, rgb.green, rgb.blue);
-                newColor = `lab(${lab.l.toFixed(2)}, ${lab.a.toFixed(2)}, ${lab.b.toFixed(2)})`;
-            }
-        } else if (currentFormat === 'rgb') {
-            const rgb = color.match(/\d+/g).map(Number);
-            if (format === 'hsl') {
-                const hsl = rgbToHSL(rgb[0], rgb[1], rgb[2]);
-                newColor = `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
-            } else if (format === 'hex') {
-                newColor = rgbToHex(rgb[0], rgb[1], rgb[2]);
-            } else if (format = 'hsv') {
-                const hsv = rgbToHSV(rgb[0], rgb[1], rgb[2]);
-                newColor = `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value})`;
-            } else if (format === 'cmyk') {
-                const cmyk = rgbToCMYK(rgb[0], rgb[1], rgb[2]);
-                newColor = `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
-            } else if (format === 'lab') {
-                const lab = rgbToLab(rgb[0], rgb[1], rgb[2]);
-                newColor = `lab(${lab.l.toFixed(2)}, ${lab.a.toFixed(2)}, ${lab.b.toFixed(2)})`;
-            }
-        } else if (currentFormat === 'hex') {
-            const rgb = hexToRGB(red, green, blue);
-            if (format === 'rgb') {
-                newColor = `rgb(${rgb.red}, ${rgb.green}, ${rgb.blue})`;
-            } else if (format === 'hsl') {
-                const hsl = rgbToHSL(rgb.red, rgb.green, rgb.blue);
-                newColor = `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
-            } else if (format === 'hsv') {
-                const hsv = rgbToHSV(rgb[0], rgb[1], rgb[2]);
-                newColor = `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value})`;
-            } else if (format === 'cmyk') {
-                const cmyk = rgbToCMYK(rgb[0], rgb[1], rgb[2]);
-                newColor = `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
-            } else if (format === 'lab') {
-                const lab = rgbToLab(rgb[0], rgb[1], rgb[2]);
-                newColor = `lab(${lab.l.toFixed(2)}, ${lab.a.toFixed(2)}, ${lab.b.toFixed(2)})`;
-            }
-        } else if (currentFormat === 'hsv') {
-            const hsv = color.match(/\d+/g).map(Number);
-            const rgb = hsvToRGB(hsv[0], hsv[1], hsv[2]);
-            if (format === 'rgb') {
-            newColor = `rgb(${rgb.red}, ${rgb.green}, ${rgb.blue})`;
-            } else if (format === 'hex') {
-                newColor = rgbToHex(rgb[0], rgb[1], rgb[2]);
-            } else if (format === 'hsl') {
-                const hsl = rgbToHSL(rgb.red, rgb.green, rgb.blue);
-                newColor = `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
-            } else if (format === 'cmyk') {
-                const cmyk = rgbToCMYK(rgb[0], rgb[1], rgb[2]);
-                newColor = `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
-            } else if (format === 'lab') {
-                const lab = rgbToLab(rgb[0], rgb[1], rgb[2]);
-                newColor = `lab(${lab.l.toFixed(2)}, ${lab.a.toFixed(2)}, ${lab.b.toFixed(2)})`;
-            }
-        } else if (currentFormat === 'cmyk') {
-            const cmyk = color.match(/\d+/g).map(Number);
-            const rgb = cmykToRGB(cmyk[0], cmyk[1], cmyk[2], cmyk[3]);
-            if (format === 'rgb') {
-                newColor = `rgb(${rgb.red}, ${rgb.green}, ${rgb.blue})`;
-            } else if (format === 'hex') {
-                newColor = rgbToHex(rgb[0], rgb[1], rgb[2]);
-            } else if (format === 'hsl') {
-                const hsl = rgbToHSL(rgb.red, rgb.green, rgb.blue);
-                newColor = `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
-            } else if (format === 'hsv') {
-                const hsv = rgbToHSV(rgb[0], rgb[1], rgb[2]);
-                newColor = `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value})`;
-            } else if (format === 'lab') {
-                const lab = rgbToLab(rgb.red, rgb.green, rgb.blue);
-                newColor = `lab(${lab.l.toFixed(2)}, ${lab.a.toFixed(2)}, ${lab.b.toFixed(2)})`;
-            }
-        } else if (currentFormat === 'lab') {
-            const lab = color.match(/-?\d*\.?\d+/g).map(Number);
-            const rgb = labToRGB(lab[0], lab[1], lab[2]);
-            if (format === 'rgb') {
-                newColor = `rgb(${rgb.red}, ${rgb.green}, ${rgb.blue})`;
-            } else if (format === 'hex') {
-                newColor = rgbToHex(rgb[0], rgb[1], rgb[2]);
-            } else if (format === 'hsl') {
-                const hsl = rgbToHSL(rgb.red, rgb.green, rgb.blue);
-                newColor = `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
-            } else if (format === 'hsv') {
-                const hsv = rgbToHSV(rgb[0], rgb[1], rgb[2]);
-                newColor = `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value})`;
-            } else if (format === 'cmyk') {
-                const cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
-                newColor = `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
-            }
-            box.value = newColor;
-            box.setAttribute('data-format', format);
+        if (!conversionFn) {
+            console.error(`Conversion from ${currentFormat} to ${targetFormat} is not supported.`);
+            return;
         }
+
+        const newColor = conversionFn(...color);
+
+        box.value = formatColor(newColor, targetFormat);
+        box.setAttribute('data-format', targetFormat);
     });
+}
+
+
+// Master Color Formatting Function
+function formatColor(color, format) {
+    if (format === 'hex') {
+        return color;
+    } else if (format === 'rgb') {
+        return `rgb(${color.red}, ${color.green}, ${color.blue})`;
+    } else if (format === 'hsl') {
+        return `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
+    } else if (format === 'hsv') {
+        return `hsv(${color.hue}, ${color.saturation}%, ${color.value}%)`;
+    } else if (format === 'cmyk') {
+        return `cmyk(${color.cyan}%, ${color.magenta}%, ${color.yellow}%, ${color.key}%)`;
+    } else if (format === 'lab') {
+        return `lab(${color.l.toFixed(2)}, ${color.a.toFixed(2)}, ${color.b.toFixed(2)})`;
+    }
+    return color;
 }
