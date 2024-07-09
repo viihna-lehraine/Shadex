@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.1.0
+// Color Palette Generator - version 0.2
 
 // Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal))
 
@@ -33,6 +33,8 @@
 
 // limitLight functions the same as limitGray, while also limiting the maximum lightness to 75
 
+// drag and drop color swatches
+
 
 
 // DEV NOTES
@@ -45,8 +47,6 @@
 //  * possible other palette types - monochromatic, double-complementary, square (tetradic at 90 degrees), neutral, warm, cool, pastel, high-contrast, retro, gradient, muted, jewel-tone, warm analogous, cool analogous, minimalist, earth-tone, greyscale, floral, sunset, ocean, bright-and-bold, gradient, neon, seasons (each), metallic, primary, secondary, low contrast, candy, desert, tropical, cosmic, forest, compound, flipped analogous, clash, custom interval, equidistant, complementary gradient, tonal, fluorescent
 
 //  * color square, interactive (top left side of page. When clicking color swatch, should populate with a color square displaying the swatch's color
-
-//  * HSL -> RGB/Hex/HSV conv
 
 //  * save color palettes
 
@@ -62,14 +62,14 @@
 
 // BUGS
 
-//  * HSL text values aren't preserved when dragging and dropping color swatches 
+// None observed at this time
 
 
 
 
 // IN PROGRESS
 
-// Drag and Drop functionality
+// HSL -> rgb / hex / hsv conversion
 
 
 
@@ -263,7 +263,6 @@ function randomHSL(limitGrayAndBlack, limitLight) {
     if (limitLight === 1) {
         lightness = Math.min(lightness, 75);
     }
-
     return { hue, saturation, lightness };
 }
 
@@ -281,7 +280,6 @@ function randomSL(limitGrayAndBlack, limitLight) {
     if (limitLight === 1) {
         lightness = Math.min(lightness, 75);
     }
-
     return { saturation, lightness };
 }
 
@@ -295,7 +293,6 @@ function generateColor1(limitGrayAndBlack, limitLight) {
         colorBox1.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
         populateColorTextOutputBox(color, 1);
     }
-
     return color;
 }
 
@@ -305,7 +302,6 @@ function generateRandomColor(limitGrayAndBlack, limitLight) {
     const color = generateColor1(limitGrayAndBlack, limitLight);
 
     populateColorTextOutputBox(color, 1);
-
     return color;
 }
 
@@ -335,7 +331,6 @@ function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(complementaryColor, i);
         }
     }
-
     return colors;
 }
 
@@ -348,7 +343,6 @@ function generateTriadicHues(color) {
     increments.forEach(increment => {
         triadicHues.push((color.hue + increment) % 360);
     });
-
     return triadicHues;
 }
 
@@ -379,7 +373,6 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(triadicColor, i + 2);
         }
     }
-
     return colors;
 }
 
@@ -396,7 +389,6 @@ function generateTetradicHues(color) {
     const hue4 = (hue3 + 180) % 360;
 
     tetradicHues.push(hue1, hue2, hue3, hue4);
-
     return tetradicHues;
 }
 
@@ -427,7 +419,6 @@ function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(tetradicColor, i + 1);
         }
     }
-
     return colors;
 }
 
@@ -445,7 +436,6 @@ function generateHexadicHues(color) {
     const hue6 = (hue5 + 180) % 360;
 
     hexadicHues.push(hue1, hue2, hue3, hue4, hue5, hue6);
-
     return hexadicHues;
 }
 
@@ -476,7 +466,6 @@ function generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(hexadicColor, i + 1);
         }
     }
-
     return colors;
 }
 
@@ -494,7 +483,6 @@ function generateSplitComplementaryHues(color, numBoxes) {
     if (numBoxes >= 3) {
         splitComplementaryHues.push((baseComplementaryHue - modifier + 360) % 360);
     }
-
     return splitComplementaryHues;
 }
 
@@ -525,7 +513,6 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
             populateColorTextOutputBox(splitComplementaryColor, i + 2);
         }
     }
-
     return colors;
 }
 
@@ -542,7 +529,6 @@ function generateAnalogousHues(color, numBoxes) {
     for (let i = 1; i < numBoxes; i++) {
         analogousHues.push((baseHue + increment * i) % 360);
     }
-
     return analogousHues;
 }
 
@@ -573,7 +559,6 @@ function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(analogousColor, i + 2);
         }
     }
-
     return colors;
 }
 
@@ -587,7 +572,6 @@ function generateDiadicHues(color, numBoxes) {
     const hue2 = (hue1 + randomDistance) % 360;
 
     diadicHues.push(hue1, hue2);
-
     return diadicHues;
 }
 
@@ -618,7 +602,6 @@ function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(diadicColor, i + 1);
         }
     }
-
     return colors;
 }
 
@@ -639,7 +622,6 @@ function getWeightedRandomInterval() {
             return weights[i];
         }
     }
-
     return weights[weights.length - 1];
 }
 
@@ -660,7 +642,6 @@ function handleDragOver(e) {
     }
 
     e.dataTransfer.dropEffect = 'move';
-
     return false;
 }
 
@@ -674,6 +655,8 @@ function handleDrop(e) {
     if (dragSrcEl !== this) {
         const dragSrcId = dragSrcEl.id;
         const dropTargetId = this.id;
+        const dragSrcText = dragSrcEl.querySelector('.color-text-output-box').value;
+        const dropTargetText = this.querySelector('.color-text-output-box').value;
         const dragSrcOuterHTML = dragSrcEl.outerHTML;
         const dropTargetOuterHTML = this.outerHTML;
 
@@ -683,10 +666,15 @@ function handleDrop(e) {
         const newDragSrcEl = document.getElementById(dropTargetId);
         const newDropTargetEl = document.getElementById(dragSrcId);
 
+        newDragSrcEl.id = dragSrcId;
+        newDropTargetEl.id = dropTargetId;
+
+        newDragSrcEl.querySelector('.color-text-output-box').value = dropTargetText;
+        newDropTargetEl.querySelector('.color-text-output-box').value = dragSrcText;
+
         attachEventListeners(newDragSrcEl);
         attachEventListeners(newDropTargetEl);
     }
-    
     return false;
 }
 
