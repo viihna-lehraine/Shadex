@@ -45,9 +45,9 @@ label {
     color: #555555;
 }
 
-button {
+#generate-button {
     background-color: #4CAF50;
-    color: #EDEDFA;
+    color: #FCFCFC;
     padding: 10px 20px;
     text-align: center;
     text-decoration: none;
@@ -55,24 +55,74 @@ button {
     font-size: 16px;
     margin: 4px 2px;
     cursor: pointer;
-    border: 1px solid #1f1f21;
+    border: 1px solid #1F1F21;
     border-radius: 5px;
 }
 
-button:hover {
+#generate-button:hover, .button-box-slice > button:hover {
     background-color: #3c803f;
 }
 
 #palette-row {
     position: relative;
     display: flex;
-    flex-direction: row;
-    top: 3vh;
+    top: 1vh;
     height: fit-content;
     width: 100%;
     justify-content: space-around;
     align-items: center;
     padding: 5px 0;
+}
+
+#button-row-title {
+    display: flex;
+    top: 1.5vh;
+    height: fit-content;
+    width: fit-content;
+    margin: 2vh auto 1vh auto;
+    padding: 0 13px;
+    font-size: 0.8em;
+    font-weight: bold;
+    background-color: #FFFFFF;
+    border: 2px solid #707070;
+    border-radius: 5px;
+    box-shadow: 1px 3px 1px rgba(0, 0, 0, 0.8);
+}
+
+#button-row {
+    position: relative;
+    display: flex;
+    top: 0.5vh;
+    height: fit-content;
+    width: 100%;
+    margin-top: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+#button-box {
+    display: flex;
+    height: fit-content;
+    width: 80%;
+    justify-content: center;
+    align-items: center;
+}
+
+.button-box-slice {
+    display: flex;
+    height: 100%;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+}
+
+.button-box-slice > button {
+    width: 85%;
+    background-color: #4CAF50;
+    color: #FCFCFC;
+    padding: 5px 0;
+    border: 1px solid #1F1F21;
+    border-radius: 5px;
 }
 
 .color-stripe {
