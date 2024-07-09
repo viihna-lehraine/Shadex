@@ -142,7 +142,7 @@ label {
     position: relative;
     display: flex;
     height: 25vh;
-    width: 12vw;
+    width: 14vw;
     flex-direction: column;
     margin-top: 2.5vh;
     margin-bottom: 2.5vh;
@@ -206,7 +206,7 @@ label {
     border: 1px solid #DDDDDD;
     border-radius: 3px;
     text-align: center;
-    font-size: 0.85em;
+    font-size: 0.75em;
 }
 
 .color-box {

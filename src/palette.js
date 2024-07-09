@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.2
+// Color Palette Generator - version 0.3
 
 // Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal))
 
@@ -35,12 +35,12 @@
 
 // drag and drop color swatches
 
+// convert between 6 color formats
+
 
 
 // DEV NOTES
 
-
-//  * try to spread lightness attributes apart across palettes for more variation
 
 //  * random color should be able to generate a true random palette for any numBoxes value
 
@@ -48,9 +48,7 @@
 
 //  * color square, interactive (top left side of page. When clicking color swatch, should populate with a color square displaying the swatch's color
 
-//  * save color palettes
-
-//  * copy palette to clipboard
+//  * save color palettes to history
 
 //  * tooltips
 
@@ -69,7 +67,7 @@
 
 // IN PROGRESS
 
-// HSL -> rgb / hex / hsv conversion
+//  copy palette to clipboard on click
 
 
 
@@ -87,10 +85,10 @@ let dragSrcEl = null;
 const conversionMap = {
     hsl: {
         rgb: hslToRGB,
-        hex: (hue, saturation, lightness) => rgbToHex(...Object.values(hslToRGB(hue, saturation, lightness))),
+        hex: hslToHex,
         hsv: hslToHSV,
-        cmyk: (hue, saturation, lightness) => rgbToCMYK(...Object.values(hslToRGB(hue, saturation, lightness))),
-        lab: (hue, saturation, lightness) => rgbToLab(...Object.values(hslToRGB(hue, saturation, lightness)))
+        cmyk: hslToCMYK,
+        lab: hslToLab
     },
     rgb: {
         hsl: rgbToHSL,
@@ -101,31 +99,31 @@ const conversionMap = {
     },
     hex: {
         rgb: hexToRGB,
-        hsl: (hex) => rgbToHSL(...Object.values(hexToRGB(hex))),
-        hsv: (hex) => rgbToHSV(...Object.values(hexToRGB(hex))),
-        cmyk: (hex) => rgbToCMYK(...Object.values(hexToRGB(hex))),
-        lab: (hex) => rgbToLab(...Object.values(hexToRGB(hex)))
+        hsl: hexToHSL,
+        hsv: hexToHSV,
+        cmyk: hexToCMYK,
+        lab: hexToLab
     },
     hsv: {
         rgb: hsvToRGB,
-        hex: (hue, saturation, value) => rgbToHex(...Object.values(hsvToRGB(hue, saturation, value))),
         hsl: hsvToHSL,
-        cmyk: (hue, saturation, value) => rgbToCMYK(...Object.values(hsvToRGB(hue, saturation, value))),
-        lab: (hue, saturation, value) => rgbToLab(...Object.values(hsvToRGB(hue, saturation, value)))
+        hex: hsvToHex,
+        cmyk: hsvToCMYK,
+        lab: hsvToLab
     },
     cmyk: {
         rgb: cmykToRGB,
-        hex: (cyan, magenta, yellow, key) => rgbToHex(...Object.values(cmykToRGB(cyan, magenta, yellow, key))),
-        hsl: (cyan, magenta, yellow, key) => rgbToHSL(...Object.values(cmykToRGB(cyan, magenta, yellow, key))),
-        hsv: (cyan, magenta, yellow, key) => rgbToHSV(...Object.values(cmykToRGB(cyan, magenta, yellow, key))),
-        lab: (cyan, magenta, yellow, key) => rgbToLab(...Object.values(cmykToRGB(cyan, magenta, yellow, key)))
+        hex: cmykToHex,
+        hsl: cmykToHSL,
+        hsv: cmykToHSV,
+        lab: cmykToLab
     },
     lab: {
         rgb: labToRGB,
-        hex: (l, a, b) => rgbToHex(...Object.values(labToRGB(l, a, b))),
-        hsl: (l, a, b) => rgbToHSL(...Object.values(labToRGB(l, a, b))),
-        hsv: (l, a, b) => rgbToHSV(...Object.values(labToRGB(l, a, b))),
-        cmyk: (l, a, b) => rgbToCMYK(...Object.values(labToRGB(l, a, b)))
+        hex: labToHex,
+        hsl: labToHSL,
+        hsv: labToHSV,
+        cmyk: labToCMYK
     }
 };
 
@@ -266,10 +264,6 @@ function generatePaletteBox(colors, numBoxes) {
     paletteBoxCount = 1;
 
     for (let i = 0; i < numBoxes; i++) {
-        if (!colors[i]) {
-            console.error(`Color at index ${i} is undefined.`);
-            continue;
-        }
 
         const { colorStripe, paletteBoxCount: newPaletteBoxCount } = makePaletteBox(colors[i], paletteBoxCount);
 
@@ -756,7 +750,7 @@ function attachEventListeners(element) {
 // Convert Hex to HSL
 function hexToHSL(hex) {
     const rgb = hexToRGB(hex);
-    return rgbToHSL(rgb.red, rgb.green, rgb.blue);
+    const hsl = rgbToHSL(rgb.red, rgb.green, rgb.blue);
 }
 
 
@@ -773,7 +767,8 @@ function hexToRGB(hex) {
 
 // Convert Hex to HSV
 function hexToHSV(hex) {
-    const rgb  = hexToRGB(hex);
+    const rgb = hexToRGB(hex);
+
     return rgbToHSV(rgb.red, rgb.green, rgb.blue);
 }
 
@@ -781,6 +776,7 @@ function hexToHSV(hex) {
 // Convert Hex to CMYK
 function hexToCMYK(hex) {
     const rgb = hexToRGB(hex);
+
     return rgbToCMYK(rgb.red, rgb.blue, rgb.green);
 }
 
@@ -789,6 +785,7 @@ function hexToCMYK(hex) {
 function hexToLab(hex) {
     const rgb = hexToRGB(hex);
     const xyz = rgbToXYZ(rgb.red, rgb.green, rgb.blue);
+
     return xyzToLab(xyz.x, xyz.y, xyz.z);
 }
 
@@ -796,6 +793,7 @@ function hexToLab(hex) {
 // Convert HSL to Hex
 function hslToHex(hue, saturation, lightness) {
     const rgb = hslToRGB(hue, saturation, lightness);
+
     return rgbToHex(rgb.red, rgb.green, rgb.blue);
 }
 
@@ -842,12 +840,12 @@ function hslToHSV(hue, saturation, lightness) {
 
     const value = lightness + saturation * Math.min(lightness, 1 - lightness);
 
-    const newSaturation = v === 0 ? 0 : 2 * (1 - lightness / value);
+    const newSaturation = value === 0 ? 0 : 2 * (1 - lightness / value);
 
     return {
-        hue: hue,
-        saturation: newSaturation * 100,
-        value: value * 100
+        hue: Math.floor(hue),
+        saturation: Math.floor(newSaturation * 100),
+        value: Math.floor(value * 100)
     };
 }
 
@@ -879,19 +877,26 @@ function rgbToHSL(red, green, blue) {
     let hue, saturation, lightness = (max + min) / 2;
 
     if (max === min) {
-        hue = saturation = 0;
+        hue = 0;
+        saturation = 0;
     } else {
-        const d = max - min;
-        saturation = lightness > 0.5 ? d / (2 - max - min) : d / (max + min);
+        const delta = max - min;
+        saturation = lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
         switch (max) {
-            case red: hue = (green - blue) / d + (green < blue ? 6 : 0); break;
-            case green: hue = (blue - red) / d + 2; break;
-            case blue: hue (red - green) / d + 4; break;
+            case red:
+                hue = (green - blue) / delta + (green < blue ? 6 : 0);
+                break;
+            case green:
+                hue = (blue - red) / delta + 2;
+                break;
+            case blue:
+                hue = (red - green) / delta + 4;
+                break;
         }
-        hue = hue * 60;
+        hue *= 60;
     }
     return {
-        h: Math.round(hue), 
+        hue: Math.round(hue),
         saturation: Math.round(saturation * 100),
         lightness: Math.round(lightness * 100)
     };
@@ -906,31 +911,38 @@ function rgbToHex(red, green, blue) {
 
 // convert RGB to HSV
 function rgbToHSV(red, green, blue) {
-    red = red / 255;
-    green = green / 255;
-    blue = blue / 255;
+
+    red /= 255;
+    green /= 255;
+    blue /= 255;
 
     const max = Math.max(red, green, blue);
     const min = Math.min(red, green, blue);
     const value = max;
-    const d = max - min;
-    const saturation = max === 0 ? 0 : d / max;
+    const delta = max - min;
+    const saturation = max === 0 ? 0 : delta / max;
     let hue;
 
     if (max === min) {
-        hue = 0;
+        hue = 0; // achromatic
     } else {
         switch (max) {
-            case red: hue = (green - blue) / d + (green < blue ? 6 : 0); break;
-            case green: hue = (blue - red) / d + 2; break;
-            case blue: hue = (red - green) / d + 4; break;
+            case red:
+                hue = (green - blue) / delta + (green < blue ? 6 : 0);
+                break;
+            case green:
+                hue = (blue - red) / delta + 2;
+                break;
+            case blue:
+                hue = (red - green) / delta + 4;
+                break;
         }
-        hue = hue * 60;
+        hue *= 60;
     }
     return {
-        hue: Math.round(hue), 
+        hue: Math.round(hue),
         saturation: Math.round(saturation * 100),
-        value: Math.round(value * 100) 
+        value: Math.round(value * 100)
     };
 }
 
@@ -979,8 +991,8 @@ function hsvToHSL(hue, saturation, value) {
 
     return {
         hue: hue,
-        saturation: newSaturation * 100,
-        lightness: lightness * 100
+        saturation: Math.floor(newSaturation * 100),
+        lightness: Math.floor(lightness * 100)
     };
 }
 
@@ -1024,16 +1036,16 @@ function hsvToCMYK(hue, saturation, value) {
 
 // Convert HSV to Lab
 function hsvToLab(hue, saturation, value) {
-    const rgb = hsvToLab(hue, saturation, value);
+    const rgb = hsvToRGB(hue, saturation, value);
     const xyz = rgbToXYZ(rgb.red, rgb.green, rgb.blue);
     return xyzToLab(xyz.x, xyz.y, xyz.z);
 }
 
 
 // Convert CMYK to Hex
-function cmyktoHex(cyan, magenta, yellow, key) {
+function cmykToHex(cyan, magenta, yellow, key) {
     const rgb = cmykToRGB(cyan, magenta, yellow, key);
-    return rgbToHex(rgb.red, rgb.green, rgb,blue);
+    return rgbToHex(rgb.red, rgb.green, rgb.blue);
 }
 
 
@@ -1065,7 +1077,7 @@ function cmykToHSV(cyan, magenta, yellow, key) {
 }
 
 
-// Conert CMYK to Lab
+// Convert CMYK to Lab
 function cmykToLab(cyan, magenta, yellow, key) {
     const rgb = cmykToRGB(cyan, magenta, yellow, key);
     const xyz = rgbToXYZ(rgb.red, rgb.green, rgb.blue);
@@ -1073,7 +1085,43 @@ function cmykToLab(cyan, magenta, yellow, key) {
 }
 
 
-// convert color component to Hex
+// Convert Lab to Hex
+function labToHex(l, a, b) {
+    const rgb = labToRGB(l, a, b);
+    return rgbToHex(rgb.red, rgb.green, rgb.blue);
+}
+
+
+//Convert Lab to HSL
+function labToHSL(l, a, b) {
+    const rgb = labToRGB(l, a, b);
+    return rgbToHSL(rgb.red, rgb.green, rgb.blue);
+}
+
+
+// Convert Lab to RGB
+function labToRGB(l, a, b) {
+    const xyz = labToXYZ(l, a, b);
+    return xyzToRGB(xyz.x, xyz.y, xyz.z);
+}
+
+
+// Convert Lab to HSV
+function labToHSV(l, a, b) {
+    const rgb = labToRGB(l, a, b);
+    return rgbToHSV(rgb.red, rgb.green, rgb.blue);
+}
+
+
+// Convert Lab to CMYK
+function labToCMYK(l, a, b) {
+    const rgb = labToRGB(l, a, b);
+    return rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+}
+
+
+
+// Convert color component to Hex
 function componentToHex(c) {
     const hex = c.toString(16);
     return hex.length === 1 ? '0' + hex : hex;
@@ -1118,13 +1166,58 @@ function xyzToLab(x, y, z) {
 }
 
 
+// Convert Lab to XYZ
+function labToXYZ(l, a, b) {
+    const refX = 95.047, refY = 100.000, refZ = 108.883;
+
+    let y = (l + 16) / 116;
+    let x = a / 500 + y;
+    let z = y - b / 200;
+
+    const pow = Math.pow;
+
+    x = refX * (pow(x, 3) > 0.008856 ? pow(x, 3) : (x - 16 / 116) / 7.787);
+    y = refY * (pow(y, 3) > 0.008856 ? pow(y, 3) : (y - 16 / 116) / 7.787);
+    z = refZ * (pow(z, 3) > 0.008856 ? pow(z, 3) : (z - 16 / 116) / 7.787);
+
+    return { x, y, z };
+}
+
+
+// Convert XYZ to RGB
+function xyzToRGB(x, y, z) {
+    x = x / 100;
+    y = y / 100;
+    z = z / 100;
+
+    let red = x * 3.2406 + y * -1.5372 + z * -0.4986;
+    let green = x * -0.9689 + y * 1.8758 + z * 0.0415;
+    let blue = x * 0.0557 + y * -0.2040 + z * 1.0570;
+
+    red = red > 0.0031308 ? 1.055 * Math.pow(red, 1 / 2.4) - 0.055 : 12.92 * red;
+    green = green > 0.0031308 ? 1.055 * Math.pow(green, 1 / 2.4) - 0.055 : 12.92 * green;
+    blue = blue > 0.0031308 ? 1.055 * Math.pow(blue, 1 / 2.4) - 0.055 : 12.92 * blue;
+
+    red = Math.min(Math.max(0, red), 1);
+    green = Math.min(Math.max(0, green), 1);
+    blue = Math.min(Math.max(0, blue), 1);
+
+    return {
+        red: Math.round(red * 255),
+        green: Math.round(green * 255),
+        blue: Math.round(blue * 255)
+    };
+}
+
+
 // Master Color Conversion Function
 function convertColors(targetFormat) {
     const colorTextOutputBoxes = document.querySelectorAll('.color-text-output-box');
 
     colorTextOutputBoxes.forEach(box => {
         const currentFormat = box.getAttribute('data-format');
-        const color = box.value.match(/-?\d*\.?\d+/g).map(Number);
+        const color = currentFormat === 'hex' ? box.value : box.value.match(/-?\d*\.?\d+/g).map(Number);
+
         const conversionFn = conversionMap[currentFormat][targetFormat];
 
         if (!conversionFn) {
@@ -1132,7 +1225,7 @@ function convertColors(targetFormat) {
             return;
         }
 
-        const newColor = conversionFn(...color);
+        const newColor = Array.isArray(color) ? conversionFn(...color) : conversionFn(color);
 
         box.value = formatColor(newColor, targetFormat);
         box.setAttribute('data-format', targetFormat);
