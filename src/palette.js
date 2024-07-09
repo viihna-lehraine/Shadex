@@ -50,18 +50,17 @@
 
 //  * save color palettes to history
 
-//  * tooltips
-
 //  * button animations
 
 //  * top bar with FAQ & About
+
+//  * mobile version
 
 
 
 // BUGS
 
 // None observed at this time
-
 
 
 
