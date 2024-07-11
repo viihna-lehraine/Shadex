@@ -15,9 +15,6 @@
 
 
 
-import { convertColors } from '/src/modules/colorConversion.js';
-import { handleGenerateButtonClick } from '/src/modules/paletteGen.js';
-
 document.addEventListener('DOMContentLoaded', () => {
     const generateButton = document.getElementById('generate-button');
 
