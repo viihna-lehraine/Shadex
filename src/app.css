@@ -3,7 +3,7 @@
 }
 
 body {
-    background-color: #F5F5F5;
+    background-color: #c5d8c8;
     color: #333333;
     font-family: Arial, sans-serif;
 }
@@ -71,6 +71,7 @@ body {
     height: 100vh;
     width: 100vw;
     align-items: center;
+    overflow-x: hidden;
 }
 
 label {
@@ -198,7 +199,7 @@ label {
     position: relative;
     display: flex;
     height: 25vh;
-    width: 20vw;
+    width: 13vw;
     flex-direction: column;
     margin-top: 2.5vh;
     margin-bottom: 2.5vh;
