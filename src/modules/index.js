@@ -5,5 +5,7 @@
 // BEGIN CODE
 
 
-import { convertColors } from '/src/modiles/colorConversion.js');
-import { handleGenerateButtonClick } from '/src/modules/paletteGen.js';
+import { convertColors } from './colorConversion.js';
+import { handleGenerateButtonClick } from './paletteGen.js';
+
+export { convertColors, handleGenerateButtonClick };

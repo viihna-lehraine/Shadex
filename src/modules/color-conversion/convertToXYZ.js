@@ -40,3 +40,6 @@ function labToXYZ(l, a, b) {
 
     return { x, y, z };
 }
+
+
+export { rgbToXYZ, labToXYZ }

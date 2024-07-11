@@ -6,7 +6,7 @@
 
 
 
-import { generateAndStoreColorValues } from '/src/modules/colorConversion.js'
+import { generateAndStoreColorValues } from '/src/modules/color-conversion/colorConversion.js'
 import { populateColorTextOutputBox } from '/src/modules/dom.js';
 import { attachEventListeners } from '/src/modules/dragAndDrop.js';
 import { generateColor1, randomSL } from '/src/utils/randomUtils.js';
