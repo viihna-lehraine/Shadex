@@ -6,7 +6,7 @@
 
 
 
-import { populateColorTextOutputBox } from "/src/modules/dom.js";
+import { populateColorTextOutputBox } from "../modules/dom.js";
 
 
 // Random HSL generation for color 1
@@ -28,7 +28,7 @@ function randomHSL(limitGrayAndBlack, limitLight) {
 
 
 // Random saturation and lightness attributes of new HSL
-export function randomSL(limitGrayAndBlack, limitLight) {
+function randomSL(limitGrayAndBlack, limitLight) {
     let saturation = Math.floor(Math.random() * 101);
     let lightness = Math.floor(Math.random() * 101);
 
@@ -45,7 +45,7 @@ export function randomSL(limitGrayAndBlack, limitLight) {
 
 
 // Generates a randomized 1st color
-export function generateColor1(limitGrayAndBlack, limitLight) {
+function generateColor1(limitGrayAndBlack, limitLight) {
     let color = randomHSL(limitGrayAndBlack, limitLight);
     const colorBox1 = document.getElementById('color-box-1');
 
@@ -64,3 +64,6 @@ function generateRandomColor(limitGrayAndBlack, limitLight) {
     populateColorTextOutputBox(color, 1);
     return color;
 }
+
+
+export { randomSL, generateColor1 };

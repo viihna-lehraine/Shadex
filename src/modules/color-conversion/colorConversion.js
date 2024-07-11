@@ -11,6 +11,7 @@ import { hexToHSV, rgbToHSV, hslToHSV, cmykToHSV, labToHSV } from './index.js';
 import { hexToCMYK, rgbToCMYK, hslToCMYK, hsvToCMYK, labToCMYK } from './index.js';
 import { hexToLab, rgbToLab, hslToLab, hsvToLab, cmykToLab } from './index.js';
 
+
 const conversionMap = {
     hsl: {
         rgb: hslToRGB,
@@ -115,3 +116,6 @@ function generateAndStoreColorValues(hue, saturation, lightness) {
 
     return colorValues;
 }
+
+
+export { convertColors, generateAndStoreColorValues };

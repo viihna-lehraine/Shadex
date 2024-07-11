@@ -12,7 +12,6 @@ import { showTooltip } from "/src/modules/dom.js";
 // Copy Color Values to Clipboard on Click
 export function copyToClipboard(text, tooltipElement) {
     navigator.clipboard.writeText(text).then(() => {
-        console.log('Copied to clipboard:', text);
         showTooltip(tooltipElement);
     }).catch(err => {
         console.error('Error copying to clipboard:', err);

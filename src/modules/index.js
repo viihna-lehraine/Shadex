@@ -5,7 +5,8 @@
 // BEGIN CODE
 
 
-import { convertColors } from './colorConversion.js';
-import { handleGenerateButtonClick } from './paletteGen.js';
+import { convertColors } from './color-conversion/colorConversion.js';
+import { handleGenerateButtonClick } from './palette-generation/paletteGen.js';
+import { generateColor1 } from '../utils/randomUtils.js';
 
-export { convertColors, handleGenerateButtonClick };
+export { convertColors, handleGenerateButtonClick, generateColor1 };
