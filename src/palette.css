@@ -12,19 +12,23 @@ body {
 
     #container {
         padding: 15px;
+        overflow-x: auto;
         overflow-y: scroll;
+    }
+
+    #palette-row {
+        flex-wrap: wrap;
     }
 
     .palette-box {
         height: 20%;
-        width: 45%;
         margin: 10px 5px;
     }
 
     button {
         font-size: 12px;
         height: fit-content;
-        width: 20%;
+        width: 80%;
     }
 
     button:first-child {
@@ -35,7 +39,7 @@ body {
 
     #theBox {
         width: 90%;
-        margin-bottom: 1vh;
+        margin-bottom: -2vh;
     }
 
     #button-box {
@@ -46,10 +50,11 @@ body {
     .button-box-slice {
         width: 100%;
         margin-bottom: 10px;
+
     }
 
     #button-row-title {
-        font-size: 0.8em;
+        order: -1;
     }
 
     .color-text-output-box {
@@ -142,9 +147,10 @@ label {
     position: relative;
     display: flex;
     top: 0.5vh;
+    flex-wrap: wrap;
     height: fit-content;
     width: 100%;
-    margin-top: 0;
+    margin-top: 20px;
     justify-content: center;
     align-items: center;
 }
@@ -163,10 +169,11 @@ label {
     flex: 1;
     justify-content: center;
     align-items: center;
+    margin: 5px;
 }
 
 .button-box-slice > button {
-    width: 85%;
+    width: 90%;
     background-color: #4CAF50;
     color: #FCFCFC;
     padding: 5px 0;
@@ -191,10 +198,11 @@ label {
     position: relative;
     display: flex;
     height: 25vh;
-    width: 14vw;
+    width: 20vw;
     flex-direction: column;
     margin-top: 2.5vh;
     margin-bottom: 2.5vh;
+    margin: 10px;
     border: 2px solid #707070;
     border-radius: 5px;
     box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.75);
