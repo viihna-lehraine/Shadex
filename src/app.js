@@ -14,6 +14,8 @@
 // BEGIN CODE
 
 
+import { convertColors } from '/src/modules/index.js';
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const generateButton = document.getElementById('generate-button');
