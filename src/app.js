@@ -8,8 +8,8 @@
 
 // This program comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND
 
-// app.js initializes the application before further handling by additional JavaScript modules. Modules are located at /src/modules/ and /src/utils/
-//      colorConversion.js | dom.js | dragAndDrop.js | paletteGen.js | clipboardUtils.js | randomUtils.js
+// This file initializes the application before further handling by additional JS modules. Modules are located at /src/modules/ and /src/utils/
+// Module Names: colorConversion.js | dom.js | dragAndDrop.js | paletteGen.js | clipboardUtils.js | randomUtils.js
 
 // BEGIN CODE
 
