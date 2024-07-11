@@ -14,7 +14,7 @@
 // BEGIN CODE
 
 
-import { convertColors } from '/src/modules/index.js';
+import { convertColors, handleGenerateButtonClick } from '/src/modules/index.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
