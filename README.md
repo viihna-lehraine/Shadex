@@ -28,7 +28,7 @@ ColorGen is a web-based color palette generator. It produces 8 styles of palette
 
 ## Installation
 
-I host a copy of this program at [sharkswithswords.com](http://sharkswithswords.com/desktop/html/color-palette-generator.html), but it will likely not be updated more than once every day or three.
+I host a copy of this program at [sharkswithswords.com](http://sharkswithswords.com/desktop/html/color-palette-generator.html), but it will likely not be updated more than once every week or so.
 
 Alternatively, you can clone the repository by typing this into your terminal:
 
