@@ -18,7 +18,7 @@ export function populateColorTextOutputBox(color, boxNumber) {
 
 
 // Populates #palette-row with .color-stripe elements
-function populateColorStripe(colors, numBoxes) {
+export function populateColorStripe(colors, numBoxes) {
     for (let i = 0; i < numBoxes; i++) {
         let colorStripe = document.getElementById(`color-stripe-${i + 1}`);
 

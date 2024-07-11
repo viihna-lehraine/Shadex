@@ -6,12 +6,11 @@
 
 
 
+import { generateAndStoreColorValues } from '/src/modules/colorConversion.js'
 import { populateColorTextOutputBox } from '/src/modules/dom.js';
 import { attachEventListeners } from '/src/modules/dragAndDrop.js';
 import { generateColor1, randomSL } from '/src/utils/randomUtils.js';
 import { copyToClipboard } from '/src/utils/clipboardUtils.js';
-
-export const generateButton = document.getElementById('generate-button');
 
 let paletteTypeOptions = document.getElementById('palette-type-options');
 let paletteNumberOptions = document.getElementById('palette-number-options');
@@ -110,6 +109,8 @@ function generatePaletteBox(colors, numBoxes) {
 
 // Generate a paletteBox element with all child elements
 function makePaletteBox(color, paletteBoxCount) {
+    const colorValues = generateAndStoreColorValues(color.hue, color.saturation, color.lightness);
+
     let paletteBox = document.createElement('div');
     paletteBox.className = 'palette-box';
     paletteBox.id = `palette-box-${paletteBoxCount}`;
@@ -121,8 +122,8 @@ function makePaletteBox(color, paletteBoxCount) {
     let colorTextOutputBox = document.createElement('div');
     colorTextOutputBox.className = 'color-text-output-box tooltip';
     colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
-    colorTextOutputBox.setAttribute('data-format', 'hsl');
-    colorTextOutputBox.textContent = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
+    colorTextOutputBox.setAttribute('data-format', 'hex');
+    colorTextOutputBox.textContent = colorValues.hex; 
 
     let tooltipText = document.createElement('span');
     tooltipText.className = 'tooltiptext';
@@ -143,7 +144,7 @@ function makePaletteBox(color, paletteBoxCount) {
     let colorBox = document.createElement('div');
     colorBox.className = 'color-box';
     colorBox.id = `color-box-${paletteBoxCount}`;
-    colorBox.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
+    colorBox.style.backgroundColor = colorValues.hsl;
 
     paletteBoxBottomHalf.appendChild(colorBox);
     paletteBox.appendChild(paletteBoxTopHalf);
@@ -152,7 +153,7 @@ function makePaletteBox(color, paletteBoxCount) {
     let colorStripe = document.createElement('div');
     colorStripe.className = 'color-stripe';
     colorStripe.id = `color-stripe-${paletteBoxCount}`;
-    colorStripe.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
+    colorStripe.style.backgroundColor = colorValues.hsl;
 
     colorStripe.setAttribute('draggable', true);
     attachEventListeners(colorStripe);

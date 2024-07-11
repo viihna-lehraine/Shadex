@@ -58,33 +58,20 @@ export function convertColors(targetFormat) {
 
     colorTextOutputBoxes.forEach(box => {
         const currentFormat = box.getAttribute('data-format');
-        let color;
+        const colorValues = box.colorValues;
 
-        if (currentFormat === 'hex') {
-            color = box.textContent;
-        } else {
-            color = box.textContent.match(/-?\d*\.?\d+/g).map(Number);
+        if (!colorValues) {
+            console.error(`No stored color values found for ${box.textContent}`);
+            return;
         }
 
-        console.log(`Converting from ${currentFormat} to ${targetFormat}:`, color);
-
-        const conversionFn = conversionMap[currentFormat][targetFormat];
-
-        if (!conversionFn) {
+        const newColor = colorValues[targetFormat];
+        if (!newColor) {
             console.error(`Conversion from ${currentFormat} to ${targetFormat} is not supported.`);
             return;
         }
 
-        let newColor;
-        if (Array.isArray(color)) {
-            newColor = conversionFn(...color);
-        } else {
-            newColor = conversionFn(color);
-        }
-
-        console.log(`Converted color:`, newColor);
-
-        box.textContent = formatColor(newColor, targetFormat);
+        box.textContent = newColor;
         box.setAttribute('data-format', targetFormat);
     });
 }
@@ -106,6 +93,22 @@ function formatColor(color, format) {
         return `lab(${color.l.toFixed(2)}, ${color.a.toFixed(2)}, ${color.b.toFixed(2)})`;
     }
     return color;
+}
+
+// Generate All Color Values and Store as an Object
+export function generateAndStoreColorValues(hue, saturation, lightness) {
+    const colorValues = {};
+    const rgb = hslToRGB(hue, saturation, lightness);
+
+    // Generate and store all possible color values
+    colorValues.hsl = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    colorValues.rgb = `rgb(${rgb.red}, ${rgb.green}, ${rgb.blue})`;
+    colorValues.hex = rgbToHex(rgb.red, rgb.green, rgb.blue);
+    colorValues.hsv = hslToHSV(hue, saturation, lightness);
+    colorValues.cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    colorValues.lab = rgbToLab(rgb.red, rgb.green, rgb.blue);
+
+    return colorValues;
 }
 
 
