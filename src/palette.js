@@ -8,70 +8,7 @@
 
 // This program comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND
 
-
-
-// CURRENT IMPLEMENTATION
-
-
-// the maximum number of swatches is 6
-
-// the saturation and lightness attributes of all colors are completely random, with outputs evenly distributed from 0 to 100, There is no further mathematical manipulation applied to these attributes at this time
-
-// generateComplementaryPalette() will always generate a palette with swatch #1 having a perfectly complementary hue to swatches 2, 3, and 4
-
-// genrateTriadicPalette() only works for a set of exactly 3 swatches. Swatches are 120 degrees apart on the color wheel
-
-// generateTetradicPalette() only works for a set of exactly 4 swatches. Swatches are 90 degrees apart on the color wheel
-
-// generateSplitComplementaryPalette() only works for a set of exactly 3 swatches. Swatches 2 and 3 are at 180 degrees +/- a random  number of degrees between 20 and 30
-
-// generateAnalogousPalette() works for a number of swatches between 2 and 6 (inclusive). First and last swatch are a maximum distance of 60 degrees apart, while individual swatches are a minimum of 10 degrees apart
-
-// generateDiadicPalette() works for exactly 2 swatches. The distance between both hues is a randomly generated number between 45 and 75 (specifically, a multiple of 5). This number has weighted probability, with the greatest weights on 40 and 45 degrees
-
-// limitGrayAndDark will set minimum saturation at 20 and lightness at 25
-
-// limitLight functions the same as limitGray, while also limiting the maximum lightness to 75
-
-// drag and drop color swatches
-
-// convert between 6 color formats
-
-
-
-// DEV NOTES
-
-
-//  * random color should be able to generate a true random palette for any numBoxes value
-
-//  * possible other palette types - monochromatic, double-complementary, square (tetradic at 90 degrees), neutral, warm, cool, pastel, high-contrast, retro, gradient, muted, jewel-tone, warm analogous, cool analogous, minimalist, earth-tone, greyscale, floral, sunset, ocean, bright-and-bold, gradient, neon, seasons (each), metallic, primary, secondary, low contrast, candy, desert, tropical, cosmic, forest, compound, flipped analogous, clash, custom interval, equidistant, complementary gradient, tonal, fluorescent
-
-//  * color square, interactive (top left side of page. When clicking color swatch, should populate with a color square displaying the swatch's color
-
-//  * save color palettes to history
-
-//  * button animations
-
-//  * top bar with FAQ & About
-
-//  * mobile version
-
-
-
-// BUGS
-
-// None observed at this time
-
-
-
-// IN PROGRESS
-
-//  copy palette to clipboard on click
-
-
-
-// BEGIN
-
+// BEGIN CODE
 
 
 const generateButton = document.getElementById('generate-button');
