@@ -5,6 +5,7 @@
 // BEGIN CODE
 
 
+
 // Populates .color-text-output-box with the HSL attribute
 export function populateColorTextOutputBox(color, boxNumber) {
     let colorTextOutputBox = document.getElementById(`color-text-output-box-${boxNumber}`);

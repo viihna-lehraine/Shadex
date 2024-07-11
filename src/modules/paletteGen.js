@@ -5,16 +5,17 @@
 // BEGIN CODE
 
 
+
 import { populateColorTextOutputBox } from '/src/modules/dom.js';
 import { attachEventListeners } from '/src/modules/dragAndDrop.js';
 import { generateColor1, randomSL } from '/src/utils/randomUtils.js';
 import { copyToClipboard } from '/src/utils/clipboardUtils.js';
 
+export const generateButton = document.getElementById('generate-button');
+
 let paletteTypeOptions = document.getElementById('palette-type-options');
 let paletteNumberOptions = document.getElementById('palette-number-options');
 let paletteBoxCount = 1;
-
-export const generateButton = document.getElementById('generate-button');
 
 
 // Define default behavior for generateButton click event

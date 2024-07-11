@@ -5,7 +5,9 @@
 // BEGIN CODE
 
 
+
 import { populateColorTextOutputBox } from "/src/modules/dom.js";
+
 
 // Random HSL generation for color 1
 function randomHSL(limitGrayAndBlack, limitLight) {

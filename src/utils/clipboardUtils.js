@@ -5,7 +5,9 @@
 // BEGIN CODE
 
 
+
 import { showTooltip } from "/src/modules/dom.js";
+
 
 // Copy Color Values to Clipboard on Click
 export function copyToClipboard(text, tooltipElement) {
