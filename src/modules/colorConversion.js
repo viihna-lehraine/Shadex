@@ -119,6 +119,26 @@ function componentToHex(c) {
 }
 
 
+// Convert XYZ to Lab
+function xyzToLab(x, y, z) {
+    const refX = 95.047, refY = 100.000, refZ = 108.883;
+
+    x = x / refX;
+    y = y / refY;
+    z = z / refZ;
+
+    x = x > 0.008856 ? Math.pow(x, 1/3) : (7.787 * x) + (16 / 116);
+    y = y > 0.008856 ? Math.pow(y, 1/3) : (7.787 * y) + (16 / 116);
+    z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787 * z) + (16 / 116);
+
+    const l = (116 * y) - 16;
+    const a = 500 * (x - z);
+    const b = 200 * (y - z);
+
+    return { l, a, b };
+}
+
+
 // Convert XYZ to RGB
 function xyzToRGB(x, y, z) {
     x = x / 100;
