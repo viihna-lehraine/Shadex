@@ -5,4 +5,5 @@
 // BEGIN CODE
 
 
-import { }
+import { convertColors } from '/src/modiles/colorConversion.js');
+import { handleGenerateButtonClick } from '/src/modules/paletteGen.js';
