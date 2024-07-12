@@ -29,6 +29,7 @@ function generatePaletteBox(colors, numBoxes) {
 
         paletteBoxCount = newPaletteBoxCount;
     }
+    console.log(colors);
 }
 
 

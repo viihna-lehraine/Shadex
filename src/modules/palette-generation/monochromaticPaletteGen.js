@@ -21,15 +21,16 @@ function generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight) {
             saturation: slValues.saturation,
             lightness: slValues.lightness
         };
+
         colors.push(monoColor);
 
         const colorBox = document.getElementById(`color-box-${i + 1}`);
         if (colorBox) {
             colorBox.style.backgroundColor = `hsl(${monoColor.hue}, ${monoColor.saturation}%, ${monoColor.lightness})`;
             populateColorTextOutputBox(monoColor, (i + 1));
-        }
-
+        } 
     }
+    return colors;
 }
 
 

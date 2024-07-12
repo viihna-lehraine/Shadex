@@ -7,6 +7,7 @@
 
 
 import { randomHSL } from './index.js';
+import { populateColorTextOutputBox } from './index.js';
 
 
 function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight) {
@@ -28,6 +29,7 @@ function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(randomColor, (i + 1));
         }
     }
+    console.log("Generated colors:", colors);
     return colors;
 }
 

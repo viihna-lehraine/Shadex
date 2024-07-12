@@ -6,7 +6,7 @@
 
 
 
-import { generateRandomColorPalette, generatePaletteBox, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette } from './index.js';
+import { generatePaletteBox, generateRandomColorPalette, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette } from './index.js';
 
 
 
@@ -24,6 +24,7 @@ function handleGenerateButtonClick() {
 
     if (selectedPaletteTypeOptionValue == "1") {
         generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight);
+        generatePaletteBox(colors, numBoxes);
     } else if (selectedPaletteTypeOptionValue == "2") {
         if (numBoxes !== 1) {
             colors = generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight);
@@ -75,7 +76,8 @@ function handleGenerateButtonClick() {
         }
     } else if (selectedPaletteTypeOptionValue == "9") {
         if (numBoxes >= 2) {
-            colors = generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight)
+            colors = generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight);
+            generatePaletteBox(colors, numBoxes);
         } else {
             window.alert('Please select a number greater than "1" for "# of colors" to generate a monochromatic palette');
         }
