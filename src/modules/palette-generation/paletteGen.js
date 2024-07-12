@@ -6,12 +6,12 @@
 
 
 
-import { generateColor1, generatePaletteBox, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette  } from './index.js';
+import { generateRandomColorPalette, generatePaletteBox, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette } from './index.js';
 
 
 
 // Define default behavior for generateButton click event
-export function handleGenerateButtonClick() {
+function handleGenerateButtonClick() {
     let paletteTypeOptions = document.getElementById('palette-type-options');
     let paletteNumberOptions = document.getElementById('palette-number-options');
     let numBoxes = parseInt(paletteNumberOptions.value, 10);
@@ -23,12 +23,7 @@ export function handleGenerateButtonClick() {
     let colors = [];
 
     if (selectedPaletteTypeOptionValue == "1") {
-        if (numBoxes == 1) {
-            colors = [generateColor1(limitGrayAndBlack, limitLight)];
-            generatePaletteBox(colors, numBoxes);
-        } else {
-            window.alert('Please select "1" for "# of colors" to generate a single random color');
-        }
+        generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight);
     } else if (selectedPaletteTypeOptionValue == "2") {
         if (numBoxes !== 1) {
             colors = generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight);
@@ -78,5 +73,14 @@ export function handleGenerateButtonClick() {
         } else {
             window.alert('Please select the number "2" for "# of colors" to generate a diadic palette');
         }
+    } else if (selectedPaletteTypeOptionValue == "9") {
+        if (numBoxes >= 2) {
+            colors = generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight)
+        } else {
+            window.alert('Please select a number greater than "1" for "# of colors" to generate a monochromatic palette');
+        }
     }
 }
+
+
+export { handleGenerateButtonClick };

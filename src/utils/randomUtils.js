@@ -9,7 +9,7 @@
 import { populateColorTextOutputBox } from "../modules/dom.js";
 
 
-// Random HSL generation for color 1
+// Random HSL generation
 function randomHSL(limitGrayAndBlack, limitLight) {
     let hue = Math.floor(Math.random() * 360);
     let saturation = Math.floor(Math.random() * 101);
@@ -66,4 +66,4 @@ function generateRandomColor(limitGrayAndBlack, limitLight) {
 }
 
 
-export { randomSL, generateColor1 };
+export { randomHSL, randomSL, generateColor1 };

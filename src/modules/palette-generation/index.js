@@ -6,6 +6,7 @@
 
 
 
+import { generateRandomColorPalette } from './randomColorPaletteGen.js';
 import { generateComplementaryPalette } from './complementaryPaletteGen.js'
 import { generateTriadicPalette } from './triadicPaletteGen.js';
 import { generateTetradicPalette } from './tetradicPaletteGen.js';
@@ -13,10 +14,11 @@ import { generateHexadicPalette } from './hexadicPaletteGen.js';
 import { generateSplitComplementaryPalette } from './splitComplementaryPaletteGen.js';
 import { generateAnalogousPalette } from './analogousPaletteGen.js';
 import { generateDiadicPalette } from './diadicPaletteGen.js';
-import { randomSL, generateColor1 } from '../../utils/randomUtils.js';
+import { generateMonochromaticPalette } from './monochromaticPaletteGen.js';
+import { randomHSL, randomSL, generateColor1 } from '../../utils/randomUtils.js';
 import { generatePaletteBox, populateColorTextOutputBox } from '../dom.js';
 
 
-export { generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette };
-export { randomSL, generateColor1 };
+export { generateRandomColorPalette, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette };
+export { randomHSL, randomSL, generateColor1 };
 export { generatePaletteBox, populateColorTextOutputBox };
