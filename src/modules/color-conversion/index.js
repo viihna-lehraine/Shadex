@@ -6,6 +6,7 @@
 
 
 
+import { generateAndStoreColorValues } from './colorConversion.js';
 import { rgbToXYZ } from './convertToXYZ.js';
 import { componentToHex, rgbToHex, hslToHex, hsvToHex, cmykToHex, labToHex } from './convertToHex.js';
 import { hexToRGB, hslToRGB, hsvToRGB, cmykToRGB, labToRGB } from './convertToRGB.js';
@@ -14,6 +15,8 @@ import { hexToHSV, rgbToHSV, hslToHSV, cmykToHSV, labToHSV } from './convertToHS
 import { hexToCMYK, rgbToCMYK, hslToCMYK, hsvToCMYK, labToCMYK } from './convertToCMYK.js';
 import { hexToLab, rgbToLab, hslToLab, hsvToLab, cmykToLab } from './convertToLab.js';
 
+
+export { generateAndStoreColorValues };
 export { rgbToXYZ };
 export { componentToHex, rgbToHex, hslToHex, hsvToHex, cmykToHex, labToHex };
 export { hexToRGB, hslToRGB, hsvToRGB, cmykToRGB, labToRGB };

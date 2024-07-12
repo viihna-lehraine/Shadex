@@ -6,11 +6,15 @@
 
 
 
+import { hexToRGB } from "./index.js";
+
+
 // Convert Hex to CMYK
 function hexToCMYK(hex) {
     const rgb = hexToRGB(hex);
+    const cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
 
-    return rgbToCMYK(rgb.red, rgb.blue, rgb.green);
+    return `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
 }
 
 

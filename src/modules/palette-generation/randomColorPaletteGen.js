@@ -29,7 +29,6 @@ function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight) {
             populateColorTextOutputBox(randomColor, (i + 1));
         }
     }
-    console.log("Generated colors:", colors);
     return colors;
 }
 

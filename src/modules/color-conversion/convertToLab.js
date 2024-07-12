@@ -6,7 +6,7 @@
 
 
 
-import { rgbToXYZ } from './index.js';
+import { rgbToXYZ, hexToRGB } from './index.js';
 
 
 // Convert XYZ to Lab
@@ -33,8 +33,9 @@ function xyzToLab(x, y, z) {
 function hexToLab(hex) {
     const rgb = hexToRGB(hex);
     const xyz = rgbToXYZ(rgb.red, rgb.green, rgb.blue);
+    const lab = xyzToLab(xyz.x, xyz.y, xyz.z);
 
-    return xyzToLab(xyz.x, xyz.y, xyz.z);
+    return `lab(${lab.l.toFixed(2)}, ${lab.a.toFixed(2)}, ${lab.b.toFixed(2)})`;
 }
 
 

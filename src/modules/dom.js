@@ -6,9 +6,9 @@
 
 
 
-import { generateAndStoreColorValues } from './color-conversion/colorConversion.js';
+import { generateAndStoreColorValues } from './color-conversion/index.js';
+import { copyToClipboard } from '../utils/index.js';
 import { attachEventListeners } from './dragAndDrop.js';
-import { copyToClipboard } from '../utils/clipboardUtils.js';
 
 
 let paletteBoxCount = 1;
@@ -31,7 +31,6 @@ function generatePaletteBox(colors, numBoxes) {
 
         paletteBoxCount = newPaletteBoxCount;
     }
-    console.log(colors);
 }
 
 
@@ -51,7 +50,8 @@ function makePaletteBox(color, paletteBoxCount) {
     colorTextOutputBox.className = 'color-text-output-box tooltip';
     colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
     colorTextOutputBox.setAttribute('data-format', 'hex');
-    colorTextOutputBox.textContent = colorValues.hex; 
+    colorTextOutputBox.textContent = colorValues.hex;
+    colorTextOutputBox.colorValues = colorValues;
 
     let tooltipText = document.createElement('span');
     tooltipText.className = 'tooltiptext';

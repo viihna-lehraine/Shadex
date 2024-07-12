@@ -6,11 +6,15 @@
 
 
 
+import { hexToRGB } from "./index.js";
+
+
 // Convert Hex to HSV
 function hexToHSV(hex) {
     const rgb = hexToRGB(hex);
+    const hsv = rgbToHSV(rgb.red, rgb.green, rgb.blue);
 
-    return rgbToHSV(rgb.red, rgb.green, rgb.blue);
+    return `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
 }
 
 
@@ -38,12 +42,12 @@ function rgbToHSV(red, green, blue) {
     green /= 255;
     blue /= 255;
 
-    const max = Math.max(red, green, blue);
-    const min = Math.min(red, green, blue);
-    const value = max;
-    const delta = max - min;
-    const saturation = max === 0 ? 0 : delta / max;
-    let hue;
+    let max = Math.max(red, green, blue);
+    let min = Math.min(red, green, blue);
+    let hue, saturation, value = max;
+
+    let delta = max - min;
+    saturation = max === 0 ? 0 : delta / max;
 
     if (max === min) {
         hue = 0; // achromatic
@@ -59,10 +63,10 @@ function rgbToHSV(red, green, blue) {
                 hue = (red - green) / delta + 4;
                 break;
         }
-        hue *= 60;
+        hue /= 6;
     }
     return {
-        hue: Math.round(hue),
+        hue: Math.round(hue * 360),
         saturation: Math.round(saturation * 100),
         value: Math.round(value * 100)
     };

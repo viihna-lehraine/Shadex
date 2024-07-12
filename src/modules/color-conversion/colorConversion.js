@@ -82,25 +82,6 @@ function convertColors(targetFormat) {
     });
 }
 
-
-// Master Color Formatting Function
-function formatColor(color, format) {
-    if (format === 'hex') {
-        return color;
-    } else if (format === 'rgb') {
-        return `rgb(${color.red}, ${color.green}, ${color.blue})`;
-    } else if (format === 'hsl') {
-        return `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
-    } else if (format === 'hsv') {
-        return `hsv(${color.hue}, ${color.saturation}%, ${color.value}%)`;
-    } else if (format === 'cmyk') {
-        return `cmyk(${color.cyan}%, ${color.magenta}%, ${color.yellow}%, ${color.key}%)`;
-    } else if (format === 'lab') {
-        return `lab(${color.l.toFixed(2)}, ${color.a.toFixed(2)}, ${color.b.toFixed(2)})`;
-    }
-    return color;
-}
-
 // Generate All Color Values and Store as an Object
 function generateAndStoreColorValues(hue, saturation, lightness) {
     const colorValues = {};
@@ -110,9 +91,9 @@ function generateAndStoreColorValues(hue, saturation, lightness) {
     colorValues.hsl = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     colorValues.rgb = `rgb(${rgb.red}, ${rgb.green}, ${rgb.blue})`;
     colorValues.hex = rgbToHex(rgb.red, rgb.green, rgb.blue);
-    colorValues.hsv = hslToHSV(hue, saturation, lightness);
-    colorValues.cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
-    colorValues.lab = rgbToLab(rgb.red, rgb.green, rgb.blue);
+    colorValues.hsv = hexToHSV(colorValues.hex);
+    colorValues.cmyk = hexToCMYK(colorValues.hex);
+    colorValues.lab = hexToLab(colorValues.hex);
 
     return colorValues;
 }

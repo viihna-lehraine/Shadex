@@ -8,7 +8,11 @@
 
 // Convert Hex to RGB
 function hexToRGB(hex) {
-    let bigint = parseInt(hex.slice(1), 16);
+    // remove the hash at the beginning if it exists
+    hex = hex.replace(/^#/, '');
+
+    // parse RGB values    
+    let bigint = parseInt(hex, 16);
     let red = (bigint >> 16) & 255;
     let green = (bigint >> 8) & 255;
     let blue = bigint & 255;

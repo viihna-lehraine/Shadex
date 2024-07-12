@@ -83,7 +83,7 @@ label {
     display: flex;
     flex-direction: column;
     padding: 10px 25px;
-    margin-top: 3vh;
+    margin-top: 2vh;
     justify-content: center;
     text-align: center;
     background-color: #FFFFFF;
@@ -100,19 +100,33 @@ label {
     color: #555555;
 }
 
-#generate-button {
-    background-color: #4CAF50;
-    color: #FCFCFC;
+#generate-button, #custom-color-button {
     padding: 10px 20px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
+    font-size: 0.9em;
+    margin: 0 2px;
     cursor: pointer;
     border: 1px solid #1F1F21;
     border-radius: 5px;
 }
+
+#generate-button {
+    background-color: #4CAF50;
+    color: #FCFCFC;
+}
+
+#custom-color-button {
+    background-color: #F8B8F5;
+    color: #0E0E0E;
+}
+
+
+#custom-color-button:hover {
+    background-color: #D87ED5;
+}
+
 
 #generate-button:hover, .button-box-slice > button:hover {
     background-color: #3c803f;
@@ -121,12 +135,11 @@ label {
 #palette-row {
     position: relative;
     display: flex;
-    top: 1vh;
+    top: 12px;
     height: fit-content;
     width: 100%;
     justify-content: space-around;
     align-items: center;
-    padding: 5px 0;
 }
 
 #button-row-title {
@@ -147,11 +160,11 @@ label {
 #button-row {
     position: relative;
     display: flex;
-    top: 0.5vh;
+    top: 0;
     flex-wrap: wrap;
     height: fit-content;
     width: 100%;
-    margin-top: 20px;
+    margin-top: 10px;
     justify-content: center;
     align-items: center;
 }
@@ -240,7 +253,7 @@ label {
     height: fit-content;
     width: 100%;
     justify-content: center;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     padding: 5px;
 }
 
