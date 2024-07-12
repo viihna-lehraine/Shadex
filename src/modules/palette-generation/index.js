@@ -17,7 +17,7 @@ import { generateDiadicPalette } from './diadicPaletteGen.js';
 import { generateMonochromaticPalette } from './monochromaticPaletteGen.js';
 import { randomHSL, randomSL, generateColor1 } from '../../utils/randomUtils.js';
 import { generatePaletteBox, populateColorTextOutputBox } from '../dom.js';
-import { generatePalette } from './palleteGen.js';
+import { generatePalette } from './paletteGen.js';
 
 
 export { generateRandomColorPalette, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette };
