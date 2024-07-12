@@ -86,4 +86,46 @@ function handleGenerateButtonClick() {
 }
 
 
-export { handleGenerateButtonClick };
+// Generate Initial Palette
+function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor) {
+    let colors = [];
+    const baseColor = customColor ? customColor : randomHSL(limitGrayAndBlack, limitLight);
+
+    switch (paletteType) {
+        case 1:
+            colors = [baseColor];
+            for (let i = 1; i < numBoxes; i++) {
+                colors.push(randomHSL(limitGrayAndBlack, limitLight));
+            }
+            break;
+        case 2:
+            colors = generateComplementaryPalette(numBoxes, baseColor);
+            break;
+        case 3:
+            colors = generateTriadicPalette(numBoxes, baseColor);
+            break;
+        case 4:
+            colors = generateTetradicPalette(numBoxes, baseColor);
+            break;
+        case 5:
+            colors = generateSplitComplementaryPalette(numBoxes, baseColor);
+            break;
+        case 6:
+            colors = generateAnalogousPalette(numBoxes, baseColor);
+            break;
+        case 7:
+            colors = generateHexadicPalette(numBoxes, baseColor);
+            break;
+        case 8:
+            colors = generateDiadicPalette(numBoxes, baseColor);
+            break;
+        case 9:
+            colors = generateMonochromaticPalette(numBoxes, baseColor);
+            break;
+    }
+
+    generatePaletteBox(colors, numBoxes);
+}
+
+
+export { handleGenerateButtonClick, generatePalette };

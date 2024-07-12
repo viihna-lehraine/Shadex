@@ -15,11 +15,15 @@
 
 
 
-import { convertColors, handleGenerateButtonClick } from './modules/index.js';
+import { generatePalette } from './modules/palette-generation/index.js';
+import { convertColors, handleGenerateButtonClick, showCustomColorPopupDiv, applyCustomColor } from './modules/index.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
     const generateButton = document.getElementById('generate-button');
+    const popupDivButton = document.getElementById('custom-color-button');
+    const applyColorButton = document.getElementById('apply-color-button');
+    let customColor = null;
 
     document.getElementById('hex-conversion-button').addEventListener('click', () => convertColors('hex'));
     document.getElementById('rgb-conversion-button').addEventListener('click', () => convertColors('rgb'));
@@ -28,9 +32,23 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cmyk-conversion-button').addEventListener('click', () => convertColors('cmyk'));
     document.getElementById('lab-conversion-button').addEventListener('click', () => convertColors('lab'));
 
-    // Prevent generateButton default click event and define intended click event
+    // Prevent generateButton default click event
     generateButton.addEventListener('click', function(e) {
         e.preventDefault();
         handleGenerateButtonClick();
+        generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor);
     });
+    
+    // Prevent popupDivButton default click event
+    popupDivButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        showCustomColorPopupDiv();
+    })
+
+    // Prevent customColorButton default click event
+    applyColorButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        customColor = applyCustomColor();
+        showCustomColorPopupDiv();
+    })
 });

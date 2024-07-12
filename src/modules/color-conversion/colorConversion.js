@@ -82,6 +82,7 @@ function convertColors(targetFormat) {
     });
 }
 
+
 // Generate All Color Values and Store as an Object
 function generateAndStoreColorValues(hue, saturation, lightness) {
     const colorValues = {};

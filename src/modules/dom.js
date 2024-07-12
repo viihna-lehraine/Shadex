@@ -8,7 +8,9 @@
 
 import { generateAndStoreColorValues } from './color-conversion/index.js';
 import { copyToClipboard } from '../utils/index.js';
-import { attachEventListeners } from './dragAndDrop.js';
+import { attachDragAndDropEventListeners } from './dragAndDrop.js';
+import { hexToRGB, hexToHSL } from './color-conversion/index.js';
+import { generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette } from './palette-generation/index.js';
 
 
 let paletteBoxCount = 1;
@@ -60,7 +62,6 @@ function makePaletteBox(color, paletteBoxCount) {
     colorTextOutputBox.appendChild(tooltipText);
 
     colorTextOutputBox.addEventListener('click', () => {
-        // pass only the color value, excluding hthe tooltip
         const colorValue = colorTextOutputBox.textContent.replace('Copied to clipboard', '').trim();
         copyToClipboard(colorValue, colorTextOutputBox);
     });
@@ -86,7 +87,7 @@ function makePaletteBox(color, paletteBoxCount) {
     colorStripe.style.backgroundColor = colorValues.hsl;
 
     colorStripe.setAttribute('draggable', true);
-    attachEventListeners(colorStripe);
+    attachDragAndDropEventListeners(colorStripe);
 
     colorStripe.appendChild(paletteBox);
 
@@ -119,4 +120,25 @@ function showTooltip(tooltipElement) {
 }
 
 
-export { generatePaletteBox, populateColorTextOutputBox, showTooltip };
+// Toggle Popup Div
+function showCustomColorPopupDiv() {
+    let popup = document.getElementById('popup-div');
+    popup.classList.toggle('show');
+}
+
+
+// Capture Custom Color
+
+function applyCustomColor() {
+    let hexCustomColor = document.getElementById('custom-color-picker').value;
+    let hslCustomColor = hexToHSL(hexCustomColor);
+    // return `hsl(${hslCustomColor.hue}, ${hslCustomColor.saturation}%, ${hslCustomColor.lightness}%)`; //This returns an object
+    return { 
+        hue: hslCustomColor.hue,
+        saturation: `${hslCustomColor.saturation}%`,
+        lightness: `${hslCustomColor.lightness}%`
+    };
+}
+
+
+export { generatePaletteBox, populateColorTextOutputBox, showTooltip, showCustomColorPopupDiv, applyCustomColor };

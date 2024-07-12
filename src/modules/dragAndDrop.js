@@ -10,7 +10,7 @@ let dragSrcEl = null;
 
 
 // Drag and Drop - attach drag and drop event listeners to elements
-function attachEventListeners(element) {
+function attachDragAndDropEventListeners(element) {
     if (element) {
         element.addEventListener('dragstart', handleDragStart);
         element.addEventListener('dragover', handleDragOver);
@@ -82,4 +82,4 @@ function handleDragEnd(e) {
 }
 
 
-export { attachEventListeners };
+export { attachDragAndDropEventListeners };

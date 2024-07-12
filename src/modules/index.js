@@ -8,5 +8,6 @@
 import { convertColors } from './color-conversion/colorConversion.js';
 import { handleGenerateButtonClick } from './palette-generation/paletteGen.js';
 import { generateColor1 } from '../utils/randomUtils.js';
+import { showCustomColorPopupDiv, applyCustomColor } from './dom.js';
 
-export { convertColors, handleGenerateButtonClick, generateColor1 };
+export { convertColors, handleGenerateButtonClick, generateColor1, showCustomColorPopupDiv, applyCustomColor };
