@@ -7,6 +7,7 @@
 
 
 import { populateColorTextOutputBox } from "../modules/dom.js";
+import { copyToClipboard } from "./clipboardUtils.js";
 
 
-export { populateColorTextOutputBox };
+export { populateColorTextOutputBox, copyToClipboard };

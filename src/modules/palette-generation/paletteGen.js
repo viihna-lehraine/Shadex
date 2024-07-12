@@ -21,9 +21,10 @@ function handleGenerateButtonClick() {
     let limitGrayAndBlack = limitGrayAndBlackCheckbox.checked ? 1 : 0;
     let limitLight = limitLightCheckbox.checked ? 1 : 0;
     let colors = [];
+    
 
     if (selectedPaletteTypeOptionValue == "1") {
-        generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight);
+        colors = generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight);
         generatePaletteBox(colors, numBoxes);
     } else if (selectedPaletteTypeOptionValue == "2") {
         if (numBoxes !== 1) {
