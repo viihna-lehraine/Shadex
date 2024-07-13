@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.31
+// Color Palette Generator - version 0.4
 
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -19,11 +19,13 @@ import { generatePalette } from './modules/palette-generation/index.js';
 import { convertColors, handleGenerateButtonClick, showCustomColorPopupDiv, applyCustomColor } from './modules/index.js';
 
 
+let customColor = null;
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const generateButton = document.getElementById('generate-button');
     const popupDivButton = document.getElementById('custom-color-button');
     const applyColorButton = document.getElementById('apply-color-button');
-    let customColor = null;
 
     document.getElementById('hex-conversion-button').addEventListener('click', () => convertColors('hex'));
     document.getElementById('rgb-conversion-button').addEventListener('click', () => convertColors('rgb'));
@@ -35,7 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Prevent generateButton default click event
     generateButton.addEventListener('click', function(e) {
         e.preventDefault();
-        handleGenerateButtonClick();
+        const paletteType = parseInt(document.getElementById('palette-type-options').value);
+        const numBoxes = parseInt(document.getElementById('palette-number-options').value);
+        const limitGrayAndBlack = document.getElementById('limitGrayAndBlackCheckbox').checked;
+        const limitLight = document.getElementById('limitLightCheckbox').checked;
         generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor);
     });
     
@@ -43,12 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
     popupDivButton.addEventListener('click', function(e) {
         e.preventDefault();
         showCustomColorPopupDiv();
-    })
+    });
 
     // Prevent customColorButton default click event
     applyColorButton.addEventListener('click', function(e) {
         e.preventDefault();
         customColor = applyCustomColor();
         showCustomColorPopupDiv();
-    })
+    });
 });

@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.31
+// Color Palette Generator - version 0.4
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -23,9 +23,9 @@ function generateDiadicHues(color, numBoxes) {
 
 
 // Generate disdic color palette
-function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
+function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
     let colors = [];
-    const color = generateColor1(limitGrayAndBlack, limitLight);
+    const color = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
     const diadicHues = generateDiadicHues(color, numBoxes);
 
     colors.push(color);

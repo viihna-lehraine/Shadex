@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.31
+// Color Palette Generator - version 0.4
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -7,83 +7,7 @@
 
 
 import { generatePaletteBox, generateRandomColorPalette, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette } from './index.js';
-
-
-
-// Define default behavior for generateButton click event
-function handleGenerateButtonClick() {
-    let paletteTypeOptions = document.getElementById('palette-type-options');
-    let paletteNumberOptions = document.getElementById('palette-number-options');
-    let numBoxes = parseInt(paletteNumberOptions.value, 10);
-    let selectedPaletteTypeOptionValue = paletteTypeOptions.value;
-    let limitGrayAndBlackCheckbox = document.getElementById('limitGrayAndBlackCheckbox');
-    let limitLightCheckbox = document.getElementById('limitLightCheckbox');
-    let limitGrayAndBlack = limitGrayAndBlackCheckbox.checked ? 1 : 0;
-    let limitLight = limitLightCheckbox.checked ? 1 : 0;
-    let colors = [];
-    
-
-    if (selectedPaletteTypeOptionValue == "1") {
-        colors = generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight);
-        generatePaletteBox(colors, numBoxes);
-    } else if (selectedPaletteTypeOptionValue == "2") {
-        if (numBoxes !== 1) {
-            colors = generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight);
-            generatePaletteBox(colors, numBoxes);
-        } else {
-            window.alert('Please select a number greater than "1" for "# of colors" to generate a complementary palette');
-        }
-    } else if (selectedPaletteTypeOptionValue == "3") {
-        if (numBoxes == 3) {
-            colors = generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight);
-            generatePaletteBox(colors, numBoxes);
-        } else {
-            window.alert('Please select the number "3" for "# of colors" to generate a triadic color palette');
-        }
-    } else if (selectedPaletteTypeOptionValue == "4") {
-        if (numBoxes == 4) {
-            colors = generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight);
-            generatePaletteBox(colors, numBoxes);
-        } else {
-            window.alert('Please select the number "4" for "# of colors" to generate a tetradic color palette');
-        }
-    } else if (selectedPaletteTypeOptionValue == "5") {
-        if (numBoxes == 3) {
-            colors = generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight);
-            generatePaletteBox(colors, numBoxes);
-        } else {
-            window.alert('Please select the number "3" for "# of colors" to generate a split complementary color palette');
-        }
-    } else if (selectedPaletteTypeOptionValue == "6") {
-        if (numBoxes !== 1) {
-            colors = generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight);
-            generatePaletteBox(colors, numBoxes);
-        } else {
-            window.alert('Please select a number greater than "1" for "# of colors" to generate an analogous color palette');
-        }
-    } else if (selectedPaletteTypeOptionValue == "7") {
-        if (numBoxes == 6) {
-            colors = generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight);
-            generatePaletteBox(colors, numBoxes);
-        } else {
-            window.alert('Please select the number "6" for "# of colors" to generate a hexadic palette');
-        }
-    } else if (selectedPaletteTypeOptionValue == "8") {
-        if (numBoxes == 2) {
-            colors = generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight);
-            generatePaletteBox(colors, numBoxes);
-        } else {
-            window.alert('Please select the number "2" for "# of colors" to generate a diadic palette');
-        }
-    } else if (selectedPaletteTypeOptionValue == "9") {
-        if (numBoxes >= 2) {
-            colors = generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight);
-            generatePaletteBox(colors, numBoxes);
-        } else {
-            window.alert('Please select a number greater than "1" for "# of colors" to generate a monochromatic palette');
-        }
-    }
-}
+import { randomHSL, hexToHSL } from './index.js';
 
 
 // Generate Initial Palette
@@ -99,32 +23,47 @@ function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, c
             }
             break;
         case 2:
-            colors = generateComplementaryPalette(numBoxes, baseColor);
+            colors = generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor);
             break;
         case 3:
-            colors = generateTriadicPalette(numBoxes, baseColor);
+            colors = generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor);
             break;
         case 4:
-            colors = generateTetradicPalette(numBoxes, baseColor);
+            colors = generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor);
             break;
         case 5:
-            colors = generateSplitComplementaryPalette(numBoxes, baseColor);
+            colors = generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor);
             break;
         case 6:
-            colors = generateAnalogousPalette(numBoxes, baseColor);
+            colors = generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor);
             break;
         case 7:
-            colors = generateHexadicPalette(numBoxes, baseColor);
+            colors = generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor);
             break;
         case 8:
-            colors = generateDiadicPalette(numBoxes, baseColor);
+            colors = generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor);
             break;
         case 9:
-            colors = generateMonochromaticPalette(numBoxes, baseColor);
+            colors = generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor);
             break;
     }
 
     generatePaletteBox(colors, numBoxes);
+};
+
+
+// Define default behavior for generateButton click event
+function handleGenerateButtonClick() {
+    let paletteTypeOptions = document.getElementById('palette-type-options');
+    let paletteNumberOptions = document.getElementById('palette-number-options');
+    let numBoxes = parseInt(paletteNumberOptions.value, 10);
+    let selectedPaletteTypeOptionValue = parseInt(paletteTypeOptions.value, 10);
+    let limitGrayAndBlackCheckbox = document.getElementById('limitGrayAndBlackCheckbox');
+    let limitLightCheckbox = document.getElementById('limitLightCheckbox');
+    let limitGrayAndBlack = limitGrayAndBlackCheckbox.checked ? 1 : 0;
+    let limitLight = limitLightCheckbox.checked ? 1 : 0;
+    
+    generatePalette(selectedPaletteTypeOptionValue, numBoxes, limitGrayAndBlack, limitLight);
 }
 
 

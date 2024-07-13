@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.31
+// Color Palette Generator - version 0.4
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -7,13 +7,13 @@
 
 
 import { populateColorTextOutputBox } from '../dom.js';
-import { generateColor1, randomSL } from './index.js';
+import { generateColor1, randomSL, generatePaletteBox } from './index.js';
 
 
 // Generate complementary palette
-function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight) {
+function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor = null) {
     const colors = [];
-    const color = generateColor1(limitGrayAndBlack, limitLight);
+    const color = baseColor !== null && baseColor !== undefined ? baseColor : generateColor1(limitGrayAndBlack, limitLight);
     const complementaryHue = (color.hue + 180) % 360;
 
     colors.push(color);

@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.31
+// Color Palette Generator - version 0.4
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -27,9 +27,9 @@ function generateHexadicHues(color) {
 
 
 // Generate hexadic palette
-function generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight) {
+function generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
     const colors = [];
-    const color = generateColor1(limitGrayAndBlack, limitLight);
+    const color = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
     const hexadicHues = generateHexadicHues(color);
 
     colors.push(color);

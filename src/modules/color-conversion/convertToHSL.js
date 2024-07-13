@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.31
+// Color Palette Generator - version 0.4
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -6,10 +6,19 @@
 
 
 
+import { hexToRGB } from "./convertToRGB.js";
+
+
 // Convert Hex to HSL
 function hexToHSL(hex) {
     const rgb = hexToRGB(hex);
     const hsl = rgbToHSL(rgb.red, rgb.green, rgb.blue);
+
+    return {
+        hue: hsl.hue,
+        saturation: hsl.saturation,
+        lightness: hsl.lightness
+    }
 }
 
 

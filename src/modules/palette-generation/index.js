@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.31
+// Color Palette Generator - version 0.4
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -18,9 +18,11 @@ import { generateMonochromaticPalette } from './monochromaticPaletteGen.js';
 import { randomHSL, randomSL, generateColor1 } from '../../utils/randomUtils.js';
 import { generatePaletteBox, populateColorTextOutputBox } from '../dom.js';
 import { generatePalette } from './paletteGen.js';
+import { hexToHSL } from '../color-conversion/convertToHSL.js';
 
 
 export { generateRandomColorPalette, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette };
+export { hexToHSL };
 export { randomHSL, randomSL, generateColor1 };
 export { generatePaletteBox, populateColorTextOutputBox };
 export { generatePalette };

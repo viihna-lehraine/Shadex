@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.31
+// Color Palette Generator - version 0.4
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -25,9 +25,9 @@ function generateAnalogousHues(color, numBoxes) {
 
 
 // Generate analogous palette
-function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight) {
+function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
     const colors = [];
-    const color = generateColor1(limitGrayAndBlack, limitLight);
+    const color = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
     const analogousHues = generateAnalogousHues(color, numBoxes);
 
     colors.push(color);

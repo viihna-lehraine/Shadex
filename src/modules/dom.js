@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.31
+// Color Palette Generator - version 0.4
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -9,7 +9,7 @@
 import { generateAndStoreColorValues } from './color-conversion/index.js';
 import { copyToClipboard } from '../utils/index.js';
 import { attachDragAndDropEventListeners } from './dragAndDrop.js';
-import { hexToRGB, hexToHSL } from './color-conversion/index.js';
+import { hexToHSL, hslToHex } from './color-conversion/index.js';
 import { generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette } from './palette-generation/index.js';
 
 
@@ -127,16 +127,15 @@ function showCustomColorPopupDiv() {
 }
 
 
-// Capture Custom Color
-
+// Apply Custom Color
 function applyCustomColor() {
     let hexCustomColor = document.getElementById('custom-color-picker').value;
     let hslCustomColor = hexToHSL(hexCustomColor);
-    // return `hsl(${hslCustomColor.hue}, ${hslCustomColor.saturation}%, ${hslCustomColor.lightness}%)`; //This returns an object
-    return { 
+    
+    return {
         hue: hslCustomColor.hue,
-        saturation: `${hslCustomColor.saturation}%`,
-        lightness: `${hslCustomColor.lightness}%`
+        saturation: hslCustomColor.saturation,
+        lightness: hslCustomColor.lightness
     };
 }
 

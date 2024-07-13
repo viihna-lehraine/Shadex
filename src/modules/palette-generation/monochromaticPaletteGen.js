@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.31
+// Color Palette Generator - version 0.4
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -10,9 +10,9 @@ import { populateColorTextOutputBox } from './index.js';
 
 
 // Generate a random color palette
-function generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight) {
+function generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
     const colors = [];
-    const baseColor = randomHSL(limitGrayAndBlack, limitLight);
+    const color = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
 
     for (let i = 0; i < numBoxes; i++) {
         const slValues = randomSL(limitGrayAndBlack, limitLight);
