@@ -47,6 +47,8 @@ I plan to introduce an easier way to use this locally in the future. Probably wi
 
 ## Features
 
+**The current version is quite buggy. I'm working on daily basis to get it running smoothly.**
+
 - Drag and drop color swatches
 - Copy color values with a single click
 - Limit very dark colors (can be turned on or off)
