@@ -11,6 +11,11 @@ import { populateColorTextOutputBox } from './index.js';
 
 // Generate a monochromatic color palette
 function generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+    if (numBoxes < 2) {
+        window.alert('To generate a monochromatic palette, please select a number of swatches greater than 1');
+        return;
+    }
+
     const colors = [];
     const color = customColor !== null && customColor !== undefined ? customColor : randomHSL(limitGrayAndBlack, limitLight);
 

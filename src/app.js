@@ -18,15 +18,16 @@
 import { convertColors, showCustomColorPopupDiv, applyCustomColor } from './modules/index.js';
 import { generatePalette } from './modules/palette-generation/index.js';
 
-
+// Initialize customColor variable
 let customColor = null;
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const generateButton = document.getElementById('generate-button');
     const popupDivButton = document.getElementById('custom-color-button');
     const applyColorButton = document.getElementById('apply-color-button');
+    const clearColorButton = document.getElementById('clear-color-button');
 
+    // Add event listeners for conversion buttons
     document.getElementById('hex-conversion-button').addEventListener('click', () => convertColors('hex'));
     document.getElementById('rgb-conversion-button').addEventListener('click', () => convertColors('rgb'));
     document.getElementById('hsv-conversion-button').addEventListener('click', () => convertColors('hsv'));
@@ -34,8 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cmyk-conversion-button').addEventListener('click', () => convertColors('cmyk'));
     document.getElementById('lab-conversion-button').addEventListener('click', () => convertColors('lab'));
 
-    
-    // Prevent generateButton default click event
+    // Generate Button click event
     generateButton.addEventListener('click', function(e) {
         e.preventDefault();
         const paletteType = parseInt(document.getElementById('palette-type-options').value);
@@ -44,19 +44,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const limitLight = document.getElementById('limitLightCheckbox').checked;
         generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor);
     });
-    
 
-    // Prevent popupDivButton default click event
+    // Popup Div button click event
     popupDivButton.addEventListener('click', function(e) {
         e.preventDefault();
         showCustomColorPopupDiv();
     });
 
-
-    // Prevent customColorButton default click event
+    // Apply color button click event
     applyColorButton.addEventListener('click', function(e) {
         e.preventDefault();
         customColor = applyCustomColor();
+        showCustomColorPopupDiv();
+    });
+
+    // Clear color button click event
+    clearColorButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        customColor = null;
         showCustomColorPopupDiv();
     });
 });

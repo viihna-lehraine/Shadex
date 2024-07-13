@@ -28,6 +28,11 @@ function generateSplitComplementaryHues(color, numBoxes) {
 
 // Generate split complementary palette
 function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+    if (numBoxes < 3) {
+        window.alert('To generate a split complementary palette, please select a number of swatches greater than 2');
+        return;
+    }
+
     const colors = [];
     const color = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
     const splitComplementaryHues = generateSplitComplementaryHues(color, numBoxes);

@@ -12,6 +12,10 @@ import { generateColor1, randomSL, generatePaletteBox } from './index.js';
 
 // Generate complementary palette
 function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor = null) {
+    if (numBoxes < 2) {
+        window.alert('To generate a complementary palette, please select a number of swatches greater than 1');
+        return;
+    }
     const colors = [];
     const color = baseColor !== null && baseColor !== undefined ? baseColor : generateColor1(limitGrayAndBlack, limitLight);
     const complementaryHue = (color.hue + 180) % 360;

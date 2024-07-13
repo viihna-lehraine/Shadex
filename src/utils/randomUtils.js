@@ -15,19 +15,18 @@ function randomHSL(limitGrayAndBlack, limitLight) {
     if (limitGrayAndBlack || limitLight) {
         saturation = Math.max(saturation, 20);
         lightness = Math.max(lightness, 25);
-        console.log('Used LGaB + LL');
     }
 
     if (limitLight) {
         lightness = Math.min(lightness, 75);
-        console.log('Used LL');
-
     }
-    return { hue, saturation, lightness };
+
+    let color = { hue, saturation, lightness }
+    return color;
 }
 
 
-// Random saturation and lightness attributes of new HSL
+// Random SL generation for an HSL attribute
 function randomSL(limitGrayAndBlack, limitLight) {
     let saturation = Math.floor(Math.random() * 101);
     let lightness = Math.floor(Math.random() * 101);
@@ -35,14 +34,16 @@ function randomSL(limitGrayAndBlack, limitLight) {
     if (limitGrayAndBlack || limitLight) {
         saturation = Math.max(saturation, 20);
         lightness = Math.max(lightness, 25);
-        console.log('Used LGaB + LL');
+        console.log(saturation, lightness);
     }
 
     if (limitLight) {
         lightness = Math.min(lightness, 75);
-        console.log('Used LL');
+        console.log(saturation, lightness);
     }
-    return { saturation, lightness };
+
+    let color = { saturation, lightness };
+    return color;
 }
 
 

@@ -337,6 +337,22 @@ label {
     cursor: pointer;
 }
 
+.popup-div {
+    flex-direction: column;
+}
+
+.popup-div-row:first-child {
+    display: flex;
+    padding-bottom: 10px;
+    justify-content: center;
+}
+
+.popup-div-row:nth-child(2) {
+    display: flex;
+    padding-bottom: 3px;
+    justify-content: space-around;
+}
+
 .popup .popuptext {
     position: absolute;
     visibility: hidden;

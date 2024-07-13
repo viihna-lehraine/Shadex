@@ -8,6 +8,7 @@
 
 import { generateColor1, randomSL, populateColorTextOutputBox } from './index.js';
 
+
 // Generate analogous hues
 function generateAnalogousHues(color, numBoxes) {
     const analogousHues = [];
@@ -26,6 +27,10 @@ function generateAnalogousHues(color, numBoxes) {
 
 // Generate analogous palette
 function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+    if (numBoxes < 2) {
+        window.alert('To generate an analogous palette, please select a number of swatches greater than 1');
+        return;
+    }
     const colors = [];
     const color = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
     const analogousHues = generateAnalogousHues(color, numBoxes);

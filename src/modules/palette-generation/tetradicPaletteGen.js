@@ -28,6 +28,11 @@ function generateTetradicHues(color) {
 
 // Generate tetradic palette
 function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+    if (numBoxes < 4) {
+        window.alert('To generate a tetradic palette, please select a number of swatches greater than 3');
+        return;
+    }
+
     const colors = [];
     const color = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
     const tetradicHues = generateTetradicHues(color);

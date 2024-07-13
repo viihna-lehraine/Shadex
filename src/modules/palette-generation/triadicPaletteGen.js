@@ -24,6 +24,11 @@ function generateTriadicHues(color) {
 
 // Generate triadic palette
 function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+    if (numBoxes < 3) {
+        window.alert('To generate a triadic palette, please select a number of swatches greater than 2');
+        return;
+    }
+
     const colors = [];
     const color = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
     const triadicHues = generateTriadicHues(color);

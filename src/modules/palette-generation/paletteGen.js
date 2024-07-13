@@ -13,14 +13,11 @@ import { randomHSL } from './index.js';
 // Generate Initial Palette
 function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor) {
     let colors = [];
-    const baseColor = customColor ? customColor : randomHSL(limitGrayAndBlack, limitLight);
+    const baseColor = customColor || randomHSL(limitGrayAndBlack, limitLight);
 
     switch (paletteType) {
         case 1:
-            colors = [baseColor];
-            for (let i = 1; i < numBoxes; i++) {
-                colors.push(randomHSL(limitGrayAndBlack, limitLight));
-            }
+            colors = generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor);
             break;
         case 2:
             colors = generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor);

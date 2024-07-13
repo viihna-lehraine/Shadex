@@ -18,7 +18,7 @@ function generateHexadicHues(color) {
     const randomDistance = Math.floor(Math.random() * 71 + 10);
     const hue3 = (hue1 + randomDistance) % 360;
     const hue4 = (hue3 + 180) % 360;
-    const hue5 = (hue1 - randomDistance) % 360;
+    const hue5 = (hue1 + 360 - randomDistance) % 360;
     const hue6 = (hue5 + 180) % 360;
 
     hexadicHues.push(hue1, hue2, hue3, hue4, hue5, hue6);
@@ -28,14 +28,18 @@ function generateHexadicHues(color) {
 
 // Generate hexadic palette
 function generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+    if (numBoxes < 6) {
+        window.alert('To generate a hexadic palette, please select a number of swatches greater than 5');
+        return [];
+    }
+
     const colors = [];
     const color = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
+    console.log(colors);
     const hexadicHues = generateHexadicHues(color);
 
-    colors.push(color);
-
-    for (let i = 0; i < hexadicHues.length; i++) {
-        let hexadicHue = hexadicHues[i];
+    for (let i = 0; i < numBoxes; i++) {
+        let hexadicHue = hexadicHues[i % 6]; // Cycle through the hexadic hues
         let hexadicSatAndLightness = randomSL(limitGrayAndBlack, limitLight);
         let hexadicColor = {
             hue: hexadicHue,
@@ -52,8 +56,10 @@ function generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
             populateColorTextOutputBox(hexadicColor, i + 1);
         }
     }
+    console.log(colors);
     return colors;
 }
+
 
 
 export { generateHexadicPalette };

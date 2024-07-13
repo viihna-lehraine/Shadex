@@ -23,7 +23,6 @@ function generatePaletteBox(colors, numBoxes) {
     paletteBoxCount = 1;
 
     for (let i = 0; i < numBoxes; i++) {
-
         const { colorStripe, paletteBoxCount: newPaletteBoxCount } = makePaletteBox(colors[i], paletteBoxCount);
 
         paletteRow.appendChild(colorStripe);
