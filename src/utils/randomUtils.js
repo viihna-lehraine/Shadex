@@ -1,12 +1,9 @@
 // Color Palette Generator - version 0.4
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
-// Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
+// Author: Viihna Leraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
 // BEGIN CODE
 
-
-
-import { populateColorTextOutputBox } from "../modules/dom.js";
 
 
 // Random HSL generation
@@ -15,13 +12,16 @@ function randomHSL(limitGrayAndBlack, limitLight) {
     let saturation = Math.floor(Math.random() * 101);
     let lightness = Math.floor(Math.random() * 101);
 
-    if ((limitGrayAndBlack === 1) || (limitLight === 1)) {
+    if (limitGrayAndBlack || limitLight) {
         saturation = Math.max(saturation, 20);
         lightness = Math.max(lightness, 25);
+        console.log('Used LGaB + LL');
     }
 
-    if (limitLight === 1) {
+    if (limitLight) {
         lightness = Math.min(lightness, 75);
+        console.log('Used LL');
+
     }
     return { hue, saturation, lightness };
 }
@@ -32,13 +32,15 @@ function randomSL(limitGrayAndBlack, limitLight) {
     let saturation = Math.floor(Math.random() * 101);
     let lightness = Math.floor(Math.random() * 101);
 
-    if ((limitGrayAndBlack === 1) || (limitLight === 1)) {
+    if (limitGrayAndBlack || limitLight) {
         saturation = Math.max(saturation, 20);
         lightness = Math.max(lightness, 25);
+        console.log('Used LGaB + LL');
     }
 
-    if (limitLight === 1) {
+    if (limitLight) {
         lightness = Math.min(lightness, 75);
+        console.log('Used LL');
     }
     return { saturation, lightness };
 }
@@ -53,15 +55,6 @@ function generateColor1(limitGrayAndBlack, limitLight) {
         colorBox1.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
         populateColorTextOutputBox(color, 1);
     }
-    return color;
-}
-
-
-// Generate random color
-function generateRandomColor(limitGrayAndBlack, limitLight) {
-    const color = generateColor1(limitGrayAndBlack, limitLight);
-
-    populateColorTextOutputBox(color, 1);
     return color;
 }
 

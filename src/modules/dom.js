@@ -1,6 +1,6 @@
 // Color Palette Generator - version 0.4
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
-// Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
+// Author: Viihna Leraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
 // BEGIN CODE
 
@@ -9,8 +9,7 @@
 import { generateAndStoreColorValues } from './color-conversion/index.js';
 import { copyToClipboard } from '../utils/index.js';
 import { attachDragAndDropEventListeners } from './dragAndDrop.js';
-import { hexToHSL, hslToHex } from './color-conversion/index.js';
-import { generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette } from './palette-generation/index.js';
+import { hexToHSL } from './color-conversion/index.js';
 
 
 let paletteBoxCount = 1;

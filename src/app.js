@@ -1,6 +1,6 @@
 // Color Palette Generator - version 0.4
 
-// Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
+// Author: Viihna Leraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 
@@ -15,8 +15,8 @@
 
 
 
+import { convertColors, showCustomColorPopupDiv, applyCustomColor } from './modules/index.js';
 import { generatePalette } from './modules/palette-generation/index.js';
-import { convertColors, handleGenerateButtonClick, showCustomColorPopupDiv, applyCustomColor } from './modules/index.js';
 
 
 let customColor = null;
@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cmyk-conversion-button').addEventListener('click', () => convertColors('cmyk'));
     document.getElementById('lab-conversion-button').addEventListener('click', () => convertColors('lab'));
 
+    
     // Prevent generateButton default click event
     generateButton.addEventListener('click', function(e) {
         e.preventDefault();
@@ -44,11 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
         generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor);
     });
     
+
     // Prevent popupDivButton default click event
     popupDivButton.addEventListener('click', function(e) {
         e.preventDefault();
         showCustomColorPopupDiv();
     });
+
 
     // Prevent customColorButton default click event
     applyColorButton.addEventListener('click', function(e) {

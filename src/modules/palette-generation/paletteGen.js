@@ -7,7 +7,7 @@
 
 
 import { generatePaletteBox, generateRandomColorPalette, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette } from './index.js';
-import { randomHSL, hexToHSL } from './index.js';
+import { randomHSL } from './index.js';
 
 
 // Generate Initial Palette
@@ -49,7 +49,7 @@ function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, c
     }
 
     generatePaletteBox(colors, numBoxes);
-};
+}
 
 
 // Define default behavior for generateButton click event
