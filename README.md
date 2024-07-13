@@ -1,9 +1,12 @@
 # ColorGen
+## version 0.4 (pre-release)
 
-ColorGen is a web-based color palette generator. It produces 8 styles of palette, defaulting to Hex color format. It can also convert between multiple color formats.
+<br>
+ColorGen is a web-based color palette generator. It produces 8 styles of palette, defaulting to Hex color format. It can also convert between 6 color formats.
 
-***
-
+*** 
+ 
+ 
 ## Supported Palette Types
 
 - Random Single Color
@@ -38,6 +41,8 @@ git clone https://github.com/lost-possum/color-gen.git
 
 After cloning, it would be easiest to open up the project in VS Code and run it in a live server environment. Please make sure to keep the directory's structure intact, or it will fail to work.
 
+I plan to introduce an easier way to use this locally in the future. Probably with the full release of 1.0.
+
 ***
 
 ## Features
@@ -48,15 +53,14 @@ After cloning, it would be easiest to open up the project in VS Code and run it 
 - Limit very light and muted colors (can also be turned on or off)
 - 8 palette types
 - Convert between 6 color formats
+- Define custom color, used as a base to generate your palette
 
 ***
 
 ## Upcoming Features
 
-- Fully randomized color palette when selecting "random color" and multiple swatches
 - Additional palette types
 - More flexibility for the number of swatches allowed on each palette type
-- Custom palette start points - select a custom color and use it as the basis of your palette
 - Aesthetic updates
 - Making the UI less clunky in general
 - Optimized mobile layout and functionality
@@ -78,4 +82,4 @@ This project is released under the GNU General Public License, version 3. See th
 ## Authors
 
 - **Viihna Lehraine** - sole creator and contributor
-- **Built With** - JavaScript in the VS Code editor and ridiculous amounts of caffeine
+- **Built With** - JavaScript, VS Code, Firefox, and unhealthy amounts of caffeine
