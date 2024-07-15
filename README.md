@@ -1,12 +1,13 @@
 # ColorGen
-## version 0.4 (pre-release)
+## version 0.5 (pre-release)
 
-<br>
-ColorGen is a web-based color palette generator. It produces 8 styles of palette, defaulting to Hex color format. It can also convert between 6 color formats.
+ColorGen is a web-based color palette generator. It produces 8 varieties of color scheme and can convert between 6 color formats.
+
+### NOTE
+Please use the branch "v0.5" to use the program. The main branch is in a state of development and is NOT stable.
 
 *** 
- 
- 
+
 ## Supported Palette Types
 
 - Random Single Color
@@ -18,7 +19,7 @@ ColorGen is a web-based color palette generator. It produces 8 styles of palette
 - Analogous
 - Diadic
 
-## Color Formatting Options
+## Color Spaces
 
 - Hex
 - RGB
@@ -29,39 +30,102 @@ ColorGen is a web-based color palette generator. It produces 8 styles of palette
 
 ***
 
+## Requirements
+
+- [Node.js](https://nodejs.org)
+- Git installed on your system:
+  - **Windows** - You can download it from [Git for Windows](https://gitforwindows.org) 
+  - **Linux** - Download it using your system's package manager
+
+***
+
 ## Installation
 
-I host a copy of this program at [sharkswithswords.com](http://sharkswithswords.com/desktop/html/color-palette-generator.html), but it will likely not be updated more than once every week or so.
+### Windows Users
 
-Alternatively, you can clone the repository by typing this into your terminal:
+1. **Open Command Prompt**:
+    - Press `Win + R` to open the Run dialog.
+    - Type `cmd` and press `Enter`.
 
-```sh
-git clone https://github.com/lost-possum/color-gen.git
-```
+    Alternatively, you can:
+    - Click on the Start Menu.
+    - Type `cmd` or `Command Prompt`.
+    - Click on the `Command Prompt` application to open it.
 
-After cloning, it would be easiest to open up the project in VS Code and run it in a live server environment. Please make sure to keep the directory's structure intact, or it will fail to work.
+2. **Clone the Repository**:
+    - In the Command Prompt, navigate to the directory where you want to clone the repository using the `cd` command. For example:
+      ```cmd
+      cd path\to\your\directory
+      ```
+    - Clone the repository using Git:
+      ```cmd
+      git clone https://github.com/lost-possum/colorgen.git
+      ```
 
-I plan to introduce an easier way to use this locally in the future. Probably with the full release of 1.0.
+### Linux Users
+
+1. **Open Terminal**:
+    - Press `Ctrl + Alt + T` to open a new terminal window.
+   
+    Alternatively:
+    - Search for `Terminal` in your application menu and open it.
+
+2. **Clone the Repository**:
+    - In the Terminal, navigate to the directory where you want to clone the repository using the `cd` command. For example:
+      ```bash
+      cd /path/to/your/directory
+      ```
+    - Clone the repository using Git:
+      ```bash
+      git clone https://github.com/lost-possum/colorgen.git
+      ```
+
+***
+
+## Running the Project
+
+1. Navigate to the project directory:
+    ```bash
+    cd /path/to/the/repo
+    ```
+
+2. Install the 'http-server' globally if you haven't already done so:
+    ```bash
+    npm install -g http-server
+    ```
+
+3. Start the server:
+    ```bash
+    http-server .
+    ```
+
+4. Open your browser and go to:
+    ```
+    http://localhost:8080
+    ```
+
+***
+
+## Additional Information
+- For development, clone the repository and open the root directory in your preferred IDE.
 
 ***
 
 ## Features
 
-**The current version is quite buggy. I'm working on daily basis to get it running smoothly.**
-
 - Drag and drop color swatches
 - Copy color values with a single click
 - Limit very dark colors (can be turned on or off)
 - Limit very light and muted colors (can also be turned on or off)
-- 8 palette types
-- Convert between 6 color formats
+- 8 types of color scheme
+- Convert between 6 color spaces
 - Define custom color, used as a base to generate your palette
 
 ***
 
 ## Upcoming Features
 
-- Additional palette types
+- Additional color schemes
 - More flexibility for the number of swatches allowed on each palette type
 - Aesthetic updates
 - Making the UI less clunky in general
