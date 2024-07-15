@@ -9,7 +9,7 @@
 import { generateAndStoreColorValues } from './color-conversion/index.js';
 import { copyToClipboard } from '../utils/index.js';
 import { attachDragAndDropEventListeners } from './dragAndDrop.js';
-import { hexToHSL } from './color-conversion/index.js';
+import { hexToHSL, hslToHex } from './color-conversion/index.js';
 
 
 let paletteBoxCount = 1;
@@ -46,25 +46,42 @@ function makePaletteBox(color, paletteBoxCount) {
     paletteBoxTopHalf.className = 'palette-box-half palette-box-top-half';
     paletteBoxTopHalf.id = `palette-box-top-half-${paletteBoxCount}`;
 
-    let colorTextOutputBox = document.createElement('div');
+    let colorTextOutputBox = document.createElement('input');
+    colorTextOutputBox.type = 'text';
     colorTextOutputBox.className = 'color-text-output-box tooltip';
     colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
     colorTextOutputBox.setAttribute('data-format', 'hex');
-    colorTextOutputBox.textContent = colorValues.hex;
+    colorTextOutputBox.value = colorValues.hex;
     colorTextOutputBox.colorValues = colorValues;
+
+    let copyButton = document.createElement('button');
+    copyButton.className = 'copy-button';
+    copyButton.textContent = 'Copy';
 
     let tooltipText = document.createElement('span');
     tooltipText.className = 'tooltiptext';
     tooltipText.textContent = 'Copied to clipboard!';
 
-    colorTextOutputBox.appendChild(tooltipText);
+    copyButton.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(colorTextOutputBox.value);
+            showTooltip(colorTextOutputBox);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
+    });
 
-    colorTextOutputBox.addEventListener('click', () => {
-        const colorValue = colorTextOutputBox.textContent.replace('Copied to clipboard', '').trim();
-        copyToClipboard(colorValue, colorTextOutputBox);
+    colorTextOutputBox.addEventListener('input', (e) => {
+        const colorValue = e.target.value;
+        if (/^#[0-9A-F]{6}$/i.test(colorValue)) {
+            document.getElementById(`color-box-${paletteBoxCount}`).style.backgroundColor = colorValue;
+            document.getElementById(`color-stripe-${paletteBoxCount}`).style.backgroundColor = colorValue;
+        }
+        // needs error handling
     });
 
     paletteBoxTopHalf.appendChild(colorTextOutputBox);
+    paletteBoxTopHalf.appendChild(copyButton);
 
     let paletteBoxBottomHalf = document.createElement('div');
     paletteBoxBottomHalf.className = 'palette-box-half palette-box-bottom-half';
@@ -98,10 +115,24 @@ function populateColorTextOutputBox(color, boxNumber) {
     let colorTextOutputBox = document.getElementById(`color-text-output-box-${boxNumber}`);
 
     if (colorTextOutputBox) {
+        let hexValue = hslToHex(color.hue, color.saturation, color.lightness);
+        colorTextOutputBox.value = hexValue;
+        colorTextOutputBox.setAttribute('data-format', 'hex');
+    }
+}
+
+
+/*
+// Populates .color-text-output-box with the HSL attribute
+function populateColorTextOutputBox(color, boxNumber) {
+    let colorTextOutputBox = document.getElementById(`color-text-output-box-${boxNumber}`);
+
+    if (colorTextOutputBox) {
         colorTextOutputBox.value = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
         colorTextOutputBox.setAttribute('data-format', 'hsl');
     }
 }
+*/
 
 
 // Show Tooltip for Copy to Clipbaoard
