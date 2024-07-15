@@ -1,4 +1,4 @@
-// Color Palette Generator - version 0.4
+// ColorGen - version 0.4
 
 // Author: Viihna Leraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
