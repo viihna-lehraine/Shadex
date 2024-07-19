@@ -5,7 +5,7 @@
 // BEGIN CODE
 
 import { generateAndStoreColorValues } from './color-conversion/index.js';
-import { copyToClipboard } from '../utils/index.js';
+/* import { copyToClipboard } from '../utils/index.js'; */
 import { attachDragAndDropEventListeners } from './dragAndDrop.js';
 import { hexToHSL, hslToHex } from './color-conversion/index.js';
 
@@ -128,21 +128,22 @@ function populateColorTextOutputBox(color, boxNumber) {
 
 
 // Saturate Button functionality
-saturateColor(selectedColor) {
+function saturateColor(selectedColor) {
     let selectedColorTextOutputBox = document.getElementById(`color-text-output-box-${selectedColor}`);
     let selectedColorBox = document.getElementById(`color-box-${selectedColor}`);
     let selectedColorStripe = document.getElementById(`color-stripe-${selectedColor}`);
     let selectedColorValue = colors[selectedColor];
-};
+}
 
 
 // Desaturate Button functionality
-desaturateColor(selectedColor) {
+function desaturateColor(selectedColor) {
     let selectedColorTextOutputBox = document.getElementById(`color-text-output-box-${selectedColor}`);
     let selectedColorBox = document.getElementById(`color-box-${selectedColor}`);
     let selectedColorStripe = document.getElementById(`color-stripe-${selectedColor}`);
-        let selectedColorValue = colors[selectedColor];
-};
+    let selectedColorValue = colors[selectedColor];
+}
+
 
 
 // Show Tooltip for Copy to Clipboard

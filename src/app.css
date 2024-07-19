@@ -1,3 +1,5 @@
+/* Full Page Selectors */
+
 * {
     box-sizing: border-box;
 }
@@ -8,6 +10,51 @@ body {
     font-family: Arial, sans-serif;
 }
 
+#container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+
+
+/* -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/- */
+/* Keyframes */
+
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+
+
+/* -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/- */
+/* Root Element Selectors */
+
+
+label {
+    font-size: 0.8em;
+    padding: 2px;
+    color: #555555;
+}
+
+h3 {
+    color: #333333;
+}
+
+
+
+/* -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/- */
+/* Media Queries */
+
+
 @media (max-width: 600px) {
 
     #container {
@@ -16,7 +63,7 @@ body {
         overflow-y: scroll;
     }
 
-    #palette-row {
+    #ui-row {
         flex-wrap: wrap;
     }
 
@@ -37,7 +84,7 @@ body {
         width: 40%;
     }
 
-    #theBox {
+    #the-box {
         width: 90%;
         margin-bottom: -2vh;
     }
@@ -53,7 +100,7 @@ body {
 
     }
 
-    #button-row-title {
+    #button-box-title-slice {
         order: -1;
     }
 
@@ -66,25 +113,15 @@ body {
     }
 }
 
-#container {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 100vw;
-    align-items: center;
-    overflow-x: hidden;
-}
 
-label {
-    font-size: 0.8em;
-    padding: 2px;
-    color: #555555;
-}
 
-#theBox {
+/* -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/- */
+/* Main User Interface (Primary Upper Box) */
+
+
+
+/* Primary Container (Layer 0) */
+#the-box {
     display: flex;
     flex-direction: column;
     padding: 10px 25px;
@@ -97,10 +134,8 @@ label {
     box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.8);
 }
 
-h3 {
-    color: #333333;
-}
 
+/* Buttons */
 #generate-button, #custom-color-button {
     padding: 10px 20px;
     text-align: center;
@@ -133,19 +168,66 @@ h3 {
     background-color: #3c803f;
 }
 
-#palette-row {
-    position: relative;
-    display: flex;
-    top: 12px;
-    height: fit-content;
-    width: 100%;
-    padding: 5px;
-    justify-content: space-around;
-    align-items: center;
 
+/* User Interface Sub-Divs (Layer 1) */
+.ui-row:last-of-type {
+    justify-content: space-evenly;
 }
 
-#button-row-title {
+.ui-row:last-of-type > * {
+    flex: 1;
+    margin-left: 1vh;
+    margin-right: 1vh;
+}
+
+
+/* User Interface Sub-Divs (Layer 2) */
+.ui-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    padding: 5px;
+}
+
+.ui-column:last-child {
+    margin-right: 0;
+}
+
+
+
+/* -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/- */
+/* Conversion Button Row */
+
+
+/* Container Div - Layer 0 */
+#button-row {
+    position: relative;
+    display: flex;
+    top: 0;
+    flex-wrap: wrap;
+    height: fit-content;
+    width: 100%;
+    margin-bottom: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/*  Subcontainer Div - Layer 1 */
+#button-box {
+    display: flex;
+    height: fit-content;
+    width: 80%;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* Sub Divs - Layer 2 */
+#button-box-title-slice {
     display: flex;
     top: 1.5vh;
     height: fit-content;
@@ -160,26 +242,6 @@ h3 {
     box-shadow: 1px 3px 1px rgba(0, 0, 0, 0.8);
 }
 
-#button-row {
-    position: relative;
-    display: flex;
-    top: 0;
-    flex-wrap: wrap;
-    height: fit-content;
-    width: 100%;
-    margin-top: 10px;
-    justify-content: center;
-    align-items: center;
-}
-
-#button-box {
-    display: flex;
-    height: fit-content;
-    width: 80%;
-    justify-content: center;
-    align-items: center;
-}
-
 .button-box-slice {
     display: flex;
     height: 100%;
@@ -189,7 +251,8 @@ h3 {
     margin: 5px;
 }
 
-.button-box-slice > button {
+/* Button-Row Buttons (sub-elements of Layer 2) */
+.button-row-button {
     width: 90%;
     background-color: #4CAF50;
     color: #FCFCFC;
@@ -198,18 +261,32 @@ h3 {
     border-radius: 5px;
 }
 
+
+
+/* -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/- */
+/* Palette Row (Main Output Field) */
+
+
+/* Container Div - Layer 0 */
+#palette-row {
+    display: flex;
+    height: fit-content;
+    width: 100%;
+}
+
+
+/* Subcontainer Divs - Layer 1 */
 .color-stripe {
     display: flex;
+    height: 30vh;
     flex-direction: column;
     flex: 1;
     justify-content: flex-start;
     align-items: center;
 }
 
-.color-stripe.dragging {
-    opacity: 0.5;
-}
 
+/* Color Swatch Divs - Layer 2 */
 .palette-box {
     background-color: #F9F9F9;
     display: flex;
@@ -217,17 +294,15 @@ h3 {
     margin-top: 2.5vh;
     margin-bottom: 2.5vh;
     margin: 10px;
-    width: 15vw;
+    height: 90%;
+    width: 13vw;
     border: 2px solid #707070;
     border-radius: 5px;
     box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.75);
 }
 
-.palette-half {
-    height: fit-content;
-    width: fit-content;
-}
 
+/* Color Swatch Halves - Layer 3 */
 .palette-box-half {
     display: flex;
     flex-direction: column;
@@ -254,30 +329,8 @@ h3 {
     border-top: 1px solid black;
 }
 
-.palette-form-row:last-of-type {
-    justify-content: space-evenly;
-}
 
-.palette-form-row:last-of-type > * {
-    flex: 1;
-    margin-left: 1vh;
-    margin-right: 1vh;
-}
-
-.palette-form-column {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    justify-content: center;
-    align-items: center;
-    margin-right: 10px;
-    padding: 5px;
-}
-
-.palette-form-column:last-child {
-    margin-right: 0;
-}
-
+/* Color Swatch Top Half Sub Divs - Layer 4A */
 .color-text-output-box {
     height: 5vh;
     width: 70%;
@@ -293,17 +346,20 @@ h3 {
     height: 70%;
 }
 
+
+/* Color Swatch Bottom Half Sub Divs - Layer 4B */
 .color-box {
-    height: 15vh;
-    width: 95%;
-    border: 1px solid black;
-    border-radius: 3px;
+    height: 90%;
+    width: 90%;
 }
 
-.checkbox-label {
-    font-size: 0.75em;
-}
 
+
+/* -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/- */
+/* Temporary & Circumstantial Elements */
+
+
+/* Tooltips */
 .tooltip {
     position: relative;
     display: inline-block;
@@ -342,12 +398,8 @@ h3 {
     opacity: 1;
 }
 
-.popup {
-    position: relative;
-    display: inline-block;
-    cursor: pointer;
-}
 
+/* Popup Divs */
 .popup-div {
     flex-direction: column;
 }
@@ -396,7 +448,17 @@ h3 {
     animation: fadeIn 1s;
 }
 
-@keyframes fadeIn {
-    from {opacity: 0;}
-    to {opacity: 1;}
+
+
+/* -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/- */
+/* Drag and Drop */
+
+.color-stripe.dragging {
+    opacity: 0.5;
+}
+
+
+
+.checkbox-label {
+    font-size: 0.75em;
 }

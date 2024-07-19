@@ -11,11 +11,11 @@
     </head>
     <body>
         <div id="container">
-            <div id="theBox">
-                <h3>Palette Generator</h3>
-                <form id="palette-form">
-                    <div class="palette-form-row">
-                        <div class="palette-form-column">
+            <div id="the-box">
+                <h3 id="the-box-title">Palette Generator</h3>
+                <form id="ui-form">
+                    <div class="ui-row">
+                        <div class="ui-column">
                             <label for="palette-type-options">Palette Type</label>
                             <select id="palette-type-options">
                                 <option value="1">Random</option>
@@ -29,8 +29,8 @@
                                 <option value="9">Monochromatic</option>
                             </select>
                         </div>
-                        <div class="palette-form-column">
-                            <label># of Colors</label>
+                        <div class="ui-column">
+                            <label for="palette-number-options"># of Swatches</label>
                             <select id="palette-number-options">
                                 <option value="1">1</option>
                                 <option value="2">2</option>
@@ -41,17 +41,17 @@
                             </select>
                         </div>
                     </div>
-                    <div class="palette-form-row">
-                        <div class="palette-form-column">
+                    <div class="ui-row">
+                        <div class="ui-column">
                             <label for="limitGrayAndBlackCheckbox" class="checkbox-label">Limit Grays & Darkness</label>
                             <input id="limitGrayAndBlackCheckbox" type="checkbox">
                         </div>
-                        <div class="palette-form-column">
+                        <div class="ui-column">
                             <label for="limitLightCheckbox" class="checkbox-label">Limit Color Lightness</label>
                             <input id="limitLightCheckbox" type="checkbox">
                         </div>
                     </div>
-                    <div class="palette-form-row">
+                    <div class="ui-row">
                         <div class="popup">
                             <button id="custom-color-button" class="popup">Custom Color</button>
                             <div class="popuptext" id="popup-div">
@@ -65,7 +65,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="palette-form-row">
+                    <div class="ui-row">
+                        <label for="selected-color-options">Select Color Swatch</label>
                         <select id="selected-color-options">
                             <option value="1">1</option>
                             <option value="2">2</option>
@@ -75,7 +76,7 @@
                             <option value="6">6</option>
                         </select>
                     </div>
-                    <div class="palette-form-row">
+                    <div class="ui-row">
                         <button id="saturate-button" class="saturate-desaturate-buttons">Saturate</button>
                         <button id="generate-button" type="submit">Generate</button>
                         <button id="desaturate-button" class="saturate-desaturate-buttons">Desaturate</button>
@@ -85,25 +86,25 @@
             <div id="button-row">
                 <div id="button-box">
                     <div class="button-box-slice">
-                        <button id="hex-conversion-button">Hex Code</button>
+                        <button id="hex-conversion-button" class="button-row-button">Hex Code</button>
                     </div>
                     <div class="button-box-slice">
-                        <button id="rgb-conversion-button">RGB</button>
+                        <button id="rgb-conversion-button" class="button-row-button">RGB</button>
                     </div>
                     <div class="button-box-slice">
-                        <button id="hsv-conversion-button">HSV</button>
+                        <button id="hsv-conversion-button" class="button-row-button">HSV</button>
                     </div>
-                    <div id="button-row-title">
+                    <div id="button-box-title-slice">
                         <p>Conversion Buttons</p>
                     </div>
                     <div class="button-box-slice">
-                        <button id="hsl-conversion-button">HSL</button>
+                        <button id="hsl-conversion-button" class="button-row-button">HSL</button>
                     </div>
                     <div class="button-box-slice">
-                        <button id="cmyk-conversion-button">CMYK</button>
+                        <button id="cmyk-conversion-button" class="button-row-button">CMYK</button>
                     </div>
                     <div class="button-box-slice">
-                        <button id="lab-conversion-button">Lab (CIELAB)</button>
+                        <button id="lab-conversion-button" class="button-row-button">Lab (CIELAB)</button>
                     </div>
                 </div>
             </div>
