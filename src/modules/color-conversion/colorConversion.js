@@ -60,32 +60,34 @@ const conversionMap = {
 };
 
 
-// Master Color Conversion Function
+// When a conversion button is clicked, this will pull the color space type for that color and repopulate color-text-output-box with it
+// Previous conversion function actually tried to convert them again. But conversion takes place with palette generation and are stored as an oject
 function convertColors(targetFormat) {
     const colorTextOutputBoxes = document.querySelectorAll('.color-text-output-box');
 
     colorTextOutputBoxes.forEach(box => {
-        const currentFormat = box.getAttribute('data-format');
         const colorValues = box.colorValues;
 
+        // error handling if no color values are found
         if (!colorValues) {
-            console.error(`No stored color values found for ${box.textContent}`);
+            console.error(`No color values found for ${box.textContent}`);
             return;
         }
 
         const newColor = colorValues[targetFormat];
+        // error handling is conversion is improperly format is malformed or nonexistent
         if (!newColor) {
-            console.error(`Conversion from ${currentFormat} to ${targetFormat} is not supported.`);
+            console.error(`'Conversion to ${targetFormat} is not supported.`);
             return;
         }
 
-        box.textContent = newColor;
+        box.value = newColor; // Changed from .textContent. Apparently this works better for input elements. Need to read more about that later
         box.setAttribute('data-format', targetFormat);
     });
 }
 
 
-// Generate All Color Values and Store as an Object
+// Generate values for all 6 color spaces for all swatches when a palette is generated, stores as an object (I think?)
 function generateAndStoreColorValues(hue, saturation, lightness) {
     const colorValues = {};
     const rgb = hslToRGB(hue, saturation, lightness);
@@ -98,6 +100,8 @@ function generateAndStoreColorValues(hue, saturation, lightness) {
     colorValues.cmyk = hexToCMYK(colorValues.hex);
     colorValues.lab = hexToLab(colorValues.hex);
 
+    console.log("generateAndStoreColorValues() complete");
+    console.log(colorValues);
     return colorValues;
 }
 

@@ -4,8 +4,6 @@
 
 // BEGIN CODE
 
-
-
 import { generateAndStoreColorValues } from './color-conversion/index.js';
 import { copyToClipboard } from '../utils/index.js';
 import { attachDragAndDropEventListeners } from './dragAndDrop.js';
@@ -31,15 +29,12 @@ function generatePaletteBox(colors, numBoxes) {
         populateColorTextOutputBox(colors[i], paletteBoxCount);
 
         paletteBoxCount = newPaletteBoxCount;
-        console.log(`Box ${paletteBoxCount} stored color values: `, colorValues);
     }
 }
 
 
 // Generate a paletteBox element with all child elements
 function makePaletteBox(colorValues, paletteBoxCount) {
-    //const colorValues = generateAndStoreColorValues(color.hue, color.saturation, color.lightness);
-
     let paletteBox = document.createElement('div');
     paletteBox.className = 'palette-box';
     paletteBox.id = `palette-box-${paletteBoxCount}`;
@@ -55,7 +50,7 @@ function makePaletteBox(colorValues, paletteBoxCount) {
     colorTextOutputBox.setAttribute('data-format', 'hex');
     colorTextOutputBox.value = colorValues.hex;
     colorTextOutputBox.colorValues = colorValues;
-    console.log(colorValues);
+
     let copyButton = document.createElement('button');
     copyButton.className = 'copy-button';
     copyButton.textContent = 'Copy';
@@ -73,6 +68,7 @@ function makePaletteBox(colorValues, paletteBoxCount) {
         }
     });
 
+
     colorTextOutputBox.addEventListener('input', (e) => {
         const colorValue = e.target.value;
         if (/^#[0-9A-F]{6}$/i.test(colorValue)) {
@@ -81,6 +77,7 @@ function makePaletteBox(colorValues, paletteBoxCount) {
         }
         // needs error handling
     });
+
 
     paletteBoxTopHalf.appendChild(colorTextOutputBox);
     paletteBoxTopHalf.appendChild(copyButton);
@@ -112,7 +109,7 @@ function makePaletteBox(colorValues, paletteBoxCount) {
 }
 
 
-// Populates .color-text-output-box with the HSL attribute
+// Populates .color-text-output-box with the hex attribute
 function populateColorTextOutputBox(color, boxNumber) {
     let colorTextOutputBox = document.getElementById(`color-text-output-box-${boxNumber}`);
 
@@ -124,20 +121,7 @@ function populateColorTextOutputBox(color, boxNumber) {
 }
 
 
-/*
-// Populates .color-text-output-box with the HSL attribute
-function populateColorTextOutputBox(color, boxNumber) {
-    let colorTextOutputBox = document.getElementById(`color-text-output-box-${boxNumber}`);
-
-    if (colorTextOutputBox) {
-        colorTextOutputBox.value = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
-        colorTextOutputBox.setAttribute('data-format', 'hsl');
-    }
-}
-*/
-
-
-// Show Tooltip for Copy to Clipbaoard
+// Show Tooltip for Copy to Clipboard
 function showTooltip(tooltipElement) {
     const tooltip = tooltipElement.querySelector('.tooltiptext');
     if (tooltip) {
@@ -162,13 +146,12 @@ function showCustomColorPopupDiv() {
 function applyCustomColor() {
     let hexCustomColor = document.getElementById('custom-color-picker').value;
     let hslCustomColor = hexToHSL(hexCustomColor);
-    
+
     return {
         hue: hslCustomColor.hue,
         saturation: hslCustomColor.saturation,
         lightness: hslCustomColor.lightness
     };
 }
-
 
 export { generatePaletteBox, populateColorTextOutputBox, showTooltip, showCustomColorPopupDiv, applyCustomColor };
