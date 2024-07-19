@@ -127,6 +127,18 @@ function populateColorTextOutputBox(color, boxNumber) {
 }
 
 
+// Saturate Button functionality
+saturateColor() {
+
+};
+
+
+// Desaturate Button functionality
+desaturateColor() {
+
+};
+
+
 // Show Tooltip for Copy to Clipboard
 function showTooltip(tooltipElement) {
     const tooltip = tooltipElement.querySelector('.tooltiptext');
@@ -160,4 +172,5 @@ function applyCustomColor() {
     };
 }
 
-export { generatePaletteBox, populateColorTextOutputBox, showTooltip, showCustomColorPopupDiv, applyCustomColor };
+
+export { generatePaletteBox, saturateColor, desaturateColor, populateColorTextOutputBox, showTooltip, showCustomColorPopupDiv, applyCustomColor };
