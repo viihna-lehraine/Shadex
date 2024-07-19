@@ -128,14 +128,20 @@ function populateColorTextOutputBox(color, boxNumber) {
 
 
 // Saturate Button functionality
-saturateColor() {
-
+saturateColor(selectedColor) {
+    let selectedColorTextOutputBox = document.getElementById(`color-text-output-box-${selectedColor}`);
+    let selectedColorBox = document.getElementById(`color-box-${selectedColor}`);
+    let selectedColorStripe = document.getElementById(`color-stripe-${selectedColor}`);
+    let selectedColorValue = colors[selectedColor];
 };
 
 
 // Desaturate Button functionality
-desaturateColor() {
-
+desaturateColor(selectedColor) {
+    let selectedColorTextOutputBox = document.getElementById(`color-text-output-box-${selectedColor}`);
+    let selectedColorBox = document.getElementById(`color-box-${selectedColor}`);
+    let selectedColorStripe = document.getElementById(`color-stripe-${selectedColor}`);
+        let selectedColorValue = colors[selectedColor];
 };
 
 
