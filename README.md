@@ -8,7 +8,25 @@ For regular use, please select the main branch. Branch v0.5-dev is not stable.
 
 *** 
 
-## Supported Palette Types
+## Table of Contents
+- [Color Schemes](#color-shemes)
+- [Color Spaces](#color-spaces)
+- [Requirements](#requirements)
+- [Installation - Windows](#windows-users) 
+- [Installation - Linux](#linux-users)
+- [Running the Project](#running-the-project)
+- [Running the Project - Additional Information](#additional-information)
+- [Features](#features)
+- [Upcoming Features](#upcoming-features)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author](#author)
+
+
+
+***
+
+## Color Schemes
 
 - Random Single Color
 - Complementary
@@ -145,7 +163,7 @@ This project is released under the GNU General Public License, version 3. See th
 
 ***
 
-## Authors
+## Author
 
 - **Viihna Lehraine** - sole creator and contributor
-- **Built With** - JavaScript, VS Code, Firefox, and unhealthy amounts of caffeine
+- **Built With** - Vanilla JavaScript, VS Code, Firefox, and unhealthy amounts of caffeine
