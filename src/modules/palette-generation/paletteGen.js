@@ -45,12 +45,13 @@ function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, c
             break;
     }
 
+    // Just before generatePaletteBox is called, make sure colors has the correct number of elements
+    console.log('Colors array: ', colors);
     generatePaletteBox(colors, numBoxes);
 }
 
 
 // Define default behavior for generateButton click event
-// THIS FUNCTION ISNT ACTUALLY BEING USED AT ALL
 function handleGenerateButtonClick() {
     let paletteTypeOptions = document.getElementById('palette-type-options');
     let paletteNumberOptions = document.getElementById('palette-number-options');

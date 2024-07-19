@@ -34,17 +34,22 @@ function randomSL(limitGrayAndBlack, limitLight) {
     if (limitGrayAndBlack || limitLight) {
         saturation = Math.max(saturation, 20);
         lightness = Math.max(lightness, 25);
-        console.log(saturation, lightness);
     }
 
     if (limitLight) {
         lightness = Math.min(lightness, 75);
-        console.log(saturation, lightness);
     }
+
+    // error checking - if saturation or lightness are outside the range 0-100, they are redefined to fit in that range
+    if (saturation > 100) saturation = 100;
+    if (saturation < 0) saturation = 0;
+    if (lightness > 100) lightness = 100;
+    if (lightness < 0) lightness = 0;
 
     let color = { saturation, lightness };
     return color;
 }
+
 
 
 // Generates a randomized 1st color

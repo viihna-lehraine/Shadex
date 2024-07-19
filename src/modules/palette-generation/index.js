@@ -19,10 +19,12 @@ import { randomHSL, randomSL, generateColor1 } from '../../utils/randomUtils.js'
 import { generatePaletteBox, populateColorTextOutputBox } from '../dom.js';
 import { generatePalette } from './paletteGen.js';
 import { hexToHSL } from '../color-conversion/convertToHSL.js';
+import { applyLimitGrayAndBlack, applyLimitLight } from './additionalUIParameters.js';
 
 
 export { generateRandomColorPalette, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette };
-export { hexToHSL };
 export { randomHSL, randomSL, generateColor1 };
 export { generatePaletteBox, populateColorTextOutputBox };
 export { generatePalette };
+export { hexToHSL };
+export { applyLimitGrayAndBlack, applyLimitLight};

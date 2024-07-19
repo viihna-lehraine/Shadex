@@ -59,6 +59,10 @@ body {
 
     .color-text-output-box {
         font-size: 0.5em;
+        user-select: text;
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text; 
     }
 }
 
@@ -138,6 +142,7 @@ h3 {
     padding: 5px;
     justify-content: space-around;
     align-items: center;
+
 }
 
 #button-row-title {
@@ -199,7 +204,6 @@ h3 {
     flex: 1;
     justify-content: flex-start;
     align-items: center;
-    max-width: 20vw;
 }
 
 .color-stripe.dragging {
@@ -250,13 +254,14 @@ h3 {
     border-top: 1px solid black;
 }
 
-.palette-form-row {
-    display: flex;
-    height: fit-content;
-    width: 100%;
-    justify-content: center;
-    margin-bottom: 5px;
-    padding: 5px;
+.palette-form-row:last-of-type {
+    justify-content: space-evenly;
+}
+
+.palette-form-row:last-of-type > * {
+    flex: 1;
+    margin-left: 1vh;
+    margin-right: 1vh;
 }
 
 .palette-form-column {

@@ -9,6 +9,7 @@
 import { populateColorTextOutputBox } from "../modules/dom.js";
 import { copyToClipboard } from "./clipboardUtils.js";
 import { randomHSL, generateColor1 } from './randomUtils.js';
+import { getWeightedRandomInterval } from "./paletteGenUtils.js";
 
 
-export { populateColorTextOutputBox, copyToClipboard, randomHSL, generateColor1 };
+export { populateColorTextOutputBox, copyToClipboard, randomHSL, generateColor1, getWeightedRandomInterval };

@@ -21,6 +21,11 @@ function generatePaletteBox(colors, numBoxes) {
     paletteBoxCount = 1;
 
     for (let i = 0; i < numBoxes; i++) {
+        // make sure colors[i] is defined for each iteration of i
+        if (!colors[i]) {
+            console.error(`Color at index ${i} is undefined`);
+            // if colors[i] is undefined, skip this iteration 
+        }
         const colorValues = generateAndStoreColorValues(colors[i].hue, colors[i].saturation, colors[i].lightness);
         const { colorStripe, paletteBoxCount: newPaletteBoxCount } = makePaletteBox(colorValues, paletteBoxCount);
 
@@ -33,7 +38,6 @@ function generatePaletteBox(colors, numBoxes) {
 }
 
 
-// Generate a paletteBox element with all child elements
 function makePaletteBox(colorValues, paletteBoxCount) {
     let paletteBox = document.createElement('div');
     paletteBox.className = 'palette-box';
@@ -50,6 +54,10 @@ function makePaletteBox(colorValues, paletteBoxCount) {
     colorTextOutputBox.setAttribute('data-format', 'hex');
     colorTextOutputBox.value = colorValues.hex;
     colorTextOutputBox.colorValues = colorValues;
+
+    // Ensure the text is selectable
+    colorTextOutputBox.readOnly = false;
+    colorTextOutputBox.style.cursor = 'text'; // Ensure the cursor indicates text selection is possible
 
     let copyButton = document.createElement('button');
     copyButton.className = 'copy-button';
@@ -68,7 +76,6 @@ function makePaletteBox(colorValues, paletteBoxCount) {
         }
     });
 
-
     colorTextOutputBox.addEventListener('input', (e) => {
         const colorValue = e.target.value;
         if (/^#[0-9A-F]{6}$/i.test(colorValue)) {
@@ -77,7 +84,6 @@ function makePaletteBox(colorValues, paletteBoxCount) {
         }
         // needs error handling
     });
-
 
     paletteBoxTopHalf.appendChild(colorTextOutputBox);
     paletteBoxTopHalf.appendChild(copyButton);
