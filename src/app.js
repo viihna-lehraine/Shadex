@@ -26,7 +26,7 @@ let customColor = null;
 document.addEventListener('DOMContentLoaded', () => {
     const generateButton = document.getElementById('generate-button');
     const saturateButton = document.getElementById('saturate-button');
-    const saturateButton = document.getElementById('desaturate-button');
+    const desaturateButton = document.getElementById('desaturate-button');
     const popupDivButton = document.getElementById('custom-color-button');
     const applyColorButton = document.getElementById('apply-color-button');
     const clearColorButton = document.getElementById('clear-color-button');
@@ -52,13 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
         generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor);
     });
     
-    // Saturate Button click event
+    // Saturate button click event
     saturateButton.addEventListener('click', function(e) {
         e.preventDefault();
         saturateColor(selectedColor);
     });
     
-    // Desaturate Button click event
+    // Desaturate button click event
     desaturateButton.addEventListener('click', function(e) {
         e.preventDefault();
         desaturateColor(selectedColor);
