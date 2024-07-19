@@ -23,6 +23,8 @@ let customColor = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     const generateButton = document.getElementById('generate-button');
+    const saturateButton = document.getElementById('saturate-button');
+    const saturateButton = document.getElementById('desaturate-button');
     const popupDivButton = document.getElementById('custom-color-button');
     const applyColorButton = document.getElementById('apply-color-button');
     const clearColorButton = document.getElementById('clear-color-button');
@@ -43,6 +45,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const limitGrayAndBlack = document.getElementById('limitGrayAndBlackCheckbox').checked;
         const limitLight = document.getElementById('limitLightCheckbox').checked;
         generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor);
+    });
+    
+    // Saturate Button click event
+    saturateButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        saturateButton();
+    });
+    
+    // Desaturate Button click event
+    desaturateButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        desaturateButton();
     });
 
     // Popup Div button click event
