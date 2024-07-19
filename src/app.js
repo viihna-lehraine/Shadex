@@ -18,8 +18,10 @@
 import { convertColors, showCustomColorPopupDiv, applyCustomColor } from './modules/index.js';
 import { generatePalette } from './modules/palette-generation/index.js';
 
+
 // Initialize customColor variable
 let customColor = null;
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const generateButton = document.getElementById('generate-button');
@@ -28,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const popupDivButton = document.getElementById('custom-color-button');
     const applyColorButton = document.getElementById('apply-color-button');
     const clearColorButton = document.getElementById('clear-color-button');
+    let selectedColor = document.getElementById('selected-color').value;
 
     // Add event listeners for conversion buttons
     document.getElementById('hex-conversion-button').addEventListener('click', () => convertColors('hex'));
@@ -50,13 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Saturate Button click event
     saturateButton.addEventListener('click', function(e) {
         e.preventDefault();
-        saturateButton();
+        saturateColor(selectedColor);
     });
     
     // Desaturate Button click event
     desaturateButton.addEventListener('click', function(e) {
         e.preventDefault();
-        desaturateButton();
+        desaturateColor(selectedColor);
     });
 
     // Popup Div button click event
