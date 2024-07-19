@@ -23,20 +23,22 @@ function generatePaletteBox(colors, numBoxes) {
     paletteBoxCount = 1;
 
     for (let i = 0; i < numBoxes; i++) {
-        const { colorStripe, paletteBoxCount: newPaletteBoxCount } = makePaletteBox(colors[i], paletteBoxCount);
+        const colorValues = generateAndStoreColorValues(colors[i].hue, colors[i].saturation, colors[i].lightness);
+        const { colorStripe, paletteBoxCount: newPaletteBoxCount } = makePaletteBox(colorValues, paletteBoxCount);
 
         paletteRow.appendChild(colorStripe);
 
         populateColorTextOutputBox(colors[i], paletteBoxCount);
 
         paletteBoxCount = newPaletteBoxCount;
+        console.log(`Box ${paletteBoxCount} stored color values: `, colorValues);
     }
 }
 
 
 // Generate a paletteBox element with all child elements
-function makePaletteBox(color, paletteBoxCount) {
-    const colorValues = generateAndStoreColorValues(color.hue, color.saturation, color.lightness);
+function makePaletteBox(colorValues, paletteBoxCount) {
+    //const colorValues = generateAndStoreColorValues(color.hue, color.saturation, color.lightness);
 
     let paletteBox = document.createElement('div');
     paletteBox.className = 'palette-box';
@@ -53,7 +55,7 @@ function makePaletteBox(color, paletteBoxCount) {
     colorTextOutputBox.setAttribute('data-format', 'hex');
     colorTextOutputBox.value = colorValues.hex;
     colorTextOutputBox.colorValues = colorValues;
-
+    console.log(colorValues);
     let copyButton = document.createElement('button');
     copyButton.className = 'copy-button';
     copyButton.textContent = 'Copy';

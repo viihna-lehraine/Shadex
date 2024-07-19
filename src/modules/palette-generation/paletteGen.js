@@ -50,6 +50,7 @@ function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, c
 
 
 // Define default behavior for generateButton click event
+// THIS FUNCTION ISNT ACTUALLY BEING USED AT ALL
 function handleGenerateButtonClick() {
     let paletteTypeOptions = document.getElementById('palette-type-options');
     let paletteNumberOptions = document.getElementById('palette-number-options');
