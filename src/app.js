@@ -30,7 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const popupDivButton = document.getElementById('custom-color-button');
     const applyColorButton = document.getElementById('apply-color-button');
     const clearColorButton = document.getElementById('clear-color-button');
-    let selectedColor = document.getElementById('selected-color').value;
+    let selectedColorOptions = document.getElementById('selected-color-options');
+    let selectedColor = parseInt(selectedColorOptions.value, 10);
+    
 
     // Add event listeners for conversion buttons
     document.getElementById('hex-conversion-button').addEventListener('click', () => convertColors('hex'));
