@@ -28,19 +28,26 @@ function xyzToLab(x, y, z) {
         y = y > 0.008856 ? Math.pow(y, 1 / 3) : (7.787 * y) + (16 / 116);
         z = z > 0.008856 ? Math.pow(z, 1 / 3) : (7.787 * z) + (16 / 116);
 
-        const l = (116 * y) - 16;
-        const a = 500 * (x - y);
-        const b = 200 * (y - z);
+        let l = (116 * y) - 16;
+        let a = 500 * (x - y);
+        let b = 200 * (y - z);
 
-        const lab = { l: l.toFixed(2), a: a.toFixed(2), b: b.toFixed(2) };
+        l = l.toFixed(2);
+        a = a.toFixed(2);
+        b = b.toFixed(2);
+
+        const lab = { l, a, b };
         console.log(`Converted Lab: ${JSON.stringify(lab)}`);
 
         return lab;
+        
     } catch (error) {
         console.error(`Error converting XYZ to Lab: ${error}`);
 
         // Return black for invalid inputs
-        return { l: 0, a: 0, b: 0 }; 
+        const lab = { l: 0, a: 0, b: 0 };
+
+        return lab;
     }
 }
 
@@ -56,11 +63,15 @@ function hexToLab(hex) {
         const lab = xyzToLab(xyz.x, xyz.y, xyz.z);
 
         return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
+
     } catch (error) {
         console.error(`Error converting Hex to Lab: ${error}`);
 
         // Return black for invalid inputs
-        return { l: 0, a: 0, b: 0 }; 
+        let l, a, b = 0;
+        let lab = { l, a, b };
+
+        return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
     }
 }
 
@@ -78,11 +89,15 @@ function rgbToLab(red, green, blue) {
         console.log(`Converted XYZ from RGB: ${JSON.stringify(xyz)}`);
 
         return xyzToLab(xyz.x, xyz.y, xyz.z);
+
     } catch (error) {
         console.error(`Error converting RGB to Lab: ${error}`);
         
         // Return black for invalid inputs
-        return { l: 0, a: 0, b: 0 }; 
+        let l, a, b = 0;
+        let lab = { l, a, b };
+
+        return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
     }
 }
 
@@ -97,11 +112,15 @@ function hslToLab(hue, saturation, lightness) {
         console.log(`Converted XYZ from RGB: ${JSON.stringify(xyz)}`);
 
         return xyzToLab(xyz.x, xyz.y, xyz.z);
+
     } catch (error) {
         console.error(`Error converting HSL to Lab: ${error}`);
         
         // Return black for invalid inputs
-        return { l: 0, a: 0, b: 0 }; 
+        let l, a, b = 0;
+        let lab = { l, a, b };
+
+        return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
     }
 }
 
@@ -116,11 +135,14 @@ function hsvToLab(hue, saturation, value) {
         console.log(`Converted XYZ from RGB: ${JSON.stringify(xyz)}`);
 
         return xyzToLab(xyz.x, xyz.y, xyz.z);
+
     } catch (error) {
         console.error(`Error converting HSV to Lab: ${error}`);
         
         // Return black for invalid inputs
-        return { l: 0, a: 0, b: 0 };
+        let l, a, b = 0;
+        let lab = { l, a, b };
+        return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
     }
 }
 
@@ -135,11 +157,14 @@ function cmykToLab(cyan, magenta, yellow, key) {
         console.log(`Converted XYZ from RGB: ${JSON.stringify(xyz)}`);
 
         return xyzToLab(xyz.x, xyz.y, xyz.z);
+        
     } catch (error) {
         console.error(`Error converting CMYK to Lab: ${error}`);
         
         // Return black for invalid inputs
-        return { l: 0, a: 0, b: 0 };
+        let l, a, b = 0;
+        let lab = { l, a, b };
+        return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
     }
 }
 

@@ -50,7 +50,6 @@ function randomHSL(limitGrayAndBlack, limitLight) {
 
     console.log(`Initial Random HSL: H=${hue}, S=${saturation}, L=${lightness}`);
 
-
     if (limitGrayAndBlack) {
         ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
         console.log(`Limited Gray and Black for HSL: S=${saturation}, L=${lightness}`);
@@ -178,6 +177,8 @@ function generateColor1(limitGrayAndBlack, limitLight, initialColorSpace) {
             break;
     }
 
+    console.log(`Generated color in generateColor1: ${JSON.stringify(color)}`);
+
     const colorBox1 = document.getElementById('color-box-1');
 
     if (colorBox1) {
@@ -205,6 +206,7 @@ function generateColor1(limitGrayAndBlack, limitLight, initialColorSpace) {
                 colorString = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
         }
 
+        console.log(`Setting background color to ${colorString}`);
         colorBox1.style.backgroundColor = colorString;
         populateColorTextOutputBox(color, 1);
     }
@@ -213,4 +215,4 @@ function generateColor1(limitGrayAndBlack, limitLight, initialColorSpace) {
 }
 
 
-export { randomHex, randomRGB, randomHSL, randomSL, randomHSV, randomCMYK, randomLab, generateColor1 };
+export { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, randomSL, randomSV, generateColor1 };

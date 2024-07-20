@@ -36,7 +36,13 @@ function hexToRGB(hex) {
 // Convert HSL to RGB
 function hslToRGB(hue, saturation, lightness) {
     try {
+        // Ensure hue, saturation, and lightness are numbers
+        if (typeof hue !== 'number' || typeof saturation !== 'number' || typeof lightness !== 'number') {
+            throw new Error(`Invalid HSL values: H=${hue}, S=${saturation}, L=${lightness}`);
+        }
+
         console.log(`Converting HSL to RGB: H=${hue}, S=${saturation}, L=${lightness}`);
+        
         hue = hue / 360;
         saturation = saturation / 100;
         lightness = lightness / 100;

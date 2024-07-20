@@ -19,11 +19,14 @@ function hexToCMYK(hex) {
         console.log(`Converted CMYK from RGB: ${JSON.stringify(cmyk)}`);
         
         return `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
+
     } catch (error) {
         console.error(`Error converting Hex to CMYK: ${error}`);
 
         // Set default CMYK in case of error
-        return `cmyk(0%, 0%, 0%, 100%)`;
+        const cmyk = { cyan: 0, magenta: 0, yellow: 0, key: 0 };
+        
+        return `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`; 
     }
 }
 
@@ -46,7 +49,7 @@ function rgbToCMYK(red, green, blue) {
         const magenta = (1 - greenPrime - key) / (1 - key) || 0;
         const yellow = (1 - bluePrime - key) / (1 - key) || 0;
 
-        let cmyk = {
+        const cmyk = {
             cyan: Math.round(cyan * 100),
             magenta: Math.round(magenta * 100),
             yellow: Math.round(yellow * 100),
@@ -60,11 +63,12 @@ function rgbToCMYK(red, green, blue) {
         console.log(`Converted CMYK from RGB: ${JSON.stringify(cmyk)}`);
         
         return cmyk;
+        
     } catch (error) {
         console.error(`Error converting RGB to CMYK: ${error}`);
 
-        // Default value in case of error
-        return { cyan: 0, magenta: 0, yellow: 0, key: 100 }; 
+        // Set default CMYK in case of error
+        return { cyan: 0, magenta: 0, yellow: 0, key: 0 };
     }
 }
 
@@ -76,15 +80,18 @@ function hslToCMYK(hue, saturation, lightness) {
         const rgb = hslToRGB(hue, saturation, lightness);
         console.log(`Converted RGB from HSL: ${JSON.stringify(rgb)}`);
 
-        return rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+        const cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+
+        return `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
+
     } catch (error) {
         console.error(`Error converting HSL to CMYK: ${error}`);
 
-        // Default CMYK in case of error
-        return { cyan: 0, magenta: 0, yellow: 0, key: 100 }; 
+        // Set default CMYK in case of error
+        const cmyk = { cyan: 0, magenta: 0, yellow: 0, key: 0 };
+        return `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`; 
     }
 }
-
 
 // Convert HSV to CMYK
 function hsvToCMYK(hue, saturation, value) {
@@ -93,12 +100,15 @@ function hsvToCMYK(hue, saturation, value) {
         const rgb = hsvToRGB(hue, saturation, value);
         console.log(`Converted RGB from HSV: ${JSON.stringify(rgb)}`);
 
-        return rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+        const cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+        return `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
+
     } catch (error) {
         console.error(`Error converting HSV to CMYK: ${error}`);
 
-        // Default CMYK in case of error
-        return { cyan: 0, magenta: 0, yellow: 0, key: 100 }; 
+        // Set default CMYK in case of error
+        const cmyk = { cyan: 0, magenta: 0, yellow: 0, key: 0 };
+        return `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`; 
     }
 }
 
@@ -110,12 +120,17 @@ function labToCMYK(l, a, b) {
         const rgb = labToRGB(l, a, b);
         console.log(`Converted RGB from Lab: ${JSON.stringify(rgb)}`);
 
-        return rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+        const cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+
+        return `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
+
     } catch (error) {
         console.error(`Error converting Lab to CMYK: ${error}`);
 
-        // Default CMYK in case of error
-        return { cyan: 0, magenta: 0, yellow: 0, key: 100 }; 
+        // Set default CMYK in case of error
+        const cmyk = { cyan: 0, magenta: 0, yellow: 0, key: 0 };
+
+        return `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;  
     }
 }
 

@@ -67,6 +67,7 @@ function labToXYZ(l, a, b) {
 
         const xyz = { x, y, z };
         console.log(`Converted XYZ from Lab: ${JSON.stringify(xyz)}`);
+        
         return xyz;
     } catch (error) {
         console.error(`Error converting Lab to XYZ: ${error}`);

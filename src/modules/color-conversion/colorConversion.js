@@ -78,7 +78,6 @@ function convertColors(targetFormat) {
         const convert = conversionMap[box.getAttribute('data-format')][targetFormat];
         const newColor = convert(colorValues);
 
-        // error handling is conversion is improperly format is malformed or nonexistent
         if (!newColor) {
             console.error(`'Conversion to ${targetFormat} is not supported.`);
             return;
