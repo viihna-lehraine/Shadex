@@ -30,8 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const popupDivButton = document.getElementById('custom-color-button');
     const applyColorButton = document.getElementById('apply-color-button');
     const clearColorButton = document.getElementById('clear-color-button');
+    const advancedMenuToggleButton = document.getElementById('advanced-menu-toggle-button');
+    const applyInitialColorSpaceButton = document.getElementById('apply-initial-colorspace-button');
     let selectedColorOptions = document.getElementById('selected-color-options');
     let selectedColor = parseInt(selectedColorOptions.value, 10);
+    let initialColorSpace = document.getElementById('initial-colorspace-options').value;
     
 
     // Add event listeners for conversion buttons
@@ -52,35 +55,63 @@ document.addEventListener('DOMContentLoaded', () => {
         generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor);
     });
     
-    // Saturate button click event
+    // Saturate Button Click Event
     saturateButton.addEventListener('click', function(e) {
         e.preventDefault();
+
         saturateColor(selectedColor);
     });
     
-    // Desaturate button click event
+    // Desaturate Button Click Event
     desaturateButton.addEventListener('click', function(e) {
         e.preventDefault();
+
         desaturateColor(selectedColor);
     });
 
-    // Popup Div button click event
+    // Popup Div Button click event
     popupDivButton.addEventListener('click', function(e) {
         e.preventDefault();
+
         showCustomColorPopupDiv();
     });
 
-    // Apply color button click event
+    // Apply color Button click event
     applyColorButton.addEventListener('click', function(e) {
-        e.preventDefault();
         customColor = applyCustomColor();
+
+        e.preventDefault();
+
         showCustomColorPopupDiv();
     });
 
-    // Clear color button click event
+    // Clear Color Button click event
     clearColorButton.addEventListener('click', function(e) {
-        e.preventDefault();
         customColor = null;
+
+        e.preventDefault();
+
         showCustomColorPopupDiv();
+    });
+
+    // Advanced Menu Toggle Button click event
+    advancedMenuToggleButton.addEventListener('click', function(e) {
+        let advancedMenu = document.getElementById('advanced-menu');
+        
+        e.preventDefault();
+        
+        if (advancedMenu.classList.contains('hidden')) {
+            advancedMenu.classList.remove('hidden');
+            advancedMenu.style.display = 'block';
+        } else {
+            advancedMenu.classList.add('hidden');
+            advancedMenu.style.display = 'none';
+        }
+    });
+
+    // Advanced Menu - Apply Initial Colorspace click event
+    applyInitialColorSpaceButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        applyInitialColorSpace(initialColorSpace);
     });
 });

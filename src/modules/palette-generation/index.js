@@ -1,4 +1,4 @@
-// ColorGen - version 0.5
+// ColorGen - version 0.5.1
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -19,7 +19,7 @@ import { randomHSL, randomSL, generateColor1 } from '../../utils/randomUtils.js'
 import { generatePaletteBox, populateColorTextOutputBox } from '../dom.js';
 import { generatePalette } from './paletteGen.js';
 import { hexToHSL } from '../color-conversion/convertToHSL.js';
-import { applyLimitGrayAndBlack, applyLimitLight } from './additionalUIParameters.js';
+import { applyLimitGrayAndBlack, applyLimitLight } from '../userIntefaceParameters.js';
 
 
 export { generateRandomColorPalette, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette };

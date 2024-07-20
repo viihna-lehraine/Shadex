@@ -1,4 +1,4 @@
-// ColorGen - version 0.5
+// ColorGen - version 0.5.1
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -6,37 +6,49 @@
 
 
 
-import { randomHSL } from './index.js';
-import { populateColorTextOutputBox } from './index.js';
+import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab } from '../../utils/index.js';
 
 
 // Generate Random Color Palette
-function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace) {
     const colors = [];
-    
+
     for (let i = 0; i < numBoxes; i++) {
-        // use custom color for 1st color, if it is defined
-        const hslValues = (i === 0 && customColor) ? customColor : randomHSL(limitGrayAndBlack, limitLight); 
-        
-        if (typeof hslValues.hue !== 'number' || typeof hslValues.saturation !== 'number' || typeof hslValues.lightness !== 'number') {
-            console.error('Invalid color values: ', hslValues);
-            continue;
+        let color;
+        if (i === 0 && customColor) {
+            color = generateAndStoreColorValues(customColor, initialColorSpace);
+        } else {
+            let baseColor;
+            switch (initialColorSpace) {
+                case 'hex':
+                    baseColor = randomHex(limitGrayAndBlack, limitLight);
+                    break;
+                case 'rgb':
+                    baseColor = randomRGB(limitGrayAndBlack, limitLight);
+                    break;
+                case 'hsl':
+                    baseColor = randomHSL(limitGrayAndBlack, limitLight);
+                    break;
+                case 'hsv':
+                    baseColor = randomHSV(limitGrayAndBlack, limitLight);
+                    break;
+                case 'cmyk':
+                    baseColor = randomCMYK(limitGrayAndBlack, limitLight);
+                    break;
+                case 'lab':
+                    baseColor = randomLab(limitGrayAndBlack, limitLight);
+                    break;
+                default:
+                    baseColor = randomHSL(limitGrayAndBlack, limitLight);
+            }
+
+            color = generateAndStoreColorValues(baseColor, initialColorSpace);
         }
 
-        const randomColor = {
-            hue: hslValues.hue,
-            saturation: hslValues.saturation,
-            lightness: hslValues.lightness
-        };
-
-        colors.push(randomColor);
-
-        const colorBox = document.getElementById(`color-box-${i + 1}`);
-        if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${randomColor.hue}, ${randomColor.saturation}%, ${randomColor.lightness})`;
-            populateColorTextOutputBox(randomColor, (i + 1));
-        }
+        colors.push(color);
     }
+
+    console.log('Generated Random Color Palette:', colors);
     return colors;
 }
 

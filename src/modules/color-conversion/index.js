@@ -1,4 +1,4 @@
-// ColorGen - version 0.5
+// ColorGen - version 0.5.1
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -6,7 +6,7 @@
 
 
 
-import { generateAndStoreColorValues } from './colorConversion.js';
+import { generateAndStoreColorValues, adjustSaturationAndLightness } from './colorConversion.js';
 import { rgbToXYZ } from './convertToXYZ.js';
 import { componentToHex, rgbToHex, hslToHex, hsvToHex, cmykToHex, labToHex } from './convertToHex.js';
 import { hexToRGB, hslToRGB, hsvToRGB, cmykToRGB, labToRGB } from './convertToRGB.js';
@@ -16,7 +16,7 @@ import { hexToCMYK, rgbToCMYK, hslToCMYK, hsvToCMYK, labToCMYK } from './convert
 import { hexToLab, rgbToLab, hslToLab, hsvToLab, cmykToLab } from './convertToLab.js';
 
 
-export { generateAndStoreColorValues };
+export { generateAndStoreColorValues, adjustSaturationAndLightness };
 export { rgbToXYZ };
 export { componentToHex, rgbToHex, hslToHex, hsvToHex, cmykToHex, labToHex };
 export { hexToRGB, hslToRGB, hsvToRGB, cmykToRGB, labToRGB };

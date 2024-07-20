@@ -1,4 +1,4 @@
-// ColorGen - version 0.5
+// ColorGen - version 0.5.1
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
@@ -8,7 +8,7 @@
 
 import { generateColor1, randomSL } from './index.js';
 import { populateColorTextOutputBox } from './index.js';
-import { applyLimitGrayAndBlack, applyLimitLight } from './additionalUIParameters.js';
+import { applyLimitGrayAndBlack, applyLimitLight } from '../userIntefaceParameters.js';
 
 
 // Generate split complementary hues

@@ -5,9 +5,9 @@
         <link rel="stylesheet" href="app.css">
         <meta charset="UTF-8">
         <meta name="viewport", content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-        <link rel="apple-touch-icon" sizes="180x180" href="./favicons/apple-touch-icon.png">
-        <link rel="icon" type="image/png" sizes="32x32" href="./favicons/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="./favicons/favicon-16x16.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="../favicons/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="../favicons/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="../favicons/favicon-16x16.png">
     </head>
     <body>
         <div id="container">
@@ -81,7 +81,31 @@
                         <button id="generate-button" type="submit">Generate</button>
                         <button id="desaturate-button" class="saturate-desaturate-buttons">Desaturate</button>
                     </div>
-                </form>  
+                </form>
+                <div id="advanced-menu-wrapper">
+                    <button id="advanced-menu-toggle-button" class="advanced-menu-toggle-button">Advanced</button>
+                    <div id="advanced-menu" class="hidden">
+                        <div class="ui-column bordered-ui-div">
+                            <form id="initial-colorspace-selection-form">
+                                <div class="ui-row">
+                                    <label for="initial-colorspace-options">Initial Colorspace</label>
+                                    <select id="initial-colorspace-options">
+                                        <option value="hex">Hex</option>
+                                        <option value="rgb">RGB</option>
+                                        <option value="hsl">HSL (default)</option>
+                                        <option value="hsv">HSV</option>
+                                        <option value="cmyk">CMYK</option>
+                                        <option value="lab">Lab (CIELAB)</option>
+                                    </select>
+                                    </form>
+                                </div>
+                                <div class="ui-row">
+                                    <button id="apply-initial-colorspace-button">Apply</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div id="button-row">
                 <div id="button-box">

@@ -1,10 +1,11 @@
 # ColorGen
-## version 0.5 (pre-release)
+## version 0.5.1 (pre-release / unstable)
 
+***
 ColorGen is a web-based color palette generator. It produces 8 varieties of color scheme and can convert between 6 color formats.
 
 ### NOTE
-For regular use, please select the main branch. Branch v0.5-dev is not stable.
+For regular use, please select the main branch. As stated above, this version as it currently exists is not intended for normal use.
 
 *** 
 
@@ -18,9 +19,11 @@ For regular use, please select the main branch. Branch v0.5-dev is not stable.
 - [Running the Project - Additional Information](#additional-information)
 - [Features](#features)
 - [Upcoming Features](#upcoming-features)
+- [Known Issues](#known-issues)
 - [Contributing](#contributing)
 - [License](#license)
 - [Author](#author)
+- [Contact](#contact-me)
 
 
 
@@ -143,11 +146,43 @@ For regular use, please select the main branch. Branch v0.5-dev is not stable.
 
 ## Upcoming Features
 
+- Seperate page for color palette history
+- Options for color palette export (from main page AND history)
+- Getting rid of the annoying window alerts and instead auto-selecting the minimum number of color swatches
 - Additional color schemes
-- More flexibility for the number of swatches allowed on each palette type
-- Aesthetic updates
-- Making the UI less clunky in general
+- Choose the initially generated color space (allows for a larger color space; i.e., HSL has ~3.5 million possibile colors, while Hex has ~15 million)
+- Copy button tooltip (will give you a visual alert that copy was successful)
+- Double-clicking color values will let you highlight them, much like you would any other text
+- UI overhaul and aesthetic updates
 - Optimized mobile layout and functionality
+- UI element explanation and tips that will show when hovering over them
+- Additional parameters!
+  1. Limit saturation
+  2. Increase / Decrease saturation for individual swatches
+  3. Increase / Decrease lightness for individual swatches
+  3. Block duplicate colors
+  4. Block pure white and black
+
+and finally
+
+- Smarter algorithms for all the palettes. I acknowledge they are not perfect, or even great yet. I will strive to get these into a better state for less bizarre outputs :)
+
+
+Farther in the future (around 1.0) I also plan to release this as a desktop app (Windows / MacOS / Linux compatible) and mobile app (Android and iOS). However, iOS development may have to come out later. I'll give more details when I start work on porting these versions.
+
+***
+
+## Known Issues
+
+Please be aware that, in its current state, I have not done a full test session to track bugs. These are just the ones I've noticed so far. Feel free to [contact](#contact-me) me to point out any bugs I haven't listed here yet!
+
+- Drag and Drop works for a short period of time before breaking
+- Drag and Drop doesn't work at all on mobile
+- Saturate and Desaturate buttons do absolutely nothing
+- Mobile layout needs a full rework
+- Gray/Black limiting and Light limiting are very primitive. Both need adjustment
+- Gray/Black limiting and Light limiting will only work for HSL color space
+- Diadic palette logic needs investigation. I'm not convinced it is working correctly
 
 ***
 
@@ -167,3 +202,11 @@ This project is released under the GNU General Public License, version 3. See th
 
 - **Viihna Lehraine** - sole creator and contributor
 - **Built With** - Vanilla JavaScript, VS Code, Firefox, and unhealthy amounts of caffeine
+
+***
+
+## Contact Me
+
+- viihna@voidfucker.com
+- viihna.78 (Signal)
+- dr.face. (Discord)

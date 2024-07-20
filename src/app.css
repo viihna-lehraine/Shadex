@@ -122,6 +122,7 @@ h3 {
 
 /* Primary Container (Layer 0) */
 #the-box {
+    position: relative;
     display: flex;
     flex-direction: column;
     padding: 10px 25px;
@@ -132,40 +133,6 @@ h3 {
     border: 2px solid #707070;
     border-radius: 5px;
     box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.8);
-}
-
-
-/* Buttons */
-#generate-button, #custom-color-button {
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 0.9em;
-    margin: 0 2px;
-    cursor: pointer;
-    border: 1px solid #1F1F21;
-    border-radius: 5px;
-}
-
-#generate-button {
-    background-color: #4CAF50;
-    color: #FCFCFC;
-}
-
-#custom-color-button {
-    background-color: #F8B8F5;
-    color: #0E0E0E;
-}
-
-
-#custom-color-button:hover {
-    background-color: #D87ED5;
-}
-
-
-#generate-button:hover, .button-box-slice > button:hover {
-    background-color: #3c803f;
 }
 
 
@@ -194,6 +161,36 @@ h3 {
 
 .ui-column:last-child {
     margin-right: 0;
+}
+
+
+/* UI - Advanced Menu */
+#advanced-menu-wrapper {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    align-items: flex-start;
+}
+
+#advanced-menu {
+    position: absolute;
+    left: -250px;
+    background-color: #FFFFFF;
+    margin-left: 10px;
+    padding: 10px;
+    border: 2px solid #707070;
+    border-radius: 5px;
+    margin-top: 10px;
+    box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.8);
+    display: none;
+}
+
+#advanced-menu > .ui-column, #advanced-menu > .ui-row {
+    padding: 10px;
+    margin: 10px;
 }
 
 
@@ -249,16 +246,6 @@ h3 {
     justify-content: center;
     align-items: center;
     margin: 5px;
-}
-
-/* Button-Row Buttons (sub-elements of Layer 2) */
-.button-row-button {
-    width: 90%;
-    background-color: #4CAF50;
-    color: #FCFCFC;
-    padding: 5px 0;
-    border: 1px solid #1F1F21;
-    border-radius: 5px;
 }
 
 
@@ -339,11 +326,6 @@ h3 {
     text-align: center;
     align-content: center;
     font-size: 0.8em;
-}
-
-.copy-button { 
-    font-size: 0.75em;
-    height: 70%;
 }
 
 
@@ -453,12 +435,92 @@ h3 {
 /* -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/- */
 /* Drag and Drop */
 
+
 .color-stripe.dragging {
     opacity: 0.5;
 }
 
 
 
+/* -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/- */
+/* Buttons */
+
+
+#generate-button {
+    background-color: #4CAF50;
+    color: #FCFCFC;
+}
+
+#generate-button, #custom-color-button {
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 0.9em;
+    margin: 0 2px;
+    cursor: pointer;
+    border: 1px solid #1F1F21;
+    border-radius: 5px;
+}
+
+#generate-button:hover, .button-box-slice > button:hover {
+    background-color: #3c803f;
+}
+
+#custom-color-button {
+    background-color: #F8B8F5;
+    color: #0E0E0E;
+}
+
+#custom-color-button:hover {
+    background-color: #D87ED5;
+}
+
+
+.button-row-button {
+    width: 90%;
+    background-color: #4CAF50;
+    color: #FCFCFC;
+    padding: 5px 0;
+    border: 1px solid #1F1F21;
+    border-radius: 5px;
+}
+
+.advanced-menu-toggle-button {
+    height: auto;
+    transform: translateX(-1.25vw);
+    color: #FCFCFC;
+    background-color: #4CAF50;
+    padding: 10px;
+    border: 1px solid #1F1F21;
+    border-radius: 5px;
+    margin-top: 10px;
+    text-orientation: upright;
+    writing-mode: vertical-lr;
+    cursor: pointer;
+    
+}
+
+.copy-button { 
+    font-size: 0.75em;
+    height: 70%;
+}
+
+
+
+/* -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/- */
+/* Not Yet Organized */
+
+
 .checkbox-label {
     font-size: 0.75em;
+}
+
+.hidden {
+    display: none;
+}
+
+.bordered-ui-div {
+    border: 1px solid #1A1A1A;
+    border-radius: 3px;
 }

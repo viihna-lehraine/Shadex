@@ -1,13 +1,15 @@
-// ColorGen - version 0.5
+// ColorGen - version 0.5.1
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
 
 // BEGIN CODE
 
+
+
 import { generateAndStoreColorValues } from './color-conversion/index.js';
-/* import { copyToClipboard } from '../utils/index.js'; */
 import { attachDragAndDropEventListeners } from './dragAndDrop.js';
 import { hexToHSL, hslToHex } from './color-conversion/index.js';
+/* import { copyToClipboard } from '../utils/index.js'; */
 
 
 let paletteBoxCount = 1;
@@ -25,8 +27,10 @@ function generatePaletteBox(colors, numBoxes) {
         if (!colors[i]) {
             console.error(`Color at index ${i} is undefined`);
             // if colors[i] is undefined, skip this iteration 
+            continue;
         }
-        const colorValues = generateAndStoreColorValues(colors[i].hue, colors[i].saturation, colors[i].lightness);
+
+        const colorValues = generateAndStoreColorValues(colors[i]);
         const { colorStripe, paletteBoxCount: newPaletteBoxCount } = makePaletteBox(colorValues, paletteBoxCount);
 
         paletteRow.appendChild(colorStripe);
@@ -55,7 +59,8 @@ function makePaletteBox(colorValues, paletteBoxCount) {
     colorTextOutputBox.value = colorValues.hex;
     colorTextOutputBox.colorValues = colorValues;
 
-    // Ensure the text is selectable
+    /* BROKEN AND INCOMPLETE FEATURE */
+    // Ensure the text in color-text-output-box is selectable
     colorTextOutputBox.readOnly = false;
     colorTextOutputBox.style.cursor = 'text'; // Ensure the cursor indicates text selection is possible
 
@@ -127,23 +132,27 @@ function populateColorTextOutputBox(color, boxNumber) {
 }
 
 
+// Sature and Desaturate Button Element Selection
+function getElementsForSelectedColor(selectedColor) {
+    return {
+        selectedColorTextOutputBox: document.getElementById(`color-text-output-box-${selectedColor}`),
+        selectedColorBox: document.getElementById(`color-box-${selectedColor}`),
+        selectedColorStripe: document.getElementById(`color-stripe-${selectedColor}`),
+        selectedColorValue: colors[selectedColor]
+    };
+}
+
+
 // Saturate Button functionality
 function saturateColor(selectedColor) {
-    let selectedColorTextOutputBox = document.getElementById(`color-text-output-box-${selectedColor}`);
-    let selectedColorBox = document.getElementById(`color-box-${selectedColor}`);
-    let selectedColorStripe = document.getElementById(`color-stripe-${selectedColor}`);
-    let selectedColorValue = colors[selectedColor];
+    getElementsForSelectedColor(selectedColor);
 }
 
 
 // Desaturate Button functionality
 function desaturateColor(selectedColor) {
-    let selectedColorTextOutputBox = document.getElementById(`color-text-output-box-${selectedColor}`);
-    let selectedColorBox = document.getElementById(`color-box-${selectedColor}`);
-    let selectedColorStripe = document.getElementById(`color-stripe-${selectedColor}`);
-    let selectedColorValue = colors[selectedColor];
+    getElementsForSelectedColor(selectedColor);
 }
-
 
 
 // Show Tooltip for Copy to Clipboard
