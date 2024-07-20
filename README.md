@@ -16,7 +16,7 @@ For regular use, please select the main branch. As stated above, this version as
 - [Installation - Windows](#windows-users) 
 - [Installation - Linux](#linux-users)
 - [Running the Project](#running-the-project)
-- [Running the Project - Additional Information](#additional-information)
+- [Additional Information](#additional-information)
 - [Features](#features)
 - [Upcoming Features](#upcoming-features)
 - [Known Issues](#known-issues)
