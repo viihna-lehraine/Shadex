@@ -8,8 +8,8 @@
 
 import { populateColorTextOutputBox } from "../modules/dom.js";
 import { copyToClipboard } from "./clipboardUtils.js";
-import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1 } from './randomUtils.js';
+import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, randomSL } from './randomUtils.js';
 import { getWeightedRandomInterval } from "./paletteGenUtils.js";
 
 
-export { populateColorTextOutputBox, copyToClipboard, randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, getWeightedRandomInterval };
+export { populateColorTextOutputBox, copyToClipboard, randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, randomSL, getWeightedRandomInterval };

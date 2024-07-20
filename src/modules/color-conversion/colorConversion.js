@@ -6,6 +6,7 @@
 
 
 
+import { applyLimitGrayAndBlack, applyLimitLight } from '../index.js';
 import { rgbToHex, hslToHex, hsvToHex, cmykToHex, labToHex } from './index.js';
 import { hexToRGB, hslToRGB, hsvToRGB, cmykToRGB, labToRGB } from './index.js';
 import { hexToHSL, rgbToHSL, hsvToHSL, cmykToHSL, labToHSL } from './index.js';
@@ -93,6 +94,9 @@ function convertColors(targetFormat) {
 function generateAndStoreColorValues(color, initialColorSpace) {
     const colorValues = {};
 
+    console.log(`Generating and storing color values for: ${JSON.stringify(color)}, initialColorSpace: ${initialColorSpace}`);
+
+
     switch (initialColorSpace) {
         case 'hex':
             const hslFromHex = hexToHSL(color);
@@ -157,6 +161,8 @@ function generateAndStoreColorValues(color, initialColorSpace) {
             colorValues.cmyk = hslToCMYK(color.hue, color.saturation, color.lightness);
             colorValues.lab = hslToLab(color.hue, color.saturation, color.lightness);
     }
+
+    console.log(`Generated and stored color values: ${JSON.stringify(colorValues)}`);
 
     return colorValues;
 }

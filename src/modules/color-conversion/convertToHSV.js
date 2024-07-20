@@ -11,79 +11,138 @@ import { hexToRGB } from "./index.js";
 
 // Convert Hex to HSV
 function hexToHSV(hex) {
-    const rgb = hexToRGB(hex);
-    const hsv = rgbToHSV(rgb.red, rgb.green, rgb.blue);
+    try {
+        console.log(`Converting Hex to HSV: ${hex}`);
+        const rgb = hexToRGB(hex);
+        console.log(`Converted RGB from Hex: ${JSON.stringify(rgb)}`);
+        const hsv = rgbToHSV(rgb.red, rgb.green, rgb.blue);
+        console.log(`Converted HSV from RGB: ${JSON.stringify(hsv)}`);
 
-    return `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
+        return `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
+    } catch (error) {
+        console.error(`Error converting Hex to HSV: ${error}`);
+        
+        // Default black for invalid inputs
+        return `hsv(0, 0%, 0%)`; 
+    }
 }
 
 
 // Convert HSL to HSV
 function hslToHSV(hue, saturation, lightness) {
-    saturation /= 100;
-    lightness /= 100;
+    try {
+        console.log(`Converting HSL to HSV: H=${hue}, S=${saturation}, L=${lightness}`);
 
-    const value = lightness + saturation * Math.min(lightness, 1 - lightness);
+        if (isNaN(hue) || isNaN(saturation) || isNaN(lightness)) {
+            throw new Error(`Invalid HSL values: H=${hue}, S=${saturation}, L=${lightness}`);
+        }
 
-    const newSaturation = value === 0 ? 0 : 2 * (1 - lightness / value);
+        saturation /= 100;
+        lightness /= 100;
 
-    return {
-        hue: Math.floor(hue),
-        saturation: Math.floor(newSaturation * 100),
-        value: Math.floor(value * 100)
-    };
+        const value = lightness + saturation * Math.min(lightness, 1 - lightness);
+        const newSaturation = value === 0 ? 0 : 2 * (1 - lightness / value);
+
+        console.log(`Converted HSV: H=${hue}, S=${newSaturation * 100}, V=${value * 100}`);
+
+        return {
+            hue: Math.floor(hue),
+            saturation: Math.floor(newSaturation * 100),
+            value: Math.floor(value * 100)
+        };
+    } catch (error) {
+        console.error(`Error converting HSL to HSV: ${error}`);
+
+        // Default black for invalid inputs
+        return { hue: 0, saturation: 0, value: 0 };
+    }
 }
 
 
 // convert RGB to HSV
 function rgbToHSV(red, green, blue) {
+    try {
+        console.log(`Converting RGB to HSV: R=${red}, G=${green}, B=${blue}`);
 
-    red /= 255;
-    green /= 255;
-    blue /= 255;
-
-    let max = Math.max(red, green, blue);
-    let min = Math.min(red, green, blue);
-    let hue, saturation, value = max;
-
-    let delta = max - min;
-    saturation = max === 0 ? 0 : delta / max;
-
-    if (max === min) {
-        hue = 0; // achromatic
-    } else {
-        switch (max) {
-            case red:
-                hue = (green - blue) / delta + (green < blue ? 6 : 0);
-                break;
-            case green:
-                hue = (blue - red) / delta + 2;
-                break;
-            case blue:
-                hue = (red - green) / delta + 4;
-                break;
+        if (isNaN(red) || isNaN(green) || isNaN(blue)) {
+            throw new Error(`Invalid RGB values: R=${red}, G=${green}, B=${blue}`);
         }
-        hue /= 6;
+
+        red /= 255;
+        green /= 255;
+        blue /= 255;
+
+        let max = Math.max(red, green, blue);
+        let min = Math.min(red, green, blue);
+        let hue, saturation, value = max;
+
+        let delta = max - min;
+        saturation = max === 0 ? 0 : delta / max;
+
+        if (max === min) {
+            hue = 0; // achromatic
+        } else {
+            switch (max) {
+                case red:
+                    hue = (green - blue) / delta + (green < blue ? 6 : 0);
+                    break;
+                case green:
+                    hue = (blue - red) / delta + 2;
+                    break;
+                case blue:
+                    hue = (red - green) / delta + 4;
+                    break;
+            }
+            hue /= 6;
+        }
+
+        console.log(`Converted HSV: H=${hue * 360}, S=${saturation * 100}, V=${value * 100}`);
+
+        return {
+            hue: Math.round(hue * 360),
+            saturation: Math.round(saturation * 100),
+            value: Math.round(value * 100)
+        };
+    } catch (error) {
+        console.error(`Error converting RGB to HSV: ${error}`);
+
+        // Default black for invalid inputs
+        return { hue: 0, saturation: 0, value: 0 };
     }
-    return {
-        hue: Math.round(hue * 360),
-        saturation: Math.round(saturation * 100),
-        value: Math.round(value * 100)
-    };
 }
 
 
 // Convert CMYK to HSV
 function cmykToHSV(cyan, magenta, yellow, key) {
-    const rgb = cmykToRGB(cyan, magenta, yellow, key);
-    return rgbToHSV(rgb.red, rgb.green, rgb.blue);
+    try {
+        console.log(`Converting CMYK to HSV: C=${cyan}, M=${magenta}, Y=${yellow}, K=${key}`);
+        const rgb = cmykToRGB(cyan, magenta, yellow, key);
+        console.log(`Converted RGB from CMYK: ${JSON.stringify(rgb)}`);
+
+        return rgbToHSV(rgb.red, rgb.green, rgb.blue);
+    } catch (error) {
+        console.error(`Error converting CMYK to HSV: ${error}`);
+
+        // Default black for invalid inputs
+        return { hue: 0, saturation: 0, value: 0 };
+    }
 }
 
 
 // Convert Lab to HSV
 function labToHSV(l, a, b) {
-    const rgb = labToRGB(l, a, b);
-    return rgbToHSV(rgb.red, rgb.green, rgb.blue);
+    try {
+        console.log(`Converting Lab to HSV: L=${l}, A=${a}, B=${b}`);
+        const rgb = labToRGB(l, a, b);
+        console.log(`Converted RGB from Lab: ${JSON.stringify(rgb)}`);
+
+        return rgbToHSV(rgb.red, rgb.green, rgb.blue);
+    } catch (error) {
+        console.error(`Error converting Lab to HSV: ${error}`);
+        
+        // Default black for invalid inputs
+        return { hue: 0, saturation: 0, value: 0 };
+    }
 }
 
 

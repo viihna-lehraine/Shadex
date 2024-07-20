@@ -6,7 +6,8 @@
 
 
 
-import { generateColor1, randomSL, populateColorTextOutputBox } from './index.js';
+import { randomSL, populateColorTextOutputBox } from './index.js';
+import { generateAndStoreColorValues } from '../color-conversion/index.js';
 
 
 // Generate hexadic hues
@@ -27,39 +28,63 @@ function generateHexadicHues(color) {
 
 
 // Generate hexadic palette
-function generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+function generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
     if (numBoxes < 6) {
         window.alert('To generate a hexadic palette, please select a number of swatches greater than 5');
         return [];
     }
 
-    const colors = [];
-    const color = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
-    console.log(colors);
-    const hexadicHues = generateHexadicHues(color);
+    // Generate the base color using the initial color space
+    if (customColor !== null && customColor !== undefined) {
+        baseColor = generateAndStoreColorValues(customColor, initialColorSpace);
+    } else {
+        switch (initialColorSpace) {
+            case 'hex':
+                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'rgb':
+                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsl':
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsv':
+                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'cmyk':
+                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'lab':
+                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            default:
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+        }
+    }
+
+    const hexadicHues = generateHexadicHues(baseColor.hue);
 
     for (let i = 0; i < numBoxes; i++) {
-        let hexadicHue = hexadicHues[i % 6]; // Cycle through the hexadic hues
-        let hexadicSatAndLightness = randomSL(limitGrayAndBlack, limitLight);
-        let hexadicColor = {
-            hue: hexadicHue,
-            saturation: hexadicSatAndLightness.saturation,
-            lightness: hexadicSatAndLightness.lightness
-        };
-
+        const hue = hexadicHues[i % 6]; // Cycle through the hexadic hues
+        let { saturation, lightness } = randomSL(limitGrayAndBlack, limitLight);
+        if (limitGrayAndBlack) {
+            ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
+        }
+        if (limitLight) {
+            lightness = applyLimitLight(lightness);
+        }
+        const hexadicColor = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
         colors.push(hexadicColor);
 
-        let colorBox = document.getElementById(`color-box-${i + 1}`);
-
+        const colorBox = document.getElementById(`color-box-${i + 1}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${hexadicColor.hue}, ${hexadicColor.saturation}%, ${hexadicColor.lightness}%)`;
+            colorBox.style.backgroundColor = hexadicColor.hsl;
             populateColorTextOutputBox(hexadicColor, i + 1);
         }
     }
-    console.log(colors);
+
     return colors;
 }
-
 
 
 export { generateHexadicPalette };

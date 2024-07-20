@@ -6,9 +6,10 @@
 
 
 
-import { generateColor1, randomSL } from './index.js';
+import { randomSL } from '../../utils/index.js';
 import { populateColorTextOutputBox } from './index.js';
-import { applyLimitGrayAndBlack, applyLimitLight } from '../userIntefaceParameters.js';
+import { applyLimitGrayAndBlack, applyLimitLight } from '../index.js';
+import { generateAndStoreColorValues } from '../color-conversion/index.js';
 
 
 // Generate split complementary hues
@@ -23,15 +24,45 @@ function generateSplitComplementaryHues(baseHue) {
     return splitComplementaryHues;
 }
 
+
 // Generate split complementary palette
-function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
     if (numBoxes < 3) {
         window.alert('To generate a split complementary palette, please select a number of swatches greater than 2');
-        return;
+        return [];
     }
 
     const colors = [];
-    const baseColor = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
+    let baseColor;
+
+    // Generate the base color using the initial color space
+    if (customColor !== null && customColor !== undefined) {
+        baseColor = generateAndStoreColorValues(customColor, initialColorSpace);
+    } else {
+        switch (initialColorSpace) {
+            case 'hex':
+                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'rgb':
+                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsl':
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsv':
+                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'cmyk':
+                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'lab':
+                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            default:
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+        }
+    }
+
     // Use baseColor.hue to generate split complementary hues
     const splitComplementaryHues = generateSplitComplementaryHues(baseColor.hue);
 
@@ -48,7 +79,8 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
         if (limitLight) {
             lightness = applyLimitLight(lightness);
         }
-        colors.push({ hue, saturation, lightness });
+        const color = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        colors.push(color);
     }
 
     // if numBoxes > 3, add additional variations within ±5 of colors 2 and/or 3
@@ -148,15 +180,15 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
             }
         }
 
-        colors.push({ hue, saturation, lightness });
+        const additionalColor = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        colors.push(additionalColor);
     }
-
 
     // Update the DOM with generated colors
     colors.forEach((color, index) => {
         const colorBox = document.getElementById(`color-box-${index + 1}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
+            colorBox.style.backgroundColor = color.hsl;
             populateColorTextOutputBox(color, index + 1);
         }
     });

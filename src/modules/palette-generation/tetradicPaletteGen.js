@@ -6,9 +6,10 @@
 
 
 
-import { randomSL, generateColor1 } from './index.js';
+import { randomSL } from './index.js';
 import { populateColorTextOutputBox } from './index.js';
 import { applyLimitGrayAndBlack, applyLimitLight } from './index.js';
+import { generateAndStoreColorValues } from '../color-conversion/colorConversion.js';
 
 
 function generateTetradicHues(baseHue) {
@@ -26,14 +27,43 @@ function generateTetradicHues(baseHue) {
 
 
 // Generate tetradic palette
-function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
     if (numBoxes < 4) {
         window.alert('To generate a tetradic palette, please select a number of swatches greater than 3');
-        return;
+        return [];
     }
 
     const colors = [];
-    const baseColor = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
+    let baseColor;
+
+    // Generate the base color using the initial color space
+    if (customColor !== null && customColor !== undefined) {
+        baseColor = generateAndStoreColorValues(customColor, initialColorSpace);
+    } else {
+        switch (initialColorSpace) {
+            case 'hex':
+                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'rgb':
+                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsl':
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsv':
+                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'cmyk':
+                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'lab':
+                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            default:
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+        }
+    }
+
     // Use baseColor.hue to generate tetradic hues
     const tetradicHues = generateTetradicHues(baseColor.hue);
 
@@ -50,7 +80,8 @@ function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, custom
         if (limitLight) {
             lightness = applyLimitLight(lightness);
         }
-        colors.push({ hue, saturation, lightness });
+        const color = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        colors.push(color);
     }
 
     // if numBoxes = 5 || 6, add additional variations
@@ -68,10 +99,10 @@ function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, custom
             isValid = true;
             const baseColor = colors[baseColorIndex];
             if (Math.abs(saturation - baseColor.saturation) < 10) {
-                saturation = baseColor.saturation + (saturation >= baseColor.saturation ? 10 : -10); 
+                saturation = baseColor.saturation + (saturation >= baseColor.saturation ? 10 : -10);
             }
             if (Math.abs(lightness - baseColor.lightness) < 10) {
-                lightness - baseColor.lightness + (lightness >= baseColor.lightness ? 10 : -10);
+                lightness = baseColor.lightness + (lightness >= baseColor.lightness ? 10 : -10);
             }
 
             // adjust if saturation or lightness are not inside the range 0-100
@@ -80,7 +111,7 @@ function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, custom
             if (lightness > 100) lightness = 100;
             if (lightness < 0) lightness = 0;
 
-            // ensure limitDarkAndGray and limitLight are still acting as additional limits
+            // ensure limitGrayAndBlack and limitLight are still acting as additional limits
             if (limitGrayAndBlack) {
                 ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
             }
@@ -98,15 +129,16 @@ function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, custom
         }
 
         if (attempts >= maxAttempts) {
-            console.warn('Reached maximumum attempts to find valid saturation and lightness');
+            console.warn('Reached maximum attempts to find valid saturation and lightness values.');
             console.log('Executing Option B - manually set saturation and lightness within acceptable range');
-            // Generate valid values within accepted bounds, excluding the range +/- 10 relative to the base color (exclusive)
+            // Generate valid values within accepted bounds, excluding the range ±10 relative to the base color (exclusive)
+            const baseColor = colors[baseColorIndex];
             saturation = Math.random() > 0.5 ? baseColor.saturation + 10 : baseColor.saturation - 10;
             lightness = Math.random() > 0.5 ? baseColor.lightness + 10 : baseColor.lightness - 10;
             if (saturation > 100) {
                 saturation = 100;
                 if (limitGrayAndBlack) {
-                    ({ saturation, lightness } = applylimitGrayAndBlack(saturation, lightness));
+                    ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
                     lightness = applyLimitLight(lightness);
@@ -115,7 +147,7 @@ function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, custom
             if (saturation < 0) {
                 saturation = 0;
                 if (limitGrayAndBlack) {
-                    ({ saturation, lightness } = applylimitGrayAndBlack(saturation, lightness));
+                    ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
                     lightness = applyLimitLight(lightness);
@@ -124,32 +156,40 @@ function generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, custom
             if (lightness > 100) {
                 lightness = 100;
                 if (limitGrayAndBlack) {
-                    ({ saturation, lightness } = applylimitGrayAndBlack(saturation, lightness));
+                    ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
                     lightness = applyLimitLight(lightness);
                 }
             }
-            if (lightness = 0) {
+            if (lightness < 0) {
                 lightness = 0;
                 if (limitGrayAndBlack) {
-                    ({ saturation, lightness } = applylimitGrayAndBlack(saturation, lightness));
+                    ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
                     lightness = applyLimitLight(lightness);
                 }
+            }
+
+            // Re-apply limits if necessary
+            if (limitGrayAndBlack) {
+                ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
+            }
+            if (limitLight) {
+                lightness = applyLimitLight(lightness);
             }
         }
 
-        colors.push({ hue, saturation, lightness });
+        const additionalColor = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        colors.push(additionalColor);
     }
-
 
     // Update the DOM with generated colors
     colors.forEach((color, index) => {
         const colorBox = document.getElementById(`color-box-${index + 1}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
+            colorBox.style.backgroundColor = color.hsl;
             populateColorTextOutputBox(color, index + 1);
         }
     });

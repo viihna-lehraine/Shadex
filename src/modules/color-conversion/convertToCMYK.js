@@ -11,51 +11,113 @@ import { hexToRGB, hslToRGB } from "./index.js";
 
 // Convert Hex to CMYK
 function hexToCMYK(hex) {
-    const rgb = hexToRGB(hex);
-    const cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    try {
+        console.log(`Converting Hex to CMYK: ${hex}`);
+        const rgb = hexToRGB(hex);
+        console.log(`Converted RGB from Hex: ${JSON.stringify(rgb)}`);
+        const cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+        console.log(`Converted CMYK from RGB: ${JSON.stringify(cmyk)}`);
+        
+        return `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
+    } catch (error) {
+        console.error(`Error converting Hex to CMYK: ${error}`);
 
-    return `cmyk(${cmyk.cyan}%, ${cmyk.magenta}%, ${cmyk.yellow}%, ${cmyk.key}%)`;
+        // Set default CMYK in case of error
+        return `cmyk(0%, 0%, 0%, 100%)`;
+    }
 }
 
 
 // Convert RGB to CMYK
 function rgbToCMYK(red, green, blue) {
-    const redPrime = red / 255;
-    const greenPrime = green / 255;
-    const bluePrime = blue / 255;
+    try {
+        console.log(`Converting RGB to CMYK: R=${red}, G=${green}, B=${blue}`);
 
-    const key = 1 - Math.max(redPrime, greenPrime, bluePrime);
-    const cyan = (1 - redPrime - key) / (1 - key) || 0;
-    const magenta = (1 - greenPrime - key) / (1 - key) || 0;
-    const yellow = (1 - bluePrime - key) / (1 - key) || 0;
+        if (isNaN(red) || isNaN(green) || isNaN(blue)) {
+            throw new Error(`Invalid RGB values: R=${red}, G=${green}, B=${blue}`);
+        }
 
-    return {
-        cyan: Math.round(cyan * 100),
-        magenta: Math.round(magenta * 100),
-        yellow: Math.round(yellow * 100),
-        key: Math.round(key * 100)
-    };
+        const redPrime = red / 255;
+        const greenPrime = green / 255;
+        const bluePrime = blue / 255;
+
+        const key = 1 - Math.max(redPrime, greenPrime, bluePrime);
+        const cyan = (1 - redPrime - key) / (1 - key) || 0;
+        const magenta = (1 - greenPrime - key) / (1 - key) || 0;
+        const yellow = (1 - bluePrime - key) / (1 - key) || 0;
+
+        let cmyk = {
+            cyan: Math.round(cyan * 100),
+            magenta: Math.round(magenta * 100),
+            yellow: Math.round(yellow * 100),
+            key: Math.round(key * 100)
+        };
+
+        if (isNaN(cmyk.cyan) || isNaN(cmyk.magenta) || isNaN(cmyk.yellow) || isNaN(cmyk.key)) {
+            throw new Error(`Invalid CMYK values generated: ${JSON.stringify(cmyk)}`);
+        }
+
+        console.log(`Converted CMYK from RGB: ${JSON.stringify(cmyk)}`);
+        
+        return cmyk;
+    } catch (error) {
+        console.error(`Error converting RGB to CMYK: ${error}`);
+
+        // Default value in case of error
+        return { cyan: 0, magenta: 0, yellow: 0, key: 100 }; 
+    }
 }
 
 
 // Convert HSL to CMYK
 function hslToCMYK(hue, saturation, lightness) {
-    const rgb = hslToRGB(hue, saturation, lightness);
-    return rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    try {
+        console.log(`Converting HSL to CMYK: H=${hue}, S=${saturation}, L=${lightness}`);
+        const rgb = hslToRGB(hue, saturation, lightness);
+        console.log(`Converted RGB from HSL: ${JSON.stringify(rgb)}`);
+
+        return rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    } catch (error) {
+        console.error(`Error converting HSL to CMYK: ${error}`);
+
+        // Default CMYK in case of error
+        return { cyan: 0, magenta: 0, yellow: 0, key: 100 }; 
+    }
 }
 
 
 // Convert HSV to CMYK
 function hsvToCMYK(hue, saturation, value) {
-    const rgb = hsvToRGB(hue, saturation, value);
-    return rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    try {
+        console.log(`Converting HSV to CMYK: H=${hue}, S=${saturation}, V=${value}`);
+        const rgb = hsvToRGB(hue, saturation, value);
+        console.log(`Converted RGB from HSV: ${JSON.stringify(rgb)}`);
+
+        return rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    } catch (error) {
+        console.error(`Error converting HSV to CMYK: ${error}`);
+
+        // Default CMYK in case of error
+        return { cyan: 0, magenta: 0, yellow: 0, key: 100 }; 
+    }
 }
 
 
 // Convert Lab to CMYK
 function labToCMYK(l, a, b) {
-    const rgb = labToRGB(l, a, b);
-    return rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    try {
+        console.log(`Converting Lab to CMYK: L=${l}, A=${a}, B=${b}`);
+        const rgb = labToRGB(l, a, b);
+        console.log(`Converted RGB from Lab: ${JSON.stringify(rgb)}`);
+
+        return rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    } catch (error) {
+        console.error(`Error converting Lab to CMYK: ${error}`);
+
+        // Default CMYK in case of error
+        return { cyan: 0, magenta: 0, yellow: 0, key: 100 }; 
+    }
 }
+
 
 export { hexToCMYK, rgbToCMYK, hslToCMYK, hsvToCMYK, labToCMYK }

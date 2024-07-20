@@ -48,13 +48,20 @@ function randomHSL(limitGrayAndBlack, limitLight) {
     let saturation = Math.floor(Math.random() * 101);
     let lightness = Math.floor(Math.random() * 101);
 
+    console.log(`Initial Random HSL: H=${hue}, S=${saturation}, L=${lightness}`);
+
+
     if (limitGrayAndBlack) {
         ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
+        console.log(`Limited Gray and Black for HSL: S=${saturation}, L=${lightness}`);
     }
 
     if (limitLight) {
         lightness = applyLimitLight(lightness);
+        console.log(`Limited Lightness for HSL: L=${lightness}`);
     }
+
+    console.log(`Generated HSL: H=${hue}, S=${saturation}, L=${lightness}`);
 
     return {
         format: 'hsl',

@@ -6,9 +6,10 @@
 
 
 
-import { randomSL, generateColor1 } from './index.js';
+import { randomSL } from './index.js';
 import { populateColorTextOutputBox } from './index.js';
 import { applyLimitGrayAndBlack, applyLimitLight } from './index.js';
+import { generateAndStoreColorValues } from '../color-conversion/index.js';
 
 
 // Generate triadic hues
@@ -24,14 +25,43 @@ function generateTriadicHues(baseHue) {
 
 
 // Generate triadic palette
-function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
     if (numBoxes < 3) {
         window.alert('To generate a triadic palette, please select a number of swatches greater than 2');
-        return;
+        return [];
     }
 
     const colors = [];
-    const baseColor = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
+    let baseColor;
+
+    // Generate the base color using the initial color space
+    if (customColor !== null && customColor !== undefined) {
+        baseColor = generateAndStoreColorValues(customColor, initialColorSpace);
+    } else {
+        switch (initialColorSpace) {
+            case 'hex':
+                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'rgb':
+                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsl':
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsv':
+                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'cmyk':
+                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'lab':
+                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            default:
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+        }
+    }
+
     const triadicHues = generateTriadicHues(baseColor.hue);
 
     // First color is the base color (randomized or customColor)
@@ -47,7 +77,8 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
         if (limitLight) {
             lightness = applyLimitLight(lightness);
         }
-        colors.push({ hue, saturation, lightness });
+        const color = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        colors.push(color);
     }
 
     // if numBoxes > 3, add additional variations within ±5 hue of colors 1-3
@@ -77,7 +108,7 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
             if (lightness > 100) lightness = 100;
             if (lightness < 0) lightness = 0;
 
-            // Ensure limitDarkAndGray and limitLight are still acting as additional limits
+            // Ensure limitGrayAndBlack and limitLight are still acting as additional limits
             if (limitGrayAndBlack) {
                 ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
             }
@@ -102,7 +133,8 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
             saturation = Math.random() > 0.5 ? baseColor.saturation + 10 : baseColor.saturation - 10;
             lightness = Math.random() > 0.5 ? baseColor.lightness + 10 : baseColor.lightness - 10;
             if (saturation > 100) {
-                saturation = 100;if (limitGrayAndBlack) {
+                saturation = 100;
+                if (limitGrayAndBlack) {
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
@@ -110,7 +142,8 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
                 }
             }
             if (saturation < 0) {
-                saturation = 0;if (limitGrayAndBlack) {
+                saturation = 0;
+                if (limitGrayAndBlack) {
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
@@ -118,7 +151,8 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
                 }
             }
             if (lightness > 100) {
-                lightness = 100;if (limitGrayAndBlack) {
+                lightness = 100;
+                if (limitGrayAndBlack) {
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
@@ -126,7 +160,8 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
                 }
             }
             if (lightness < 0) {
-                lightness = 0;if (limitGrayAndBlack) {
+                lightness = 0;
+                if (limitGrayAndBlack) {
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
@@ -143,14 +178,15 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
             }
         }
 
-        colors.push({ hue, saturation, lightness });
+        const additionalColor = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        colors.push(additionalColor);
     }
 
     // Update the DOM with generated colors
     colors.forEach((color, index) => {
         const colorBox = document.getElementById(`color-box-${index + 1}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
+            colorBox.style.backgroundColor = color.hsl;
             populateColorTextOutputBox(color, index + 1);
         }
     });

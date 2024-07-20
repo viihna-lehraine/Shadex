@@ -5,33 +5,62 @@
 // BEGIN CODE
 
 
-import { randomHSL, randomSL } from './index.js';
+
 import { populateColorTextOutputBox } from './index.js';
+import { randomHSL, randomSL } from '../../utils/index.js';
+import { generateAndStoreColorValues } from '../color-conversion/index.js';
 
 
-// Generate a monochromatic color palette
-function generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+function generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
     if (numBoxes < 2) {
         window.alert('To generate a monochromatic palette, please select a number of swatches greater than 1');
-        return;
+        return [];
     }
 
     const colors = [];
-    const color = customColor !== null && customColor !== undefined ? customColor : randomHSL(limitGrayAndBlack, limitLight);
+    let baseColor;
+
+    // Generate the base color using the initial color space
+    if (customColor !== null && customColor !== undefined) {
+        baseColor = generateAndStoreColorValues(customColor, initialColorSpace);
+    } else {
+        switch (initialColorSpace) {
+            case 'hex':
+                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'rgb':
+                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsl':
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsv':
+                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'cmyk':
+                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'lab':
+                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            default:
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+        }
+    }
 
     for (let i = 0; i < numBoxes; i++) {
         const slValues = randomSL(limitGrayAndBlack, limitLight);
-        const monoColor = {
-            hue: color.hue, // Use the hue from the base color
+        const monoColor = generateAndStoreColorValues({
+            hue: baseColor.hue, // Use the hue from the base color
             saturation: slValues.saturation,
             lightness: slValues.lightness
-        };
+        }, 'hsl');
 
         colors.push(monoColor);
 
         const colorBox = document.getElementById(`color-box-${i + 1}`);
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${monoColor.hue}, ${monoColor.saturation}%, ${monoColor.lightness}%)`;
+            colorBox.style.backgroundColor = monoColor.hsl;
             populateColorTextOutputBox(monoColor, (i + 1));
         }
     }

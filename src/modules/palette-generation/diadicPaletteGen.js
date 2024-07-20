@@ -6,9 +6,8 @@
 
 
 
-import { generateColor1, randomSL } from './index.js';
-import { populateColorTextOutputBox } from './index.js';
-import { getWeightedRandomInterval } from '../../utils/index.js';
+import { randomSL, populateColorTextOutputBox, getWeightedRandomInterval } from '../../utils/index.js';
+import { generateAndStoreColorValues } from '../color-conversion/index.js';
 import { applyLimitGrayAndBlack, applyLimitLight } from './index.js';
 
 
@@ -25,34 +24,62 @@ function generateDiadicHues(baseHue) {
 
 
 // Generate diadic color palette
-function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null) {
+function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
     if (numBoxes < 2) {
         window.alert('To generate a diadic palette, please select a number of swatches greater than 1');
         return;
     }
 
     const colors = [];
-    const baseColor = customColor !== null && customColor !== undefined ? customColor : generateColor1(limitGrayAndBlack, limitLight);
-    // Use baseColor.hue to generate diadic hues
+    let baseColor;
+
+    // Generate the base color using the initial color space
+    if (customColor !== null && customColor !== undefined) {
+        baseColor = generateAndStoreColorValues(customColor, initialColorSpace);
+    } else {
+        switch (initialColorSpace) {
+            case 'hex':
+                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'rgb':
+                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsl':
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'hsv':
+                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'cmyk':
+                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            case 'lab':
+                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace);
+                break;
+            default:
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+        }
+    }
+
+    // Use baseColor.hsl to generate diadic hues
     const diadicHues = generateDiadicHues(baseColor.hue);
 
     // First color is the base color (randomized or customColor)
     colors.push(baseColor);
 
-    // Generate main diadic colors (colors 2, i = 1)
-    for (let i = 0; i < 1; i++) {
-        const hue = diadicHues[i + 1];
-        let { saturation, lightness } = randomSL(limitGrayAndBlack, limitLight);
-        if (limitGrayAndBlack) {
-            ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
-        }
-        if (limitLight) {
-            lightness = applyLimitLight(lightness);
-        }
-        colors.push({ hue, saturation, lightness });
+    // Generate the main diadic color (second color)
+    const hue = diadicHues[1];
+    let { saturation, lightness } = randomSL(limitGrayAndBlack, limitLight);
+    if (limitGrayAndBlack) {
+        ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
     }
+    if (limitLight) {
+        lightness = applyLimitLight(lightness);
+    }
+    const diadicColor = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+    colors.push(diadicColor);
 
-    // if numBoxes > 2, add additional variations within +/-5 of colors 1 or 2
+    // If numBoxes > 2, add additional variations within +/-5 of colors 1 or 2
     while (colors.length < numBoxes) {
         const baseColorIndex = Math.floor(Math.random() * 2); // Randomly select color 1 or 2
         const baseHue = diadicHues[baseColorIndex]; // Use hues from color 1 or 2
@@ -73,13 +100,13 @@ function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, customCo
                 lightness = baseColor.lightness + (lightness >= baseColor.lightness ? 10 : -10);
             }
 
-            // adjust if saturation or lightness are not inside the range 0-100
+            // Adjust if saturation or lightness are not inside the range 0-100
             if (saturation > 100) saturation = 100;
             if (saturation < 0) saturation = 0;
             if (lightness > 100) lightness = 100;
             if (lightness < 0) lightness = 0;
 
-            // ensure limitGrayAndBlack and limitLight are still acting as additional limits
+            // Ensure limitGrayAndBlack and limitLight are still acting as additional limits
             if (limitGrayAndBlack) {
                 ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
             }
@@ -140,7 +167,7 @@ function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, customCo
                 }
             }
 
-            // Re-apply limits if necessary
+            // Re-apply parameters if necessary
             if (limitGrayAndBlack) {
                 ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
             }
@@ -149,21 +176,20 @@ function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, customCo
             }
         }
 
-        colors.push({ hue, saturation, lightness });
+        const additionalColor = generateAndStoreColorValue({ hue, saturation, lightness }, 'hsl');
     }
-
 
     // Update the DOM with generated colors
     colors.forEach((color, index) => {
         const colorBox = document.getElementById(`color-box-${index + 1}`);
+        
         if (colorBox) {
-            colorBox.style.backgroundColor = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
+            colorBox.style.backgroundColor = color.hsl;
             populateColorTextOutputBox(color, index + 1);
         }
-    });
+    })
 
     return colors;
 }
-
 
 export { generateDiadicPalette };

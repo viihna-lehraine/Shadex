@@ -11,81 +11,143 @@ import { hexToRGB } from "./convertToRGB.js";
 
 // Convert Hex to HSL
 function hexToHSL(hex) {
-    const rgb = hexToRGB(hex);
-    const hsl = rgbToHSL(rgb.red, rgb.green, rgb.blue);
+    try {
+        console.log(`Converting Hex to HSL: ${hex}`);
+        const rgb = hexToRGB(hex);
+        console.log(`Converted RGB from Hex: ${JSON.stringify(rgb)}`);
+        const hsl = rgbToHSL(rgb.red, rgb.green, rgb.blue);
+        console.log(`Converted HSL from RGB: ${JSON.stringify(hsl)}`);
 
-    return {
-        hue: hsl.hue,
-        saturation: hsl.saturation,
-        lightness: hsl.lightness
+        return {
+            hue: hsl.hue,
+            saturation: hsl.saturation,
+            lightness: hsl.lightness
+        };
+    } catch (error) {
+        console.error(`Error converting Hex to HSL: ${error}`);
+
+        // Return black for invalid inputs
+        return { hue: 0, saturation: 0, lightness: 0 };
     }
 }
 
 
 // convert RGB to HSL
 function rgbToHSL(red, green, blue) {
-    red = red / 255;
-    green = green / 255;
-    blue = blue / 255;
+    try {
+        console.log(`Converting RGB to HSL: R=${red}, G=${green}, B=${blue}`);
 
-    const max = Math.max(red, green, blue);
-    const min = Math.min(red, green, blue);
-    let hue, saturation, lightness = (max + min) / 2;
-
-    if (max === min) {
-        hue = 0;
-        saturation = 0;
-    } else {
-        const delta = max - min;
-        saturation = lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
-        switch (max) {
-            case red:
-                hue = (green - blue) / delta + (green < blue ? 6 : 0);
-                break;
-            case green:
-                hue = (blue - red) / delta + 2;
-                break;
-            case blue:
-                hue = (red - green) / delta + 4;
-                break;
+        if (isNaN(red) || isNaN(green) || isNaN(blue)) {
+            throw new Error(`Invalid RGB values: R=${red}, G=${green}, B=${blue}`);
         }
-        hue *= 60;
+
+        red = red / 255;
+        green = green / 255;
+        blue = blue / 255;
+
+        const max = Math.max(red, green, blue);
+        const min = Math.min(red, green, blue);
+        let hue, saturation, lightness = (max + min) / 2;
+
+        if (max === min) {
+            hue = 0;
+            saturation = 0;
+        } else {
+            const delta = max - min;
+            saturation = lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+            switch (max) {
+                case red:
+                    hue = (green - blue) / delta + (green < blue ? 6 : 0);
+                    break;
+                case green:
+                    hue = (blue - red) / delta + 2;
+                    break;
+                case blue:
+                    hue = (red - green) / delta + 4;
+                    break;
+            }
+            hue *= 60;
+        }
+
+        console.log(`Converted HSL: H=${hue}, S=${saturation * 100}, L=${lightness * 100}`);
+
+        return {
+            hue: Math.round(hue),
+            saturation: Math.round(saturation * 100),
+            lightness: Math.round(lightness * 100)
+        };
+    } catch (error) {
+        console.error(`Error converting RGB to HSL: ${error}`);
+
+        // Return black for invalid inputs
+        return { hue: 0, saturation: 0, lightness: 0 }; 
     }
-    return {
-        hue: Math.round(hue),
-        saturation: Math.round(saturation * 100),
-        lightness: Math.round(lightness * 100)
-    };
 }
 
 
 // Convert HSV to HSL
 function hsvToHSL(hue, saturation, value) {
-    saturation /= 100;
-    value /= 100;
+    try {
+        console.log(`Converting HSV to HSL: H=${hue}, S=${saturation}, V=${value}`);
 
-    let lightness = value * (1 - saturation / 2);
-    let newSaturation = (lightness === 0 || lightness === 1) ? 0 : (value - lightness) / Math.min(lightness, 1 - lightness);
+        if (isNaN(hue) || isNaN(saturation) || isNaN(value)) {
+            throw new Error(`Invalid HSV values: H=${hue}, S=${saturation}, V=${value}`);
+        }
 
-    return {
-        hue: hue,
-        saturation: Math.floor(newSaturation * 100),
-        lightness: Math.floor(lightness * 100)
-    };
+        saturation /= 100;
+        value /= 100;
+
+        let lightness = value * (1 - saturation / 2);
+        let newSaturation = (lightness === 0 || lightness === 1) ? 0 : (value - lightness) / Math.min(lightness, 1 - lightness);
+
+        console.log(`Converted HSL: H=${hue}, S=${newSaturation * 100}, L=${lightness * 100}`);
+
+        return {
+            hue: hue,
+            saturation: Math.floor(newSaturation * 100),
+            lightness: Math.floor(lightness * 100)
+        };
+    } catch (error) {
+        console.error(`Error converting HSV to HSL: ${error}`);
+
+        // Return black for invalid inputs
+        return { hue: 0, saturation: 0, lightness: 0 }; 
+    }
 }
 
 
 // Convert CMYK to HSL
 function cmykToHSL(cyan, magenta, yellow, key) {
-    const rgb = cmykToRGB(cyan, magenta, yellow, key);
-    return rgbToHSL(rgb.red, rgb.green, rgb.blue);
+    try {
+        console.log(`Converting CMYK to HSL: C=${cyan}, M=${magenta}, Y=${yellow}, K=${key}`);
+        const rgb = cmykToRGB(cyan, magenta, yellow, key);
+        console.log(`Converted RGB from CMYK: ${JSON.stringify(rgb)}`);
+
+        return rgbToHSL(rgb.red, rgb.green, rgb.blue);
+    } catch (error) {
+        console.error(`Error converting CMYK to HSL: ${error}`);
+
+        // Return black for invalid inputs
+        return { hue: 0, saturation: 0, lightness: 0 };
+    }
 }
 
 
 //Convert Lab to HSL
 function labToHSL(l, a, b) {
-    const rgb = labToRGB(l, a, b);
-    return rgbToHSL(rgb.red, rgb.green, rgb.blue);
+    try {
+        console.log(`Converting Lab to HSL: L=${l}, A=${a}, B=${b}`);
+        const rgb = labToRGB(l, a, b);
+        console.log(`Converted RGB from Lab: ${JSON.stringify(rgb)}`);
+        
+        return rgbToHSL(rgb.red, rgb.green, rgb.blue);
+    } catch (error) {
+        console.error(`Error converting Lab to HSL: ${error}`);
+        
+        // Return black for invalid inputs
+        return { hue: 0, saturation: 0, lightness: 0 }; 
+    }
 }
+
 
 export { hexToHSL, rgbToHSL, hsvToHSL, cmykToHSL, labToHSL };

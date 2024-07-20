@@ -7,6 +7,7 @@
 
 
 import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab } from '../../utils/index.js';
+import { generateAndStoreColorValues } from '../color-conversion/index.js';
 
 
 // Generate Random Color Palette
@@ -15,6 +16,7 @@ function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, cus
 
     for (let i = 0; i < numBoxes; i++) {
         let color;
+
         if (i === 0 && customColor) {
             color = generateAndStoreColorValues(customColor, initialColorSpace);
         } else {
@@ -42,6 +44,7 @@ function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, cus
                     baseColor = randomHSL(limitGrayAndBlack, limitLight);
             }
 
+            console.log(`Base Color Generated: ${JSON.stringify(baseColor)}`);
             color = generateAndStoreColorValues(baseColor, initialColorSpace);
         }
 
