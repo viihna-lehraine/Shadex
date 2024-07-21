@@ -11,12 +11,18 @@ import { hexToRGB } from "./index.js";
 
 // Convert Hex to HSV
 function hexToHSV(hex) {
+    console.log('executing hexToHSV');
+    console.log('hex: ', hex, ' data type ', (typeof hex));
+
     try {
         console.log(`Converting Hex to HSV: ${hex}`);
         const rgb = hexToRGB(hex);
         console.log(`Converted RGB from Hex: ${JSON.stringify(rgb)}`);
+        console.log('rgb: ', rgb, ' data type: ', (typeof rgb));
         const hsv = rgbToHSV(rgb.red, rgb.green, rgb.blue);
         console.log(`Converted HSV from RGB: ${JSON.stringify(hsv)}`);
+        console.log('hsv: ', hsv, ' type: ', (typeof hsv));
+        console.log('execution of hexToHSV complete');
 
         return `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
 
@@ -24,6 +30,9 @@ function hexToHSV(hex) {
         console.error(`Error converting Hex to HSV: ${error}`);
         // Default black for invalid inputs
         const hsv = { hue: 0, saturation: 0, value: 0 };
+        
+        console.log('hsv: ', hsv, ' type: ', (typeof hsv));
+        console.log('execution of hexToHSV complete');
 
         return `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
     }
@@ -32,6 +41,10 @@ function hexToHSV(hex) {
 
 // Convert HSL to HSV
 function hslToHSV(hue, saturation, lightness) {
+    console.log('executing hslToHSV');
+    console.log('hue: ', hue, ' saturation: ', saturation, ' lightness: ', lightness);
+    console.log('types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' lightness: ', (typeof lightness));
+
     try {
         console.log(`Converting HSL to HSV: H=${hue}, S=${saturation}, L=${lightness}`);
 
@@ -53,12 +66,18 @@ function hslToHSV(hue, saturation, lightness) {
             value: Math.floor(value * 100)
         };
 
+        console.log('hsv: ', hsv, ' type: ', (typeof hsv));
+        console.log('execution of hslToHSV complete');
+
         return `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
 
     } catch (error) {
         console.error(`Error converting HSL to HSV: ${error}`);
         // Default black for invalid inputs
         const hsv = { hue: 0, saturation: 0, value: 0 };
+
+        console.log('hsv: ', hsv, ' type: ', (typeof hsv));
+        console.log('execution of hslToHSV complete');
 
         return `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
     }
@@ -67,6 +86,10 @@ function hslToHSV(hue, saturation, lightness) {
 
 // Convert RGB to HSV
 function rgbToHSV(red, green, blue) {
+    console.log('executing rgbToHSV');
+    console.log('red: ', red, ' green: ', green, ' blue: ', blue);
+    console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ', (typeof blue));
+
     try {
         console.log(`Converting RGB to HSV: R=${red}, G=${green}, B=${blue}`);
 
@@ -110,12 +133,18 @@ function rgbToHSV(red, green, blue) {
             value: Math.floor(value * 100)
         };
 
+        console.log('hsv: ', hsv, ' type: ', (typeof hsv));
+        console.log('execution of rgbToHSV complete');
+
         return `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
         
     } catch (error) {
         console.error(`Error converting RGB to HSV: ${error}`);
         // Default black for invalid inputs
         const hsv = { hue: 0, saturation: 0, value: 0 };
+
+        console.log('hsv: ', hsv, ' type: ', (typeof hsv));
+        console.log('execution of rgbToHSV complete');
 
         return `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
     }
@@ -124,10 +153,16 @@ function rgbToHSV(red, green, blue) {
 
 // Convert CMYK to HSV
 function cmykToHSV(cyan, magenta, yellow, key) {
+    console.log('executing cmykToHSV');
+    console.log('cyan: ', cyan, ' magenta: ', magenta, ' yellow: ', yellow, ' key: ', key);
+    console.log('types - cyan: ', (typeof cyan), ' magenta: ', (typeof magenta), ' yellow: ', (typeof yellow), ' key: ', (typeof key));
+
     try {
         console.log(`Converting CMYK to HSV: C=${cyan}, M=${magenta}, Y=${yellow}, K=${key}`);
         const rgb = cmykToRGB(cyan, magenta, yellow, key);
         console.log(`Converted RGB from CMYK: ${JSON.stringify(rgb)}`);
+        console.log('rgb: ', rgb, ' type: ', (typeof rgb));
+        console.log('execution of cmykToHSV complete');
 
         return rgbToHSV(rgb.red, rgb.green, rgb.blue);
 
@@ -136,6 +171,9 @@ function cmykToHSV(cyan, magenta, yellow, key) {
         // Default black for invalid inputs
         const hsv = { hue: 0, saturation: 0, value: 0 };
 
+        console.log('hsv: ', hsv, ' type: ', (typeof hsv));
+        console.log('execution of cmykToHSV complete');
+
         return `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
     }
 }
@@ -143,10 +181,14 @@ function cmykToHSV(cyan, magenta, yellow, key) {
 
 // Convert Lab to HSV
 function labToHSV(l, a, b) {
+    console.log('executing labToHSV');
+
     try {
         console.log(`Converting Lab to HSV: L=${l}, A=${a}, B=${b}`);
         const rgb = labToRGB(l, a, b);
         console.log(`Converted RGB from Lab: ${JSON.stringify(rgb)}`);
+        console.log('rgb: ', rgb, ' type: ', (typeof rgb));
+        console.log('execution of labToHSV complete');
 
         return rgbToHSV(rgb.red, rgb.green, rgb.blue);
 
@@ -154,6 +196,9 @@ function labToHSV(l, a, b) {
         console.error(`Error converting Lab to HSV: ${error}`);
         // Default black for invalid inputs
         const hsv = { hue: 0, saturation: 0, value: 0 };
+
+        console.log('hsv: ', hsv, ' type: ', (typeof hsv));
+        console.log('execution of labToHSV complete');
 
         return `hsv(${hsv.hue}, ${hsv.saturation}%, ${hsv.value}%)`;
     }

@@ -8,6 +8,9 @@
 
 // Convert Hex to RGB
 function hexToRGB(hex) {
+    console.log('executing hexToRGB');
+    console.log('hex: ', hex, ' data type ', (typeof hex));
+
     try {
         console.log(`Converting Hex to RGB: ${hex}`);
         // Remove the hash at the beginning if it exists
@@ -19,14 +22,21 @@ function hexToRGB(hex) {
         let green = (bigint >> 8) & 255;
         let blue = bigint & 255;
 
+        console.log('red: ', red, ' green: ', green, ' blue: ', blue);
+        console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ' (typeof blue));
+
         if (isNaN(red) || isNaN(green) || isNaN(blue)) {
             throw new Error(`Invalid RGB values from hex: R=${red}, G=${green}, B=${blue}`);
         }
+
+        console.log('execution of hexToRGB complete');
 
         return { red, green, blue };
     } catch (error) {
         console.error(`Error converting Hex to RGB: ${error}`);
         
+        console.log('execution of hexToRGB complete');
+
         // Return black for invalid inputs
         return { red: 0, green: 0, blue: 0 };
     }
@@ -35,6 +45,10 @@ function hexToRGB(hex) {
 
 // Convert HSL to RGB
 function hslToRGB(hue, saturation, lightness) {
+    console.log('executing hslToRGB');
+    console.log('hue: ', hue, ' saturation: ', saturation, ' lightness: ', lightness);
+    console.log('types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' lightness: ', (typeof lightness));
+
     try {
         // Ensure hue, saturation, and lightness are numbers
         if (typeof hue !== 'number' || typeof saturation !== 'number' || typeof lightness !== 'number') {
@@ -63,6 +77,8 @@ function hslToRGB(hue, saturation, lightness) {
             const q = lightness < 0.5 ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation;
             const p = 2 * lightness - q;
 
+            console.log('calling hueToRGB 3x, once each for parameters red, green, and blue');
+
             red = hueToRGB(p, q, hue + 1 / 3);
             green = hueToRGB(p, q, hue);
             blue = hueToRGB(p, q, hue - 1 / 3);
@@ -72,13 +88,20 @@ function hslToRGB(hue, saturation, lightness) {
         green = Math.round(green * 255);
         blue = Math.round(blue * 255);
 
+        console.log('red: ', red, ' green: ', green, ' blue: ', blue);
+        console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ' (typeof blue));
+
         if (isNaN(red) || isNaN(green) || isNaN(blue)) {
             throw new Error(`Invalid RGB values from HSL: R=${red}, G=${green}, B=${blue}`);
         }
 
+        console.log('execution of hslToRGB complete');
+
         return { red, green, blue };
     } catch (error) {
         console.error(`Error converting HSL to RGB: ${error}`);
+
+        console.log('execution of hslToRGB complete');
         
         // Return black for invalid inputs
         return { red: 0, green: 0, blue: 0 };
@@ -88,6 +111,10 @@ function hslToRGB(hue, saturation, lightness) {
 
 // Convert HSV to RGB
 function hsvToRGB(hue, saturation, value) {
+    console.log('executing hsvToRGB');
+    console.log('hue: ', hue, ' saturation: ', saturation, ' value: ', value);
+    console.log('types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' value: ', (typeof value));
+
     try {
         console.log(`Converting HSV to RGB: H=${hue}, S=${saturation}, V=${value}`);
         saturation /= 100;
@@ -114,14 +141,21 @@ function hsvToRGB(hue, saturation, value) {
         green = Math.round(green * 255);
         blue = Math.round(blue * 255);
 
+        console.log('red: ', red, ' green: ', green, ' blue: ', blue);
+        console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ' (typeof blue));
+
         if (isNaN(red) || isNaN(green) || isNaN(blue)) {
             throw new Error(`Invalid RGB values from HSV: R=${red}, G=${green}, B=${blue}`);
         }
+
+        console.log('execution of hsvToRGB complete; returning { red, green, blue }');
 
         return { red, green, blue };
     } catch (error) {
         console.error(`Error converting HSV to RGB: ${error}`);
         
+        console.log('execution of hsvToRGB complete; returning { red: 0, green: 0, blue: 0 }');
+
         // Return black for invalid inputs
         return { red: 0, green: 0, blue: 0 };
     }
@@ -130,8 +164,13 @@ function hsvToRGB(hue, saturation, value) {
 
 // Convert CMYK to RGB
 function cmykToRGB(cyan, magenta, yellow, key) {
+    console.log('executing cmykToRGB');
+    console.log('cyan: ', cyan, ' magenta: ', magenta, ' yellow: ', yellow, ' key: ', key);
+    console.log('types - cyan: ', (typeof cyan), ' magenta: ', (typeof magenta), ' yellow: ', (typeof yellow), ' key: ', (typeof key));
+
     try {
         console.log(`Converting CMYK to RGB: C=${cyan}, M=${magenta}, Y=${yellow}, K=${key}`);
+
         const red = 255 * (1 - cyan / 100) * (1 - key / 100);
         const green = 255 * (1 - magenta / 100) * (1 - key / 100);
         const blue = 255 * (1 - yellow / 100) * (1 - key / 100);
@@ -140,13 +179,21 @@ function cmykToRGB(cyan, magenta, yellow, key) {
             throw new Error(`Invalid RGB values from CMYK: R=${red}, G=${green}, B=${blue}`);
         }
 
-        return {
-            red: Math.round(red),
-            green: Math.round(green),
-            blue: Math.round(blue)
-        };
+        red = Math.round(red);
+        green = Math.round(green);
+        blue = Math.round(blue);
+
+        console.log('red: ', red, ' green: ', green, ' blue: ', blue);
+        console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ' (typeof blue));
+
+        console.log('execution of cmykToRGB complete; returning { red, green, blue }');
+
+        return { red, green, blue };
+
     } catch (error) {
         console.error(`Error converting CMYK to RGB: ${error}`);
+
+        console.log('execution of cmykToRGB complete; returning { red: 0, green: 0, blue: 0 }');
         
         // Return black for invalid inputs
         return { red: 0, green: 0, blue: 0 };
@@ -156,6 +203,10 @@ function cmykToRGB(cyan, magenta, yellow, key) {
 
 // Convert XYZ to RGB
 function xyzToRGB(x, y, z) {
+    console.log('executing xyzToRGB');
+    console.log('x: ', x, ' y: ', y, ' z: ', z);
+    console.log('types')
+
     try {
         console.log(`Converting XYZ to RGB: X=${x}, Y=${y}, Z=${z}`);
         x = x / 100;
@@ -178,14 +229,20 @@ function xyzToRGB(x, y, z) {
         green = Math.round(green * 255);
         blue = Math.round(blue * 255);
 
+        console.log('red: ', red, ' green: ', green, ' blue: ', blue);
+        console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ' (typeof blue));
+
         if (isNaN(red) || isNaN(green) || isNaN(blue)) {
             throw new Error(`Invalid RGB values from XYZ: R=${red}, G=${green}, B=${blue}`);
         }
+
+        console.log('execution of xyzToRGB complete; returning { red, green, blue }')
 
         return { red, green, blue };
     } catch (error) {
         console.error(`Error converting XYZ to RGB: ${error}`);
         
+        console.log('execution of xyzToRGB complete; returning { red: 0, green: 0, blue: 0');
         // Return black for invalid inputs
         return { red: 0, green: 0, blue: 0 };
     }
@@ -194,15 +251,25 @@ function xyzToRGB(x, y, z) {
 
 // Convert Lab to RGB
 function labToRGB(l, a, b) {
+    console.log('executing labToRGB');
+    console.log('l: ', l, ' a: ', a, ' b: ', b);
+    console.log('types - l: ', (typeof l), ' a: ', (typeof a), ' b: ', (typeof b));
+
     try {
         console.log(`Converting Lab to RGB: L=${l}, A=${a}, B=${b}`);
+        console.log('calling labToXYZ');
         const xyz = labToXYZ(l, a, b);
         console.log(`Converted XYZ from Lab: ${JSON.stringify(xyz)}`);
+        console.log('xyz: ', xyz, ' type: ', (typeof xyz));
+
+        console.log('execution of labToRGB complete; will return the result of calling xyzToRGB');
 
         return xyzToRGB(xyz.x, xyz.y, xyz.z);
     } catch (error) {
         console.error(`Error converting Lab to RGB: ${error}`);
         
+        console.log('execution of labToRGB complete; returning { red: 0, green: 0, blue: 0');
+
         // Return black for invalid inputs
         return { red: 0, green: 0, blue: 0 };
     }

@@ -8,6 +8,10 @@
 
 // Convert RGB to XYZ
 function rgbToXYZ(red, green, blue) {
+    console.log('executing rgbToXYZ');
+    console.log('red: ', red, ' green: ', green, ' blue: ', blue);
+    console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ', (typeof blue));
+    
     try {
         console.log(`Converting RGB to XYZ: R=${red}, G=${green}, B=${blue}`);
 
@@ -31,12 +35,20 @@ function rgbToXYZ(red, green, blue) {
         const y = red * 0.2126 + green * 0.7152 + blue * 0.0722;
         const z = red * 0.0193 + green * 0.1192 + blue * 0.9505;
 
+        console.log('x: ', x, ' y: ', y, ' z: ', z);
+        console.log('types - x: ', (typeof x), ' y: ', (typeof y), ' z: ', (typeof z));
+
         const xyz = { x, y, z };
+
         console.log(`Converted XYZ from RGB: ${JSON.stringify(xyz)}`);
+        console.log('xyz:, ', xyz, ' type: ', (typeof xyz));
+        console.log('execution of rgbToXYZ complete; returning xyz as { x, y, z }');
 
         return xyz;
     } catch (error) {
         console.error(`Error converting RGB to XYZ: ${error}`);
+
+        console.log('execution of rgbToXYZ complete; returning { x: 0, y: 0, z: 0 }');
 
         // Return black for invalid inputs
         return { x: 0, y: 0, z: 0 }; 
@@ -46,6 +58,10 @@ function rgbToXYZ(red, green, blue) {
 
 // Convert Lab to XYZ
 function labToXYZ(l, a, b) {
+    console.log('executing labToXYZ');
+    console.log('l: ', l, ' a: ', a, ' b: ', b);
+    console.log('types - l: ', (typeof l), ' a: ', (typeof a), ' b: ', (typeof b));
+
     try {
         console.log(`Converting Lab to XYZ: L=${l}, A=${a}, B=${b}`);
 
@@ -64,13 +80,21 @@ function labToXYZ(l, a, b) {
         x = refX * (pow(x, 3) > 0.008856 ? pow(x, 3) : (x - 16 / 116) / 7.787);
         y = refY * (pow(y, 3) > 0.008856 ? pow(y, 3) : (y - 16 / 116) / 7.787);
         z = refZ * (pow(z, 3) > 0.008856 ? pow(z, 3) : (z - 16 / 116) / 7.787);
+        
+        console.log('x: ', x, ' y: ', y, ' z: ', z);
+        console.log('types - x: ', (typeof x), ' y: ', (typeof y), ' z: ', (typeof z));
 
         const xyz = { x, y, z };
+
         console.log(`Converted XYZ from Lab: ${JSON.stringify(xyz)}`);
+        console.log('xyz:, ', xyz, ' type: ', (typeof xyz));
+        console.log('execution of labToXYZ complete; returning xyz as { x, y, z }');
         
         return xyz;
     } catch (error) {
         console.error(`Error converting Lab to XYZ: ${error}`);
+
+        console.log('execution of labToXYZ complete; returning { x: 0, y: 0, z: 0');
         
         // Return black for invalid inputs
         return { x: 0, y: 0, z: 0 }; 

@@ -22,26 +22,36 @@ function attachDragAndDropEventListeners(element) {
 
 // Drag and Drop - 1st function
 function handleDragStart(e) {
+    console.log('executing handleDragStart(e)');
+
     dragSrcEl = this;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.outerHTML);
     this.classList.add('dragging');
+
+    console.log('execution of handleDragStart(e) complete');
 }
 
 
 // Drag and Drop - 2nd function
 function handleDragOver(e) {
+    console.log('executing handleDragOver(e)');
+
     if (e.preventDefault) {
         e.preventDefault();
     }
 
     e.dataTransfer.dropEffect = 'move';
+
+    console.log('execution of handleDragOver(e) complete');
     return false;
 }
 
 
 // Drag and Drop - 3rd function
 function handleDrop(e) {
+    console.log('executing handleDrop(e)');
+    
     if (e.stopPropagation) {
         e.stopPropagation();
     }
@@ -66,19 +76,27 @@ function handleDrop(e) {
         newDragSrcEl.querySelector('.color-text-output-box').value = dropTargetText;
         newDropTargetEl.querySelector('.color-text-output-box').value = dragSrcText;
 
+        console.log('calling attachEventListeners 2x, once each for parameters newDragSrcEl and newDropTargetEl');
+
         attachEventListeners(newDragSrcEl);
         attachEventListeners(newDropTargetEl);
     }
+
+    console.log('execution of handleDrop(e) complete');
     return false;
 }
 
 
 // Drag and Drop - 4th function
 function handleDragEnd(e) {
+    console.log('executing handleDragEnd(e)');
+
     this.classList.remove('dragging');
     document.querySelectorAll('.color-stripe').forEach((el) => {
         el.classList.remove('dragging');
     });
+
+    console.log('execution of handleDragEnd(e) complete');
 }
 
 

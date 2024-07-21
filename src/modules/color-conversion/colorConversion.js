@@ -64,6 +64,9 @@ const conversionMap = {
 // When a conversion button is clicked, this will pull the color space type for that color and repopulate color-text-output-box with it
 // Previous conversion function actually tried to convert them again. But conversion takes place with palette generation and are stored as an oject
 function convertColors(targetFormat) {
+    console.log('executing convertColors');
+    console.log('targetFormat: ', targetFormat, ' data type: ', (typeof targetFormat));
+
     const colorTextOutputBoxes = document.querySelectorAll('.color-text-output-box');
 
     colorTextOutputBoxes.forEach(box => {
@@ -85,124 +88,155 @@ function convertColors(targetFormat) {
 
         box.value = newColor; // Changed from .textContent. Apparently this works better for input elements. Need to read more about that later
         box.setAttribute('data-format', targetFormat);
+
+        console.log('execution of convertColos complete');
     });
 }
 
 
 // Generate values for all 6 color spaces for all swatches when a palette is generated, stores as an object (I think?)
 function generateAndStoreColorValues(color, initialColorSpace) {
-    const colorValues = {};
+    console.log('executing generateAndStoreColorValues');
+    console.log('color: ', color, ' data type: ', (typeof color));
+    console.log('initialColorSpace: ', initialColorSpace, ' data type: ', (typeof initialColorSpace));
+    
+    let colorValues = {};
+    let hslColor;
 
-    console.log(`Generating and storing color values for: ${JSON.stringify(color)}, initialColorSpace: ${initialColorSpace}`);
+    if (color.format === 'hex') {
+        console.log('calling hexToHSL');
+        hslColor = hexToHSL(color.value);
+    } else if (color.format === 'rgb') {
+        console.log('calling rgbToHSL');
+        hslColor = rgbToHSL(color.value);
+    } else if (color.format === 'hsl') {
+        hslColor = parseHSL(color.value);
+    } else if (color.format === 'hsv') {
+        console.log('calling hslToHSV');
+        hslColor = hslToHSV(color.value);
+    } else if (color.format === 'cmyk') {
+        console.log('calling cmykToHSL');
+        hslColor = cmykToHSL(color.value);
+    } else if (color.format === 'lab') {
+        console.log('calling labToHSL')
+        hslColor = labToHSL(color.value);
+    } else {
+        console.error('ERROR: unsupported color format: ', color.format);
+        return;
+    }
 
+    console.log('generated HSL color: ', hslColor);
 
     switch (initialColorSpace) {
         case 'hex':
-            const hslFromHex = hexToHSL(color);
-            colorValues.hsl = `hsl(${hslFromHex.hue}, ${hslFromHex.saturation}%, ${hslFromHex.lightness}%)`;
-            colorValues.rgb = hexToRGB(color);
-            colorValues.hsv = hexToHSV(color);
-            colorValues.cmyk = hexToCMYK(color);
-            colorValues.lab = hexToLab(color);
-            colorValues.hex = color;
+            colorValues = {
+                hex: color.value,
+                rgb: hexToRGB(color.value),
+                hsl: hslColor,
+                hsv: hexToHSV(color.value),
+                cmyk: hexToCMYK(color.value),
+                lab: hexToLab(color.value),
+            };
             break;
         case 'rgb':
-            const hslFromRGB = rgbToHSL(color.red, color.green, color.blue);
-            colorValues.hsl = `hsl(${hslFromRGB.hue}, ${hslFromRGB.saturation}%, ${hslFromRGB.lightness}%)`;
-            colorValues.rgb = `rgb(${color.red}, ${color.green}, ${color.blue})`;
-            colorValues.hex = rgbToHex(color.red, color.green, color.blue);
-            colorValues.hsv = rgbToHSV(color.red, color.green, color.blue);
-            colorValues.cmyk = rgbToCMYK(color.red, color.green, color.blue);
-            colorValues.lab = rgbToLab(color.red, color.green, color.blue);
+            colorValues = {
+                hex: rgbToHex(color.value),
+                rgb: color.value,
+                hsl: hslColor,
+                hsv: rgbToHSV(color.value),
+                cmyk: rgbToCMYK(color.value),
+                lab: rgbToLab(color.value),
+            };
             break;
         case 'hsl':
-            const rgbFromHSL = hslToRGB(color.hue, color.saturation, color.lightness);
-            colorValues.hsl = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
-            colorValues.rgb = `rgb(${rgbFromHSL.red}, ${rgbFromHSL.green}, ${rgbFromHSL.blue})`;
-            colorValues.hex = hslToHex(color.hue, color.saturation, color.lightness);
-            colorValues.hsv = hslToHSV(color.hue, color.saturation, color.lightness);
-            colorValues.cmyk = hslToCMYK(color.hue, color.saturation, color.lightness);
-            colorValues.lab = hslToLab(color.hue, color.saturation, color.lightness);
-            break;
-        case 'hsv':
-            const hslFromHSV = hsvToHSL(color.hue, color.saturation, color.value);
-            colorValues.hsl = `hsl(${hslFromHSV.hue}, ${hslFromHSV.saturation}%, ${hslFromHSV.lightness}%)`;
-            colorValues.rgb = hsvToRGB(color.hue, color.saturation, color.value);
-            colorValues.hex = hsvToHex(color.hue, color.saturation, color.value);
-            colorValues.hsv = `hsv(${color.hue}, ${color.saturation}%, ${color.value}%)`;
-            colorValues.cmyk = hsvToCMYK(color.hue, color.saturation, color.value);
-            colorValues.lab = hsvToLab(color.hue, color.saturation, color.value);
-            break;
-        case 'cmyk':
-            const hslFromCMYK = cmykToHSL(color.cyan, color.magenta, color.yellow, color.black);
-            colorValues.hsl = `hsl(${hslFromCMYK.hue}, ${hslFromCMYK.saturation}%, ${hslFromCMYK.lightness}%)`;
-            colorValues.rgb = cmykToRGB(color.cyan, color.magenta, color.yellow, color.black);
-            colorValues.hex = cmykToHex(color.cyan, color.magenta, color.yellow, color.black);
-            colorValues.hsv = cmykToHSV(color.cyan, color.magenta, color.yellow, color.black);
-            colorValues.cmyk = `cmyk(${color.cyan}%, ${color.magenta}%, ${color.yellow}%, ${color.black}%)`;
-            colorValues.lab = cmykToLab(color.cyan, color.magenta, color.yellow, color.black);
-            break;
-        case 'lab':
-            const hslFromLab = labToHSL(color.l, color.a, color.b);
-            colorValues.hsl = `hsl(${hslFromLab.hue}, ${hslFromLab.saturation}%, ${hslFromLab.lightness}%)`;
-            colorValues.rgb = labToRGB(color.l, color.a, color.b);
-            colorValues.hex = labToHex(color.l, color.a, color.b);
-            colorValues.hsv = labToHSV(color.l, color.a, color.b);
-            colorValues.cmyk = labToCMYK(color.l, color.a, color.b);
-            colorValues.lab = `lab(${color.l}, ${color.a}, ${color.b})`;
+            colorValues = {
+                hex: hslToHex(hslColor),
+                rgb: hslToRGB(hslColor),
+                hsl: hslColor,
+                hsv: hslToHSV(hslColor),
+                cmyk: hslToCMYK(hslColor),
+                lab: hslToLab(hslColor),
+            };
             break;
         default:
-            const defaultHSL = hslToRGB(color.hue, color.saturation, color.lightness);
-            colorValues.hsl = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
-            colorValues.rgb = `rgb(${defaultHSL.red}, ${defaultHSL.green}, ${defaultHSL.blue})`;
-            colorValues.hex = hslToHex(color.hue, color.saturation, color.lightness);
-            colorValues.hsv = hslToHSV(color.hue, color.saturation, color.lightness);
-            colorValues.cmyk = hslToCMYK(color.hue, color.saturation, color.lightness);
-            colorValues.lab = hslToLab(color.hue, color.saturation, color.lightness);
+            console.log('executing initialColorSpace switch expression for DEFAULT CASE');
+            colorValues = {
+                hex: hslToHex(hslColor),
+                rgb: hslToRGB(hslColor),
+                hsl: hslColor,
+                hsv: hslToHSV(hslColor),
+                cmyk: hslToCMYK(hslColor),
+                lab: hslToLab(hslColor),
+            };
+            break;
     }
 
-    console.log(`Generated and stored color values: ${JSON.stringify(colorValues)}`);
+    console.log('initialColorSpace switch expression completed for generateAndStoreColorValues');
+    console.log('generated color values: ', colorValues);
+    console.log('colorValues: ', colorValues, ' data type: ', (typeof colorValues));
+
+    console.log('execution of generateAndStoreColorValues complete');
 
     return colorValues;
 }
 
 
 function adjustSaturationAndLightness(color, limitGrayAndBlack, limitLight, initialColorSpace) {
+    console.log('executing adjustSaturationAndLightness');
+    console.log(`color: ${color}, limitGrayAndBlack: ${limitGrayAndBlack}, limitLight: ${limitLight}, initialColorSpace: ${initialColorSpace}`);
+    console.log('types - color: ', (typeof color), ' limitGrayAndBlack: ', (typeof limitGrayAndBlack), ' limitLight ', (typeof limitLight), ' initialColorSpace: ', (typeof initialColorSpace));
+
     let hslColor;
 
     // convert the input color to HSL
     switch (initialColorSpace) {
         case 'hex':
+            console.log('calling hexToHSL');
             hslColor = hexToHSL(color);
+            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         case 'rgb':
+            console.log('calling rgbToHSL');
             hslColor = rgbToHSL(color.red, color.green, color.blue);
+            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         case 'hsl':
             hslColor = color;
+            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         case 'hsv':
+            console.log('calling hsvToHSL');
             hslColor = hsvToHSL(color.hue, color.saturation, color.value);
+            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         case 'cmyk':
+            console.log('calling cmykToHSL');
             hslColor = cmykToHSL(color.cyan, color.magenta, color.yellow, color.black);
+            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         case 'lab':
+            console.log('calling labToHSL');
             hslColor = labToHSL(color.l, color.a, color.b);
+            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         default:
             hslColor = color;
+            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
     }
+    console.log('initialColorSpace switch expression completed for adjustSaturationAndLightness');
 
     // Apply limitGrayAndBlack and limitLight, if applicable
     if (limitGrayAndBlack) {
+        console.log('calling applyLimitGrayAndBlack');
         ({ saturation: hslColor.saturation, lightness: hslColor.lightness } = applyLimitGrayAndBlack(hslColor.saturation, hslColor.lightness));
     }
 
     if (limitLight) {
+        console.log('calling applyLimitLight');
         hslColor.lightness = applyLimitLight(hslColor.lightness);
     }
 
+    console.log('execution of adjustSaturationAndLightness complete');
     return hslColor;
 }
 

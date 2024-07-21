@@ -33,44 +33,47 @@ function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, c
     }
 
     console.log('generatePalette() initialColorSpace switch expression complete');
-    console.log('baseColor:', baseColor, 'data type:', typeof baseColor);
+    console.log('baseColor: ', baseColor, ' type: ', (typeof baseColor));
 
+    if (!baseColor.value) {
+        switch (initialColorSpace) {
+            case 'hex':
+                console.log('calling randomHex from within generatePalette');
+                baseColor.value = randomHex(limitGrayAndBlack, limitLight);
+                console.log('baseColor.value: ', baseColor.value, ' type: ', (typeof baseColor.value));
+                break;
+            case 'rgb':
+                console.log('calling randomRGB from within generatePalette');
+                baseColor.value = randomRGB(limitGrayAndBlack, limitLight);
+                console.log('baseColor.value: ', baseColor.value, ' type: ', (typeof baseColor.value));
+                break;
+            case 'hsl':
+                console.log('calling randomHSL from within generatePalette');
+                baseColor.value = randomHSL(limitGrayAndBlack, limitLight);
+                console.log('baseColor.value: ', baseColor.value, ' type: ', (typeof baseColor.value));
+                break;
+            case 'hsv':
+                console.log('calling randomHSV from within generatePalette');
+                baseColor.value = randomHSV(limitGrayAndBlack, limitLight);
+                console.log('baseColor.value: ', baseColor.value, ' type: ', (typeof baseColor.value));
+                break;
+            case 'cmyk':
+                console.log('calling randomCMYK from within generatePalette');
+                baseColor.value = randomCMYK(limitGrayAndBlack, limitLight);
+                console.log('baseColor.value: ', baseColor.value, ' type: ', (typeof baseColor.value));
+                break;
+            case 'lab':
+                console.log('calling randomLab from within generatePalette');
+                baseColor.value = randomLab(limitGrayAndBlack, limitLight);
+                console.log('baseColor.value: ', baseColor.value, ' type: ', (typeof baseColor.value));
+                break;
+            default:
+                console.log('DEFAULT CASE - calling randomHex from within generatePalette');
+                baseColor.value = randomHex(limitGrayAndBlack, limitLight);
+                console.log('baseColor.value: ', baseColor.value, ' type: ', (typeof baseColor.value));
+        }
 
-    switch (initialColorSpace) {
-        case 'hex':
-            console.log('calling randomHex from within generatePalette');
-            baseColor = customColor || randomHex(limitGrayAndBlack, limitLight);
-            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
-            break;
-        case 'rgb':
-            console.log('calling randomRGB from within generatePalette');
-            baseColor = customColor || randomRGB(limitGrayAndBlack, limitLight);
-            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
-            break;
-        case 'hsl':
-            console.log('calling randomHSL from within generatePalette');
-            baseColor = customColor || randomHSL(limitGrayAndBlack, limitLight);
-            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
-            break;
-        case 'hsv':
-            console.log('calling randomHSV from within generatePalette');
-            baseColor = customColor || randomHSV(limitGrayAndBlack, limitLight);
-            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
-            break;
-        case 'cmyk':
-            console.log('calling randomCMYK from within generatePalette');
-            baseColor = customColor || randomCMYK(limitGrayAndBlack, limitLight);
-            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
-            break;
-        case 'lab':
-            console.log('calling randomLab from within generatePalette');
-            baseColor = customColor || randomLab(limitGrayAndBlack, limitLight);
-            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
-            break;
-        default:
-            console.log('DEFAULT CASE - calling randomHex from within generatePalette');
-            baseColor = customColor || randomHex(limitGrayAndBlack, limitLight);
-            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
+        console.log ('baseColor.value: ', baseColor.value);
     }
 
     console.log('generatePalette initialColorSpace switch expression complete');
@@ -79,7 +82,7 @@ function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, c
     switch (paletteType) {
         case 1:
             console.log('calling generateRandomColorPalette');
-            colors = generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor);
+            colors = generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace);
             console.log('colors: ', colors, ' data type: ', (typeof colors));
             break;
         case 2:
@@ -129,6 +132,11 @@ function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, c
 
     console.log('paletteType switch expression complete for generatePalette function');
 
+    if (!colors) {
+        console.error('ERROR - ending generatePalette execution (cannot determine color scheme');
+        return;
+    }
+
     // Error logging if the colors array is malformed
     if (!colors || colors.length === 0) {
         console.error('colors array is empty or undefined');
@@ -136,6 +144,7 @@ function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, c
 
     console.log('colors: ', colors, ' data type: ', (typeof colors));
     console.log('numBoxes: ', numBoxes, ' data type: ', (typeof numBoxes));
+
     console.log('generatePalette execution complete; calling generatePaletteBox');
 
     generatePaletteBox(colors, numBoxes);

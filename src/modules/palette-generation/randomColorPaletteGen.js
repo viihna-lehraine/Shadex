@@ -64,7 +64,7 @@ function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, cus
         colors.push(color);
     }
 
-    console.log('generated random color palette :', colors);
+    console.log('generated random color palette : ', colors);
     console.log('execution complete for generateRandomColorPalette');
     return colors;
 }

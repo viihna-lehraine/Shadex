@@ -25,6 +25,8 @@ let customColor = null;
 
 // App Initialization - applies all event listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM content loaded. Initializing application');
+    
     const generateButton = document.getElementById('generate-button');
     const saturateButton = document.getElementById('saturate-button');
     const desaturateButton = document.getElementById('desaturate-button');
@@ -36,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedColorOptions = document.getElementById('selected-color-options');
     let selectedColor = parseInt(selectedColorOptions.value, 10);
 
-    // Add event listeners for conversion buttons
+    // Conversion Button event listeners
     document.getElementById('hex-conversion-button').addEventListener('click', () => convertColors('hex'));
     document.getElementById('rgb-conversion-button').addEventListener('click', () => convertColors('rgb'));
     document.getElementById('hsv-conversion-button').addEventListener('click', () => convertColors('hsv'));
@@ -44,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cmyk-conversion-button').addEventListener('click', () => convertColors('cmyk'));
     document.getElementById('lab-conversion-button').addEventListener('click', () => convertColors('lab'));
 
-    // Generate Button click event
+    // Generate Button event listener
     generateButton.addEventListener('click', function(e) {
         e.preventDefault();
         const paletteType = parseInt(document.getElementById('palette-type-options').value);
@@ -67,28 +69,28 @@ document.addEventListener('DOMContentLoaded', () => {
         generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace);
     });
     
-    // Saturate Button Click Event
+    // Saturate Button event listener
     saturateButton.addEventListener('click', function(e) {
         e.preventDefault();
         console.log('calling saturateColor');
         saturateColor(selectedColor);
     });
     
-    // Desaturate Button Click Event
+    // Desaturate Button event listener
     desaturateButton.addEventListener('click', function(e) {
         e.preventDefault();
         console.log('calling desaturateColor');
         desaturateColor(selectedColor);
     });
 
-    // Popup Div Button click event
+    // Popup Div Button event litener
     popupDivButton.addEventListener('click', function(e) {
         e.preventDefault();
         console.log('calling showCustomColorPopupDiv');
         showCustomColorPopupDiv();
     });
 
-    // Apply Color Button click event
+    // Apply Color Button event listener
     applyColorButton.addEventListener('click', function(e) {
         e.preventDefault();
         console.log('calling applyCustomColor');
@@ -98,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showCustomColorPopupDiv();
     });
 
-    // Clear Color Button click event
+    // Clear Color Button event listener
     clearColorButton.addEventListener('click', function(e) {
         e.preventDefault();
         customColor = null;
@@ -106,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showCustomColorPopupDiv();
     });
 
-    // Advanced Menu Toggle Button click event
+    // Advanced Menu Toggle Button event listener
     advancedMenuToggleButton.addEventListener('click', function(e) {
         e.preventDefault();
         let advancedMenu = document.getElementById('advanced-menu');
@@ -120,10 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Advanced Menu - Apply Initial Color Space Button click event
+    // Advanced Menu - Apply Initial Color Space Button event listener
     applyInitialColorSpaceButton.addEventListener('click', function(e) {
         e.preventDefault();
         let initialColorSpace = document.getElementById('initial-color-space-options').value;
+        // function does not yet exist
     //    applyInitialColorSpace(initialColorSpace);
     });
 });
