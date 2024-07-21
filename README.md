@@ -5,7 +5,7 @@
 ColorGen is a web-based color palette generator. It produces 8 varieties of color scheme and can convert between 6 color formats.
 
 ### NOTE
-For regular use, please select the main branch. As stated above, this version as it currently exists is not intended for normal use.
+For regular use, please select the main branch. This version as it currently exists is not intended for normal use.
 
 *** 
 
