@@ -26,7 +26,7 @@ function randomHex(limitGrayAndBlack, limitLight) {
 
     return {
         format: 'hex',
-        value: '#' + hexCodeArray.join('').toUpperCase()
+        value: '#' + hexCodeArray.join('')
     };
 }
 
@@ -52,15 +52,15 @@ function randomHSL(limitGrayAndBlack, limitLight) {
 
     if (limitGrayAndBlack) {
         ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
-        console.log(`Limited Gray and Black for HSL: S=${saturation}, L=${lightness}`);
+        console.log(`Limited Gray and Black for Random HSL: S=${saturation}%, L=${lightness}}`);
     }
 
     if (limitLight) {
         lightness = applyLimitLight(lightness);
-        console.log(`Limited Lightness for HSL: L=${lightness}`);
+        console.log(`Limited Lightness for Random HSL: L=${lightness}%`);
     }
 
-    console.log(`Generated HSL: H=${hue}, S=${saturation}, L=${lightness}`);
+    console.log(`Generated Random HSL: hsl(${hue}, ${saturation}%, ${lightness}%)`);
 
     return {
         format: 'hsl',

@@ -13,6 +13,12 @@ import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab } fro
 
 // Generate complementary palette
 function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor = null, initialColorSpace) {
+
+    console.log('generateComplementaryPalette() execution starting');
+
+    let generateComplementaryPaletteParameters = [ numBoxes, limitGrayAndBlack, limitLight, baseColor, initialColorSpace ];
+    console.log(generateComplementaryPaletteParameters);
+
     if (numBoxes < 2) {
         window.alert('To generate a complementary palette, please select a number of swatches greater than 1');
         return;
@@ -26,38 +32,53 @@ function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, b
     } else {
         switch (initialColorSpace) {
             case 'hex':
+                console.log('calling generateAndStoreColorValues(randomHex()');
                 color = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             case 'rgb':
+                console.log('calling generateAndStoreColorValues(randomRGB()');
                 color = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             case 'hsl':
+                console.log('calling generateAndStoreColorValues(randomHSL()');
                 color = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             case 'hsv':
+                console.log('calling generateAndStoreColorValues(randomHSV()');
                 color = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             case 'cmyk':
+                console.log('calling generateAndStoreColorValues(randomCMYK()');
                 color = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             case 'lab':
+                console.log('calling generateAndStoreColorValues(randomLab()');
                 color = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             default:
+                // needs adjustment
+                console.log('calling generateAndStoreColorValues(randomHSL()');
                 color = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
         }
+
+        console.log('1st initialColorSpace switch expression for generateComplementaryPalette complete');
     }
 
     const complementaryHue = (color.hsl.hue + 180) % 360;
     colors.push(color);
 
     for (let i = 2; i <= numBoxes; i++) {
+
+        console.log('calling adjustSaturationAndLightness()');
         let complementarySatAndLightness = adjustSaturationAndLightness({
             hue: complementaryHue,
             saturation: color.hsl.saturation,
             lightness: color.hsl.lightness,
         }, 'hsl', limitGrayAndBlack, limitLight);
+        console.log(complementarySatAndLightness);
 
+
+        console.log('calling generateAndStoreColorValues()');
         let complementaryColor = generateAndStoreColorValues(complementarySatAndLightness, 'hsl');
         colors.push(complementaryColor);
 
@@ -87,10 +108,14 @@ function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, b
                 default:
                     colorString = complementaryColor.hsl;
             }
+            console.log('2nd initialColorSpace switch expression for generateComplementaryPalette complete');
             colorBox.style.backgroundColor = colorString;
+            console.log('calling populateColorTextOutputBox(complementaryColor, i)');
             populateColorTextOutputBox(complementaryColor, i);
         }
     }
+
+    console.log('generateComplementaryPalette() execution complete');
     return colors;
 }
 

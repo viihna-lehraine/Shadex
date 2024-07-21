@@ -14,18 +14,26 @@ import { generateAndStoreColorValues } from '../color-conversion/index.js';
 
 // Generate triadic hues
 function generateTriadicHues(baseHue) {
+    console.log('executing generateTriadicHues');
+    console.log('baseHue: ', baseHue);
+
     const triadicHues = [];
     const increments = [120, 240];
 
     increments.forEach(increment => {
         triadicHues.push((baseHue + increment) % 360);
     });
+
+    console.log('triadicHues: ', triadicHues);
     return triadicHues;
 }
 
 
 // Generate triadic palette
 function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
+    console.log('executing generateTriadicColorPalette');
+    console.log(`numBoxes: ${numBoxes}, limitGrayAndBlack: ${limitGrayAndBlack}, limitLight: ${limitLight}, customColor: ${customColor}, initialColorSpace: ${initialColorSpace}`);
+
     if (numBoxes < 3) {
         window.alert('To generate a triadic palette, please select a number of swatches greater than 2');
         return [];
@@ -36,7 +44,9 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
 
     // Generate the base color using the initial color space
     if (customColor !== null && customColor !== undefined) {
+        console.log('calling generateAndStoreColorValues to define baseColor');
         baseColor = generateAndStoreColorValues(customColor, initialColorSpace);
+        console.log('baseColor: ', baseColor);
     } else {
         switch (initialColorSpace) {
             case 'hex':
@@ -60,9 +70,13 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
             default:
                 baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
         }
+        
+        console.log('initialColorSpace switch expression complete for generateTriadicPalette');
     }
 
+    console.log('calling generateTriadicHues');
     const triadicHues = generateTriadicHues(baseColor.hue);
+    console.log('triadicHues: ', triadicHues);
 
     // First color is the base color (randomized or customColor)
     colors.push(baseColor);
@@ -70,14 +84,20 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
     // Generate main triadic colors (colors 2-3, i = 1 || 2)
     for (let i = 0; i < 2; i++) {
         const hue = triadicHues[i];
+        console.log('calling randomSL');
         let { saturation, lightness } = randomSL(limitGrayAndBlack, limitLight);
         if (limitGrayAndBlack) {
+            console.log('calling applyLimitGrayAndBlack');
             ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
         }
         if (limitLight) {
+            console.log('calling applyLimitLight');
             lightness = applyLimitLight(lightness);
         }
+
+        console.log('calling generateAndStoreColorValues to define const color');
         const color = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        console.log(`triadic colors; color #${i}: ${color}`);
         colors.push(color);
     }
 
@@ -86,6 +106,7 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
         const baseColorIndex = Math.floor(Math.random() * 3); // Randomly select one of the first three colors
         const baseHue = colors[baseColorIndex].hue;
         const hue = (baseHue + Math.floor(Math.random() * 11) - 5 + 360) % 360; // Generate hue within ±5 of baseHue
+        console.log('calling randomSL');
         let { saturation, lightness } = randomSL(limitGrayAndBlack, limitLight);
         let isValid = false;
         let attempts = 0;
@@ -110,13 +131,16 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
 
             // Ensure limitGrayAndBlack and limitLight are still acting as additional limits
             if (limitGrayAndBlack) {
+                console.log('calling applyLimitGrayAndBlack');
                 ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
             }
             if (limitLight) {
+                console.log('calling applyLimitLight');
                 lightness = applyLimitLight(lightness);
             }
 
             if (Math.abs(saturation - baseColor.saturation) < 10 || Math.abs(lightness - baseColor.lightness) < 10) {
+                console.log('calling randomSL');
                 const newSL = randomSL(limitGrayAndBlack, limitLight);
                 saturation = newSL.saturation;
                 lightness = newSL.lightness;
@@ -135,50 +159,62 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
             if (saturation > 100) {
                 saturation = 100;
                 if (limitGrayAndBlack) {
+                    console.log('calling applyLimitGrayAndBlack');
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
+                    console.log('calling applyLimitLight');
                     lightness = applyLimitLight(lightness);
                 }
             }
             if (saturation < 0) {
                 saturation = 0;
                 if (limitGrayAndBlack) {
+                    console.log('calling applyLimitGrayAndBlack');
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
+                    console.log('calling applyLimitLight');
                     lightness = applyLimitLight(lightness);
                 }
             }
             if (lightness > 100) {
                 lightness = 100;
                 if (limitGrayAndBlack) {
+                    console.log('calling applyLimitGrayAndBlack');
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
+                    console.log('calling applyLimitLight');
                     lightness = applyLimitLight(lightness);
                 }
             }
             if (lightness < 0) {
                 lightness = 0;
                 if (limitGrayAndBlack) {
+                    console.log('calling applyLimitGrayAndBlack');
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
+                    console.log('calling applyLimitLight');
                     lightness = applyLimitLight(lightness);
                 }
             }
 
             // Re-apply limits if necessary
             if (limitGrayAndBlack) {
+                console.log('calling applyLimitGrayAndBlack');
                 ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
             }
             if (limitLight) {
+                console.log('calling applyLimitLight');
                 lightness = applyLimitLight(lightness);
             }
         }
 
+        console.log('calling generateAndStoreColorValues to define additionalColor');
         const additionalColor = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        console.log('additionalColor: ', additionalColor);
         colors.push(additionalColor);
     }
 
@@ -186,7 +222,9 @@ function generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, customC
     colors.forEach((color, index) => {
         const colorBox = document.getElementById(`color-box-${index + 1}`);
         if (colorBox) {
+            console.log(`applying background color ${backgroundColor} to color-box #${index + 1}`);
             colorBox.style.backgroundColor = color.hsl;
+            console.log(`calling populateColorTextOutputBox for palette-box #${index + 1}`);
             populateColorTextOutputBox(color, index + 1);
         }
     });

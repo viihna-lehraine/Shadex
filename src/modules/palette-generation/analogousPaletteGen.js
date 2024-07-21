@@ -13,6 +13,11 @@ import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab } fro
 
 // Generate analogous hues
 function generateAnalogousHues(color, numBoxes) {
+
+    console.log('generateAnalogousHues() executing');
+    console.log('color: ', color);
+    console.log('numBoxes: ', numBoxes);
+
     const analogousHues = [];
     const baseHue = color.hue;
     const maxTotalDistance = 60;
@@ -23,12 +28,21 @@ function generateAnalogousHues(color, numBoxes) {
     for (let i = 1; i < numBoxes; i++) {
         analogousHues.push((baseHue + increment * i) % 360);
     }
+
+    console.log('analogousHues array: ', analogousHues);
+    console.log('generateAnalogousHues() execution complete');
+
     return analogousHues;
 }
 
 
 // Generate analogous palette
 function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
+
+    console.log('generateAnalogousPalette() executing');
+    let generateAnalogousPaletteParameters = [ numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace ];
+    console.log(generateAnalogousPaletteParameters);
+
     if (numBoxes < 2) {
         window.alert('To generate an analogous palette, please select a number of swatches greater than 1');
         return;
@@ -106,9 +120,12 @@ function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight, custo
             }
 
             colorBox.style.backgroundColor = colorString;
+            console.log('Calling populateColorTextOutputBox()');
             populateColorTextOutputBox(analogousColor, i + 2);
         }
     }
+
+    console.log('generateAnalogousPalette() execution complete');
 
     return colors;
 }

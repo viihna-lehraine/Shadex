@@ -12,6 +12,9 @@ import { generateAndStoreColorValues } from '../color-conversion/index.js';
 
 
 function generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
+    console.log('executing generateMonochromaticPalette');
+    console.log(`numBoxes: ${numBoxes}, limitGrayAndBlack: ${limitGrayAndBlack}, limitLight: ${limitLight}, customColor: ${customColor}, initialColorSpace: ${initialColorSpace}`);
+
     if (numBoxes < 2) {
         window.alert('To generate a monochromatic palette, please select a number of swatches greater than 1');
         return [];
@@ -22,7 +25,9 @@ function generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight, c
 
     // Generate the base color using the initial color space
     if (customColor !== null && customColor !== undefined) {
+        console.log('calling generateAndStoreColorValues to define baseColor');
         baseColor = generateAndStoreColorValues(customColor, initialColorSpace);
+        console.log('baseColor: ', baseColor);
     } else {
         switch (initialColorSpace) {
             case 'hex':
@@ -46,24 +51,32 @@ function generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight, c
             default:
                 baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
         }
+        console.log('initialColorSpace switch expression complete for generateMonochromaticPalette');
     }
 
     for (let i = 0; i < numBoxes; i++) {
+        console.log('calling randomSL');
         const slValues = randomSL(limitGrayAndBlack, limitLight);
+        console.log('calling generateAndStoreColorValues');
         const monoColor = generateAndStoreColorValues({
             hue: baseColor.hue, // Use the hue from the base color
             saturation: slValues.saturation,
             lightness: slValues.lightness
         }, 'hsl');
+        console.log('monoColor: ', monoColor);
 
         colors.push(monoColor);
 
         const colorBox = document.getElementById(`color-box-${i + 1}`);
         if (colorBox) {
+            console.log(`applying background color ${monoColor.hsl} to color-box #${i + 1}`);
             colorBox.style.backgroundColor = monoColor.hsl;
+            console.log('calling populateColorTextOutputBox');
             populateColorTextOutputBox(monoColor, (i + 1));
         }
     }
+
+    console.log('execution complete for generateMonochromaticPalette');
     return colors;
 }
 

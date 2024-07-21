@@ -14,6 +14,9 @@ import { generateAndStoreColorValues } from '../color-conversion/index.js';
 
 // Generate split complementary hues
 function generateSplitComplementaryHues(baseHue) {
+    console.log('executing generateSplitcomplementaryHues');
+    console.log('baseHue: ', baseHue);
+
     const splitComplementaryHues = [];
     const baseComplementaryHue = (baseHue + 180) % 360;
     const modifier = Math.floor(Math.random() * 11) + 20;
@@ -27,6 +30,9 @@ function generateSplitComplementaryHues(baseHue) {
 
 // Generate split complementary palette
 function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
+    console.log('executing generateSplitcomplementaryPalette');
+    console.log(`numBoxes: ${numBoxes}, limitGrayAndBlack: ${limitGrayAndBlack}, limitLight: ${limitLight}, customColor: ${customColor}, initialColorSpace: ${initialColorSpace}`);
+
     if (numBoxes < 3) {
         window.alert('To generate a split complementary palette, please select a number of swatches greater than 2');
         return [];
@@ -37,34 +43,46 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
 
     // Generate the base color using the initial color space
     if (customColor !== null && customColor !== undefined) {
+        console.log('calling generateAndStoreColorValues to define baseColor');
         baseColor = generateAndStoreColorValues(customColor, initialColorSpace);
+        console.log('baseColor: ', baseColor);
     } else {
         switch (initialColorSpace) {
             case 'hex':
+                console.log('calling generateAndStoreColorValues');
                 baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             case 'rgb':
+                console.log('calling generateAndStoreColorValues');
                 baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             case 'hsl':
+                console.log('calling generateAndStoreColorValues');
                 baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             case 'hsv':
+                console.log('calling generateAndStoreColorValues');
                 baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             case 'cmyk':
+                console.log('calling generateAndStoreColorValues');
                 baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             case 'lab':
+                console.log('calling generateAndStoreColorValues');
                 baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace);
                 break;
             default:
+                console.log('DEFAULT CASE - calling generateAndStoreColorValues');
                 baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
         }
+
+        console.log('initialColorSpace switch expression complete for generateSplitComplementaryPalette');
     }
 
     // Use baseColor.hue to generate split complementary hues
     const splitComplementaryHues = generateSplitComplementaryHues(baseColor.hue);
+    console.log('splitComplementaryHues: ', splitComplementaryHues);
 
     // First color is the base color (randomized or customColor)
     colors.push(baseColor);
@@ -72,11 +90,14 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
     // Generate main split complementary colors (colors 2-3, i = 1 || 2)
     for (let i = 0; i < 2; i++) {
         const hue = splitComplementaryHues[i];
+        console.log('calling randomSL');
         let { saturation, lightness } = randomSL(limitGrayAndBlack, limitLight);
         if (limitGrayAndBlack) {
+            console.log('calling applyLimitGrayAndBlack');
             ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
         }
         if (limitLight) {
+            console.log('calling applyLimitLight');
             lightness = applyLimitLight(lightness);
         }
         const color = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
@@ -88,6 +109,7 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
         const baseColorIndex = Math.floor(Math.random() * 2) + 1; // Randomly select color 2 or 3
         const baseHue = splitComplementaryHues[baseColorIndex - 1]; // Use hues from color 2 or 3
         const hue = (baseHue + Math.floor(Math.random() * 11) - 5 + 360) % 360; // Generate hue within ±5 of baseHue
+        console.log('calling randomSL');
         let { saturation, lightness } = randomSL(limitGrayAndBlack, limitLight);
         let isValid = false;
         let attempts = 0;
@@ -137,36 +159,44 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
             if (saturation > 100) {
                 saturation = 100;
                 if (limitGrayAndBlack) {
+                    console.log('calling applyLimitGrayAndBlack');
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
+                    console.log('calling applyLimitLight');
                     lightness = applyLimitLight(lightness);
                 }
             }
             if (saturation < 0) {
                 saturation = 0;
                 if (limitGrayAndBlack) {
+                    console.log('calling applyLimitGrayAndBlack');
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
+                    console.log('calling applyLimitLight');
                     lightness = applyLimitLight(lightness);
                 }
             }
             if (lightness > 100) {
                 lightness = 100;
                 if (limitGrayAndBlack) {
+                    console.log('calling applyLimitGrayAndBlack');
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
+                    console.log('calling applyLimitLight');
                     lightness = applyLimitLight(lightness);
                 }
             }
             if (lightness < 0) {
                 lightness = 0;
                 if (limitGrayAndBlack) {
+                    console.log('calling applyLimitGrayAndBlack');
                     ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
                 }
                 if (limitLight) {
+                    console.log('calling applyLimitLight');
                     lightness = applyLimitLight(lightness);
                 }
             }
@@ -176,11 +206,13 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
                 ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
             }
             if (limitLight) {
+                console.log('calling applyLimitLight');
                 lightness = applyLimitLight(lightness);
             }
         }
 
         const additionalColor = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        console.log('additionalColor: ', additionalColor);
         colors.push(additionalColor);
     }
 
@@ -188,11 +220,15 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
     colors.forEach((color, index) => {
         const colorBox = document.getElementById(`color-box-${index + 1}`);
         if (colorBox) {
+            console.log(`applying background color ${backgroundColor} for color-box #${index + 1}`);
             colorBox.style.backgroundColor = color.hsl;
+            console.log(`calling populateColorTextOutputBox for palette-box #${index + 1}`);
             populateColorTextOutputBox(color, index + 1);
         }
     });
 
+    console.log('colors: ', colors);
+    console.log('execution complete for generateSplitcomplementaryPalette');
     return colors;
 }
 

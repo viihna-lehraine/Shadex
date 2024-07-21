@@ -11,83 +11,142 @@ import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab } fro
 
 
 // Generate Initial Palette
-function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, initialColorSpace, customColor) {
+function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace) {
+    console.log('executing generatePalette');
+
     let colors = [];
     let baseColor;
 
-    switch (initialColorSpace) {
-        case 'hex':
-            baseColor = customColor || randomHex(limitGrayAndBlack, limitLight);
-            break;
-        case 'rgb':
-            baseColor = customColor || randomRGB(limitGrayAndBlack, limitLight);
-            break;
-        case 'hsl':
-            baseColor = customColor || randomHSL(limitGrayAndBlack, limitLight);
-            break;
-        case 'hsv':
-            baseColor = customColor || randomHSV(limitGrayAndBlack, limitLight);
-            break;
-        case 'cmyk':
-            baseColor = customColor || randomCMYK(limitGrayAndBlack, limitLight);
-            break;
-        case 'lab':
-            baseColor = customColor || randomLab(limitGrayAndBlack, limitLight);
-            break;
-        default:
-            baseColor = customColor || randomHSL(limitGrayAndBlack, limitLight);
+    console.log('customColor: ', customColor, " data type: ", (typeof customColor));
+
+    // Ensures customColor is an object. If not, reformats as an object
+    if (customColor && typeof customColor === 'object' && customColor.value) {
+        baseColor = customColor;
+        console.log('customColor already exists as an object with an assigned value');
+    } else {
+        // Assign default values if customColor is not provided or is not an object
+        console.log('formatting customColor as an object')
+        baseColor = {
+            format: initialColorSpace,
+            value: customColor
+        };
     }
 
-    // Ensure baseColor is correctly generated
-    console.log('Base color: ', baseColor);
+    console.log('generatePalette() initialColorSpace switch expression complete');
+    console.log('baseColor:', baseColor, 'data type:', typeof baseColor);
+
+
+    switch (initialColorSpace) {
+        case 'hex':
+            console.log('calling randomHex from within generatePalette');
+            baseColor = customColor || randomHex(limitGrayAndBlack, limitLight);
+            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
+            break;
+        case 'rgb':
+            console.log('calling randomRGB from within generatePalette');
+            baseColor = customColor || randomRGB(limitGrayAndBlack, limitLight);
+            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
+            break;
+        case 'hsl':
+            console.log('calling randomHSL from within generatePalette');
+            baseColor = customColor || randomHSL(limitGrayAndBlack, limitLight);
+            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
+            break;
+        case 'hsv':
+            console.log('calling randomHSV from within generatePalette');
+            baseColor = customColor || randomHSV(limitGrayAndBlack, limitLight);
+            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
+            break;
+        case 'cmyk':
+            console.log('calling randomCMYK from within generatePalette');
+            baseColor = customColor || randomCMYK(limitGrayAndBlack, limitLight);
+            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
+            break;
+        case 'lab':
+            console.log('calling randomLab from within generatePalette');
+            baseColor = customColor || randomLab(limitGrayAndBlack, limitLight);
+            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
+            break;
+        default:
+            console.log('DEFAULT CASE - calling randomHex from within generatePalette');
+            baseColor = customColor || randomHex(limitGrayAndBlack, limitLight);
+            console.log('baseColor: ', baseColor, 'data type: ', (typeof baseColor));
+    }
+
+    console.log('generatePalette initialColorSpace switch expression complete');
+    console.log('baseColor: ', baseColor);
 
     switch (paletteType) {
         case 1:
+            console.log('calling generateRandomColorPalette');
             colors = generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor);
+            console.log('colors: ', colors, ' data type: ', (typeof colors));
             break;
         case 2:
+            console.log('calling generateComplementaryPalette');
             colors = generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace);
+            console.log('colors: ', colors, ' data type: ', (typeof colors));
             break;
         case 3:
+            console.log('calling generateTriadicPalette');
             colors = generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace);
+            console.log('colors: ', colors, ' data type: ', (typeof colors));
             break;
         case 4:
+            console.log('calling generateTetradicPalette');
             colors = generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace);
+            console.log('colors: ', colors, ' data type: ', (typeof colors));
             break;
         case 5:
+            console.log('calling generateSplitComplementaryPalette');
             colors = generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace);
+            console.log('colors: ', colors, ' data type: ', (typeof colors));
             break;
         case 6:
+            console.log('calling generatAnalogousPalette');
             colors = generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace);
+            console.log('colors: ', colors, ' data type: ', (typeof colors));
             break;
         case 7:
+            console.log('calling generateHexadicPalette');
             colors = generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace);
+            console.log('colors: ', colors, ' data type: ', (typeof colors));
             break;
         case 8:
+            console.log('calling generateDiadicPalette');
             colors = generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace);
+            console.log('colors: ', colors, ' data type: ', (typeof colors));
             break;
         case 9:
+            console.log('calling generateMonochromaticPalette');
             colors = generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace);
+            console.log('colors: ', colors, ' data type: ', (typeof colors));
             break;
         default:
-            console.error('Unable to determine color scheme (paletteGen.js)');
+            console.error('unable to determine color scheme');
             break;
     }
 
-    // Check value of colors array
-    console.log('Colors Array: ', colors);
+    console.log('paletteType switch expression complete for generatePalette function');
 
-    // Error logging if colors array is empty or undefined
+    // Error logging if the colors array is malformed
     if (!colors || colors.length === 0) {
-        console.error('Colors array is empty or undefined');
+        console.error('colors array is empty or undefined');
     }
+
+    console.log('colors: ', colors, ' data type: ', (typeof colors));
+    console.log('numBoxes: ', numBoxes, ' data type: ', (typeof numBoxes));
+    console.log('generatePalette execution complete; calling generatePaletteBox');
 
     generatePaletteBox(colors, numBoxes);
 }
 
 
+// What the fuck is this function actually doing anymore???
 // Define default behavior for generateButton click event
 function handleGenerateButtonClick() {
+    console.loog('executing handleGenerateButtonClick');
+
     let paletteTypeOptions = document.getElementById('palette-type-options');
     let paletteNumberOptions = document.getElementById('palette-number-options');
     let numBoxes = parseInt(paletteNumberOptions.value, 10);
@@ -98,6 +157,9 @@ function handleGenerateButtonClick() {
     let limitLight = limitLightCheckbox.checked ? 1 : 0;
     let initialColorSpace = document.getElementById('initial-colorspace-options').value || 'hsl' ;
     
+    console.log(`selectedPaletteTypeOptionValue: ${selectedPaletteTypeOptionValue}, numBoxes: ${numBoxes}, limitGrayAndBlacK: ${limitGrayAndBlack}, limitLight: ${limitLight}, initialColorSpace: ${initialColorSpace}`);
+    
+    console.log('execution of handleGenerateButtonClick complete; executing generatePalette')
     generatePalette(selectedPaletteTypeOptionValue, numBoxes, limitGrayAndBlack, limitLight, initialColorSpace);
 }
 
