@@ -17,27 +17,24 @@ function hexToHSL(hex) {
     try {
         console.log(`Converting Hex to HSL: ${hex}`);
         console.log('calling hexToRGB');
-        const rgb = hexToRGB(hex);
+        const rgb = hexToRGB(hex.value);
         console.log(`Converted RGB from Hex: ${JSON.stringify(rgb)}`);
         console.log('rgb: ', rgb, ' type: ', (typeof rgb));
+
         console.log('calling rgbToHSL');
         const hsl = rgbToHSL(rgb.red, rgb.green, rgb.blue);
         console.log(`Converted HSL from RGB: ${JSON.stringify(hsl)}`);
         console.log('hsl: ', hsl, ' type: ', (typeof hsl));
         console.log('execution of hexToHSL complete');
 
-        return `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
+        // Return the HSL object
+        return hsl;
 
     } catch (error) {
         console.error(`Error converting Hex to HSL: ${error}`);
 
         // Return black for invalid inputs
-        let hue, saturation, lightness = 0;
-        let hsl = { hue, saturation, lightness };
-
-        console.log('execution of hexToHSL complete');
-
-        return `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
+        return { hue: 0, saturation: 0, lightness: 0 };
     }
 }
 
@@ -93,24 +90,26 @@ function rgbToHSL(red, green, blue) {
         console.log('hue: ', hue, ' saturation: ', saturation, ' lightness: ', lightness);
         console.log('types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' lightness: ', (typeof lightness));
 
-        hsl = { hue, saturation, lightness };
+        let hsl = { hue, saturation, lightness };
 
         console.log('hsl: ', hsl, ' type: ', (typeof hsl));
         console.log('execution of rgbToHSL complete');
 
-        return `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
+        //return `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
+        return hsl; // return the HSL object
 
     } catch (error) {
         console.error(`Error converting RGB to HSL: ${error}`);
 
         // Return black for invalid inputs
-        hue, saturation, lightness = 0;
+        let hue, saturation, lightness = 0;
         hsl = { hue, saturation, lightness };
 
         console.log('hsl: ', hsl, ' type: ', (typeof hsl));
         console.log('execution of rgbToHSL complete');
         
-        return `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
+        //return `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
+        return hsl; // return the HSL object
     }
 }
 

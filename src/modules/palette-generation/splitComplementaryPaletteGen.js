@@ -6,7 +6,7 @@
 
 
 
-import { randomSL } from '../../utils/index.js';
+import { randomHSL, randomHSV, randomLab, randomSL } from '../../utils/index.js';
 import { populateColorTextOutputBox } from './index.js';
 import { applyLimitGrayAndBlack, applyLimitLight } from '../index.js';
 import { generateAndStoreColorValues } from '../color-conversion/index.js';
@@ -29,7 +29,7 @@ function generateSplitComplementaryHues(baseHue) {
 
 
 // Generate split complementary palette
-function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
+function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hex') {
     console.log('executing generateSplitcomplementaryPalette');
     console.log(`numBoxes: ${numBoxes}, limitGrayAndBlack: ${limitGrayAndBlack}, limitLight: ${limitLight}, customColor: ${customColor}, initialColorSpace: ${initialColorSpace}`);
 
@@ -44,37 +44,37 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
     // Generate the base color using the initial color space
     if (customColor !== null && customColor !== undefined) {
         console.log('calling generateAndStoreColorValues to define baseColor');
-        baseColor = generateAndStoreColorValues(customColor, initialColorSpace);
+        baseColor = generateAndStoreColorValues(customColor, initialColorSpace = 'hsl');
         console.log('baseColor: ', baseColor);
     } else {
         switch (initialColorSpace) {
             case 'hex':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'rgb':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'hsl':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'hsv':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'cmyk':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'lab':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             default:
                 console.log('DEFAULT CASE - calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
         }
 
         console.log('initialColorSpace switch expression complete for generateSplitComplementaryPalette');
@@ -211,7 +211,7 @@ function generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLig
             }
         }
 
-        const additionalColor = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        const additionalColor = generateAndStoreColorValues({ hue, saturation, lightness }, 'hex');
         console.log('additionalColor: ', additionalColor);
         colors.push(additionalColor);
     }

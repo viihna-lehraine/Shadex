@@ -23,7 +23,7 @@ function hexToRGB(hex) {
         let blue = bigint & 255;
 
         console.log('red: ', red, ' green: ', green, ' blue: ', blue);
-        console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ' (typeof blue));
+        console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ', (typeof blue));
 
         if (isNaN(red) || isNaN(green) || isNaN(blue)) {
             throw new Error(`Invalid RGB values from hex: R=${red}, G=${green}, B=${blue}`);
@@ -49,9 +49,12 @@ function hslToRGB(hue, saturation, lightness) {
     console.log('hue: ', hue, ' saturation: ', saturation, ' lightness: ', lightness);
     console.log('types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' lightness: ', (typeof lightness));
 
-    try {
-        // Ensure hue, saturation, and lightness are numbers
-        if (typeof hue !== 'number' || typeof saturation !== 'number' || typeof lightness !== 'number') {
+    try { // Ensure hue, saturation, and lightness are numbers
+        if (typeof hue === 'string') hue = parseFloat(hue);
+        if (typeof saturation === 'string') saturation = parseFloat(saturation);
+        if (typeof lightness === 'string') lightness = parseFloat(lightness);
+
+        if (isNaN(hue) || isNaN(saturation) || isNaN(lightness)) {
             throw new Error(`Invalid HSL values: H=${hue}, S=${saturation}, L=${lightness}`);
         }
 
@@ -89,7 +92,7 @@ function hslToRGB(hue, saturation, lightness) {
         blue = Math.round(blue * 255);
 
         console.log('red: ', red, ' green: ', green, ' blue: ', blue);
-        console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ' (typeof blue));
+        console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ', (typeof blue));
 
         if (isNaN(red) || isNaN(green) || isNaN(blue)) {
             throw new Error(`Invalid RGB values from HSL: R=${red}, G=${green}, B=${blue}`);

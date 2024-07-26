@@ -37,7 +37,7 @@ function generateAnalogousHues(color, numBoxes) {
 
 
 // Generate analogous palette
-function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
+function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hex') {
 
     console.log('generateAnalogousPalette() executing');
     let generateAnalogousPaletteParameters = [ numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace ];
@@ -52,29 +52,29 @@ function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight, custo
 
     // Generate the base color using the initial color space
     if (customColor !== null && customColor !== undefined) {
-        color = generateAndStoreColorValues(customColor, initialColorSpace);
+        color = generateAndStoreColorValues(customColor, initialColorSpace = 'hex');
     } else {
         switch (initialColorSpace) {
             case 'hex':
-                color = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace);
+                color = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'rgb':
-                color = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace);
+                color = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'hsl':
-                color = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                color = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'hsv':
-                color = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace);
+                color = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'cmyk':
-                color = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace);
+                color = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'lab':
-                color = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace);
+                color = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             default:
-                color: generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                color: generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
         }
     }
 
@@ -116,7 +116,7 @@ function generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight, custo
                     colorString = analogousColor.lab;
                     break;
                 default:
-                    colorString = analogousColor.hsl;
+                    colorString = analogousColor.hex;
             }
 
             colorBox.style.backgroundColor = colorString;

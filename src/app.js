@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`Generate Button - passing initialColorSpace ${initialColorSpace} to generatePalette()`);
         console.log('Generate Button click event execution complete. Calling generatePalette()');
 
-        generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace);
+        generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace = 'hex');
     });
     
     // Saturate Button event listener

@@ -120,6 +120,7 @@ function makePaletteBox(colorValues, paletteBoxCount) {
     paletteBoxBottomHalf.id = `palette-box-bottom-half-${paletteBoxCount}`;
 
     let colorBox = document.createElement('div');
+    
     colorBox.className = 'color-box';
     colorBox.id = `color-box-${paletteBoxCount}`;
     colorBox.style.backgroundColor = colorValues.hsl;

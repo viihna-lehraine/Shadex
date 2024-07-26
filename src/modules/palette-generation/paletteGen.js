@@ -11,7 +11,7 @@ import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab } fro
 
 
 // Generate Initial Palette
-function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace) {
+function generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace = 'hex') {
     console.log('executing generatePalette');
 
     let colors = [];

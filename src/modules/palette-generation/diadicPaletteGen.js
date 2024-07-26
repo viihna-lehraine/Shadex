@@ -6,7 +6,7 @@
 
 
 
-import { randomSL, populateColorTextOutputBox, getWeightedRandomInterval } from '../../utils/index.js';
+import { randomHSL, randomHSV, randomLab, randomSL, populateColorTextOutputBox, getWeightedRandomInterval } from '../../utils/index.js';
 import { generateAndStoreColorValues } from '../color-conversion/index.js';
 import { applyLimitGrayAndBlack, applyLimitLight } from './index.js';
 
@@ -31,7 +31,7 @@ function generateDiadicHues(baseHue) {
 
 
 // Generate diadic color palette
-function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hsl') {
+function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hex') {
 
     console.log('generateDiadicPalette() executing');
     let generateDiadicPaletteParameters = [ numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace ];
@@ -48,36 +48,36 @@ function generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, customCo
     // Generate the base color using the initial color space
     if (customColor !== null && customColor !== undefined) {
         console.log('calling generateAndStoreColorValues');
-        baseColor = generateAndStoreColorValues(customColor, initialColorSpace);
+        baseColor = generateAndStoreColorValues(customColor, initialColorSpace = 'hex');
     } else {
         switch (initialColorSpace) {
             case 'hex':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'rgb':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'hsl':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'hsv':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'cmyk':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             case 'lab':
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
                 break;
             default:
                 console.log('calling generateAndStoreColorValues');
-                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace);
+                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
         }
 
         console.log('initialColorSpace switch expression for generateDiadicPalette complete');

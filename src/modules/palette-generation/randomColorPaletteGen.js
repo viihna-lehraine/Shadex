@@ -11,7 +11,7 @@ import { generateAndStoreColorValues } from '../color-conversion/index.js';
 
 
 // Generate Random Color Palette
-function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace) {
+function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hex') {
     console.log('executing generateRandomColorPalette');
     console.log(`numBoxes: ${numBoxes}, limitGrayAndBlack: ${limitGrayAndBlack}, customColor: ${customColor}, initialColorSpace: ${initialColorSpace}`);
 
@@ -23,7 +23,7 @@ function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, cus
         if (i === 0 && customColor) {
             console.log('user-defined custom color: ', customColor);
             console.log('calling generateAndStoreColorValues');
-            color = generateAndStoreColorValues(customColor, initialColorSpace);
+            color = generateAndStoreColorValues(customColor, initialColorSpace = 'hex');
         } else {
             let baseColor;
             switch (initialColorSpace) {
@@ -58,7 +58,7 @@ function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, cus
 
             console.log('initialColorSpace switch expression complete for generateRandomColorPalette');
             console.log(`Base Color Generated: ${JSON.stringify(baseColor)}`);
-            color = generateAndStoreColorValues(baseColor, initialColorSpace);
+            color = generateAndStoreColorValues(baseColor, initialColorSpace = 'hex');
         }
 
         colors.push(color);

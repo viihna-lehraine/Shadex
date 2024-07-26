@@ -12,7 +12,7 @@ import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab } fro
 
 
 // Generate complementary palette
-function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor = null, initialColorSpace) {
+function generateComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor = null, initialColorSpace = 'hex') {
 
     console.log('generateComplementaryPalette() execution starting');
 
