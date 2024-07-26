@@ -10,7 +10,7 @@ import { hexToRGB } from "./index.js";
 
 
 // Convert Hex to HSV
-function hexToHSV(hex) {
+function hexToHSV(hexValue) {
     console.log('executing hexToHSV');
     console.log('hex: ', hex, ' data type ', (typeof hex));
 

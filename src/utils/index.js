@@ -9,7 +9,10 @@
 import { populateColorTextOutputBox } from "../modules/dom.js";
 import { copyToClipboard } from "./clipboardUtils.js";
 import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, randomSL } from './randomUtils.js';
+import { logObjectProperties, logObjectPropertiesInColorValues } from "./logUtils.js";
 import { getWeightedRandomInterval } from "./paletteGenUtils.js";
+import { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs } from './logUtils.js';
 
 
-export { populateColorTextOutputBox, copyToClipboard, randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, randomSL, getWeightedRandomInterval };
+export { populateColorTextOutputBox, copyToClipboard, randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, randomSL, logObjectProperties, logObjectPropertiesInColorValues, getWeightedRandomInterval };
+export { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs };

@@ -7,14 +7,14 @@
 
 
 // Convert Hex to RGB
-function hexToRGB(hex) {
+function hexToRGB(hexValue) {
     console.log('executing hexToRGB');
-    console.log('hex: ', hex, ' data type ', (typeof hex));
+    console.log('hexValue: ', hexValue, ' data type ', (typeof hexValue));
 
     try {
-        console.log(`Converting Hex to RGB: ${hex}`);
+        console.log(`Converting Hex to RGB: ${hexValue}`);
         // Remove the hash at the beginning if it exists
-        hex = hex.replace(/^#/, '');
+        hexValue = hexValue.replace(/^#/, '');
 
         // Parse RGB values
         let bigint = parseInt(hex, 16);
@@ -34,11 +34,8 @@ function hexToRGB(hex) {
         return { red, green, blue };
     } catch (error) {
         console.error(`Error converting Hex to RGB: ${error}`);
-        
         console.log('execution of hexToRGB complete');
-
-        // Return black for invalid inputs
-        return { red: 0, green: 0, blue: 0 };
+        return { red: 0, green: 0, blue: 0 }; // return black for invalid inputs
     }
 }
 

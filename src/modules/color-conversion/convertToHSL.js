@@ -10,14 +10,14 @@ import { hexToRGB } from "./index.js";
 
 
 // Convert Hex to HSL
-function hexToHSL(hex) {
+function hexToHSL(hexValue) {
     console.log('executing hexToHSL');
-    console.log('hex: ', hex, ' type: ', (typeof hex));
+    console.log('hexValue: ', hexValue, ' type: ', (typeof hexValue));
 
     try {
-        console.log(`Converting Hex to HSL: ${hex}`);
+        console.log(`Converting Hex to HSL: ${hexValue}`);
         console.log('calling hexToRGB');
-        const rgb = hexToRGB(hex.value);
+        const rgb = hexToRGB(hexValue.value);
         console.log(`Converted RGB from Hex: ${JSON.stringify(rgb)}`);
         console.log('rgb: ', rgb, ' type: ', (typeof rgb));
 
