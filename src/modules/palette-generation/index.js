@@ -21,6 +21,9 @@ import { generatePalette } from './paletteGen.js';
 import { hexToHSL } from '../color-conversion/convertToHSL.js';
 import { applyLimitGrayAndBlack, applyLimitLight } from '../userIntefaceParameters.js';
 
+import { randomInitialColor, generateSelectedPaletteType } from './paletteGenHelpers.js'; 
+import { randomInitialColorWithLogs,generateSelectedPaletteTypeWithLogs } from './paletteGenHelpers.js'; 
+
 
 export { generateRandomColorPalette, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette };
 export { randomHSL, randomSL, generateColor1 };
@@ -28,3 +31,6 @@ export { generatePaletteBox, populateColorTextOutputBox };
 export { generatePalette };
 export { hexToHSL };
 export { applyLimitGrayAndBlack, applyLimitLight};
+
+export { randomInitialColor, generateSelectedPaletteType };
+export { randomInitialColorWithLogs, generateSelectedPaletteTypeWithLogs };

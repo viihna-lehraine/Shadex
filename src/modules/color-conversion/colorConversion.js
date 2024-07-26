@@ -6,11 +6,11 @@
 
 
 
-import { applyLimitGrayAndBlack, applyLimitLight } from '../index.js';
-import { hexToHSL, rgbToHSL, hslToHSV, hsvToHSL, cmykToHSL, labToHSL, generateAndStoreColorValuesInitialLogging } from './index.js';
-import { declareConversionMap } from './index.js';
+import { applyLimitGrayAndBlack, applyLimitLight, generateAndStoreColorValuesInitialLogging, satAndLightHslColorGen, declareConversionMap } from './index.js';
+
 import { initialHSLColorGenerationWithLogs, formatHSLForInitialColorValueGenWithLogs, formatHslColorPropertiesAsNumbersWithLogs, globalColorSpaceFormattingWithLogs } from './index.js';
-import { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs } from '../../utils/index.js';
+
+import { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs, adjustSatAndLightInitLogs } from '../../utils/index.js';
 
 
 //Create map object for conversion functions
@@ -46,7 +46,7 @@ function convertColors(targetFormat) {
 
         console.log('execution of convertColors complete');
     });
-}
+};
 
 
 // Generate values for all 6 color spaces for all swatches when a palette is generated, stores as an object (I think?)
@@ -91,55 +91,19 @@ function generateAndStoreColorValues(color, initialColorSpace = 'hex') {
     };
 
     globalColorSpaceFormattingWithLogs(initialColorSpace = 'hex', hexValue, formattedHslColor, colorValues, hslColor);
-    generateAndStoreColorValuesFinalLogs(colorValues)
+    generateAndStoreColorValuesFinalLogs(colorValues);
 
     return colorValues;
-}
+};
 
 
 function adjustSaturationAndLightness(color, limitGrayAndBlack, limitLight, initialColorSpace = 'hex') {
-    console.log('executing adjustSaturationAndLightness');
-    console.log(`color: ${color}, limitGrayAndBlack: ${limitGrayAndBlack}, limitLight: ${limitLight}, initialColorSpace: ${initialColorSpace}`);
-    console.log('types - color: ', (typeof color), ' limitGrayAndBlack: ', (typeof limitGrayAndBlack), ' limitLight ', (typeof limitLight), ' initialColorSpace: ', (typeof initialColorSpace));
+    adjustSatAndLightInitLogs(color, limitGrayAndBlack, limitLight, initialColorSpace = 'hex');
 
     let hslColor;
 
     // convert the input color to HSL
-    switch (initialColorSpace) {
-        case 'hex':
-            console.log('calling hexToHSL');
-            hslColor = hexToHSL(color);
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        case 'rgb':
-            console.log('calling rgbToHSL');
-            hslColor = rgbToHSL(color.red, color.green, color.blue);
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        case 'hsl':
-            hslColor = color;
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        case 'hsv':
-            console.log('calling hsvToHSL');
-            hslColor = hsvToHSL(color.hue, color.saturation, color.value);
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        case 'cmyk':
-            console.log('calling cmykToHSL');
-            hslColor = cmykToHSL(color.cyan, color.magenta, color.yellow, color.black);
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        case 'lab':
-            console.log('calling labToHSL');
-            hslColor = labToHSL(color.l, color.a, color.b);
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        default:
-            hslColor = color;
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-    }
-    console.log('initialColorSpace switch expression completed for adjustSaturationAndLightness');
+    satAndLightHslColorGen(initialColorSpace = 'hex', color);
 
     // Apply limitGrayAndBlack and limitLight, if applicable
     if (limitGrayAndBlack) {
@@ -153,8 +117,9 @@ function adjustSaturationAndLightness(color, limitGrayAndBlack, limitLight, init
     }
 
     console.log('execution of adjustSaturationAndLightness complete');
+
     return hslColor;
-}
+};
 
 
 export { convertColors, generateAndStoreColorValues, adjustSaturationAndLightness };

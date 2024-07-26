@@ -24,9 +24,9 @@ import { hexToLab, rgbToLab, hslToLab, hsvToLab, cmykToLab } from './convertToLa
 
 import { declareConversionMap } from './colorConversionHelperFunctions.js';
 
-import { initialHSLColorGeneration, formatHSLForInitialColorValueGen, formatHslColorPropertiesAsNumbers, globalColorSpaceFormatting } from './colorConversionHelperFunctions.js';
+import { initialHSLColorGeneration, formatHSLForInitialColorValueGen, formatHslColorPropertiesAsNumbers, globalColorSpaceFormatting, satAndLightHslColorGen } from './colorConversionHelperFunctions.js';
 
-import { initialHSLColorGenerationWithLogs, formatHSLForInitialColorValueGenWithLogs, formatHslColorPropertiesAsNumbersWithLogs, globalColorSpaceFormattingWithLogs } from './colorConversionHelperFunctions.js';
+import { initialHSLColorGenerationWithLogs, formatHSLForInitialColorValueGenWithLogs, formatHslColorPropertiesAsNumbersWithLogs, globalColorSpaceFormattingWithLogs, satAndLightHslColorGenWithLogs } from './colorConversionHelperFunctions.js';
 
 import { initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT } from './colorConversionHelperFunctions.js';
 
@@ -51,9 +51,9 @@ export { hexToLab, rgbToLab, hslToLab, hsvToLab, cmykToLab };
 
 export { declareConversionMap };
 
-export { initialHSLColorGeneration, formatHSLForInitialColorValueGen, formatHslColorPropertiesAsNumbers, globalColorSpaceFormatting };
+export { initialHSLColorGeneration, formatHSLForInitialColorValueGen, formatHslColorPropertiesAsNumbers, globalColorSpaceFormatting, satAndLightHslColorGen };
 
-export { initialHSLColorGenerationWithLogs, formatHSLForInitialColorValueGenWithLogs, formatHslColorPropertiesAsNumbersWithLogs, globalColorSpaceFormattingWithLogs };
+export { initialHSLColorGenerationWithLogs, formatHSLForInitialColorValueGenWithLogs, formatHslColorPropertiesAsNumbersWithLogs, globalColorSpaceFormattingWithLogs, satAndLightHslColorGenWithLogs };
 
 export { initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT };
 

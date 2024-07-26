@@ -70,5 +70,16 @@ function generateAndStoreColorValuesFinalLogs(colorValues) {
 };
 
 
+// Initial logging for adjustSaturationAndLightness
+function adjustSatAndLightInitLogs(color, limitGrayAndBlack, limitLight, initialColorSpace = 'hex') {
+    console.log('executing adjustSaturationAndLightness');
+    console.log(`color: ${color}, limitGrayAndBlack: ${limitGrayAndBlack}, limitLight: ${limitLight}, initialColorSpace: ${initialColorSpace}`);
+    console.log('types - color: ', (typeof color), ' limitGrayAndBlack: ', (typeof limitGrayAndBlack), ' limitLight ', (typeof limitLight), ' initialColorSpace: ', (typeof initialColorSpace));
+};
+
+
 export { logObjectProperties, logObjectPropertiesInColorValues };
+
 export { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs };
+
+export { adjustSatAndLightInitLogs };
