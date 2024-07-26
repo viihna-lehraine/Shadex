@@ -9,4 +9,6 @@ function initializeButtons() {
     const applyInitialColorSpaceButton = document.getElementById('apply-initial-color-space-button');
     let selectedColorOptions = document.getElementById('selected-color-options');
     let selectedColor = parseInt(selectedColorOptions.value, 10);
+    
+    return selectedColorOptions, selectedColor;
 };
