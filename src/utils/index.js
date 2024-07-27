@@ -1,6 +1,6 @@
 // ColorGen - version 0.5.1
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
-// Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
+// Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
 
 // BEGIN CODE
 
@@ -11,16 +11,8 @@ import { copyToClipboard } from "./clipboardUtils.js";
 import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, randomSL } from './randomUtils.js';
 import { logObjectProperties, logObjectPropertiesInColorValues } from "./logUtils.js";
 import { getWeightedRandomInterval } from "./paletteGenUtils.js";
-<<<<<<< HEAD
 import { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs, adjustSatAndLightInitLogs, generateButtonExitLogs, generatePaletteExitLogs, handleGenerateButtonClickExitLogs } from './logUtils.js';
 
 
 export { populateColorTextOutputBox, copyToClipboard, randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, randomSL, logObjectProperties, logObjectPropertiesInColorValues, getWeightedRandomInterval };
 export { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs,adjustSatAndLightInitLogs, generateButtonExitLogs, generatePaletteExitLogs, handleGenerateButtonClickExitLogs };
-=======
-import { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs } from './logUtils.js';
-
-
-export { populateColorTextOutputBox, copyToClipboard, randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, randomSL, logObjectProperties, logObjectPropertiesInColorValues, getWeightedRandomInterval };
-export { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs };
->>>>>>> parent of 5f76951 (ok I lied. EOD for real now)

@@ -1,21 +1,15 @@
 // ColorGen - version 0.5.1
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
-// Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
+// Author: Viihna Lehraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
 
 // BEGIN CODE
 
 
 
-<<<<<<< HEAD
-import { satAndLightHslColorGen, declareConversionMap } from './index.js';
+import { declareConversionMap } from './index.js';
 
 import { applyLimitGrayAndBlack, applyLimitLight } from '../userIntefaceParameters.js';
 
-=======
-import { applyLimitGrayAndBlack, applyLimitLight } from '../index.js';
-import { hexToHSL, rgbToHSL, hslToHSV, hsvToHSL, cmykToHSL, labToHSL, generateAndStoreColorValuesInitialLogging } from './index.js';
-import { declareConversionMap } from './index.js';
->>>>>>> parent of 5f76951 (ok I lied. EOD for real now)
 import { initialHSLColorGenerationWithLogs, formatHSLForInitialColorValueGenWithLogs, formatHslColorPropertiesAsNumbersWithLogs, globalColorSpaceFormattingWithLogs } from './index.js';
 import { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs } from '../../utils/index.js';
 
