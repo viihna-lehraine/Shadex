@@ -131,7 +131,7 @@ function initialHSLColorGenerationWithLogs(color, hexValue) {
 
 // Ensure HSL is in the correct format
 function formatHSLForInitialColorValueGen(hue, saturation, lightness) {
-    const { hue, saturation, lightness } = hslColor; // *DEV-NOTE* this declaration needs to be reassessed
+    let hslColor = { hue, saturation, lightness };
     if (typeof hue === 'object') {
         hslColor = {
             hue: hue.hue,
@@ -146,11 +146,11 @@ function formatHSLForInitialColorValueGen(hue, saturation, lightness) {
 
 // Ensure HSL is in the correct format, with logs
 function formatHSLForInitialColorValueGenWithLogs(hue, saturation, lightness) {
-    const { hue, saturation, lightness } = hslColor; // *DEV-NOTE* this declaration needs to be reassessed
+    let hslColor = { hue, saturation, lightness }; // Fixed the declaration
     console.log('hue: ', hue, ' type: ', (typeof hue));
     console.log('deconstructing hue if it is an object and splitting into hue.hue, hue.saturation, and hue.lightness');
     if (typeof hue === 'object') {
-        console.log('hslColor is not an object; extracting nested values and returning as an object'); 
+        console.log('hue is an object; extracting nested values and returning as an object'); 
         hslColor = {
             hue: hue.hue,
             saturation: hue.saturation,
@@ -160,7 +160,8 @@ function formatHSLForInitialColorValueGenWithLogs(hue, saturation, lightness) {
 
     console.log('hue data type: ', (typeof hue), ' hue.hue: ', (typeof hue.hue), ' hue.saturation: ', (typeof hue.saturation), ' hue.lightness: ', (typeof hue.lightness));
     console.log('hslColor: ', hslColor, ' type: ', (typeof hslColor));
-};
+    return hslColor; // Ensure the function returns the value
+}
 
 
 // Ensure hslColor.saturation and hslColor.lightness are type "number"

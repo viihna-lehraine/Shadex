@@ -6,7 +6,9 @@
 
 
 
-import { applyLimitGrayAndBlack, applyLimitLight, generateAndStoreColorValuesInitialLogging, satAndLightHslColorGen, declareConversionMap } from './index.js';
+import { satAndLightHslColorGen, declareConversionMap } from './index.js';
+
+import { applyLimitGrayAndBlack, applyLimitLight } from '../userIntefaceParameters.js';
 
 import { initialHSLColorGenerationWithLogs, formatHSLForInitialColorValueGenWithLogs, formatHslColorPropertiesAsNumbersWithLogs, globalColorSpaceFormattingWithLogs } from './index.js';
 

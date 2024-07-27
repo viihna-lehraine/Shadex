@@ -62,6 +62,7 @@ function generateAndStoreColorValuesInitialLogging(color, initialColorSpace = 'h
     console.log('initialColorSpace: ', initialColorSpace, ' data type: ', (typeof initialColorSpace));
 };
 
+
 // Final logging for generateAndStoreColorValues()
 function generateAndStoreColorValuesFinalLogs(colorValues) {
     console.log('initialColorSpace switch expression completed for generateAndStoreColorValues');
@@ -78,8 +79,32 @@ function adjustSatAndLightInitLogs(color, limitGrayAndBlack, limitLight, initial
 };
 
 
+// Final Logging for Generate Button Click Event before executing generatePalette function
+function generateButtonExitLogs(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor = null, initialColorSpace = 'hex') {
+    console.log('Generate Button clicked');
+    console.log(`Generate Button - passing paletteType ${paletteType}, numBoxes ${numBoxes}, limitGrayAndBlack ${limitGrayAndBlack}, limitLight ${limitLight}, and customColor ${customColor}`);
+    console.log(`Generate Button - passing initialColorSpace ${initialColorSpace} to generatePalette()`);
+    console.log('Generate Button click event execution complete. Calling generatePalette()');
+}
+
+
+// Exit logs for generatePalette function - paletteGen.js
+// Logs value and data type for colors and numBoxes before announcing the successful completion of generatePalette 
+function generatePaletteExitLogs(colors, numBoxes) {
+    console.log('colors: ', colors, ' data type: ', (typeof colors));
+    console.log('numBoxes: ', numBoxes, ' data type: ', (typeof numBoxes));
+    console.log('generatePalette execution complete; calling generatePaletteBox');
+};
+
+
+//Exit logs for handleGenerateButtonClick - paletteGen.js
+function handleGenerateButtonClickExitLogs(selectedPaletteTypeOptionValue, numBoxes, limitGrayAndBlack, limitLight, initialColorSpace) {
+    console.log(`selectedPaletteTypeOptionValue: ${selectedPaletteTypeOptionValue}, numBoxes: ${numBoxes}, limitGrayAndBlacK: ${limitGrayAndBlack}, limitLight: ${limitLight}, initialColorSpace: ${initialColorSpace}`);
+    console.log('execution of handleGenerateButtonClick complete; executing generatePalette');
+};
+
+
 export { logObjectProperties, logObjectPropertiesInColorValues };
-
 export { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs };
-
 export { adjustSatAndLightInitLogs };
+export { generateButtonExitLogs, generatePaletteExitLogs, handleGenerateButtonClickExitLogs };

@@ -15,102 +15,111 @@
 
 
 
+import { defineUIButtons, addConversionButtonEventListeners, pullParametersFromUI } from './appHelpers.js';
 import { convertColors, showCustomColorPopupDiv, applyCustomColor } from './modules/index.js';
+import { generateButtonExitLogs } from './utils/index.js';
 import { generatePalette } from './modules/palette-generation/index.js';
-
-
-// Initialize customColor variable
-let customColor = null;
 
 
 // App Initialization - applies all event listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM content loaded. Initializing application');
     
-    const generateButton = document.getElementById('generate-button');
-    const saturateButton = document.getElementById('saturate-button');
-    const desaturateButton = document.getElementById('desaturate-button');
-    const popupDivButton = document.getElementById('custom-color-button');
-    const applyColorButton = document.getElementById('apply-color-button');
-    const clearColorButton = document.getElementById('clear-color-button');
-    const advancedMenuToggleButton = document.getElementById('advanced-menu-toggle-button');
-    const applyInitialColorSpaceButton = document.getElementById('apply-initial-color-space-button');
-    let selectedColorOptions = document.getElementById('selected-color-options');
-    let selectedColor = parseInt(selectedColorOptions.value, 10);
+    // Defines the buttons within the main UI 
+    const {
+        generateButton,
+        saturateButton,
+        desaturateButton,
+        popupDivButton,
+        applyColorButton,
+        clearColorButton,
+        advancedMenuToggleButton,
+        applyInitialColorSpaceButton,
+        selectedColor
+    } = defineUIButtons();
 
-    // Conversion Button event listeners
-    document.getElementById('hex-conversion-button').addEventListener('click', () => convertColors('hex'));
-    document.getElementById('rgb-conversion-button').addEventListener('click', () => convertColors('rgb'));
-    document.getElementById('hsv-conversion-button').addEventListener('click', () => convertColors('hsv'));
-    document.getElementById('hsl-conversion-button').addEventListener('click', () => convertColors('hsl'));
-    document.getElementById('cmyk-conversion-button').addEventListener('click', () => convertColors('cmyk'));
-    document.getElementById('lab-conversion-button').addEventListener('click', () => convertColors('lab'));
+    // Adds the Conversion Button event listeners
+    addConversionButtonEventListeners();
 
     // Generate Button event listener
     generateButton.addEventListener('click', function(e) {
         e.preventDefault();
-        const paletteType = parseInt(document.getElementById('palette-type-options').value);
-        const numBoxes = parseInt(document.getElementById('palette-number-options').value);
-        const limitGrayAndBlack = document.getElementById('limitGrayAndBlackCheckbox').checked;
-        const limitLight = document.getElementById('limitLightCheckbox').checked;
-        const validColorSpaces = [ 'hex', 'rgb', 'hsl', 'hsv', 'cmyk', 'lab' ];
-        let initialColorSpace = document.getElementById('initial-color-space-options').value;
 
-        if (!validColorSpaces.includes(initialColorSpace)) {
-            initialColorSpace = 'hex';
-            console.log('No user-defined initial color space found. Using default value');
-        }
+        let { paletteType, numBoxes, limitGrayAndBlack, limitLight, initialColorSpace } = pullParametersFromUI();
 
-        console.log('Generate Button clicked');
-        console.log(`Generate Button - passing paletteType ${paletteType}, numBoxes ${numBoxes}, limitGrayAndBlack ${limitGrayAndBlack}, limitLight ${limitLight}, and customColor ${customColor}`);
-        console.log(`Generate Button - passing initialColorSpace ${initialColorSpace} to generatePalette()`);
-        console.log('Generate Button click event execution complete. Calling generatePalette()');
+        // Set default values if not provided by user
+        initialColorSpace = initialColorSpace || 'hex';
+        
+        // Logs status information about variable values before exiting the generateButton event listener
+        generateButtonExitLogs(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace);
 
-        generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace = 'hex');
+        //*DEV-NOTE* add descriptive comment
+        generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace);
     });
     
     // Saturate Button event listener
     saturateButton.addEventListener('click', function(e) {
         e.preventDefault();
+
         console.log('calling saturateColor');
+        
+        //*DEV-NOTE* add descriptive comment
         saturateColor(selectedColor);
     });
     
     // Desaturate Button event listener
     desaturateButton.addEventListener('click', function(e) {
         e.preventDefault();
+
         console.log('calling desaturateColor');
+
+        //*DEV-NOTE* add descriptive comment
         desaturateColor(selectedColor);
     });
 
-    // Popup Div Button event litener
+    // Popup Div Button event listener
     popupDivButton.addEventListener('click', function(e) {
         e.preventDefault();
+        
         console.log('calling showCustomColorPopupDiv');
+        
+        //*DEV-NOTE* add descriptive comment
         showCustomColorPopupDiv();
     });
 
     // Apply Color Button event listener
     applyColorButton.addEventListener('click', function(e) {
         e.preventDefault();
+
         console.log('calling applyCustomColor');
+
+        //*DEV-NOTE* add descriptive comment
         customColor = applyCustomColor();
-        console.log('customColor: ', customColor);
+        console.log('customColor: ', customColor, ' type: ', (typeof customColor));
         console.log('calling showCustomColorPopupDiv');
+
+        // Displays an overlay div allowing the user to select a custom color
         showCustomColorPopupDiv();
     });
 
     // Clear Color Button event listener
     clearColorButton.addEventListener('click', function(e) {
         e.preventDefault();
+
         customColor = null;
+        
+        //*DEV-NOTE* add descriptive comment
         console.log('calling showCustomColorPopupDiv');
+
+        // Displays an overlay div allowing the user to select a custom color
         showCustomColorPopupDiv();
     });
 
     // Advanced Menu Toggle Button event listener
+    //*DEV-NOTE* add descriptive comment
     advancedMenuToggleButton.addEventListener('click', function(e) {
         e.preventDefault();
+
         let advancedMenu = document.getElementById('advanced-menu');
                 
         if (advancedMenu.classList.contains('hidden')) {
@@ -125,8 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Advanced Menu - Apply Initial Color Space Button event listener
     applyInitialColorSpaceButton.addEventListener('click', function(e) {
         e.preventDefault();
+
         let initialColorSpace = document.getElementById('initial-color-space-options').value;
+
         // function does not yet exist
-    //    applyInitialColorSpace(initialColorSpace);
+        // applyInitialColorSpace(initialColorSpace);
     });
 });

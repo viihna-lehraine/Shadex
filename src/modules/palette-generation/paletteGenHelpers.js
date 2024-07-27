@@ -6,6 +6,9 @@
 
 
 
+import { handleGenerateButtonClickExitLogs } from "../../utils/index.js";
+
+
 // Create random initial colors if user doesn't define a custom color
 function randomInitialColor(baseColor, initialColorSpace = 'hex', limitGrayAndBlack, limitLight) {
     if (!baseColor.value) {
@@ -200,5 +203,135 @@ function generateSelectedPaletteTypeWithLogs(paletteType, numBoxes, limitGrayAnd
 };
 
 
-export { randomInitialColor, generateSelectedPaletteType };
-export { randomInitialColorWithLogs, generateSelectedPaletteTypeWithLogs };
+// First, will check f customColor was provided, ensures it is in the form of an object. If not, will reformat customColor as an object
+// If customColor has no value, will instead assign it a default value while formatting it as an object
+function paletteGenColorSpaceConditionCheck(customColor) {
+    // Ensures customColor is an object. If not, reformats as an object
+    if (customColor && typeof customColor === 'object' && customColor.value) {
+        baseColor = customColor;
+
+        return customColor;
+    } else {
+        // Assign default values if customColor is not provided or is not an object
+        console.log('formatting customColor as an object');
+
+        baseColor = {
+            format: initialColorSpace,
+            value: customColor
+        };
+
+        return customColor;
+    }
+};
+
+
+// First, will check if customColor was provided, ensures it is in the form of an object. If not, will reformat customColor as an object
+// If customColor has no value, will instead assign it a default value while formatting it as an object
+// This version also logs the data type of customColor and its value
+function paletteGenColorSpaceConditionCheck(customColor) {
+    // Ensures customColor is an object. If not, reformats as an object
+    if (customColor && typeof customColor === 'object' && customColor.value) {
+        baseColor = customColor;
+
+        if (!baseColor) {
+            console.error('ERROR: baseColor default assignment failed. generatePalette function execution will continue');
+        }
+
+        if (typeof baseColor !== 'object') {
+            console.error('ERROR: Failed to format baseColor as an object. generatePalette function execution will continue');
+        }
+
+        return baseColor;
+    } else {
+        // Assign default values if customColor is not provided or is not an object
+        console.log('formatting customColor as an object')
+        baseColor = {
+            format: initialColorSpace,
+            value: customColor
+        };
+
+        return baseColor;
+    }
+};
+
+
+// First, will check if customColor was provided, ensures it is in the form of an object. If not, will reformat customColor as an object
+// If customColor has no value, will instead assign it a default value while formatting it as an object
+// This version also logs the data type of customColor and its value
+function paletteGenColorSpaceConditionCheckWithLogs(customColor) {
+    // Ensures customColor is an object. If not, reformats as an object
+    if (customColor && typeof customColor === 'object' && customColor.value) {
+        console.log('customColor: ', ' type: ', (typeof customcolor));
+        console.log('customColor already exists as an object with an assigned value; assigning customColor value and properties to baseColor');
+
+        baseColor = customColor;
+
+        if (!baseColor) {
+            console.error('ERROR: baseColor default assignment failed. generatePalette function execution will continue');
+        }
+
+        if (typeof baseColor !== 'object') {
+            console.error('ERROR: Failed to format baseColor as an object. generatePalette function execution will continue');
+        }
+
+        console.log('baseColor: ', ' type: ', (typeof baseColor));
+        console.log('generatePalette initialColorSpace conditional checks complete');
+
+        return baseColor;
+    } else {
+        console.log('customColor is either 1. not provided, 2. is not an object, or 3. has no value property. Assigning as an object with default values and properties');
+
+        // Assign default values if customColor is not provided or is not an object
+        baseColor = {
+            format: initialColorSpace,
+            value: customColor
+        };
+
+        console.log('baseColor: ', ' type: ', (typeof baseColor));
+        console.log('generatePalette initialColorSpace conditional checks complete. returning baseColor to generatePalette');
+
+        return baseColor;
+    }
+};
+
+
+//
+function parameterAssignForGenerateButtonEventHandler() {
+    let paletteTypeOptions = document.getElementById('palette-type-options');
+    let paletteNumberOptions = document.getElementById('palette-number-options');
+    let numBoxes = parseInt(paletteNumberOptions.value, 10);
+    let selectedPaletteTypeOptionValue = parseInt(paletteTypeOptions.value, 10);
+    let limitGrayAndBlackCheckbox = document.getElementById('limitGrayAndBlackCheckbox');
+    let limitLightCheckbox = document.getElementById('limitLightCheckbox');
+    let limitGrayAndBlack = limitGrayAndBlackCheckbox.checked ? 1 : 0;
+    let limitLight = limitLightCheckbox.checked ? 1 : 0;
+    let initialColorSpace = document.getElementById('initial-colorspace-options').value || 'hsl' ;
+};
+
+
+//
+function parameterAssignForGenerateButtonEventHandlerWithLogs() {
+    let paletteTypeOptions = document.getElementById('palette-type-options');
+    let paletteNumberOptions = document.getElementById('palette-number-options');
+    let numBoxes = parseInt(paletteNumberOptions.value, 10);
+    let selectedPaletteTypeOptionValue = parseInt(paletteTypeOptions.value, 10);
+    let limitGrayAndBlackCheckbox = document.getElementById('limitGrayAndBlackCheckbox');
+    let limitLightCheckbox = document.getElementById('limitLightCheckbox');
+    let limitGrayAndBlack = limitGrayAndBlackCheckbox.checked ? 1 : 0;
+    let limitLight = limitLightCheckbox.checked ? 1 : 0;
+    let initialColorSpace = document.getElementById('initial-colorspace-options').value || 'hsl' ;
+
+    handleGenerateButtonClickExitLogs(selectedPaletteTypeOptionValue, numBoxes, limitGrayAndBlack, limitLight, initialColorSpace);
+
+    return { 
+        numBoxes,
+        selectedPaletteTypeOptionValue,
+        limitGrayAndBlack,
+        limitLight,
+        initialColorSpace
+    };
+};
+
+
+export { randomInitialColor, generateSelectedPaletteType, paletteGenColorSpaceConditionCheck, parameterAssignForGenerateButtonEventHandler };
+export { randomInitialColorWithLogs, generateSelectedPaletteTypeWithLogs, paletteGenColorSpaceConditionCheckWithLogs, parameterAssignForGenerateButtonEventHandlerWithLogs };
