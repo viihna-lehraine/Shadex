@@ -71,6 +71,7 @@ function generateAndStoreColorValuesFinalLogs(colorValues) {
 };
 
 
+<<<<<<< HEAD
 // Initial logging for adjustSaturationAndLightness
 function adjustSatAndLightInitLogs(color, limitGrayAndBlack, limitLight, initialColorSpace = 'hex') {
     console.log('executing adjustSaturationAndLightness');
@@ -108,3 +109,7 @@ export { logObjectProperties, logObjectPropertiesInColorValues };
 export { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs };
 export { adjustSatAndLightInitLogs };
 export { generateButtonExitLogs, generatePaletteExitLogs, handleGenerateButtonClickExitLogs };
+=======
+export { logObjectProperties, logObjectPropertiesInColorValues };
+export { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs };
+>>>>>>> parent of 5f76951 (ok I lied. EOD for real now)

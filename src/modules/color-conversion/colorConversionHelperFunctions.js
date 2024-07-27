@@ -364,83 +364,15 @@ function globalColorSpaceFormattingWithLogs(initialColorSpace = 'hex', hexValue,
 };
 
 
-function satAndLightHslColorGen(initialColorSpace = 'hex', color, ) {
-    switch (initialColorSpace) {
-        case 'hex':
-            hslColor = hexToHSL(color);
-
-            break;
-        case 'rgb':
-            hslColor = rgbToHSL(color.red, color.green, color.blue);
-            break;
-        case 'hsl':
-            hslColor = color;
-            break;
-        case 'hsv':
-            hslColor = hsvToHSL(color.hue, color.saturation, color.value);
-            break;
-        case 'cmyk':
-            hslColor = cmykToHSL(color.cyan, color.magenta, color.yellow, color.black);
-            break;
-        case 'lab':
-            hslColor = labToHSL(color.l, color.a, color.b);
-            break;
-        default:
-            hslColor = color;
-    }
-
-    return hslColor;
-};
-
-
-// Convert input colors to HSL for adjustSaturationAndLightness function
-function satAndLightHslColorGenWithLogs(initialColorSpace = 'hex', color, ) {
-    switch (initialColorSpace) {
-        case 'hex':
-            console.log('calling hexToHSL');
-            hslColor = hexToHSL(color);
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        case 'rgb':
-            console.log('calling rgbToHSL');
-            hslColor = rgbToHSL(color.red, color.green, color.blue);
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        case 'hsl':
-            hslColor = color;
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        case 'hsv':
-            console.log('calling hsvToHSL');
-            hslColor = hsvToHSL(color.hue, color.saturation, color.value);
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        case 'cmyk':
-            console.log('calling cmykToHSL');
-            hslColor = cmykToHSL(color.cyan, color.magenta, color.yellow, color.black);
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        case 'lab':
-            console.log('calling labToHSL');
-            hslColor = labToHSL(color.l, color.a, color.b);
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            break;
-        default:
-            hslColor = color;
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-    }
-
-    console.log('initialColorSpace switch expression completed for adjustSaturationAndLightness');
-
-    return hslColor;
-};
-
-
 export { declareConversionMap };
-export { initialHSLColorGeneration, formatHSLForInitialColorValueGen, formatHslColorPropertiesAsNumbers, globalColorSpaceFormatting, satAndLightHslColorGen };
 
-export { initialHSLColorGenerationWithLogs, formatHSLForInitialColorValueGenWithLogs, formatHslColorPropertiesAsNumbersWithLogs, globalColorSpaceFormattingWithLogs, satAndLightHslColorGenWithLogs };
+export { initialHSLColorGeneration, formatHSLForInitialColorValueGen, formatHslColorPropertiesAsNumbers };
+
+export { initialHSLColorGenerationWithLogs, formatHSLForInitialColorValueGenWithLogs, formatHslColorPropertiesAsNumbersWithLogs };
 
 export { initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT };
 
 export { initialColorValuesGenerationCaseHexWithLogging, initialColorValuesGenerationCaseRGBWithLogging, initialColorValuesGenerationCaseHSLWithLogging, initialColorValuesGenerationCaseDEFAULTWithLogging };
+
+export { globalColorSpaceFormatting };
+export { globalColorSpaceFormattingWithLogs };

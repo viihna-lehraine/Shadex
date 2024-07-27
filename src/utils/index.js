@@ -11,8 +11,16 @@ import { copyToClipboard } from "./clipboardUtils.js";
 import { randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, randomSL } from './randomUtils.js';
 import { logObjectProperties, logObjectPropertiesInColorValues } from "./logUtils.js";
 import { getWeightedRandomInterval } from "./paletteGenUtils.js";
+<<<<<<< HEAD
 import { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs, adjustSatAndLightInitLogs, generateButtonExitLogs, generatePaletteExitLogs, handleGenerateButtonClickExitLogs } from './logUtils.js';
 
 
 export { populateColorTextOutputBox, copyToClipboard, randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, randomSL, logObjectProperties, logObjectPropertiesInColorValues, getWeightedRandomInterval };
 export { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs,adjustSatAndLightInitLogs, generateButtonExitLogs, generatePaletteExitLogs, handleGenerateButtonClickExitLogs };
+=======
+import { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs } from './logUtils.js';
+
+
+export { populateColorTextOutputBox, copyToClipboard, randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateColor1, randomSL, logObjectProperties, logObjectPropertiesInColorValues, getWeightedRandomInterval };
+export { convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesFinalLogs };
+>>>>>>> parent of 5f76951 (ok I lied. EOD for real now)

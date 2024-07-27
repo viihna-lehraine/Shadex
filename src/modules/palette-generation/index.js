@@ -20,8 +20,11 @@ import { generatePaletteBox, populateColorTextOutputBox } from '../dom.js';
 import { generatePalette } from './paletteGen.js';
 import { hexToHSL } from '../color-conversion/convertToHSL.js';
 import { applyLimitGrayAndBlack, applyLimitLight } from '../userIntefaceParameters.js';
+<<<<<<< HEAD
 import { randomInitialColor, generateSelectedPaletteType } from './paletteGenHelpers.js'; 
 import { randomInitialColorWithLogs,generateSelectedPaletteTypeWithLogs, paletteGenColorSpaceConditionCheckWithLogs } from './paletteGenHelpers.js';
+=======
+>>>>>>> parent of 5f76951 (ok I lied. EOD for real now)
 
 
 export { generateRandomColorPalette, generateComplementaryPalette, generateTriadicPalette, generateTetradicPalette, generateHexadicPalette, generateSplitComplementaryPalette, generateAnalogousPalette, generateDiadicPalette, generateMonochromaticPalette };
@@ -29,6 +32,10 @@ export { randomHSL, randomSL, generateColor1 };
 export { generatePaletteBox, populateColorTextOutputBox };
 export { generatePalette };
 export { hexToHSL };
+<<<<<<< HEAD
 export { applyLimitGrayAndBlack, applyLimitLight };
 export { randomInitialColor, generateSelectedPaletteType };
 export { randomInitialColorWithLogs, generateSelectedPaletteTypeWithLogs, paletteGenColorSpaceConditionCheckWithLogs };
+=======
+export { applyLimitGrayAndBlack, applyLimitLight};
+>>>>>>> parent of 5f76951 (ok I lied. EOD for real now)
