@@ -157,71 +157,40 @@ function generateSelectedPaletteTypeWithLogs(paletteType, numBoxes, limitGrayAnd
             colors = generateTriadicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace = 'hex');
             console.log('colors: ', colors, ' data type: ', (typeof colors));
             return colors;
-            break;
         case 4:
             console.log('calling generateTetradicPalette');
             colors = generateTetradicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace = 'hex');
             console.log('colors: ', colors, ' data type: ', (typeof colors));
             return colors;
-            break;
         case 5:
             console.log('calling generateSplitComplementaryPalette');
             colors = generateSplitComplementaryPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace = 'hex');
             console.log('colors: ', colors, ' data type: ', (typeof colors));
             return colors;
-            break;
         case 6:
             console.log('calling generatAnalogousPalette');
             colors = generateAnalogousPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace = 'hex');
             console.log('colors: ', colors, ' data type: ', (typeof colors));
             return colors;
-            break;
         case 7:
             console.log('calling generateHexadicPalette');
             colors = generateHexadicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace = 'hex');
             console.log('colors: ', colors, ' data type: ', (typeof colors));
             return colors;
-            break;
         case 8:
             console.log('calling generateDiadicPalette');
             colors = generateDiadicPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace = 'hex');
             console.log('colors: ', colors, ' data type: ', (typeof colors));
             return colors;
-            break;
         case 9:
             console.log('calling generateMonochromaticPalette');
             colors = generateMonochromaticPalette(numBoxes, limitGrayAndBlack, limitLight, baseColor, customColor, initialColorSpace = 'hex');
             console.log('colors: ', colors, ' data type: ', (typeof colors));
             return colors;
-            break;
         default:
             console.error('unable to determine color scheme');
             break;
     };
-
-    console.log('paletteType switch expression complete for generatePalette function');
-};
-
-
-// First, will check f customColor was provided, ensures it is in the form of an object. If not, will reformat customColor as an object
-// If customColor has no value, will instead assign it a default value while formatting it as an object
-function paletteGenColorSpaceConditionCheck(customColor) {
-    // Ensures customColor is an object. If not, reformats as an object
-    if (customColor && typeof customColor === 'object' && customColor.value) {
-        baseColor = customColor;
-
-        return customColor;
-    } else {
-        // Assign default values if customColor is not provided or is not an object
-        console.log('formatting customColor as an object');
-
-        baseColor = {
-            format: initialColorSpace,
-            value: customColor
-        };
-
-        return customColor;
-    }
 };
 
 
