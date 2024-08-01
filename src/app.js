@@ -1,4 +1,4 @@
-// KolorKraft - version 0.5.2-dev
+// ColorGen - version 0.5.2-dev
 
 // Author: Viihna Leraine (reach me at viihna@ViihnaTech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
 
