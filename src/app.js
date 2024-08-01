@@ -1,6 +1,6 @@
-// ColorGen - version 0.5
+// ColorGen - version 0.5.0
 
-// Author: Viihna Leraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Lost-Possum (Github))
+// Author: Viihna Leraine (reach me at viihna@viihnatech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
 
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 
