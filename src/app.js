@@ -1,6 +1,6 @@
-// ColorGen - version 0.5
+// KolorKraft - version 0.5.2-dev
 
-// Author: Viihna Leraine (reach me at viihna@voidfucker.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
+// Author: Viihna Leraine (reach me at viihna@ViihnaTech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
 
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 
