@@ -1,3 +1,5 @@
 dev/
 
+*.env
+
 jsconfig.json

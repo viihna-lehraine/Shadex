@@ -1,4 +1,4 @@
-// ColorGen - version 0.5.21-dev
+// ColorGen - version 0.5.22-dev
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@ViihnaTech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
 
@@ -12,8 +12,8 @@ function defineUIButtons() {
     const saturateButton = document.getElementById('saturate-button');
     const desaturateButton = document.getElementById('desaturate-button');
     const popupDivButton = document.getElementById('custom-color-button');
-    const applyColorButton = document.getElementById('apply-color-button');
-    const clearColorButton = document.getElementById('clear-color-button');
+    const applyCustomColorButton = document.getElementById('apply-custom-color-button');
+    const clearCustomColorButton = document.getElementById('clear-custom-color-button');
     const advancedMenuToggleButton = document.getElementById('advanced-menu-toggle-button');
     const applyInitialColorSpaceButton = document.getElementById('apply-initial-color-space-button');
 
@@ -25,8 +25,8 @@ function defineUIButtons() {
         saturateButton,
         desaturateButton,
         popupDivButton,
-        applyColorButton,
-        clearColorButton,
+        applyCustomColorButton,
+        clearCustomColorButton,
         advancedMenuToggleButton,
         applyInitialColorSpaceButton,
         selectedColor

@@ -1,4 +1,4 @@
-// ColorGen - version 0.5.21-dev
+// ColorGen - version 0.5.22-dev
 
 // Author: Viihna Leraine (reach me at viihna@ViihnaTech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
 
@@ -18,107 +18,84 @@
 import { addConversionButtonEventListeners, applyCustomColor, defineUIButtons, generateButtonExitLogs, generatePalette, pullParametersFromUI, showCustomColorPopupDiv } from './export.js';
 
 
+let customColor = null;
+
+
 // App Initialization - applies all event listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM content loaded. Initializing application');
+    console.log('app.js - DOM content loaded; initializing application');
     
-    // Defines the buttons within the main UI 
+    // Defines the buttons within the main UI
+    console.log('app.js > DOM event listener - calling defineUIButtons() and defining its output as properties of an unnamed object'); 
     const {
         generateButton,
         saturateButton,
         desaturateButton,
         popupDivButton,
-        applyColorButton,
-        clearColorButton,
+        applyCustomColorButton,
+        clearCustomColorButton,
         advancedMenuToggleButton,
         applyInitialColorSpaceButton,
         selectedColor
     } = defineUIButtons();
 
     // Adds the Conversion Button event listeners
+    console.log('app.js > DOM event listener - caling addConversionButtonEventListeners()');
     addConversionButtonEventListeners();
 
     // Generate Button event listener
     generateButton.addEventListener('click', function(e) {
         e.preventDefault();
-
+        console.log('app.js > generateButton event listener - calling pullParametersFromUI() and defining its output as properties of an unnamed object');
         let { paletteType, numBoxes, limitGrayAndBlack, limitLight, initialColorSpace } = pullParametersFromUI();
-
-        // Set default values if not provided by user
-        initialColorSpace = initialColorSpace || 'hex';
-        
-        // Logs status information about variable values before exiting the generateButton event listener
-        generateButtonExitLogs(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace);
-
-        //*DEV-NOTE* add descriptive comment
-        generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace);
+        initialColorSpace = initialColorSpace || 'hex'; // set default values if not provided by user
+        generateButtonExitLogs(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace); // logs status information about variable values before exiting the generateButton event listener
+        generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace); //*DEV-NOTE* add descriptive comment
     })
     
     // Saturate Button event listener
     saturateButton.addEventListener('click', function(e) {
         e.preventDefault();
-
-        console.log('calling saturateColor');
-        
-        //*DEV-NOTE* add descriptive comment
-        saturateColor(selectedColor);
+        console.log('app.js > saturateButton event listener- calling saturateColor()');
+        saturateColor(selectedColor); //*DEV-NOTE* add descriptive comment
     })
     
     // Desaturate Button event listener
     desaturateButton.addEventListener('click', function(e) {
         e.preventDefault();
-
-        console.log('calling desaturateColor');
-
-        //*DEV-NOTE* add descriptive comment
-        desaturateColor(selectedColor);
+        console.log('app.js > desaturateButton evenet listener- calling desaturateColor()');
+        desaturateColor(selectedColor); //*DEV-NOTE* add descriptive comment
     })
 
     // Popup Div Button event listener
     popupDivButton.addEventListener('click', function(e) {
         e.preventDefault();
-        
-        console.log('calling showCustomColorPopupDiv');
-        
-        //*DEV-NOTE* add descriptive comment
-        showCustomColorPopupDiv();
+        console.log('app.js > popupDivButton event listener - calling showCustomColorPopupDiv()');
+        showCustomColorPopupDiv(); //*DEV-NOTE* add descriptive comment
     })
 
     // Apply Color Button event listener
-    applyColorButton.addEventListener('click', function(e) {
+    applyCustomColorButton.addEventListener('click', function(e) {
         e.preventDefault();
-
-        console.log('calling applyCustomColor');
-
-        //*DEV-NOTE* add descriptive comment
-        customColor = applyCustomColor();
+        console.log('app.js > applyCustomColorButton event listener - calling applyCustomColor()');
+        customColor = applyCustomColor(); //*DEV-NOTE* add descriptive comment above
         console.log('customColor: ', customColor, ' type: ', (typeof customColor));
-        console.log('calling showCustomColorPopupDiv');
-
-        // Displays an overlay div allowing the user to select a custom color
-        showCustomColorPopupDiv();
+        console.log('calling showCustomColorPopupDiv()');
+        showCustomColorPopupDiv(); // displays an overlay div allowing the user to select a custom color
     })
 
     // Clear Color Button event listener
-    clearColorButton.addEventListener('click', function(e) {
+    clearCustomColorButton.addEventListener('click', function(e) {
         e.preventDefault();
-
         customColor = null;
-        
-        //*DEV-NOTE* add descriptive comment
-        console.log('calling showCustomColorPopupDiv');
-
-        // Displays an overlay div allowing the user to select a custom color
-        showCustomColorPopupDiv();
+        console.log('app.js > clearCustomColorButton event listener - calling showCustomColorPopupDiv()'); //*DEV-NOTE* add descriptive comment
+        showCustomColorPopupDiv(); // displays an overlay div allowing the user to select a custom color
     })
 
-    // Advanced Menu Toggle Button event listener
-    //*DEV-NOTE* add descriptive comment
+    // Advanced Menu Toggle Button event listener / *DEV-NOTE* add descriptive comment
     advancedMenuToggleButton.addEventListener('click', function(e) {
         e.preventDefault();
-
         let advancedMenu = document.getElementById('advanced-menu');
-                
         if (advancedMenu.classList.contains('hidden')) {
             advancedMenu.classList.remove('hidden');
             advancedMenu.style.display = 'block';
@@ -131,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Advanced Menu - Apply Initial Color Space Button event listener
     applyInitialColorSpaceButton.addEventListener('click', function(e) {
         e.preventDefault();
-
         let initialColorSpace = document.getElementById('initial-color-space-options').value;
 
         // function does not yet exist

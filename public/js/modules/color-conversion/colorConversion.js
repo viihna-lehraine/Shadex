@@ -1,4 +1,4 @@
-// ColorGen - version 0.5.21-dev
+// ColorGen - version 0.5.22-dev
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 // Author: Viihna Lehraine (reach me at viihna@ViihnaTech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
 
@@ -6,7 +6,7 @@
 
 
 
-import { applyLimitGrayAndBlack, applyLimitLight, convertColorsInitialLogging, declareConversionMap, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, generateAndStoreColorValuesExitLogs, generateAndStoreColorValuesInitialLogging, globalColorSpaceFormatting } from '../../export.js';
+import { applyLimitGrayAndBlack, applyLimitLight, convertColorsInitialLogging, declareConversionMap, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, generateAndStoreColorValuesExitLogs, generateAndStoreColorValuesInitialLogging, globalColorSpaceFormatting, initialHslColorGeneration } from '../../export.js';
 
 
 //Create map object for conversion functions
@@ -55,33 +55,38 @@ function generateAndStoreColorValues(color, initialColorSpace = 'hex') {
     let hslColor;
 
     // Ensure initialColorSpace is set correctly
-    console.log('checking if initialColorSpace is null. If null, assigning value "hex" to initialColorSpace');
+    console.log('generateAndStoreColorValues() - checking if initialColorSpace is null. If null, assigning value "hex" to initialColorSpace');
 
     if (initialColorSpace == null) {
+        console.log('generateAndStoreColorValues() - initialColorSpace was null; declaring as "hex"');
         initialColorSpace = 'hex';
     }
 
-    console.log('initialColorSpace defined as ', initialColorSpace, ' , data type: ', (typeof initialColorSpace));
+    console.log('generateAndStoreColorValues() - initialColorSpace defined as ', initialColorSpace, ' , data type: ', (typeof initialColorSpace));
 
     // Ensure Hex value is correctly extracted
     const hexValue = (typeof color.value === 'object' && color.value.value) ? color.value.value : color.value;
 
-    console.log('hexValue: ', hexValue, ' type: ', (typeof hexValue));
+    console.log('generateAndStoreColorValues() - hexValue: ', hexValue, ' type: ', (typeof hexValue));
 
     // Set color.format according to initialColorSpace
     color.format = initialColorSpace;
 
-    console.log('color.format set to: ', color.format);
+    console.log('generateAndStoreColorValues() - color.format set to: ', color.format);
 
     // Generate HSL color based on the initial color format
     initialHslColorGeneration(color, hexValue);
 
-    console.log('generated HSL color: ', hslColor, ' type: ', (typeof hslColor));
+    console.log('generateAndStoreColorValues() - generated HSL color: ', hslColor, ' type: ', (typeof hslColor));
 
     // Ensure HSL is in the correct format
+    console.log('generateAndStoreColorValues() - calling formatHslForInitialColorValuesGen(hue, saturation, lightness)');
     formatHslForInitialColorValueGen(hue, saturation, lightness);
 
+    console.log('generateAndStoreColorValues() - hslColor: ', hslColor, ' type: ', (typeof hslColor));
+
     // Ensure hslColor.saturation and hslColor.lightness are type "number"
+    console.log('generateAndStoreColorValues() - calling formatHslColorPropertiesAsNumbers');
     formatHslColorPropertiesAsNumbers(hslColor);
 
     // Deconstruct HSL object into h, s, and l values with correct formatting
@@ -91,15 +96,20 @@ function generateAndStoreColorValues(color, initialColorSpace = 'hex') {
         lightness: `${hslColor.lightness}%`
     }
 
+    console.log('generateAndStoreColorValues() - initialColorSpace: ', initialColorSpace, ' type: ', (typeof initialColorSpace));
+    console.log('generateAndStoreColorValues() - hexValue: ', hexValue, ' type: ' (typeof hexValue));
+    console.log('generateAndStoreColorValues() - formattedHslColor: ', formattedHslColor, ' type: ', (typeof formattedHslColor));
+    console.log('generateAndStoreColorValues() - colorValues: ', colorValues, ' type: ', (typeof colorValues));
+    console.log('generateAndStoreColorValues() - hslColor: ', hslColor, ', type: ', (typeof hslColor));
+    console.log('generateAndStoreColorValues() - calling globalColorSpaceFormatting(initialColorSpace = "hex", hexValue, formattedHslColor, colorValues, hslColor)');
     globalColorSpaceFormatting(initialColorSpace = 'hex', hexValue, formattedHslColor, colorValues, hslColor);
-    generateAndStoreColorValuesExitLogs(colorValues)
-
+    generateAndStoreColorValuesExitLogs(colorValues);
     return colorValues;
 };
 
 
 function adjustSaturationAndLightness(color, limitGrayAndBlack, limitLight, initialColorSpace = 'hex') {
-    console.log('executing adjustSaturationAndLightness');
+    console.log('adjustSaturationAndLightnesss() executing with parameters (color, limitGrayAndBlack, limitLight, initialColorSpace = "hex")');
     console.log(`color: ${color}, limitGrayAndBlack: ${limitGrayAndBlack}, limitLight: ${limitLight}, initialColorSpace: ${initialColorSpace}`);
     console.log('types - color: ', (typeof color), ' limitGrayAndBlack: ', (typeof limitGrayAndBlack), ' limitLight ', (typeof limitLight), ' initialColorSpace: ', (typeof initialColorSpace));
 
@@ -108,73 +118,57 @@ function adjustSaturationAndLightness(color, limitGrayAndBlack, limitLight, init
     // convert the input color to HSL
     switch (initialColorSpace) {
         case 'hex':
-            console.log('calling hexToHSL');
-
+            console.log('adjustSaturationAndLightness() - CASE hex > calling hexToHSL()');
             hslColor = hexToHSL(color);
-
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-            
+            console.log('adjustSaturationAndLightness() - CASE hex > hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         case 'rgb':
-            console.log('calling rgbToHSL');
-
+            console.log('adjustSaturationAndLightness() - CASE rgb > calling rgbToHSL');
             hslColor = rgbToHSL(color.red, color.green, color.blue);
-
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-
+            console.log('adjustSaturationAndLightness() - CASE rgb > hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         case 'hsl':
+            console.log('adjustSaturationAndLightness() - CASE hsl > assinging color to hslColor');
             hslColor = color;
-
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-
+            console.log('adjustSaturationAndLightness() - CASE hsl > hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         case 'hsv':
-            console.log('calling hsvToHSL');
-
+            console.log('adjustSaturationAndLightness() - CASE hsv > calling hsvToHSL');
             hslColor = hsvToHSL(color.hue, color.saturation, color.value);
-
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-
+            console.log('adjustSaturationAndLightness() - CASE hsv > hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         case 'cmyk':
-            console.log('calling cmykToHSL');
-
+            console.log('adjustSaturationAndLightness() - CASE cmyk > calling cmykToHSL');
             hslColor = cmykToHSL(color.cyan, color.magenta, color.yellow, color.black);
-
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-
+            console.log('adjustSaturationAndLightness() - CASE cmyk > hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         case 'lab':
-            console.log('calling labToHSL');
-
+            console.log('adjustSaturationAndLightness() - CASE lab > calling labToHSL');
             hslColor = labToHSL(color.l, color.a, color.b);
-
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
-
+            console.log('adjustSaturationAndLightness() - CASE lab > hslColor: ', hslColor, ' data type: ', (typeof hslColor));
             break;
         default:
-            hslColor = color;
-
-            console.log('hslColor: ', hslColor, ' data type: ', (typeof hslColor));
+            console.log('adjustSaturationAndLightness() - DEFAULT CASE > calling hexToHSL()');
+            hslColor = hexToHSL(color);
+            console.log('adjustSaturationAndLightness() - DEFAULT CASE > hslColor: ', hslColor, ' data type: ', (typeof hslColor));
+            break;
     }
-    console.log('initialColorSpace switch expression completed for adjustSaturationAndLightness');
+
+    console.log('adjustSaturationAndLightness() - initialColorSpace switch expression completed for adjustSaturationAndLightness');
 
     // Apply limitGrayAndBlack and limitLight, if applicable
     if (limitGrayAndBlack) {
-        console.log('calling applyLimitGrayAndBlack');
-
+        console.log('adjustSaturationAndLightness() - calling applyLimitGrayAndBlack()');
         ({ saturation: hslColor.saturation, lightness: hslColor.lightness } = applyLimitGrayAndBlack(hslColor.saturation, hslColor.lightness));
     }
 
     if (limitLight) {
-        console.log('calling applyLimitLight');
-
+        console.log('adjustSaturationAndLightness() - calling applyLimitLight()');
         hslColor.lightness = applyLimitLight(hslColor.lightness);
     }
 
-    console.log('execution of adjustSaturationAndLightness complete');
-
+    console.log('adjustSaturationAndLightness() - hslColor: ', hslColor, ' type: ', (typeof hslColor));
+    console.log('adjustSaturationAndLightness() complete; returning hslColor');
     return hslColor;
 };
 
