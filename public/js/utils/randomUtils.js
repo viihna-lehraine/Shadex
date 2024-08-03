@@ -6,7 +6,7 @@
 
 
 
-import { applyLimitGrayAndBlack, applyLimitLight } from '../../export.js';
+import { applyLimitGrayAndBlack, applyLimitLight } from '../export.js';
 
 
 // Random SL generation for an HSL attribute
