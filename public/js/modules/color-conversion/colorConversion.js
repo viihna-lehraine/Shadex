@@ -9,10 +9,6 @@
 import { applyLimitGrayAndBlack, applyLimitLight, convertColorsInitialLogging, declareConversionMap, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, generateAndStoreColorValuesExitLogs, generateAndStoreColorValuesInitialLogging, globalColorSpaceFormatting, initialHslColorGeneration } from '../../export.js';
 
 
-//Create map object for conversion functions
-declareConversionMap();
-
-
 // When a conversion button is clicked, this will pull the color space type for that color and repopulate color-text-output-box with it
 // Previous conversion function actually tried to convert them again. But conversion takes place with palette generation and are stored as an oject
 function convertColors(targetFormat) {

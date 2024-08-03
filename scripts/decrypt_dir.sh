@@ -27,16 +27,28 @@ echo "GPG_RECIPIENT: $GPG_RECIPIENT"
 # Decrypt the archive
 gpg --output "$ARCHIVE" --decrypt "$ENCRYPTED_ARCHIVE"
 
-# Extract the decompressed archive
-tar -xzvf "$ARCHIVE"
+# Check if the decryption was successful
+if [ $? -eq 0 ]; then
+    # Check if the output directory already exists and find a new name if necessary
+    OUTPUT_DIR="$DIR"
+    i=1
+    while [ -d "$OUTPUT_DIR" ]; do
+        OUTPUT_DIR="${DIR}-$i"
+        i=$((i + 1))
+    done
 
-# Optionally, prompt to remove the decrypted tar.gz file
-read -p "Do you want to delete the decrypted archive ($ARCHIVE)? (y/n): " answer
-if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+    # Extract the decompressed archive
+    tar -xzvf "$ARCHIVE" -C "$CWD"
+    mv "$CWD/$DIR" "$OUTPUT_DIR"
+
+    # Remove the input encrypted archive and intermediate tar.gz archive
+    rm "$ENCRYPTED_ARCHIVE"
+    echo "Encrypted archive deleted."
     rm "$ARCHIVE"
-    echo "Decrypted archive deleted."
 else
-    echo "Decrypted archive kept."
+    echo "Decryption failed."
+    exit 1
 fi
 
-read -p "unlock_dir.sh execution complete"
+# Indicate completion
+echo "unlockDev.sh execution complete

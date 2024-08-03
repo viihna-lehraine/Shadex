@@ -11,22 +11,18 @@ import { hslToRGB } from '../../export.js';
 
 // Convert color component to Hexfunction componentToHex(c) {
 function componentToHex(c) {
-    console.log('executing componentToHex');
-    console.log('c: ', c, ' type: ', (typeof c));
+    console.log('componentToHex()');
+    console.log('componentToHex() - c: ', c, ' type: ', (typeof c));
 
     try {
         const hex = c.toString(16);
-        console.log('hex: ', hex, ' type: ', (typeof hex));
-        console.log('execution of componentToHex complete');
-
+        console.log('componentToHex() - hex: ', hex, ' type: ', (typeof hex));
+        console.log('componentToHex() - execution of componentToHex complete');
         return hex.length === 1 ? '0' + hex : hex;
     } catch (error) {
-        console.error(`Error converting component to hex: ${error}`);
-
-        console.log('execution of componentToHex complete');
-
-        // Return '00' for invalid components
-        return '00'; 
+        console.error(`componentToHex() - error converting component to hex: ${error}`);
+        console.log('componentToHex() complete - returning default component "00"');
+        return '00'; // return '00' for invalid components
     }
 }
 

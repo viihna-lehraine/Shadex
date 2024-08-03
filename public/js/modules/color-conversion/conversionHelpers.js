@@ -64,46 +64,46 @@ function declareConversionMap() {
 
 // Generate initial HSL color based on color.format
 function initialHslColorGeneration(color, hexValue) {
-    console.log('executing initialHslColorGeneration()');
+    console.log('initialHslColorGeneration() executing');
     console.log('initialHslColorGeneration() - color: ', color, ' typeof color: ', (typeof color), ' hexValue: ', hexValue, ' typeof hexValue: ', (typeof hexValue));
 
     if (!color) {
-        console.error('Error: initialHslColorGeneration() - color not found');
+        console.error('initialHslColorGeneration() - error: color not found');
     }
     
     if (!hexValue) {
-        console.error('Error: initialHslColorGeneration() - hexValue not found');
+        console.error('initialHslColorGeneration() - error: hexValue not found');
     }
 
     if (color.format === 'hex') {
-        console.log('initialHslColorGeneration() -calling hexToHSL');
+        console.log('initialHslColorGeneration() - calling hexToHSL()');
         hslColor = hexToHSL(hexValue);
     } else if (color.format === 'rgb') {
-        console.log('initialHslColorGeneration() -calling rgbToHSL');
+        console.log('initialHslColorGeneration() - calling rgbToHSL()');
         hslColor = rgbToHSL(color.value);
     } else if (color.format === 'hsl') {
         console.log('initialHslColorGeneration() - calling parseHSL()');
         hslColor = parseHSL(color.value);
     } else if (color.format === 'hsv') {
-        console.log('initialHslColorGeneration() - calling hslToHSV');
+        console.log('initialHslColorGeneration() - calling hslToHSV()');
         hslColor = hslToHSV(color.value);
     } else if (color.format === 'cmyk') {
-        console.log('initialHslColorGeneration() - calling cmykToHSL');
+        console.log('initialHslColorGeneration() - calling cmykToHSL()');
         hslColor = cmykToHSL(color.value);
     } else if (color.format === 'lab') {
-        console.log('initialHslColorGeneration() - calling labToHSL')
+        console.log('initialHslColorGeneration() - calling labToHSL()')
         hslColor = labToHSL(color.value);
     } else {
-        console.error('initialHslColorGeneration() - ERROR: unsupported color format: ', color.format);
+        console.error('initialHslColorGeneration() - error: unsupported color format: ', color.format, ' ; returning');
         return;
     }
 
     if (typeof hslColor !== 'object') {
-        console.error('initialHslColorGeneration() - Error: initialHslColorGeneration - hslColor is not an object');
+        console.error('initialHslColorGeneration() - error: hslColor is not an object');
     }
 
     console.log('initialHslColorGeneration() - generated HSL color: ', hslColor, ' type: ', (typeof hslColor));
-    console.log('initialHslColorGeneration() - execution of initialHslColorGeneration() complete; returning hslColor');
+    console.log('initialHslColorGeneration() complete; returning hslColor');
     return hslColor;
 };
 

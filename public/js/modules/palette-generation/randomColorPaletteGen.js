@@ -64,13 +64,13 @@ function generateRandomColorPalette(numBoxes, limitGrayAndBlack, limitLight, cus
                     console.log('generateRandomColorPalette() - baseColor: ', baseColor, ' type: ', (typeof baseColor));
                     break;
                 default:
-                    console.log('generateRandomColorPalette() - DEFAULT CASE > calling randomHSL');
-                    baseColor = randomHSL(limitGrayAndBlack, limitLight);
+                    console.log('generateRandomColorPalette() - DEFAULT CASEr > calling randomHex');
+                    baseColor = randomHex(limitGrayAndBlack, limitLight);
                     console.log('generateRandomColorPalette() - baseColor: ', baseColor, ' type: ', (typeof baseColor));
                     break;
             }
 
-            console.log('generateRandomColorPalette() - initialColorSpace switch expression complete for generateRandomColorPalette()');
+            console.log('generateRandomColorPalette() - initialColorSpace switch expression complete');
             console.log(`generateRandomColorPalette() - base color generated: ${JSON.stringify(baseColor)}`);
             console.log('generateRandomColorPalette() - generateAndStoreColorValues()');
             color = generateAndStoreColorValues(baseColor, initialColorSpace = 'hex');
