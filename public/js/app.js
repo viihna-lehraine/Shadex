@@ -8,17 +8,14 @@
 
 // This program comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND
 
-// This file initializes the application before further handling by additional JS modules. Modules are located at /src/modules/ and /src/utils/
+// This file initializes the application before further handling by additional JS modules
 
 
 // BEGIN CODE
 
 
 
-import { defineUIButtons, addConversionButtonEventListeners, pullParametersFromUI } from './export.js';
-import { showCustomColorPopupDiv, applyCustomColor } from './export.js';
-import { generateButtonExitLogs } from './export.js';
-import { generatePalette } from './export.js';
+import { addConversionButtonEventListeners, applyCustomColor, defineUIButtons, generateButtonExitLogs, generatePalette, pullParametersFromUI, showCustomColorPopupDiv } from './export.js';
 
 
 // App Initialization - applies all event listeners when DOM is loaded
@@ -55,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         //*DEV-NOTE* add descriptive comment
         generatePalette(paletteType, numBoxes, limitGrayAndBlack, limitLight, customColor, initialColorSpace);
-    });
+    })
     
     // Saturate Button event listener
     saturateButton.addEventListener('click', function(e) {
@@ -65,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         //*DEV-NOTE* add descriptive comment
         saturateColor(selectedColor);
-    });
+    })
     
     // Desaturate Button event listener
     desaturateButton.addEventListener('click', function(e) {
@@ -75,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         //*DEV-NOTE* add descriptive comment
         desaturateColor(selectedColor);
-    });
+    })
 
     // Popup Div Button event listener
     popupDivButton.addEventListener('click', function(e) {
@@ -85,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         //*DEV-NOTE* add descriptive comment
         showCustomColorPopupDiv();
-    });
+    })
 
     // Apply Color Button event listener
     applyColorButton.addEventListener('click', function(e) {
@@ -100,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Displays an overlay div allowing the user to select a custom color
         showCustomColorPopupDiv();
-    });
+    })
 
     // Clear Color Button event listener
     clearColorButton.addEventListener('click', function(e) {
@@ -113,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Displays an overlay div allowing the user to select a custom color
         showCustomColorPopupDiv();
-    });
+    })
 
     // Advanced Menu Toggle Button event listener
     //*DEV-NOTE* add descriptive comment
@@ -129,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             advancedMenu.classList.add('hidden');
             advancedMenu.style.display = 'none';
         }
-    });
+    })
 
     // Advanced Menu - Apply Initial Color Space Button event listener
     applyInitialColorSpaceButton.addEventListener('click', function(e) {
@@ -139,5 +136,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // function does not yet exist
         // applyInitialColorSpace(initialColorSpace);
-    });
+    })
 });

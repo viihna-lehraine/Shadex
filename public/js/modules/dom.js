@@ -6,7 +6,7 @@
 
 
 
-import { attachDragAndDropEventListeners, generateAndStoreColorValues, hexToHSL, hslToHex } from '../../export.js';
+import { attachDragAndDropEventListeners, generateAndStoreColorValues, hexToHSL, hslToHex } from '../export.js';
 
 
 let paletteBoxCount = 1;

@@ -6,7 +6,7 @@
 
 
 
-import { showTooltip } from '../../export.js';
+import { showTooltip } from '../export.js';
 
 
 // Copy Color Values to Clipboard on Click

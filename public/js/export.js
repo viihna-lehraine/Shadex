@@ -22,14 +22,14 @@ import { xyzToLab, hexToLab, rgbToLab, hslToLab, hsvToLab, cmykToLab } from './m
 import { xyzToRGB, hexToRGB, hslToRGB, hsvToRGB, cmykToRGB, labToRGB } from './modules/color-conversion/convertToRGB.js';
 import { rgbToXYZ, labToXYZ } from './modules/color-conversion/convertToXYZ.js';
 
-import { generateAnalogousHues, generateAnalogousPalette } from './modules/palette-generation/analogousPaletteGen';
-import { generateComplementaryPalette } from './modules/palette-generation';
+import { generateAnalogousHues, generateAnalogousPalette } from './modules/palette-generation/analogousPaletteGen.js';
+import { generateComplementaryPalette } from './modules/palette-generation/complementaryPaletteGen.js';
 import { generateDiadicHues, generateDiadicPalette } from './modules/palette-generation/diadicPaletteGen.js';
 import { generateHexadicHues, generateHexadicPalette } from './modules/palette-generation/hexadicPaletteGen.js';
 import { generateMonochromaticPalette } from './modules/palette-generation/monochromaticPaletteGen.js';
 import { generatePalette, handleGenerateButtonClick } from './modules/palette-generation/paletteGen.js';
 import { randomInitialColor, generateSelectedPaletteType, paletteGenColorSpaceConditionCheck, parameterAssignForGenerateButtonEventHandler } from './modules/palette-generation/paletteGenHelpers.js';
-import { generateRandomColorPalette } from './modules/palette-generation';
+import { generateRandomColorPalette } from './modules/palette-generation/randomColorPaletteGen.js';
 import { generateSplitComplementaryHues, generateSplitComplementaryPalette } from './modules/palette-generation/splitComplementaryPaletteGen.js';
 import { generateTetradicHues, generateTetradicPalette } from './modules/palette-generation/tetradicPaletteGen.js';
 import { generateTriadicHues, generateTriadicPalette } from './modules/palette-generation/triadicPaletteGen.js';
