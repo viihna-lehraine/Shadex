@@ -6,7 +6,7 @@
 
 
 
-import { hexToRGB, hexToHSL, hexToHSV, hexToCMYK, hexToLab, rgbToHex, rgbToHSL, rgbToHSV, rgbToCMYK, rgbToLab, hslToHex, hslToRGB, hslToHSV, hslToCMYK, hslToLab, hsvToHex, hsvToRGB, hsvToHSL, hsvToCMYK, hsvToLab, cmykToHex, cmykToRGB, cmykToHSL, cmykToHSV, cmykToLab, labToHex, labToRGB, labToHSL, labToHSV, labToCMYK } from '../../export.js';
+import { hexToRGB, hexToHSL, hexToHSV, hexToCMYK, hexToLab, rgbToHex, rgbToHSL, rgbToHSV, rgbToCMYK, rgbToLab, hslToHex, hslToRGB, hslToHSV, hslToCMYK, hslToLab, hsvToHex, hsvToRGB, hsvToHSL, hsvToCMYK, hsvToLab, cmykToHex, cmykToRGB, cmykToHSL, cmykToHSV, cmykToLab, labToHex, labToRGB, labToHSL, labToHSV, labToCMYK } from '../export.js';
 
 
 // Declares conversionMap object

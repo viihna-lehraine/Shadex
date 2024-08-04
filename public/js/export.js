@@ -6,14 +6,15 @@
 
 
 
-import { defineUIButtons, addConversionButtonEventListeners, pullParametersFromUI } from './helpers.js';
+import { defineUIButtons, addConversionButtonEventListeners, pullParametersFromUI } from './helpers/appHelpers.js';
+import { declareConversionMap, initialHslColorGeneration, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT, globalColorSpaceFormatting } from './helpers/conversionHelpers.js';
+import { randomInitialColor, generateSelectedPaletteType, paletteGenColorSpaceConditionCheck, parameterAssignForGenerateButtonEventHandler } from './helpers/paletteGenHelpers.js';
 
-import { generatePaletteBox, makePaletteBox, populateColorTextOutputBox, getElementsForSelectedColor, saturateColor, desaturateColor, showTooltip, showCustomColorPopupDiv, applyCustomColor } from './modules/dom.js';
-import { attachDragAndDropEventListeners, handleDragStart, handleDragOver, handleDrop, handleDragEnd } from './modules/dragAndDrop.js';
-import { applyLimitGrayAndBlack, applyLimitLight } from './modules/userIntefaceParameters.js';
+import { generatePaletteBox, makePaletteBox, populateColorTextOutputBox, getElementsForSelectedColor, saturateColor, desaturateColor, showTooltip, showCustomColorPopupDiv, applyCustomColor } from './modules/dom/dom.js';
+import { attachDragAndDropEventListeners, handleDragStart, handleDragOver, handleDrop, handleDragEnd } from './modules/dom/dragAndDrop.js';
+import { applyLimitGrayAndBlack, applyLimitLight } from './modules/dom/userIntefaceParameters.js';
 
 import { convertColors, generateAndStoreColorValues, adjustSaturationAndLightness } from './modules/color-conversion/colorConversion.js';
-import { declareConversionMap, initialHslColorGeneration, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT, globalColorSpaceFormatting } from './modules/color-conversion/conversionHelpers.js';
 import { hexToCMYK, rgbToCMYK, hslToCMYK, hsvToCMYK, labToCMYK } from './modules/color-conversion/convertToCMYK.js';
 import { componentToHex, rgbToHex, hslToHex, hsvToHex, cmykToHex, labToHex } from './modules/color-conversion/convertToHex.js';
 import { hexToHSL, rgbToHSL, hsvToHSL, cmykToHSL, labToHSL } from './modules/color-conversion/convertToHSL.js';
@@ -28,7 +29,6 @@ import { generateDiadicHues, generateDiadicPalette } from './modules/palette-gen
 import { generateHexadicHues, generateHexadicPalette } from './modules/palette-generation/hexadicPaletteGen.js';
 import { generateMonochromaticPalette } from './modules/palette-generation/monochromaticPaletteGen.js';
 import { generatePalette, handleGenerateButtonClick } from './modules/palette-generation/paletteGen.js';
-import { randomInitialColor, generateSelectedPaletteType, paletteGenColorSpaceConditionCheck, parameterAssignForGenerateButtonEventHandler } from './modules/palette-generation/paletteGenHelpers.js';
 import { generateRandomColorPalette } from './modules/palette-generation/randomColorPaletteGen.js';
 import { generateSplitComplementaryHues, generateSplitComplementaryPalette } from './modules/palette-generation/splitComplementaryPaletteGen.js';
 import { generateTetradicHues, generateTetradicPalette } from './modules/palette-generation/tetradicPaletteGen.js';
