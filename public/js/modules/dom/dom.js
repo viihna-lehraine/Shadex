@@ -14,50 +14,47 @@ let paletteBoxCount = 1;
 
 // Generate paletteBox {numBoxes} number of times 
 function generatePaletteBox(colors, numBoxes) {
-    console.log('executing generatePaletteBox');
-    console.log('colors: ', colors, ' data type ', (typeof colors));
-    console.log('numBoxes: ', numBoxes, ' data type ', (typeof numBoxes));
+    console.log('generatePaletteBox() executing');
+    console.log('generatePaletteBox() - colors: ', colors, ' data type ', (typeof colors));
+    console.log('generatePaletteBox() - numBoxes: ', numBoxes, ' data type ', (typeof numBoxes));
 
     const paletteRow = document.getElementById('palette-row');
 
     paletteRow.innerHTML = '';
     paletteBoxCount = 1;
 
-    for (let i = 0; i < numBoxes; i++) {
-        // make sure colors[i] is defined for each iteration of i
+    for (let i = 0; i < numBoxes; i++) { // make sure colors[i] is defined for each iteration of i
         if (!colors[i]) {
-            console.error(`Color at index ${i} is undefined`);
-            // if colors[i] is undefined, skip this iteration 
-            continue;
+            console.error(`generatePaletteBox() - color at index ${i} is undefined`);
+            continue; // if colors[i] is undefined, skip this iteration 
         }
 
-        console.log(`calling genrateAndStoreColorValues (from within generatePaletteBox) for colors array at index ${i}`);
+        console.log('generatePaletteBox() - calling generateAndStoreColorValues() with parameters (colors[i]: ', `(${colors[i]})`);
 
         const colorValues = generateAndStoreColorValues(colors[i]);
 
-        console.log('calling makePaletteBox from within generatePaletteBox');
+        console.log('generatePaletteBox() - calling makePaletteBox() with parameters (colorValues, paletteBox) and using result to define new, unnamed object with properties { colorStripe, paletteBoxCount: newPaletteBoxCount');
 
         const { colorStripe, paletteBoxCount: newPaletteBoxCount } = makePaletteBox(colorValues, paletteBoxCount);
 
         paletteRow.appendChild(colorStripe);
 
-        console.log('paletteBoxCount: ', paletteBoxCount, ' data type: ', typeof(paletteBoxCount));
-        console.log(`colors at index ${i}: ${colors[i]}, data type (typeof ${colors[i]}`);
+        console.log('generatePaletteBox() - paletteBoxCount: ', paletteBoxCount, ' data type: ', typeof(paletteBoxCount));
+        console.log(`generatePaletteBox() - colors at index ${i}: ${colors[i]}, data type (typeof ${colors[i]}`);
 
-        console.log(`calling populateColorTextOutputBox from within generatePaletteBox for palette-box #${paletteBoxCount}`);
+        console.log(`generatePaletteBox() - calling populateColorTextOutputBox for palette-box #${paletteBoxCount} using parameters (colors[i], paletteBoxCount)`);
         populateColorTextOutputBox(colors[i], paletteBoxCount);
 
-        console.log(`execution of generatePaletteBox for palette-box #${paletteBoxCount}`);
-
+        console.log(`generatePaletteBox() complete for palette-box #${paletteBoxCount}`);
         paletteBoxCount = newPaletteBoxCount;
     }
 };
 
 
 function makePaletteBox(colorValues, paletteBoxCount) {
-    console.log(`executing makePaletteBox for palette-box #${paletteBoxCount}`);
-    console.log('colorValues: ', colorValues, ' data type: ', (typeof colorValues));
-    console.log('paletteBoxCount: ', paletteBoxCount, ' data type: ', (typeof paletteBoxCount));
+    console.log(`makePaletteBox() executing for palette-box #${paletteBoxCount}`);
+    console.log('makePaletteBox() - colorValues: ', colorValues, ' data type: ', (typeof colorValues));
+    console.log('makePaletteBox() - paletteBoxCount: ', paletteBoxCount, ' data type: ', (typeof paletteBoxCount));
 
     let paletteBox = document.createElement('div');
     paletteBox.className = 'palette-box';
@@ -132,41 +129,39 @@ function makePaletteBox(colorValues, paletteBoxCount) {
     colorStripe.style.backgroundColor = colorValues.hsl;
 
     colorStripe.setAttribute('draggable', true);
-    console.log(`calling attachDragAndDropEventListeners for palette-box ${paletteBoxCount}`);
+    console.log(`makePaletteBox() - calling attachDragAndDropEventListeners for palette-box ${paletteBoxCount}`);
     attachDragAndDropEventListeners(colorStripe);
 
     colorStripe.appendChild(paletteBox);
 
-    console.log(`execution of makePaletteBox for palette-box #${paletteBoxCount} finalizing`);
-    console.log('returning colorStripe and iterating paletteBoxCount');
-
+    console.log(`makePaletteBox() complete for palette-box #${paletteBoxCount} - returning colorStripe and iterating paletteBoxCount`);
     return { colorStripe, paletteBoxCount: paletteBoxCount + 1 };
 };
 
 
 // Populates .color-text-output-box with the hex attribute
 function populateColorTextOutputBox(color, boxNumber) {
-    console.log(`executing populateColorTextOutputBox for palette-box #${boxNumber}`);
+    console.log(`populateColorTextOutputBox() executing for palette-box #${boxNumber}`);
 
     let colorTextOutputBox = document.getElementById(`color-text-output-box-${boxNumber}`);
 
     if (colorTextOutputBox) {
-        console.log(`calling hslToHex from within populateColorTextOutputBox for palette-box #${boxNumber}`);
+        console.log(`populateColorTextOutputBox() - calling hslToHex with parameters (color.hue, color.saturation, color.lightness) for palette-box #${boxNumber}`);
 
         let hexValue = hslToHex(color.hue, color.saturation, color.lightness);
-
-        console.log('hexValue: ', hexValue, ' data type: ', (typeof hexValue));
+        console.log('makePaletteBox() - hexValue: ', hexValue, ' data type: ', (typeof hexValue));
 
         colorTextOutputBox.value = hexValue;
         colorTextOutputBox.setAttribute('data-format', 'hex');
     }
 
-    console.log(`execution of populateColorTextOutputBox for palette-box #${boxNumber} complete`);
+    console.log(`makePaletteBox() complete for palette-box #${boxNumber}`);
 };
 
 
 // Sature and Desaturate Button Element Selection
 function getElementsForSelectedColor(selectedColor) {
+    console.log('getElementsForSelectedColor() executing with parameter (selectedColor) - completing and returning elements as properties of an unnamed object');
     return {
         selectedColorTextOutputBox: document.getElementById(`color-text-output-box-${selectedColor}`),
         selectedColorBox: document.getElementById(`color-box-${selectedColor}`),

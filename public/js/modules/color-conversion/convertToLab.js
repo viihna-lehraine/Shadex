@@ -11,15 +11,15 @@ import { rgbToXYZ, hexToRGB, hslToRGB, hsvToRGB } from '../../export.js';
 
 // Convert XYZ to Lab
 function xyzToLab(x, y, z) {
-    console.log('executing xyzToLab');
-    console.log('x: ', x, ' y: ', y, ' z: ', z);
-    console.log('types - x: ', (typeof x), ' y: ', (typeof y), ' z: ', (typeof z));
+    console.log('xyzToLab() executing');
+    console.log('xyzToLab() - x: ', x, ' y: ', y, ' z: ', z);
+    console.log('xyzToLab() > types - x: ', (typeof x), ' y: ', (typeof y), ' z: ', (typeof z));
 
     try {
-        console.log(`Converting XYZ to Lab: X=${x}, Y=${y}, Z=${z}`);
+        console.log(`xyzToLab() - converting XYZ to Lab: X=${x}, Y=${y}, Z=${z}`);
 
         if (isNaN(x) || isNaN(y) || isNaN(z)) {
-            throw new Error(`Invalid XYZ values: X=${x}, Y=${y}, Z=${z}`);
+            throw new Error(`xyzToLab() - invalid XYZ values: X=${x}, Y=${y}, Z=${z}`);
         }
 
         const refX = 95.047, refY = 100.000, refZ = 108.883;
@@ -36,34 +36,31 @@ function xyzToLab(x, y, z) {
         let a = 500 * (x - y);
         let b = 200 * (y - z);
 
-        console.log('l: ', l, ' a: ', a, ' b: ', b);
-        console.log('types - l: ', (typeof l), ' a: ', (typeof a), ' b: ', (typeof b));
+        console.log('xyzToLab() - l: ', l, ' a: ', a, ' b: ', b);
+        console.log('xyzToLab() - types - l: ', (typeof l), ' a: ', (typeof a), ' b: ', (typeof b));
 
 
         l = l.toFixed(2);
         a = a.toFixed(2);
         b = b.toFixed(2);
 
-        console.log('truncating { l, a, b } values');
-        console.log('l: ', l, ' a: ', a, ' b: ', b);
-        console.log('types - l: ', (typeof l), ' a: ', (typeof a), ' b: ', (typeof b));
+        console.log('xyzToLab() - truncating { l, a, b } values');
+        console.log('xyzToLab() - l: ', l, ' a: ', a, ' b: ', b);
+        console.log('xyzToLab() - types - l: ', (typeof l), ' a: ', (typeof a), ' b: ', (typeof b));
 
         const lab = { l, a, b };
-        console.log(`Converted Lab: ${JSON.stringify(lab)}`);
-        console.log('lab: ', lab, ' type: ', (typeof lab));
-        console.log('execution of xyzToLab complete');
 
+        console.log(`xyzToLab() - converted Lab: ${JSON.stringify(lab)}`);
+        console.log('xyzToLab() - lab: ', lab, ' type: ', (typeof lab));
+        console.log('xyzToLab() complete - returning lab');
         return lab;
-        
     } catch (error) {
-        console.error(`Error converting XYZ to Lab: ${error}`);
+        console.error(`xyzToLab() - error converting XYZ to Lab: ${error}`);
 
-        // Return black for invalid inputs
-        const lab = { l: 0, a: 0, b: 0 };
+        const lab = { l: 0, a: 0, b: 0 }; // return black for invalid inputs
 
-        console.log('lab: ', lab, ' type: ', (typeof lab));
-        console.log('execution of xyzToLab complete');
-
+        console.log('xyzToLab() - lab: ', lab, ' type: ', (typeof lab));
+        console.log('xyzToLab() - execution of xyzToLab complete');
         return lab;
     }
 };
@@ -71,42 +68,38 @@ function xyzToLab(x, y, z) {
 
 // Convert Hex to Lab
 function hexToLab(hex) {
-    console.log('executing hexToLab');
-    console.log('hex: ', hex, ' data type ', (typeof hex));
+    console.log('hexToLab() executing');
+    console.log('hexToLab() - hex: ', hex, ' data type ', (typeof hex));
 
     try {
-        console.log(`Converting Hex to Lab: ${hex}`);
-        console.log('calling hexToRGB');
+        console.log(`hexToLab() - converting Hex to Lab: ${hex}`);
+        console.log('hexToLab() - calling hexToRGB');
 
         const rgb = hexToRGB(hex);
 
-        console.log(`Converted RGB from Hex: ${JSON.stringify(rgb)}`);
-        console.log('rgb: ', rgb, ' type: ', (typeof rgb));
-        console.log('calling rgbToXYZ');
+        console.log(`hexToLab() - converted RGB from Hex: ${JSON.stringify(rgb)}`);
+        console.log('hexToLab() - rgb: ', rgb, ' type: ', (typeof rgb));
+        console.log('hexToLab() - calling rgbToXYZ() with parameters (rgb.red, rgb.green, rgb.blue)');
 
         const xyz = rgbToXYZ(rgb.red, rgb.green, rgb.blue);
 
-        console.log('xyz: ', xyz, ' type: ', (typeof xyz));
-        console.log(`Converted XYZ from RGB: ${JSON.stringify(xyz)}`);
-        console.log('calling xyzToLab');
+        console.log('hexToLab() - xyz: ', xyz, ' type: ', (typeof xyz));
+        console.log(`hexToLab() - converted XYZ from RGB: ${JSON.stringify(xyz)}`);
+        console.log('hexToLab() - calling xyzToLab() with parameters (xyz.x, xyz.y, xyz.z)');
 
         const lab = xyzToLab(xyz.x, xyz.y, xyz.z);
 
-        console.log('lab: ', lab, ' type: ', (typeof lab));
-        console.log('execution of hexToLab complete');
-
+        console.log('hexToLab() - lab: ', lab, ' type: ', (typeof lab));
+        console.log('hexToLab() complete - returning lab as a formatted string');
         return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
-
     } catch (error) {
-        console.error(`Error converting Hex to Lab: ${error}`);
+        console.error(`hexToLab() - error converting Hex to Lab: ${error}`);
 
-        // Return black for invalid inputs
-        let l, a, b = 0;
+        let l, a, b = 0; // return black for invalid inputs
         let lab = { l, a, b };
 
-        console.log('lab: ', lab, ' type: ', (typeof lab));
-        console.log('execution of hexToLab complete');
-
+        console.log('hexToLab() - lab: ', lab, ' type: ', (typeof lab));
+        console.log('hexToLab() complete - returning lab as a formatted string');
         return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
     }
 };
@@ -114,37 +107,35 @@ function hexToLab(hex) {
 
 // Convert RGB to Lab
 function rgbToLab(red, green, blue) {
-    console.log('executing rgbToLab');
-    console.log('red: ', red, ' green: ', green, ' blue: ', blue);
-    console.log('types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ', (typeof blue));
+    console.log('rgbToLab() executing');
+    console.log('rgbToLab() - red: ', red, ' green: ', green, ' blue: ', blue);
+    console.log('rgbToLab() > types - red: ', (typeof red), ' green: ', (typeof green), ' blue: ', (typeof blue));
 
     try {
-        console.log(`Converting RGB to Lab: R=${red}, G=${green}, B=${blue}`);
+        console.log(`rgbToLab() - converting RGB to Lab: R=${red}, G=${green}, B=${blue}`);
 
         if (isNaN(red) || isNaN(green) || isNaN(blue)) {
-            throw new Error(`Invalid RGB values: R=${red}, G=${green}, B=${blue}`);
+            throw new Error(`rgbToLab() - invalid RGB values: R=${red}, G=${green}, B=${blue}`);
         }
 
-        console.log('calling rgbToXYZ');
+        console.log('rgbToLab() - calling rgbToXYZ() with parameters (red, green, blue)');
 
         const xyz = rgbToXYZ(red, green, blue);
 
-        console.log(`Converted XYZ from RGB: ${JSON.stringify(xyz)}`);
-        console.log('xyz: ', xyz, ' type: ', (typeof xyz));
-        console.log('execution of rgbToLab complete');
+        console.log(`rgbToLab() - converted XYZ from RGB: ${JSON.stringify(xyz)}`);
+        console.log('rgbToLab() - xyz: ', xyz, ' type: ', (typeof xyz));
+        console.log('rgbToLab() complete - returning result of xyzToLab() with parameters (xyz.x, xyz.y, xyz.z)');
 
         return xyzToLab(xyz.x, xyz.y, xyz.z);
-
     } catch (error) {
-        console.error(`Error converting RGB to Lab: ${error}`);
+        console.error(`rgbToLab() - error converting RGB to Lab: ${error}`);
         
         // Return black for invalid inputs
         let l, a, b = 0;
         let lab = { l, a, b };
 
-        console.log('lab: ', lab, ' type: ', (typeof lab));
-        console.log('execution of rgbToLab complete');
-
+        console.log('rgbToLab() - lab: ', lab, ' type: ', (typeof lab));
+        console.log('rgbToLab() complete - reutrning lab as a formatted string');
         return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
     }
 };
@@ -152,38 +143,35 @@ function rgbToLab(red, green, blue) {
 
 // Convert HSL to Lab
 function hslToLab(hue, saturation, lightness) {
-    console.log('executing hslToLab');
-    console.log('hue: ', hue, ' saturation: ', saturation, ' lightness: ', lightness);
-    console.log('types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' lightness: ', (typeof lightness));
+    console.log('hslToLab() executing');
+    console.log('hslToLab() - hue: ', hue, ' saturation: ', saturation, ' lightness: ', lightness);
+    console.log('hslToLab() > types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' lightness: ', (typeof lightness));
 
     try {
-        console.log(`Converting HSL to Lab: H=${hue}, S=${saturation}, L=${lightness}`);
-        console.log('calling hslToRGB');
+        console.log(`hslToLab() - converting HSL to Lab: H=${hue}, S=${saturation}, L=${lightness}`);
+        console.log('hslToLab() - calling hslToRGB() with parameters (hue, saturation, lightness)');
 
         const rgb = hslToRGB(hue, saturation, lightness);
 
-        console.log(`Converted RGB from HSL: ${JSON.stringify(rgb)}`);
-        console.log('rgb: ', rgb, ' type: ', (typeof rgb));
-        console.log('calling rgbToXYZ');
+        console.log(`hslToLab() - converted RGB from HSL: ${JSON.stringify(rgb)}`);
+        console.log('hslToLab() - rgb: ', rgb, ' type: ', (typeof rgb));
+        console.log('hslToLab() - calling rgbToXYZ() with parameters (rgb.red, rgb.green, rgb.blue)');
 
         const xyz = rgbToXYZ(rgb.red, rgb.green, rgb.blue);
 
-        console.log(`Converted XYZ from RGB: ${JSON.stringify(xyz)}`);
-        console.log('xyz: ', xyz, ' type: ', (typeof xyz));
-        console.log('execution of hslToLab complete');
+        console.log(`hslToLab() - converted XYZ from RGB: ${JSON.stringify(xyz)}`);
+        console.log('hslToLab() - xyz: ', xyz, ' type: ', (typeof xyz));
+        console.log('hslToLab() complete - returning results of xyzToLab() with parameters (xyz.x, xyz.y, xyz.z)');
 
         return xyzToLab(xyz.x, xyz.y, xyz.z);
-
     } catch (error) {
-        console.error(`Error converting HSL to Lab: ${error}`);
+        console.error(`hslToLab() - error converting HSL to Lab: ${error}`);
         
-        // Return black for invalid inputs
-        let l, a, b = 0;
+        let l, a, b = 0; // return black for invalid inputs
         let lab = { l, a, b };
 
-        console.log('lab: ', lab, ' type: ', (typeof lab));
-        console.log('execution of hslToLab complete');
-
+        console.log('hslToLab() - lab: ', lab, ' type: ', (typeof lab));
+        console.log('hslToLab() complete - returning lab as a formatted string');
         return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
     }
 };
@@ -191,38 +179,35 @@ function hslToLab(hue, saturation, lightness) {
 
 // Convert HSV to Lab
 function hsvToLab(hue, saturation, value) {
-    console.log('executing hsvToLab');
-    console.log('hue: ', hue, ' saturation: ', saturation, ' value: ', value);
-    console.log('types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' value: ', (typeof value));
+    console.log('hsvToLab() executing');
+    console.log('hsvToLab() - hue: ', hue, ' saturation: ', saturation, ' value: ', value);
+    console.log('hsvToLab() > types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' value: ', (typeof value));
 
     try {
-        console.log(`Converting HSV to Lab: H=${hue}, S=${saturation}, V=${value}`);
-        console.log('calling hsvToRGB');
+        console.log(`hsvToLab() - converting HSV to Lab: H=${hue}, S=${saturation}, V=${value}`);
+        console.log('hsvToLab() - calling hsvToRGB() with parameters (hue, saturation, value)');
 
         const rgb = hsvToRGB(hue, saturation, value);
 
-        console.log(`Converted RGB from HSV: ${JSON.stringify(rgb)}`);
-        console.log('rgb: ', rgb, ' type: ', (typeof rgb));
-        console.log('calling rgbToXYZ');
+        console.log(`hsvToLab() - converted RGB from HSV: ${JSON.stringify(rgb)}`);
+        console.log('hsvToLab() - rgb: ', rgb, ' type: ', (typeof rgb));
+        console.log('hsvToLab() - calling rgbToXYZ() with parameters (rgb.red, rgb.green, rgb.blue)');
 
         const xyz = rgbToXYZ(rgb.red, rgb.green, rgb.blue);
 
-        console.log(`Converted XYZ from RGB: ${JSON.stringify(xyz)}`);
-        console.log('xyz: ', xyz, ' type: ', (typeof xyz));
-        console.log('execution of hsvToLab complete');
+        console.log(`hsvToLab() - converted XYZ from RGB: ${JSON.stringify(xyz)}`);
+        console.log('hsvToLab() - xyz: ', xyz, ' type: ', (typeof xyz));
+        console.log('hsvToLab() complete - returning result of xyzToLab() with parameters (xyz.x, xyz.y, xyz.z)');
 
         return xyzToLab(xyz.x, xyz.y, xyz.z);
-
     } catch (error) {
-        console.error(`Error converting HSV to Lab: ${error}`);
+        console.error(`hsvToLab() - error converting HSV to Lab: ${error}`);
         
-        // Return black for invalid inputs
-        let l, a, b = 0;
+        let l, a, b = 0; // return black for invalid inputs
         let lab = { l, a, b };
 
-        console.log('lab: ', lab, ' type: ', (typeof lab));
-        console.log('execution of hsvToLab complete');
-
+        console.log('hsvToLab() - lab: ', lab, ' type: ', (typeof lab));
+        console.log('hsvToLab() complete - returning lab as a formatted string');
         return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
     }
 };
@@ -230,37 +215,34 @@ function hsvToLab(hue, saturation, value) {
 
 // Convert CMYK to Lab
 function cmykToLab(cyan, magenta, yellow, key) {
-    console.log('executing cmykToLab');
-    console.log('cyan: ', cyan, ' magenta: ', magenta, ' yellow: ', yellow, ' key: ', key);
-    console.log('types - cyan: ', (typeof cyan), ' magenta: ', (typeof magenta), ' yellow: ', (typeof yellow), ' key: ', (typeof key));
+    console.log('cmykToLab() executing');
+    console.log('cmykToLab() - cyan: ', cyan, ' magenta: ', magenta, ' yellow: ', yellow, ' key: ', key);
+    console.log('cmykToLab() > types - cyan: ', (typeof cyan), ' magenta: ', (typeof magenta), ' yellow: ', (typeof yellow), ' key: ', (typeof key));
 
     try {
-        console.log(`Converting CMYK to Lab: C=${cyan}, M=${magenta}, Y=${yellow}, K=${key}`);
-        console.log('calling cmykToRGB');
+        console.log(`cmykToLab() - converting CMYK to Lab: C=${cyan}, M=${magenta}, Y=${yellow}, K=${key}`);
+        console.log('cmykToLab() - calling cmykToRGB() with parameters (cyan, magenta, yellow, key)');
 
         const rgb = cmykToRGB(cyan, magenta, yellow, key);
 
-        console.log(`Converted RGB from CMYK: ${JSON.stringify(rgb)}`);
-        console.log('rgb: ', rgb, ' type: ', (typeof rgb));
-        console.log('calling rgbToXYZ');
+        console.log(`cmykToLab() - converted RGB from CMYK: ${JSON.stringify(rgb)}`);
+        console.log('cmykToLab() - rgb: ', rgb, ' type: ', (typeof rgb));
+        console.log('cmykToLab() - calling rgbToXYZ() with parameters (rgb.red, rgb.green, rgb.blue)');
 
         const xyz = rgbToXYZ(rgb.red, rgb.green, rgb.blue);
 
-        console.log(`Converted XYZ from RGB: ${JSON.stringify(xyz)}`);
-        console.log('execution of cmykToLab complete. return statement calls xyzToLab');
+        console.log(`cmykToLab() - converted XYZ from RGB: ${JSON.stringify(xyz)}`);
+        console.log('cmykToLab() - complete - returning result of xyzToLab() with parameters (xyz.x, xyz.y, xyz.z)');
 
         return xyzToLab(xyz.x, xyz.y, xyz.z);
-        
     } catch (error) {
-        console.error(`Error converting CMYK to Lab: ${error}`);
+        console.error(`cmykToLab() - error converting CMYK to Lab: ${error}`);
         
-        // Return black for invalid inputs
         let l, a, b = 0;
-        let lab = { l, a, b };
+        let lab = { l, a, b }; // return black for invalid inputs
 
-        console.log('lab: ', lab, ' type: ', (typeof lab));
-        console.log('execution of cmykToLab complete');
-
+        console.log('cmykToLab() - lab: ', lab, ' type: ', (typeof lab));
+        console.log('cmykToLab() complete - returning lab as a formatted string');
         return `lab(${lab.l}, ${lab.a}, ${lab.b})`;
     }
 };

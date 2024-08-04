@@ -17,23 +17,18 @@ function hexToHSL(hexValue) {
     try {
         console.log(`hexToHSL() - converting Hex to HSL: ${hexValue}`);
         console.log('hexToHSL() - calling hexToRGB()');
-
         const rgb = hexToRGB(hexValue.value);
-
         console.log(`hexToHSL() - converted RGB from Hex: ${JSON.stringify(rgb)}`);
         console.log('hexToHSL() - rgb: ', rgb, ' type: ', (typeof rgb));
         console.log('hexToHSL() - calling rgbToHSL');
-
         const hsl = rgbToHSL(rgb.red, rgb.green, rgb.blue);
-        
         console.log(`hexToHSL() - converted HSL from RGB: ${JSON.stringify(hsl)}`);
         console.log('hexToHSL() - hsl: ', hsl, ' type: ', (typeof hsl));
         console.log('hexToHSL complete - returning hsl as an object');
-
         return hsl; // return hsl as an object
 
     } catch (error) {
-        console.error(`error converting Hex to HSL: ${error}`);
+        console.error(`hexToHSL() - error converting Hex to HSL: ${error}`);
         console.log('hextoHSL() complete - returning { hue: 0, saturation: 0, lightness: 0 }')
         return { hue: 0, saturation: 0, lightness: 0 }; // return black for invalid inputs
     }
@@ -139,19 +134,16 @@ function hsvToHSL(hue, saturation, value) {
         console.log('hsvToHSL() - types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' lightness: ', (typeof lightness));
 
         hsl = { hue, saturation, lightness };
-
+        
         console.log('hsvToHSL() - hsl: ', hsl, ' type: ', (typeof hsl));
         console.log('hsvToHSL() - execution of hsvToHSL complete');
         return `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`
     } catch (error) {
         console.error(`hsvToHSL() - error converting HSV to HSL: ${error}`);
-
         hue, saturation, lightness = 0;
         hsl = { hue, saturation, lightness }; // return black for invalid inputs
-
         console.log('hsvtoHSL() - hsl: ', hsl, ' type: ', (typeof hsl));
         console.log('hsvToHSL complete - returning hsl as a formatted string');
-
         return `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`;
     }
 };
@@ -170,12 +162,9 @@ function cmykToHSL(cyan, magenta, yellow, key) {
         console.log('cmykToHSL() - rgb: ', rgb, ' type: ', (typeof rgb))
         console.log('cmykToHSL() complete');
         return rgbToHSL(rgb.red, rgb.green, rgb.blue);
-
     } catch (error) {
         console.error(`cmykToHSL() - error converting CMYK to HSL: ${error}`);
-
-        // Return black for invalid inputs
-        hue, saturation, lightness = 0;
+        hue, saturation, lightness = 0; // return black for invalid inputs
         hsl = { hue, saturation, lightness };
 
         console.log('cmykToHSL() - hsl: ', hsl, ' type: ', (typeof hsl));
@@ -198,16 +187,12 @@ function labToHSL(l, a, b) {
         console.log('labToHSL() - rgb: ', rgb, ' type: ', (typeof rgb));
         console.log('labToHSL() complete');
         return rgbToHSL(rgb.red, rgb.green, rgb.blue);
-
     } catch (error) {
         console.error(`labToHSL() - error converting Lab to HSL: ${error}`);
-        
         hue, saturation, lightness = 0;
-        hsl = { hue, saturation, lightness }; // return black for invalid inputs
-        
+        hsl = { hue, saturation, lightness }; // return black for invalid inputs  
         console.log('labToHSL() - hsl: ', hsl, ' type: ', (typeof hsl));
         console.log('labToHSL() complete - returning hsl as a formatted string');
-
         return `hsl(${hsl.hue}, ${hsl.saturation}%, ${hsl.lightness}%)`; 
     }
 };

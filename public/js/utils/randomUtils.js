@@ -6,7 +6,7 @@
 
 
 
-import { applyLimitGrayAndBlack, applyLimitLight } from '../export.js';
+import { applyLimitGrayAndBlack, applyLimitLight, generateRandomFirstColorInitLogs, randomCMYKLogs, randomHSLExitLogs, randomHSVLogs, randomLabLogs, randomRGBLogs, randomSLExitLogs, randomSVExitLogs } from "../export.js";
 
 
 // Random SL generation for an HSL attribute
@@ -34,9 +34,7 @@ function randomSL(limitGrayAndBlack, limitLight) {
 
     let color = { saturation, lightness };
 
-    console.log('randomSL() - color: ', color, ' type: ', (typeof color));
-    console.log('randomSL() - saturation: ', color.saturation, ' typeof saturation: ', (typeof color.saturation), ' lightness: ', color.lightness, ' typeof lightness: ', (typeof lightness));
-    console.log('randomSL() complete - returning color');
+    randomSLExitLogs(color);
     return color;
 };
 
@@ -56,9 +54,7 @@ function randomSV() {
 
     let color = { saturation, value };
 
-    console.log('randomSV() - color: ', color, ' type: ', (typeof color));
-    console.log('randomSV() - saturation: ', color.saturation, ' typeof saturation: ', (typeof color.saturation), ' value: ', color.value, ' typeof value: ', (typeof value));
-    console.log('randomSV() complete - returning color');
+    randomSVExitLogs(color);
     return color;
 };
 
@@ -66,10 +62,8 @@ function randomSV() {
 // Random Hex Digit Generation
 function generateRandomHexDigit() {
     console.log('generateRandomHexDigit() executing');
-
     const hexDigits = '0123456789ABCDEF';
     const randomIndex = Math.floor(Math.random() * hexDigits.length);
-
     console.log('generateRandomHexDigit() complete');
     return hexDigits[randomIndex];
 };
@@ -94,8 +88,7 @@ function randomHex() {
 
 // Random RGB Generation
 function randomRGB() {
-    console.log('randomRGB() executing');
-    console.log('randomRGB() complete, returning { format: "rgb", red: , green: , blue: }');
+    randomRGBLogs();
     return {
         format: 'rgb',
         red: Math.floor(Math.random() * 256),
@@ -108,30 +101,24 @@ function randomRGB() {
 // Random HSL generation
 function randomHSL(limitGrayAndBlack, limitLight) {
     console.log('randomHSL() executing');
-
     let hue = Math.floor(Math.random() * 360);
     let saturation = Math.floor(Math.random() * 101);
     let lightness = Math.floor(Math.random() * 101);
-
     console.log(`randomHSL() - initial random HSL: H=${hue}, S=${saturation}, L=${lightness}`);
 
     if (limitGrayAndBlack) {
         console.log('randomHSL() - calling applyLimitGrayAndBlack()');
         ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
-
         console.log(`randomHSL() - limited gray and black for random HSL: S=${saturation}%, L=${lightness}}`);
     }
 
     if (limitLight) {
         console.log('randomHSL() - calling applyLimitLight()');
         lightness = applyLimitLight(lightness);
-
         console.log(`randomHSL() - limited lightness for random HSL: L=${lightness}%`);
     }
 
-    console.log(`randomHSL() - generated random HSL: hsl(${hue}, ${saturation}%, ${lightness}%)`);
-
-    console.log('randomHSL() complete');
+    randomHSLExitLogs(hue, saturation, lightness);
     return {
         format: 'hsl',
         hue,
@@ -143,8 +130,7 @@ function randomHSL(limitGrayAndBlack, limitLight) {
 
 // Random HSV Generation
 function randomHSV() {
-    console.log('randomHSV() executing');
-    console.log('randomHSV() complete, returning { format: "hsv", hue: , saturation: , value: }');
+    randomHSVLogs();
     return {
         format: 'hsv',
         hue: Math.floor(Math.random() * 360),
@@ -156,8 +142,7 @@ function randomHSV() {
 
 // Random CMYK Generation
 function randomCMYK() {
-    console.log('randomCMYK() executing');
-    console.log('randomCMYK() complete, returning { format: "cmyk", cyan: , magenta: , yellow: , key: }');
+    randomCMYKLogs();
     return {
         format: 'cmyk',
         cyan: Math.floor(Math.random() * 101),
@@ -170,8 +155,7 @@ function randomCMYK() {
 
 // Random Lab (CIELAB) Generation
 function randomLab() {
-    console.log('randomLab() executing');
-    console.log('randomLab() complete, returning { format: "lab", l: , a: , b: }');
+    randomLabLogs();
     return {
         format: 'lab',
         l: (Math.random() * 100).toFixed(2),
@@ -183,9 +167,7 @@ function randomLab() {
 
 // Generates a randomized 1st color
 function generateRandomFirstColor(limitGrayAndBlack, limitLight, initialColorSpace) {
-    console.log('generateRandomFirstColor() executing');
-    console.log('generateRandomFirstColor() - limitGrayAndBlack: ', limitGrayAndBlack, ' limitLight: ', limitLight, ' initialColorSpace: ', initialColorSpace);
-    console.log('generateRandomFirstColor() - types > limitGrayAndBlack: ', (typeof limitGrayAndBlack), ' limitLight: ', (typeof limitLight), ' initialColorSpace: ', (typeof initialColorSpace));
+    generateRandomFirstColorInitLogs(limitGrayAndBlack, limitLight, initialColorSpace);
 
     let color;
 
@@ -229,7 +211,6 @@ function generateRandomFirstColor(limitGrayAndBlack, limitLight, initialColorSpa
     }
 
     console.log(`generateRandomFirstColor() - generated color with generateRandomFirstColor() > ${JSON.stringify(color)}`);
-
     const colorBox1 = document.getElementById('color-box-1');
 
     if (colorBox1) {
@@ -274,8 +255,8 @@ function generateRandomFirstColor(limitGrayAndBlack, limitLight, initialColorSpa
         }
 
         console.log(`generateRandomFirstColor() - setting background color to ${colorString}`);
-
         colorBox1.style.backgroundColor = colorString;
+        console.log('generateRandomFirstColor() - calling populateColorTextOutputBox() with parameters (color, 1)');
         populateColorTextOutputBox(color, 1);
     }
 

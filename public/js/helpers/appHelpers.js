@@ -16,7 +16,6 @@ function defineUIButtons() {
     const clearCustomColorButton = document.getElementById('clear-custom-color-button');
     const advancedMenuToggleButton = document.getElementById('advanced-menu-toggle-button');
     const applyInitialColorSpaceButton = document.getElementById('apply-initial-color-space-button');
-
     let selectedColorOptions = document.getElementById('selected-color-options');
     let selectedColor = parseInt(selectedColorOptions.value, 10);
 

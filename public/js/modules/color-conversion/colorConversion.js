@@ -6,7 +6,7 @@
 
 
 
-import { applyLimitGrayAndBlack, applyLimitLight, convertColorsInitialLogging, declareConversionMap, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, generateAndStoreColorValuesExitLogs, generateAndStoreColorValuesInitialLogging, globalColorSpaceFormatting, initialHslColorGeneration } from '../../export.js';
+import { adjustSatAndLightExitLogs, adjustSatAndLightInitLogs, applyLimitGrayAndBlack, applyLimitLight, convertColorsInitialLogging, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, generateAndStoreColorValuesExitLogs, generateAndStoreColorValuesPreExitLogs, generateAndStoreColorValuesInitialLogging, globalColorSpaceFormatting, initialHslColorGeneration } from '../../export.js';
 
 
 // When a conversion button is clicked, this will pull the color space type for that color and repopulate color-text-output-box with it
@@ -22,7 +22,6 @@ function convertColors(targetFormat) {
         // error handling if no color values are found
         if (!colorValues) {
             console.error(`No color values found for ${box.textContent}`);
-
             return;
         }
 
@@ -31,13 +30,11 @@ function convertColors(targetFormat) {
 
         if (!newColor) {
             console.error(`Conversion to ${targetFormat} is not supported.`);
-
             return;
         }
 
         box.value = newColor;
         box.setAttribute('data-format', targetFormat);
-
         console.log('execution of convertColors complete');
     })
 };
@@ -50,9 +47,7 @@ function generateAndStoreColorValues(color, initialColorSpace = 'hex') {
     let colorValues = {};
     let hslColor;
 
-    // Ensure initialColorSpace is set correctly
-    console.log('generateAndStoreColorValues() - checking if initialColorSpace is null. If null, assigning value "hex" to initialColorSpace');
-
+    console.log('generateAndStoreColorValues() - checking if initialColorSpace is null. If null, assigning value "hex" to initialColorSpace'); // ensure initialColorSpace is set correctly
     if (initialColorSpace == null) {
         console.log('generateAndStoreColorValues() - initialColorSpace was null; declaring as "hex"');
         initialColorSpace = 'hex';
@@ -60,44 +55,27 @@ function generateAndStoreColorValues(color, initialColorSpace = 'hex') {
 
     console.log('generateAndStoreColorValues() - initialColorSpace defined as ', initialColorSpace, ' , data type: ', (typeof initialColorSpace));
 
-    // Ensure Hex value is correctly extracted
-    const hexValue = (typeof color.value === 'object' && color.value.value) ? color.value.value : color.value;
-
+    const hexValue = (typeof color.value === 'object' && color.value.value) ? color.value.value : color.value; // ensure Hex value is correctly extracted
     console.log('generateAndStoreColorValues() - hexValue: ', hexValue, ' type: ', (typeof hexValue));
 
-    // Set color.format according to initialColorSpace
-    color.format = initialColorSpace;
-
+    color.format = initialColorSpace; // set color.format according to initialColorSpace
     console.log('generateAndStoreColorValues() - color.format set to: ', color.format);
-
-    // Generate HSL color based on the initial color format
+    console.log('generateAndStoreColorValues - calling initialHslColorGeneration() with parameters (color, hexValue'); // generate HSL color based on the initial color format
     initialHslColorGeneration(color, hexValue);
-
     console.log('generateAndStoreColorValues() - generated HSL color: ', hslColor, ' type: ', (typeof hslColor));
-
-    // Ensure HSL is in the correct format
-    console.log('generateAndStoreColorValues() - calling formatHslForInitialColorValuesGen(hue, saturation, lightness)');
+    console.log('generateAndStoreColorValues() - calling formatHslForInitialColorValuesGen(hue, saturation, lightness)'); // ensure HSL is in the correct format
     formatHslForInitialColorValueGen(hue, saturation, lightness);
-
     console.log('generateAndStoreColorValues() - hslColor: ', hslColor, ' type: ', (typeof hslColor));
-
-    // Ensure hslColor.saturation and hslColor.lightness are type "number"
-    console.log('generateAndStoreColorValues() - calling formatHslColorPropertiesAsNumbers');
+    console.log('generateAndStoreColorValues() - calling formatHslColorPropertiesAsNumbers'); // ensure hslColor.saturation and hslColor.lightness are type "number"
     formatHslColorPropertiesAsNumbers(hslColor);
 
-    // Deconstruct HSL object into h, s, and l values with correct formatting
-    const formattedHslColor = {
+    const formattedHslColor = { // deconstruct HSL object into h, s, and l values with correct formatting
         hue: hslColor.hue,
         saturation: `${hslColor.saturation}%`,
         lightness: `${hslColor.lightness}%`
     }
 
-    console.log('generateAndStoreColorValues() - initialColorSpace: ', initialColorSpace, ' type: ', (typeof initialColorSpace));
-    console.log('generateAndStoreColorValues() - hexValue: ', hexValue, ' type: ' (typeof hexValue));
-    console.log('generateAndStoreColorValues() - formattedHslColor: ', formattedHslColor, ' type: ', (typeof formattedHslColor));
-    console.log('generateAndStoreColorValues() - colorValues: ', colorValues, ' type: ', (typeof colorValues));
-    console.log('generateAndStoreColorValues() - hslColor: ', hslColor, ', type: ', (typeof hslColor));
-    console.log('generateAndStoreColorValues() - calling globalColorSpaceFormatting(initialColorSpace = "hex", hexValue, formattedHslColor, colorValues, hslColor)');
+    generateAndStoreColorValuesPreExitLogs(initialColorSpace = 'hex', hexValue, formattedHslColor, colorValues, hslColor);
     globalColorSpaceFormatting(initialColorSpace = 'hex', hexValue, formattedHslColor, colorValues, hslColor);
     generateAndStoreColorValuesExitLogs(colorValues);
     return colorValues;
@@ -105,9 +83,7 @@ function generateAndStoreColorValues(color, initialColorSpace = 'hex') {
 
 
 function adjustSaturationAndLightness(color, limitGrayAndBlack, limitLight, initialColorSpace = 'hex') {
-    console.log('adjustSaturationAndLightnesss() executing with parameters (color, limitGrayAndBlack, limitLight, initialColorSpace = "hex")');
-    console.log(`color: ${color}, limitGrayAndBlack: ${limitGrayAndBlack}, limitLight: ${limitLight}, initialColorSpace: ${initialColorSpace}`);
-    console.log('types - color: ', (typeof color), ' limitGrayAndBlack: ', (typeof limitGrayAndBlack), ' limitLight ', (typeof limitLight), ' initialColorSpace: ', (typeof initialColorSpace));
+    adjustSatAndLightInitLogs(color, limitGrayAndBlack, limitLight, initialColorSpace = 'hex');
 
     let hslColor;
 
@@ -163,8 +139,7 @@ function adjustSaturationAndLightness(color, limitGrayAndBlack, limitLight, init
         hslColor.lightness = applyLimitLight(hslColor.lightness);
     }
 
-    console.log('adjustSaturationAndLightness() - hslColor: ', hslColor, ' type: ', (typeof hslColor));
-    console.log('adjustSaturationAndLightness() complete; returning hslColor');
+    adjustSatAndLightExitLogs(hslColor);
     return hslColor;
 };
 

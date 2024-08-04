@@ -7,7 +7,7 @@
 
 
 import { defineUIButtons, addConversionButtonEventListeners, pullParametersFromUI } from './helpers/appHelpers.js';
-import { declareConversionMap, initialHslColorGeneration, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT, globalColorSpaceFormatting } from './helpers/conversionHelpers.js';
+import { declareConversionMap, initialHslColorGeneration, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT, globalColorSpaceFormatting, hexToCMYKTryCaseHelper, hslToCMYKTryCaseHelper, hsvToCMYKTryCaseHelper, labToCMYKTryCaseHelper, hslToHexTryCaseHelper } from './helpers/conversionHelpers.js';
 import { randomInitialColor, generateSelectedPaletteType, paletteGenColorSpaceConditionCheck, parameterAssignForGenerateButtonEventHandler } from './helpers/paletteGenHelpers.js';
 
 import { generatePaletteBox, makePaletteBox, populateColorTextOutputBox, getElementsForSelectedColor, saturateColor, desaturateColor, showTooltip, showCustomColorPopupDiv, applyCustomColor } from './modules/dom/dom.js';
@@ -18,7 +18,7 @@ import { convertColors, generateAndStoreColorValues, adjustSaturationAndLightnes
 import { hexToCMYK, rgbToCMYK, hslToCMYK, hsvToCMYK, labToCMYK } from './modules/color-conversion/convertToCMYK.js';
 import { componentToHex, rgbToHex, hslToHex, hsvToHex, cmykToHex, labToHex } from './modules/color-conversion/convertToHex.js';
 import { hexToHSL, rgbToHSL, hsvToHSL, cmykToHSL, labToHSL } from './modules/color-conversion/convertToHSL.js';
-import { hexToHSV, rgbToHSV, hslToHSV, cmykToHSV, labToHSV } from './modules/color-conversion/convertToHSV.js';
+import { hexToHSV, rgbToHSV, hslToHSV, cmykToHSV, labToHSV  } from './modules/color-conversion/convertToHSV.js';
 import { xyzToLab, hexToLab, rgbToLab, hslToLab, hsvToLab, cmykToLab } from './modules/color-conversion/convertToLab.js';
 import { xyzToRGB, hexToRGB, hslToRGB, hsvToRGB, cmykToRGB, labToRGB } from './modules/color-conversion/convertToRGB.js';
 import { rgbToXYZ, labToXYZ } from './modules/color-conversion/convertToXYZ.js';
@@ -35,19 +35,24 @@ import { generateTetradicHues, generateTetradicPalette } from './modules/palette
 import { generateTriadicHues, generateTriadicPalette } from './modules/palette-generation/triadicPaletteGen.js';
 
 import { copyToClipboard } from './utils/clipboardUtils.js';
-import { logObjectProperties, logObjectPropertiesInColorValues, convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesExitLogs, adjustSatAndLightInitLogs, generateButtonExitLogs, generatePaletteExitLogs, handleGenerateButtonClickExitLogs } from './utils/logUtils.js';
+///////////////////////////////////////////////////////////
+import { logObjectProperties, logObjectPropertiesInColorValues, convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesPreExitLogs, generateAndStoreColorValuesExitLogs, adjustSatAndLightInitLogs, adjustSatAndLightExitLogs, generateButtonExitLogs, generatePaletteExitLogs, handleGenerateButtonClickExitLogs, randomSLExitLogs, randomSVExitLogs, randomRGBLogs, randomHSLExitLogs, randomCMYKLogs, randomLabLogs, generateRandomFirstColorInitLogs } from './utils/logUtils.js';
+import { hexToCMYKInitLogs, hexToCMYKTryExitLogs, hexToCMYKCatchExitLogs, rgbToCMYKInitLogs, rgbToCMYKTryExitLogs, rgbToCMYKCatchExitLogs, hslToCMYKInitLogs, hsvToCMYKInitLogs, labToCMYKInitLogs } from './utils/logUtils.js';
+///////////////////////////////////////////////////////////
 import { getWeightedRandomInterval } from './utils/paletteGenUtils.js';
 import { randomSL, randomSV, generateRandomHexDigit, randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateRandomFirstColor } from './utils/randomUtils.js';
 
 
 export { defineUIButtons, addConversionButtonEventListeners, pullParametersFromUI };
+export { declareConversionMap, initialHslColorGeneration, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT, globalColorSpaceFormatting, hexToCMYKTryCaseHelper, hslToCMYKTryCaseHelper, hsvToCMYKTryCaseHelper, labToCMYKTryCaseHelper, hslToHexTryCaseHelper };
+export { randomInitialColor, generateSelectedPaletteType, paletteGenColorSpaceConditionCheck, parameterAssignForGenerateButtonEventHandler };
 
 export { generatePaletteBox, makePaletteBox, populateColorTextOutputBox, getElementsForSelectedColor, saturateColor, desaturateColor, showTooltip, showCustomColorPopupDiv, applyCustomColor };
 export { attachDragAndDropEventListeners, handleDragStart, handleDragOver, handleDrop, handleDragEnd };
 export { applyLimitGrayAndBlack, applyLimitLight };
 
 export { convertColors, generateAndStoreColorValues, adjustSaturationAndLightness };
-export { declareConversionMap, initialHslColorGeneration, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT, globalColorSpaceFormatting };
+
 export { hexToCMYK, rgbToCMYK, hslToCMYK, hsvToCMYK, labToCMYK };
 export { componentToHex, rgbToHex, hslToHex, hsvToHex, cmykToHex, labToHex };
 export { hexToHSL, rgbToHSL, hsvToHSL, cmykToHSL, labToHSL };
@@ -62,13 +67,15 @@ export { generateDiadicHues, generateDiadicPalette };
 export { generateHexadicHues, generateHexadicPalette };
 export { generateMonochromaticPalette };
 export { generatePalette, handleGenerateButtonClick };
-export { randomInitialColor, generateSelectedPaletteType, paletteGenColorSpaceConditionCheck, parameterAssignForGenerateButtonEventHandler };
 export { generateRandomColorPalette};
 export { generateSplitComplementaryHues, generateSplitComplementaryPalette };
 export { generateTetradicHues, generateTetradicPalette };
 export { generateTriadicHues, generateTriadicPalette };
 
 export { copyToClipboard };
-export { logObjectProperties, logObjectPropertiesInColorValues, convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesExitLogs, adjustSatAndLightInitLogs, generateButtonExitLogs, generatePaletteExitLogs, handleGenerateButtonClickExitLogs };
+///////////////////////////////////////////////////////////
+export { logObjectProperties, logObjectPropertiesInColorValues, convertColorsInitialLogging, generateAndStoreColorValuesInitialLogging, generateAndStoreColorValuesPreExitLogs, generateAndStoreColorValuesExitLogs, adjustSatAndLightInitLogs, adjustSatAndLightExitLogs, generateButtonExitLogs, generatePaletteExitLogs, handleGenerateButtonClickExitLogs, randomSLExitLogs, randomSVExitLogs, randomRGBLogs, randomHSLExitLogs, randomCMYKLogs, randomLabLogs, generateRandomFirstColorInitLogs };
+export { hexToCMYKInitLogs, hexToCMYKTryExitLogs, hexToCMYKCatchExitLogs, rgbToCMYKInitLogs, rgbToCMYKTryExitLogs, rgbToCMYKCatchExitLogs, hslToCMYKInitLogs, hsvToCMYKInitLogs, labToCMYKInitLogs };
+///////////////////////////////////////////////////////////
 export { getWeightedRandomInterval };
 export { randomSL, randomSV, generateRandomHexDigit, randomHex, randomRGB, randomHSL, randomHSV, randomCMYK, randomLab, generateRandomFirstColor };

@@ -6,7 +6,8 @@
 
 
 
-import { hslToRGB } from '../../export.js';
+import { hslToHexTryCaseHelper } from '../../export.js';
+import { hsvToRGB } from '../../export.js';
 
 
 // Convert color component to Hexfunction componentToHex(c) {
@@ -56,101 +57,81 @@ function rgbToHex(red, green, blue) {
 
 // Convert HSL to Hex
 function hslToHex(hue, saturation, lightness) {
-    console.log('calling hslToHex');
-    console.log('hue: ', hue, ' saturation: ', saturation, ' lightness: ', lightness);
-    console.log('types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' lightness: ', (typeof lightness));
+    console.log('hslToHex() executing');
+    console.log('hslToHex() - hue: ', hue, ' saturation: ', saturation, ' lightness: ', lightness);
+    console.log('hslToHex() - types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' lightness: ', (typeof lightness));
     
     try {
-        console.log(`Converting HSL to Hex: H=${hue}, S=${saturation}, L=${lightness}`);
-        console.log('calling hslToRGB');
-        const rgb = hslToRGB(hue, saturation, lightness);
-        console.log(`Converted RGB from HSL: ${JSON.stringify(rgb)}`);
-        console.log('rgb: ', rgb, ' type: ', (typeof rgb));
-
-        console.log('calling rgbToHex');
-        console.log('execution of hslToHex complete');
+        hslToHexTryCaseHelper(hue, saturation, lightness);
+        console.log('hslToHex() - execution of hslToHex complete; calling rgbToHex with parameters (rgb.red, rgb.green, rgb.blue) and returning hex: ', hex, ' type: ', (typeof hex));
         return rgbToHex(rgb.red, rgb.green, rgb.blue);
     } catch (error) {
-        console.error(`Error converting HSL to Hex: ${error}`);
-
-        console.log('execution of hslToHex complete');
-
-        // Return black for invalid inputs
-        return '#000000'; 
+        console.error(`hslToHex() - error converting HSL to Hex: ${error}`);
+        console.log('hslToHex complete - returning "#000000"');
+        return '#000000'; // return black for invalid inputs
     }
-}
+};
 
 
 // Convert HSV to Hex
 function hsvToHex(hue, saturation, value) {
-    console.log('executing hsvToHex');
-    console.log('hue: ', hue, ' saturation: ', saturation, ' value: ', value);
-    console.log('types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' value: ', (typeof value));
+    console.log('hsvToHex() executing');
+    console.log('hsvToHex() - hue: ', hue, ' saturation: ', saturation, ' value: ', value);
+    console.log('hsvToHex() - types - hue: ', (typeof hue), ' saturation: ', (typeof saturation), ' value: ', (typeof value));
 
     try {
-        console.log(`Converting HSV to Hex: H=${hue}, S=${saturation}, V=${value}`);
+        console.log(`hsvToHex() - converting HSV to Hex: H=${hue}, S=${saturation}, V=${value}`);
         const rgb = hsvToRGB(hue, saturation, value);
-        console.log(`Converted RGB from HSV: ${JSON.stringify(rgb)}`);
-        console.log('rgb: ', rgb, ' type: ', (typeof rgb));
-
+        console.log(`hsvToHex() - converted RGB from HSV: ${JSON.stringify(rgb)}`);
+        console.log('hsvToHex() - rgb: ', rgb, ' type: ', (typeof rgb));
         return rgbToHex(rgb.red, rgb.green, rgb.blue);
     } catch (error) {
-        console.error(`Error converting HSV to Hex: ${error}`);
-
-        // Return black for invalid input
-        return '#000000'; 
+        console.error(`hsvToHex() complete > error converting HSV to Hex: ${error} - returning "#000000"`);
+        return '#000000'; // return black for invalid input
     }
 }
 
 
 // Convert CMYK to Hex
 function cmykToHex(cyan, magenta, yellow, key) {
-    console.log('executing cmykToHex');
-    console.log('cyan: ', cyan, ' magenta: ', magenta, ' yellow: ', yellow, ' key: ', key);
-    console.log('types - cyan: ', (typeof cyan), ' magenta: ', (typeof magenta), ' yellow: ', (typeof yellow), ' key: ', (typeof key));
+    console.log('cmykToHex() executing');
+    console.log('cmykToHex() - cyan: ', cyan, ' magenta: ', magenta, ' yellow: ', yellow, ' key: ', key);
+    console.log('cmykToHex() > types - cyan: ', (typeof cyan), ' magenta: ', (typeof magenta), ' yellow: ', (typeof yellow), ' key: ', (typeof key));
 
     try {
-        console.log(`Converting CMYK to Hex: C=${cyan}, M=${magenta}, Y=${yellow}, K=${key}`);
-        console.log('calling cmykToHex');
+        console.log(`cmykToHex() - converting CMYK to Hex: C=${cyan}, M=${magenta}, Y=${yellow}, K=${key}`);
+        console.log('cmykToHex() - calling cmykToHex() with parameters (cyan, magenta, yellow, key)');
         const rgb = cmykToRGB(cyan, magenta, yellow, key);
-        console.log(`Converted RGB from CMYK: ${JSON.stringify(rgb)}`);
-        console.log('rgb: ', rgb, ' type: ', (typeof rgb));
-        console.log('execution of cmykToHex complete');
-
+        console.log(`cmykToHex() - converted RGB from CMYK: ${JSON.stringify(rgb)}`);
+        console.log('cmykToHex() - rgb: ', rgb, ' type: ', (typeof rgb));
+        console.log('cmykToHex() complete');
         return rgbToHex(rgb.red, rgb.green, rgb.blue);
     } catch (error) {
-        console.error(`Error converting CMYK to Hex: ${error}`);
-        console.log('execution of cmykToHex complete');
-        
-        // Return black for invalid inputs
-        return '#000000'; 
+        console.error(`cmykToHex() - error converting CMYK to Hex: ${error}`);
+        console.log('cmykToHex() complete - returning "#000000"');
+        return '#000000'; // return black for invalid inputs
     }
 }
 
 
 // Convert Lab to Hex
 function labToHex(l, a, b) {
-    console.log('executing labToHex');
-    console.log('l: ', l, ' a: ', a, ' b: ', b);
-    console.log('types - l: ', (typeof l), ' a: ', (typeof a), ' b: ', (typeof b));
+    console.log('labToHex() executing');
+    console.log('labToHex() - l: ', l, ' a: ', a, ' b: ', b);
+    console.log('labToHex() - types - l: ', (typeof l), ' a: ', (typeof a), ' b: ', (typeof b));
 
     try {
-        console.log(`Converting Lab to Hex: L=${l}, A=${a}, B=${b}`);
-        console.log('calling labToRGB');
+        console.log(`labToHex() - converting Lab to Hex: L=${l}, A=${a}, B=${b}`);
+        console.log('labToHex() - calling labToRGB');
         const rgb = labToRGB(l, a, b);
-        console.log(`Converted RGB from Lab: ${JSON.stringify(rgb)}`);
-        console.log('rgb: ', rgb, ' type: ', (typeof rgb));
-        console.log('execution of labToHex complete');
-
+        console.log(`labToHex() - converted RGB from Lab: ${JSON.stringify(rgb)}`);
+        console.log('labToHex() - rgb: ', rgb, ' type: ', (typeof rgb));
+        console.log('labToHex() - execution of labToHex complete');
         return rgbToHex(rgb.red, rgb.green, rgb.blue);
     } catch (error) {
-        console.error(`Error converting Lab to Hex: ${error}`);
-
-        console.log('execution of labToHex complete');
-
-        
-        // Return black for invalid input
-        return '#000000'; 
+        console.error(`labToHex() - error converting Lab to Hex: ${error}`);
+        console.log('labToHex() complete - returning "#000000"');
+        return '#000000'; // return black for invalid input
     }
 }
 

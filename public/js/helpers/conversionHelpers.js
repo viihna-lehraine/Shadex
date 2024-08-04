@@ -269,4 +269,70 @@ function globalColorSpaceFormatting(initialColorSpace = 'hex', hexValue,formatte
 };
 
 
-export { declareConversionMap, initialHslColorGeneration, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT, globalColorSpaceFormatting };
+// Executes try case for hexToCMYK > converts from
+function hexToCMYKTryCaseHelper() {
+    console.log(`hexToCMYKTryCaseHelper() - converting Hex to CMYK: ${hex}`);
+    console.log('hexToCMYKTryCaseHelper() - calling hexToRGB() with parameter (hex)');
+    const rgb = hexToRGB(hex);
+    console.log(`hexToCMYKTryCaseHelper() - converted RGB from Hex: ${JSON.stringify(rgb)}`);
+    console.log('hexToCMYKTryCaseHelper() - rgb: ', rgb, ' data type: ', (typeof rgb));
+    console.log('hexToCMYKTryCaseHelper() - calling rgbToCMYK()');
+    const cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    return cmyk;
+};
+
+
+// Executes try case for hslToCMYK > converts from hsl to rgb to cmyk - convertToCMYK.js
+function hslToCMYKTryCaseHelper(hue, saturation, lightness) {
+    console.log(`hslToCMYKTryCaseHelper() - converting HSL to CMYK: H=${hue}, S=${saturation}, L=${lightness}`);
+    const rgb = hslToRGB(hue, saturation, lightness);
+    console.log('hslToCMYKTryCaseHelper() - rgb: ', rgb, ' type: ', (typeof rgb));
+    console.log(`hslToCMYKTryCaseHelper() - converted RGB from HSL: ${JSON.stringify(rgb)}`);
+    console.log('hslToCMYKTryCaseHelper() - calling rgbToCMYK(rgb.red, rgb.green, rgb.blue)');
+    const cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    console.log('hslToCMYKTryCaseHelper() - cmyk: ', cmyk, ' type: ', (typeof cmyk));
+    return cmyk;
+};
+
+
+// Executes try case for hsvToCMYK > converts from hsv to rgb to cmyk - convertToCMYK.js
+function hsvToCMYKTryCaseHelper(hue, saturation, value) {
+    console.log(`hsvToCMYKTryCaseHelper() - converting HSV to CMYK: H=${hue}, S=${saturation}, V=${value}`);
+    console.log('hsvToCMYKTryCaseHelper() - calling hsvToRGB()');
+    const rgb = hsvToRGB(hue, saturation, value);
+    console.log(`hsvToCMYKTryCaseHelper() - converted RGB from HSV: ${JSON.stringify(rgb)}`);
+    console.log('hsvToCMYKTryCaseHelper() - rgb: ', rgb, ' type: ', (typeof rgb));
+    const cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    console.log('hsvToCMYKTryCaseHelper() - cmyk: ', cmyk, ' type: ', (typeof cmyk));
+    console.log('hsvToCMYKTryCaseHelper() complete - returning cmyk as a formatted string');
+    return cmyk;
+};
+
+
+// Executes try case for labToCMYK > converts from lab to rgb to cmyk - convertToCMYK.js
+function labToCMYKTryCaseHelper(l, a, b) {
+    console.log(`labToCMYK() - converting Lab to CMYK: L=${l}, A=${a}, B=${b}`);
+    console.log('labToCMYK() - calling labToRGB()');
+    const rgb = labToRGB(l, a, b);
+    console.log(`labToCMYK() - converted RGB from Lab: ${JSON.stringify(rgb)}`);
+    console.log('labToCMYK() - rgb: ', rgb, ' type: ', (typeof rgb));
+    console.log('labToCMYK() - calling rgbToCMYK(rgb.red, rgb.green, rgb.blue');
+    const cmyk = rgbToCMYK(rgb.red, rgb.green, rgb.blue);
+    console.log('cmyk: ', cmyk, ' type: ', (typeof cmyk));
+    console.log('labToCMYK() complete - returning cmyk as a formatted string');
+    return cmyk;
+};
+
+
+// Executes try case for hslToHex - convertToHex.js
+function hslToHexTryCaseHelper(hue, saturation, lightness) {
+    console.log(`hslToHexTryCaseHelper() - converting HSL to Hex: H=${hue}, S=${saturation}, L=${lightness}`);
+    console.log('hslToHexTryCaseHelper() - calling hslToRGB');
+    const rgb = hslToRGB(hue, saturation, lightness);
+    console.log(`hslToHexTryCaseHelper() - converted RGB from HSL: ${JSON.stringify(rgb)}`);
+    console.log('hslToHexTryCaseHelper() - rgb: ', rgb, ' type: ', (typeof rgb));
+    return rgb;
+};
+
+
+export { declareConversionMap, initialHslColorGeneration, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT, globalColorSpaceFormatting, hexToCMYKTryCaseHelper, hslToCMYKTryCaseHelper, hsvToCMYKTryCaseHelper, labToCMYKTryCaseHelper, hslToHexTryCaseHelper };
