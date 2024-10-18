@@ -1,12 +1,10 @@
-import {
-    applyLimitGrayAndBlack,
-    applyLimitLight } from '../export';
 
+import { CMYK, HSL, HSV, LAB, RGB } from '../types/types';
 
-// Random SL generation for an HSL attribute
-function randomSL(limitGrayAndBlack, limitLight) {
-    console.log('executing randomSL()');
-
+export function randomSL(
+    limitGrayAndBlack: boolean,
+    limitLight: boolean
+) {
     let saturation = Math.floor(Math.random() * 101);
     let lightness = Math.floor(Math.random() * 101);
 
@@ -17,12 +15,10 @@ function randomSL(limitGrayAndBlack, limitLight) {
     if (lightness < 0) lightness = 0;
 
     if (limitGrayAndBlack) {
-        console.log('randomSL() - calling applyLimitGrayAndBlack()');
         ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
     }
 
     if (limitLight) {
-        console.log('randomSL() - calling applyLimitLight()');
         lightness = applyLimitLight(lightness);
     }
 
@@ -47,19 +43,19 @@ export function randomSV() {
     return color;
 };
 
-export function generateRandomHexDigit() {
+export function randomHexDigit(): string {
     const hexDigits = '0123456789ABCDEF';
     const randomIndex = Math.floor(Math.random() * hexDigits.length);
-    console.log('generateRandomHexDigit() complete');
+    console.log('genRandomHexDigit() complete');
 
     return hexDigits[randomIndex];
 };
 
-export function randomHex() {
+export function randomHex(): string {
     let hexCodeArray = [];
 
     for (let i = 0; i < 6; i++) {
-        hexCodeArray.push(generateRandomHexDigit());
+        hexCodeArray.push(randomHexDigit());
     }
 
     return {
@@ -68,7 +64,7 @@ export function randomHex() {
     }
 };
 
-export function randomRGB() {
+export function randomRGB(): RGB  {
     return {
         format: 'rgb',
         red: Math.floor(Math.random() * 256),
@@ -77,19 +73,20 @@ export function randomRGB() {
     }
 };
 
-export function randomHSL(limitGrayAndBlack: boolean, limitLight: boolean) {
+export function randomHSL(
+    limitGrayAndBlack: boolean,
+    limitLight: boolean
+): HSL {
     let hue = Math.floor(Math.random() * 360);
     let saturation = Math.floor(Math.random() * 101);
     let lightness = Math.floor(Math.random() * 101);
 
     if (limitGrayAndBlack) {
-        console.log('randomHSL() - calling applyLimitGrayAndBlack()');
         ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
         console.log(`randomHSL() - limited gray and black for random HSL: S=${saturation}%, L=${lightness}}`);
     }
 
     if (limitLight) {
-        console.log('randomHSL() - calling applyLimitLight()');
         lightness = applyLimitLight(lightness);
         console.log(`randomHSL() - limited lightness for random HSL: L=${lightness}%`);
     }
@@ -102,7 +99,7 @@ export function randomHSL(limitGrayAndBlack: boolean, limitLight: boolean) {
     }
 };
 
-export function randomHSV() {
+export function randomHSV(): HSV {
     return {
         format: 'hsv',
         hue: Math.floor(Math.random() * 360),
@@ -111,7 +108,7 @@ export function randomHSV() {
     }
 };
 
-export function randomCMYK() {
+export function randomCMYK(): CMYK {
     return {
         format: 'cmyk',
         cyan: Math.floor(Math.random() * 101),
@@ -121,7 +118,7 @@ export function randomCMYK() {
     }
 };
 
-export function randomLab() {
+export function randomLAB(): LAB {
     return {
         format: 'lab',
         l: (Math.random() * 100).toFixed(2),

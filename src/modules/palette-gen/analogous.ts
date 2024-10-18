@@ -1,4 +1,5 @@
-import { generateAndStoreColorValues, randomCMYK, randomHex, randomHSL, randomHSV, randomLab, randomRGB, randomSL } from '../../export';
+import { randomCMYK, randomHex, randomHSL, randomHSV, randomLab, randomRGB, randomSL } from '../../export';
+import { genAndStoreColorValues } from '../color-convert/convert';
 
 export function generateAnalogousHues(color, numBoxes: number) {
     const analogousHues = [];
@@ -15,7 +16,7 @@ export function generateAnalogousHues(color, numBoxes: number) {
     return analogousHues;
 };
 
-export function generateAnalogousPalette(numBoxes: number, limitGrayAndBlack: boolean, limitLight: boolean, customColor: unknown = null, initialColorSpace: string = 'hex') {
+export function genAnalogousPalette(numBoxes: number, limitGrayAndBlack: boolean, limitLight: boolean, customColor: unknown = null, initialColorSpace: string = 'hex') {
     if (numBoxes < 2) {
         window.alert('To generate an analogous palette, please select a number of swatches greater than 1');
         return;
@@ -25,29 +26,68 @@ export function generateAnalogousPalette(numBoxes: number, limitGrayAndBlack: bo
 
     // generate the base color using the initial color space
     if (customColor !== null && customColor !== undefined) {
-        color = generateAndStoreColorValues(customColor, initialColorSpace = 'hex');
+        color = genAndStoreColorValues(customColor, initialColorSpace = 'hex');
     } else {
         switch (initialColorSpace) {
             case 'hex':
-                color = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                color = genAndStoreColorValues(
+                    randomHex(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
                 break;
             case 'rgb':
-                color = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                color = genAndStoreColorValues(
+                    randomRGB(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
                 break;
             case 'hsl':
-                color = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                color = genAndStoreColorValues(
+                    randomHSL(
+                        limitGrayAndBlack,
+                        limitLight
+                    ), initialColorSpace = 'hex'
+                );
                 break;
             case 'hsv':
-                color = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                color = genAndStoreColorValues(
+                    randomHSV(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
                 break;
             case 'cmyk':
-                color = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                color = genAndStoreColorValues(
+                    randomCMYK(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
                 break;
             case 'lab':
-                color = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                color = genAndStoreColorValues(randomLab(
+                    limitGrayAndBlack,
+                    limitLight
+                ), initialColorSpace = 'hex'
+            );
                 break;
             default:
-                color: generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                color: genAndStoreColorValues(
+                    randomHSL(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
         }
     }
 
@@ -57,7 +97,7 @@ export function generateAnalogousPalette(numBoxes: number, limitGrayAndBlack: bo
     for (let i = 0; i < analogousHues.length; i++) {
         let analogousHue = analogousHues[i];
         let analogousSatAndLightness = randomSL(limitGrayAndBlack, limitLight);
-        let analogousColor = generateAndStoreColorValues({
+        let analogousColor = genAndStoreColorValues({
             hue: analogousHue,
             saturation: analogousSatAndLightness.saturation,
             lightness: analogousSatAndLightness.lightness

@@ -1,9 +1,9 @@
-export function rgbToXYZ(red: number, green: number, blue: number) {
-    try {
-        if (isNaN(red) || isNaN(green) || isNaN(blue)) {
-            throw new Error(`rgbToXYZ() - invalid RGB values: R=${red}, G=${green}, B=${blue}`);
-        }
+import { LAB, RGB, XYZ } from '../../types/types';
 
+const defaulXYZ: XYZ = { x: 0, y: 0, z: 0 };
+
+export function rgbToXYZ({ red, green, blue }: RGB): XYZ {
+    try {
         red = red / 255;
         green = green / 255;
         blue = blue / 255;
@@ -24,17 +24,13 @@ export function rgbToXYZ(red: number, green: number, blue: number) {
 
         return xyz;
     } catch (error) {
-
-        return { x: 0, y: 0, z: 0 }; // return black for invalid inputs
+        console.error(`rgbToXYZ error: ${error}`);
+        return defaulXYZ;
     }
-};
+}
 
-export function labToXYZ(l: number, a: number, b: number) {
+export function labToXYZ({ l, a, b }: LAB): XYZ {
     try {
-        if (isNaN(l) || isNaN(a) || isNaN(b)) {
-            throw new Error(`labToXYZ() - invalid Lab values: L=${l}, A=${a}, B=${b}`);
-        }
-
         const refX = 95.047, refY = 100.000, refZ = 108.883;
 
         let y = (l + 16) / 116;
@@ -51,7 +47,7 @@ export function labToXYZ(l: number, a: number, b: number) {
 
         return xyz;
     } catch (error) {
-
-        return { x: 0, y: 0, z: 0 }; // return black for invalid inputs
+        console.error(`labToXYZ error: ${error}`);
+        return { x: 0, y: 0, z: 0 };
     }
-};
+}

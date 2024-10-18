@@ -1,29 +1,27 @@
-import {
-    attachDragAndDropEventListeners,
-    generateAndStoreColorValues,
-    hexToHSL,
-    hslToHex
-} from '../../export';
+import { attachDragAndDropEventListeners } from './drag-and-drop';
+import { genAndStoreColorValues } from '../color-convert/convert';
+import { convert } from '../color-convert/conversion-index';
 
 let paletteBoxCount = 1;
 
-// generate paletteBox {numBoxes} number of times 
-const paletteRow = document.getElementById('palette-row');
+// generate paletteBox {numBoxes} # of times 
+export function genPaletteBox(numBoxes: number, colors) {
+    const paletteRow = document.getElementById('palette-row');
     if (!paletteRow) {
-        console.error('generatePaletteBox() - paletteRow is undefined');
+        console.error("document.getElementById('paletteRow') is undefined");
         return;
     }
 
     paletteRow.innerHTML = '';
     paletteBoxCount = 1;
 
-    for (let i = 0; i < numBoxes; i++) { // make sure colors[i] is defined for each iteration of i
+    for (let i = 0; i < numBoxes; i++) { // ensure colors[i] is defined for all values of i
         if (!colors[i]) {
-            console.error(`generatePaletteBox() - color at index ${i} is undefined`);
+            console.warn(`generatePaletteBox() - color at index ${i} is undefined`);
             continue; // if colors[i] is undefined, skip this iteration 
         }
 
-        const colorValues = generateAndStoreColorValues(colors[i]);
+        const colorValues = genAndStoreColorValues(colors[i]);
 
         const { colorStripe, paletteBoxCount: newPaletteBoxCount } = makePaletteBox(colorValues, paletteBoxCount);
 
@@ -64,6 +62,7 @@ export function makePaletteBox(colorValues: { hex: string, hsl: string }, palett
     copyButton.textContent = 'Copy';
 
     let tooltipText = document.createElement('span');
+
     tooltipText.className = 'tooltiptext';
     tooltipText.textContent = 'Copied to clipboard!';
 
@@ -80,8 +79,10 @@ export function makePaletteBox(colorValues: { hex: string, hsl: string }, palett
     // *DEV-NOTE* move to app.js
     colorTextOutputBox.addEventListener('input', (e) => {
         const target = e.target as HTMLInputElement | null;
+
         if (target) {
             const colorValue = target.value;
+
             if (/^#[0-9A-F]{6}$/i.test(colorValue)) {
                 document.getElementById(`color-box-${paletteBoxCount}`)!.style.backgroundColor = colorValue;
                 document.getElementById(`color-stripe-${paletteBoxCount}`)!.style.backgroundColor = colorValue;
@@ -108,6 +109,7 @@ export function makePaletteBox(colorValues: { hex: string, hsl: string }, palett
     paletteBox.appendChild(paletteBoxBottomHalf);
 
     let colorStripe = document.createElement('div');
+
     colorStripe.className = 'color-stripe';
     colorStripe.id = `color-stripe-${paletteBoxCount}`;
     colorStripe.style.backgroundColor = colorValues.hsl;
@@ -125,7 +127,7 @@ export function populateColorTextOutputBox(color, boxNumber) {
     let colorTextOutputBox = document.getElementById(`color-text-output-box-${boxNumber}`);
 
     if (colorTextOutputBox) {
-        let hexValue = hslToHex(color.hue, color.saturation, color.lightness);
+        let hexValue = convert.hslToHex(color);
 
         colorTextOutputBox.value = hexValue;
         colorTextOutputBox.setAttribute('data-format', 'hex');
@@ -134,7 +136,7 @@ export function populateColorTextOutputBox(color, boxNumber) {
     console.log(`makePaletteBox() complete for palette-box #${boxNumber}`);
 };
 
-// sature and desaturate Button Element Selection
+// saturate and desaturate button element Selection
 export function getElementsForSelectedColor(selectedColor: number) {
     return {
         selectedColorTextOutputBox: document.getElementById(`color-text-output-box-${selectedColor}`),
@@ -177,7 +179,7 @@ export function showCustomColorPopupDiv() {
 
 export function applyCustomColor() {
     let hexCustomColor = document.getElementById('custom-color-picker').value;
-    let hslCustomColor = hexToHSL(hexCustomColor);
+    let hslCustomColor = convert.hexToHSL(hexCustomColor);
 
     return { 
         format: 'hsl',

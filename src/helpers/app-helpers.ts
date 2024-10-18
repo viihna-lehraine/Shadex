@@ -1,4 +1,4 @@
-import { convertColors } from '../export';
+import { convertColors } from '../modules/color-convert/convert';
 
 // defines buttons for the main UI 
 function defineUIButtons() {

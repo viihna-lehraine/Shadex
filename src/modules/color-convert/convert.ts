@@ -1,4 +1,10 @@
-import { applyLimitGrayAndBlack, applyLimitLight, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, globalColorSpaceFormatting, hexToHSL, initialHslColorGeneration, rgbToHSL } from '../../export';
+import { isHSLTooGray, isHSLTooDark, isHSLTooBright } from '../dom/UI-params';
+import {
+    formatHSLColorPropertiesAsNumbers,
+    globalColorSpaceFormatting,
+    initialHSLColorGeneration
+} from '../../helpers/conversion-helpers';
+import { convert } from '../color-convert/conversion-index';
 
 // when a conversion button is clicked, this will pull the color space type for that color and repopulate color-text-output-box with it
 // previous conversion function actually tried to convert them again. But conversion takes place with palette generation and are stored as an oject
@@ -21,7 +27,7 @@ export function convertColors(targetFormat) {
 };
 
 // generate values for all 6 color spaces for all swatches when a palette is generated, stores as an object (I think?)
-export function generateAndStoreColorValues(color, initialColorSpace = 'hex') {    
+export function genAndStoreColorValues(color, initialColorSpace = 'hex') {    
     let colorValues = {};
     let hslColor;
 
@@ -43,30 +49,39 @@ export function generateAndStoreColorValues(color, initialColorSpace = 'hex') {
 };
 
 
-export function adjustSaturationAndLightness(color: number | string, limitGrayAndBlack: boolean, limitLight: boolean, initialColorSpace: string = 'hex') {
+export function adjustSL(
+    color: number | string,
+    limitGrayAndBlack: boolean,
+    limitLight: boolean,
+    initialColorSpace: string = 'hex'
+) {
     let hslColor;
+
+    if (typeof color === 'number') {
+        color = color.toString(16); // *DEV-NOTE** check this
+    } 
 
     switch (initialColorSpace) {
         case 'hex':
-            hslColor = hexToHSL(color);
+            hslColor = convert.hexToHSL(color);
             break;
         case 'rgb':
-            hslColor = rgbToHSL(color.red, color.green, color.blue);
+            hslColor = convert.rgbToHSL(color);
             break;
         case 'hsl':
             hslColor = color;
             break;
         case 'hsv':
-            hslColor = hsvToHSL(color.hue, color.saturation, color.value);
+            hslColor = convert.hsvToHSL(color);
             break;
         case 'cmyk':
-            hslColor = cmykToHSL(color.cyan, color.magenta, color.yellow, color.black);
+            hslColor = convert.cmykToHSL(color);
             break;
         case 'lab':
-            hslColor = labToHSL(color.l, color.a, color.b);
+            hslColor = convert.labToHSL(color);
             break;
         default:
-            hslColor = hexToHSL(color);
+            hslColor = convert.hexToHSL(color);
             break;
     }
 

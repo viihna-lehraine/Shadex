@@ -1,6 +1,18 @@
-import { applyLimitGrayAndBlack, applyLimitLight, generateAndStoreColorValues, getWeightedRandomInterval, populateColorTextOutputBox, randomHSL, randomHSV, randomLab, randomSL } from '../../export';
+import { genAndStoreColorValues } from '../../modules/color-convert/convert';
+import { convert } from '../color-convert/conversion-index';
+import { getWeightedRandomInterval } from '../../utils/palette-gen';
+import { populateColorTextOutputBox } from '../dom/main';
+import {
+    randomCMYK,
+    randomHex,
+    randomHSL,
+    randomHSV,
+    randomLAB,
+    randomRGB,
+    randomSL
+} from '../../utils/random';
 
-export function generateDiadicHues(baseHue) {
+export function genDiadicHues(baseHue: number) {
     const diadicHues = [];
     const randomDistance = getWeightedRandomInterval();
     const hue1 = baseHue;
@@ -11,7 +23,13 @@ export function generateDiadicHues(baseHue) {
     return diadicHues;
 };
 
-export function generateDiadicPalette(numBoxes: number, limitGrayAndBlack: boolean, limitLight: boolean, customColor: unknown = null, initialColorSpace: string = 'hex') {
+export function genDiadicPalette(
+    numBoxes: number,
+    limitGrayAndBlack: boolean,
+    limitLight: boolean,
+    customColor: unknown = null,
+    initialColorSpace: string = 'hex'
+) {
     if (numBoxes < 2) {
         window.alert('To generate a diadic palette, please select a number of swatches greater than 1');
 
@@ -21,42 +39,77 @@ export function generateDiadicPalette(numBoxes: number, limitGrayAndBlack: boole
     const colors = [];
     let baseColor;
 
-    // generate the base color using the initial color space
+    // generate base color using initial color space
     if (customColor !== null && customColor !== undefined) {
-        baseColor = generateAndStoreColorValues(customColor, initialColorSpace = 'hex');
+        baseColor = genAndStoreColorValues(
+            customColor,
+            initialColorSpace = 'hex'
+        );
     } else {
         switch (initialColorSpace) {
             case 'hex':
-                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
-
+                baseColor = genAndStoreColorValues(
+                    randomHex(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex');
                 break;
             case 'rgb':
-                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
-
+                baseColor = genAndStoreColorValues(
+                    randomRGB(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex');
                 break;
             case 'hsl':
-                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
-
+                baseColor = genAndStoreColorValues(
+                    randomHSL(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex');
                 break;
             case 'hsv':
-                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
-
+                baseColor = genAndStoreColorValues(
+                    randomHSV(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex');
                 break;
             case 'cmyk':
-                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
-
+                baseColor = genAndStoreColorValues(
+                    randomCMYK(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
                 break;
             case 'lab':
-                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
-
+                baseColor = genAndStoreColorValues(
+                    randomLAB(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
                 break;
             default:
-                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                baseColor = genAndStoreColorValues(
+                    randomHSL(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
         }
     }
 
     // use baseColor.hsl to generate diadic hues
-    const diadicHues = generateDiadicHues(baseColor.hue);
+    const diadicHues = genDiadicHues(baseColor.hue);
 
     // first color is the base color (randomized or customColor)
     colors.push(baseColor);
@@ -74,7 +127,7 @@ export function generateDiadicPalette(numBoxes: number, limitGrayAndBlack: boole
         lightness = applyLimitLight(lightness);
     }
 
-    const diadicColor = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+    const diadicColor = genAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
 
     colors.push(diadicColor);
 

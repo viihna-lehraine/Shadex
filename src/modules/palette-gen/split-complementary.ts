@@ -1,19 +1,35 @@
-import { applyLimitGrayAndBlack, applyLimitLight, generateAndStoreColorValues, populateColorTextOutputBox, randomSL } from '../../export';
+import { genAndStoreColorValues } from '../color-convert/convert';
+import { populateColorTextOutputBox } from '../dom/main';
+import {
+    randomCMYK,
+    randomHex,
+    randomHSL,
+    randomHSV,
+    randomLAB,
+    randomRGB,
+    randomSL
+} from '../../utils/random';
 
-export function generateTriadicHues(baseHue) {
-    const triadicHues = [];
-    const increments = [120, 240];
+export function genSplitComplementaryHues(baseHue) {
+    const splitComplementaryHues = [];
+    const baseComplementaryHue = (baseHue + 180) % 360;
+    const modifier = Math.floor(Math.random() * 11) + 20;
 
-    increments.forEach(increment => {
-        triadicHues.push((baseHue + increment) % 360);
-    })
+    splitComplementaryHues.push((baseComplementaryHue + modifier) % 360);
+    splitComplementaryHues.push((baseComplementaryHue - modifier + 360) % 360);
 
-    return triadicHues;
-};
+    return splitComplementaryHues;
+}
 
-export function generateTriadicPalette(numBoxes: number, limitGrayAndBlack: boolean, limitLight: boolean, customColor: unknown = null, initialColorSpace: string = 'hex') {
+export function genSplitComplementaryPalette(
+    numBoxes: number,
+    limitGrayAndBlack: boolean,
+    limitLight: boolean,
+    customColor: unknown = null,
+    initialColorSpace: string = 'hex'
+) {
     if (numBoxes < 3) {
-        window.alert('To generate a triadic palette, please select a number of swatches greater than 2');
+        window.alert('To generate a split complementary palette, please select a number of swatches greater than 2');
 
         return [];
     }
@@ -21,40 +37,84 @@ export function generateTriadicPalette(numBoxes: number, limitGrayAndBlack: bool
     const colors = [];
     let baseColor;
 
+    // generate the base color using the initial color space
     if (customColor !== null && customColor !== undefined) {
-        baseColor = generateAndStoreColorValues(customColor, initialColorSpace = 'hex');
+        baseColor = genAndStoreColorValues(customColor, initialColorSpace = 'hsl');
     } else {
         switch (initialColorSpace) {
             case 'hex':
-                baseColor = generateAndStoreColorValues(randomHex(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                baseColor = generateAndStoreColorValues(
+                    randomHex(
+                        limitGrayAndBlack,
+                        limitLight
+                    ), initialColorSpace = 'hex'
+                );
                 break;
             case 'rgb':
-                baseColor = generateAndStoreColorValues(randomRGB(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                baseColor = genAndStoreColorValues(
+                    randomRGB(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
                 break;
             case 'hsl':
-                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                baseColor = genAndStoreColorValues(
+                    randomHSL(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
                 break;
             case 'hsv':
-                baseColor = generateAndStoreColorValues(randomHSV(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                baseColor = genAndStoreColorValues(
+                    randomHSV(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
                 break;
             case 'cmyk':
-                baseColor = generateAndStoreColorValues(randomCMYK(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                baseColor = genAndStoreColorValues(
+                    randomCMYK(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
                 break;
             case 'lab':
-                baseColor = generateAndStoreColorValues(randomLab(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                baseColor = genAndStoreColorValues(
+                    randomLAB(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
                 break;
             default:
-                baseColor = generateAndStoreColorValues(randomHSL(limitGrayAndBlack, limitLight), initialColorSpace = 'hex');
+                baseColor = genAndStoreColorValues(
+                    randomHSL(
+                        limitGrayAndBlack,
+                        limitLight
+                    ),
+                    initialColorSpace = 'hex'
+                );
         }
     }
-    const triadicHues = generateTriadicHues(baseColor.hue);
+
+    // use baseColor.hue to generate split complementary hues
+    const splitComplementaryHues = geneSplitComplementaryHues(baseColor.hue);
 
     // first color is the base color (randomized or customColor)
     colors.push(baseColor);
 
-    // generate main triadic colors (colors 2-3, i = 1 || 2)
+    // generate main split complementary colors (colors 2-3, i = 1 || 2)
     for (let i = 0; i < 2; i++) {
-        const hue = triadicHues[i];
+        const hue = splitComplementaryHues[i];
 
         let { saturation, lightness } = randomSL(limitGrayAndBlack, limitLight);
 
@@ -66,15 +126,15 @@ export function generateTriadicPalette(numBoxes: number, limitGrayAndBlack: bool
             lightness = applyLimitLight(lightness);
         }
 
-        const color = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        const color = genAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
 
         colors.push(color);
     }
 
-    // if numBoxes > 3, add additional variations within ±5 hue of colors 1-3
+    // if numBoxes > 3, add additional variations within ±5 of colors 2 and/or 3
     while (colors.length < numBoxes) {
-        const baseColorIndex = Math.floor(Math.random() * 3); // randomly select one of the first three colors
-        const baseHue = colors[baseColorIndex].hue;
+        const baseColorIndex = Math.floor(Math.random() * 2) + 1; // randomly select color 2 or 3
+        const baseHue = splitComplementaryHues[baseColorIndex - 1]; // Use hues from color 2 or 3
         const hue = (baseHue + Math.floor(Math.random() * 11) - 5 + 360) % 360; // generate hue within ±5 of baseHue
 
         let { saturation, lightness } = randomSL(limitGrayAndBlack, limitLight);
@@ -83,8 +143,10 @@ export function generateTriadicPalette(numBoxes: number, limitGrayAndBlack: bool
 
         const maxAttempts = 100;
 
+        // ensure saturation and lightness are at least 10 units away
         while (!isValid && attempts < maxAttempts) {
             isValid = true;
+
             const baseColor = colors[baseColorIndex];
 
             if (Math.abs(saturation - baseColor.saturation) < 10) {
@@ -105,6 +167,7 @@ export function generateTriadicPalette(numBoxes: number, limitGrayAndBlack: bool
             if (limitGrayAndBlack) {
                 ({ saturation, lightness } = applyLimitGrayAndBlack(saturation, lightness));
             }
+
             if (limitLight) {
                 lightness = applyLimitLight(lightness);
             }
@@ -186,7 +249,7 @@ export function generateTriadicPalette(numBoxes: number, limitGrayAndBlack: bool
             }
         }
 
-        const additionalColor = generateAndStoreColorValues({ hue, saturation, lightness }, 'hsl');
+        const additionalColor = genAndStoreColorValues({ hue, saturation, lightness }, 'hex');
 
         colors.push(additionalColor);
     }
@@ -200,7 +263,7 @@ export function generateTriadicPalette(numBoxes: number, limitGrayAndBlack: bool
 
             populateColorTextOutputBox(color, index + 1);
         }
-    });
+    })
 
     return colors;
 };

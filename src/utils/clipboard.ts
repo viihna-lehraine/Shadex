@@ -1,6 +1,6 @@
-import { showTooltip } from '../export';
+import { showTooltip } from '../modules/dom/main'
 
-// copy color values to clipboard on Click
+// copy color values to clipboard on click
 function copyToClipboard(text: string, tooltipElement: HTMLElement) {
     const colorValue = text.replace('Copied to clipboard!', '').trim(); // clean the color value
 

@@ -4,6 +4,7 @@
   "author": "Viihna Lehraine",
   "license": "GNU GPL v3",
   "keywords": [],
+  "type": "module",
   "description": "*** ColorGen is a web-based color palette generator. It produces 8 varieties of color scheme and can convert between 6 color formats.",
   "main": "./public/app.js",
   "scripts": {
