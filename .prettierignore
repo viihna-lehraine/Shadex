@@ -1,0 +1,14 @@
+# Directories
+.dev/
+node_modules/
+
+# File extensions
+*.md
+*.svg
+*.txt
+*.xml
+
+# Files
+.gitignore
+package.json
+package-lock.json

@@ -1,12 +1,25 @@
 {
   "name": "colorgen-v0.5.22-dev",
-  "author": "Viihna Lehraine",
-  "license": "ISC",
   "version": "1.0.0",
+  "author": "Viihna Lehraine",
+  "license": "GNU GPL v3",
+  "keywords": [],
   "description": "*** ColorGen is a web-based color palette generator. It produces 8 varieties of color scheme and can convert between 6 color formats.",
-  "main": "index.js",
+  "main": "./public/app.js",
   "scripts": {
-    "test": "jest"
+    "build": "tsc",
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "start": "node ./public/app.js"
   },
-  "keywords": []
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.10.0",
+    "@typescript-eslint/parser": "^8.10.0",
+    "eslint": "^9.12.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  }
 }

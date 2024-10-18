@@ -1,11 +1,3 @@
-// ColorGen - version 0.5.22-dev
-// Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
-// Author: Viihna Lehraine (reach me at viihna@ViihnaTech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
-
-// BEGIN CODE
-
-
-
 import { defineUIButtons, addConversionButtonEventListeners, pullParametersFromUI } from './helpers/appHelpers.js';
 import { declareConversionMap, initialHslColorGeneration, formatHslForInitialColorValueGen, formatHslColorPropertiesAsNumbers, initialColorValuesGenerationCaseHex, initialColorValuesGenerationCaseRGB, initialColorValuesGenerationCaseHSL, initialColorValuesGenerationCaseDEFAULT, globalColorSpaceFormatting, hexToCMYKTryCaseHelper, hslToCMYKTryCaseHelper, hsvToCMYKTryCaseHelper, labToCMYKTryCaseHelper, hslToHexTryCaseHelper } from './helpers/conversionHelpers.js';
 import { randomInitialColor, generateSelectedPaletteType, paletteGenColorSpaceConditionCheck, parameterAssignForGenerateButtonEventHandler } from './helpers/paletteGenHelpers.js';
