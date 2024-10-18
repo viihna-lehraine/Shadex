@@ -1,6 +1,12 @@
 import {
     hexToRGB, hexToHSL, hexToHSV, hexToCMYK, hexToLab, rgbToHex, rgbToHSL, rgbToHSV, rgbToCMYK, rgbToLab, hslToHex, hslToRGB, hslToHSV, hslToCMYK, hslToLab, hsvToHex, hsvToRGB, hsvToHSL, hsvToCMYK, hsvToLab, cmykToHex, cmykToRGB, cmykToHSL, cmykToHSV, cmykToLab, labToHex, labToRGB, labToHSL, labToHSV, labToCMYK } from '../export';
 
+interface HSL {
+    hue: number;
+    saturation: number;
+    lightness: number;
+}
+
 export function declareConversionMap() {
     const conversionMap = {
         hsl: {
@@ -70,7 +76,7 @@ export function initialHslColorGeneration(color, hexValue) {
     return hslColor;
 };
 
-export function formatHslForInitialColorValueGen(hue, saturation, lightness) {
+export function formatHslForInitialColorValueGen(hue: number, saturation: number, lightness: number) {
     let hslColor = { hue, saturation, lightness };
 
     if (typeof hue === 'object') {
@@ -84,7 +90,7 @@ export function formatHslForInitialColorValueGen(hue, saturation, lightness) {
     return hslColor;
 };
 
-export function formatHslColorPropertiesAsNumbers(hslColor) {
+export function formatHslColorPropertiesAsNumbers(hslColor: HSL) {
     hslColor.hue = Number(hslColor.hue);
     hslColor.saturation = Number(hslColor.saturation);
     hslColor.lightness = Number(hslColor.lightness);
@@ -97,8 +103,8 @@ export function formatHslColorPropertiesAsNumbers(hslColor) {
     return hslColor;
 };
 
-export function initialColorValuesGenerationCaseHex(hexValue, formattedHslColor, colorValues) {
-    colorValues = {
+export function initialColorValuesGenerationCaseHex(hexValue: string, formattedHslColor: HSL) {
+    let colorValues = {
         hex: hexValue,
         rgb: hexToRGB(hexValue),
         hsl: formattedHslColor,
@@ -123,7 +129,7 @@ export function initialColorValuesGenerationCaseRGB(color, formattedHslColor, co
     return colorValues;
 };
 
-function initialColorValuesGenerationCaseHSL(hslColor, formattedHslColor, colorValues) {
+function initialColorValuesGenerationCaseHSL(hslColor: HSL, formattedHslColor, colorValues) {
     colorValues = {
         hex: hslToHex(hslColor.hue, hslColor.saturation, hslColor.lightness),
         rgb: hslToRGB(hslColor.hue, hslColor.saturation, hslColor.lightness),

@@ -1,7 +1,6 @@
-// ColorGen - version 0.5.22-dev
+// ColorGen - version 0.6.0-dev
 
 // Author: Viihna Leraine (reach me at viihna@ViihnaTech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
-
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
 
 // You may use this code for any purpose EXCEPT for the creation of proprietary derivatives. I encourage you to improve on my code or to include it in other projects if you find it helpful! I only ask that you to credit me as the original author, and more importantly, show me what you did. I'm still a rookie programmer, and would love to look at and learn from any changes you make!
@@ -29,8 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('app.js - DOM content loaded; initializing application');
     
     // defines the buttons within the main UI
-    console.log('app.js > DOM event listener - calling defineUIButtons() and defining its output as properties of an unnamed object');
-    
     const generateButton = getElement<HTMLButtonElement>('generate-button');
     const saturateButton = getElement<HTMLButtonElement>('saturate-button');
     const desaturateButton = getElement<HTMLButtonElement>('desaturate-button');
@@ -40,14 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const advancedMenuToggleButton = getElement<HTMLButtonElement>('advanced-menu-toggle-button');
     const applyInitialColorSpaceButton = getElement<HTMLButtonElement>('apply-initial-color-space-button');
     const selectedColorOptions = getElement<HTMLSelectElement>('selected-color-options');
-
     const selectedColor = selectedColorOptions ? parseInt(selectedColorOptions.value, 10) : 0;
 
-    console.log('app.js > DOM event listener - calling addConversionButtonEventListeners()');
     addConversionButtonEventListeners();
 
     generateButton?.addEventListener('click', (e) => {
         e.preventDefault();
+
         const { paletteType, numBoxes, limitGrayAndBlack, limitLight, initialColorSpace } = pullParametersFromUI();
         
         // use the value of customColor or null if not set
@@ -58,33 +54,28 @@ document.addEventListener('DOMContentLoaded', () => {
     
     saturateButton?.addEventListener('click', (e) => {
         e.preventDefault();
-        console.log('Calling saturateColor()');
         saturateColor(selectedColor);
     });
 
     desaturateButton?.addEventListener('click', (e) => {
         e.preventDefault();
-        console.log('Calling desaturateColor()');
         desaturateColor(selectedColor);
     });
 
     popupDivButton?.addEventListener('click', (e) => {
         e.preventDefault();
-        console.log('Showing custom color popup');
         showCustomColorPopupDiv();
     });
 
     applyCustomColorButton?.addEventListener('click', (e) => {
         e.preventDefault();
         customColor = applyCustomColor();
-        console.log('Custom color applied:', customColor);
         showCustomColorPopupDiv();
     });    
 
     clearCustomColorButton?.addEventListener('click', (e) => {
         e.preventDefault();
         customColor = null;
-        console.log('Custom color cleared');
         showCustomColorPopupDiv();
     });
 
@@ -99,8 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     applyInitialColorSpaceButton?.addEventListener('click', (e) => {
         e.preventDefault();
+
         const initialColorSpace = getElement<HTMLSelectElement>('initial-color-space-options')?.value || 'hex';
         console.log('Initial color space:', initialColorSpace);
+
         // applyInitialColorSpace(initialColorSpace); // *DEV-NOTE* uncomment when implemented
     });
 });
