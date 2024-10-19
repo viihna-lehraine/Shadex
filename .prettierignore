@@ -1,0 +1,19 @@
+# directories
+.dev/
+node_modules/
+public/assets/
+
+# extensions
+**/*d.ts
+**/*.css
+**/*.json
+**/*.html
+**/*.md
+**/*.txt
+**/*.xml
+
+# files
+.editorconfig
+.gitignore
+.prettierrc
+eslint.config.js

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>ColorGen</title>
+        <meta charset="UTF-8">
+        <meta name="viewport", content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <meta name="description" content="Color Palette Generator">
+        <meta name="keywords" content="colors, palettes, color generator, palette generator, art, art tools">
+        <meta name="author" content="Viihna Lehraine">
+        <link rel="stylesheet" href="./css/styles.css">
+        <link rel="icon" type="img/svg+xml" href="./assets/favicons/favicon.svg">
+        <link rel="shortcut icon" type="image/png" size="16x16" href="./assets/favicons/favicon-android-chrome.png">
+    </head>
+    <body>
+        <div id="container">
+            <div id="the-box">
+                <h3 id="the-box-title">ColorGen</h3>
+                <form id="ui-form">
+                    <div class="ui-row">
+                        <div class="ui-column">
+                            <label for="palette-type-options">Palette Type</label>
+                            <select id="palette-type-options">
+                                <option value="1">Random</option>
+                                <option value="2">Complementary</option>
+                                <option value="3">Triadic</option>
+                                <option value="4">Tetradic</option>
+                                <option value="5">Split Complementary</option>
+                                <option value="6">Analogous</option>
+                                <option value="7">Hexadic</option>
+                                <option value="8">Diadic</option>
+                                <option value="9">Monochromatic</option>
+                            </select>
+                        </div>
+                        <div class="ui-column">
+                            <label for="palette-number-options"># of Swatches</label>
+                            <select id="palette-number-options">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="ui-row">
+                        <div class="ui-column">
+                            <label for="limitDarkCheckbox" class="checkbox-label">Limit Darkness</label>
+                            <input id="limitDarkCheckbox" type="checkbox">
+                            <label for="limitLightCheckbox" class="checkbox-label">Limit Lightness</label>
+                            <input id="limitLightCheckbox" type="checkbox">
+                        </div>
+                        <div class="ui-column">
+                            <label for="limitGrayCheckbox" class="checkbox-label">Limit Gray</label>
+                            <input id="limitGrayCheckbox" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="ui-row">
+                        <div class="popup">
+                            <button id="custom-color-button" class="popup">Custom Color</button>
+                            <div class="popuptext" id="popup-div">
+                                <div class="popup-div-row">
+                                    <input type="color" id="custom-color-picker" value="#EA5050">
+                                </div>
+                                <div class="popup-div-row">
+                                    <button id="apply-custom-color-button">Apply</button>
+                                    <button id="clear-custom-color-button">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui-row">
+                        <label for="selected-color-options">Select Color Swatch</label>
+                        <select id="selected-color-options">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </div>
+                    <div class="ui-row">
+                        <button id="saturate-button" class="saturate-desaturate-buttons">Saturate</button>
+                        <button id="generate-button" type="submit">Generate</button>
+                        <button id="desaturate-button" class="saturate-desaturate-buttons">Desaturate</button>
+                    </div>
+                </form>
+                <div id="advanced-menu-wrapper">
+                    <button id="advanced-menu-toggle-button" class="advanced-menu-toggle-button">Advanced</button>
+                    <div id="advanced-menu" class="hidden">
+                        <div class="ui-column bordered-ui-div">
+                            <form id="initial-colorspace-selection-form">
+                                <div class="ui-row">
+                                    <label for="initial-color-space-options">Initial Colorspace</label>
+                                    <select id="initial-color-space-options">
+                                        <option value="hex">Hex</option>
+                                        <option value="rgb">RGB</option>
+                                        <option value="hsl">HSL</option>
+                                        <option value="hsv">HSV</option>
+                                        <option value="cmyk">CMYK</option>
+                                        <option value="lab">Lab (CIELAB)</option>
+                                    </select>
+                                </div>
+                                <div class="ui-row">
+                                    <button id="apply-initial-color-space-button">Apply</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="button-row">
+                <div id="button-box">
+                    <div class="button-box-slice">
+                        <button id="hex-conversion-button" class="button-row-button">Hex Code</button>
+                    </div>
+                    <div class="button-box-slice">
+                        <button id="rgb-conversion-button" class="button-row-button">RGB</button>
+                    </div>
+                    <div class="button-box-slice">
+                        <button id="hsv-conversion-button" class="button-row-button">HSV</button>
+                    </div>
+                    <div id="button-box-title-slice">
+                        <p>Conversion Buttons</p>
+                    </div>
+                    <div class="button-box-slice">
+                        <button id="hsl-conversion-button" class="button-row-button">HSL</button>
+                    </div>
+                    <div class="button-box-slice">
+                        <button id="cmyk-conversion-button" class="button-row-button">CMYK</button>
+                    </div>
+                    <div class="button-box-slice">
+                        <button id="lab-conversion-button" class="button-row-button">Lab (CIELAB)</button>
+                    </div>
+                </div>
+            </div>
+            <div id="palette-row"></div>
+        </div>
+        <script type="module" src="./js/app.js"></script>
+    </body>
+<html>
