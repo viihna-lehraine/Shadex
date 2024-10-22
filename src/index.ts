@@ -53,10 +53,9 @@ export interface ColorObject<T> {
 	format?: 'cmyk' | 'hex' | 'hsl' | 'hsv' | 'lab' | 'rgb' | 'xyz';
 }
 
-export type CustomColor = {
-	format: ColorSpace;
-	value: ColorData;
-} | null;
+export type ColorSpace = 'cmyk' | 'hex' | 'hsl' | 'hsv' | 'lab' | 'rgb';
+
+export type CustomColor = ColorData | null;
 
 export interface ColorObjectGeneric<T> {
 	value: T;
@@ -501,7 +500,7 @@ export interface GenButtonParams {
 	numBoxes: number;
 	paletteType: number;
 	initialColorSpace?: ColorSpace;
-	customColor?: ColorIndex;
+	customColor?: CustomColor;
 }
 
 export interface GenPaletteColors {
@@ -516,7 +515,16 @@ export interface GenPaletteColors {
 	format?: string;
 }
 
-export type ColorSpace = 'cmyk' | 'hex' | 'hsl' | 'hsv' | 'lab' | 'rgb';
+export interface GetElementsForSelectedColor {
+	selectedColorTextOutputBox: HTMLElement | null;
+	selectedColorBox: HTMLElement | null;
+	selectedColorStripe: HTMLElement | null;
+}
+
+export interface MakePaletteBox {
+	colorStripe: HTMLDivElement;
+	paletteBoxCount: number;
+}
 
 export interface PullParamsFromUI {
 	paletteType: number;
@@ -554,8 +562,20 @@ export type ConversionMap = {
 
 // ***** Storage *****
 
+export type Key = 'AppStorage';
+
 export interface AppStorage {
 	customColor?: CustomColor;
+	initialColorSpace?: ColorSpace;
 	theme?: string;
 	[key: string]: unknown;
+}
+
+export interface StorageInterface {
+	clearStorage(): void;
+	getAppStorage(): AppStorage | null;
+	getCookie<T>(name: string): T | null;
+	setAppStorage(value: AppStorage): void;
+	setCookie<T>(name: string, value: T, days: number): void;
+	updateAppStorage(updates: Partial<AppStorage>): void;
 }

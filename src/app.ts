@@ -10,6 +10,7 @@
 import { domHelpers } from './helpers/dom';
 import {
 	applyCustomColor,
+	applyInitialColorSpace,
 	desaturateColor,
 	saturateColor,
 	showCustomColorPopupDiv
@@ -58,6 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	generateButton?.addEventListener('click', e => {
 		e.preventDefault();
 
+		console.log('generateButton clicked');
+
 		const { paletteType, numBoxes, initialColorSpace } =
 			domHelpers.pullParamsFromUI();
 
@@ -68,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				)
 			: null;
 
-		paletteHelpers.genPalette(
+		paletteHelpers.startPaletteGen(
 			paletteType,
 			numBoxes,
 			initialColorSpace,
@@ -93,13 +96,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	applyCustomColorButton?.addEventListener('click', e => {
 		e.preventDefault();
-		const hslColor = applyCustomColor();
-		const customColor: types.CustomColor = {
-			format: 'hsl',
-			value: hslColor
-		};
-		storage.setAppStorage(customColor);
+		const hslColorFlat = applyCustomColor();
+		const customColor: types.CustomColor = hslColorFlat;
+		storage.setAppStorage({ customColor });
 		showCustomColorPopupDiv();
+	});
+
+	applyInitialColorSpaceButton?.addEventListener('click', e => {
+		e.preventDefault();
+		const initialColorSpace: types.ColorSpace = applyInitialColorSpace();
+		const currentStorage = storage.getAppStorage() || {};
+		const newStorage = { ...currentStorage, initialColorSpace };
+		storage.setAppStorage(newStorage);
 	});
 
 	clearCustomColorButton?.addEventListener('click', e => {
@@ -120,16 +128,5 @@ document.addEventListener('DOMContentLoaded', () => {
 				? 'none'
 				: 'block';
 		}
-	});
-
-	applyInitialColorSpaceButton?.addEventListener('click', e => {
-		e.preventDefault();
-
-		const initialColorSpace =
-			getElement<HTMLSelectElement>('initial-color-space-options')
-				?.value || 'hex';
-		console.log('Initial color space:', initialColorSpace);
-
-		// applyInitialColorSpace(initialColorSpace); // *DEV-NOTE* uncomment when implemented
 	});
 });

@@ -34,7 +34,6 @@ export function applyFirstColorToUI(
 			return color;
 		}
 
-		// set background color
 		colorBox1.style.backgroundColor = colorString;
 		if (color.format === 'hsl') {
 			populateColorTextOutputBox(color, 1);
@@ -50,7 +49,6 @@ export function applyFirstColorToUI(
 	return color;
 }
 
-// generate paletteBox (numBoxes) # of times
 export function genPaletteBox(
 	numBoxes: number,
 	colors: types.ColorData[]
@@ -118,7 +116,6 @@ export function genPaletteBox(
 	}
 }
 
-// populates .color-text-output-box with hex attribute
 export function populateColorTextOutputBox(
 	hsl: types.HSL,
 	boxNumber: number
@@ -133,8 +130,9 @@ export function populateColorTextOutputBox(
 	}
 }
 
-// saturate and desaturate button element selection
-export function getElementsForSelectedColor(selectedColor: number) {
+export function getElementsForSelectedColor(
+	selectedColor: number
+): types.GetElementsForSelectedColor {
 	return {
 		selectedColorTextOutputBox: document.getElementById(
 			`color-text-output-box-${selectedColor}`
@@ -146,19 +144,16 @@ export function getElementsForSelectedColor(selectedColor: number) {
 	};
 }
 
-// saturate button functionality
+// *DEV NOTE: add saturation logic and function type
 export function saturateColor(selectedColor: number) {
 	getElementsForSelectedColor(selectedColor);
-	// *DEV NOTE: add saturation logic here
 }
 
-// desaturate button functionality
+// *DEV NOTE: add desaturation logic and function type
 export function desaturateColor(selectedColor: number) {
 	getElementsForSelectedColor(selectedColor);
-	// *DEV NOTE: add desaturation logic here
 }
 
-// show tooltip for copy to clipboard
 export function showTooltip(tooltipElement: HTMLElement): void {
 	const tooltip = tooltipElement.querySelector<HTMLElement>('.tooltiptext');
 	if (tooltip) {
@@ -173,7 +168,6 @@ export function showTooltip(tooltipElement: HTMLElement): void {
 	console.log('execution of showTooltip complete');
 }
 
-// toggle popup div
 export function showCustomColorPopupDiv(): void {
 	const popup = document.getElementById('popup-div');
 
@@ -200,9 +194,23 @@ export function applyCustomColor(): types.HSL {
 	return customHSL;
 }
 
-// copy color values to clipboard on click
-export function copyToClipboard(text: string, tooltipElement: HTMLElement) {
-	const colorValue = text.replace('Copied to clipboard!', '').trim(); // clean the color value
+export function applyInitialColorSpace(): types.ColorSpace {
+	const initialColorSpaceValue = (
+		document.getElementById(
+			'initial-colorspace-options'
+		) as HTMLSelectElement
+	).value;
+
+	return guards.isColorSpace(initialColorSpaceValue)
+		? initialColorSpaceValue
+		: 'hex';
+}
+
+export function copyToClipboard(
+	text: string,
+	tooltipElement: HTMLElement
+): void {
+	const colorValue = text.replace('Copied to clipboard!', '').trim();
 
 	navigator.clipboard
 		.writeText(colorValue)
@@ -215,7 +223,6 @@ export function copyToClipboard(text: string, tooltipElement: HTMLElement) {
 		});
 }
 
-// when a conversion button is clicked, this will pull the color space type for that color and repopulate color-text-output-box with it
 export function convertColors(targetFormat: types.ColorSpaceFormats): void {
 	const colorTextOutputBoxes = document.querySelectorAll<HTMLInputElement>(
 		'.color-text-output-box'
@@ -268,7 +275,6 @@ export function convertColors(targetFormat: types.ColorSpaceFormats): void {
 	});
 }
 
-// *DEV-NOTE* add custom color input later
 export function getGenerateButtonParams(): types.GenButtonParams {
 	const paletteTypeOptions = document.getElementById(
 		'palette-type-options'
@@ -286,18 +292,22 @@ export function getGenerateButtonParams(): types.GenButtonParams {
 	)
 		? colorSpaceValue
 		: 'hex';
-	// const customColorRaw = (document.getElementById(
-	// 	'custom-color') as HTMLInputElement)?.value;
+	const customColorRaw = (
+		document.getElementById('custom-color') as HTMLInputElement
+	)?.value;
+	const customColor: types.CustomColor = domHelpers.parseCustomColor(
+		initialColorSpace,
+		customColorRaw
+	);
 
 	return {
 		numBoxes: parseInt(paletteNumberOptions.value, 10),
 		paletteType: parseInt(paletteTypeOptions.value, 10),
-		initialColorSpace
-		// customColor
+		initialColorSpace,
+		customColor
 	};
 }
 
-// default behavior for generateButton click
 export function handleGenButtonClick(): void {
 	const {
 		paletteType,
@@ -312,5 +322,5 @@ export function handleGenButtonClick(): void {
 
 	const initialColorSpace: types.ColorSpace = space ?? 'hex';
 
-	paletteHelpers.genPalette(paletteType, numBoxes, initialColorSpace);
+	paletteHelpers.startPaletteGen(paletteType, numBoxes, initialColorSpace);
 }

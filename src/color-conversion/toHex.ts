@@ -2,6 +2,7 @@ import { convert } from '../color-conversion/conversion-index';
 import * as types from '../index';
 import { componentToHex } from '../utils/transforms';
 import { conversionHelpers } from '../helpers/conversion';
+import { defaults } from '../utils/defaults';
 
 export function hslToHex(hsl: types.HSL): types.Hex {
 	try {
@@ -9,7 +10,7 @@ export function hslToHex(hsl: types.HSL): types.Hex {
 		return rgbToHex(rgb);
 	} catch (error) {
 		console.warn(`hslToHex error: ${error}`);
-		return { hex: '#000000', format: 'hex' };
+		return defaults.defaultHex();
 	}
 }
 
@@ -19,7 +20,7 @@ export function hsvToHex(hsv: types.HSV): types.Hex {
 		return rgbToHex(rgb);
 	} catch (error) {
 		console.warn(`hsvToHex error: ${error}`);
-		return { hex: '#000000', format: 'hex' };
+		return defaults.defaultHex();
 	}
 }
 
@@ -29,7 +30,7 @@ export function cmykToHex(cmyk: types.CMYK): types.Hex {
 		return rgbToHex(rgb);
 	} catch (error) {
 		console.warn(`cmykToHex error: ${error}`);
-		return { hex: '#000000', format: 'hex' };
+		return defaults.defaultHex();
 	}
 }
 
@@ -40,7 +41,7 @@ export function labToHex(lab: types.LAB): types.Hex {
 		return rgbToHex(rgb);
 	} catch (error) {
 		console.warn(`labToHex error: ${error}`);
-		return { hex: '#000000', format: 'hex' };
+		return defaults.defaultHex();
 	}
 }
 
@@ -63,7 +64,7 @@ export function rgbToHex(rgb: types.RGB): types.Hex {
 		};
 	} catch (error) {
 		console.warn(`rgbToHex error: ${error}`);
-		return { hex: '#000000', format: 'hex' };
+		return defaults.defaultHex();
 	}
 }
 
@@ -72,6 +73,6 @@ export function xyzToHex(xyz: types.XYZ): types.Hex {
 		return conversionHelpers.xyzToHexTryCaseHelper(xyz);
 	} catch (error) {
 		console.warn(`xyzToHex error: ${error}`);
-		return { hex: '#000000', format: 'hex' };
+		return defaults.defaultHex();
 	}
 }

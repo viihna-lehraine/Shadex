@@ -2,6 +2,7 @@ import { labToXYZ } from './toXYZ';
 import * as types from '../index';
 import { stripHashFromHex } from '../utils/transforms';
 import { conversionHelpers } from '../helpers/conversion';
+import { defaults } from '../utils/defaults';
 
 export function xyzToRGB(xyz: types.XYZ): types.RGB {
 	try {
@@ -22,7 +23,7 @@ export function xyzToRGB(xyz: types.XYZ): types.RGB {
 		return conversionHelpers.clampRGB(rgb);
 	} catch (error) {
 		console.error(`xyzToRGB error: ${error}`);
-		return { red: 0, green: 0, blue: 0, format: 'rgb' };
+		return defaults.defaultRGB();
 	}
 }
 
@@ -39,7 +40,7 @@ export function hexToRGB(hex: types.Hex): types.RGB {
 		};
 	} catch (error) {
 		console.error(`hexToRGB error: ${error}`);
-		return { red: 0, green: 0, blue: 0, format: 'rgb' };
+		return defaults.defaultRGB();
 	}
 }
 
@@ -63,7 +64,7 @@ export function hslToRGB(hsl: types.HSL): types.RGB {
 		};
 	} catch (error) {
 		console.error(`hslToRGB error: ${error}`);
-		return { red: 0, green: 0, blue: 0, format: 'rgb' };
+		return defaults.defaultRGB();
 	}
 }
 
@@ -105,7 +106,7 @@ export function hsvToRGB(hsv: types.HSV): types.RGB {
 		return conversionHelpers.clampRGB(rgb);
 	} catch (error) {
 		console.error(`hsvToRGB error: ${error}`);
-		return { red: 0, green: 0, blue: 0, format: 'rgb' };
+		return defaults.defaultRGB();
 	}
 }
 
@@ -120,11 +121,16 @@ export function cmykToRGB(cmyk: types.CMYK): types.RGB {
 		return conversionHelpers.clampRGB(rgb);
 	} catch (error) {
 		console.error(`cmykToRGB error: ${error}`);
-		return { red: 0, green: 0, blue: 0, format: 'rgb' };
+		return defaults.defaultRGB();
 	}
 }
 
 export function labToRGB(lab: types.LAB): types.RGB {
-	const xyz = labToXYZ(lab);
-	return xyzToRGB(xyz);
+	try {
+		const xyz = labToXYZ(lab);
+		return xyzToRGB(xyz);
+	} catch (error) {
+		console.error(`labToRGB error: ${error}`);
+		return defaults.defaultRGB();
+	}
 }

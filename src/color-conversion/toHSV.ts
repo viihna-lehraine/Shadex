@@ -1,13 +1,7 @@
 import { convert } from './conversion-index';
 import * as types from '../index';
 import { conversionHelpers } from '../helpers/conversion';
-
-const defaultHSV: types.HSV = {
-	hue: 0,
-	saturation: 0,
-	value: 0,
-	format: 'hsv'
-};
+import { defaults } from '../utils/defaults';
 
 export function hexToHSV(hex: types.Hex): types.HSV {
 	try {
@@ -15,7 +9,7 @@ export function hexToHSV(hex: types.Hex): types.HSV {
 		return convert.rgbToHSV(rgb);
 	} catch (error) {
 		console.error(`hexToHSV() error: ${error}`);
-		return defaultHSV;
+		return defaults.defaultHSV();
 	}
 }
 
@@ -59,7 +53,7 @@ export function rgbToHSV(rgb: types.RGB): types.HSV {
 		};
 	} catch (error) {
 		console.error(`rgbToHSV() error: ${error}`);
-		return defaultHSV;
+		return defaults.defaultHSV();
 	}
 }
 
@@ -79,7 +73,7 @@ export function hslToHSV(hsl: types.HSL): types.HSV {
 		};
 	} catch (error) {
 		console.error(`hslToHSV() error: ${error}`);
-		return defaultHSV;
+		return defaults.defaultHSV();
 	}
 }
 
@@ -89,7 +83,7 @@ export function cmykToHSV(cmyk: types.CMYK): types.HSV {
 		return rgbToHSV(rgb);
 	} catch (error) {
 		console.error(`cmykToHSV() error: ${error}`);
-		return defaultHSV;
+		return defaults.defaultHSV();
 	}
 }
 
@@ -99,7 +93,7 @@ export function labToHSV(lab: types.LAB): types.HSV {
 		return rgbToHSV(rgb);
 	} catch (error) {
 		console.error(`labToHSV() error: ${error}`);
-		return defaultHSV;
+		return defaults.defaultHSV();
 	}
 }
 
@@ -108,6 +102,6 @@ export function xyzToHSV(xyz: types.XYZ): types.HSV {
 		return conversionHelpers.xyzToHSVTryCaseHelper(xyz);
 	} catch (error) {
 		console.error(`xyzToHSV() error: ${error}`);
-		return defaultHSV;
+		return defaults.defaultHSV();
 	}
 }

@@ -1,6 +1,8 @@
 let dragSrcEl: HTMLElement | null = null;
 
-export function attachDragAndDropEventListeners(element: HTMLElement | null) {
+export function attachDragAndDropEventListeners(
+	element: HTMLElement | null
+): void {
 	if (element) {
 		element.addEventListener('dragstart', handleDragStart);
 		element.addEventListener('dragover', handleDragOver);
@@ -24,7 +26,7 @@ export function handleDragStart(e: DragEvent): void {
 export function handleDragOver(e: DragEvent): boolean {
 	console.log('executing handleDragOver');
 
-	e.preventDefault(); // allow dropping by preventing default behavior
+	e.preventDefault();
 
 	if (e.dataTransfer) {
 		e.dataTransfer.dropEffect = 'move';

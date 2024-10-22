@@ -1,13 +1,7 @@
 import { convert } from './conversion-index';
 import { conversionHelpers } from '../helpers/conversion';
 import * as types from '../index';
-
-const defaultHSL: types.HSL = {
-	hue: 0,
-	saturation: 0,
-	lightness: 0,
-	format: 'hsl'
-};
+import { defaults } from '../utils/defaults';
 
 export function hexToHSL(hex: types.Hex): types.HSL {
 	try {
@@ -15,7 +9,7 @@ export function hexToHSL(hex: types.Hex): types.HSL {
 		return rgbToHSL(rgb);
 	} catch (error) {
 		console.error(`hexToHSL() error: ${error}`);
-		return defaultHSL;
+		return defaults.defaultHSL();
 	}
 }
 
@@ -62,7 +56,7 @@ export function rgbToHSL(rgb: types.RGB): types.HSL {
 		};
 	} catch (error) {
 		console.error(`rgbToHSL() error: ${error}`);
-		return defaultHSL;
+		return defaults.defaultHSL();
 	}
 }
 
@@ -84,7 +78,7 @@ export function hsvToHSL(hsv: types.HSV): types.HSL {
 		};
 	} catch (error) {
 		console.error(`hsvToHSL() error: ${error}`);
-		return defaultHSL;
+		return defaults.defaultHSL();
 	}
 }
 
@@ -94,7 +88,7 @@ export function cmykToHSL(cmyk: types.CMYK): types.HSL {
 		return rgbToHSL(rgb);
 	} catch (error) {
 		console.error(`cmykToHSL() error: ${error}`);
-		return defaultHSL;
+		return defaults.defaultHSL();
 	}
 }
 
@@ -104,7 +98,7 @@ export function labToHSL(lab: types.LAB): types.HSL {
 		return rgbToHSL(rgb);
 	} catch (error) {
 		console.error(`labToHSL() error: ${error}`);
-		return defaultHSL;
+		return defaults.defaultHSL();
 	}
 }
 
@@ -114,6 +108,6 @@ export function xyzToHSL(xyz: types.XYZ): types.HSL {
 		return hsl;
 	} catch (error) {
 		console.error(`xyzToHSL() error: ${error}`);
-		return defaultHSL;
+		return defaults.defaultHSL();
 	}
 }

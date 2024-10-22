@@ -1,12 +1,13 @@
 import { conversionHelpers } from '../helpers/conversion';
 import * as types from '../index';
+import { defaults } from '../utils/defaults';
 
 export function hexToCMYK(hex: types.Hex): types.CMYK {
 	try {
 		return conversionHelpers.hexToCMYKTryCaseHelper(hex);
 	} catch (error) {
 		console.error(`Error converting hex to CMYK: ${error}`);
-		return fallbackCMYK();
+		return defaults.defaultCMYK();
 	}
 }
 
@@ -15,7 +16,7 @@ export function hslToCMYK(hsl: types.HSL): types.CMYK {
 		return conversionHelpers.hslToCMYKTryCaseHelper(hsl);
 	} catch (error) {
 		console.error(`Error converting HSL to CMYK: ${error}`);
-		return fallbackCMYK();
+		return defaults.defaultCMYK();
 	}
 }
 
@@ -24,7 +25,7 @@ export function hsvToCMYK(hsv: types.HSV): types.CMYK {
 		return conversionHelpers.hsvToCMYKTryCaseHelper(hsv);
 	} catch (error) {
 		console.error(`Error converting HSV to CMYK: ${error}`);
-		return fallbackCMYK();
+		return defaults.defaultCMYK();
 	}
 }
 
@@ -33,7 +34,7 @@ export function labToCMYK(lab: types.LAB): types.CMYK {
 		return conversionHelpers.labToCMYKTryCaseHelper(lab);
 	} catch (error) {
 		console.error(`Error converting Lab to CMYK: ${error}`);
-		return fallbackCMYK();
+		return defaults.defaultCMYK();
 	}
 }
 
@@ -57,7 +58,7 @@ export function rgbToCMYK(rgb: types.RGB): types.CMYK {
 		};
 	} catch (error) {
 		console.error(`Error converting RGB to CMYK: ${error}`);
-		return fallbackCMYK();
+		return defaults.defaultCMYK();
 	}
 }
 
@@ -67,10 +68,6 @@ export function xyzToCMYK(xyz: types.XYZ): types.CMYK {
 		return cmyk;
 	} catch (error) {
 		console.error(`Error converting XYZ to CMYK: ${error}`);
-		return fallbackCMYK();
+		return defaults.defaultCMYK();
 	}
-}
-
-function fallbackCMYK(): types.CMYK {
-	return { cyan: 0, magenta: 0, yellow: 0, key: 0, format: 'cmyk' };
 }

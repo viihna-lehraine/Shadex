@@ -1,8 +1,8 @@
 import * as types from '../index';
 
-const STORAGE_KEY = 'appStorage';
+const KEY: types.Key = 'AppStorage' as const;
 
-export const storage = {
+export const storage: types.StorageInterface = {
 	clearStorage(): void {
 		localStorage.clear();
 		document.cookie.split(';').forEach(cookie => {
@@ -13,7 +13,7 @@ export const storage = {
 
 	getAppStorage(): types.AppStorage | null {
 		try {
-			const item = localStorage.getItem(STORAGE_KEY);
+			const item = localStorage.getItem(String(KEY));
 			return item ? (JSON.parse(item) as types.AppStorage) : null;
 		} catch (error) {
 			console.error(`Error reading from localStorage: ${error}`);
@@ -38,7 +38,7 @@ export const storage = {
 	setAppStorage(value: types.AppStorage): void {
 		try {
 			const serializedValue = JSON.stringify(value);
-			localStorage.setItem(STORAGE_KEY, serializedValue);
+			localStorage.setItem(KEY, serializedValue);
 		} catch (error) {
 			console.error(`Error saving to localStorage: ${error}`);
 		}
@@ -60,7 +60,7 @@ export const storage = {
 			const newData = { ...currentData, ...updates };
 			const serializedData = JSON.stringify(newData);
 
-			localStorage.setItem(STORAGE_KEY, serializedData);
+			localStorage.setItem(KEY, serializedData);
 		} catch (error) {
 			console.error(`Error updating appStorage: ${error}`);
 		}

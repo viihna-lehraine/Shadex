@@ -42,7 +42,7 @@ function defineUIButtons(): types.UIButtons {
 }
 
 // add conversion button event listeners
-function addConversionButtonEventListeners() {
+function addConversionButtonEventListeners(): void {
 	const addListener = (id: string, colorSpace: keyof types.ConversionMap) => {
 		const button = document.getElementById(id) as HTMLButtonElement | null;
 
@@ -64,21 +64,15 @@ function addConversionButtonEventListeners() {
 function makePaletteBox(
 	colorValues: types.ColorObjectData,
 	paletteBoxCount: number
-): {
-	colorStripe: HTMLDivElement;
-	paletteBoxCount: number;
-} {
-	// create main palette box container
+): types.MakePaletteBox {
 	const paletteBox = document.createElement('div');
 	paletteBox.className = 'palette-box';
 	paletteBox.id = `palette-box-${paletteBoxCount}`;
 
-	// create top half of palette box
 	const paletteBoxTopHalf = document.createElement('div');
 	paletteBoxTopHalf.className = 'palette-box-half palette-box-top-half';
 	paletteBoxTopHalf.id = `palette-box-top-half-${paletteBoxCount}`;
 
-	// create input element with extended type
 	const colorTextOutputBox = document.createElement(
 		'input'
 	) as types.ColorInputElement;
@@ -183,7 +177,35 @@ function makePaletteBox(
 	};
 }
 
-//extracts user-defined parameters
+function parseCustomColor(
+	colorSpace: types.ColorSpace,
+	rawValue: string
+): types.CustomColor | null {
+	switch (colorSpace) {
+		case 'hex':
+			return { hex: rawValue, format: 'hex' };
+		case 'hsl': {
+			const match = rawValue.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+			if (match) {
+				const [, hue, saturation, lightness] = match.map(Number);
+				return {
+					hue,
+					saturation,
+					lightness,
+					format: 'hsl'
+				};
+			}
+			break;
+		}
+		default:
+			console.warn(`Unsupported color space: ${colorSpace}`);
+			return null;
+	}
+
+	console.error(`Failed to parse custom color: ${rawValue}`);
+	return null;
+}
+
 function pullParamsFromUI(): types.PullParamsFromUI {
 	const paletteTypeElement = document.getElementById(
 		'palette-type-options'
@@ -216,5 +238,6 @@ export const domHelpers = {
 	defineUIButtons,
 	addConversionButtonEventListeners,
 	makePaletteBox,
+	parseCustomColor,
 	pullParamsFromUI
 };

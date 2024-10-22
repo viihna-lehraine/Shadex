@@ -1,7 +1,6 @@
 import { convert } from './conversion-index';
 import * as types from '../index';
-
-const defaultLAB: types.LAB = { l: 0, a: 0, b: 0, format: 'lab' };
+import { defaults } from '../utils/defaults';
 
 export function xyzToLAB(xyz: types.XYZ): types.LAB {
 	try {
@@ -33,7 +32,7 @@ export function xyzToLAB(xyz: types.XYZ): types.LAB {
 		return { l, a, b, format: 'lab' };
 	} catch (error) {
 		console.error(`xyzToLab() error: ${error}`);
-		return defaultLAB;
+		return defaults.defaultLAB();
 	}
 }
 
@@ -45,7 +44,7 @@ export function hexToLAB(hex: types.Hex): types.LAB {
 		return xyzToLAB(xyz);
 	} catch (error) {
 		console.error(`hexToLAB() error: ${error}`);
-		return defaultLAB;
+		return defaults.defaultLAB();
 	}
 }
 
@@ -55,7 +54,7 @@ export function rgbToLAB(rgb: types.RGB): types.LAB {
 		return xyzToLAB(xyz);
 	} catch (error) {
 		console.error(`rgbToLab() error: ${error}`);
-		return defaultLAB;
+		return defaults.defaultLAB();
 	}
 }
 
@@ -67,7 +66,7 @@ export function hslToLAB(hsl: types.HSL): types.LAB {
 		return xyzToLAB(xyz);
 	} catch (error) {
 		console.error(`hslToLab() error: ${error}`);
-		return defaultLAB;
+		return defaults.defaultLAB();
 	}
 }
 
@@ -79,7 +78,7 @@ export function hsvToLAB(hsv: types.HSV): types.LAB {
 		return xyzToLAB(xyz);
 	} catch (error) {
 		console.error(`hsvToLab() error: ${error}`);
-		return defaultLAB;
+		return defaults.defaultLAB();
 	}
 }
 
@@ -91,6 +90,6 @@ export function cmykToLAB(cmyk: types.CMYK): types.LAB {
 		return xyzToLAB(xyz);
 	} catch (error) {
 		console.error(`cmykToLab() error: ${error}`);
-		return defaultLAB;
+		return defaults.defaultLAB();
 	}
 }

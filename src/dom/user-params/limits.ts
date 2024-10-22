@@ -33,7 +33,7 @@ export function isHSLTooDark(
 export function isHSLTooBright(
 	hsl: types.HSL,
 	hslBrightnessThreshold: number = 75
-) {
+): boolean {
 	return hsl.lightness > hslBrightnessThreshold;
 }
 
@@ -100,14 +100,14 @@ export function isCMYKTooGray(
 export function isCMYKTooDark(
 	cmyk: types.CMYK,
 	cmykDarknesshreshold: number = 90
-) {
+): boolean {
 	return cmyk.key > cmykDarknesshreshold;
 }
 
 export function isCMYKTooBright(
 	cmyk: types.CMYK,
 	cmykBrightnessThreshold: number = 10
-) {
+): boolean {
 	return (
 		cmyk.cyan < cmykBrightnessThreshold &&
 		cmyk.magenta < cmykBrightnessThreshold &&
@@ -115,7 +115,10 @@ export function isCMYKTooBright(
 	);
 }
 
-export function isLABTooGray(lab: types.LAB, labGrayThreshold: number = 10) {
+export function isLABTooGray(
+	lab: types.LAB,
+	labGrayThreshold: number = 10
+): boolean {
 	return (
 		Math.abs(lab.a) < labGrayThreshold && Math.abs(lab.b) < labGrayThreshold
 	);
@@ -124,14 +127,14 @@ export function isLABTooGray(lab: types.LAB, labGrayThreshold: number = 10) {
 export function isLABTooDark(
 	lab: types.LAB,
 	labDarknessThreshold: number = 10
-) {
+): boolean {
 	return lab.l < labDarknessThreshold;
 }
 
 export function isLABTooBright(
 	lab: types.LAB,
 	labBrightnessThreshold: number = 90
-) {
+): boolean {
 	return lab.l > labBrightnessThreshold;
 }
 

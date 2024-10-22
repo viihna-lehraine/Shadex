@@ -1,14 +1,13 @@
 import { conversionHelpers } from '../helpers/conversion';
 import * as types from '../index';
-
-const defaulXYZ: types.XYZ = { x: 0, y: 0, z: 0, format: 'xyz' };
+import { defaults } from '../utils/defaults';
 
 export function cmykToXYZ(cmyk: types.CMYK): types.XYZ {
 	try {
 		return conversionHelpers.cmykToXYZTryCaseHelper(cmyk);
 	} catch (error) {
 		console.error(`cmykToXYZ error: ${error}`);
-		return defaulXYZ;
+		return defaults.defaultXYZ();
 	}
 }
 
@@ -17,7 +16,7 @@ export function hexToXYZ(hex: types.Hex): types.XYZ {
 		return conversionHelpers.hexToXYZTryCaseHelper(hex);
 	} catch (error) {
 		console.error(`hexToXYZ error: ${error}`);
-		return defaulXYZ;
+		return defaults.defaultXYZ();
 	}
 }
 
@@ -26,7 +25,7 @@ export function hslToXYZ(hsl: types.HSL): types.XYZ {
 		return conversionHelpers.hslToXYZTryCaseHelper(hsl);
 	} catch (error) {
 		console.error(`hslToXYZ error: ${error}`);
-		return defaulXYZ;
+		return defaults.defaultXYZ();
 	}
 }
 
@@ -35,7 +34,7 @@ export function hsvToXYZ(hsv: types.HSV): types.XYZ {
 		return conversionHelpers.hsvToXYZTryCaseHelper(hsv);
 	} catch (error) {
 		console.error(`hsvToXYZ error: ${error}`);
-		return defaulXYZ;
+		return defaults.defaultXYZ();
 	}
 }
 
@@ -65,7 +64,7 @@ export function labToXYZ(lab: types.LAB): types.XYZ {
 		};
 	} catch (error) {
 		console.error(`labToXYZ error: ${error}`);
-		return { x: 0, y: 0, z: 0, format: 'xyz' };
+		return defaults.defaultXYZ();
 	}
 }
 
@@ -100,6 +99,6 @@ export function rgbToXYZ(rgb: types.RGB): types.XYZ {
 		};
 	} catch (error) {
 		console.error(`rgbToXYZ error: ${error}`);
-		return defaulXYZ;
+		return defaults.defaultXYZ();
 	}
 }

@@ -28,7 +28,7 @@ function genSelectedPaletteType(
 	baseColor: types.ColorData,
 	customColor: types.ColorData | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
-) {
+): types.ColorData[] {
 	switch (paletteType) {
 		case 1:
 			return palette.genRandomPalette(
@@ -115,12 +115,12 @@ function startInHSL(color: types.ColorData): types.HSL | null {
 	}
 }
 
-function genPalette(
+function startPaletteGen(
 	paletteType: number,
 	numBoxes: number,
 	initialColorSpace: types.ColorSpace = 'hex',
 	customColor?: types.ColorData | null
-) {
+): void {
 	let colors: types.ColorData[] = [];
 
 	const baseColor: types.ColorData =
@@ -143,6 +143,7 @@ function genPalette(
 	genPaletteBox(numBoxes, colors);
 }
 
+// *DEV-NOTE* refine return type
 function initialHSLColorGen(
 	color: types.ColorObject<
 		types.CMYK | types.Hex | types.HSL | types.HSV | types.LAB | types.RGB
@@ -168,8 +169,8 @@ function initialHSLColorGen(
 
 export const paletteHelpers = {
 	adjustSL,
-	genPalette,
 	genSelectedPaletteType,
 	initialHSLColorGen,
-	startInHSL
+	startInHSL,
+	startPaletteGen
 };
