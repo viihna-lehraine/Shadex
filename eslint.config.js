@@ -21,7 +21,17 @@ export default [
 		},
 		rules: {
 			"prettier/prettier": ["error"],
-			"no-unused-vars": "warn",
+			"no-unused-vars": "off",
+			"@typescript-eslint/no-unused-vars": [
+				"warn",
+				{
+					args: "none",
+					argsIgnorePattern: "^_",
+					caughtErrors: "none",
+					caughtErrorsIgnorePattern: "^_",
+					varsIgnorePattern: "^_",
+				}
+			],
 			"@typescript-eslint/no-explicit-any": "error",
 			"@typescript-eslint/explicit-module-boundary-types": "off"
 		}

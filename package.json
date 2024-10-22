@@ -8,23 +8,24 @@
 	"description": "*** Web-based color palette generator. Produces 8 varieties of color scheme and can convert between 6 colorspaces.",
 	"main": "./public/app.js",
 	"scripts": {
-	  "build:tsc": "tsc",
-	  "format": "npx prettier . --write",
-	  "lint": "npx eslint",
-	  "lint:fix": "npx eslint --fix",
-	  "lint:watch": "npx eslint --watch",
-	  "scan:tsc:errors": "tsc --noEmit",
-	  "start": "node ./public/app.js",
-	  "watch:format": "npx prettier . --write --watch",
-	  "watch:lint": "npx eslint --watch"
+		"build:tsc": "rm -rf ./public/js && tsc && node scripts/add-js-extensions.js",
+		"format": "npx prettier . --write",
+		"lint": "npx eslint",
+		"lint:fix": "npx eslint --fix",
+		"lint:watch": "npx eslint --watch",
+		"scan:tsc:errors": "tsc --noEmit",
+		"start": "node ./public/app.js",
+		"watch:format": "npx prettier . --write --watch",
+		"watch:lint": "npx eslint --watch"
 	},
 	"devDependencies": {
-	  "@typescript-eslint/eslint-plugin": "^8.10.0",
-	  "@typescript-eslint/parser": "^8.10.0",
-	  "eslint": "^9.12.0",
-	  "eslint-config-prettier": "^9.1.0",
-	  "eslint-plugin-prettier": "^5.2.1",
-	  "prettier": "^3.3.3",
-	  "typescript": "^5.6.3"
+		"@typescript-eslint/eslint-plugin": "^8.11.0",
+		"@typescript-eslint/parser": "^8.11.0",
+		"eslint": "^9.13.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-prettier": "^5.2.1",
+		"prettier": "^3.3.3",
+		"replace-in-file": "^8.2.0",
+		"typescript": "^5.6.3"
 	}
-  }
+}
