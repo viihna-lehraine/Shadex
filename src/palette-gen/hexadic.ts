@@ -5,7 +5,7 @@ import * as types from '../index';
 
 export function genHexadicHues(hsl: types.HSL): number[] {
 	const hexadicHues: number[] = [];
-	const baseHue = hsl.hue;
+	const baseHue = hsl.value.hue;
 	const hue1 = baseHue;
 	const hue2 = (hue1 + 180) % 360;
 	const randomDistance = Math.floor(Math.random() * 71 + 10);
@@ -21,9 +21,9 @@ export function genHexadicHues(hsl: types.HSL): number[] {
 
 export function genHexadicPalette(
 	numBoxes: number,
-	customColor: types.ColorData | null = null,
+	customColor: types.Color | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
-): types.ColorData[] {
+): types.Color[] {
 	if (numBoxes < 6) {
 		window.alert(
 			'To generate a hexadic palette, please select a number of swatches greater than 5'
@@ -31,7 +31,7 @@ export function genHexadicPalette(
 		return [];
 	}
 
-	const colors: types.ColorData[] = [];
+	const colors: types.Color[] = [];
 
 	let baseColorValues = customColor
 		? genAllColorValues(customColor)
@@ -51,12 +51,12 @@ export function genHexadicPalette(
 
 	for (let i = 0; i < numBoxes; i++) {
 		const hue = hexadicHues[i % 6];
-		let { saturation, lightness } = random.randomSL();
+		let {
+			value: { saturation, lightness }
+		} = random.randomSL();
 
 		const hexadicColorValues = genAllColorValues({
-			hue,
-			saturation,
-			lightness,
+			value: { hue, saturation, lightness },
 			format: 'hsl'
 		});
 		const hexadicHSL = hexadicColorValues.hsl as types.HSL;
@@ -67,7 +67,7 @@ export function genHexadicPalette(
 
 		if (colorBox) {
 			const hexColor = hexadicColorValues.hex as types.Hex;
-			colorBox.style.backgroundColor = hexColor.hex;
+			colorBox.style.backgroundColor = hexColor.value.hex;
 
 			populateColorTextOutputBox(hexadicHSL, i + 1);
 		}

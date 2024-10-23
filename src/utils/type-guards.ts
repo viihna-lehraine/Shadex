@@ -1,31 +1,31 @@
 import * as types from '../index';
 import { conversionMap } from '../color-conversion/conversion';
 
-function isCMYK(color: types.ColorData): color is types.CMYK {
+function isCMYK(color: types.Color): color is types.CMYK {
 	return color.format === 'cmyk';
 }
 
-function isHex(color: types.ColorData): color is types.Hex {
+function isHex(color: types.Color): color is types.Hex {
 	return color.format === 'hex';
 }
 
-function isHSL(color: types.ColorData): color is types.HSL {
+function isHSL(color: types.Color): color is types.HSL {
 	return color.format === 'hsl';
 }
 
-function isHSV(color: types.ColorData): color is types.HSV {
+function isHSV(color: types.Color): color is types.HSV {
 	return color.format === 'hsv';
 }
 
-function isLAB(color: types.ColorData): color is types.LAB {
+function isLAB(color: types.Color): color is types.LAB {
 	return color.format === 'lab';
 }
 
-function isRGB(color: types.ColorData): color is types.RGB {
+function isRGB(color: types.Color): color is types.RGB {
 	return color.format === 'rgb';
 }
 
-function isXYZ(color: types.ColorData): color is types.XYZ {
+function isXYZ(color: types.Color): color is types.XYZ {
 	return color.format === 'xyz';
 }
 
@@ -35,51 +35,60 @@ function isHexColor(value: unknown): value is types.Hex {
 	return (
 		typeof value === 'object' &&
 		value !== null &&
-		'hex' in value &&
-		typeof (value as types.Hex).hex === 'string' &&
-		(value as types.Hex).format === 'hex'
+		'format' in value &&
+		(value as types.Hex).format === 'hex' &&
+		'value' in value &&
+		typeof (value as types.Hex).value.hex === 'string'
 	);
 }
 
 // ***** SECTION 3 *****
 
-function isColorObjectData(color: unknown): color is types.ColorObjectData {
+function isFormat(format: unknown): format is types.Format {
 	return (
-		typeof color === 'object' &&
-		color !== null &&
-		'format' in color &&
-		'value' in color
+		typeof format === 'string' &&
+		['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb', 'sl', 'sv', 'xyz'].includes(
+			format
+		)
 	);
-}
-
-// ***** SECTION 4 *****
-
-function isColorFormat(format: string): format is types.ColorFormats {
-	return ['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb'].includes(format);
 }
 
 function isColorSpace(value: string): value is types.ColorSpace {
 	return ['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb', 'xyz'].includes(value);
 }
 
-// ***** SECTION 5 *****
+function isConvertibleColor(
+	color: types.Color
+): color is
+	| types.CMYK
+	| types.Hex
+	| types.HSL
+	| types.HSV
+	| types.LAB
+	| types.RGB {
+	return (
+		color.format === 'cmyk' ||
+		color.format === 'hex' ||
+		color.format === 'hsl' ||
+		color.format === 'hsv' ||
+		color.format === 'lab' ||
+		color.format === 'rgb'
+	);
+}
 
 function isInputElement(element: HTMLElement | null): element is HTMLElement {
 	return element instanceof HTMLInputElement;
 }
 
-// ***** SECTION 6 *****
-
 function isConversion(
 	from: keyof types.ConversionMap,
-	to: keyof types.ColorDataInterface
+	to: keyof types.Color
 ): boolean {
 	return from in conversionMap && to in conversionMap[from];
 }
 
 export const guards = {
 	isCMYK,
-	isColorObjectData,
 	isHex,
 	isHSL,
 	isHSV,
@@ -87,8 +96,9 @@ export const guards = {
 	isRGB,
 	isXYZ,
 	isHexColor,
-	isColorFormat,
 	isColorSpace,
 	isConversion,
+	isConvertibleColor,
+	isFormat,
 	isInputElement
 };

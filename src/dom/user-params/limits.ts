@@ -20,21 +20,21 @@ export function isHSLTooGray(
 	hsl: types.HSL,
 	hslGrayThreshold: number = 20
 ): boolean {
-	return hsl.saturation < hslGrayThreshold;
+	return hsl.value.saturation < hslGrayThreshold;
 }
 
 export function isHSLTooDark(
 	hsl: types.HSL,
 	hslDarknessThreshold: number = 25
 ): boolean {
-	return hsl.lightness < hslDarknessThreshold;
+	return hsl.value.lightness < hslDarknessThreshold;
 }
 
 export function isHSLTooBright(
 	hsl: types.HSL,
 	hslBrightnessThreshold: number = 75
 ): boolean {
-	return hsl.lightness > hslBrightnessThreshold;
+	return hsl.value.lightness > hslBrightnessThreshold;
 }
 
 export function isRGBTooGray(
@@ -42,9 +42,9 @@ export function isRGBTooGray(
 	rgbGrayTreshold: number = 10
 ): boolean {
 	return (
-		Math.abs(rgb.red - rgb.green) < rgbGrayTreshold &&
-		Math.abs(rgb.green - rgb.blue) < rgbGrayTreshold &&
-		Math.abs(rgb.red - rgb.blue) < rgbGrayTreshold
+		Math.abs(rgb.value.red - rgb.value.green) < rgbGrayTreshold &&
+		Math.abs(rgb.value.green - rgb.value.blue) < rgbGrayTreshold &&
+		Math.abs(rgb.value.red - rgb.value.blue) < rgbGrayTreshold
 	);
 }
 
@@ -52,28 +52,34 @@ export function isRGBTooDark(
 	rgb: types.RGB,
 	rgbMinBrightness: number = 50
 ): boolean {
-	return (rgb.red + rgb.green + rgb.blue) / 3 < rgbMinBrightness;
+	return (
+		(rgb.value.red + rgb.value.green + rgb.value.blue) / 3 <
+		rgbMinBrightness
+	);
 }
 
 export function isRGBTooBright(
 	rgb: types.RGB,
 	rgbMaxBrightness: number = 200
 ): boolean {
-	return (rgb.red + rgb.green + rgb.blue) / 3 > rgbMaxBrightness;
+	return (
+		(rgb.value.red + rgb.value.green + rgb.value.blue) / 3 >
+		rgbMaxBrightness
+	);
 }
 
 export function isHSVTooGray(
 	hsv: types.HSV,
 	hsvGrayThreshold: number = 10
 ): boolean {
-	return hsv.saturation < hsvGrayThreshold;
+	return hsv.value.saturation < hsvGrayThreshold;
 }
 
 export function isHSVTooDark(
 	hsv: types.HSV,
 	hsvDarknessThreshold: number = 10
 ): boolean {
-	return hsv.value < hsvDarknessThreshold;
+	return hsv.value.value < hsvDarknessThreshold;
 }
 
 export function isHSVTooBright(
@@ -82,8 +88,8 @@ export function isHSVTooBright(
 	hsvBrightnessSaturationThreshold: number = 10
 ): boolean {
 	return (
-		hsv.value > hsvBrightnessValueThreshold &&
-		hsv.saturation < hsvBrightnessSaturationThreshold
+		hsv.value.value > hsvBrightnessValueThreshold &&
+		hsv.value.saturation < hsvBrightnessSaturationThreshold
 	);
 }
 
@@ -92,8 +98,8 @@ export function isCMYKTooGray(
 	cmykGrayThreshold: number = 5
 ): boolean {
 	return (
-		Math.abs(cmyk.cyan - cmyk.magenta) < cmykGrayThreshold &&
-		Math.abs(cmyk.magenta - cmyk.yellow) < cmykGrayThreshold
+		Math.abs(cmyk.value.cyan - cmyk.value.magenta) < cmykGrayThreshold &&
+		Math.abs(cmyk.value.magenta - cmyk.value.yellow) < cmykGrayThreshold
 	);
 }
 
@@ -101,7 +107,7 @@ export function isCMYKTooDark(
 	cmyk: types.CMYK,
 	cmykDarknesshreshold: number = 90
 ): boolean {
-	return cmyk.key > cmykDarknesshreshold;
+	return cmyk.value.key > cmykDarknesshreshold;
 }
 
 export function isCMYKTooBright(
@@ -109,9 +115,9 @@ export function isCMYKTooBright(
 	cmykBrightnessThreshold: number = 10
 ): boolean {
 	return (
-		cmyk.cyan < cmykBrightnessThreshold &&
-		cmyk.magenta < cmykBrightnessThreshold &&
-		cmyk.yellow < cmykBrightnessThreshold
+		cmyk.value.cyan < cmykBrightnessThreshold &&
+		cmyk.value.magenta < cmykBrightnessThreshold &&
+		cmyk.value.yellow < cmykBrightnessThreshold
 	);
 }
 
@@ -120,7 +126,8 @@ export function isLABTooGray(
 	labGrayThreshold: number = 10
 ): boolean {
 	return (
-		Math.abs(lab.a) < labGrayThreshold && Math.abs(lab.b) < labGrayThreshold
+		Math.abs(lab.value.a) < labGrayThreshold &&
+		Math.abs(lab.value.b) < labGrayThreshold
 	);
 }
 
@@ -128,14 +135,14 @@ export function isLABTooDark(
 	lab: types.LAB,
 	labDarknessThreshold: number = 10
 ): boolean {
-	return lab.l < labDarknessThreshold;
+	return lab.value.l < labDarknessThreshold;
 }
 
 export function isLABTooBright(
 	lab: types.LAB,
 	labBrightnessThreshold: number = 90
 ): boolean {
-	return lab.l > labBrightnessThreshold;
+	return lab.value.l > labBrightnessThreshold;
 }
 
 export function isColorInBounds(

@@ -4,13 +4,13 @@ import * as types from '../index';
 
 export function genRandomPalette(
 	numBoxes: number,
-	customColor: types.ColorData | null = null,
+	customColor: types.Color | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
-): types.ColorData[] {
-	const colors: types.ColorData[] = [];
+): types.Color[] {
+	const colors: types.Color[] = [];
 
 	for (let i = 0; i < numBoxes; i++) {
-		let colorValues: Partial<Record<types.ColorFormats, types.ColorData>>;
+		let colorValues: Partial<types.ColorData>;
 
 		if (i === 0 && customColor) {
 			colorValues = genAllColorValues(customColor);

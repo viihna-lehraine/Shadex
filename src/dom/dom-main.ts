@@ -1,34 +1,32 @@
 import * as types from '../index';
 import { guards } from '../utils/type-guards';
 import { convert } from '../color-conversion/conversion-index';
-import { paletteHelpers } from '../helpers/palette';
 import { random } from '../utils/color-randomizer';
-import { domHelpers } from '../helpers/dom';
-import { genAllColorValues } from '../color-conversion/conversion';
-import { colorToColorObject, createColorObjectData } from '../utils/transforms';
+import { parseCustomColor } from '../utils/transforms';
 import { getConversionFn } from '../color-conversion/conversion';
+import { startPaletteGen } from '../palette-gen/generate';
 
 export function applyFirstColorToUI(
 	initialColorSpace: types.ColorSpace
-): types.ColorData {
-	const color = random.getRandomColorBySpace(initialColorSpace);
+): types.Color {
+	const color = random.randomColor(initialColorSpace);
 	const colorBox1 = document.getElementById('color-box-1');
 
 	if (colorBox1) {
 		let colorString: string;
 
 		if (guards.isCMYK(color)) {
-			colorString = `cmyk(${color.cyan}, ${color.magenta}, ${color.yellow}, ${color.key})`;
+			colorString = `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key})`;
 		} else if (guards.isHex(color)) {
-			colorString = color.hex;
+			colorString = color.value.hex;
 		} else if (guards.isRGB(color)) {
-			colorString = `rgb(${color.red}, ${color.green}, ${color.blue})`;
+			colorString = `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue})`;
 		} else if (guards.isHSL(color)) {
-			colorString = `hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`;
+			colorString = `hsl(${color.value.hue}, ${color.value.saturation}%, ${color.value.lightness}%)`;
 		} else if (guards.isHSV(color)) {
-			colorString = `hsv(${color.hue}, ${color.saturation}%, ${color.value}%)`;
+			colorString = `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%)`;
 		} else if (guards.isLAB(color)) {
-			colorString = `lab(${color.l}, ${color.a}, ${color.b})`;
+			colorString = `lab(${color.value.l}, ${color.value.a}, ${color.value.b})`;
 		} else {
 			console.error('Unexpected color format');
 			return color;
@@ -39,7 +37,7 @@ export function applyFirstColorToUI(
 			populateColorTextOutputBox(color, 1);
 		} else {
 			console.error(
-				'Logic not yet implemented fpr cases where intiialColorSpace !== hsl!'
+				'Logic not yet implemented for cases where intiialColorSpace !== hsl!'
 			);
 		}
 	} else {
@@ -49,85 +47,40 @@ export function applyFirstColorToUI(
 	return color;
 }
 
-export function genPaletteBox(
-	numBoxes: number,
-	colors: types.ColorData[]
-): void {
-	const paletteRow = document.getElementById('palette-row');
-
-	if (!paletteRow) {
-		console.error('paletteRow is undefined');
-		return;
-	}
-
-	paletteRow.innerHTML = '';
-	let paletteBoxCount = 1;
-
-	for (let i = 0; i < numBoxes; i++) {
-		const colorData = colors[i];
-
-		if (!colorData) {
-			console.warn(`Color at index ${i} is undefined.`);
-			continue;
-		}
-
-		const colorObject = colorToColorObject(colorData);
-
-		if (!colorObject) {
-			console.warn(`Skipping invalid color data at index ${i}.`);
-			continue;
-		}
-
-		const colorValues = genAllColorValues(colorObject);
-		const originalColorFormat =
-			colorObject.format as types.ColorSpaceFormats;
-
-		if (!guards.isColorFormat(originalColorFormat)) {
-			console.warn(
-				`Skipping unsupported color format: ${originalColorFormat}`
-			);
-			continue;
-		}
-
-		const originalColorValue = colorValues[originalColorFormat];
-
-		if (!originalColorValue) {
-			throw new Error(
-				`Failed to generate color data for format ${originalColorFormat}`
-			);
-		}
-
-		const colorObjectData: types.ColorObjectData = createColorObjectData(
-			originalColorFormat,
-			originalColorValue
-		);
-		const { colorStripe, paletteBoxCount: newPaletteBoxCount } =
-			domHelpers.makePaletteBox(colorObjectData, paletteBoxCount);
-
-		paletteRow.appendChild(colorStripe);
-
-		if (guards.isHSL(colorData)) {
-			populateColorTextOutputBox(colorData, paletteBoxCount);
-		} else {
-			console.warn(`Skipping non-HSL color at index ${i}.`);
-		}
-
-		paletteBoxCount = newPaletteBoxCount;
-	}
-}
-
 export function populateColorTextOutputBox(
-	hsl: types.HSL,
+	color: Exclude<types.Color, types.XYZ>,
 	boxNumber: number
 ): void {
 	const colorTextOutputBox = document.getElementById(
 		`color-text-output-box-${boxNumber}`
 	) as HTMLInputElement | null;
 
-	if (colorTextOutputBox) {
-		const hexColor = convert.hslToHex(hsl);
-		colorTextOutputBox.value = hexColor.hex;
+	if (!colorTextOutputBox) return;
+
+	// convert color to Hex for display purposes
+	let hexColor: types.Hex | null = null;
+
+	if (color.format === 'cmyk') {
+		hexColor = convert.cmykToHex(color as types.CMYK);
+	} else if (color.format === 'hex') {
+		hexColor = color;
+	} else if (color.format === 'hsl') {
+		hexColor = convert.hslToHex(color as types.HSL);
+	} else if (color.format === 'hsv') {
+		hexColor = convert.hsvToHex(color as types.HSV);
+	} else if (color.format === 'lab') {
+		hexColor = convert.labToHex(color as types.LAB);
+	} else if (color.format === 'rgb') {
+		hexColor = convert.rgbToHex(color as types.RGB);
+	} else {
+		console.error('Unexpected color format');
+		return;
 	}
+
+	console.log(`Hex color alue: ${hexColor.value.hex}`);
+
+	colorTextOutputBox.value = hexColor.value.hex;
+	colorTextOutputBox.setAttribute('data-format', 'hex');
 }
 
 export function getElementsForSelectedColor(
@@ -183,7 +136,10 @@ export function applyCustomColor(): types.HSL {
 	const customHexBase = (
 		document.getElementById('custom-color-picker') as HTMLInputElement
 	).value;
-	const customHex: types.Hex = { hex: customHexBase, format: 'hex' };
+	const customHex: types.Hex = {
+		value: { hex: customHexBase },
+		format: 'hex'
+	};
 
 	if (!guards.isHexColor(customHexBase)) {
 		throw new Error('Invalid hex color');
@@ -223,7 +179,7 @@ export function copyToClipboard(
 		});
 }
 
-export function convertColors(targetFormat: types.ColorSpaceFormats): void {
+export function convertColors(targetFormat: types.ColorSpace): void {
 	const colorTextOutputBoxes = document.querySelectorAll<HTMLInputElement>(
 		'.color-text-output-box'
 	);
@@ -244,11 +200,11 @@ export function convertColors(targetFormat: types.ColorSpaceFormats): void {
 
 		const currentFormat = inputBox.getAttribute(
 			'data-format'
-		) as types.ColorSpaceFormats;
+		) as types.ColorSpace;
 
 		if (
-			!guards.isColorFormat(currentFormat) ||
-			!guards.isColorFormat(targetFormat)
+			!guards.isColorSpace(currentFormat) ||
+			!guards.isColorSpace(targetFormat)
 		) {
 			console.error(
 				`Invalid format: ${currentFormat} or ${targetFormat}`
@@ -264,14 +220,18 @@ export function convertColors(targetFormat: types.ColorSpaceFormats): void {
 			return;
 		}
 
-		const newColor = convertFn(colorValues as types.ColorData);
-		if (!newColor) {
-			console.error(`Conversion to ${targetFormat} failed.`);
-			return;
-		}
+		if (guards.isConvertibleColor(colorValues)) {
+			const newColor = convertFn(colorValues);
+			if (!newColor) {
+				console.error(`Conversion to ${targetFormat} failed.`);
+				return;
+			}
 
-		inputBox.value = String(newColor);
-		inputBox.setAttribute('data-format', targetFormat);
+			inputBox.value = String(newColor);
+			inputBox.setAttribute('data-format', targetFormat);
+		} else {
+			console.error(`Invalid color type for conversion.`);
+		}
 	});
 }
 
@@ -295,10 +255,7 @@ export function getGenerateButtonParams(): types.GenButtonParams {
 	const customColorRaw = (
 		document.getElementById('custom-color') as HTMLInputElement
 	)?.value;
-	const customColor: types.CustomColor = domHelpers.parseCustomColor(
-		initialColorSpace,
-		customColorRaw
-	);
+	const customColor = parseCustomColor(initialColorSpace, customColorRaw);
 
 	return {
 		numBoxes: parseInt(paletteNumberOptions.value, 10),
@@ -312,7 +269,8 @@ export function handleGenButtonClick(): void {
 	const {
 		paletteType,
 		numBoxes,
-		initialColorSpace: space
+		initialColorSpace: space,
+		customColor
 	} = getGenerateButtonParams();
 
 	if (!paletteType || !numBoxes) {
@@ -322,5 +280,5 @@ export function handleGenButtonClick(): void {
 
 	const initialColorSpace: types.ColorSpace = space ?? 'hex';
 
-	paletteHelpers.startPaletteGen(paletteType, numBoxes, initialColorSpace);
+	startPaletteGen(paletteType, numBoxes, initialColorSpace, customColor);
 }

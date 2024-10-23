@@ -15,12 +15,12 @@ export function hexToHSV(hex: types.Hex): types.HSV {
 
 export function rgbToHSV(rgb: types.RGB): types.HSV {
 	try {
-		rgb.red /= 255;
-		rgb.green /= 255;
-		rgb.blue /= 255;
+		rgb.value.red /= 255;
+		rgb.value.green /= 255;
+		rgb.value.blue /= 255;
 
-		const max = Math.max(rgb.red, rgb.green, rgb.blue);
-		const min = Math.min(rgb.red, rgb.green, rgb.blue);
+		const max = Math.max(rgb.value.red, rgb.value.green, rgb.value.blue);
+		const min = Math.min(rgb.value.red, rgb.value.green, rgb.value.blue);
 		const delta = max - min;
 
 		let hue = 0;
@@ -29,16 +29,16 @@ export function rgbToHSV(rgb: types.RGB): types.HSV {
 
 		if (max !== min) {
 			switch (max) {
-				case rgb.red:
+				case rgb.value.red:
 					hue =
-						(rgb.green - rgb.blue) / delta +
-						(rgb.green < rgb.blue ? 6 : 0);
+						(rgb.value.green - rgb.value.blue) / delta +
+						(rgb.value.green < rgb.value.blue ? 6 : 0);
 					break;
-				case rgb.green:
-					hue = (rgb.blue - rgb.red) / delta + 2;
+				case rgb.value.green:
+					hue = (rgb.value.blue - rgb.value.red) / delta + 2;
 					break;
-				case rgb.blue:
-					hue = (rgb.red - rgb.green) / delta + 4;
+				case rgb.value.blue:
+					hue = (rgb.value.red - rgb.value.green) / delta + 4;
 					break;
 			}
 
@@ -46,9 +46,11 @@ export function rgbToHSV(rgb: types.RGB): types.HSV {
 		}
 
 		return {
-			hue: Math.round(hue),
-			saturation: Math.round(saturation * 100),
-			value: Math.round(value * 100),
+			value: {
+				hue: Math.round(hue),
+				saturation: Math.round(saturation * 100),
+				value: Math.round(value * 100)
+			},
 			format: 'hsv'
 		};
 	} catch (error) {
@@ -59,16 +61,18 @@ export function rgbToHSV(rgb: types.RGB): types.HSV {
 
 export function hslToHSV(hsl: types.HSL): types.HSV {
 	try {
-		const s = hsl.saturation / 100;
-		const l = hsl.lightness / 100;
+		const s = hsl.value.saturation / 100;
+		const l = hsl.value.lightness / 100;
 
 		const value = l + s * Math.min(l, 1 - 1);
 		const newSaturation = value === 0 ? 0 : 2 * (1 - l / value);
 
 		return {
-			hue: Math.round(hsl.hue),
-			saturation: Math.round(newSaturation * 100),
-			value: Math.round(value * 100),
+			value: {
+				hue: Math.round(hsl.value.hue),
+				saturation: Math.round(newSaturation * 100),
+				value: Math.round(value * 100)
+			},
 			format: 'hsv'
 		};
 	} catch (error) {

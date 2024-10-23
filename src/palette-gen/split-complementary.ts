@@ -16,9 +16,9 @@ export function genSplitComplementaryHues(baseHue: number): number[] {
 
 export function genSplitComplementaryPalette(
 	numBoxes: number,
-	customColor: types.ColorData | null = null,
+	customColor: types.Color | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
-): types.ColorData[] {
+): types.Color[] {
 	if (numBoxes < 3) {
 		window.alert(
 			'To generate a split complementary palette, please select a number of swatches greater than 2'
@@ -26,8 +26,8 @@ export function genSplitComplementaryPalette(
 		return [];
 	}
 
-	const colors: types.ColorData[] = [];
-	let baseColor: types.ColorData;
+	const colors: types.Color[] = [];
+	let baseColor: types.Color;
 
 	if (customColor) {
 		baseColor = customColor;
@@ -38,17 +38,21 @@ export function genSplitComplementaryPalette(
 	}
 
 	const splitComplementaryHues = genSplitComplementaryHues(
-		(baseColor as types.HSL).hue
+		(baseColor as types.HSL).value.hue
 	);
 
 	colors.push(baseColor);
 
 	splitComplementaryHues.forEach(hue => {
-		const { saturation, lightness } = random.randomSL();
+		const {
+			value: { saturation, lightness }
+		} = random.randomSL();
 		const complementaryColor = genAllColorValues({
-			hue,
-			saturation,
-			lightness,
+			value: {
+				hue,
+				saturation,
+				lightness
+			},
 			format: 'hsl'
 		}).hsl;
 
@@ -62,14 +66,18 @@ export function genSplitComplementaryPalette(
 		const baseHue = splitComplementaryHues[baseColorIndex - 1];
 		const hue = (baseHue + Math.floor(Math.random() * 11) - 5 + 360) % 360;
 
-		let { saturation, lightness } = random.randomSL();
+		let {
+			value: { saturation, lightness }
+		} = random.randomSL();
 		saturation = Math.min(100, Math.max(0, saturation));
 		lightness = Math.min(100, Math.max(0, lightness));
 
 		const additionalColor = genAllColorValues({
-			hue,
-			saturation,
-			lightness,
+			value: {
+				hue,
+				saturation,
+				lightness
+			},
 			format: 'hsl'
 		}).hsl;
 
@@ -83,7 +91,7 @@ export function genSplitComplementaryPalette(
 
 		if (colorBox) {
 			const hexColor = genAllColorValues(color).hex as types.Hex;
-			colorBox.style.backgroundColor = hexColor.hex;
+			colorBox.style.backgroundColor = hexColor.value.hex;
 			populateColorTextOutputBox(color as types.HSL, index + 1);
 		}
 	});

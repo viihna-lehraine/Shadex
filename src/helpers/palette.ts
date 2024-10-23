@@ -1,176 +1,67 @@
-import { palette } from '../palette-gen/palette-index';
 import { convert } from '../color-conversion/conversion-index';
 import * as types from '../index';
-import { genPaletteBox } from '../dom/dom-main';
-import { random } from '../utils/color-randomizer';
 
 function adjustSL(color: types.HSL, amount: number = 10): types.HSL {
 	const adjustedSaturation = Math.min(
-		Math.max(color.saturation + amount, 0),
+		Math.max(color.value.saturation + amount, 0),
 		100
 	);
-	const adjustedLightness = Math.min(
-		Math.max(color.lightness + amount, 0),
-		100
-	);
+	const adjustedLightness = Math.min(100);
 
 	return {
-		hue: color.hue,
-		saturation: adjustedSaturation,
-		lightness: adjustedLightness,
+		value: {
+			hue: color.value.hue,
+			saturation: adjustedSaturation,
+			lightness: adjustedLightness
+		},
 		format: 'hsl'
 	};
 }
 
-function genSelectedPaletteType(
-	paletteType: number,
-	numBoxes: number,
-	baseColor: types.ColorData,
-	customColor: types.ColorData | null = null,
-	initialColorSpace: types.ColorSpace = 'hex'
-): types.ColorData[] {
-	switch (paletteType) {
-		case 1:
-			return palette.genRandomPalette(
-				numBoxes,
-				customColor,
-				initialColorSpace
-			);
-		case 2:
-			return palette.genComplementaryPalette(
-				numBoxes,
-				baseColor,
-				initialColorSpace
-			);
-		case 3:
-			return palette.genTriadicPalette(
-				numBoxes,
-				baseColor,
-				initialColorSpace
-			);
-		case 4:
-			return palette.genTetradicPalette(
-				numBoxes,
-				baseColor,
-				initialColorSpace
-			);
-		case 5:
-			return palette.genSplitComplementaryPalette(
-				numBoxes,
-				baseColor,
-				initialColorSpace
-			);
-		case 6:
-			return palette.genAnalogousPalette(
-				numBoxes,
-				baseColor,
-				initialColorSpace
-			);
-		case 7:
-			return palette.genHexadicPalette(
-				numBoxes,
-				baseColor,
-				initialColorSpace
-			);
-		case 8:
-			return palette.genDiadicPalette(
-				numBoxes,
-				baseColor,
-				initialColorSpace
-			);
-		case 9:
-			return palette.genMonochromaticPalette(
-				numBoxes,
-				baseColor,
-				initialColorSpace
-			);
-		default:
-			console.error('DEFAULT CASE > unable to determine color scheme');
-			return [];
-	}
-}
+function getWeightedRandomInterval(): number {
+	const weights: number[] = [40, 45, 50, 55, 60, 65, 70];
+	const probabilities: number[] = [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05];
 
-function startInHSL(color: types.ColorData): types.HSL | null {
-	if (color.format === 'cmyk') {
-		const cmyk = color as types.CMYK;
-		return convert.cmykToHSL(cmyk);
-	} else if (color.format === 'hex') {
-		const hex = color as types.Hex;
-		return convert.hexToHSL(hex);
-	} else if (color.format === 'hsl') {
-		const hsl = color as types.HSL;
-		return hsl;
-	} else if (color.format === 'hsv') {
-		const hsv = color as types.HSV;
-		return convert.hsvToHSL(hsv);
-	} else if (color.format === 'lab') {
-		const lab = color as types.LAB;
-		return convert.labToHSL(lab);
-	} else if (color.format === 'rgb') {
-		const rgb = color as types.RGB;
-		return convert.rgbToHSL(rgb);
-	} else {
-		console.error('Unrecognized color format');
-		return null;
-	}
-}
-
-function startPaletteGen(
-	paletteType: number,
-	numBoxes: number,
-	initialColorSpace: types.ColorSpace = 'hex',
-	customColor?: types.ColorData | null
-): void {
-	let colors: types.ColorData[] = [];
-
-	const baseColor: types.ColorData =
-		customColor ??
-		(random.randomColor(initialColorSpace, 'flat') as types.ColorData);
-
-	genSelectedPaletteType(
-		paletteType,
-		numBoxes,
-		baseColor,
-		customColor,
-		initialColorSpace
+	const cumulativeProbabilities: number[] = probabilities.reduce(
+		(acc: number[], prob: number, i: number) => {
+			acc[i] = (acc[i - 1] || 0) + prob;
+			return acc;
+		},
+		[]
 	);
 
-	if (colors.length === 0) {
-		console.error('Colors array is empty or undefined.');
-		return;
+	const random = Math.random();
+
+	for (let i = 0; i < cumulativeProbabilities.length; i++) {
+		if (random < cumulativeProbabilities[i]) {
+			return weights[i];
+		}
 	}
 
-	genPaletteBox(numBoxes, colors);
+	return weights[weights.length - 1];
 }
 
-// *DEV-NOTE* refine return type
-function initialHSLColorGen(
-	color: types.ColorObject<
-		types.CMYK | types.Hex | types.HSL | types.HSV | types.LAB | types.RGB
-	>
-): types.HSL | undefined {
+function initialHSLColorGen(color: types.Color): types.HSL | null {
 	switch (color.format) {
 		case 'cmyk':
-			return convert.cmykToHSL(color.value as types.CMYK);
+			return convert.cmykToHSL(color as types.CMYK);
 		case 'hex':
-			return convert.hexToHSL(color.value as types.Hex);
+			return convert.hexToHSL(color as types.Hex);
 		case 'hsl':
-			return color.value as types.HSL;
+			return color as types.HSL;
 		case 'hsv':
-			return convert.hsvToHSL(color.value as types.HSV);
+			return convert.hsvToHSL(color as types.HSV);
 		case 'lab':
-			return convert.labToHSL(color.value as types.LAB);
+			return convert.labToHSL(color as types.LAB);
 		case 'rgb':
-			return convert.rgbToHSL(color.value as types.RGB);
+			return convert.rgbToHSL(color as types.RGB);
 		default:
-			return undefined;
+			return null;
 	}
 }
 
 export const paletteHelpers = {
 	adjustSL,
-	genSelectedPaletteType,
-	initialHSLColorGen,
-	startInHSL,
-	startPaletteGen
+	getWeightedRandomInterval,
+	initialHSLColorGen
 };

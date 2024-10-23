@@ -1,0 +1,2 @@
+10/23/24
+	- Just before end of session, I created getCSSString Fn in transforms.ts. This should be used in makePaletteBox to ensure generated colors are successfully applied to the DOM. Currently, the strings are generated but colors are not applied.

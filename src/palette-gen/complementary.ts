@@ -6,9 +6,9 @@ import { paletteHelpers } from '../helpers/palette';
 
 export function genComplementaryPalette(
 	numBoxes: number,
-	baseColor: types.ColorData | null = null,
+	baseColor: types.Color | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
-): types.ColorData[] {
+): types.Color[] {
 	if (numBoxes < 2) {
 		window.alert(
 			'To generate a complementary palette, please select a number of swatches greater than 1'
@@ -30,13 +30,15 @@ export function genComplementaryPalette(
 
 	colors.push(baseHSL);
 
-	const complementaryHue = (baseHSL.hue + 180) % 360;
+	const complementaryHue = (baseHSL.value.hue + 180) % 360;
 
 	for (let i = 2; i <= numBoxes; i++) {
 		const adjustedHSLColor = paletteHelpers.adjustSL({
-			hue: complementaryHue,
-			saturation: baseHSL.saturation,
-			lightness: baseHSL.lightness,
+			value: {
+				hue: complementaryHue,
+				saturation: baseHSL.value.saturation,
+				lightness: baseHSL.value.lightness
+			},
 			format: 'hsl'
 		});
 
@@ -53,7 +55,7 @@ export function genComplementaryPalette(
 			const hexValue = complementaryColorValues.hex as
 				| types.Hex
 				| undefined;
-			colorBox.style.backgroundColor = hexValue ? hexValue.hex : '';
+			colorBox.style.backgroundColor = hexValue ? hexValue.value.hex : '';
 
 			populateColorTextOutputBox(complementaryHSL, i);
 		}

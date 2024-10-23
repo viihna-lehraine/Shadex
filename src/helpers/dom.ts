@@ -43,7 +43,7 @@ function defineUIButtons(): types.UIButtons {
 
 // add conversion button event listeners
 function addConversionButtonEventListeners(): void {
-	const addListener = (id: string, colorSpace: keyof types.ConversionMap) => {
+	const addListener = (id: string, colorSpace: types.ColorSpace) => {
 		const button = document.getElementById(id) as HTMLButtonElement | null;
 
 		if (button) {
@@ -62,7 +62,7 @@ function addConversionButtonEventListeners(): void {
 }
 
 function makePaletteBox(
-	colorValues: types.ColorObjectData,
+	colorValues: types.Color,
 	paletteBoxCount: number
 ): types.MakePaletteBox {
 	const paletteBox = document.createElement('div');
@@ -83,7 +83,7 @@ function makePaletteBox(
 
 	// access nested properties safely using type guard(s)
 	if (colorValues.format === 'hex' && 'value' in colorValues) {
-		colorTextOutputBox.value = (colorValues as types.HexObject).value.hex;
+		colorTextOutputBox.value = (colorValues as types.Hex).value.hex;
 	} else {
 		console.warn(`Hex value not found for palette-box #${paletteBoxCount}`);
 		colorTextOutputBox.value = '';
@@ -177,35 +177,6 @@ function makePaletteBox(
 	};
 }
 
-function parseCustomColor(
-	colorSpace: types.ColorSpace,
-	rawValue: string
-): types.CustomColor | null {
-	switch (colorSpace) {
-		case 'hex':
-			return { hex: rawValue, format: 'hex' };
-		case 'hsl': {
-			const match = rawValue.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
-			if (match) {
-				const [, hue, saturation, lightness] = match.map(Number);
-				return {
-					hue,
-					saturation,
-					lightness,
-					format: 'hsl'
-				};
-			}
-			break;
-		}
-		default:
-			console.warn(`Unsupported color space: ${colorSpace}`);
-			return null;
-	}
-
-	console.error(`Failed to parse custom color: ${rawValue}`);
-	return null;
-}
-
 function pullParamsFromUI(): types.PullParamsFromUI {
 	const paletteTypeElement = document.getElementById(
 		'palette-type-options'
@@ -238,6 +209,5 @@ export const domHelpers = {
 	defineUIButtons,
 	addConversionButtonEventListeners,
 	makePaletteBox,
-	parseCustomColor,
 	pullParamsFromUI
 };

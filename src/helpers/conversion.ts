@@ -9,9 +9,11 @@ function applyGammaCorrection(value: number): number {
 
 function clampRGB(rgb: types.RGB): types.RGB {
 	return {
-		red: Math.round(Math.min(Math.max(0, rgb.red), 1) * 255),
-		green: Math.round(Math.min(Math.max(0, rgb.green), 1) * 255),
-		blue: Math.round(Math.min(Math.max(0, rgb.blue), 1) * 255),
+		value: {
+			red: Math.round(Math.min(Math.max(0, rgb.value.red), 1) * 255),
+			green: Math.round(Math.min(Math.max(0, rgb.value.green), 1) * 255),
+			blue: Math.round(Math.min(Math.max(0, rgb.value.blue), 1) * 255)
+		},
 		format: 'rgb'
 	};
 }
@@ -42,21 +44,8 @@ export function hueToRGB(p: number, q: number, t: number): number {
 	return p;
 }
 
-function hslAddFormat(
-	hue: number,
-	saturation: number,
-	lightness: number
-): types.HSL {
-	return { hue, saturation, lightness, format: 'hsl' } as types.HSL;
-}
-
-function hslStringToHSL(hsl: Partial<types.HSLString>): types.HSL {
-	return {
-		hue: Number(hsl.hue),
-		saturation: Number(hsl.saturation),
-		lightness: Number(hsl.lightness),
-		format: 'hsl'
-	} as types.HSL;
+function hslAddFormat(value: types.HSLValue): types.HSL {
+	return { value: value, format: 'hsl' } as types.HSL;
 }
 
 function hslToCMYKTryCaseHelper(hsl: types.HSL): types.CMYK {
@@ -116,7 +105,6 @@ export const conversionHelpers = {
 	hexToCMYKTryCaseHelper,
 	hexToXYZTryCaseHelper,
 	hslAddFormat,
-	hslStringToHSL,
 	hslToCMYKTryCaseHelper,
 	hslToHexTryCaseHelper,
 	hslToXYZTryCaseHelper,

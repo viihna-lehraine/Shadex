@@ -15,8 +15,8 @@ import {
 	saturateColor,
 	showCustomColorPopupDiv
 } from './dom/dom-main';
-import { paletteHelpers } from './helpers/palette';
-import { parseColorValue } from './utils/transforms';
+import { startPaletteGen } from './palette-gen/generate';
+import { parseColor } from './utils/transforms';
 import { storage } from './dom/storage';
 import * as types from './index';
 
@@ -28,9 +28,9 @@ function getElement<T extends HTMLElement>(id: string): T | null {
 
 // applies all event listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-	console.log('app.js - DOM content loaded; initializing application');
+	console.log('DOM content loaded - Initializing application');
 
-	// defines the buttons within the main UI
+	// define buttons within the main UI
 	const generateButton = getElement<HTMLButtonElement>('generate-button');
 	const saturateButton = getElement<HTMLButtonElement>('saturate-button');
 	const desaturateButton = getElement<HTMLButtonElement>('desaturate-button');
@@ -50,11 +50,25 @@ document.addEventListener('DOMContentLoaded', () => {
 	const selectedColorOptions = getElement<HTMLSelectElement>(
 		'selected-color-options'
 	);
+
+	// confirm that all elements are accessible
+	console.log(
+		`generateButton: ${generateButton}\nsaturateButton: ${saturateButton}\ndesaturateButton: ${desaturateButton}\npopupDivButton: ${popupDivButton}\napplyCustomColorButton: ${applyCustomColorButton}\nclearCustomColorButton: ${clearCustomColorButton}\nadvancedMenuToggleButton: ${advancedMenuToggleButton}\napplyInitialColorSpaceButton: ${applyInitialColorSpaceButton}\nselectedColorOptions: ${selectedColorOptions}`
+	);
+
 	const selectedColor = selectedColorOptions
 		? parseInt(selectedColorOptions.value, 10)
 		: 0;
+	console.log(`Selected color: ${selectedColor}`);
 
-	domHelpers.addConversionButtonEventListeners();
+	try {
+		domHelpers.addConversionButtonEventListeners();
+		console.log('Conversion button event listeners attached');
+	} catch (error) {
+		console.error(
+			`Unable to attach conversion button event listeners: ${error}`
+		);
+	}
 
 	generateButton?.addEventListener('click', e => {
 		e.preventDefault();
@@ -64,40 +78,38 @@ document.addEventListener('DOMContentLoaded', () => {
 		const { paletteType, numBoxes, initialColorSpace } =
 			domHelpers.pullParamsFromUI();
 
-		const colorValue: types.ColorData | null = customColor
-			? parseColorValue(
+		const color: types.Color | null = customColor
+			? parseColor(
 					customColor.format as types.ColorSpace,
 					customColor.value
 				)
 			: null;
 
-		paletteHelpers.startPaletteGen(
-			paletteType,
-			numBoxes,
-			initialColorSpace,
-			colorValue
-		);
+		startPaletteGen(paletteType, numBoxes, initialColorSpace, color);
 	});
 
 	saturateButton?.addEventListener('click', e => {
 		e.preventDefault();
+		console.log('saturateButton clicked');
 		saturateColor(selectedColor);
 	});
 
 	desaturateButton?.addEventListener('click', e => {
 		e.preventDefault();
+		console.log('desaturateButton clicked');
 		desaturateColor(selectedColor);
 	});
 
 	popupDivButton?.addEventListener('click', e => {
 		e.preventDefault();
+		console.log('popupDivButton clicked');
 		showCustomColorPopupDiv();
 	});
 
 	applyCustomColorButton?.addEventListener('click', e => {
 		e.preventDefault();
 		const hslColorFlat = applyCustomColor();
-		const customColor: types.CustomColor = hslColorFlat;
+		const customColor: types.Color = hslColorFlat;
 		storage.setAppStorage({ customColor });
 		showCustomColorPopupDiv();
 	});

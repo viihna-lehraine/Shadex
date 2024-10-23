@@ -16,9 +16,9 @@ export function genTriadicHues(baseHue: number): number[] {
 
 export function genTriadicPalette(
 	numBoxes: number,
-	customColor: types.ColorData | null = null,
+	customColor: types.Color | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
-): types.ColorData[] {
+): types.Color[] {
 	if (numBoxes < 3) {
 		window.alert(
 			'To generate a triadic palette, please select a number of swatches greater than 2'
@@ -26,8 +26,8 @@ export function genTriadicPalette(
 		return [];
 	}
 
-	const colors: types.ColorData[] = [];
-	let baseColor: types.ColorData;
+	const colors: types.Color[] = [];
+	let baseColor: types.Color;
 
 	// generate or use the custom base color
 	if (customColor) {
@@ -46,18 +46,22 @@ export function genTriadicPalette(
 		baseColor = generatedColor;
 	}
 
-	const triadicHues = genTriadicHues((baseColor as types.HSL).hue);
+	const triadicHues = genTriadicHues((baseColor as types.HSL).value.hue);
 
 	// add the base color to the palette
 	colors.push(baseColor);
 
 	// generate the main triadic colors
 	triadicHues.forEach(hue => {
-		const { saturation, lightness } = random.randomSL();
+		const {
+			value: { saturation, lightness }
+		} = random.randomSL();
 		const color = genAllColorValues({
-			hue,
-			saturation,
-			lightness,
+			value: {
+				hue,
+				saturation,
+				lightness
+			},
 			format: 'hsl'
 		}).hsl;
 
@@ -72,14 +76,18 @@ export function genTriadicPalette(
 		const baseHue = triadicHues[baseColorIndex];
 		const hue = (baseHue + Math.floor(Math.random() * 11) - 5 + 360) % 360;
 
-		let { saturation, lightness } = random.randomSL();
+		let {
+			value: { saturation, lightness }
+		} = random.randomSL();
 		saturation = Math.min(100, Math.max(0, saturation));
 		lightness = Math.min(100, Math.max(0, lightness));
 
 		const additionalColor = genAllColorValues({
-			hue,
-			saturation,
-			lightness,
+			value: {
+				hue,
+				saturation,
+				lightness
+			},
 			format: 'hsl'
 		}).hsl;
 
@@ -93,7 +101,7 @@ export function genTriadicPalette(
 		const colorBox = document.getElementById(`color-box-${index + 1}`);
 		if (colorBox) {
 			const hexColor = genAllColorValues(color).hex as types.Hex;
-			colorBox.style.backgroundColor = hexColor.hex;
+			colorBox.style.backgroundColor = hexColor.value.hex;
 			populateColorTextOutputBox(color as types.HSL, index + 1);
 		}
 	});

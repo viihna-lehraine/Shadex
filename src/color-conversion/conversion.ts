@@ -1,31 +1,26 @@
 import { convert } from './conversion-index';
 import * as types from '../index';
 import { wrappers } from '../helpers/wrappers';
-import { guards } from '../utils/type-guards';
-import { colorToColorObject } from '../utils/transforms';
-import { defaults } from '../utils/defaults';
 
 export function getConversionFn<
-	From extends keyof types.ColorDataInterface,
-	To extends keyof types.ColorDataInterface
+	From extends keyof types.ConversionData,
+	To extends keyof types.ConversionData
 >(
 	from: From,
 	to: To
 ):
-	| ((value: types.ColorDataInterface[From]) => types.ColorDataInterface[To])
+	| ((value: types.ConversionData[From]) => types.ConversionData[To])
 	| undefined {
 	const fromMap = conversionMap[from];
 
 	if (!fromMap || !(to in fromMap)) return undefined;
 
-	// Ensure the value parameter is correctly typed and used
-	return (value: types.ColorDataInterface[From]) => {
-		const conversionFn = fromMap[to] as (
-			_input: types.ColorDataInterface[From]
-		) => types.ColorDataInterface[To];
+	const conversionFn = fromMap[to] as unknown as (
+		input: types.ConversionData[From]
+	) => types.ConversionData[To];
 
-		return conversionFn(value); // Now `value` is properly used
-	};
+	return (value: types.ConversionData[From]): types.ConversionData[To] =>
+		conversionFn(value);
 }
 
 export const conversionMap: types.ConversionMap = {
@@ -88,89 +83,60 @@ export const conversionMap: types.ConversionMap = {
 };
 
 export function genAllColorValues(
-	color: types.ColorObjectData | types.ColorData
-): Partial<Record<types.ColorFormats, types.ColorData>> {
-	const colorObject = guards.isColorObjectData(color)
-		? color
-		: colorToColorObject(color);
-
-	if (!colorObject) {
-		throw new Error(`Invalid color data: ${JSON.stringify(color)}`);
-	}
-
-	const result: Partial<Record<types.ColorFormats, types.ColorData>> = {};
+	color: types.Color
+): Partial<types.ColorData> {
+	const result: Partial<types.ColorData> = {};
 
 	switch (color.format) {
-		case 'cmyk': {
-			const cmykValue = colorObject.value as types.CMYK;
-			result.cmyk = cmykValue;
-			result.hex = convert.cmykToHex(cmykValue);
-			result.hsl = convert.cmykToHSL(cmykValue);
-			result.hsv = convert.cmykToHSV(cmykValue);
-			result.lab = convert.cmykToLAB(cmykValue);
-			result.rgb = convert.cmykToRGB(cmykValue);
+		case 'cmyk':
+			result.cmyk = color;
+			result.hex = convert.cmykToHex(color);
+			result.hsl = convert.cmykToHSL(color);
+			result.hsv = convert.cmykToHSV(color);
+			result.lab = convert.cmykToLAB(color);
+			result.rgb = convert.cmykToRGB(color);
 			break;
-		}
-		case 'hex': {
-			const hexValue = colorObject.value as types.Hex;
-			result.hex = hexValue;
-			result.cmyk = convert.hexToCMYK(hexValue);
-			result.hsl = convert.hexToHSL(hexValue);
-			result.hsv = convert.hexToHSV(hexValue);
-			result.lab = convert.hexToLAB(hexValue);
-			result.rgb = convert.hexToRGB(hexValue);
+		case 'hex':
+			result.hex = color;
+			result.cmyk = convert.hexToCMYK(color);
+			result.hsl = convert.hexToHSL(color);
+			result.hsv = convert.hexToHSV(color);
+			result.lab = convert.hexToLAB(color);
+			result.rgb = convert.hexToRGB(color);
 			break;
-		}
-		case 'hsl': {
-			const hslValue = colorObject.value as types.HSL;
-			result.cmyk = convert.hslToCMYK(hslValue);
-			result.hex = convert.hslToHex(hslValue);
-			result.hsl = hslValue;
-			result.hsv = convert.hslToHSV(hslValue);
-			result.lab = convert.hslToLAB(hslValue);
-			result.rgb = convert.hslToRGB(hslValue);
+		case 'hsl':
+			result.hsl = color;
+			result.cmyk = convert.hslToCMYK(color);
+			result.hex = convert.hslToHex(color);
+			result.hsv = convert.hslToHSV(color);
+			result.lab = convert.hslToLAB(color);
+			result.rgb = convert.hslToRGB(color);
 			break;
-		}
-		case 'hsv': {
-			const hsvValue = colorObject.value as types.HSV;
-			result.cmyk = convert.hsvToCMYK(hsvValue);
-			result.hex = convert.hsvToHex(hsvValue);
-			result.hsl = convert.hsvToHSL(hsvValue);
-			result.hsv = hsvValue;
-			result.lab = convert.hsvToLAB(hsvValue);
-			result.rgb = convert.hsvToRGB(hsvValue);
+		case 'hsv':
+			result.hsv = color;
+			result.cmyk = convert.hsvToCMYK(color);
+			result.hex = convert.hsvToHex(color);
+			result.hsl = convert.hsvToHSL(color);
+			result.lab = convert.hsvToLAB(color);
+			result.rgb = convert.hsvToRGB(color);
 			break;
-		}
-		case 'lab': {
-			const labValue = colorObject.value as types.LAB;
-			result.cmyk = convert.labToCMYK(labValue);
-			result.hex = convert.labToHex(labValue);
-			result.hsl = convert.labToHSL(labValue);
-			result.hsv = convert.labToHSV(labValue);
-			result.lab = labValue;
-			result.rgb = convert.labToRGB(labValue);
+		case 'lab':
+			result.lab = color;
+			result.cmyk = convert.labToCMYK(color);
+			result.hex = convert.labToHex(color);
+			result.hsl = convert.labToHSL(color);
+			result.hsv = convert.labToHSV(color);
+			result.rgb = convert.labToRGB(color);
 			break;
-		}
-		case 'rgb': {
-			const rgbValue = colorObject.value as types.RGB;
-			result.cmyk = convert.rgbToCMYK(rgbValue);
-			result.hex = convert.rgbToHex(rgbValue);
-			result.hsl = convert.rgbToHSL(rgbValue);
-			result.hsv = convert.rgbToHSV(rgbValue);
-			result.lab = convert.rgbToLAB(rgbValue);
-			result.rgb = rgbValue;
+		case 'rgb':
+			result.rgb = color;
+			result.cmyk = convert.rgbToCMYK(color);
+			result.hex = convert.rgbToHex(color);
+			result.hsl = convert.rgbToHSL(color);
+			result.hsv = convert.rgbToHSV(color);
+			result.lab = convert.rgbToLAB(color);
 			break;
-		}
-		default:
-			throw new Error(`Unsupported color format: ${color.format}`);
 	}
 
-	return {
-		cmyk: result.cmyk || defaults.defaultCMYK(),
-		hex: result.hex || defaults.defaultHex(),
-		hsl: result.hsl || defaults.defaultHSL(),
-		hsv: result.hsv || defaults.defaultHSV(),
-		lab: result.lab || defaults.defaultLAB(),
-		rgb: result.rgb || defaults.defaultRGB()
-	};
+	return result;
 }

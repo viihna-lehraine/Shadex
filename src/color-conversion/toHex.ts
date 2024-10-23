@@ -48,18 +48,20 @@ export function labToHex(lab: types.LAB): types.Hex {
 export function rgbToHex(rgb: types.RGB): types.Hex {
 	try {
 		if (
-			[rgb.red, rgb.green, rgb.blue].some(
+			[rgb.value.red, rgb.value.green, rgb.value.blue].some(
 				v => isNaN(v) || v < 0 || v > 255
 			)
 		) {
 			console.warn(
-				`Invalid RGB values: R=${rgb.red}, G=${rgb.green}, B=${rgb.blue}`
+				`Invalid RGB values: R=${rgb.value.red}, G=${rgb.value.green}, B=${rgb.value.blue}`
 			);
-			return { hex: '#000000', format: 'hex' };
+			return { value: { hex: '#000000' }, format: 'hex' };
 		}
 
 		return {
-			hex: `#${componentToHex(rgb.red)}${componentToHex(rgb.green)}${componentToHex(rgb.blue)}`,
+			value: {
+				hex: `#${componentToHex(rgb.value.red)}${componentToHex(rgb.value.green)}${componentToHex(rgb.value.blue)}`
+			},
 			format: 'hex'
 		};
 	} catch (error) {

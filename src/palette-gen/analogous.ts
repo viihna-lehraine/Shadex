@@ -4,7 +4,7 @@ import { genAllColorValues } from '../color-conversion/conversion';
 
 export function genAnalogousHues(color: types.HSL, numBoxes: number): number[] {
 	const analogousHues = [];
-	const baseHue = color.hue;
+	const baseHue = color.value.hue;
 	const maxTotalDistance = 60;
 	const minTotalDistance = 10 + (numBoxes - 2) * 9;
 	const totalIncrement =
@@ -21,9 +21,9 @@ export function genAnalogousHues(color: types.HSL, numBoxes: number): number[] {
 
 export function genAnalogousPalette(
 	numBoxes: number,
-	customColor: types.ColorData | null = null,
+	customColor: types.Color | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
-): types.ColorData[] {
+): types.Color[] {
 	if (numBoxes < 2) {
 		window.alert(
 			'To generate an analogous palette, please select a number of swatches greater than 1'
@@ -32,7 +32,7 @@ export function genAnalogousPalette(
 		return [];
 	}
 
-	const colors: types.ColorData[] = [];
+	const colors: types.Color[] = [];
 	const baseColorValues = customColor
 		? genAllColorValues(customColor)
 		: genAllColorValues(random.randomColor(initialColorSpace));
@@ -52,9 +52,11 @@ export function genAnalogousPalette(
 	analogousHues.forEach((hue, i) => {
 		const sl = random.randomSL();
 		const analogousColorValues = genAllColorValues({
-			hue,
-			saturation: sl.saturation,
-			lightness: sl.lightness,
+			value: {
+				hue,
+				saturation: sl.value.saturation,
+				lightness: sl.value.lightness
+			},
 			format: 'hsl'
 		});
 
@@ -68,7 +70,7 @@ export function genAnalogousPalette(
 
 		if (colorBox) {
 			const hexValue = analogousColorValues.hex as types.Hex | undefined;
-			colorBox.style.backgroundColor = hexValue ? hexValue.hex : '';
+			colorBox.style.backgroundColor = hexValue ? hexValue.value.hex : '';
 		}
 	});
 

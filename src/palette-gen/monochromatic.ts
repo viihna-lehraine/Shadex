@@ -5,9 +5,9 @@ import * as types from '../index';
 
 export function genMonochromaticPalette(
 	numBoxes: number,
-	customColor: types.ColorData | null = null,
+	customColor: types.Color | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
-): types.ColorData[] {
+): types.Color[] {
 	if (numBoxes < 2) {
 		window.alert(
 			'To generate a monochromatic palette, please select a number of swatches greater than 1'
@@ -15,7 +15,7 @@ export function genMonochromaticPalette(
 		return [];
 	}
 
-	const colors: types.ColorData[] = [];
+	const colors: types.Color[] = [];
 	const baseColorValues = customColor
 		? genAllColorValues(customColor)
 		: genAllColorValues(random.randomColor(initialColorSpace));
@@ -32,9 +32,11 @@ export function genMonochromaticPalette(
 	for (let i = 1; i < numBoxes; i++) {
 		const slValues = random.randomSL();
 		const monoColorValues = genAllColorValues({
-			hue: baseHSL.hue,
-			saturation: slValues.saturation,
-			lightness: slValues.lightness,
+			value: {
+				hue: baseHSL.value.hue,
+				saturation: slValues.value.saturation,
+				lightness: slValues.value.lightness
+			},
 			format: 'hsl'
 		});
 
@@ -45,7 +47,7 @@ export function genMonochromaticPalette(
 		const colorBox = document.getElementById(`color-box-${i + 1}`);
 		if (colorBox) {
 			const hexColor = monoColorValues.hex as types.Hex;
-			colorBox.style.backgroundColor = hexColor.hex;
+			colorBox.style.backgroundColor = hexColor.value.hex;
 
 			populateColorTextOutputBox(monoHSL, i + 1);
 		}

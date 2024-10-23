@@ -44,22 +44,24 @@ export function labToXYZ(lab: types.LAB): types.XYZ {
 			refY = 100.0,
 			refZ = 108.883;
 
-		let y = (lab.l + 16) / 116;
-		let x = lab.a / 500 + y;
-		let z = y - lab.b / 200;
+		let y = (lab.value.l + 16) / 116;
+		let x = lab.value.a / 500 + y;
+		let z = y - lab.value.b / 200;
 
 		const pow = Math.pow;
 
 		return {
-			x:
-				refX *
-				(pow(x, 3) > 0.008856 ? pow(x, 3) : (x - 16 / 116) / 7.787),
-			y:
-				refY *
-				(pow(y, 3) > 0.008856 ? pow(y, 3) : (y - 16 / 116) / 7.787),
-			z:
-				refZ *
-				(pow(z, 3) > 0.008856 ? pow(z, 3) : (z - 16 / 116) / 7.787),
+			value: {
+				x:
+					refX *
+					(pow(x, 3) > 0.008856 ? pow(x, 3) : (x - 16 / 116) / 7.787),
+				y:
+					refY *
+					(pow(y, 3) > 0.008856 ? pow(y, 3) : (y - 16 / 116) / 7.787),
+				z:
+					refZ *
+					(pow(z, 3) > 0.008856 ? pow(z, 3) : (z - 16 / 116) / 7.787)
+			},
 			format: 'xyz'
 		};
 	} catch (error) {
@@ -70,31 +72,42 @@ export function labToXYZ(lab: types.LAB): types.XYZ {
 
 export function rgbToXYZ(rgb: types.RGB): types.XYZ {
 	try {
-		rgb.red = rgb.red / 255;
-		rgb.green = rgb.green / 255;
-		rgb.blue = rgb.blue / 255;
+		rgb.value.red = rgb.value.red / 255;
+		rgb.value.green = rgb.value.green / 255;
+		rgb.value.blue = rgb.value.blue / 255;
 
-		rgb.red =
-			rgb.red > 0.04045
-				? Math.pow((rgb.red + 0.055) / 1.055, 2.4)
-				: rgb.red / 12.92;
-		rgb.green =
-			rgb.green > 0.04045
-				? Math.pow((rgb.green + 0.055) / 1.055, 2.4)
-				: rgb.green / 12.92;
-		rgb.blue =
-			rgb.blue > 0.04045
-				? Math.pow((rgb.blue + 0.055) / 1.055, 2.4)
-				: rgb.blue / 12.92;
+		rgb.value.red =
+			rgb.value.red > 0.04045
+				? Math.pow((rgb.value.red + 0.055) / 1.055, 2.4)
+				: rgb.value.red / 12.92;
+		rgb.value.green =
+			rgb.value.green > 0.04045
+				? Math.pow((rgb.value.green + 0.055) / 1.055, 2.4)
+				: rgb.value.green / 12.92;
+		rgb.value.blue =
+			rgb.value.blue > 0.04045
+				? Math.pow((rgb.value.blue + 0.055) / 1.055, 2.4)
+				: rgb.value.blue / 12.92;
 
-		rgb.red = rgb.red * 100;
-		rgb.green = rgb.green * 100;
-		rgb.blue = rgb.blue * 100;
+		rgb.value.red = rgb.value.red * 100;
+		rgb.value.green = rgb.value.green * 100;
+		rgb.value.blue = rgb.value.blue * 100;
 
 		return {
-			x: rgb.red * 0.4124 + rgb.green * 0.3576 + rgb.blue * 0.1805,
-			y: rgb.red * 0.2126 + rgb.green * 0.7152 + rgb.blue * 0.0722,
-			z: rgb.red * 0.0193 + rgb.green * 0.1192 + rgb.blue * 0.9505,
+			value: {
+				x:
+					rgb.value.red * 0.4124 +
+					rgb.value.green * 0.3576 +
+					rgb.value.blue * 0.1805,
+				y:
+					rgb.value.red * 0.2126 +
+					rgb.value.green * 0.7152 +
+					rgb.value.blue * 0.0722,
+				z:
+					rgb.value.red * 0.0193 +
+					rgb.value.green * 0.1192 +
+					rgb.value.blue * 0.9505
+			},
 			format: 'xyz'
 		};
 	} catch (error) {

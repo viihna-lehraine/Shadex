@@ -15,12 +15,12 @@ export function hexToHSL(hex: types.Hex): types.HSL {
 
 export function rgbToHSL(rgb: types.RGB): types.HSL {
 	try {
-		rgb.red /= 255;
-		rgb.green /= 255;
-		rgb.blue /= 255;
+		rgb.value.red /= 255;
+		rgb.value.green /= 255;
+		rgb.value.blue /= 255;
 
-		const max = Math.max(rgb.red, rgb.green, rgb.blue);
-		const min = Math.min(rgb.red, rgb.green, rgb.blue);
+		const max = Math.max(rgb.value.red, rgb.value.green, rgb.value.blue);
+		const min = Math.min(rgb.value.red, rgb.value.green, rgb.value.blue);
 
 		let hue = 0,
 			saturation = 0,
@@ -33,25 +33,27 @@ export function rgbToHSL(rgb: types.RGB): types.HSL {
 				lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
 
 			switch (max) {
-				case rgb.red:
+				case rgb.value.red:
 					hue =
-						(rgb.green - rgb.blue) / delta +
-						(rgb.green < rgb.blue ? 6 : 0);
+						(rgb.value.green - rgb.value.blue) / delta +
+						(rgb.value.green < rgb.value.blue ? 6 : 0);
 					break;
-				case rgb.green:
-					hue = (rgb.blue - rgb.red) / delta + 2;
+				case rgb.value.green:
+					hue = (rgb.value.blue - rgb.value.red) / delta + 2;
 					break;
-				case rgb.blue:
-					hue = (rgb.red - rgb.green) / delta + 4;
+				case rgb.value.blue:
+					hue = (rgb.value.red - rgb.value.green) / delta + 4;
 					break;
 			}
 			hue *= 60;
 		}
 
 		return {
-			hue: Math.round(hue),
-			saturation: Math.round(saturation * 100),
-			lightness: Math.round(lightness * 100),
+			value: {
+				hue: Math.round(hue),
+				saturation: Math.round(saturation * 100),
+				lightness: Math.round(lightness * 100)
+			},
 			format: 'hsl'
 		};
 	} catch (error) {
@@ -63,17 +65,21 @@ export function rgbToHSL(rgb: types.RGB): types.HSL {
 export function hsvToHSL(hsv: types.HSV): types.HSL {
 	try {
 		const newSaturation =
-			hsv.value * (1 - hsv.saturation / 100) === 0 || hsv.value === 0
+			hsv.value.value * (1 - hsv.value.saturation / 100) === 0 ||
+			hsv.value.value === 0
 				? 0
-				: (hsv.value - hsv.value * (1 - hsv.saturation / 100)) /
-					Math.min(hsv.value, 100 - hsv.value);
+				: (hsv.value.value -
+						hsv.value.value * (1 - hsv.value.saturation / 100)) /
+					Math.min(hsv.value.value, 100 - hsv.value.value);
 
-		const lightness = hsv.value * (1 - hsv.saturation / 200);
+		const lightness = hsv.value.value * (1 - hsv.value.saturation / 200);
 
 		return {
-			hue: Math.round(hsv.hue),
-			saturation: Math.round(newSaturation * 100),
-			lightness: Math.round(lightness),
+			value: {
+				hue: Math.round(hsv.value.hue),
+				saturation: Math.round(newSaturation * 100),
+				lightness: Math.round(lightness)
+			},
 			format: 'hsl'
 		};
 	} catch (error) {

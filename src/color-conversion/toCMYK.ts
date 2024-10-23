@@ -40,9 +40,9 @@ export function labToCMYK(lab: types.LAB): types.CMYK {
 
 export function rgbToCMYK(rgb: types.RGB): types.CMYK {
 	try {
-		const redPrime = rgb.red / 255;
-		const greenPrime = rgb.green / 255;
-		const bluePrime = rgb.blue / 255;
+		const redPrime = rgb.value.red / 255;
+		const greenPrime = rgb.value.green / 255;
+		const bluePrime = rgb.value.blue / 255;
 
 		const key = 1 - Math.max(redPrime, greenPrime, bluePrime);
 		const cyan = (1 - redPrime - key) / (1 - key) || 0;
@@ -50,10 +50,12 @@ export function rgbToCMYK(rgb: types.RGB): types.CMYK {
 		const yellow = (1 - bluePrime - key) / (1 - key) || 0;
 
 		return {
-			cyan: Math.round(cyan * 100),
-			magenta: Math.round(magenta * 100),
-			yellow: Math.round(yellow * 100),
-			key: Math.round(key * 100),
+			value: {
+				cyan: Math.round(cyan * 100),
+				magenta: Math.round(magenta * 100),
+				yellow: Math.round(yellow * 100),
+				key: Math.round(key * 100)
+			},
 			format: 'cmyk'
 		};
 	} catch (error) {
