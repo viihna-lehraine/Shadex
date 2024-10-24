@@ -1,8 +1,67 @@
 import { convert } from './conversion-index';
-import * as types from '../index';
+import * as fnObjects from '../index/fn-objects';
+import * as types from '../index/types';
 import { defaults } from '../utils/defaults';
 
-export function xyzToLAB(xyz: types.XYZ): types.LAB {
+function cmykToLAB(cmyk: types.CMYK): types.LAB {
+	try {
+		const rgb = convert.cmykToRGB(cmyk);
+		const xyz = convert.rgbToXYZ(rgb);
+
+		return xyzToLAB(xyz);
+	} catch (error) {
+		console.error(`cmykToLab() error: ${error}`);
+		return defaults.defaultLAB();
+	}
+}
+
+function hexToLAB(hex: types.Hex): types.LAB {
+	try {
+		const rgb = convert.hexToRGB(hex);
+		const xyz = convert.rgbToXYZ(rgb);
+
+		return xyzToLAB(xyz);
+	} catch (error) {
+		console.error(`hexToLAB() error: ${error}`);
+		return defaults.defaultLAB();
+	}
+}
+
+function hslToLAB(hsl: types.HSL): types.LAB {
+	try {
+		const rgb = convert.hslToRGB(hsl);
+		const xyz = convert.rgbToXYZ(rgb);
+
+		return xyzToLAB(xyz);
+	} catch (error) {
+		console.error(`hslToLab() error: ${error}`);
+		return defaults.defaultLAB();
+	}
+}
+
+function hsvToLAB(hsv: types.HSV): types.LAB {
+	try {
+		const rgb = convert.hsvToRGB(hsv);
+		const xyz = convert.rgbToXYZ(rgb);
+
+		return xyzToLAB(xyz);
+	} catch (error) {
+		console.error(`hsvToLab() error: ${error}`);
+		return defaults.defaultLAB();
+	}
+}
+
+function rgbToLAB(rgb: types.RGB): types.LAB {
+	try {
+		const xyz = convert.rgbToXYZ(rgb);
+		return xyzToLAB(xyz);
+	} catch (error) {
+		console.error(`rgbToLab() error: ${error}`);
+		return defaults.defaultLAB();
+	}
+}
+
+function xyzToLAB(xyz: types.XYZ): types.LAB {
 	try {
 		const refX = 95.047,
 			refY = 100.0,
@@ -36,60 +95,11 @@ export function xyzToLAB(xyz: types.XYZ): types.LAB {
 	}
 }
 
-export function hexToLAB(hex: types.Hex): types.LAB {
-	try {
-		const rgb = convert.hexToRGB(hex);
-		const xyz = convert.rgbToXYZ(rgb);
-
-		return xyzToLAB(xyz);
-	} catch (error) {
-		console.error(`hexToLAB() error: ${error}`);
-		return defaults.defaultLAB();
-	}
-}
-
-export function rgbToLAB(rgb: types.RGB): types.LAB {
-	try {
-		const xyz = convert.rgbToXYZ(rgb);
-		return xyzToLAB(xyz);
-	} catch (error) {
-		console.error(`rgbToLab() error: ${error}`);
-		return defaults.defaultLAB();
-	}
-}
-
-export function hslToLAB(hsl: types.HSL): types.LAB {
-	try {
-		const rgb = convert.hslToRGB(hsl);
-		const xyz = convert.rgbToXYZ(rgb);
-
-		return xyzToLAB(xyz);
-	} catch (error) {
-		console.error(`hslToLab() error: ${error}`);
-		return defaults.defaultLAB();
-	}
-}
-
-export function hsvToLAB(hsv: types.HSV): types.LAB {
-	try {
-		const rgb = convert.hsvToRGB(hsv);
-		const xyz = convert.rgbToXYZ(rgb);
-
-		return xyzToLAB(xyz);
-	} catch (error) {
-		console.error(`hsvToLab() error: ${error}`);
-		return defaults.defaultLAB();
-	}
-}
-
-export function cmykToLAB(cmyk: types.CMYK): types.LAB {
-	try {
-		const rgb = convert.cmykToRGB(cmyk);
-		const xyz = convert.rgbToXYZ(rgb);
-
-		return xyzToLAB(xyz);
-	} catch (error) {
-		console.error(`cmykToLab() error: ${error}`);
-		return defaults.defaultLAB();
-	}
-}
+export const toLAB: fnObjects.ToLAB = {
+	cmykToLAB,
+	hexToLAB,
+	hslToLAB,
+	hsvToLAB,
+	rgbToLAB,
+	xyzToLAB
+};

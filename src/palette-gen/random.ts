@@ -1,30 +1,35 @@
 import { genAllColorValues } from '../color-conversion/conversion';
+import * as types from '../index/types';
 import { random } from '../utils/color-randomizer';
-import * as types from '../index';
 
 export function genRandomPalette(
 	numBoxes: number,
 	customColor: types.Color | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
 ): types.Color[] {
-	const colors: types.Color[] = [];
+	try {
+		const colors: types.Color[] = [];
 
-	for (let i = 0; i < numBoxes; i++) {
-		let colorValues: Partial<types.ColorData>;
+		for (let i = 0; i < numBoxes; i++) {
+			const colorValues =
+				i === 0 && customColor
+					? genAllColorValues(customColor)
+					: genAllColorValues(random.randomColor(initialColorSpace));
 
-		if (i === 0 && customColor) {
-			colorValues = genAllColorValues(customColor);
-		} else {
-			const baseColor = random.randomColor(initialColorSpace);
-			colorValues = genAllColorValues(baseColor);
+			const selectedColor = colorValues[initialColorSpace];
+
+			if (selectedColor) {
+				colors.push(selectedColor);
+			} else {
+				console.warn(
+					`Skipping color at index ${i} due to missing ${initialColorSpace} value.`
+				);
+			}
 		}
 
-		const selectedColor = colorValues[initialColorSpace];
-
-		if (selectedColor) {
-			colors.push(selectedColor);
-		}
+		return colors;
+	} catch (error) {
+		console.error(`Error generating random palette: ${error}`);
+		return [];
 	}
-
-	return colors;
 }

@@ -1,9 +1,20 @@
 import { convert } from './conversion-index';
-import * as types from '../index';
 import { conversionHelpers } from '../helpers/conversion';
+import * as fnObjects from '../index/fn-objects';
+import * as types from '../index/types';
 import { defaults } from '../utils/defaults';
 
-export function hexToHSV(hex: types.Hex): types.HSV {
+function cmykToHSV(cmyk: types.CMYK): types.HSV {
+	try {
+		const rgb = convert.cmykToRGB(cmyk);
+		return rgbToHSV(rgb);
+	} catch (error) {
+		console.error(`cmykToHSV() error: ${error}`);
+		return defaults.defaultHSV();
+	}
+}
+
+function hexToHSV(hex: types.Hex): types.HSV {
 	try {
 		const rgb = convert.hexToRGB(hex);
 		return convert.rgbToHSV(rgb);
@@ -13,7 +24,39 @@ export function hexToHSV(hex: types.Hex): types.HSV {
 	}
 }
 
-export function rgbToHSV(rgb: types.RGB): types.HSV {
+function hslToHSV(hsl: types.HSL): types.HSV {
+	try {
+		const s = hsl.value.saturation / 100;
+		const l = hsl.value.lightness / 100;
+
+		const value = l + s * Math.min(l, 1 - 1);
+		const newSaturation = value === 0 ? 0 : 2 * (1 - l / value);
+
+		return {
+			value: {
+				hue: Math.round(hsl.value.hue),
+				saturation: Math.round(newSaturation * 100),
+				value: Math.round(value * 100)
+			},
+			format: 'hsv'
+		};
+	} catch (error) {
+		console.error(`hslToHSV() error: ${error}`);
+		return defaults.defaultHSV();
+	}
+}
+
+function labToHSV(lab: types.LAB): types.HSV {
+	try {
+		const rgb = convert.labToRGB(lab);
+		return rgbToHSV(rgb);
+	} catch (error) {
+		console.error(`labToHSV() error: ${error}`);
+		return defaults.defaultHSV();
+	}
+}
+
+function rgbToHSV(rgb: types.RGB): types.HSV {
 	try {
 		rgb.value.red /= 255;
 		rgb.value.green /= 255;
@@ -59,53 +102,20 @@ export function rgbToHSV(rgb: types.RGB): types.HSV {
 	}
 }
 
-export function hslToHSV(hsl: types.HSL): types.HSV {
+function xyzToHSV(xyz: types.XYZ): types.HSV {
 	try {
-		const s = hsl.value.saturation / 100;
-		const l = hsl.value.lightness / 100;
-
-		const value = l + s * Math.min(l, 1 - 1);
-		const newSaturation = value === 0 ? 0 : 2 * (1 - l / value);
-
-		return {
-			value: {
-				hue: Math.round(hsl.value.hue),
-				saturation: Math.round(newSaturation * 100),
-				value: Math.round(value * 100)
-			},
-			format: 'hsv'
-		};
-	} catch (error) {
-		console.error(`hslToHSV() error: ${error}`);
-		return defaults.defaultHSV();
-	}
-}
-
-export function cmykToHSV(cmyk: types.CMYK): types.HSV {
-	try {
-		const rgb = convert.cmykToRGB(cmyk);
-		return rgbToHSV(rgb);
-	} catch (error) {
-		console.error(`cmykToHSV() error: ${error}`);
-		return defaults.defaultHSV();
-	}
-}
-
-export function labToHSV(lab: types.LAB): types.HSV {
-	try {
-		const rgb = convert.labToRGB(lab);
-		return rgbToHSV(rgb);
-	} catch (error) {
-		console.error(`labToHSV() error: ${error}`);
-		return defaults.defaultHSV();
-	}
-}
-
-export function xyzToHSV(xyz: types.XYZ): types.HSV {
-	try {
-		return conversionHelpers.xyzToHSVTryCaseHelper(xyz);
+		return conversionHelpers.xyzToHSVHelper(xyz);
 	} catch (error) {
 		console.error(`xyzToHSV() error: ${error}`);
 		return defaults.defaultHSV();
 	}
 }
+
+export const toHSV: fnObjects.ToHSV = {
+	cmykToHSV,
+	hexToHSV,
+	hslToHSV,
+	labToHSV,
+	rgbToHSV,
+	xyzToHSV
+};

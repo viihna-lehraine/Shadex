@@ -1,103 +1,116 @@
+import { domHelpers } from '../helpers/dom';
+import * as fnObjects from '../index/fn-objects';
+
 let dragSrcEl: HTMLElement | null = null;
 
-export function attachDragAndDropEventListeners(
-	element: HTMLElement | null
-): void {
-	if (element) {
-		element.addEventListener('dragstart', handleDragStart);
-		element.addEventListener('dragover', handleDragOver);
-		element.addEventListener('drop', handleDrop);
-		element.addEventListener('dragend', handleDragEnd);
+function handleDragStart(e: DragEvent): void {
+	try {
+		dragSrcEl = e.currentTarget as HTMLElement;
+
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = 'move';
+			e.dataTransfer.setData('text/html', dragSrcEl.outerHTML);
+		}
+
+		console.log('handleDragStart complete');
+	} catch (error) {
+		console.error(`Error in handleDragStart: ${error}`);
 	}
 }
 
-export function handleDragStart(e: DragEvent): void {
-	console.log('executing handleDragStart');
+function handleDragOver(e: DragEvent): boolean {
+	try {
+		e.preventDefault();
 
-	dragSrcEl = e.currentTarget as HTMLElement;
-	if (e.dataTransfer) {
-		e.dataTransfer.effectAllowed = 'move';
-		e.dataTransfer.setData('text/html', dragSrcEl.outerHTML);
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = 'move';
+		}
+
+		console.log('handleDragOver complete');
+		return false;
+	} catch (error) {
+		console.error(`Error in handleDragOver: ${error}`);
+		return false;
 	}
-
-	console.log('handleDragStart complete');
 }
 
-export function handleDragOver(e: DragEvent): boolean {
-	console.log('executing handleDragOver');
+function handleDragEnd(e: DragEvent): void {
+	try {
+		const target = e.currentTarget as HTMLElement;
+		target.classList.remove('dragging');
 
-	e.preventDefault();
+		document.querySelectorAll('.color-stripe').forEach(el => {
+			el.classList.remove('dragging');
+		});
 
-	if (e.dataTransfer) {
-		e.dataTransfer.dropEffect = 'move';
+		console.log('handleDragEnd complete');
+	} catch (error) {
+		console.error(`Error in handleDragEnd: ${error}`);
 	}
-
-	console.log('handleDragOver complete');
-	return false;
 }
 
-export function handleDrop(e: DragEvent): void {
-	console.log('executing handleDrop');
+function handleDrop(e: DragEvent): void {
+	try {
+		e.stopPropagation();
 
-	e.stopPropagation(); // prevents default drop action
+		const target = e.currentTarget as HTMLElement;
 
-	const target = e.currentTarget as HTMLElement;
+		if (dragSrcEl && dragSrcEl !== target) {
+			const dragSrcId = dragSrcEl.id;
+			const dropTargetId = target.id;
+			const dragSrcText = (
+				dragSrcEl.querySelector(
+					'.color-text-output-box'
+				) as HTMLInputElement
+			).value;
+			const dropTargetText = (
+				target.querySelector(
+					'.color-text-output-box'
+				) as HTMLInputElement
+			).value;
+			const dragSrcOuterHTML = dragSrcEl.outerHTML;
+			const dropTargetOuterHTML = target.outerHTML;
 
-	if (dragSrcEl && dragSrcEl !== target) {
-		const dragSrcId = dragSrcEl.id;
-		const dropTargetId = target.id;
-		const dragSrcText = (
-			dragSrcEl.querySelector(
-				'.color-text-output-box'
-			) as HTMLInputElement
-		).value;
-		const dropTargetText = (
-			target.querySelector('.color-text-output-box') as HTMLInputElement
-		).value;
-		const dragSrcOuterHTML = dragSrcEl.outerHTML;
-		const dropTargetOuterHTML = target.outerHTML;
+			dragSrcEl.outerHTML = dropTargetOuterHTML;
+			target.outerHTML = dragSrcOuterHTML;
 
-		dragSrcEl.outerHTML = dropTargetOuterHTML;
-		target.outerHTML = dragSrcOuterHTML;
+			const newDragSrcEl = document.getElementById(
+				dropTargetId
+			) as HTMLElement;
+			const newDropTargetEl = document.getElementById(
+				dragSrcId
+			) as HTMLElement;
 
-		const newDragSrcEl = document.getElementById(
-			dropTargetId
-		) as HTMLElement;
-		const newDropTargetEl = document.getElementById(
-			dragSrcId
-		) as HTMLElement;
+			newDragSrcEl.id = dragSrcId;
+			newDropTargetEl.id = dropTargetId;
 
-		newDragSrcEl.id = dragSrcId;
-		newDropTargetEl.id = dropTargetId;
+			(
+				newDragSrcEl.querySelector(
+					'.color-text-output-box'
+				) as HTMLInputElement
+			).value = dropTargetText;
+			(
+				newDropTargetEl.querySelector(
+					'.color-text-output-box'
+				) as HTMLInputElement
+			).value = dragSrcText;
 
-		(
-			newDragSrcEl.querySelector(
-				'.color-text-output-box'
-			) as HTMLInputElement
-		).value = dropTargetText;
-		(
-			newDropTargetEl.querySelector(
-				'.color-text-output-box'
-			) as HTMLInputElement
-		).value = dragSrcText;
+			console.log(
+				'calling attachDragAndDropEventListeners for new elements'
+			);
+			domHelpers.attachDragAndDropEventListeners(newDragSrcEl);
+			domHelpers.attachDragAndDropEventListeners(newDropTargetEl);
+		}
 
-		console.log('calling attachDragAndDropEventListeners for new elements');
-		attachDragAndDropEventListeners(newDragSrcEl);
-		attachDragAndDropEventListeners(newDropTargetEl);
+		console.log('handleDrop complete');
+	} catch (error) {
+		console.error(`Error in handleDrop: ${error}`);
 	}
-
-	console.log('handleDrop complete');
 }
 
-export function handleDragEnd(e: DragEvent): void {
-	console.log('executing handleDragEnd');
-
-	const target = e.currentTarget as HTMLElement;
-	target.classList.remove('dragging');
-
-	document.querySelectorAll('.color-stripe').forEach(el => {
-		el.classList.remove('dragging');
-	});
-
-	console.log('handleDragEnd complete');
-}
+export const dragAndDrop: fnObjects.DragAndDrop = {
+	handleDragEnd,
+	handleDragOver,
+	handleDragStart,
+	handleDrop
+};

@@ -1,9 +1,20 @@
 import { convert } from './conversion-index';
 import { conversionHelpers } from '../helpers/conversion';
-import * as types from '../index';
+import * as fnObjects from '../index/fn-objects';
+import * as types from '../index/types';
 import { defaults } from '../utils/defaults';
 
-export function hexToHSL(hex: types.Hex): types.HSL {
+function cmykToHSL(cmyk: types.CMYK): types.HSL {
+	try {
+		const rgb = convert.cmykToRGB(cmyk);
+		return rgbToHSL(rgb);
+	} catch (error) {
+		console.error(`cmykToHSL() error: ${error}`);
+		return defaults.defaultHSL();
+	}
+}
+
+function hexToHSL(hex: types.Hex): types.HSL {
 	try {
 		const rgb = convert.hexToRGB(hex);
 		return rgbToHSL(rgb);
@@ -13,7 +24,7 @@ export function hexToHSL(hex: types.Hex): types.HSL {
 	}
 }
 
-export function rgbToHSL(rgb: types.RGB): types.HSL {
+function rgbToHSL(rgb: types.RGB): types.HSL {
 	try {
 		rgb.value.red /= 255;
 		rgb.value.green /= 255;
@@ -62,7 +73,7 @@ export function rgbToHSL(rgb: types.RGB): types.HSL {
 	}
 }
 
-export function hsvToHSL(hsv: types.HSV): types.HSL {
+function hsvToHSL(hsv: types.HSV): types.HSL {
 	try {
 		const newSaturation =
 			hsv.value.value * (1 - hsv.value.saturation / 100) === 0 ||
@@ -88,17 +99,7 @@ export function hsvToHSL(hsv: types.HSV): types.HSL {
 	}
 }
 
-export function cmykToHSL(cmyk: types.CMYK): types.HSL {
-	try {
-		const rgb = convert.cmykToRGB(cmyk);
-		return rgbToHSL(rgb);
-	} catch (error) {
-		console.error(`cmykToHSL() error: ${error}`);
-		return defaults.defaultHSL();
-	}
-}
-
-export function labToHSL(lab: types.LAB): types.HSL {
+function labToHSL(lab: types.LAB): types.HSL {
 	try {
 		const rgb = convert.labToRGB(lab);
 		return rgbToHSL(rgb);
@@ -108,12 +109,21 @@ export function labToHSL(lab: types.LAB): types.HSL {
 	}
 }
 
-export function xyzToHSL(xyz: types.XYZ): types.HSL {
+function xyzToHSL(xyz: types.XYZ): types.HSL {
 	try {
-		const hsl = conversionHelpers.xyzToHSLTryCaseHelper(xyz);
+		const hsl = conversionHelpers.xyzToHSLHelper(xyz);
 		return hsl;
 	} catch (error) {
 		console.error(`xyzToHSL() error: ${error}`);
 		return defaults.defaultHSL();
 	}
 }
+
+export const toHSL: fnObjects.ToHSL = {
+	cmykToHSL,
+	hexToHSL,
+	hsvToHSL,
+	rgbToHSL,
+	labToHSL,
+	xyzToHSL
+};

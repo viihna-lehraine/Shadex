@@ -1,17 +1,15 @@
 import { genAllColorValues } from '../color-conversion/conversion';
-import { populateColorTextOutputBox } from '../dom/dom-main';
+import { dom } from '../dom/dom-main';
+import * as types from '../index/types';
 import { random } from '../utils/color-randomizer';
-import * as types from '../index';
 
 export function genTriadicHues(baseHue: number): number[] {
-	const triadicHues: number[] = [];
-	const increments = [120, 240];
-
-	increments.forEach(increment => {
-		triadicHues.push((baseHue + increment) % 360);
-	});
-
-	return triadicHues;
+	try {
+		return [120, 240].map(increment => (baseHue + increment) % 360);
+	} catch (error) {
+		console.error(`Error generating triadic hues: ${error}`);
+		return [];
+	}
 }
 
 export function genTriadicPalette(
@@ -19,92 +17,71 @@ export function genTriadicPalette(
 	customColor: types.Color | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
 ): types.Color[] {
-	if (numBoxes < 3) {
-		window.alert(
-			'To generate a triadic palette, please select a number of swatches greater than 2'
-		);
+	try {
+		if (numBoxes < 3) {
+			window.alert(
+				'To generate a triadic palette, please select at least 3 swatches.'
+			);
+			return [];
+		}
+
+		const colors: types.Color[] = [];
+		const baseColor = customColor ?? random.randomColor(initialColorSpace);
+
+		const baseColorValues = genAllColorValues(baseColor);
+		const baseHSL = baseColorValues.hsl as types.HSL;
+
+		if (!baseHSL) {
+			throw new Error('Base HSL value is required.');
+		}
+
+		colors.push(baseHSL);
+
+		const triadicHues = genTriadicHues(baseHSL.value.hue);
+
+		// generate triadic colors and add to palette
+		triadicHues.forEach(hue => {
+			const sl = random.randomSL();
+			const color = genAllColorValues({
+				value: { hue, ...sl.value },
+				format: 'hsl'
+			}).hsl;
+
+			if (color) {
+				colors.push(color);
+			}
+		});
+
+		// generate additional colors if needed
+		while (colors.length < numBoxes) {
+			const baseHue = triadicHues[Math.floor(Math.random() * 3)];
+			const hue =
+				(baseHue + Math.floor(Math.random() * 11) - 5 + 360) % 360;
+
+			const sl = random.randomSL();
+			const additionalColor = genAllColorValues({
+				value: { hue, ...sl.value },
+				format: 'hsl'
+			}).hsl;
+
+			if (additionalColor) {
+				colors.push(additionalColor);
+			}
+		}
+
+		// update the DOM with generated colors
+		colors.forEach((color, index) => {
+			const colorBox = document.getElementById(`color-box-${index + 1}`);
+			if (colorBox) {
+				const hexColor = genAllColorValues(color).hex as types.Hex;
+				colorBox.style.backgroundColor = hexColor.value.hex;
+				dom.populateColorTextOutputBox(color, index + 1);
+			}
+		});
+
+		return colors;
+	} catch (error) {
+		console.error(`Error generating triadic palette: ${error}`);
 		return [];
 	}
-
-	const colors: types.Color[] = [];
-	let baseColor: types.Color;
-
-	// generate or use the custom base color
-	if (customColor) {
-		baseColor = customColor;
-	} else {
-		const randomColor = random.randomColor(initialColorSpace);
-		const colorValues = genAllColorValues(randomColor);
-
-		const generatedColor = colorValues[initialColorSpace];
-		if (!generatedColor) {
-			throw new Error(
-				`Failed to generate a valid color in ${initialColorSpace}`
-			);
-		}
-
-		baseColor = generatedColor;
-	}
-
-	const triadicHues = genTriadicHues((baseColor as types.HSL).value.hue);
-
-	// add the base color to the palette
-	colors.push(baseColor);
-
-	// generate the main triadic colors
-	triadicHues.forEach(hue => {
-		const {
-			value: { saturation, lightness }
-		} = random.randomSL();
-		const color = genAllColorValues({
-			value: {
-				hue,
-				saturation,
-				lightness
-			},
-			format: 'hsl'
-		}).hsl;
-
-		if (color) {
-			colors.push(color);
-		}
-	});
-
-	// generate additional colors if needed
-	while (colors.length < numBoxes) {
-		const baseColorIndex = Math.floor(Math.random() * 3); // randomly select one of the first three colors
-		const baseHue = triadicHues[baseColorIndex];
-		const hue = (baseHue + Math.floor(Math.random() * 11) - 5 + 360) % 360;
-
-		let {
-			value: { saturation, lightness }
-		} = random.randomSL();
-		saturation = Math.min(100, Math.max(0, saturation));
-		lightness = Math.min(100, Math.max(0, lightness));
-
-		const additionalColor = genAllColorValues({
-			value: {
-				hue,
-				saturation,
-				lightness
-			},
-			format: 'hsl'
-		}).hsl;
-
-		if (additionalColor) {
-			colors.push(additionalColor);
-		}
-	}
-
-	// update the DOM with generated colors
-	colors.forEach((color, index) => {
-		const colorBox = document.getElementById(`color-box-${index + 1}`);
-		if (colorBox) {
-			const hexColor = genAllColorValues(color).hex as types.Hex;
-			colorBox.style.backgroundColor = hexColor.value.hex;
-			populateColorTextOutputBox(color as types.HSL, index + 1);
-		}
-	});
-
-	return colors;
 }

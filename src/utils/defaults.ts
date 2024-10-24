@@ -1,4 +1,5 @@
-import * as types from '../index';
+import * as fnObjects from '../index/fn-objects';
+import * as types from '../index/types';
 
 function defaultCMYK(): types.CMYK {
 	return {
@@ -39,7 +40,7 @@ function defaultXYZ(): types.XYZ {
 	return { value: { x: 0, y: 0, z: 0 }, format: 'xyz' };
 }
 
-export const defaults = {
+export const defaults: fnObjects.Defaults = {
 	defaultCMYK,
 	defaultHex,
 	defaultHSL,

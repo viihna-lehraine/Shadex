@@ -1,48 +1,55 @@
 import { conversionHelpers } from '../helpers/conversion';
-import * as types from '../index';
+import { paletteHelpers } from '../helpers/palette';
+import * as fnObjects from '../index/fn-objects';
+import * as types from '../index/types';
 import { defaults } from '../utils/defaults';
 
-export function hexToCMYK(hex: types.Hex): types.CMYK {
+function hexToCMYK(hex: types.Hex): types.CMYK {
 	try {
-		return conversionHelpers.hexToCMYKTryCaseHelper(hex);
+		const clonedHex = paletteHelpers.clone(hex);
+		return conversionHelpers.hexToCMYKHelper(clonedHex);
 	} catch (error) {
 		console.error(`Error converting hex to CMYK: ${error}`);
-		return defaults.defaultCMYK();
+		return paletteHelpers.clone(defaults.defaultCMYK());
 	}
 }
 
-export function hslToCMYK(hsl: types.HSL): types.CMYK {
+function hslToCMYK(hsl: types.HSL): types.CMYK {
 	try {
-		return conversionHelpers.hslToCMYKTryCaseHelper(hsl);
+		const clonedHSL = paletteHelpers.clone(hsl);
+		return conversionHelpers.hslToCMYKHelper(clonedHSL);
 	} catch (error) {
 		console.error(`Error converting HSL to CMYK: ${error}`);
-		return defaults.defaultCMYK();
+		return paletteHelpers.clone(defaults.defaultCMYK());
 	}
 }
 
-export function hsvToCMYK(hsv: types.HSV): types.CMYK {
+function hsvToCMYK(hsv: types.HSV): types.CMYK {
 	try {
-		return conversionHelpers.hsvToCMYKTryCaseHelper(hsv);
+		const clonedHSV = paletteHelpers.clone(hsv);
+		return conversionHelpers.hsvToCMYKHelper(clonedHSV);
 	} catch (error) {
 		console.error(`Error converting HSV to CMYK: ${error}`);
-		return defaults.defaultCMYK();
+		return paletteHelpers.clone(defaults.defaultCMYK());
 	}
 }
 
-export function labToCMYK(lab: types.LAB): types.CMYK {
+function labToCMYK(lab: types.LAB): types.CMYK {
 	try {
-		return conversionHelpers.labToCMYKTryCaseHelper(lab);
+		const clonedLAB = paletteHelpers.clone(lab);
+		return conversionHelpers.labToCMYKHelper(lab);
 	} catch (error) {
 		console.error(`Error converting Lab to CMYK: ${error}`);
-		return defaults.defaultCMYK();
+		return paletteHelpers.clone(defaults.defaultCMYK());
 	}
 }
 
-export function rgbToCMYK(rgb: types.RGB): types.CMYK {
+function rgbToCMYK(rgb: types.RGB): types.CMYK {
 	try {
-		const redPrime = rgb.value.red / 255;
-		const greenPrime = rgb.value.green / 255;
-		const bluePrime = rgb.value.blue / 255;
+		const clonedRGB = paletteHelpers.clone(rgb);
+		const redPrime = clonedRGB.value.red / 255;
+		const greenPrime = clonedRGB.value.green / 255;
+		const bluePrime = clonedRGB.value.blue / 255;
 
 		const key = 1 - Math.max(redPrime, greenPrime, bluePrime);
 		const cyan = (1 - redPrime - key) / (1 - key) || 0;
@@ -64,12 +71,21 @@ export function rgbToCMYK(rgb: types.RGB): types.CMYK {
 	}
 }
 
-export function xyzToCMYK(xyz: types.XYZ): types.CMYK {
+function xyzToCMYK(xyz: types.XYZ): types.CMYK {
 	try {
-		const cmyk: types.CMYK = conversionHelpers.xyzToCMYKTryCaseHelper(xyz);
+		const cmyk: types.CMYK = conversionHelpers.xyzToCMYKHelper(xyz);
 		return cmyk;
 	} catch (error) {
 		console.error(`Error converting XYZ to CMYK: ${error}`);
 		return defaults.defaultCMYK();
 	}
 }
+
+export const toCMYK: fnObjects.ToCMYK = {
+	hexToCMYK,
+	hslToCMYK,
+	hsvToCMYK,
+	labToCMYK,
+	rgbToCMYK,
+	xyzToCMYK
+};

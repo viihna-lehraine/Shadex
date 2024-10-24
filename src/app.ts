@@ -7,47 +7,41 @@
 
 // This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND.
 
-import { domHelpers } from './helpers/dom';
-import {
-	applyCustomColor,
-	applyInitialColorSpace,
-	desaturateColor,
-	saturateColor,
-	showCustomColorPopupDiv
-} from './dom/dom-main';
-import { startPaletteGen } from './palette-gen/generate';
-import { parseColor } from './utils/transforms';
+import { dom } from './dom/dom-main';
 import { storage } from './dom/storage';
-import * as types from './index';
+import { domHelpers } from './helpers/dom';
+import * as types from './index/types';
+import { generate } from './palette-gen/generate';
 
-let customColor: { format: string; value: string } | null = null;
-
-function getElement<T extends HTMLElement>(id: string): T | null {
-	return document.getElementById(id) as T | null;
-}
+let customColor: types.Color | null = null;
 
 // applies all event listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
 	console.log('DOM content loaded - Initializing application');
 
-	// define buttons within the main UI
-	const generateButton = getElement<HTMLButtonElement>('generate-button');
-	const saturateButton = getElement<HTMLButtonElement>('saturate-button');
-	const desaturateButton = getElement<HTMLButtonElement>('desaturate-button');
-	const popupDivButton = getElement<HTMLButtonElement>('custom-color-button');
-	const applyCustomColorButton = getElement<HTMLButtonElement>(
+	const generateButton =
+		domHelpers.getElement<HTMLButtonElement>('generate-button');
+	const saturateButton =
+		domHelpers.getElement<HTMLButtonElement>('saturate-button');
+	const desaturateButton =
+		domHelpers.getElement<HTMLButtonElement>('desaturate-button');
+	const popupDivButton = domHelpers.getElement<HTMLButtonElement>(
+		'custom-color-button'
+	);
+	const applyCustomColorButton = domHelpers.getElement<HTMLButtonElement>(
 		'apply-custom-color-button'
 	);
-	const clearCustomColorButton = getElement<HTMLButtonElement>(
+	const clearCustomColorButton = domHelpers.getElement<HTMLButtonElement>(
 		'clear-custom-color-button'
 	);
-	const advancedMenuToggleButton = getElement<HTMLButtonElement>(
+	const advancedMenuToggleButton = domHelpers.getElement<HTMLButtonElement>(
 		'advanced-menu-toggle-button'
 	);
-	const applyInitialColorSpaceButton = getElement<HTMLButtonElement>(
-		'apply-initial-color-space-button'
-	);
-	const selectedColorOptions = getElement<HTMLSelectElement>(
+	const applyInitialColorSpaceButton =
+		domHelpers.getElement<HTMLButtonElement>(
+			'apply-initial-color-space-button'
+		);
+	const selectedColorOptions = domHelpers.getElement<HTMLSelectElement>(
 		'selected-color-options'
 	);
 
@@ -59,10 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
 	const selectedColor = selectedColorOptions
 		? parseInt(selectedColorOptions.value, 10)
 		: 0;
+
 	console.log(`Selected color: ${selectedColor}`);
 
 	try {
-		domHelpers.addConversionButtonEventListeners();
+		dom.addConversionButtonEventListeners();
+
 		console.log('Conversion button event listeners attached');
 	} catch (error) {
 		console.error(
@@ -76,69 +72,83 @@ document.addEventListener('DOMContentLoaded', () => {
 		console.log('generateButton clicked');
 
 		const { paletteType, numBoxes, initialColorSpace } =
-			domHelpers.pullParamsFromUI();
-
+			dom.pullParamsFromUI();
 		const color: types.Color | null = customColor
-			? parseColor(
-					customColor.format as types.ColorSpace,
-					customColor.value
-				)
+			? structuredClone(customColor)
 			: null;
+		const space: types.ColorSpace = initialColorSpace ?? 'hex';
 
-		startPaletteGen(paletteType, numBoxes, initialColorSpace, color);
+		generate.startPaletteGen(paletteType, numBoxes, space, color);
 	});
 
 	saturateButton?.addEventListener('click', e => {
 		e.preventDefault();
+
 		console.log('saturateButton clicked');
-		saturateColor(selectedColor);
+
+		dom.saturateColor(selectedColor);
 	});
 
 	desaturateButton?.addEventListener('click', e => {
 		e.preventDefault();
+
 		console.log('desaturateButton clicked');
-		desaturateColor(selectedColor);
+
+		dom.desaturateColor(selectedColor);
 	});
 
 	popupDivButton?.addEventListener('click', e => {
 		e.preventDefault();
+
 		console.log('popupDivButton clicked');
-		showCustomColorPopupDiv();
+
+		dom.showCustomColorPopupDiv();
 	});
 
 	applyCustomColorButton?.addEventListener('click', e => {
 		e.preventDefault();
-		const hslColorFlat = applyCustomColor();
-		const customColor: types.Color = hslColorFlat;
-		storage.setAppStorage({ customColor });
-		showCustomColorPopupDiv();
+
+		const hslColor = dom.applyCustomColor();
+		const customColorClone: types.Color = structuredClone(hslColor);
+
+		storage.setAppStorage({ customColor: customColorClone });
+
+		dom.showCustomColorPopupDiv();
 	});
 
 	applyInitialColorSpaceButton?.addEventListener('click', e => {
 		e.preventDefault();
-		const initialColorSpace: types.ColorSpace = applyInitialColorSpace();
+
+		const initialColorSpace: types.ColorSpace =
+			dom.applyInitialColorSpace();
 		const currentStorage = storage.getAppStorage() || {};
 		const newStorage = { ...currentStorage, initialColorSpace };
+
 		storage.setAppStorage(newStorage);
 	});
 
 	clearCustomColorButton?.addEventListener('click', e => {
 		e.preventDefault();
+
 		storage.updateAppStorage({ customColor: null });
+
 		customColor = null;
-		showCustomColorPopupDiv();
+
+		dom.showCustomColorPopupDiv();
 	});
 
 	advancedMenuToggleButton?.addEventListener('click', e => {
 		e.preventDefault();
-		const advancedMenu = getElement<HTMLDivElement>('advanced-menu');
+
+		const advancedMenu =
+			domHelpers.getElement<HTMLDivElement>('advanced-menu');
+
 		if (advancedMenu) {
+			const clonedClasses = [...advancedMenu.classList];
+			const isHidden = clonedClasses.includes('hidden');
+
 			advancedMenu.classList.toggle('hidden');
-			advancedMenu.style.display = advancedMenu.classList.contains(
-				'hidden'
-			)
-				? 'none'
-				: 'block';
+			advancedMenu.style.display = isHidden ? 'block' : 'none';
 		}
 	});
 });

@@ -1,40 +1,33 @@
-import { labToXYZ } from './toXYZ';
-import * as types from '../index';
-import { stripHashFromHex } from '../utils/transforms';
 import { conversionHelpers } from '../helpers/conversion';
+import * as fnObjects from '../index/fn-objects';
+import * as types from '../index/types';
 import { defaults } from '../utils/defaults';
+import { transforms } from '../utils/transforms';
 
-export function xyzToRGB(xyz: types.XYZ): types.RGB {
+export function cmykToRGB(cmyk: types.CMYK): types.RGB {
 	try {
-		xyz.value.x /= 100;
-		xyz.value.y /= 100;
-		xyz.value.z /= 100;
+		const r =
+			255 * (1 - cmyk.value.cyan / 100) * (1 - cmyk.value.key / 100);
+		const g =
+			255 * (1 - cmyk.value.magenta / 100) * (1 - cmyk.value.key / 100);
+		const b =
+			255 * (1 - cmyk.value.yellow / 100) * (1 - cmyk.value.key / 100);
 
-		let red =
-			xyz.value.x * 3.2406 +
-			xyz.value.y * -1.5372 +
-			xyz.value.z * -0.4986;
-		let green =
-			xyz.value.x * -0.9689 + xyz.value.y * 1.8758 + xyz.value.z * 0.0415;
-		let blue =
-			xyz.value.x * 0.0557 + xyz.value.y * -0.204 + xyz.value.z * 1.057;
-
-		red = conversionHelpers.applyGammaCorrection(red);
-		green = conversionHelpers.applyGammaCorrection(green);
-		blue = conversionHelpers.applyGammaCorrection(blue);
-
-		const rgb: types.RGB = { value: { red, green, blue }, format: 'rgb' };
+		const rgb: types.RGB = {
+			value: { red: r, green: g, blue: b },
+			format: 'rgb'
+		};
 
 		return conversionHelpers.clampRGB(rgb);
 	} catch (error) {
-		console.error(`xyzToRGB error: ${error}`);
+		console.error(`cmykToRGB error: ${error}`);
 		return defaults.defaultRGB();
 	}
 }
 
 export function hexToRGB(hex: types.Hex): types.RGB {
 	try {
-		const strippedHex = stripHashFromHex(hex).value.hex;
+		const strippedHex = transforms.stripHashFromHex(hex).value.hex;
 		const bigint = parseInt(strippedHex, 16);
 
 		return {
@@ -126,33 +119,49 @@ export function hsvToRGB(hsv: types.HSV): types.RGB {
 	}
 }
 
-export function cmykToRGB(cmyk: types.CMYK): types.RGB {
-	try {
-		const r =
-			255 * (1 - cmyk.value.cyan / 100) * (1 - cmyk.value.key / 100);
-		const g =
-			255 * (1 - cmyk.value.magenta / 100) * (1 - cmyk.value.key / 100);
-		const b =
-			255 * (1 - cmyk.value.yellow / 100) * (1 - cmyk.value.key / 100);
-
-		const rgb: types.RGB = {
-			value: { red: r, green: g, blue: b },
-			format: 'rgb'
-		};
-
-		return conversionHelpers.clampRGB(rgb);
-	} catch (error) {
-		console.error(`cmykToRGB error: ${error}`);
-		return defaults.defaultRGB();
-	}
-}
-
 export function labToRGB(lab: types.LAB): types.RGB {
 	try {
-		const xyz = labToXYZ(lab);
+		const xyz = conversionHelpers.labToXYZHelper(lab);
 		return xyzToRGB(xyz);
 	} catch (error) {
 		console.error(`labToRGB error: ${error}`);
 		return defaults.defaultRGB();
 	}
 }
+
+export function xyzToRGB(xyz: types.XYZ): types.RGB {
+	try {
+		xyz.value.x /= 100;
+		xyz.value.y /= 100;
+		xyz.value.z /= 100;
+
+		let red =
+			xyz.value.x * 3.2406 +
+			xyz.value.y * -1.5372 +
+			xyz.value.z * -0.4986;
+		let green =
+			xyz.value.x * -0.9689 + xyz.value.y * 1.8758 + xyz.value.z * 0.0415;
+		let blue =
+			xyz.value.x * 0.0557 + xyz.value.y * -0.204 + xyz.value.z * 1.057;
+
+		red = conversionHelpers.applyGammaCorrection(red);
+		green = conversionHelpers.applyGammaCorrection(green);
+		blue = conversionHelpers.applyGammaCorrection(blue);
+
+		const rgb: types.RGB = { value: { red, green, blue }, format: 'rgb' };
+
+		return conversionHelpers.clampRGB(rgb);
+	} catch (error) {
+		console.error(`xyzToRGB error: ${error}`);
+		return defaults.defaultRGB();
+	}
+}
+
+export const toRGB: fnObjects.ToRGB = {
+	cmykToRGB,
+	hexToRGB,
+	hslToRGB,
+	hsvToRGB,
+	labToRGB,
+	xyzToRGB
+};

@@ -1,29 +1,39 @@
 import { convert } from './conversion-index';
-import * as types from '../index';
 import { wrappers } from '../helpers/wrappers';
+import * as interfaces from '../index/interfaces';
+import * as types from '../index/types';
 
 export function getConversionFn<
-	From extends keyof types.ConversionData,
-	To extends keyof types.ConversionData
+	From extends keyof interfaces.ConversionData,
+	To extends keyof interfaces.ConversionData
 >(
 	from: From,
 	to: To
 ):
-	| ((value: types.ConversionData[From]) => types.ConversionData[To])
+	| ((
+			value: interfaces.ConversionData[From]
+	  ) => interfaces.ConversionData[To])
 	| undefined {
-	const fromMap = conversionMap[from];
+	try {
+		const fromMap = conversionMap[from];
 
-	if (!fromMap || !(to in fromMap)) return undefined;
+		if (!fromMap || !(to in fromMap)) return undefined;
 
-	const conversionFn = fromMap[to] as unknown as (
-		input: types.ConversionData[From]
-	) => types.ConversionData[To];
+		const conversionFn = fromMap[to] as unknown as (
+			input: interfaces.ConversionData[From]
+		) => interfaces.ConversionData[To];
 
-	return (value: types.ConversionData[From]): types.ConversionData[To] =>
-		conversionFn(value);
+		return (
+			value: interfaces.ConversionData[From]
+		): interfaces.ConversionData[To] =>
+			structuredClone(conversionFn(value));
+	} catch (error) {
+		console.error(`Error getting conversion function: ${error}`);
+		return undefined;
+	}
 }
 
-export const conversionMap: types.ConversionMap = {
+export const conversionMap: types.ConversionMap = structuredClone({
 	cmyk: {
 		hex: convert.cmykToHex,
 		hsl: convert.cmykToHSL,
@@ -80,63 +90,70 @@ export const conversionMap: types.ConversionMap = {
 		lab: convert.xyzToLAB,
 		rgb: convert.xyzToRGB
 	}
-};
+});
 
 export function genAllColorValues(
 	color: types.Color
-): Partial<types.ColorData> {
-	const result: Partial<types.ColorData> = {};
+): Partial<interfaces.ColorData> {
+	const result: Partial<interfaces.ColorData> = {};
 
-	switch (color.format) {
-		case 'cmyk':
-			result.cmyk = color;
-			result.hex = convert.cmykToHex(color);
-			result.hsl = convert.cmykToHSL(color);
-			result.hsv = convert.cmykToHSV(color);
-			result.lab = convert.cmykToLAB(color);
-			result.rgb = convert.cmykToRGB(color);
-			break;
-		case 'hex':
-			result.hex = color;
-			result.cmyk = convert.hexToCMYK(color);
-			result.hsl = convert.hexToHSL(color);
-			result.hsv = convert.hexToHSV(color);
-			result.lab = convert.hexToLAB(color);
-			result.rgb = convert.hexToRGB(color);
-			break;
-		case 'hsl':
-			result.hsl = color;
-			result.cmyk = convert.hslToCMYK(color);
-			result.hex = convert.hslToHex(color);
-			result.hsv = convert.hslToHSV(color);
-			result.lab = convert.hslToLAB(color);
-			result.rgb = convert.hslToRGB(color);
-			break;
-		case 'hsv':
-			result.hsv = color;
-			result.cmyk = convert.hsvToCMYK(color);
-			result.hex = convert.hsvToHex(color);
-			result.hsl = convert.hsvToHSL(color);
-			result.lab = convert.hsvToLAB(color);
-			result.rgb = convert.hsvToRGB(color);
-			break;
-		case 'lab':
-			result.lab = color;
-			result.cmyk = convert.labToCMYK(color);
-			result.hex = convert.labToHex(color);
-			result.hsl = convert.labToHSL(color);
-			result.hsv = convert.labToHSV(color);
-			result.rgb = convert.labToRGB(color);
-			break;
-		case 'rgb':
-			result.rgb = color;
-			result.cmyk = convert.rgbToCMYK(color);
-			result.hex = convert.rgbToHex(color);
-			result.hsl = convert.rgbToHSL(color);
-			result.hsv = convert.rgbToHSV(color);
-			result.lab = convert.rgbToLAB(color);
-			break;
+	try {
+		const clonedColor = structuredClone(color);
+
+		switch (clonedColor.format) {
+			case 'cmyk':
+				result.cmyk = clonedColor;
+				result.hex = convert.cmykToHex(clonedColor);
+				result.hsl = convert.cmykToHSL(clonedColor);
+				result.hsv = convert.cmykToHSV(clonedColor);
+				result.lab = convert.cmykToLAB(clonedColor);
+				result.rgb = convert.cmykToRGB(clonedColor);
+				break;
+			case 'hex':
+				result.hex = clonedColor;
+				result.cmyk = convert.hexToCMYK(clonedColor);
+				result.hsl = convert.hexToHSL(clonedColor);
+				result.hsv = convert.hexToHSV(clonedColor);
+				result.lab = convert.hexToLAB(clonedColor);
+				result.rgb = convert.hexToRGB(clonedColor);
+				break;
+			case 'hsl':
+				result.hsl = clonedColor;
+				result.cmyk = convert.hslToCMYK(clonedColor);
+				result.hex = convert.hslToHex(clonedColor);
+				result.hsv = convert.hslToHSV(clonedColor);
+				result.lab = convert.hslToLAB(clonedColor);
+				result.rgb = convert.hslToRGB(clonedColor);
+				break;
+			case 'hsv':
+				result.hsv = clonedColor;
+				result.cmyk = convert.hsvToCMYK(clonedColor);
+				result.hex = convert.hsvToHex(clonedColor);
+				result.hsl = convert.hsvToHSL(clonedColor);
+				result.lab = convert.hsvToLAB(clonedColor);
+				result.rgb = convert.hsvToRGB(clonedColor);
+				break;
+			case 'lab':
+				result.lab = clonedColor;
+				result.cmyk = convert.labToCMYK(clonedColor);
+				result.hex = convert.labToHex(clonedColor);
+				result.hsl = convert.labToHSL(clonedColor);
+				result.hsv = convert.labToHSV(clonedColor);
+				result.rgb = convert.labToRGB(clonedColor);
+				break;
+			case 'rgb':
+				result.rgb = clonedColor;
+				result.cmyk = convert.rgbToCMYK(clonedColor);
+				result.hex = convert.rgbToHex(clonedColor);
+				result.hsl = convert.rgbToHSL(clonedColor);
+				result.hsv = convert.rgbToHSV(clonedColor);
+				result.lab = convert.rgbToLAB(clonedColor);
+				break;
+		}
+
+		return structuredClone(result);
+	} catch (error) {
+		console.error(`Error generating all color values: ${error}`);
+		return {};
 	}
-
-	return result;
 }

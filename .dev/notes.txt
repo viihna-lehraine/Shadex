@@ -1,2 +1,13 @@
 10/23/24
-	- Just before end of session, I created getCSSString Fn in transforms.ts. This should be used in makePaletteBox to ensure generated colors are successfully applied to the DOM. Currently, the strings are generated but colors are not applied.
+
+- src/helpers/dom-main.ts
+	- desaturateColor and saturateColor need to be completed. They lack real implementation logic
+
+
+FINISH IMPLEMENTATION CLONES AND IMMUTABILITY
+
+LAB Colorspace
+	- I am totally unsure if I set up conversions to use the correct ranges
+		L [0 100]%
+		A [-125, 125]
+		B [-125, 125]

@@ -1,184 +1,149 @@
-import * as types from '../../index';
 import { convert } from '../../color-conversion/conversion-index';
+import { config } from '../../config/constants';
+import * as fnObjects from '../../index/fn-objects';
+import * as interfaces from '../../index/interfaces';
+import * as types from '../../index/types';
 
-export function isHexTooGray(hex: types.Hex): boolean {
-	const rgb = convert.hexToRGB(hex);
-	return isRGBTooGray(rgb);
+function isCMYKTooBright(cmyk: types.CMYK): boolean {
+	return (
+		cmyk.value.cyan < config.cmykBrightnessThreshold &&
+		cmyk.value.magenta < config.cmykBrightnessThreshold &&
+		cmyk.value.yellow < config.cmykBrightnessThreshold
+	);
 }
 
-export function isHexTooDark(hex: types.Hex): boolean {
-	const rgb = convert.hexToRGB(hex);
-	return isRGBTooDark(rgb);
+export function isCMYKTooDark(cmyk: types.CMYK): boolean {
+	return cmyk.value.key > config.cmykDarknessThreshold;
 }
 
-export function isHexTooBright(hex: types.Hex): boolean {
+function isCMYKTooGray(cmyk: types.CMYK): boolean {
+	return (
+		Math.abs(cmyk.value.cyan - cmyk.value.magenta) <
+			config.cmykGrayThreshold &&
+		Math.abs(cmyk.value.magenta - cmyk.value.yellow) <
+			config.cmykGrayThreshold
+	);
+}
+
+function isHexTooBright(hex: types.Hex): boolean {
 	const rgb = convert.hexToRGB(hex);
 	return isRGBTooBright(rgb);
 }
 
-export function isHSLTooGray(
-	hsl: types.HSL,
-	hslGrayThreshold: number = 20
-): boolean {
-	return hsl.value.saturation < hslGrayThreshold;
+function isHexTooDark(hex: types.Hex): boolean {
+	const rgb = convert.hexToRGB(hex);
+	return isRGBTooDark(rgb);
 }
 
-export function isHSLTooDark(
-	hsl: types.HSL,
-	hslDarknessThreshold: number = 25
-): boolean {
-	return hsl.value.lightness < hslDarknessThreshold;
+function isHexTooGray(hex: types.Hex): boolean {
+	const rgb = convert.hexToRGB(hex);
+	return isRGBTooGray(rgb);
 }
 
-export function isHSLTooBright(
-	hsl: types.HSL,
-	hslBrightnessThreshold: number = 75
-): boolean {
-	return hsl.value.lightness > hslBrightnessThreshold;
+function isHSLTooBright(hsl: types.HSL): boolean {
+	return hsl.value.lightness > config.hslBrightnessThreshold;
 }
 
-export function isRGBTooGray(
-	rgb: types.RGB,
-	rgbGrayTreshold: number = 10
-): boolean {
+function isHSLTooDark(hsl: types.HSL): boolean {
+	return hsl.value.lightness < config.hslDarknessThreshold;
+}
+
+function isHSLTooGray(hsl: types.HSL): boolean {
+	return hsl.value.saturation < config.hslGrayThreshold;
+}
+
+function isHSVTooBright(hsv: types.HSV): boolean {
 	return (
-		Math.abs(rgb.value.red - rgb.value.green) < rgbGrayTreshold &&
-		Math.abs(rgb.value.green - rgb.value.blue) < rgbGrayTreshold &&
-		Math.abs(rgb.value.red - rgb.value.blue) < rgbGrayTreshold
+		hsv.value.value > config.hsvBrightnessValueThreshold &&
+		hsv.value.saturation < config.hsvBrightnessSaturationThreshold
 	);
 }
 
-export function isRGBTooDark(
-	rgb: types.RGB,
-	rgbMinBrightness: number = 50
-): boolean {
+function isHSVTooDark(hsv: types.HSV): boolean {
+	return hsv.value.value < config.hsvDarknessThreshold;
+}
+
+function isHSVTooGray(hsv: types.HSV): boolean {
+	return hsv.value.saturation < config.hsvGrayThreshold;
+}
+
+function isLABTooBright(lab: types.LAB): boolean {
+	return lab.value.l > config.labBrightnessThreshold;
+}
+
+function isLABTooDark(lab: types.LAB): boolean {
+	return lab.value.l < config.labDarknessThreshold;
+}
+
+function isLABTooGray(lab: types.LAB): boolean {
 	return (
-		(rgb.value.red + rgb.value.green + rgb.value.blue) / 3 <
-		rgbMinBrightness
+		Math.abs(lab.value.a) < config.labGrayThreshold &&
+		Math.abs(lab.value.b) < config.labGrayThreshold
 	);
 }
 
-export function isRGBTooBright(
-	rgb: types.RGB,
-	rgbMaxBrightness: number = 200
-): boolean {
+function isRGBTooBright(rgb: types.RGB): boolean {
 	return (
 		(rgb.value.red + rgb.value.green + rgb.value.blue) / 3 >
-		rgbMaxBrightness
+		config.rgbMaxBrightness
 	);
 }
 
-export function isHSVTooGray(
-	hsv: types.HSV,
-	hsvGrayThreshold: number = 10
-): boolean {
-	return hsv.value.saturation < hsvGrayThreshold;
-}
-
-export function isHSVTooDark(
-	hsv: types.HSV,
-	hsvDarknessThreshold: number = 10
-): boolean {
-	return hsv.value.value < hsvDarknessThreshold;
-}
-
-export function isHSVTooBright(
-	hsv: types.HSV,
-	hsvBrightnessValueThreshold: number = 90,
-	hsvBrightnessSaturationThreshold: number = 10
-): boolean {
+function isRGBTooDark(rgb: types.RGB): boolean {
 	return (
-		hsv.value.value > hsvBrightnessValueThreshold &&
-		hsv.value.saturation < hsvBrightnessSaturationThreshold
+		(rgb.value.red + rgb.value.green + rgb.value.blue) / 3 <
+		config.rgbMinBrightness
 	);
 }
 
-export function isCMYKTooGray(
-	cmyk: types.CMYK,
-	cmykGrayThreshold: number = 5
-): boolean {
+function isRGBTooGray(rgb: types.RGB): boolean {
 	return (
-		Math.abs(cmyk.value.cyan - cmyk.value.magenta) < cmykGrayThreshold &&
-		Math.abs(cmyk.value.magenta - cmyk.value.yellow) < cmykGrayThreshold
+		Math.abs(rgb.value.red - rgb.value.green) < config.rgbGrayThreshold &&
+		Math.abs(rgb.value.green - rgb.value.blue) < config.rgbGrayThreshold &&
+		Math.abs(rgb.value.red - rgb.value.blue) < config.rgbGrayThreshold
 	);
 }
 
-export function isCMYKTooDark(
-	cmyk: types.CMYK,
-	cmykDarknesshreshold: number = 90
-): boolean {
-	return cmyk.value.key > cmykDarknesshreshold;
+function getLimitChecker<K extends keyof fnObjects.ColorLimits>(
+	limit: K
+): fnObjects.ColorLimits[K] {
+	return colorLimits[limit];
 }
 
-export function isCMYKTooBright(
-	cmyk: types.CMYK,
-	cmykBrightnessThreshold: number = 10
-): boolean {
-	return (
-		cmyk.value.cyan < cmykBrightnessThreshold &&
-		cmyk.value.magenta < cmykBrightnessThreshold &&
-		cmyk.value.yellow < cmykBrightnessThreshold
-	);
+function isColorInBounds(colors: interfaces.ConversionData): boolean {
+	try {
+		return Object.entries(colors).some(([key, color]) => {
+			if (!color) return false;
+
+			const format = key.toUpperCase();
+
+			const isTooGray = getLimitChecker(
+				`is${format}TooGray` as keyof fnObjects.ColorLimits
+			);
+			const isTooDark = getLimitChecker(
+				`is${format}TooDark` as keyof fnObjects.ColorLimits
+			);
+			const isTooBright = getLimitChecker(
+				`is${format}TooBright` as keyof fnObjects.ColorLimits
+			);
+
+			return isTooGray(color) || isTooDark(color) || isTooBright(color);
+		});
+	} catch (error) {
+		console.error(`Error validating color bounds: ${error}`);
+		return false;
+	}
 }
 
-export function isLABTooGray(
-	lab: types.LAB,
-	labGrayThreshold: number = 10
-): boolean {
-	return (
-		Math.abs(lab.value.a) < labGrayThreshold &&
-		Math.abs(lab.value.b) < labGrayThreshold
-	);
-}
-
-export function isLABTooDark(
-	lab: types.LAB,
-	labDarknessThreshold: number = 10
-): boolean {
-	return lab.value.l < labDarknessThreshold;
-}
-
-export function isLABTooBright(
-	lab: types.LAB,
-	labBrightnessThreshold: number = 90
-): boolean {
-	return lab.value.l > labBrightnessThreshold;
-}
-
-export function isColorInBounds(
-	cmyk: types.CMYK,
-	hex: types.Hex,
-	hsl: types.HSL,
-	hsv: types.HSV,
-	lab: types.LAB,
-	rgb: types.RGB
-): boolean {
-	return (
-		isCMYKTooGray(cmyk) ||
-		isCMYKTooDark(cmyk) ||
-		isCMYKTooBright(cmyk) ||
-		isHexTooGray(hex) ||
-		isHexTooDark(hex) ||
-		isHexTooBright(hex) ||
-		isHSLTooGray(hsl) ||
-		isHSLTooDark(hsl) ||
-		isHSLTooBright(hsl) ||
-		isHSVTooGray(hsv) ||
-		isHSVTooDark(hsv) ||
-		isHSVTooBright(hsv) ||
-		isLABTooGray(lab) ||
-		isLABTooDark(lab) ||
-		isLABTooBright(lab) ||
-		isRGBTooGray(rgb) ||
-		isRGBTooDark(rgb) ||
-		isRGBTooBright(rgb)
-	);
-}
-
-export const colorLimits = {
+export const colorLimits: fnObjects.ColorLimits = {
+	getLimitChecker,
 	isCMYKTooBright,
 	isCMYKTooDark,
 	isCMYKTooGray,
+	isColorInBounds,
+	isHexTooBright,
+	isHexTooDark,
+	isHexTooGray,
 	isHSLTooBright,
 	isHSLTooDark,
 	isHSLTooGray,

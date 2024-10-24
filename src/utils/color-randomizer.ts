@@ -1,127 +1,185 @@
-import * as types from '../index';
+import { defaults } from './defaults';
+import { paletteHelpers } from '../helpers/palette';
+import * as fnObjects from '../index/fn-objects';
+import * as types from '../index/types';
 
 function randomCMYK(): types.CMYK {
-	return {
-		value: {
-			cyan: Math.floor(Math.random() * 101),
-			magenta: Math.floor(Math.random() * 101),
-			yellow: Math.floor(Math.random() * 101),
-			key: Math.floor(Math.random() * 101)
-		},
-		format: 'cmyk'
-	};
-}
-
-function randomColor(initialColorSpace: string): types.Color {
-	switch (initialColorSpace) {
-		case 'cmyk':
-			return random.randomCMYK();
-		case 'hex':
-			return random.randomHex();
-		case 'hsl':
-			return random.randomHSL();
-		case 'hsv':
-			return random.randomHSV();
-		case 'lab':
-			return random.randomLAB();
-		case 'rgb':
-			return random.randomRGB();
-		default:
-			return random.randomHex(); // default to hex
+	try {
+		return {
+			value: {
+				cyan: paletteHelpers.sanitizePercentage(
+					Math.floor(Math.random() * 101)
+				),
+				magenta: paletteHelpers.sanitizePercentage(
+					Math.floor(Math.random() * 101)
+				),
+				yellow: paletteHelpers.sanitizePercentage(
+					Math.floor(Math.random() * 101)
+				),
+				key: paletteHelpers.sanitizePercentage(
+					Math.floor(Math.random() * 101)
+				)
+			},
+			format: 'cmyk'
+		};
+	} catch (error) {
+		console.error(`Error generating random CMYK color: ${error}`);
+		return defaults.defaultCMYK();
 	}
 }
 
 function randomHex(): types.Hex {
-	const hexDigits = '0123456789ABCDEF';
-	const hexCodeArray = Array.from(
-		{ length: 6 },
-		() => hexDigits[Math.floor(Math.random() * hexDigits.length)]
-	);
+	try {
+		const hexDigits = '0123456789ABCDEF';
+		const hexCodeArray = Array.from(
+			{ length: 6 },
+			() => hexDigits[Math.floor(Math.random() * hexDigits.length)]
+		);
 
-	return {
-		value: { hex: `#${hexCodeArray.join('')}` },
-		format: 'hex'
-	};
+		return {
+			value: { hex: `#${hexCodeArray.join('')}` },
+			format: 'hex'
+		};
+	} catch (error) {
+		console.error(`Error generating random hex color: ${error}`);
+		return defaults.defaultHex();
+	}
 }
 
 function randomHSL(): types.HSL {
-	return {
-		value: {
-			hue: Math.floor(Math.random() * 360),
-			saturation: Math.floor(Math.random() * 101),
-			lightness: Math.floor(Math.random() * 101)
-		},
-		format: 'hsl'
-	};
+	try {
+		return {
+			value: {
+				hue: paletteHelpers.sanitizePercentage(
+					Math.floor(Math.random() * 360)
+				),
+				saturation: paletteHelpers.sanitizePercentage(
+					Math.floor(Math.random() * 101)
+				),
+				lightness: paletteHelpers.sanitizePercentage(
+					Math.floor(Math.random() * 101)
+				)
+			},
+			format: 'hsl'
+		};
+	} catch (error) {
+		console.error(`Error generating random HSL color: ${error}`);
+		return defaults.defaultHSL();
+	}
 }
 
 function randomHSV(): types.HSV {
-	return {
-		value: {
-			hue: Math.floor(Math.random() * 360),
-			saturation: Math.floor(Math.random() * 101),
-			value: Math.floor(Math.random() * 101)
-		},
-		format: 'hsv'
-	};
+	try {
+		return {
+			value: {
+				hue: paletteHelpers.sanitizeRadial(
+					Math.floor(Math.random() * 360)
+				),
+				saturation: paletteHelpers.sanitizePercentage(
+					Math.floor(Math.random() * 101)
+				),
+				value: paletteHelpers.sanitizePercentage(
+					Math.floor(Math.random() * 101)
+				)
+			},
+			format: 'hsv'
+		};
+	} catch (error) {
+		console.error(`Error generating random HSV color: ${error}`);
+		return defaults.defaultHSV();
+	}
 }
 
 function randomLAB(): types.LAB {
-	return {
-		value: {
-			l: Math.random() * 100,
-			a: Math.random() * 256 - 128,
-			b: Math.random() * 256 - 128
-		},
-		format: 'lab'
-	};
+	try {
+		return {
+			value: {
+				l: paletteHelpers.sanitizePercentage(Math.random() * 100),
+				a: Math.random() * 256 - 128,
+				b: Math.random() * 256 - 128
+			},
+			format: 'lab'
+		};
+	} catch (error) {
+		console.error(`Error generating random LAB color: ${error}`);
+		return defaults.defaultLAB();
+	}
 }
 
 function randomRGB(): types.RGB {
-	return {
-		value: {
-			red: Math.floor(Math.random() * 256),
-			green: Math.floor(Math.random() * 256),
-			blue: Math.floor(Math.random() * 256)
-		},
-		format: 'rgb'
-	};
+	try {
+		return {
+			value: {
+				red: Math.floor(Math.random() * 256),
+				green: Math.floor(Math.random() * 256),
+				blue: Math.floor(Math.random() * 256)
+			},
+			format: 'rgb'
+		};
+	} catch (error) {
+		console.error(`Error generating random RGB color: ${error}`);
+		return defaults.defaultRGB();
+	}
 }
 
 function randomSL(): types.SL {
-	let saturation = Math.floor(Math.random() * 101);
-	let lightness = Math.floor(Math.random() * 101);
-	let format: 'sl' = 'sl';
+	try {
+		const saturation = Math.max(0, Math.min(100, Math.random() * 100));
+		const lightness = Math.max(0, Math.min(100, Math.random() * 100));
+		const format: 'sl' = 'sl';
 
-	if (saturation > 100) saturation = 100;
-	if (saturation < 0) saturation = 0;
-	if (lightness > 100) lightness = 100;
-	if (lightness < 0) lightness = 0;
-
-	return { value: { saturation, lightness }, format };
+		return { value: { saturation, lightness }, format };
+	} catch (error) {
+		console.error(`Error generating random SL color: ${error}`);
+		return defaults.defaultSL();
+	}
 }
 
 function randomSV(): types.SV {
-	let saturation = Math.floor(Math.random() * 101);
-	let value = Math.floor(Math.random() * 101);
-	let format: 'sv' = 'sv';
+	try {
+		const saturation = Math.max(0, Math.min(100, Math.random() * 100));
+		const value = Math.max(0, Math.min(100, Math.random() * 100));
+		const format: 'sv' = 'sv';
 
-	if (saturation > 100) saturation = 100;
-	if (saturation < 0) saturation = 0;
-	if (value > 100) value = 100;
-	if (value < 0) value = 0;
-
-	return { value: { saturation, value }, format };
+		return { value: { saturation, value }, format };
+	} catch (error) {
+		console.error(`Error generating random SV color: ${error}`);
+		return defaults.defaultSV();
+	}
 }
 
-export const random = {
+function randomColor(colorSpace: types.ColorSpace): types.Color {
+	try {
+		switch (colorSpace) {
+			case 'cmyk':
+				return random.randomCMYK();
+			case 'hex':
+				return random.randomHex();
+			case 'hsl':
+				return random.randomHSL();
+			case 'hsv':
+				return random.randomHSV();
+			case 'lab':
+				return random.randomLAB();
+			case 'rgb':
+				return random.randomRGB();
+			default:
+				return random.randomHex();
+		}
+	} catch (error) {
+		console.error(`Error generating random color: ${error}`);
+		return random.randomHex();
+	}
+}
+
+export const random: fnObjects.Random = {
 	randomCMYK,
-	randomColor,
 	randomHex,
 	randomHSL,
 	randomHSV,
 	randomLAB,
 	randomRGB,
 	randomSL,
-	randomSV
+	randomSV,
+	randomColor
 };

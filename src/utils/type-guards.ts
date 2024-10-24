@@ -1,5 +1,6 @@
-import * as types from '../index';
 import { conversionMap } from '../color-conversion/conversion';
+import * as fnObjects from '../index/fn-objects';
+import * as types from '../index/types';
 
 function isCMYK(color: types.Color): color is types.CMYK {
 	return color.format === 'cmyk';
@@ -44,6 +45,10 @@ function isHexColor(value: unknown): value is types.Hex {
 
 // ***** SECTION 3 *****
 
+function ensureHash(value: string): string {
+	return value.startsWith('#') ? value : `#${value}`;
+}
+
 function isFormat(format: unknown): format is types.Format {
 	return (
 		typeof format === 'string' &&
@@ -87,7 +92,8 @@ function isConversion(
 	return from in conversionMap && to in conversionMap[from];
 }
 
-export const guards = {
+export const guards: fnObjects.Guards = {
+	ensureHash,
 	isCMYK,
 	isHex,
 	isHSL,

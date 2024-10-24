@@ -1,30 +1,11 @@
 import { convert } from '../color-conversion/conversion-index';
-import * as types from '../index';
-import { componentToHex } from '../utils/transforms';
 import { conversionHelpers } from '../helpers/conversion';
+import * as types from '../index/types';
+import * as fnObjects from '../index/fn-objects';
 import { defaults } from '../utils/defaults';
+import { transforms } from '../utils/transforms';
 
-export function hslToHex(hsl: types.HSL): types.Hex {
-	try {
-		const rgb: types.RGB = convert.hslToRGB(hsl);
-		return rgbToHex(rgb);
-	} catch (error) {
-		console.warn(`hslToHex error: ${error}`);
-		return defaults.defaultHex();
-	}
-}
-
-export function hsvToHex(hsv: types.HSV): types.Hex {
-	try {
-		const rgb: types.RGB = convert.hsvToRGB(hsv);
-		return rgbToHex(rgb);
-	} catch (error) {
-		console.warn(`hsvToHex error: ${error}`);
-		return defaults.defaultHex();
-	}
-}
-
-export function cmykToHex(cmyk: types.CMYK): types.Hex {
+function cmykToHex(cmyk: types.CMYK): types.Hex {
 	try {
 		const rgb: types.RGB = convert.cmykToRGB(cmyk);
 		return rgbToHex(rgb);
@@ -34,7 +15,27 @@ export function cmykToHex(cmyk: types.CMYK): types.Hex {
 	}
 }
 
-export function labToHex(lab: types.LAB): types.Hex {
+function hslToHex(hsl: types.HSL): types.Hex {
+	try {
+		const rgb: types.RGB = convert.hslToRGB(hsl);
+		return rgbToHex(rgb);
+	} catch (error) {
+		console.warn(`hslToHex error: ${error}`);
+		return defaults.defaultHex();
+	}
+}
+
+function hsvToHex(hsv: types.HSV): types.Hex {
+	try {
+		const rgb: types.RGB = convert.hsvToRGB(hsv);
+		return rgbToHex(rgb);
+	} catch (error) {
+		console.warn(`hsvToHex error: ${error}`);
+		return defaults.defaultHex();
+	}
+}
+
+function labToHex(lab: types.LAB): types.Hex {
 	try {
 		const rgb: types.RGB = convert.labToRGB(lab);
 
@@ -45,7 +46,7 @@ export function labToHex(lab: types.LAB): types.Hex {
 	}
 }
 
-export function rgbToHex(rgb: types.RGB): types.Hex {
+function rgbToHex(rgb: types.RGB): types.Hex {
 	try {
 		if (
 			[rgb.value.red, rgb.value.green, rgb.value.blue].some(
@@ -60,7 +61,7 @@ export function rgbToHex(rgb: types.RGB): types.Hex {
 
 		return {
 			value: {
-				hex: `#${componentToHex(rgb.value.red)}${componentToHex(rgb.value.green)}${componentToHex(rgb.value.blue)}`
+				hex: `#${transforms.componentToHex(rgb.value.red)}${transforms.componentToHex(rgb.value.green)}${transforms.componentToHex(rgb.value.blue)}`
 			},
 			format: 'hex'
 		};
@@ -70,11 +71,20 @@ export function rgbToHex(rgb: types.RGB): types.Hex {
 	}
 }
 
-export function xyzToHex(xyz: types.XYZ): types.Hex {
+function xyzToHex(xyz: types.XYZ): types.Hex {
 	try {
-		return conversionHelpers.xyzToHexTryCaseHelper(xyz);
+		return conversionHelpers.xyzToHexHelper(xyz);
 	} catch (error) {
 		console.warn(`xyzToHex error: ${error}`);
 		return defaults.defaultHex();
 	}
 }
+
+export const toHex: fnObjects.ToHex = {
+	cmykToHex,
+	hslToHex,
+	hsvToHex,
+	labToHex,
+	rgbToHex,
+	xyzToHex
+};

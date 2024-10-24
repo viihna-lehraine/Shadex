@@ -1,17 +1,20 @@
 import { genAllColorValues } from '../color-conversion/conversion';
-import { populateColorTextOutputBox } from '../dom/dom-main';
+import { dom } from '../dom/dom-main';
+import * as types from '../index/types';
 import { random } from '../utils/color-randomizer';
-import * as types from '../index';
 
 export function genSplitComplementaryHues(baseHue: number): number[] {
-	const splitComplementaryHues = [];
-	const baseComplementaryHue = (baseHue + 180) % 360;
-	const modifier = Math.floor(Math.random() * 11) + 20;
+	try {
+		const modifier = Math.floor(Math.random() * 11) + 20;
 
-	splitComplementaryHues.push((baseComplementaryHue + modifier) % 360);
-	splitComplementaryHues.push((baseComplementaryHue - modifier + 360) % 360);
-
-	return splitComplementaryHues;
+		return [
+			(baseHue + 180 + modifier) % 360,
+			(baseHue + 180 - modifier + 360) % 360
+		];
+	} catch (error) {
+		console.error(`Error generating split complementary hues: ${error}`);
+		return [];
+	}
 }
 
 export function genSplitComplementaryPalette(
@@ -19,82 +22,78 @@ export function genSplitComplementaryPalette(
 	customColor: types.Color | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
 ): types.Color[] {
-	if (numBoxes < 3) {
-		window.alert(
-			'To generate a split complementary palette, please select a number of swatches greater than 2'
-		);
+	try {
+		if (numBoxes < 3) {
+			window.alert(
+				'To generate a split complementary palette, please select at least 3 swatches.'
+			);
+			return [];
+		}
+
+		const colors: types.Color[] = [];
+		let baseColor: types.Color;
+
+		// retrieve base color, either from input or randomly generated
+		baseColor = customColor ?? random.randomColor(initialColorSpace);
+
+		const baseColorValues = genAllColorValues(baseColor);
+		const baseHSL = baseColorValues.hsl as types.HSL;
+
+		if (!baseHSL) {
+			throw new Error('Base HSL color is required for this palette.');
+		}
+
+		colors.push(baseHSL);
+
+		// generate split complementary hues
+		const splitHues = genSplitComplementaryHues(baseHSL.value.hue);
+
+		// generate the complementary colors and push them to the palette
+		splitHues.forEach(hue => {
+			const sl = random.randomSL();
+			const complementaryColor = genAllColorValues({
+				value: { hue, ...sl.value },
+				format: 'hsl'
+			}).hsl;
+
+			if (complementaryColor) {
+				colors.push(complementaryColor);
+			}
+		});
+
+		// generate additional colors if needed to match `numBoxes`
+		while (colors.length < numBoxes) {
+			const randomIndex = Math.floor(Math.random() * 2) + 1;
+			const baseHue = splitHues[randomIndex - 1];
+			const hue =
+				(baseHue + Math.floor(Math.random() * 11) - 5 + 360) % 360;
+			const sl = random.randomSL();
+
+			const additionalColor = genAllColorValues({
+				value: { hue, ...sl.value },
+				format: 'hsl'
+			}).hsl;
+
+			if (additionalColor) {
+				colors.push(additionalColor);
+			}
+		}
+
+		// update the DOM with the generated colors
+		colors.forEach((color, index) => {
+			const colorBox = document.getElementById(`color-box-${index + 1}`);
+
+			if (colorBox) {
+				const hexColor = genAllColorValues(color).hex as types.Hex;
+				colorBox.style.backgroundColor = hexColor.value.hex;
+
+				dom.populateColorTextOutputBox(color, index + 1);
+			}
+		});
+
+		return colors;
+	} catch (error) {
+		console.error('Error generating split complementary palette:', error);
 		return [];
 	}
-
-	const colors: types.Color[] = [];
-	let baseColor: types.Color;
-
-	if (customColor) {
-		baseColor = customColor;
-	} else {
-		const randomColor = random.randomColor(initialColorSpace);
-		const colorValues = genAllColorValues(randomColor);
-		baseColor = colorValues[initialColorSpace] ?? random.randomHSL(); // Safe fallback
-	}
-
-	const splitComplementaryHues = genSplitComplementaryHues(
-		(baseColor as types.HSL).value.hue
-	);
-
-	colors.push(baseColor);
-
-	splitComplementaryHues.forEach(hue => {
-		const {
-			value: { saturation, lightness }
-		} = random.randomSL();
-		const complementaryColor = genAllColorValues({
-			value: {
-				hue,
-				saturation,
-				lightness
-			},
-			format: 'hsl'
-		}).hsl;
-
-		if (complementaryColor) {
-			colors.push(complementaryColor);
-		}
-	});
-
-	while (colors.length < numBoxes) {
-		const baseColorIndex = Math.floor(Math.random() * 2) + 1;
-		const baseHue = splitComplementaryHues[baseColorIndex - 1];
-		const hue = (baseHue + Math.floor(Math.random() * 11) - 5 + 360) % 360;
-
-		let {
-			value: { saturation, lightness }
-		} = random.randomSL();
-		saturation = Math.min(100, Math.max(0, saturation));
-		lightness = Math.min(100, Math.max(0, lightness));
-
-		const additionalColor = genAllColorValues({
-			value: {
-				hue,
-				saturation,
-				lightness
-			},
-			format: 'hsl'
-		}).hsl;
-
-		if (additionalColor) {
-			colors.push(additionalColor);
-		}
-	}
-
-	colors.forEach((color, index) => {
-		const colorBox = document.getElementById(`color-box-${index + 1}`);
-
-		if (colorBox) {
-			const hexColor = genAllColorValues(color).hex as types.Hex;
-			colorBox.style.backgroundColor = hexColor.value.hex;
-			populateColorTextOutputBox(color as types.HSL, index + 1);
-		}
-	});
-
-	return colors;
 }

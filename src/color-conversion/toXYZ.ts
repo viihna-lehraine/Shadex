@@ -1,44 +1,45 @@
 import { conversionHelpers } from '../helpers/conversion';
-import * as types from '../index';
+import * as fnObjects from '../index/fn-objects';
+import * as types from '../index/types';
 import { defaults } from '../utils/defaults';
 
-export function cmykToXYZ(cmyk: types.CMYK): types.XYZ {
+function cmykToXYZ(cmyk: types.CMYK): types.XYZ {
 	try {
-		return conversionHelpers.cmykToXYZTryCaseHelper(cmyk);
+		return conversionHelpers.cmykToXYZHelper(cmyk);
 	} catch (error) {
 		console.error(`cmykToXYZ error: ${error}`);
 		return defaults.defaultXYZ();
 	}
 }
 
-export function hexToXYZ(hex: types.Hex): types.XYZ {
+function hexToXYZ(hex: types.Hex): types.XYZ {
 	try {
-		return conversionHelpers.hexToXYZTryCaseHelper(hex);
+		return conversionHelpers.hexToXYZHelper(hex);
 	} catch (error) {
 		console.error(`hexToXYZ error: ${error}`);
 		return defaults.defaultXYZ();
 	}
 }
 
-export function hslToXYZ(hsl: types.HSL): types.XYZ {
+function hslToXYZ(hsl: types.HSL): types.XYZ {
 	try {
-		return conversionHelpers.hslToXYZTryCaseHelper(hsl);
+		return conversionHelpers.hslToXYZHelper(hsl);
 	} catch (error) {
 		console.error(`hslToXYZ error: ${error}`);
 		return defaults.defaultXYZ();
 	}
 }
 
-export function hsvToXYZ(hsv: types.HSV): types.XYZ {
+function hsvToXYZ(hsv: types.HSV): types.XYZ {
 	try {
-		return conversionHelpers.hsvToXYZTryCaseHelper(hsv);
+		return conversionHelpers.hsvToXYZHelper(hsv);
 	} catch (error) {
 		console.error(`hsvToXYZ error: ${error}`);
 		return defaults.defaultXYZ();
 	}
 }
 
-export function labToXYZ(lab: types.LAB): types.XYZ {
+function labToXYZ(lab: types.LAB): types.XYZ {
 	try {
 		const refX = 95.047,
 			refY = 100.0,
@@ -70,7 +71,7 @@ export function labToXYZ(lab: types.LAB): types.XYZ {
 	}
 }
 
-export function rgbToXYZ(rgb: types.RGB): types.XYZ {
+function rgbToXYZ(rgb: types.RGB): types.XYZ {
 	try {
 		rgb.value.red = rgb.value.red / 255;
 		rgb.value.green = rgb.value.green / 255;
@@ -115,3 +116,12 @@ export function rgbToXYZ(rgb: types.RGB): types.XYZ {
 		return defaults.defaultXYZ();
 	}
 }
+
+export const toXYZ: fnObjects.ToXYZ = {
+	cmykToXYZ,
+	hexToXYZ,
+	hslToXYZ,
+	hsvToXYZ,
+	labToXYZ,
+	rgbToXYZ
+};

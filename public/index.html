@@ -57,14 +57,15 @@
                     </div>
                     <div class="ui-row">
                         <div class="popup">
-                            <button id="custom-color-button" class="popup">Custom Color</button>
+                            <button id="custom-color-button" class="popup" type="button">Custom Color</button>
                             <div class="popuptext" id="popup-div">
                                 <div class="popup-div-row">
-                                    <input type="color" id="custom-color-picker" value="#EA5050">
+									<label for="custom-color-picker">Select Custom Color</label>
+                                    <input id="custom-color-picker" value="#EA5050" type="color" >
                                 </div>
                                 <div class="popup-div-row">
-                                    <button id="apply-custom-color-button">Apply</button>
-                                    <button id="clear-custom-color-button">Clear</button>
+                                    <button id="apply-custom-color-button" type="button">Apply</button>
+                                    <button id="clear-custom-color-button" type="button">Clear</button>
                                 </div>
                             </div>
                         </div>
@@ -81,13 +82,13 @@
                         </select>
                     </div>
                     <div class="ui-row">
-                        <button id="saturate-button" class="saturate-desaturate-buttons">Saturate</button>
+                        <button id="saturate-button" class="saturate-desaturate-buttons" type="button">Saturate</button>
                         <button id="generate-button" type="submit">Generate</button>
-                        <button id="desaturate-button" class="saturate-desaturate-buttons">Desaturate</button>
+                        <button id="desaturate-button" class="saturate-desaturate-buttons" type="button">Desaturate</button>
                     </div>
                 </form>
                 <div id="advanced-menu-wrapper">
-                    <button id="advanced-menu-toggle-button" class="advanced-menu-toggle-button">Advanced</button>
+                    <button id="advanced-menu-toggle-button" class="advanced-menu-toggle-button" type="button">Advanced</button>
                     <div id="advanced-menu" class="hidden">
                         <div class="ui-column bordered-ui-div">
                             <form id="initial-colorspace-selection-form">
@@ -103,7 +104,7 @@
                                     </select>
                                 </div>
                                 <div class="ui-row">
-                                    <button id="apply-initial-color-space-button">Apply</button>
+                                    <button id="apply-initial-color-space-button" type="button">Apply</button>
                                 </div>
                             </form>
                         </div>

@@ -1,22 +1,24 @@
-import { random } from '../utils/color-randomizer';
 import { genAllColorValues } from '../color-conversion/conversion';
-import { populateColorTextOutputBox } from '../dom/dom-main';
-import * as types from '../index';
+import { dom } from '../dom/dom-main';
+import * as types from '../index/types';
+import { random } from '../utils/color-randomizer';
 
-export function genTetradicHues(baseHue: number) {
-	const tetradicHues = [];
-	const hue1 = baseHue;
-	const hue2 = (hue1 + 180) % 360;
-	const randomOffset = Math.floor(Math.random() * 46) + 20;
-	const distance = 90 + (Math.random() < 0.5 ? -randomOffset : randomOffset);
-	const hue3 = (hue1 + distance) % 360;
-	const hue4 = (hue3 + 180) % 360;
+export function genTetradicHues(baseHue: number): number[] {
+	try {
+		const randomOffset = Math.floor(Math.random() * 46) + 20;
+		const distance =
+			90 + (Math.random() < 0.5 ? -randomOffset : randomOffset);
 
-	tetradicHues.push(hue1, hue2, hue3, hue4);
-
-	console.log('tetradicHues: ', tetradicHues);
-
-	return tetradicHues;
+		return [
+			baseHue,
+			(baseHue + 180) % 360,
+			(baseHue + distance) % 360,
+			(baseHue + distance + 180) % 360
+		];
+	} catch (error) {
+		console.error(`Error generating tetradic hues: ${error}`);
+		return [];
+	}
 }
 
 export function genTetradicPalette(
@@ -24,98 +26,73 @@ export function genTetradicPalette(
 	customColor: types.Color | null = null,
 	initialColorSpace: types.ColorSpace = 'hex'
 ): types.Color[] {
-	if (numBoxes < 4) {
-		window.alert(
-			'To generate a tetradic palette, please select a number of swatches greater than 3'
-		);
-		return [];
-	}
-
-	const colors: types.Color[] = [];
-	let baseColor: types.Color;
-
-	if (customColor) {
-		baseColor = customColor;
-	} else {
-		const randomColor = random.randomColor(initialColorSpace);
-		const colorValues = genAllColorValues(randomColor);
-
-		baseColor =
-			colorValues[initialColorSpace] ?? Object.values(colorValues)[0];
-
-		if (!baseColor) {
-			throw new Error(
-				`Failed to generate a valid color in ${initialColorSpace}`
+	try {
+		if (numBoxes < 4) {
+			window.alert(
+				'To generate a tetradic palette, please select at least 4 swatches.'
 			);
+			return [];
 		}
-	}
 
-	const tetradicHues = genTetradicHues((baseColor as types.HSL).value.hue);
+		const colors: types.Color[] = [];
+		const baseColor = customColor ?? random.randomColor(initialColorSpace);
 
-	// add the base color
-	colors.push(baseColor);
+		const baseColorValues = genAllColorValues(baseColor);
+		const baseHSL = baseColorValues.hsl as types.HSL;
 
-	// generate main tetradic colors (2-4)
-	tetradicHues.slice(1).forEach(hue => {
-		const {
-			value: { saturation, lightness }
-		} = random.randomSL();
-		const tetradicColor = genAllColorValues({
-			value: {
-				hue,
-				saturation,
-				lightness
-			},
-			format: 'hsl'
-		}).hsl;
-
-		if (tetradicColor) {
-			colors.push(tetradicColor);
+		if (!baseHSL) {
+			throw new Error('Base HSL value is required.');
 		}
-	});
 
-	// generate additional variations if needed
-	while (colors.length < numBoxes) {
-		const baseColorIndex = Math.floor(Math.random() * 4);
-		const baseHue = tetradicHues[baseColorIndex];
-		const hue = (baseHue + Math.floor(Math.random() * 11) - 5 + 360) % 360;
+		colors.push(baseHSL);
 
-		let {
-			value: { saturation, lightness }
-		} = random.randomSL();
+		const tetradicHues = genTetradicHues(baseHSL.value.hue);
 
-		saturation = Math.min(100, Math.max(0, saturation));
-		lightness = Math.min(100, Math.max(0, lightness));
+		// generate the main tetradic colors (hues 2-4)
+		tetradicHues.slice(1).forEach(hue => {
+			const sl = random.randomSL();
+			const colorValues = genAllColorValues({
+				value: { hue, ...sl.value },
+				format: 'hsl'
+			}).hsl;
 
-		const additionalColor = genAllColorValues({
-			value: {
-				hue,
-				saturation,
-				lightness
-			},
-			format: 'hsl'
-		}).hsl;
+			if (colorValues) {
+				colors.push(colorValues);
+			}
+		});
 
-		if (additionalColor) {
-			colors.push(additionalColor);
-		}
-	}
+		// generate additional colors if needed
+		while (colors.length < numBoxes) {
+			const baseHue = tetradicHues[Math.floor(Math.random() * 4)];
+			const hue =
+				(baseHue + Math.floor(Math.random() * 11) - 5 + 360) % 360;
 
-	// update the DOM with generated colors
-	colors.forEach((color, index) => {
-		const colorBox = document.getElementById(`color-box-${index + 1}`);
+			const sl = random.randomSL();
+			const additionalColor = genAllColorValues({
+				value: { hue, ...sl.value },
+				format: 'hsl'
+			}).hsl;
 
-		if (colorBox) {
-			const hexColor = genAllColorValues(color).hex as types.Hex;
-			colorBox.style.backgroundColor = hexColor.value.hex;
-
-			if (color.format === 'hsl') {
-				populateColorTextOutputBox(color as types.HSL, index + 1);
-			} else {
-				console.warn(`Skipping non-HSL color at index ${index + 1}`);
+			if (additionalColor) {
+				colors.push(additionalColor);
 			}
 		}
-	});
 
-	return colors;
+		// update the DOM with generated colors
+		colors.forEach((color, index) => {
+			const colorBox = document.getElementById(`color-box-${index + 1}`);
+
+			if (colorBox) {
+				const hexColor = genAllColorValues(color).hex as types.Hex;
+				colorBox.style.backgroundColor = hexColor.value.hex;
+
+				dom.populateColorTextOutputBox(color, index + 1);
+			}
+		});
+
+		return colors;
+	} catch (error) {
+		console.error(`Error generating tetradic palette: ${error}`);
+		return [];
+	}
 }
