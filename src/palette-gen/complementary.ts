@@ -3,13 +3,28 @@ import { dom } from '../dom/dom-main';
 import { paletteHelpers } from '../helpers/palette';
 import * as types from '../index/types';
 import { random } from '../utils/color-randomizer';
+import { core } from '../utils/core';
 
 export function genComplementaryPalette(
 	numBoxes: number,
-	baseColor: types.Color | null = null,
-	initialColorSpace: types.ColorSpace = 'hex'
+	customColor: types.Color | null = null,
+	colorSpace: types.ColorSpace = 'hex'
 ): types.Color[] {
 	try {
+		let clonedCustomColor: types.Color | null = null;
+
+		if (customColor) {
+			if (!paletteHelpers.validateColorValues(customColor)) {
+				console.error(
+					`Invalid custom color value ${JSON.stringify(customColor)}`
+				);
+
+				return [];
+			}
+
+			clonedCustomColor = core.clone(customColor);
+		}
+
 		if (numBoxes < 2) {
 			window.alert(
 				'To generate a complementary palette, please select a number of swatches greater than 1'
@@ -21,7 +36,7 @@ export function genComplementaryPalette(
 		const colors = [];
 
 		const baseColorValues = genAllColorValues(
-			baseColor ?? random.randomColor(initialColorSpace)
+			clonedCustomColor ?? random.randomColor(colorSpace)
 		);
 		const baseHSL = baseColorValues.hsl as types.HSL;
 
@@ -48,7 +63,7 @@ export function genComplementaryPalette(
 			const complementaryColorValues =
 				genAllColorValues(adjustedHSLColor);
 			const complementaryColor = complementaryColorValues[
-				initialColorSpace
+				colorSpace
 			] as types.Color;
 
 			if (complementaryColor) {
@@ -68,6 +83,10 @@ export function genComplementaryPalette(
 				dom.populateColorTextOutputBox(complementaryColor, i);
 			}
 		}
+
+		console.log(
+			`Generated complementary palette: ${JSON.stringify(colors)}`
+		);
 
 		return colors;
 	} catch (error) {

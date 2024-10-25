@@ -1,37 +1,128 @@
 import { convert } from './conversion-index';
 import { conversionHelpers } from '../helpers/conversion';
+import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
 import * as types from '../index/types';
+import { core } from '../utils/core';
 import { defaults } from '../utils/defaults';
 
 function cmykToHSL(cmyk: types.CMYK): types.HSL {
 	try {
-		const rgb = convert.cmykToRGB(cmyk);
+		if (!paletteHelpers.validateColorValues(cmyk)) {
+			console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
+
+			return core.clone(defaults.defaultHSL());
+		}
+
+		const rgb = convert.cmykToRGB(core.clone(cmyk));
+
 		return rgbToHSL(rgb);
 	} catch (error) {
 		console.error(`cmykToHSL() error: ${error}`);
-		return defaults.defaultHSL();
+
+		return core.clone(defaults.defaultHSL());
 	}
 }
 
 function hexToHSL(hex: types.Hex): types.HSL {
 	try {
-		const rgb = convert.hexToRGB(hex);
+		if (!paletteHelpers.validateColorValues(hex)) {
+			console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
+
+			return core.clone(defaults.defaultHSL());
+		}
+
+		const rgb = convert.hexToRGB(core.clone(hex));
+
 		return rgbToHSL(rgb);
 	} catch (error) {
 		console.error(`hexToHSL() error: ${error}`);
-		return defaults.defaultHSL();
+
+		return core.clone(defaults.defaultHSL());
+	}
+}
+
+function hsvToHSL(hsv: types.HSV): types.HSL {
+	try {
+		if (!paletteHelpers.validateColorValues(hsv)) {
+			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
+
+			return core.clone(defaults.defaultHSL());
+		}
+
+		const clonedHSV = core.clone(hsv);
+
+		const newSaturation =
+			clonedHSV.value.value * (1 - clonedHSV.value.saturation / 100) ===
+				0 || clonedHSV.value.value === 0
+				? 0
+				: (clonedHSV.value.value -
+						clonedHSV.value.value *
+							(1 - clonedHSV.value.saturation / 100)) /
+					Math.min(
+						clonedHSV.value.value,
+						100 - clonedHSV.value.value
+					);
+
+		const lightness =
+			clonedHSV.value.value * (1 - clonedHSV.value.saturation / 200);
+
+		return {
+			value: {
+				hue: Math.round(clonedHSV.value.hue),
+				saturation: Math.round(newSaturation * 100),
+				lightness: Math.round(lightness)
+			},
+			format: 'hsl'
+		};
+	} catch (error) {
+		console.error(`hsvToHSL() error: ${error}`);
+
+		return core.clone(defaults.defaultHSL());
+	}
+}
+
+function labToHSL(lab: types.LAB): types.HSL {
+	try {
+		if (!paletteHelpers.validateColorValues(lab)) {
+			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
+
+			return core.clone(defaults.defaultHSL());
+		}
+
+		const rgb = convert.labToRGB(core.clone(lab));
+		return rgbToHSL(rgb);
+	} catch (error) {
+		console.error(`labToHSL() error: ${error}`);
+
+		return core.clone(defaults.defaultHSL());
 	}
 }
 
 function rgbToHSL(rgb: types.RGB): types.HSL {
 	try {
-		rgb.value.red /= 255;
-		rgb.value.green /= 255;
-		rgb.value.blue /= 255;
+		if (!paletteHelpers.validateColorValues(rgb)) {
+			console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
-		const max = Math.max(rgb.value.red, rgb.value.green, rgb.value.blue);
-		const min = Math.min(rgb.value.red, rgb.value.green, rgb.value.blue);
+			return core.clone(defaults.defaultHSL());
+		}
+
+		const clonedRGB = core.clone(rgb);
+
+		clonedRGB.value.red /= 255;
+		clonedRGB.value.green /= 255;
+		clonedRGB.value.blue /= 255;
+
+		const max = Math.max(
+			clonedRGB.value.red,
+			clonedRGB.value.green,
+			clonedRGB.value.blue
+		);
+		const min = Math.min(
+			clonedRGB.value.red,
+			clonedRGB.value.green,
+			clonedRGB.value.blue
+		);
 
 		let hue = 0,
 			saturation = 0,
@@ -44,16 +135,20 @@ function rgbToHSL(rgb: types.RGB): types.HSL {
 				lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
 
 			switch (max) {
-				case rgb.value.red:
+				case clonedRGB.value.red:
 					hue =
-						(rgb.value.green - rgb.value.blue) / delta +
-						(rgb.value.green < rgb.value.blue ? 6 : 0);
+						(clonedRGB.value.green - clonedRGB.value.blue) / delta +
+						(clonedRGB.value.green < clonedRGB.value.blue ? 6 : 0);
 					break;
-				case rgb.value.green:
-					hue = (rgb.value.blue - rgb.value.red) / delta + 2;
+				case clonedRGB.value.green:
+					hue =
+						(clonedRGB.value.blue - clonedRGB.value.red) / delta +
+						2;
 					break;
-				case rgb.value.blue:
-					hue = (rgb.value.red - rgb.value.green) / delta + 4;
+				case clonedRGB.value.blue:
+					hue =
+						(clonedRGB.value.red - clonedRGB.value.green) / delta +
+						4;
 					break;
 			}
 			hue *= 60;
@@ -69,53 +164,24 @@ function rgbToHSL(rgb: types.RGB): types.HSL {
 		};
 	} catch (error) {
 		console.error(`rgbToHSL() error: ${error}`);
-		return defaults.defaultHSL();
-	}
-}
 
-function hsvToHSL(hsv: types.HSV): types.HSL {
-	try {
-		const newSaturation =
-			hsv.value.value * (1 - hsv.value.saturation / 100) === 0 ||
-			hsv.value.value === 0
-				? 0
-				: (hsv.value.value -
-						hsv.value.value * (1 - hsv.value.saturation / 100)) /
-					Math.min(hsv.value.value, 100 - hsv.value.value);
-
-		const lightness = hsv.value.value * (1 - hsv.value.saturation / 200);
-
-		return {
-			value: {
-				hue: Math.round(hsv.value.hue),
-				saturation: Math.round(newSaturation * 100),
-				lightness: Math.round(lightness)
-			},
-			format: 'hsl'
-		};
-	} catch (error) {
-		console.error(`hsvToHSL() error: ${error}`);
-		return defaults.defaultHSL();
-	}
-}
-
-function labToHSL(lab: types.LAB): types.HSL {
-	try {
-		const rgb = convert.labToRGB(lab);
-		return rgbToHSL(rgb);
-	} catch (error) {
-		console.error(`labToHSL() error: ${error}`);
-		return defaults.defaultHSL();
+		return core.clone(defaults.defaultHSL());
 	}
 }
 
 function xyzToHSL(xyz: types.XYZ): types.HSL {
 	try {
-		const hsl = conversionHelpers.xyzToHSLHelper(xyz);
-		return hsl;
+		if (!paletteHelpers.validateColorValues(xyz)) {
+			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
+
+			return core.clone(defaults.defaultHSL());
+		}
+
+		return conversionHelpers.xyzToHSLHelper(core.clone(xyz));
 	} catch (error) {
 		console.error(`xyzToHSL() error: ${error}`);
-		return defaults.defaultHSL();
+
+		return core.clone(defaults.defaultHSL());
 	}
 }
 

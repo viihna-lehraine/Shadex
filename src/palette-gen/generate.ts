@@ -1,14 +1,44 @@
 import { genAllColorValues } from '../color-conversion/conversion';
 import { dom } from '../dom/dom-main';
 import { domHelpers } from '../helpers/dom';
+import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
 import * as types from '../index/types';
 import { palette } from './palette-index';
 import { random } from '../utils/color-randomizer';
+import { core } from '../utils/core';
+import { transforms } from '../utils/transforms';
 import { guards } from '../utils/type-guards';
 
-function genPaletteBox(numBoxes: number, colors: types.Color[]): void {
+function genPaletteBox(
+	colors: types.Color[] | types.ColorString,
+	numBoxes: number
+): void {
 	try {
+		const normalizedColors: types.Color[] = Array.isArray(colors)
+			? colors.map(color =>
+					core.clone(
+						guards.isColorString(color)
+							? transforms.colorStringToColor(color)
+							: color
+					)
+				)
+			: [];
+		const areAllColorsValid = normalizedColors.every((color, index) => {
+			if (!paletteHelpers.validateColorValues(color)) {
+				console.error(
+					`Invalid color at index ${index}: ${JSON.stringify(color)}`
+				);
+				return false;
+			}
+			return true;
+		});
+
+		if (!areAllColorsValid) {
+			console.error('One or more colors are invalid.');
+			return;
+		}
+
 		const paletteRow = document.getElementById('palette-row');
 
 		if (!paletteRow) {
@@ -16,47 +46,51 @@ function genPaletteBox(numBoxes: number, colors: types.Color[]): void {
 			return;
 		}
 
-		paletteRow.innerHTML = ''; // clear the row
+		paletteRow.innerHTML = '';
 		let paletteBoxCount = 1;
 
 		for (let i = 0; i < numBoxes; i++) {
-			const color = colors[i];
+			const clonedColor = normalizedColors[i];
 
-			if (!color) {
+			if (!clonedColor) {
 				console.warn(`Color at index ${i} is undefined.`);
 				continue;
 			}
 
 			console.log(
-				`Color at index ${i} being processed is: ${JSON.stringify(color.value)} in ${color.format}`
+				`Processing color at index ${i}: ${JSON.stringify(clonedColor.value)} in ${clonedColor.format}`
 			);
-			const colorValues = genAllColorValues(color);
-			console.log(
-				`Generated color values: ${JSON.stringify(colorValues)}`
-			);
-			const originalColorFormat = color.format as types.ColorSpace;
 
-			if (!guards.isFormat(originalColorFormat)) {
+			const clonedColorValues = genAllColorValues(clonedColor);
+			console.log(
+				`Generated color values: ${JSON.stringify(clonedColorValues)}`
+			);
+
+			const clonedOriginalColorFormat =
+				clonedColor.format as types.ColorSpace;
+
+			if (!guards.isFormat(clonedOriginalColorFormat)) {
 				console.warn(
-					`Skipping unsupported color format: ${originalColorFormat}`
+					`Skipping unsupported color format: ${clonedOriginalColorFormat}`
 				);
 				continue;
 			}
 
-			const originalColorValue = colorValues[originalColorFormat];
+			const clonedOriginalColorValue =
+				clonedColorValues[clonedOriginalColorFormat];
 
-			if (!originalColorValue) {
+			if (!clonedOriginalColorValue) {
 				throw new Error(
-					`Failed to generate color data for format ${originalColorFormat}`
+					`Failed to generate color data for format ${clonedOriginalColorFormat}`
 				);
 			}
 
 			const { colorStripe, paletteBoxCount: newPaletteBoxCount } =
-				domHelpers.makePaletteBox(color, paletteBoxCount);
+				domHelpers.makePaletteBox(clonedColor, paletteBoxCount);
 
 			paletteRow.appendChild(colorStripe);
 
-			dom.populateColorTextOutputBox(color, paletteBoxCount);
+			dom.populateColorTextOutputBox(clonedColor, paletteBoxCount);
 
 			paletteBoxCount = newPaletteBoxCount;
 		}
@@ -68,77 +102,121 @@ function genPaletteBox(numBoxes: number, colors: types.Color[]): void {
 function genSelectedPaletteType(
 	paletteType: number,
 	numBoxes: number,
-	baseColor: types.Color,
-	customColor: types.Color | null = null,
-	initialColorSpace: types.ColorSpace = 'hex'
+	baseColor: types.Color | types.ColorString,
+	customColor: types.Color | types.ColorString | null = null,
+	colorSpace: types.ColorSpace = 'hex'
 ): types.Color[] {
 	try {
+		const validatedBaseColor = guards.isColor(baseColor)
+			? baseColor
+			: transforms.colorStringToColor(baseColor);
+
+		if (!paletteHelpers.validateColorValues(validatedBaseColor)) {
+			console.error(
+				`Invalid base color: ${JSON.stringify(validatedBaseColor)}`
+			);
+
+			return [];
+		}
+
+		const validatedCustomColor = customColor
+			? guards.isColor(customColor)
+				? customColor
+				: transforms.colorStringToColor(customColor)
+			: null;
+
+		if (
+			validatedCustomColor &&
+			!paletteHelpers.validateColorValues(validatedCustomColor)
+		) {
+			console.error(
+				`Invalid custom color value ${JSON.stringify(validatedCustomColor)}`
+			);
+
+			return [];
+		}
+
+		const validatedBaseColorClone = core.clone(validatedBaseColor);
+		const validatedCustomColorClone = validatedCustomColor
+			? core.clone(validatedCustomColor)
+			: null;
+
 		switch (paletteType) {
 			case 1:
 				console.log('Generating random palette');
 				return palette.genRandomPalette(
 					numBoxes,
-					customColor,
-					initialColorSpace
+					validatedCustomColorClone,
+					colorSpace
 				);
+
 			case 2:
 				console.log('Generating complementary palette');
 				return palette.genComplementaryPalette(
 					numBoxes,
-					baseColor,
-					initialColorSpace
+					validatedCustomColorClone,
+					colorSpace
 				);
+
 			case 3:
 				console.log('Generating triadic palette');
 				return palette.genTriadicPalette(
 					numBoxes,
-					baseColor,
-					initialColorSpace
+					validatedBaseColorClone,
+					colorSpace
 				);
+
 			case 4:
 				console.log('Generating tetradic palette');
 				return palette.genTetradicPalette(
 					numBoxes,
-					baseColor,
-					initialColorSpace
+					validatedBaseColorClone,
+					colorSpace
 				);
+
 			case 5:
 				console.log('Generating split complementary palette');
 				return palette.genSplitComplementaryPalette(
 					numBoxes,
-					baseColor,
-					initialColorSpace
+					validatedBaseColorClone,
+					colorSpace
 				);
+
 			case 6:
 				console.log('Generating analogous palette');
 				return palette.genAnalogousPalette(
 					numBoxes,
-					baseColor,
-					initialColorSpace
+					validatedBaseColorClone,
+					colorSpace
 				);
+
 			case 7:
 				console.log('Generating hexadic palette');
 				return palette.genHexadicPalette(
 					numBoxes,
-					baseColor,
-					initialColorSpace
+					validatedBaseColorClone,
+					colorSpace
 				);
+
 			case 8:
 				console.log('Generating diadic palette');
 				return palette.genDiadicPalette(
 					numBoxes,
-					baseColor,
-					initialColorSpace
+					validatedBaseColorClone,
+					colorSpace
 				);
+
 			case 9:
 				console.log('Generating monochromatic palette');
 				return palette.genMonochromaticPalette(
 					numBoxes,
-					baseColor,
-					initialColorSpace
+					validatedBaseColorClone,
+					colorSpace
 				);
+
 			default:
 				console.error('Unable to determine color scheme');
+
 				return [];
 		}
 	} catch (error) {
@@ -150,29 +228,42 @@ function genSelectedPaletteType(
 function startPaletteGen(
 	paletteType: number,
 	numBoxes: number,
-	initialColorSpace: types.ColorSpace = 'hex',
-	customColor: types.Color | null
+	colorSpace: types.ColorSpace = 'hex',
+	customColor: types.Color | types.ColorString | null
 ): void {
 	try {
-		const baseColor: types.Color =
-			customColor ?? random.randomColor(initialColorSpace);
+		const clonedCustomColor = customColor ? core.clone(customColor) : null;
+		const validatedCustomColorClone: types.Color = clonedCustomColor
+			? guards.isColor(clonedCustomColor)
+				? clonedCustomColor
+				: transforms.colorStringToColor(clonedCustomColor)
+			: random.randomColor(colorSpace);
 
+		const baseColor: types.Color =
+			validatedCustomColorClone ?? random.randomColor(colorSpace);
+		const clonedBaseColor = core.clone(baseColor);
 		const colors: types.Color[] = genSelectedPaletteType(
 			paletteType,
 			numBoxes,
-			baseColor,
-			customColor,
-			initialColorSpace
+			clonedBaseColor,
+			validatedCustomColorClone,
+			colorSpace
 		);
+		const clonedColors = core.clone(colors);
 
 		if (colors.length === 0) {
 			console.error('Colors array is empty or undefined.');
+
 			return;
 		} else {
 			console.log(`Colors array: ${JSON.stringify(colors)}`);
 		}
 
-		genPaletteBox(numBoxes, colors);
+		console.log(
+			`Calling genPaletteBox with clonedColors ${JSON.stringify(clonedColors)} and numBoxes ${numBoxes}`
+		);
+
+		genPaletteBox(clonedColors, numBoxes);
 	} catch (error) {
 		console.error(`Error starting palette generation: ${error}`);
 	}

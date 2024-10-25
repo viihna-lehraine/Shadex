@@ -1,17 +1,26 @@
 import { genAllColorValues } from '../color-conversion/conversion';
 import { conversionHelpers } from '../helpers/conversion';
+import { paletteHelpers } from '../helpers/palette';
 import * as types from '../index/types';
 import { random } from '../utils/color-randomizer';
+import { core } from '../utils/core';
 
 export function genAnalogousHues(
 	color: types.Color,
 	numBoxes: number
 ): number[] {
 	try {
+		if (!paletteHelpers.validateColorValues(color)) {
+			console.error(`Invalid color value ${JSON.stringify(color)}`);
+
+			return [];
+		}
+
+		const clonedColor = core.clone(color);
 		const hslColor =
-			color.format === 'hsl'
-				? (color as types.HSL)
-				: conversionHelpers.convertColorToHSL(color);
+			clonedColor.format === 'hsl'
+				? (clonedColor as types.HSL)
+				: conversionHelpers.convertColorToHSL(clonedColor);
 
 		if (!hslColor) {
 			console.error(`Failed to retrieve HSL color from ${color.format}`);
@@ -42,9 +51,23 @@ export function genAnalogousHues(
 export function genAnalogousPalette(
 	numBoxes: number,
 	customColor: types.Color | null = null,
-	initialColorSpace: types.ColorSpace = 'hex'
+	colorSpace: types.ColorSpace = 'hex'
 ): types.Color[] {
 	try {
+		let clonedCustomColor: types.Color | null = null;
+
+		if (customColor) {
+			if (!paletteHelpers.validateColorValues(customColor)) {
+				console.error(
+					`Invalid custom color value ${JSON.stringify(customColor)}`
+				);
+
+				return [];
+			}
+
+			clonedCustomColor = core.clone(customColor);
+		}
+
 		if (numBoxes < 2) {
 			window.alert(
 				'To generate an analogous palette, please select a number of swatches greater than 1'
@@ -54,13 +77,13 @@ export function genAnalogousPalette(
 		}
 
 		const colors: types.Color[] = [];
-		const baseColorValues = customColor
-			? genAllColorValues(customColor)
-			: genAllColorValues(random.randomColor(initialColorSpace));
-		const baseColor = baseColorValues[initialColorSpace];
+		const baseColorValues = clonedCustomColor
+			? genAllColorValues(clonedCustomColor)
+			: genAllColorValues(random.randomColor(colorSpace));
+		const baseColor = baseColorValues[colorSpace];
 
 		if (!baseColor) {
-			throw new Error('Base color is missin in the generated values');
+			throw new Error('Base color is missing in the generated values');
 		}
 
 		colors.push(baseColor);
@@ -99,9 +122,12 @@ export function genAnalogousPalette(
 			}
 		});
 
+		console.log(`Generated analogous palette: ${JSON.stringify(colors)}`);
+
 		return colors;
 	} catch (error) {
 		console.error(`Error generating analogous palette: ${error}`);
+
 		return [];
 	}
 }

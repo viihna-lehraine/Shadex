@@ -1,106 +1,224 @@
 import { convert } from '../../color-conversion/conversion-index';
 import { config } from '../../config/constants';
+import { paletteHelpers } from '../../helpers/palette';
 import * as fnObjects from '../../index/fn-objects';
 import * as interfaces from '../../index/interfaces';
 import * as types from '../../index/types';
+import { core } from '../../utils/core';
 
 function isCMYKTooBright(cmyk: types.CMYK): boolean {
+	if (!paletteHelpers.validateColorValues(cmyk)) {
+		console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
+
+		return false;
+	}
+
 	return (
-		cmyk.value.cyan < config.cmykBrightnessThreshold &&
-		cmyk.value.magenta < config.cmykBrightnessThreshold &&
-		cmyk.value.yellow < config.cmykBrightnessThreshold
+		core.clone(cmyk).value.cyan < config.cmykBrightnessThreshold &&
+		core.clone(cmyk).value.magenta < config.cmykBrightnessThreshold &&
+		core.clone(cmyk).value.yellow < config.cmykBrightnessThreshold
 	);
 }
 
 export function isCMYKTooDark(cmyk: types.CMYK): boolean {
-	return cmyk.value.key > config.cmykDarknessThreshold;
+	if (!paletteHelpers.validateColorValues(cmyk)) {
+		console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
+
+		return false;
+	}
+
+	return core.clone(cmyk).value.key > config.cmykDarknessThreshold;
 }
 
 function isCMYKTooGray(cmyk: types.CMYK): boolean {
+	if (!paletteHelpers.validateColorValues(cmyk)) {
+		console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
+
+		return false;
+	}
+
 	return (
-		Math.abs(cmyk.value.cyan - cmyk.value.magenta) <
+		Math.abs(core.clone(cmyk).value.cyan - core.clone(cmyk).value.magenta) <
 			config.cmykGrayThreshold &&
-		Math.abs(cmyk.value.magenta - cmyk.value.yellow) <
-			config.cmykGrayThreshold
+		Math.abs(
+			core.clone(cmyk).value.magenta - core.clone(cmyk).value.yellow
+		) < config.cmykGrayThreshold
 	);
 }
 
 function isHexTooBright(hex: types.Hex): boolean {
-	const rgb = convert.hexToRGB(hex);
-	return isRGBTooBright(rgb);
+	if (!paletteHelpers.validateColorValues(hex)) {
+		console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
+
+		return false;
+	}
+
+	return isRGBTooBright(convert.hexToRGB(core.clone(hex)));
 }
 
 function isHexTooDark(hex: types.Hex): boolean {
-	const rgb = convert.hexToRGB(hex);
-	return isRGBTooDark(rgb);
+	if (!paletteHelpers.validateColorValues(hex)) {
+		console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
+
+		return false;
+	}
+
+	return isRGBTooBright(convert.hexToRGB(core.clone(hex)));
 }
 
 function isHexTooGray(hex: types.Hex): boolean {
-	const rgb = convert.hexToRGB(hex);
-	return isRGBTooGray(rgb);
+	if (!paletteHelpers.validateColorValues(hex)) {
+		console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
+
+		return false;
+	}
+
+	return isRGBTooGray(convert.hexToRGB(core.clone(hex)));
 }
 
 function isHSLTooBright(hsl: types.HSL): boolean {
-	return hsl.value.lightness > config.hslBrightnessThreshold;
+	if (!paletteHelpers.validateColorValues(hsl)) {
+		console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+
+		return false;
+	}
+
+	return core.clone(hsl).value.lightness > config.hslBrightnessThreshold;
 }
 
 function isHSLTooDark(hsl: types.HSL): boolean {
-	return hsl.value.lightness < config.hslDarknessThreshold;
+	if (!paletteHelpers.validateColorValues(hsl)) {
+		console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+
+		return false;
+	}
+
+	return core.clone(hsl).value.lightness < config.hslDarknessThreshold;
 }
 
 function isHSLTooGray(hsl: types.HSL): boolean {
-	return hsl.value.saturation < config.hslGrayThreshold;
+	if (!paletteHelpers.validateColorValues(hsl)) {
+		console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+
+		return false;
+	}
+
+	return core.clone(hsl).value.saturation < config.hslGrayThreshold;
 }
 
 function isHSVTooBright(hsv: types.HSV): boolean {
+	if (!paletteHelpers.validateColorValues(hsv)) {
+		console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
+
+		return false;
+	}
+
 	return (
-		hsv.value.value > config.hsvBrightnessValueThreshold &&
-		hsv.value.saturation < config.hsvBrightnessSaturationThreshold
+		core.clone(hsv).value.value > config.hsvBrightnessValueThreshold &&
+		core.clone(hsv).value.saturation <
+			config.hsvBrightnessSaturationThreshold
 	);
 }
 
 function isHSVTooDark(hsv: types.HSV): boolean {
-	return hsv.value.value < config.hsvDarknessThreshold;
+	if (!paletteHelpers.validateColorValues(hsv)) {
+		console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
+
+		return false;
+	}
+
+	return core.clone(hsv).value.value < config.hsvDarknessThreshold;
 }
 
 function isHSVTooGray(hsv: types.HSV): boolean {
-	return hsv.value.saturation < config.hsvGrayThreshold;
+	if (!paletteHelpers.validateColorValues(hsv)) {
+		console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
+
+		return false;
+	}
+
+	return core.clone(hsv).value.saturation < config.hsvGrayThreshold;
 }
 
 function isLABTooBright(lab: types.LAB): boolean {
-	return lab.value.l > config.labBrightnessThreshold;
+	if (!paletteHelpers.validateColorValues(lab)) {
+		console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
+
+		return false;
+	}
+
+	return core.clone(lab).value.l > config.labBrightnessThreshold;
 }
 
 function isLABTooDark(lab: types.LAB): boolean {
-	return lab.value.l < config.labDarknessThreshold;
+	if (!paletteHelpers.validateColorValues(lab)) {
+		console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
+
+		return false;
+	}
+
+	return core.clone(lab).value.l < config.labDarknessThreshold;
 }
 
 function isLABTooGray(lab: types.LAB): boolean {
+	if (!paletteHelpers.validateColorValues(lab)) {
+		console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
+
+		return false;
+	}
+
 	return (
-		Math.abs(lab.value.a) < config.labGrayThreshold &&
-		Math.abs(lab.value.b) < config.labGrayThreshold
+		Math.abs(core.clone(lab).value.a) < config.labGrayThreshold &&
+		Math.abs(core.clone(lab).value.b) < config.labGrayThreshold
 	);
 }
 
 function isRGBTooBright(rgb: types.RGB): boolean {
+	if (!paletteHelpers.validateColorValues(rgb)) {
+		console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+
+		return false;
+	}
+
 	return (
-		(rgb.value.red + rgb.value.green + rgb.value.blue) / 3 >
+		(core.clone(rgb).value.red +
+			core.clone(rgb).value.green +
+			core.clone(rgb).value.blue) /
+			3 >
 		config.rgbMaxBrightness
 	);
 }
 
 function isRGBTooDark(rgb: types.RGB): boolean {
+	if (!paletteHelpers.validateColorValues(rgb)) {
+		console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+
+		return false;
+	}
+
 	return (
-		(rgb.value.red + rgb.value.green + rgb.value.blue) / 3 <
+		(core.clone(rgb).value.red +
+			core.clone(rgb).value.green +
+			core.clone(rgb).value.blue) /
+			3 <
 		config.rgbMinBrightness
 	);
 }
 
 function isRGBTooGray(rgb: types.RGB): boolean {
+	if (!paletteHelpers.validateColorValues(rgb)) {
+		console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+
+		return false;
+	}
+
 	return (
-		Math.abs(rgb.value.red - rgb.value.green) < config.rgbGrayThreshold &&
-		Math.abs(rgb.value.green - rgb.value.blue) < config.rgbGrayThreshold &&
-		Math.abs(rgb.value.red - rgb.value.blue) < config.rgbGrayThreshold
+		Math.abs(core.clone(rgb).value.red - core.clone(rgb).value.green) <
+			config.rgbGrayThreshold &&
+		Math.abs(core.clone(rgb).value.green - core.clone(rgb).value.blue) <
+			config.rgbGrayThreshold &&
+		Math.abs(core.clone(rgb).value.red - core.clone(rgb).value.blue) <
+			config.rgbGrayThreshold
 	);
 }
 
@@ -112,6 +230,20 @@ function getLimitChecker<K extends keyof fnObjects.ColorLimits>(
 
 function isColorInBounds(colors: interfaces.ConversionData): boolean {
 	try {
+		const areAllColorsValid = Object.entries(colors).every(
+			([key, color]) => {
+				if (!paletteHelpers.validateColorValues(color)) {
+					console.error(
+						`Invalid color (${key}): ${JSON.stringify(color)}`
+					);
+					return false;
+				}
+				return true;
+			}
+		);
+
+		if (!areAllColorsValid) return false;
+
 		return Object.entries(colors).some(([key, color]) => {
 			if (!color) return false;
 
@@ -131,6 +263,7 @@ function isColorInBounds(colors: interfaces.ConversionData): boolean {
 		});
 	} catch (error) {
 		console.error(`Error validating color bounds: ${error}`);
+
 		return false;
 	}
 }

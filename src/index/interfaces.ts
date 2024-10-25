@@ -1,10 +1,23 @@
 import * as types from './types';
 
+export interface Adjustments {
+	adjustSLAmount: number;
+}
+
 export interface AppStorage {
 	customColor?: types.Color | null;
-	initialColorSpace?: types.ColorSpace;
+	colorSpace?: types.ColorSpace;
 	theme?: string;
 	[key: string]: unknown;
+}
+
+export interface Boundaries {
+	xyzMaxX: number;
+	xyzMaxY: number;
+	xyzMaxZ: number;
+	xyzMinX: number;
+	xyzMinY: number;
+	xyzMinZ: number;
 }
 
 export interface ColorData {
@@ -17,31 +30,21 @@ export interface ColorData {
 	xyz?: types.XYZ;
 }
 
+export interface Debounce {
+	buttonDebounce: number;
+	inputDebounce: number;
+}
+
 export interface ColorInputElement extends HTMLInputElement {
 	colorValues?: types.Color;
 }
 
-export interface Config {
-	adjustSLAmount: number;
-	cmykBrightnessThreshold: number;
-	cmykDarknessThreshold: number;
-	cmykGrayThreshold: number;
-	hslBrightnessThreshold: number;
-	hslDarknessThreshold: number;
-	hslGrayThreshold: number;
-	hsvBrightnessValueThreshold: number;
-	hsvBrightnessSaturationThreshold: number;
-	hsvDarknessThreshold: number;
-	hsvGrayThreshold: number;
-	labBrightnessThreshold: number;
-	labDarknessThreshold: number;
-	labGrayThreshold: number;
-	rgbMaxBrightness: number;
-	rgbMinBrightness: number;
-	rgbGrayThreshold: number;
-	probabilities: number[];
-	weights: number[];
-}
+export type Config = Adjustments &
+	Boundaries &
+	Debounce &
+	ProbabilityConstants &
+	Thresholds &
+	Timeouts;
 
 export interface ConversionData {
 	cmyk: types.CMYK;
@@ -60,7 +63,7 @@ export interface Flags {
 export interface GenButtonParams {
 	numBoxes: number;
 	paletteType: number;
-	initialColorSpace: types.ColorSpace;
+	colorSpace: types.ColorSpace;
 	customColor: types.Color | null;
 }
 
@@ -75,10 +78,24 @@ export interface MakePaletteBox {
 	paletteBoxCount: number;
 }
 
+export interface ProbabilityConstants {
+	probabilities: number[];
+	weights: number[];
+}
+
 export interface PullParamsFromUI {
 	paletteType: number;
 	numBoxes: number;
-	initialColorSpace: types.ColorSpace | undefined;
+	colorSpace: types.ColorSpace | undefined;
+}
+
+export interface StorageInterface {
+	clearStorage(): void;
+	getAppStorage(): AppStorage | null;
+	getCookie<T>(name: string): T | null;
+	setAppStorage(value: AppStorage): void;
+	setCookie<T>(name: string, value: T, days: number): void;
+	updateAppStorage(updates: Partial<AppStorage>): void;
 }
 
 export interface UIButtons {
@@ -89,15 +106,31 @@ export interface UIButtons {
 	applyCustomColorButton: HTMLElement | null;
 	clearCustomColorButton: HTMLElement | null;
 	advancedMenuToggleButton: HTMLElement | null;
-	applyInitialColorSpaceButton: HTMLElement | null;
+	applyColorSpaceButton: HTMLElement | null;
 	selectedColor: number;
 }
 
-export interface StorageInterface {
-	clearStorage(): void;
-	getAppStorage(): AppStorage | null;
-	getCookie<T>(name: string): T | null;
-	setAppStorage(value: AppStorage): void;
-	setCookie<T>(name: string, value: T, days: number): void;
-	updateAppStorage(updates: Partial<AppStorage>): void;
+export interface Thresholds {
+	cmykBrightnessThreshold: number;
+	cmykDarknessThreshold: number;
+	cmykGrayThreshold: number;
+	hslBrightnessThreshold: number;
+	hslDarknessThreshold: number;
+	hslGrayThreshold: number;
+	hsvBrightnessValueThreshold: number;
+	hsvBrightnessSaturationThreshold: number;
+	hsvDarknessThreshold: number;
+	hsvGrayThreshold: number;
+	labBrightnessThreshold: number;
+	labDarknessThreshold: number;
+	labGrayThreshold: number;
+	rgbMaxBrightness: number;
+	rgbMinBrightness: number;
+	rgbGrayThreshold: number;
+}
+
+export interface Timeouts {
+	copyButtonTextTimeout: number;
+	toastTimeout: number;
+	tooltipTimeout: number;
 }

@@ -1,9 +1,22 @@
 import { conversionMap } from '../color-conversion/conversion';
 import * as interfaces from './interfaces';
 
-export type Color = CMYK | Hex | HSL | HSV | LAB | RGB | XYZ;
+export type Color = CMYK | Hex | HSL | HSV | LAB | RGB | SL | SV | XYZ;
+
+export type ColorPartial = SL | SV;
 
 export type ColorSpace = 'cmyk' | 'hex' | 'hsl' | 'hsv' | 'lab' | 'rgb';
+
+export type ColorSpaceExtended = ColorSpace | 'sl' | 'sv';
+
+export type ColorString =
+	| CMYKString
+	| HSLString
+	| HSVString
+	| SLString
+	| SVString;
+
+export type ColorStringExtended = ColorString | Hex | LAB | RGB | XYZ;
 
 export type ConversionFunction<From, To> = (input: From) => To;
 
@@ -80,6 +93,37 @@ export type XYZValue = {
 	z: number;
 };
 
+// ***** Color Values (relevant props as strings, will have leading '%' character) *****
+
+export type CMYKValueString = {
+	cyan: string;
+	magenta: string;
+	yellow: string;
+	key: string;
+};
+
+export type HSLValueString = {
+	hue: number;
+	saturation: string;
+	lightness: string;
+};
+
+export type HSVValueString = {
+	hue: number;
+	saturation: string;
+	value: string;
+};
+
+export type SLValueString = {
+	saturation: string;
+	lightness: string;
+};
+
+export type SVValueString = {
+	saturation: string;
+	value: string;
+};
+
 // ***** Colors *****
 
 export type CMYK = {
@@ -125,4 +169,31 @@ export type SV = {
 export type XYZ = {
 	value: XYZValue;
 	format: 'xyz';
+};
+
+// ***** Colors with String Values *****
+
+export type CMYKString = {
+	value: CMYKValueString;
+	format: 'cmyk';
+};
+
+export type HSLString = {
+	value: HSLValueString;
+	format: 'hsl';
+};
+
+export type HSVString = {
+	value: HSVValueString;
+	format: 'hsv';
+};
+
+export type SLString = {
+	value: SLValueString;
+	format: 'sl';
+};
+
+export type SVString = {
+	value: SVValueString;
+	format: 'sv';
 };

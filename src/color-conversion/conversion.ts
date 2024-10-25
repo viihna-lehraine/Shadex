@@ -1,7 +1,9 @@
 import { convert } from './conversion-index';
+import { paletteHelpers } from '../helpers/palette';
 import { wrappers } from '../helpers/wrappers';
 import * as interfaces from '../index/interfaces';
 import * as types from '../index/types';
+import { core } from '../utils/core';
 
 export function getConversionFn<
 	From extends keyof interfaces.ConversionData,
@@ -33,7 +35,7 @@ export function getConversionFn<
 	}
 }
 
-export const conversionMap: types.ConversionMap = structuredClone({
+export const conversionMap: types.ConversionMap = core.clone({
 	cmyk: {
 		hex: convert.cmykToHex,
 		hsl: convert.cmykToHSL,
@@ -98,7 +100,13 @@ export function genAllColorValues(
 	const result: Partial<interfaces.ColorData> = {};
 
 	try {
-		const clonedColor = structuredClone(color);
+		const clonedColor = core.clone(color);
+
+		if (!paletteHelpers.validateColorValues(clonedColor)) {
+			console.error(`Invalid color: ${JSON.stringify(clonedColor)}`);
+
+			return {};
+		}
 
 		switch (clonedColor.format) {
 			case 'cmyk':
@@ -151,7 +159,7 @@ export function genAllColorValues(
 				break;
 		}
 
-		return structuredClone(result);
+		return core.clone(result);
 	} catch (error) {
 		console.error(`Error generating all color values: ${error}`);
 		return {};

@@ -1,7 +1,10 @@
+import { config } from '../config/constants';
 import { dragAndDrop } from '../dom/drag-and-drop';
+import { paletteHelpers } from './palette';
 import * as fnObjects from '../index/fn-objects';
 import * as interfaces from '../index/interfaces';
 import * as types from '../index/types';
+import { core } from '../utils/core';
 import { transforms } from '../utils/transforms';
 
 function attachDragAndDropEventListeners(element: HTMLElement | null): void {
@@ -12,6 +15,8 @@ function attachDragAndDropEventListeners(element: HTMLElement | null): void {
 			element.addEventListener('drop', dragAndDrop.handleDrop);
 			element.addEventListener('dragend', dragAndDrop.handleDragEnd);
 		}
+
+		console.log('Drag and drop event listeners successfully attached');
 	} catch (error) {
 		console.error(
 			`Failed to execute attachDragAndDropEventListeners: ${error}`
@@ -28,12 +33,23 @@ function makePaletteBox(
 	paletteBoxCount: number
 ): interfaces.MakePaletteBox {
 	try {
-		// create main palette-box element
+		if (!paletteHelpers.validateColorValues(color)) {
+			console.error(
+				`Invalid ${color.format} color value ${JSON.stringify(color)}`
+			);
+
+			return {
+				colorStripe: document.createElement('div'),
+				paletteBoxCount
+			};
+		}
+
+		const clonedColor = core.clone(color);
+
 		const paletteBox = document.createElement('div');
 		paletteBox.className = 'palette-box';
 		paletteBox.id = `palette-box-${paletteBoxCount}`;
 
-		// create top half of palette box
 		const paletteBoxTopHalf = document.createElement('div');
 		paletteBoxTopHalf.className = 'palette-box-half palette-box-top-half';
 		paletteBoxTopHalf.id = `palette-box-top-half-${paletteBoxCount}`;
@@ -46,18 +62,10 @@ function makePaletteBox(
 		colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
 		colorTextOutputBox.setAttribute('data-format', 'hex');
 
-		const colorString = transforms.getCSSColorString(color);
+		const colorString = transforms.getCSSColorString(clonedColor);
 
-		if (colorString) {
-			colorTextOutputBox.value = colorString;
-		} else {
-			console.warn(
-				`Failed to generate color string for box #${paletteBoxCount}`
-			);
-			colorTextOutputBox.value = '';
-		}
-
-		colorTextOutputBox.colorValues = color; // store color values
+		colorTextOutputBox.value = colorString || '';
+		colorTextOutputBox.colorValues = clonedColor;
 		colorTextOutputBox.readOnly = false;
 		colorTextOutputBox.style.cursor = 'text';
 		colorTextOutputBox.style.pointerEvents = 'none';
@@ -74,30 +82,38 @@ function makePaletteBox(
 			try {
 				await navigator.clipboard.writeText(colorTextOutputBox.value);
 				domHelpers.showTooltip(colorTextOutputBox);
+
+				clearTimeout(config.tooltipTimeout || 1000);
+
 				copyButton.textContent = 'Copied!';
-				setTimeout(() => (copyButton.textContent = 'Copy'), 1000);
+				setTimeout(
+					() => (copyButton.textContent = 'Copy'),
+					config.copyButtonTextTimeout || 1000
+				);
 			} catch (error) {
 				console.error(`Failed to copy: ${error}`);
 			}
 		});
 
-		colorTextOutputBox.addEventListener('input', e => {
-			const target = e.target as HTMLInputElement | null;
+		colorTextOutputBox.addEventListener(
+			'input',
+			core.debounce((e: Event) => {
+				const target = e.target as HTMLInputElement | null;
+				if (target) {
+					const cssColor = target.value.trim();
+					const boxElement = document.getElementById(
+						`color-box-${paletteBoxCount}`
+					);
+					const stripeElement = document.getElementById(
+						`color-stripe-${paletteBoxCount}`
+					);
 
-			if (target) {
-				const cssColor = target.value.trim();
-				const boxElement = document.getElementById(
-					`color-box-${paletteBoxCount}`
-				);
-				const stripeElement = document.getElementById(
-					`color-stripe-${paletteBoxCount}`
-				);
-
-				if (boxElement) boxElement.style.backgroundColor = cssColor;
-				if (stripeElement)
-					stripeElement.style.backgroundColor = cssColor;
-			}
-		});
+					if (boxElement) boxElement.style.backgroundColor = cssColor;
+					if (stripeElement)
+						stripeElement.style.backgroundColor = cssColor;
+				}
+			}, config.inputDebounce || 200)
+		);
 
 		paletteBoxTopHalf.appendChild(colorTextOutputBox);
 		paletteBoxTopHalf.appendChild(copyButton);
@@ -110,24 +126,20 @@ function makePaletteBox(
 		const colorBox = document.createElement('div');
 		colorBox.className = 'color-box';
 		colorBox.id = `color-box-${paletteBoxCount}`;
-
-		colorBox.style.backgroundColor = transforms.getCSSColorString(color);
+		colorBox.style.backgroundColor = colorString || '#ffffff';
 
 		paletteBoxBottomHalf.appendChild(colorBox);
-
 		paletteBox.appendChild(paletteBoxTopHalf);
 		paletteBox.appendChild(paletteBoxBottomHalf);
 
-		// create color stripe
 		const colorStripe = document.createElement('div');
 		colorStripe.className = 'color-stripe';
 		colorStripe.id = `color-stripe-${paletteBoxCount}`;
-		colorStripe.style.backgroundColor = transforms.getCSSColorString(color);
+		colorStripe.style.backgroundColor = colorString || '#ffffff';
 
 		colorStripe.setAttribute('draggable', 'true');
 		attachDragAndDropEventListeners(colorStripe);
 
-		// append palette box to color stripe
 		colorStripe.appendChild(paletteBox);
 
 		return {
@@ -143,6 +155,19 @@ function makePaletteBox(
 	}
 }
 
+function showToast(message: string): void {
+	const toast = document.createElement('div');
+	toast.className = 'toast-message';
+	toast.textContent = message;
+
+	document.body.appendChild(toast);
+
+	setTimeout(() => {
+		toast.classList.add('fade-out');
+		toast.addEventListener('transitioned', () => toast.remove());
+	}, config.toastTimeout || 3000);
+}
+
 function showTooltip(tooltipElement: HTMLElement): void {
 	try {
 		const tooltip =
@@ -154,7 +179,7 @@ function showTooltip(tooltipElement: HTMLElement): void {
 			setTimeout(() => {
 				tooltip.style.visibility = 'hidden';
 				tooltip.style.opacity = '0';
-			}, 1000);
+			}, config.tooltipTimeout || 1000);
 		}
 
 		console.log('showTooltip executed');
@@ -167,5 +192,6 @@ export const domHelpers: fnObjects.DOMHelpers = {
 	attachDragAndDropEventListeners,
 	getElement,
 	makePaletteBox,
+	showToast,
 	showTooltip
 };

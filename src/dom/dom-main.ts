@@ -1,11 +1,13 @@
 import { getConversionFn } from '../color-conversion/conversion';
-import { conversionHelpers } from '../helpers/conversion';
+import { config } from '../config/constants';
 import { domHelpers } from '../helpers/dom';
+import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
 import * as interfaces from '../index/interfaces';
 import * as types from '../index/types';
 import { generate } from '../palette-gen/generate';
 import { random } from '../utils/color-randomizer';
+import { core } from '../utils/core';
 import { transforms } from '../utils/transforms';
 import { guards } from '../utils/type-guards';
 
@@ -75,9 +77,9 @@ function applyCustomColor(): types.Color {
 	}
 }
 
-function applyFirstColorToUI(initialColorSpace: types.ColorSpace): types.Color {
+function applyFirstColorToUI(colorSpace: types.ColorSpace): types.Color {
 	try {
-		const color = random.randomColor(initialColorSpace);
+		const color = random.randomColor(colorSpace);
 		const colorBox1 = document.getElementById('color-box-1');
 
 		if (!colorBox1) {
@@ -103,7 +105,7 @@ function applyFirstColorToUI(initialColorSpace: types.ColorSpace): types.Color {
 	}
 }
 
-function applyInitialColorSpace(): types.ColorSpace {
+function applyUIColorSpace(): types.ColorSpace {
 	try {
 		const element = document.getElementById(
 			'initial-colorspace-options'
@@ -130,16 +132,15 @@ function convertColors(targetFormat: types.ColorSpace): void {
 			);
 
 		colorTextOutputBoxes.forEach(box => {
-			if (!(box instanceof HTMLInputElement)) {
-				console.error('Invalid input element.');
-				return;
-			}
-
 			const inputBox = box as interfaces.ColorInputElement;
 			const colorValues = inputBox.colorValues;
 
-			if (!colorValues) {
-				console.error('Missing color values.');
+			if (
+				!colorValues ||
+				!paletteHelpers.validateColorValues(colorValues)
+			) {
+				console.error('Invalid color values.');
+				domHelpers.showToast('Invalid color values.');
 				return;
 			}
 
@@ -147,41 +148,63 @@ function convertColors(targetFormat: types.ColorSpace): void {
 				'data-format'
 			) as types.ColorSpace;
 
-			if (
-				!guards.isColorSpace(currentFormat) ||
-				!guards.isColorSpace(targetFormat)
-			) {
-				console.error(
-					`Invalid format: ${currentFormat} or ${targetFormat}`
-				);
-				return;
-			}
-
-			if (colorValues.format === 'xyz') {
-				console.warn('Skipping XYZ color type');
-				return;
-			}
+			console.log(`Converting from ${currentFormat} to ${targetFormat}`);
 
 			const convertFn = getConversionFn(currentFormat, targetFormat);
+
 			if (!convertFn) {
 				console.error(
 					`Conversion from ${currentFormat} to ${targetFormat} is not supported.`
 				);
+				domHelpers.showToast('Conversion not supported.');
 				return;
 			}
 
-			if (guards.isConvertibleColor(colorValues)) {
-				const newColor = convertFn(colorValues);
-				if (!newColor) {
-					console.error(`Conversion to ${targetFormat} failed.`);
-					return;
-				}
-
-				inputBox.value = String(newColor);
-				inputBox.setAttribute('data-format', targetFormat);
-			} else {
-				console.error(`Invalid color type for conversion.`);
+			if (colorValues.format === 'xyz') {
+				console.error(
+					'Cannot convert from XYZ to another color space.'
+				);
+				domHelpers.showToast('Conversion not supported.');
+				return;
 			}
+
+			const clonedColor = guards.narrowToColor(colorValues);
+
+			if (
+				!clonedColor ||
+				guards.isSLColor(clonedColor) ||
+				guards.isSVColor(clonedColor) ||
+				guards.isXYZ(clonedColor)
+			) {
+				console.error(
+					'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.'
+				);
+
+				domHelpers.showToast('Conversion not supported.');
+
+				return;
+			}
+
+			if (!clonedColor) {
+				console.error(`Conversion to ${targetFormat} failed.`);
+
+				domHelpers.showToast('Conversion failed.');
+
+				return;
+			}
+
+			const newColor = core.clone(convertFn(clonedColor));
+
+			if (!newColor) {
+				console.error(`Conversion to ${targetFormat} failed.`);
+
+				domHelpers.showToast('Conversion failed.');
+
+				return;
+			}
+
+			inputBox.value = String(newColor);
+			inputBox.setAttribute('data-format', targetFormat);
 		});
 	} catch (error) {
 		console.error('Failed to convert colors:', error);
@@ -197,6 +220,11 @@ function copyToClipboard(text: string, tooltipElement: HTMLElement): void {
 			.then(() => {
 				domHelpers.showTooltip(tooltipElement);
 				console.log(`Copied color value: ${colorValue}`);
+
+				setTimeout(
+					() => tooltipElement.classList.remove('show'),
+					config.tooltipTimeout || 1000
+				);
 			})
 			.catch(err => {
 				console.error('Error copying to clipboard:', err);
@@ -221,7 +249,7 @@ function defineUIButtons(): interfaces.UIButtons {
 		const advancedMenuToggleButton = document.getElementById(
 			'advanced-menu-toggle-button'
 		);
-		const applyInitialColorSpaceButton = document.getElementById(
+		const applyColorSpaceButton = document.getElementById(
 			'apply-initial-color-space-button'
 		);
 		const selectedColorOptions = document.getElementById(
@@ -239,7 +267,7 @@ function defineUIButtons(): interfaces.UIButtons {
 			applyCustomColorButton,
 			clearCustomColorButton,
 			advancedMenuToggleButton,
-			applyInitialColorSpaceButton,
+			applyColorSpaceButton,
 			selectedColor
 		};
 	} catch (error) {
@@ -252,7 +280,7 @@ function defineUIButtons(): interfaces.UIButtons {
 			applyCustomColorButton: null,
 			clearCustomColorButton: null,
 			advancedMenuToggleButton: null,
-			applyInitialColorSpaceButton: null,
+			applyColorSpaceButton: null,
 			selectedColor: 0
 		};
 	}
@@ -269,26 +297,29 @@ function desaturateColor(selectedColor: number): void {
 function getElementsForSelectedColor(
 	selectedColor: number
 ): interfaces.GetElementsForSelectedColor {
-	try {
-		return {
-			selectedColorTextOutputBox: document.getElementById(
-				`color-text-output-box-${selectedColor}`
-			),
-			selectedColorBox: document.getElementById(
-				`color-box-${selectedColor}`
-			),
-			selectedColorStripe: document.getElementById(
-				`color-stripe-${selectedColor}`
-			)
-		};
-	} catch (error) {
-		console.error('Failed to get elements for selected color:', error);
+	const selectedColorBox = document.getElementById(
+		`color-box-${selectedColor}`
+	);
+
+	if (!selectedColorBox) {
+		console.warn(`Element not found for color ${selectedColor}`);
+		domHelpers.showToast('Please select a valid color.');
 		return {
 			selectedColorTextOutputBox: null,
 			selectedColorBox: null,
 			selectedColorStripe: null
 		};
 	}
+
+	return {
+		selectedColorTextOutputBox: document.getElementById(
+			`color-text-output-box-${selectedColor}`
+		),
+		selectedColorBox,
+		selectedColorStripe: document.getElementById(
+			`color-stripe-${selectedColor}`
+		)
+	};
 }
 
 function getGenerateButtonParams(): interfaces.GenButtonParams | null {
@@ -304,25 +335,25 @@ function getGenerateButtonParams(): interfaces.GenButtonParams | null {
 				'initial-colorspace-options'
 			) as HTMLSelectElement
 		)?.value;
-		const initialColorSpace = guards.isColorSpace(colorSpaceValue)
+		const colorSpace = guards.isColorSpace(colorSpaceValue)
 			? (colorSpaceValue as types.ColorSpace)
 			: 'hex';
 		const customColorRaw = (
 			document.getElementById('custom-color') as HTMLInputElement
 		)?.value;
 		const customColor = transforms.parseCustomColor(
-			initialColorSpace,
+			colorSpace,
 			customColorRaw
 		);
 
 		console.log(
-			`numBoxes: ${parseInt(paletteNumberOptions.value, 10)}\npaletteType: ${parseInt(paletteTypeOptions.value, 10)}\ninitialColorSpace: ${initialColorSpace}\ncustomColor: ${JSON.stringify(customColor)}`
+			`numBoxes: ${parseInt(paletteNumberOptions.value, 10)}\npaletteType: ${parseInt(paletteTypeOptions.value, 10)}\ncolorSpace: ${colorSpace}\ncustomColor: ${JSON.stringify(customColor)}`
 		);
 
 		return {
 			numBoxes: parseInt(paletteNumberOptions.value, 10),
 			paletteType: parseInt(paletteTypeOptions.value, 10),
-			initialColorSpace,
+			colorSpace,
 			customColor
 		};
 	} catch (error) {
@@ -331,7 +362,7 @@ function getGenerateButtonParams(): interfaces.GenButtonParams | null {
 	}
 }
 
-function handleGenButtonClick(): void {
+const handleGenButtonClick = core.debounce(() => {
 	try {
 		const params = getGenerateButtonParams();
 
@@ -340,46 +371,53 @@ function handleGenButtonClick(): void {
 			return;
 		}
 
-		const { paletteType, numBoxes, initialColorSpace, customColor } =
-			params;
+		const { paletteType, numBoxes, colorSpace, customColor } = params;
 
 		if (!paletteType || !numBoxes) {
 			console.error('paletteType and/or numBoxes are undefined');
 			return;
 		}
 
-		const space: types.ColorSpace = initialColorSpace ?? 'hex';
+		const space: types.ColorSpace = colorSpace ?? 'hex';
 
 		generate.startPaletteGen(paletteType, numBoxes, space, customColor);
 	} catch (error) {
 		console.error(`Failed to handle generate button click: ${error}`);
 	}
-}
+}, config.buttonDebounce || 300);
 
 function populateColorTextOutputBox(
-	color: types.Color,
+	color: types.Color | types.ColorString,
 	boxNumber: number
 ): void {
 	try {
+		const clonedColor: types.Color = guards.isColor(color)
+			? core.clone(color)
+			: transforms.colorStringToColor(color);
+
+		if (!paletteHelpers.validateColorValues(clonedColor)) {
+			console.error('Invalid color values.');
+
+			domHelpers.showToast('Invalid color values.');
+
+			return;
+		}
+
 		const colorTextOutputBox = document.getElementById(
 			`color-text-output-box-${boxNumber}`
 		) as HTMLInputElement | null;
 
 		if (!colorTextOutputBox) return;
 
-		const hexColor = conversionHelpers.convertColorToHex(color);
+		const stringifiedColor = transforms.getCSSColorString(clonedColor);
 
-		if (!hexColor) {
-			console.error('Failed to convert color to hex');
-			return;
-		}
+		console.log(`Adding CSS-formatted color to DOM ${stringifiedColor}`);
 
-		console.log(`Hex color value: ${JSON.stringify(hexColor.value.hex)}`);
-
-		colorTextOutputBox.value = hexColor.value.hex;
-		colorTextOutputBox.setAttribute('data-format', 'hex');
+		colorTextOutputBox.value = stringifiedColor;
+		colorTextOutputBox.setAttribute('data-format', color.format);
 	} catch (error) {
 		console.error('Failed to populate color text output box:', error);
+
 		return;
 	}
 }
@@ -392,7 +430,7 @@ function pullParamsFromUI(): interfaces.PullParamsFromUI {
 		const numBoxesElement = document.getElementById(
 			'palette-number-options'
 		) as HTMLSelectElement | null;
-		const initialColorSpaceElement = document.getElementById(
+		const colorSpaceElement = document.getElementById(
 			'initial-color-space-options'
 		) as HTMLSelectElement | null;
 
@@ -402,23 +440,22 @@ function pullParamsFromUI(): interfaces.PullParamsFromUI {
 		const numBoxes = numBoxesElement
 			? parseInt(numBoxesElement.value, 10)
 			: 0;
-		const initialColorSpace =
-			initialColorSpaceElement &&
-			guards.isColorSpace(initialColorSpaceElement.value)
-				? (initialColorSpaceElement.value as types.ColorSpace)
+		const colorSpace =
+			colorSpaceElement && guards.isColorSpace(colorSpaceElement.value)
+				? (colorSpaceElement.value as types.ColorSpace)
 				: 'hex';
 
 		return {
 			paletteType,
 			numBoxes,
-			initialColorSpace
+			colorSpace
 		};
 	} catch (error) {
 		console.error(`Failed to pull parameters from UI: ${error}`);
 		return {
 			paletteType: 0,
 			numBoxes: 0,
-			initialColorSpace: 'hex'
+			colorSpace: 'hex'
 		};
 	}
 }
@@ -450,7 +487,7 @@ export const dom: fnObjects.DOM = {
 	addConversionButtonEventListeners,
 	applyCustomColor,
 	applyFirstColorToUI,
-	applyInitialColorSpace,
+	applyUIColorSpace,
 	convertColors,
 	copyToClipboard,
 	defineUIButtons,

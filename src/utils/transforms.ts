@@ -1,3 +1,5 @@
+import { core } from './core';
+import { defaults } from './defaults';
 import * as fnObjects from '../index/fn-objects';
 import * as types from '../index/types';
 import { guards } from './type-guards';
@@ -9,16 +11,114 @@ function addHashToHex(hex: types.Hex): types.Hex {
 			: { value: { hex: `#${hex.value}}` }, format: 'hex' as const };
 	} catch (error) {
 		console.error(`addHashToHex error: ${error}`);
+
 		return { value: { hex: '#FFFFFF' }, format: 'hex' as const };
+	}
+}
+
+function colorToColorString(
+	color: Exclude<types.Color, types.Hex | types.LAB | types.RGB>
+): types.ColorString {
+	try {
+		const clonedColor = core.clone(color);
+		const addPercentage = (
+			key: keyof (typeof clonedColor)['value'],
+			value: number | string
+		): string | number =>
+			[
+				'cyan',
+				'magenta',
+				'yellow',
+				'key',
+				'saturation',
+				'lightness',
+				'value'
+			].includes(key as string) && typeof value === 'number'
+				? `${value}%`
+				: value;
+		const newValue = Object.entries(clonedColor.value).reduce(
+			(acc, [key, val]) => {
+				acc[key as keyof (typeof clonedColor)['value']] = addPercentage(
+					key as keyof (typeof clonedColor)['value'],
+					val
+				) as never;
+				return acc;
+			},
+			{} as Record<keyof (typeof clonedColor)['value'], string | number>
+		);
+
+		if (guards.isCMYK(clonedColor)) {
+			return { format: 'cmyk', value: newValue as types.CMYKValueString };
+		} else if (guards.isHSL(clonedColor)) {
+			return { format: 'hsl', value: newValue as types.HSLValueString };
+		} else if (guards.isHSV(clonedColor)) {
+			return { format: 'hsv', value: newValue as types.HSVValueString };
+		} else if (guards.isSL(clonedColor)) {
+			return { format: 'sl', value: newValue as types.SLValueString };
+		} else if (guards.isSV(clonedColor)) {
+			return { format: 'sv', value: newValue as types.SVValueString };
+		} else {
+			throw new Error(`Unsupported format: ${clonedColor.format}`);
+		}
+	} catch (error) {
+		console.error(`addPercentToColorString error: ${error}`);
+
+		throw new Error('Failed to add percent to color string');
+	}
+}
+
+function colorStringToColor(
+	color: types.ColorString
+): Exclude<types.Color, types.Hex | types.LAB | types.RGB> {
+	try {
+		const clonedColor = core.clone(color);
+		const parseValue = (value: string | number): number =>
+			typeof value === 'string' && value.endsWith('%')
+				? parseFloat(value.slice(0, -1))
+				: Number(value);
+		const newValue = Object.entries(clonedColor.value).reduce(
+			(acc, [key, val]) => {
+				acc[key as keyof (typeof clonedColor)['value']] = parseValue(
+					val
+				) as never;
+				return acc;
+			},
+			{} as Record<keyof (typeof clonedColor)['value'], number>
+		);
+
+		console.log(
+			`Stripped percent from ${clonedColor.format} color string: ${JSON.stringify(newValue)}`
+		);
+
+		switch (clonedColor.format) {
+			case 'cmyk':
+				return { format: 'cmyk', value: newValue as types.CMYKValue };
+			case 'hsl':
+				return { format: 'hsl', value: newValue as types.HSLValue };
+			case 'hsv':
+				return { format: 'hsv', value: newValue as types.HSVValue };
+			case 'sl':
+				return { format: 'sl', value: newValue as types.SLValue };
+			case 'sv':
+				return { format: 'sv', value: newValue as types.SVValue };
+			default:
+				throw new Error('Unsupported format');
+		}
+	} catch (error) {
+		console.error(`stripPercentFromColorString error: ${error}`);
+
+		throw new Error('Failed to strip percent from color string');
 	}
 }
 
 function componentToHex(component: number): string {
 	try {
 		const hex = Math.max(0, Math.min(255, component)).toString(16);
+
 		return hex.length === 1 ? '0' + hex : hex;
 	} catch (error) {
 		console.error(`componentToHex error: ${error}`);
+
 		return '00';
 	}
 }
@@ -58,10 +158,12 @@ function getColorString(color: types.Color): string | null {
 				return formatters.xyz(color);
 			default:
 				console.error(`Unsupported color format for ${color}`);
+
 				return null;
 		}
 	} catch (error) {
 		console.error(`getColorString error: ${error}`);
+
 		return null;
 	}
 }
@@ -85,10 +187,12 @@ function getCSSColorString(color: types.Color): string {
 				return `xyz(${color.value.x},${color.value.y},${color.value.z})`;
 			default:
 				console.error('Unexpected color format');
+
 				return '#FFFFFF';
 		}
 	} catch (error) {
 		console.error(`getCSSColorString error: ${error}`);
+
 		return '#FFFFFF';
 	}
 }
@@ -101,6 +205,7 @@ const parseColor = (
 		switch (colorSpace) {
 			case 'cmyk': {
 				const [c, m, y, k] = parseColorComponents(value, 4);
+
 				return {
 					value: { cyan: c, magenta: m, yellow: y, key: k },
 					format: 'cmyk'
@@ -113,6 +218,7 @@ const parseColor = (
 				};
 			case 'hsl': {
 				const [h, s, l] = parseColorComponents(value, 3);
+
 				return {
 					value: { hue: h, saturation: s, lightness: l },
 					format: 'hsl'
@@ -120,6 +226,7 @@ const parseColor = (
 			}
 			case 'hsv': {
 				const [h, s, v] = parseColorComponents(value, 3);
+
 				return {
 					value: { hue: h, saturation: s, value: v },
 					format: 'hsv'
@@ -131,6 +238,7 @@ const parseColor = (
 			}
 			case 'rgb': {
 				const [r, g, b] = value.split(',').map(Number);
+
 				return { value: { red: r, green: g, blue: b }, format: 'rgb' };
 			}
 			default:
@@ -138,6 +246,7 @@ const parseColor = (
 		}
 	} catch (error) {
 		console.error(`parseColor error: ${error}`);
+
 		return null;
 	}
 };
@@ -157,6 +266,7 @@ function parseColorComponents(value: string, expectedLength: number): number[] {
 		return components;
 	} catch (error) {
 		console.error(`parseColorComponents error: ${error}`);
+
 		return [];
 	}
 }
@@ -180,6 +290,7 @@ function parseCustomColor(
 						format: 'cmyk'
 					};
 				}
+
 				break;
 			}
 			case 'hex': {
@@ -196,6 +307,7 @@ function parseCustomColor(
 				const match = rawValue.match(
 					/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/
 				);
+
 				if (match) {
 					const [, hue, saturation, lightness] = match.map(Number);
 					return {
@@ -203,22 +315,26 @@ function parseCustomColor(
 						format: 'hsl'
 					};
 				}
+
 				break;
 			}
 			case 'hsv': {
 				const match = rawValue.match(
 					/hsv\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/i
 				);
+
 				if (match) {
 					const [, hue, saturation, value] = match.map(Number);
 					return { value: { hue, saturation, value }, format: 'hsv' };
 				}
+
 				break;
 			}
 			case 'lab': {
 				const match = rawValue.match(
 					/lab\(([-\d.]+),\s*([-\d.]+),\s*([-\d.]+)\)/i
 				);
+
 				if (match) {
 					const [, l, a, b] = match.map(Number);
 					return {
@@ -226,25 +342,31 @@ function parseCustomColor(
 						format: 'lab'
 					};
 				}
+
 				break;
 			}
 			case 'rgb': {
 				const match = rawValue.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/i);
+
 				if (match) {
 					const [, red, green, blue] = match.map(Number);
 					return { value: { red, green, blue }, format: 'rgb' };
 				}
+
 				break;
 			}
 			default:
 				console.warn(`Unsupported color space: ${colorSpace}`);
+
 				return null;
 		}
 
 		console.error(`Failed to parse custom color: ${rawValue}`);
+
 		return null;
 	} catch (error) {
 		console.error(`parseCustomColor error: ${error}`);
+
 		return null;
 	}
 }
@@ -258,12 +380,15 @@ function stripHashFromHex(hex: types.Hex): types.Hex {
 			: hex;
 	} catch (error) {
 		console.error(`stripHashFromHex error: ${error}`);
-		return { value: { hex: 'FFFFFF' }, format: 'hex' as const };
+
+		return core.clone(defaults.defaultHex());
 	}
 }
 
 export const transforms: fnObjects.Transforms = {
 	addHashToHex,
+	colorToColorString,
+	colorStringToColor,
 	componentToHex,
 	getColorString,
 	getCSSColorString,

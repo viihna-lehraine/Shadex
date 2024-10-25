@@ -1,13 +1,18 @@
 import { genAllColorValues } from '../color-conversion/conversion';
 import { dom } from '../dom/dom-main';
+import { paletteHelpers } from '../helpers/palette';
 import * as types from '../index/types';
 import { random } from '../utils/color-randomizer';
+import { core } from '../utils/core';
 
 export function genTriadicHues(baseHue: number): number[] {
 	try {
-		return [120, 240].map(increment => (baseHue + increment) % 360);
+		const clonedBaseHue = core.clone(baseHue);
+
+		return [120, 240].map(increment => (clonedBaseHue + increment) % 360);
 	} catch (error) {
 		console.error(`Error generating triadic hues: ${error}`);
+
 		return [];
 	}
 }
@@ -15,9 +20,23 @@ export function genTriadicHues(baseHue: number): number[] {
 export function genTriadicPalette(
 	numBoxes: number,
 	customColor: types.Color | null = null,
-	initialColorSpace: types.ColorSpace = 'hex'
+	colorSpace: types.ColorSpace = 'hex'
 ): types.Color[] {
 	try {
+		let clonedCustomColor: types.Color | null = null;
+
+		if (customColor) {
+			if (!paletteHelpers.validateColorValues(customColor)) {
+				console.error(
+					`Invalid custom color value ${JSON.stringify(customColor)}`
+				);
+
+				return [];
+			}
+
+			clonedCustomColor = core.clone(customColor);
+		}
+
 		if (numBoxes < 3) {
 			window.alert(
 				'To generate a triadic palette, please select at least 3 swatches.'
@@ -26,8 +45,7 @@ export function genTriadicPalette(
 		}
 
 		const colors: types.Color[] = [];
-		const baseColor = customColor ?? random.randomColor(initialColorSpace);
-
+		const baseColor = clonedCustomColor ?? random.randomColor(colorSpace);
 		const baseColorValues = genAllColorValues(baseColor);
 		const baseHSL = baseColorValues.hsl as types.HSL;
 
@@ -39,7 +57,6 @@ export function genTriadicPalette(
 
 		const triadicHues = genTriadicHues(baseHSL.value.hue);
 
-		// generate triadic colors and add to palette
 		triadicHues.forEach(hue => {
 			const sl = random.randomSL();
 			const color = genAllColorValues({
@@ -52,7 +69,6 @@ export function genTriadicPalette(
 			}
 		});
 
-		// generate additional colors if needed
 		while (colors.length < numBoxes) {
 			const baseHue = triadicHues[Math.floor(Math.random() * 3)];
 			const hue =
@@ -69,19 +85,24 @@ export function genTriadicPalette(
 			}
 		}
 
-		// update the DOM with generated colors
 		colors.forEach((color, index) => {
 			const colorBox = document.getElementById(`color-box-${index + 1}`);
+
 			if (colorBox) {
 				const hexColor = genAllColorValues(color).hex as types.Hex;
+
 				colorBox.style.backgroundColor = hexColor.value.hex;
+
 				dom.populateColorTextOutputBox(color, index + 1);
 			}
 		});
 
+		console.log(`Generated triadic palette: ${JSON.stringify(colors)}`);
+
 		return colors;
 	} catch (error) {
 		console.error(`Error generating triadic palette: ${error}`);
+
 		return [];
 	}
 }

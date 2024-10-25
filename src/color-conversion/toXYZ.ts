@@ -1,53 +1,90 @@
 import { conversionHelpers } from '../helpers/conversion';
+import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
 import * as types from '../index/types';
+import { core } from '../utils/core';
 import { defaults } from '../utils/defaults';
 
 function cmykToXYZ(cmyk: types.CMYK): types.XYZ {
 	try {
-		return conversionHelpers.cmykToXYZHelper(cmyk);
+		if (!paletteHelpers.validateColorValues(cmyk)) {
+			console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
+
+			return core.clone(defaults.defaultXYZ());
+		}
+
+		return conversionHelpers.cmykToXYZHelper(core.clone(cmyk));
 	} catch (error) {
 		console.error(`cmykToXYZ error: ${error}`);
-		return defaults.defaultXYZ();
+
+		return core.clone(defaults.defaultXYZ());
 	}
 }
 
 function hexToXYZ(hex: types.Hex): types.XYZ {
 	try {
-		return conversionHelpers.hexToXYZHelper(hex);
+		if (!paletteHelpers.validateColorValues(hex)) {
+			console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
+
+			return core.clone(defaults.defaultXYZ());
+		}
+
+		return conversionHelpers.hexToXYZHelper(core.clone(hex));
 	} catch (error) {
 		console.error(`hexToXYZ error: ${error}`);
-		return defaults.defaultXYZ();
+
+		return core.clone(defaults.defaultXYZ());
 	}
 }
 
 function hslToXYZ(hsl: types.HSL): types.XYZ {
 	try {
-		return conversionHelpers.hslToXYZHelper(hsl);
+		if (!paletteHelpers.validateColorValues(hsl)) {
+			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+
+			return core.clone(defaults.defaultXYZ());
+		}
+
+		return conversionHelpers.hslToXYZHelper(core.clone(hsl));
 	} catch (error) {
 		console.error(`hslToXYZ error: ${error}`);
-		return defaults.defaultXYZ();
+
+		return core.clone(defaults.defaultXYZ());
 	}
 }
 
 function hsvToXYZ(hsv: types.HSV): types.XYZ {
 	try {
-		return conversionHelpers.hsvToXYZHelper(hsv);
+		if (!paletteHelpers.validateColorValues(hsv)) {
+			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
+
+			return core.clone(defaults.defaultXYZ());
+		}
+
+		return conversionHelpers.hsvToXYZHelper(core.clone(hsv));
 	} catch (error) {
 		console.error(`hsvToXYZ error: ${error}`);
-		return defaults.defaultXYZ();
+
+		return core.clone(defaults.defaultXYZ());
 	}
 }
 
 function labToXYZ(lab: types.LAB): types.XYZ {
 	try {
+		if (!paletteHelpers.validateColorValues(lab)) {
+			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
+
+			return core.clone(defaults.defaultXYZ());
+		}
+
+		const clonedLAB = core.clone(lab);
 		const refX = 95.047,
 			refY = 100.0,
 			refZ = 108.883;
 
-		let y = (lab.value.l + 16) / 116;
-		let x = lab.value.a / 500 + y;
-		let z = y - lab.value.b / 200;
+		let y = (clonedLAB.value.l + 16) / 116;
+		let x = clonedLAB.value.a / 500 + y;
+		let z = y - clonedLAB.value.b / 200;
 
 		const pow = Math.pow;
 
@@ -67,53 +104,63 @@ function labToXYZ(lab: types.LAB): types.XYZ {
 		};
 	} catch (error) {
 		console.error(`labToXYZ error: ${error}`);
-		return defaults.defaultXYZ();
+
+		return core.clone(defaults.defaultXYZ());
 	}
 }
 
 function rgbToXYZ(rgb: types.RGB): types.XYZ {
 	try {
-		rgb.value.red = rgb.value.red / 255;
-		rgb.value.green = rgb.value.green / 255;
-		rgb.value.blue = rgb.value.blue / 255;
+		if (!paletteHelpers.validateColorValues(rgb)) {
+			console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
-		rgb.value.red =
-			rgb.value.red > 0.04045
-				? Math.pow((rgb.value.red + 0.055) / 1.055, 2.4)
-				: rgb.value.red / 12.92;
-		rgb.value.green =
-			rgb.value.green > 0.04045
-				? Math.pow((rgb.value.green + 0.055) / 1.055, 2.4)
-				: rgb.value.green / 12.92;
-		rgb.value.blue =
-			rgb.value.blue > 0.04045
-				? Math.pow((rgb.value.blue + 0.055) / 1.055, 2.4)
-				: rgb.value.blue / 12.92;
+			return core.clone(defaults.defaultXYZ());
+		}
 
-		rgb.value.red = rgb.value.red * 100;
-		rgb.value.green = rgb.value.green * 100;
-		rgb.value.blue = rgb.value.blue * 100;
+		const clonedRGB = core.clone(rgb);
+
+		clonedRGB.value.red = clonedRGB.value.red / 255;
+		clonedRGB.value.green = clonedRGB.value.green / 255;
+		clonedRGB.value.blue = clonedRGB.value.blue / 255;
+
+		clonedRGB.value.red =
+			clonedRGB.value.red > 0.04045
+				? Math.pow((clonedRGB.value.red + 0.055) / 1.055, 2.4)
+				: clonedRGB.value.red / 12.92;
+		clonedRGB.value.green =
+			clonedRGB.value.green > 0.04045
+				? Math.pow((clonedRGB.value.green + 0.055) / 1.055, 2.4)
+				: clonedRGB.value.green / 12.92;
+		clonedRGB.value.blue =
+			clonedRGB.value.blue > 0.04045
+				? Math.pow((clonedRGB.value.blue + 0.055) / 1.055, 2.4)
+				: clonedRGB.value.blue / 12.92;
+
+		clonedRGB.value.red = clonedRGB.value.red * 100;
+		clonedRGB.value.green = clonedRGB.value.green * 100;
+		clonedRGB.value.blue = clonedRGB.value.blue * 100;
 
 		return {
 			value: {
 				x:
-					rgb.value.red * 0.4124 +
-					rgb.value.green * 0.3576 +
-					rgb.value.blue * 0.1805,
+					clonedRGB.value.red * 0.4124 +
+					clonedRGB.value.green * 0.3576 +
+					clonedRGB.value.blue * 0.1805,
 				y:
-					rgb.value.red * 0.2126 +
-					rgb.value.green * 0.7152 +
-					rgb.value.blue * 0.0722,
+					clonedRGB.value.red * 0.2126 +
+					clonedRGB.value.green * 0.7152 +
+					clonedRGB.value.blue * 0.0722,
 				z:
-					rgb.value.red * 0.0193 +
-					rgb.value.green * 0.1192 +
-					rgb.value.blue * 0.9505
+					clonedRGB.value.red * 0.0193 +
+					clonedRGB.value.green * 0.1192 +
+					clonedRGB.value.blue * 0.9505
 			},
 			format: 'xyz'
 		};
 	} catch (error) {
 		console.error(`rgbToXYZ error: ${error}`);
-		return defaults.defaultXYZ();
+
+		return core.clone(defaults.defaultXYZ());
 	}
 }
 

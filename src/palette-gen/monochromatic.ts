@@ -1,30 +1,47 @@
 import { genAllColorValues } from '../color-conversion/conversion';
 import { dom } from '../dom/dom-main';
+import { paletteHelpers } from '../helpers/palette';
 import * as types from '../index/types';
 import { random } from '../utils/color-randomizer';
+import { core } from '../utils/core';
 
 export function genMonochromaticPalette(
 	numBoxes: number,
 	customColor: types.Color | null = null,
-	initialColorSpace: types.ColorSpace = 'hex'
+	colorSpace: types.ColorSpace = 'hex'
 ): types.Color[] {
 	try {
+		let clonedCustomColor: types.Color | null = null;
+
+		if (customColor) {
+			if (!paletteHelpers.validateColorValues(customColor)) {
+				console.error(
+					`Invalid custom color value ${JSON.stringify(customColor)}`
+				);
+
+				return [];
+			}
+
+			clonedCustomColor = core.clone(customColor);
+		}
+
 		if (numBoxes < 2) {
 			window.alert(
 				'To generate a monochromatic palette, please select a number of swatches greater than 1'
 			);
+
 			return [];
 		}
 
 		const colors: types.Color[] = [];
 		const baseColorValues = genAllColorValues(
-			customColor ?? random.randomColor(initialColorSpace)
+			clonedCustomColor ?? random.randomColor(colorSpace)
 		);
 		const baseHSL = baseColorValues.hsl as types.HSL;
 
 		if (!baseHSL) {
 			throw new Error(
-				'Base HSL value is required for a monochromatic palette.'
+				'Could not retrieve HSL color from genAllColorValues. HSL color is required for a monochromatic palette.'
 			);
 		}
 
@@ -34,7 +51,6 @@ export function genMonochromaticPalette(
 			const {
 				value: { saturation, lightness }
 			} = random.randomSL();
-
 			const monoColorValues = genAllColorValues({
 				value: {
 					hue: baseHSL.value.hue,
@@ -43,23 +59,29 @@ export function genMonochromaticPalette(
 				},
 				format: 'hsl'
 			});
-
 			const monoHSL = monoColorValues.hsl as types.HSL;
+
 			colors.push(monoHSL);
 
-			// update the DOM with generated colors
 			const colorBox = document.getElementById(`color-box-${i + 1}`);
+
 			if (colorBox) {
 				const hexColor = monoColorValues.hex as types.Hex;
+
 				colorBox.style.backgroundColor = hexColor.value.hex;
 
 				dom.populateColorTextOutputBox(monoHSL, i + 1);
 			}
 		}
 
+		console.log(
+			`Generated monochromatic palette: ${JSON.stringify(colors)}`
+		);
+
 		return colors;
 	} catch (error) {
 		console.error(`Error generating monochromatic palette: ${error}`);
+
 		return [];
 	}
 }

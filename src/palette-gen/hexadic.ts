@@ -1,23 +1,33 @@
 import { genAllColorValues } from '../color-conversion/conversion';
 import { dom } from '../dom/dom-main';
+import { paletteHelpers } from '../helpers/palette';
 import * as types from '../index/types';
 import { random } from '../utils/color-randomizer';
+import { core } from '../utils/core';
 
 export function genHexadicHues(color: types.Color): number[] {
 	try {
-		const colorValues = genAllColorValues(color);
-		const baseHSL = colorValues.hsl as types.HSL;
+		const clonedColor = core.clone(color);
 
-		if (!baseHSL) {
+		if (!paletteHelpers.validateColorValues(color)) {
+			console.error(`Invalid color value ${JSON.stringify(color)}`);
+
+			return [];
+		}
+
+		const clonedColorValues = genAllColorValues(clonedColor);
+		const clonedBaseHSL = clonedColorValues.hsl as types.HSL;
+
+		if (!clonedBaseHSL) {
 			throw new Error(
 				'Unable to generate hexadic hues - missing HSL values'
 			);
 		}
 
 		const hexadicHues: number[] = [];
-		const baseHue = baseHSL.value.hue;
+		const clonedBaseHue = clonedBaseHSL.value.hue;
 
-		const hue1 = baseHue;
+		const hue1 = clonedBaseHue;
 		const hue2 = (hue1 + 180) % 360;
 		const randomDistance = Math.floor(Math.random() * 71 + 10);
 		const hue3 = (hue1 + randomDistance) % 360;
@@ -30,6 +40,7 @@ export function genHexadicHues(color: types.Color): number[] {
 		return hexadicHues;
 	} catch (error) {
 		console.error(`Error generating hexadic hues: ${error}`);
+
 		return [];
 	}
 }
@@ -37,22 +48,35 @@ export function genHexadicHues(color: types.Color): number[] {
 export function genHexadicPalette(
 	numBoxes: number,
 	customColor: types.Color | null = null,
-	initialColorSpace: types.ColorSpace = 'hex'
+	colorSpace: types.ColorSpace = 'hex'
 ): types.Color[] {
 	try {
+		let clonedCustomColor: types.Color | null = null;
+
+		if (customColor) {
+			if (!paletteHelpers.validateColorValues(customColor)) {
+				console.error(
+					`Invalid custom color value ${JSON.stringify(customColor)}`
+				);
+
+				return [];
+			}
+
+			clonedCustomColor = core.clone(customColor);
+		}
+
 		if (numBoxes < 6) {
 			window.alert(
 				'To generate a hexadic palette, please select a number of swatches greater than 5'
 			);
+
 			return [];
 		}
 
 		const colors: types.Color[] = [];
-
 		const baseColorValues = genAllColorValues(
-			customColor ?? random.randomColor(initialColorSpace)
+			clonedCustomColor ?? random.randomColor(colorSpace)
 		);
-
 		const baseHSL = baseColorValues.hsl as types.HSL;
 
 		if (!baseHSL) {
@@ -89,9 +113,12 @@ export function genHexadicPalette(
 			}
 		}
 
+		console.log(`Generated hexadic palette: ${JSON.stringify(colors)}`);
+
 		return colors;
 	} catch (error) {
 		console.error(`Error generating hexadic palette: ${error}`);
+
 		return [];
 	}
 }

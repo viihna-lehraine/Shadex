@@ -31,8 +31,12 @@ export interface ConversionHelpers {
 	applyGammaCorrection(value: number): number;
 	clampRGB(rgb: types.RGB): types.RGB;
 	cmykToXYZHelper(cmyk: types.CMYK): types.XYZ;
+	convertColorToCMYK(color: types.Color): types.CMYK | null;
 	convertColorToHex(color: types.Color): types.Hex | null;
 	convertColorToHSL(color: types.Color): types.HSL | null;
+	convertColorToHSV(color: types.Color): types.HSV | null;
+	convertColorToLAB(color: types.Color): types.LAB | null;
+	convertColorToRGB(color: types.Color): types.RGB | null;
 	hexToCMYKHelper(hex: types.Hex): types.CMYK;
 	hexToXYZHelper(hex: types.Hex): types.XYZ;
 	hueToRGB(p: number, q: number, t: number): number;
@@ -59,6 +63,15 @@ export interface Convert
 		ToRGB,
 		ToXYZ {}
 
+export interface Core {
+	clone<T>(value: T): T;
+	debounce: <T extends (...args: Parameters<T>) => void>(
+		func: T,
+		delay: number
+	) => (...args: Parameters<T>) => void;
+	isInRange(value: number, min: number, max: number): boolean;
+}
+
 export interface Defaults {
 	defaultCMYK(): types.CMYK;
 	defaultHex(): types.Hex;
@@ -74,8 +87,8 @@ export interface Defaults {
 export interface DOM {
 	addConversionButtonEventListeners(): void;
 	applyCustomColor(): types.Color;
-	applyFirstColorToUI(initialColorSpace: types.ColorSpace): types.Color;
-	applyInitialColorSpace(): types.ColorSpace;
+	applyFirstColorToUI(colorSpace: types.ColorSpace): types.Color;
+	applyUIColorSpace(): types.ColorSpace;
 	convertColors(targetFormat: types.ColorSpace): void;
 	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
 	defineUIButtons(): interfaces.UIButtons;
@@ -98,6 +111,7 @@ export interface DOMHelpers {
 		color: types.Color,
 		paletteBoxCount: number
 	): interfaces.MakePaletteBox;
+	showToast(message: string): void;
 	showTooltip(tooltipElement: HTMLElement): void;
 }
 
@@ -109,40 +123,66 @@ export interface DragAndDrop {
 }
 
 export interface Generate {
-	genPaletteBox(numBoxes: number, colors: types.Color[]): void;
+	genPaletteBox(colors: types.Color[], numBoxes: number): void;
 	genSelectedPaletteType(
 		paletteType: number,
 		numBoxes: number,
 		baseColor: types.Color,
 		customColor: types.Color | null,
-		initialColorSpace: types.ColorSpace
+		colorSpace: types.ColorSpace
 	): types.Color[];
 	startPaletteGen(
 		paletteType: number,
 		numBoxes: number,
-		initialColorSpace: types.ColorSpace,
+		colorSpace: types.ColorSpace,
 		customColor: types.Color | null
 	): void;
 }
 
 export interface Guards {
-	isCMYK(color: types.Color): boolean;
-	isHex(color: types.Color): boolean;
-	isHSL(color: types.Color): boolean;
-	isHSV(color: types.Color): boolean;
-	isLAB(color: types.Color): boolean;
-	isRGB(color: types.Color): boolean;
-	isXYZ(color: types.Color): boolean;
-	isHexColor(value: unknown): boolean;
 	ensureHash(value: string): string;
+	isCMYK(
+		color: types.Color | types.ColorString
+	): color is types.CMYK | types.CMYKString;
+	isCMYKColor(value: unknown): value is types.CMYK;
+	isCMYKString(value: unknown): value is types.CMYKString;
+	isColor(value: unknown): value is types.Color;
 	isColorSpace(value: string): boolean;
+	isColorSpaceExtended(value: string): boolean;
+	isColorString(value: unknown): value is types.ColorString;
 	isConversion(
 		from: keyof types.ConversionMap,
 		to: keyof types.Color
 	): boolean;
 	isConvertibleColor(color: types.Color): boolean;
 	isFormat(format: unknown): boolean;
+	isHex(color: types.Color | types.ColorString): color is types.Hex;
+	isHexColor(value: unknown): boolean;
+	isHSL(
+		color: types.Color | types.ColorString
+	): color is types.HSL | types.HSLString;
+	isHSLColor(value: unknown): value is types.HSL;
+	isHSLString(value: unknown): value is types.HSLString;
+	isHSV(
+		color: types.Color | types.ColorString
+	): color is types.HSV | types.HSVString;
+	isHSVColor(value: unknown): value is types.HSV;
+	isHSVString(value: unknown): value is types.HSVString;
 	isInputElement(element: HTMLElement | null): element is HTMLElement;
+	isLAB(color: types.Color | types.ColorString): color is types.LAB;
+	isRGB(color: types.Color | types.ColorString): color is types.RGB;
+	isSL(
+		color: types.Color | types.ColorString
+	): color is types.SL | types.SLString;
+	isSLColor(value: unknown): value is types.SL;
+	isSLString(value: unknown): value is types.SLString;
+	isSV(
+		color: types.Color | types.ColorString
+	): color is types.SV | types.SVString;
+	isSVColor(value: unknown): value is types.SV;
+	isSVString(value: unknown): value is types.SVString;
+	isXYZ(color: types.Color | types.ColorString): color is types.XYZ;
+	narrowToColor(color: types.Color | types.ColorString): types.Color | null;
 }
 
 export interface Palette {
@@ -155,57 +195,58 @@ export interface Palette {
 	genAnalogousPalette(
 		numBoxes: number,
 		customColor: types.Color | null,
-		initialColorSpace: types.ColorSpace
+		colorSpace: types.ColorSpace
 	): types.Color[];
 	genComplementaryPalette(
 		numBoxes: number,
 		baseColor: types.Color | null,
-		initialColorSpace: types.ColorSpace
+		colorSpace: types.ColorSpace
 	): types.Color[];
 	genDiadicPalette(
 		numBoxes: number,
 		customColor: types.Color | null,
-		initialColorSpace: types.ColorSpace
+		colorSpace: types.ColorSpace
 	): types.Color[];
 	genHexadicPalette(
 		numBoxes: number,
 		customColor: types.Color | null,
-		initialColorSpace: types.ColorSpace
+		colorSpace: types.ColorSpace
 	): types.Color[];
 	genMonochromaticPalette(
 		numBoxes: number,
 		customColor: types.Color | null,
-		initialColorSpace: types.ColorSpace
+		colorSpace: types.ColorSpace
 	): types.Color[];
 	genRandomPalette(
 		numBoxes: number,
 		customColor: types.Color | null,
-		initialColorSpace: types.ColorSpace
+		colorSpace: types.ColorSpace
 	): types.Color[];
 	genSplitComplementaryPalette(
 		numBoxes: number,
 		customColor: types.Color | null,
-		initialColorSpace: types.ColorSpace
+		colorSpace: types.ColorSpace
 	): types.Color[];
 	genTetradicPalette(
 		numBoxes: number,
 		customColor: types.Color | null,
-		initialColorSpace: types.ColorSpace
+		colorSpace: types.ColorSpace
 	): types.Color[];
 	genTriadicPalette(
 		numBoxes: number,
 		customColor: types.Color | null,
-		initialColorSpace: types.ColorSpace
+		colorSpace: types.ColorSpace
 	): types.Color[];
 }
 
 export interface PaletteHelpers {
 	adjustSL(color: types.HSL): types.HSL;
-	clone<T>(value: T): T;
 	getWeightedRandomInterval(): number;
+	sanitizeLAB(value: number): number;
 	sanitizePercentage(value: number): number;
 	sanitizeRadial(value: number): number;
-	validateColorValues(color: types.Color): boolean;
+	sanitizeRGB(value: number): number;
+	validateColorValues(color: types.Color | types.SL | types.SV): boolean;
 }
 
 export interface Random {
@@ -217,7 +258,7 @@ export interface Random {
 	randomRGB(): types.RGB;
 	randomSL(): types.SL;
 	randomSV(): types.SV;
-	randomColor(initialColorSpace: types.ColorSpace): types.Color;
+	randomColor(colorSpace: types.ColorSpace): types.Color;
 }
 
 export interface ToCMYK {
@@ -285,6 +326,12 @@ export interface ToXYZ {
 
 export interface Transforms {
 	addHashToHex(hex: types.Hex): types.Hex;
+	colorStringToColor(
+		color: types.ColorString
+	): Exclude<types.Color, types.Hex | types.LAB | types.RGB>;
+	colorToColorString(
+		color: Exclude<types.Color, types.Hex | types.LAB | types.RGB>
+	): types.ColorString;
 	componentToHex(componment: number): string;
 	getColorString(color: types.Color): string | null;
 	getCSSColorString(color: types.Color): string;

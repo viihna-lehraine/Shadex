@@ -2,10 +2,11 @@ import { defaults } from './defaults';
 import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
 import * as types from '../index/types';
+import { core } from './core';
 
 function randomCMYK(): types.CMYK {
 	try {
-		return {
+		const cmyk: types.CMYK = {
 			value: {
 				cyan: paletteHelpers.sanitizePercentage(
 					Math.floor(Math.random() * 101)
@@ -22,8 +23,21 @@ function randomCMYK(): types.CMYK {
 			},
 			format: 'cmyk'
 		};
+
+		if (!paletteHelpers.validateColorValues(cmyk)) {
+			console.error(
+				`Invalid random CMYK color value ${JSON.stringify(cmyk)}`
+			);
+
+			return core.clone(defaults.defaultCMYK());
+		}
+
+		console.log(`Generated randomCMYK: ${JSON.stringify(cmyk)}`);
+
+		return cmyk;
 	} catch (error) {
 		console.error(`Error generating random CMYK color: ${error}`);
+
 		return defaults.defaultCMYK();
 	}
 }
@@ -35,22 +49,34 @@ function randomHex(): types.Hex {
 			{ length: 6 },
 			() => hexDigits[Math.floor(Math.random() * hexDigits.length)]
 		);
-
-		return {
+		const hex: types.Hex = {
 			value: { hex: `#${hexCodeArray.join('')}` },
 			format: 'hex'
 		};
+
+		if (!paletteHelpers.validateColorValues(hex)) {
+			console.error(
+				`Invalid random hex color value ${JSON.stringify(hex)}`
+			);
+
+			return core.clone(defaults.defaultHex());
+		}
+
+		console.log(`Generated randomHex: ${JSON.stringify(hex)}`);
+
+		return hex;
 	} catch (error) {
 		console.error(`Error generating random hex color: ${error}`);
+
 		return defaults.defaultHex();
 	}
 }
 
 function randomHSL(): types.HSL {
 	try {
-		return {
+		const hsl: types.HSL = {
 			value: {
-				hue: paletteHelpers.sanitizePercentage(
+				hue: paletteHelpers.sanitizeRadial(
 					Math.floor(Math.random() * 360)
 				),
 				saturation: paletteHelpers.sanitizePercentage(
@@ -62,15 +88,28 @@ function randomHSL(): types.HSL {
 			},
 			format: 'hsl'
 		};
+
+		if (!paletteHelpers.validateColorValues(hsl)) {
+			console.error(
+				`Invalid random HSL color value ${JSON.stringify(hsl)}`
+			);
+
+			return core.clone(defaults.defaultHSL());
+		}
+
+		console.log(`Generated randomHSL: ${JSON.stringify(hsl)}`);
+
+		return hsl;
 	} catch (error) {
 		console.error(`Error generating random HSL color: ${error}`);
+
 		return defaults.defaultHSL();
 	}
 }
 
 function randomHSV(): types.HSV {
 	try {
-		return {
+		const hsv: types.HSV = {
 			value: {
 				hue: paletteHelpers.sanitizeRadial(
 					Math.floor(Math.random() * 360)
@@ -84,66 +123,149 @@ function randomHSV(): types.HSV {
 			},
 			format: 'hsv'
 		};
+
+		if (!paletteHelpers.validateColorValues(hsv)) {
+			console.error(
+				`Invalid random HSV color value ${JSON.stringify(hsv)}`
+			);
+
+			return core.clone(defaults.defaultHSV());
+		}
+
+		console.log(`Generated randomHSV: ${JSON.stringify(hsv)}`);
+
+		return hsv;
 	} catch (error) {
 		console.error(`Error generating random HSV color: ${error}`);
+
 		return defaults.defaultHSV();
 	}
 }
 
 function randomLAB(): types.LAB {
 	try {
-		return {
+		const lab: types.LAB = {
 			value: {
 				l: paletteHelpers.sanitizePercentage(Math.random() * 100),
-				a: Math.random() * 256 - 128,
-				b: Math.random() * 256 - 128
+				a: paletteHelpers.sanitizeLAB(Math.random() * 251 - 125),
+				b: paletteHelpers.sanitizeLAB(Math.random() * 251 - 125)
 			},
 			format: 'lab'
 		};
+
+		if (!paletteHelpers.validateColorValues(lab)) {
+			console.error(
+				`Invalid random LAB color value ${JSON.stringify(lab)}`
+			);
+
+			return core.clone(defaults.defaultLAB());
+		}
+
+		console.log(`Generated randomLAB: ${JSON.stringify(lab)}`);
+
+		return lab;
 	} catch (error) {
 		console.error(`Error generating random LAB color: ${error}`);
+
 		return defaults.defaultLAB();
 	}
 }
 
 function randomRGB(): types.RGB {
 	try {
-		return {
+		const rgb: types.RGB = {
 			value: {
-				red: Math.floor(Math.random() * 256),
-				green: Math.floor(Math.random() * 256),
-				blue: Math.floor(Math.random() * 256)
+				red: paletteHelpers.sanitizeRGB(
+					Math.floor(Math.random() * 256)
+				),
+				green: paletteHelpers.sanitizeRGB(
+					Math.floor(Math.random() * 256)
+				),
+				blue: paletteHelpers.sanitizeRGB(
+					Math.floor(Math.random() * 256)
+				)
 			},
 			format: 'rgb'
 		};
+
+		if (!paletteHelpers.validateColorValues(rgb)) {
+			console.error(
+				`Invalid random RGB color value ${JSON.stringify(rgb)}`
+			);
+
+			return core.clone(defaults.defaultRGB());
+		}
+
+		console.log(`Generated randomRGB: ${JSON.stringify(rgb)}`);
+
+		return rgb;
 	} catch (error) {
 		console.error(`Error generating random RGB color: ${error}`);
+
 		return defaults.defaultRGB();
 	}
 }
 
 function randomSL(): types.SL {
 	try {
-		const saturation = Math.max(0, Math.min(100, Math.random() * 100));
-		const lightness = Math.max(0, Math.min(100, Math.random() * 100));
-		const format: 'sl' = 'sl';
+		const sl: types.SL = {
+			value: {
+				saturation: paletteHelpers.sanitizePercentage(
+					Math.max(0, Math.min(100, Math.random() * 100))
+				),
+				lightness: paletteHelpers.sanitizePercentage(
+					Math.max(0, Math.min(100, Math.random() * 100))
+				)
+			},
+			format: 'sl'
+		};
 
-		return { value: { saturation, lightness }, format };
+		if (!paletteHelpers.validateColorValues(sl as types.SL)) {
+			console.error(
+				`Invalid random SV color value ${JSON.stringify(sl)}`
+			);
+
+			return core.clone(defaults.defaultSL());
+		}
+
+		console.log(`Generated randomSL: ${JSON.stringify(sl)}`);
+
+		return sl;
 	} catch (error) {
 		console.error(`Error generating random SL color: ${error}`);
+
 		return defaults.defaultSL();
 	}
 }
 
 function randomSV(): types.SV {
 	try {
-		const saturation = Math.max(0, Math.min(100, Math.random() * 100));
-		const value = Math.max(0, Math.min(100, Math.random() * 100));
-		const format: 'sv' = 'sv';
+		const sv: types.SV = {
+			value: {
+				saturation: paletteHelpers.sanitizePercentage(
+					Math.max(0, Math.min(100, Math.random() * 100))
+				),
+				value: paletteHelpers.sanitizePercentage(
+					Math.max(0, Math.min(100, Math.random() * 100))
+				)
+			},
+			format: 'sv'
+		};
 
-		return { value: { saturation, value }, format };
+		if (!paletteHelpers.validateColorValues(sv)) {
+			console.error(
+				`Invalid random SV color value ${JSON.stringify(sv)}`
+			);
+
+			return core.clone(defaults.defaultSV());
+		}
+
+		console.log(`Generated randomSV: ${JSON.stringify(sv)}`);
+
+		return sv;
 	} catch (error) {
 		console.error(`Error generating random SV color: ${error}`);
+
 		return defaults.defaultSV();
 	}
 }
@@ -168,6 +290,7 @@ function randomColor(colorSpace: types.ColorSpace): types.Color {
 		}
 	} catch (error) {
 		console.error(`Error generating random color: ${error}`);
+
 		return random.randomHex();
 	}
 }
