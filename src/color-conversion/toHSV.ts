@@ -2,11 +2,11 @@ import { convert } from './conversion-index';
 import { conversionHelpers } from '../helpers/conversion';
 import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { core } from '../utils/core';
 import { defaults } from '../utils/defaults';
 
-function cmykToHSV(cmyk: types.CMYK): types.HSV {
+function cmykToHSV(cmyk: colors.CMYK): colors.HSV {
 	try {
 		if (!paletteHelpers.validateColorValues(cmyk)) {
 			console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
@@ -24,7 +24,7 @@ function cmykToHSV(cmyk: types.CMYK): types.HSV {
 	}
 }
 
-function hexToHSV(hex: types.Hex): types.HSV {
+function hexToHSV(hex: colors.Hex): colors.HSV {
 	try {
 		if (!paletteHelpers.validateColorValues(hex)) {
 			console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
@@ -42,7 +42,7 @@ function hexToHSV(hex: types.Hex): types.HSV {
 	}
 }
 
-function hslToHSV(hsl: types.HSL): types.HSV {
+function hslToHSV(hsl: colors.HSL): colors.HSV {
 	try {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
@@ -73,7 +73,7 @@ function hslToHSV(hsl: types.HSL): types.HSV {
 	}
 }
 
-function labToHSV(lab: types.LAB): types.HSV {
+function labToHSV(lab: colors.LAB): colors.HSV {
 	try {
 		if (!paletteHelpers.validateColorValues(lab)) {
 			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
@@ -91,7 +91,7 @@ function labToHSV(lab: types.LAB): types.HSV {
 	}
 }
 
-function rgbToHSV(rgb: types.RGB): types.HSV {
+function rgbToHSV(rgb: colors.RGB): colors.HSV {
 	try {
 		if (!paletteHelpers.validateColorValues(rgb)) {
 			console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
@@ -158,7 +158,7 @@ function rgbToHSV(rgb: types.RGB): types.HSV {
 	}
 }
 
-function xyzToHSV(xyz: types.XYZ): types.HSV {
+function xyzToHSV(xyz: colors.XYZ): colors.HSV {
 	try {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);

@@ -1,10 +1,10 @@
 import { core } from './core';
 import { defaults } from './defaults';
 import * as fnObjects from '../index/fn-objects';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { guards } from './type-guards';
 
-function addHashToHex(hex: types.Hex): types.Hex {
+function addHashToHex(hex: colors.Hex): colors.Hex {
 	try {
 		return hex.value.hex.startsWith('#')
 			? hex
@@ -17,10 +17,18 @@ function addHashToHex(hex: types.Hex): types.Hex {
 }
 
 function colorToColorString(
-	color: Exclude<types.Color, types.Hex | types.LAB | types.RGB>
-): types.ColorString {
+	color: Exclude<colors.Color, colors.Hex | colors.LAB | colors.RGB>
+): colors.ColorString {
 	try {
+		if (guards.isColorString(color)) {
+			console.log(
+				`Already formatted as color string: ${JSON.stringify(color)}`
+			);
+			return color;
+		}
+
 		const clonedColor = core.clone(color);
+
 		const addPercentage = (
 			key: keyof (typeof clonedColor)['value'],
 			value: number | string
@@ -36,6 +44,7 @@ function colorToColorString(
 			].includes(key as string) && typeof value === 'number'
 				? `${value}%`
 				: value;
+
 		const newValue = Object.entries(clonedColor.value).reduce(
 			(acc, [key, val]) => {
 				acc[key as keyof (typeof clonedColor)['value']] = addPercentage(
@@ -47,29 +56,31 @@ function colorToColorString(
 			{} as Record<keyof (typeof clonedColor)['value'], string | number>
 		);
 
-		if (guards.isCMYK(clonedColor)) {
-			return { format: 'cmyk', value: newValue as types.CMYKValueString };
-		} else if (guards.isHSL(clonedColor)) {
-			return { format: 'hsl', value: newValue as types.HSLValueString };
-		} else if (guards.isHSV(clonedColor)) {
-			return { format: 'hsv', value: newValue as types.HSVValueString };
-		} else if (guards.isSL(clonedColor)) {
-			return { format: 'sl', value: newValue as types.SLValueString };
-		} else if (guards.isSV(clonedColor)) {
-			return { format: 'sv', value: newValue as types.SVValueString };
+		if (guards.isCMYKColor(clonedColor)) {
+			return {
+				format: 'cmyk',
+				value: newValue as colors.CMYKValueString
+			};
+		} else if (guards.isHSLColor(clonedColor)) {
+			return { format: 'hsl', value: newValue as colors.HSLValueString };
+		} else if (guards.isHSVColor(clonedColor)) {
+			return { format: 'hsv', value: newValue as colors.HSVValueString };
+		} else if (guards.isSLColor(clonedColor)) {
+			return { format: 'sl', value: newValue as colors.SLValueString };
+		} else if (guards.isSVColor(clonedColor)) {
+			return { format: 'sv', value: newValue as colors.SVValueString };
 		} else {
 			throw new Error(`Unsupported format: ${clonedColor.format}`);
 		}
 	} catch (error) {
 		console.error(`addPercentToColorString error: ${error}`);
-
 		throw new Error('Failed to add percent to color string');
 	}
 }
 
 function colorStringToColor(
-	color: types.ColorString
-): Exclude<types.Color, types.Hex | types.LAB | types.RGB> {
+	color: colors.ColorString
+): Exclude<colors.Color, colors.Hex | colors.LAB | colors.RGB> {
 	try {
 		const clonedColor = core.clone(color);
 		const parseValue = (value: string | number): number =>
@@ -92,15 +103,15 @@ function colorStringToColor(
 
 		switch (clonedColor.format) {
 			case 'cmyk':
-				return { format: 'cmyk', value: newValue as types.CMYKValue };
+				return { format: 'cmyk', value: newValue as colors.CMYKValue };
 			case 'hsl':
-				return { format: 'hsl', value: newValue as types.HSLValue };
+				return { format: 'hsl', value: newValue as colors.HSLValue };
 			case 'hsv':
-				return { format: 'hsv', value: newValue as types.HSVValue };
+				return { format: 'hsv', value: newValue as colors.HSVValue };
 			case 'sl':
-				return { format: 'sl', value: newValue as types.SLValue };
+				return { format: 'sl', value: newValue as colors.SLValue };
 			case 'sv':
-				return { format: 'sv', value: newValue as types.SVValue };
+				return { format: 'sv', value: newValue as colors.SVValue };
 			default:
 				throw new Error('Unsupported format');
 		}
@@ -123,21 +134,21 @@ function componentToHex(component: number): string {
 	}
 }
 
-function getColorString(color: types.Color): string | null {
+function getColorString(color: colors.Color): string | null {
 	try {
 		const formatters = {
-			cmyk: (c: types.CMYK) =>
+			cmyk: (c: colors.CMYK) =>
 				`cmyk(${c.value.cyan}, ${c.value.magenta}, ${c.value.yellow}, ${c.value.key})`,
-			hex: (c: types.Hex) => c.value.hex,
-			hsl: (c: types.HSL) =>
+			hex: (c: colors.Hex) => c.value.hex,
+			hsl: (c: colors.HSL) =>
 				`hsl(${c.value.hue}, ${c.value.saturation}%, ${c.value.lightness}%)`,
-			hsv: (c: types.HSV) =>
+			hsv: (c: colors.HSV) =>
 				`hsv(${c.value.hue}, ${c.value.saturation}%, ${c.value.value}%)`,
-			lab: (c: types.LAB) =>
+			lab: (c: colors.LAB) =>
 				`lab(${c.value.l}, ${c.value.a}, ${c.value.b})`,
-			rgb: (c: types.RGB) =>
+			rgb: (c: colors.RGB) =>
 				`rgb(${c.value.red}, ${c.value.green}, ${c.value.blue})`,
-			xyz: (c: types.XYZ) =>
+			xyz: (c: colors.XYZ) =>
 				`xyz(${c.value.x}, ${c.value.y}, ${c.value.z})`
 		};
 
@@ -168,7 +179,7 @@ function getColorString(color: types.Color): string | null {
 	}
 }
 
-function getCSSColorString(color: types.Color): string {
+function getCSSColorString(color: colors.Color): string {
 	try {
 		switch (color.format) {
 			case 'cmyk':
@@ -198,9 +209,9 @@ function getCSSColorString(color: types.Color): string {
 }
 
 const parseColor = (
-	colorSpace: types.ColorSpace,
+	colorSpace: colors.ColorSpace,
 	value: string
-): types.Color | null => {
+): colors.Color | null => {
 	try {
 		switch (colorSpace) {
 			case 'cmyk': {
@@ -272,9 +283,9 @@ function parseColorComponents(value: string, expectedLength: number): number[] {
 }
 
 function parseCustomColor(
-	colorSpace: types.ColorSpace,
+	colorSpace: colors.ColorSpace,
 	rawValue: string
-): types.Color | null {
+): colors.Color | null {
 	try {
 		console.log(`Parsing custom color: ${JSON.stringify(rawValue)}`);
 
@@ -371,7 +382,7 @@ function parseCustomColor(
 	}
 }
 
-function stripHashFromHex(hex: types.Hex): types.Hex {
+function stripHashFromHex(hex: colors.Hex): colors.Hex {
 	try {
 		const hexString = hex.value.hex;
 

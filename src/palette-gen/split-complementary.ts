@@ -1,7 +1,7 @@
 import { genAllColorValues } from '../color-conversion/conversion';
 import { dom } from '../dom/dom-main';
 import { paletteHelpers } from '../helpers/palette';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { random } from '../utils/color-randomizer';
 import { core } from '../utils/core';
 
@@ -23,11 +23,11 @@ export function genSplitComplementaryHues(baseHue: number): number[] {
 
 export function genSplitComplementaryPalette(
 	numBoxes: number,
-	customColor: types.Color | null = null,
-	colorSpace: types.ColorSpace = 'hex'
-): types.Color[] {
+	customColor: colors.Color | null = null,
+	colorSpace: colors.ColorSpace = 'hex'
+): colors.Color[] {
 	try {
-		let clonedCustomColor: types.Color | null = null;
+		let clonedCustomColor: colors.Color | null = null;
 
 		if (customColor) {
 			if (!paletteHelpers.validateColorValues(customColor)) {
@@ -49,13 +49,13 @@ export function genSplitComplementaryPalette(
 			return [];
 		}
 
-		const colors: types.Color[] = [];
-		let baseColor: types.Color;
+		const colors: colors.Color[] = [];
+		let baseColor: colors.Color;
 
 		baseColor = clonedCustomColor ?? random.randomColor(colorSpace);
 
 		const baseColorValues = genAllColorValues(baseColor);
-		const baseHSL = baseColorValues.hsl as types.HSL;
+		const baseHSL = baseColorValues.hsl as colors.HSL;
 
 		if (!baseHSL) {
 			throw new Error('Base HSL color is required for this palette.');
@@ -97,7 +97,7 @@ export function genSplitComplementaryPalette(
 			const colorBox = document.getElementById(`color-box-${index + 1}`);
 
 			if (colorBox) {
-				const hexColor = genAllColorValues(color).hex as types.Hex;
+				const hexColor = genAllColorValues(color).hex as colors.Hex;
 
 				colorBox.style.backgroundColor = hexColor.value.hex;
 

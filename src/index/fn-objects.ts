@@ -1,57 +1,60 @@
-import * as interfaces from './interfaces';
-import * as types from './types';
+import { IDBPObjectStore } from 'idb';
+import * as colors from './colors';
+import * as conversion from './conversion';
+import * as domTypes from './dom-types';
+import * as idb from './idb';
 
 export interface ColorLimits {
 	isCMYKTooBright(
-		cmyk: types.CMYK,
+		cmyk: colors.CMYK,
 		cmykBrightnessThreshold?: number
 	): boolean;
-	isCMYKTooDark(cmyk: types.CMYK, cmykDarknessThreshold?: number): boolean;
-	isCMYKTooGray(cmyk: types.CMYK, cmykGrayThreshold?: number): boolean;
-	isHexTooBright(hex: types.Hex, hexBrightnessThreshold?: number): boolean;
-	isHexTooDark(hex: types.Hex, hexDarknessThreshold?: number): boolean;
-	isHexTooGray(hex: types.Hex, hexGrayThreshold?: number): boolean;
-	isHSLTooBright(hsl: types.HSL, hslBrightnessThreshold?: number): boolean;
-	isHSLTooDark(hsl: types.HSL, hslDarknessThreshold?: number): boolean;
-	isHSLTooGray(hsl: types.HSL, hslGrayThreshold?: number): boolean;
-	isHSVTooBright(hsv: types.HSV, hsvBrightnessThreshold?: number): boolean;
-	isHSVTooDark(hsv: types.HSV, hsvDarknessThreshold?: number): boolean;
-	isHSVTooGray(hsv: types.HSV, hsvGrayThreshold?: number): boolean;
-	isLABTooBright(lab: types.LAB, labBrightnessThreshold?: number): boolean;
-	isLABTooDark(lab: types.LAB, labDarknessThreshold?: number): boolean;
-	isLABTooGray(lab: types.LAB, labGrayThreshold?: number): boolean;
-	isRGBTooBright(rgb: types.RGB, rgbBrightnessThreshold?: number): boolean;
-	isRGBTooDark(rgb: types.RGB, rgbDarknessThreshold?: number): boolean;
-	isRGBTooGray(rgb: types.RGB, rgbGrayThreshold?: number): boolean;
+	isCMYKTooDark(cmyk: colors.CMYK, cmykDarknessThreshold?: number): boolean;
+	isCMYKTooGray(cmyk: colors.CMYK, cmykGrayThreshold?: number): boolean;
+	isHexTooBright(hex: colors.Hex, hexBrightnessThreshold?: number): boolean;
+	isHexTooDark(hex: colors.Hex, hexDarknessThreshold?: number): boolean;
+	isHexTooGray(hex: colors.Hex, hexGrayThreshold?: number): boolean;
+	isHSLTooBright(hsl: colors.HSL, hslBrightnessThreshold?: number): boolean;
+	isHSLTooDark(hsl: colors.HSL, hslDarknessThreshold?: number): boolean;
+	isHSLTooGray(hsl: colors.HSL, hslGrayThreshold?: number): boolean;
+	isHSVTooBright(hsv: colors.HSV, hsvBrightnessThreshold?: number): boolean;
+	isHSVTooDark(hsv: colors.HSV, hsvDarknessThreshold?: number): boolean;
+	isHSVTooGray(hsv: colors.HSV, hsvGrayThreshold?: number): boolean;
+	isLABTooBright(lab: colors.LAB, labBrightnessThreshold?: number): boolean;
+	isLABTooDark(lab: colors.LAB, labDarknessThreshold?: number): boolean;
+	isLABTooGray(lab: colors.LAB, labGrayThreshold?: number): boolean;
+	isRGBTooBright(rgb: colors.RGB, rgbBrightnessThreshold?: number): boolean;
+	isRGBTooDark(rgb: colors.RGB, rgbDarknessThreshold?: number): boolean;
+	isRGBTooGray(rgb: colors.RGB, rgbGrayThreshold?: number): boolean;
 	getLimitChecker<K extends keyof ColorLimits>(limit: K): ColorLimits[K];
-	isColorInBounds(color: interfaces.ConversionData): boolean;
+	isColorInBounds(color: colors.ColorDataAssertion): boolean;
 }
 
 export interface ConversionHelpers {
 	applyGammaCorrection(value: number): number;
-	clampRGB(rgb: types.RGB): types.RGB;
-	cmykToXYZHelper(cmyk: types.CMYK): types.XYZ;
-	convertColorToCMYK(color: types.Color): types.CMYK | null;
-	convertColorToHex(color: types.Color): types.Hex | null;
-	convertColorToHSL(color: types.Color): types.HSL | null;
-	convertColorToHSV(color: types.Color): types.HSV | null;
-	convertColorToLAB(color: types.Color): types.LAB | null;
-	convertColorToRGB(color: types.Color): types.RGB | null;
-	hexToCMYKHelper(hex: types.Hex): types.CMYK;
-	hexToXYZHelper(hex: types.Hex): types.XYZ;
+	clampRGB(rgb: colors.RGB): colors.RGB;
+	cmykToXYZHelper(cmyk: colors.CMYK): colors.XYZ;
+	convertColorToCMYK(color: colors.Color): colors.CMYK | null;
+	convertColorToHex(color: colors.Color): colors.Hex | null;
+	convertColorToHSL(color: colors.Color): colors.HSL | null;
+	convertColorToHSV(color: colors.Color): colors.HSV | null;
+	convertColorToLAB(color: colors.Color): colors.LAB | null;
+	convertColorToRGB(color: colors.Color): colors.RGB | null;
+	hexToCMYKHelper(hex: colors.Hex): colors.CMYK;
+	hexToXYZHelper(hex: colors.Hex): colors.XYZ;
 	hueToRGB(p: number, q: number, t: number): number;
-	hslAddFormat(value: types.HSLValue): types.HSL;
-	hslToCMYKHelper(hsl: types.HSL): types.CMYK;
-	hslToHexHelper(hsl: types.HSL): types.Hex;
-	hslToXYZHelper(hsl: types.HSL): types.XYZ;
-	hsvToCMYKHelper(hsv: types.HSV): types.CMYK;
-	hsvToXYZHelper(hsv: types.HSV): types.XYZ;
-	labToCMYKHelper(lab: types.LAB): types.CMYK;
-	labToXYZHelper(lab: types.LAB): types.XYZ;
-	xyzToCMYKHelper(xyz: types.XYZ): types.CMYK;
-	xyzToHexHelper(xyz: types.XYZ): types.Hex;
-	xyzToHSLHelper(xyz: types.XYZ): types.HSL;
-	xyzToHSVHelper(xyz: types.XYZ): types.HSV;
+	hslAddFormat(value: colors.HSLValue): colors.HSL;
+	hslToCMYKHelper(hsl: colors.HSL): colors.CMYK;
+	hslToHexHelper(hsl: colors.HSL): colors.Hex;
+	hslToXYZHelper(hsl: colors.HSL): colors.XYZ;
+	hsvToCMYKHelper(hsv: colors.HSV): colors.CMYK;
+	hsvToXYZHelper(hsv: colors.HSV): colors.XYZ;
+	labToCMYKHelper(lab: colors.LAB): colors.CMYK;
+	labToXYZHelper(lab: colors.LAB): colors.XYZ;
+	xyzToCMYKHelper(xyz: colors.XYZ): colors.CMYK;
+	xyzToHexHelper(xyz: colors.XYZ): colors.Hex;
+	xyzToHSLHelper(xyz: colors.XYZ): colors.HSL;
+	xyzToHSVHelper(xyz: colors.XYZ): colors.HSV;
 }
 
 export interface Convert
@@ -73,33 +76,33 @@ export interface Core {
 }
 
 export interface Defaults {
-	defaultCMYK(): types.CMYK;
-	defaultHex(): types.Hex;
-	defaultHSL(): types.HSL;
-	defaultHSV(): types.HSV;
-	defaultLAB(): types.LAB;
-	defaultRGB(): types.RGB;
-	defaultSL(): types.SL;
-	defaultSV(): types.SV;
-	defaultXYZ(): types.XYZ;
+	defaultCMYK(): colors.CMYK;
+	defaultHex(): colors.Hex;
+	defaultHSL(): colors.HSL;
+	defaultHSV(): colors.HSV;
+	defaultLAB(): colors.LAB;
+	defaultRGB(): colors.RGB;
+	defaultSL(): colors.SL;
+	defaultSV(): colors.SV;
+	defaultXYZ(): colors.XYZ;
 }
 
 export interface DOM {
 	addConversionButtonEventListeners(): void;
-	applyCustomColor(): types.Color;
-	applyFirstColorToUI(colorSpace: types.ColorSpace): types.Color;
-	applyUIColorSpace(): types.ColorSpace;
-	convertColors(targetFormat: types.ColorSpace): void;
+	applyCustomColor(): colors.Color;
+	applyFirstColorToUI(colorSpace: colors.ColorSpace): colors.Color;
+	applySelectedColorSpace(): colors.ColorSpace;
+	convertColors(targetFormat: colors.ColorSpace): void;
 	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
-	defineUIButtons(): interfaces.UIButtons;
+	defineUIButtons(): domTypes.UIButtons;
 	desaturateColor(selectedColor: number): void;
 	getElementsForSelectedColor(
 		selectedColor: number
-	): interfaces.GetElementsForSelectedColor;
-	getGenerateButtonParams(): interfaces.GenButtonParams | null;
+	): domTypes.GetElementsForSelectedColor;
+	getGenerateButtonParams(): domTypes.GenButtonParams | null;
 	handleGenButtonClick(): void;
-	populateColorTextOutputBox(color: types.Color, boxNumber: number): void;
-	pullParamsFromUI(): interfaces.PullParamsFromUI;
+	populateColorTextOutputBox(color: colors.Color, boxNumber: number): void;
+	pullParamsFromUI(): domTypes.PullParamsFromUI;
 	saturateColor(selectedColor: number): void;
 	showCustomColorPopupDiv(): void;
 }
@@ -108,9 +111,9 @@ export interface DOMHelpers {
 	attachDragAndDropEventListeners(element: HTMLElement | null): void;
 	getElement<T extends HTMLElement>(id: string): T | null;
 	makePaletteBox(
-		color: types.Color,
+		color: colors.Color,
 		paletteBoxCount: number
-	): interfaces.MakePaletteBox;
+	): domTypes.MakePaletteBox;
 	showToast(message: string): void;
 	showTooltip(tooltipElement: HTMLElement): void;
 }
@@ -123,232 +126,257 @@ export interface DragAndDrop {
 }
 
 export interface Generate {
-	genPaletteBox(colors: types.Color[], numBoxes: number): void;
-	genSelectedPaletteType(
-		paletteType: number,
+	genPaletteBox(
+		colors: colors.Color[],
 		numBoxes: number,
-		baseColor: types.Color,
-		customColor: types.Color | null,
-		colorSpace: types.ColorSpace
-	): types.Color[];
-	startPaletteGen(
-		paletteType: number,
-		numBoxes: number,
-		colorSpace: types.ColorSpace,
-		customColor: types.Color | null
-	): void;
+		tableId: string
+	): Promise<void>;
+	genSelectedPaletteType(options: colors.PaletteOptions): colors.Color[];
+	startPaletteGen(options: colors.PaletteOptions): Promise<void>;
+	validateAndConvertColor(
+		color: colors.Color | colors.ColorString | null
+	): colors.Color | null;
 }
 
 export interface Guards {
 	ensureHash(value: string): string;
-	isCMYK(
-		color: types.Color | types.ColorString
-	): color is types.CMYK | types.CMYKString;
-	isCMYKColor(value: unknown): value is types.CMYK;
-	isCMYKString(value: unknown): value is types.CMYKString;
-	isColor(value: unknown): value is types.Color;
+	isCMYKColor(value: unknown): value is colors.CMYK;
+	isCMYKString(value: unknown): value is colors.CMYKString;
+	isColor(value: unknown): value is colors.Color;
 	isColorSpace(value: string): boolean;
 	isColorSpaceExtended(value: string): boolean;
-	isColorString(value: unknown): value is types.ColorString;
+	isColorString(value: unknown): value is colors.ColorString;
 	isConversion(
-		from: keyof types.ConversionMap,
-		to: keyof types.Color
+		from: keyof conversion.ConversionMap,
+		to: keyof colors.Color
 	): boolean;
-	isConvertibleColor(color: types.Color): boolean;
+	isConvertibleColor(color: colors.Color): boolean;
 	isFormat(format: unknown): boolean;
-	isHex(color: types.Color | types.ColorString): color is types.Hex;
-	isHexColor(value: unknown): boolean;
-	isHSL(
-		color: types.Color | types.ColorString
-	): color is types.HSL | types.HSLString;
-	isHSLColor(value: unknown): value is types.HSL;
-	isHSLString(value: unknown): value is types.HSLString;
-	isHSV(
-		color: types.Color | types.ColorString
-	): color is types.HSV | types.HSVString;
-	isHSVColor(value: unknown): value is types.HSV;
-	isHSVString(value: unknown): value is types.HSVString;
+	isHex(color: colors.Color | colors.ColorString): color is colors.Hex;
+	isHSLColor(value: unknown): value is colors.HSL;
+	isHSLString(value: unknown): value is colors.HSLString;
+	isHSVColor(value: unknown): value is colors.HSV;
+	isHSVString(value: unknown): value is colors.HSVString;
 	isInputElement(element: HTMLElement | null): element is HTMLElement;
-	isLAB(color: types.Color | types.ColorString): color is types.LAB;
-	isRGB(color: types.Color | types.ColorString): color is types.RGB;
-	isSL(
-		color: types.Color | types.ColorString
-	): color is types.SL | types.SLString;
-	isSLColor(value: unknown): value is types.SL;
-	isSLString(value: unknown): value is types.SLString;
-	isSV(
-		color: types.Color | types.ColorString
-	): color is types.SV | types.SVString;
-	isSVColor(value: unknown): value is types.SV;
-	isSVString(value: unknown): value is types.SVString;
-	isXYZ(color: types.Color | types.ColorString): color is types.XYZ;
-	narrowToColor(color: types.Color | types.ColorString): types.Color | null;
+	isLAB(color: colors.Color | colors.ColorString): color is colors.LAB;
+	isRGB(color: colors.Color | colors.ColorString): color is colors.RGB;
+	isSLColor(value: unknown): value is colors.SL;
+	isSLString(value: unknown): value is colors.SLString;
+	isSVColor(value: unknown): value is colors.SV;
+	isSVString(value: unknown): value is colors.SVString;
+	isXYZ(color: colors.Color | colors.ColorString): color is colors.XYZ;
+	narrowToColor(
+		color: colors.Color | colors.ColorString
+	): colors.Color | null;
+}
+
+export interface IDBFn {
+	createMutationLogger<T extends object>(obj: T, key: string): T;
+	deleteTable(id: string): Promise<void>;
+	getCustomColor(): Promise<colors.Color | null>;
+	getDB(): Promise<idb.PaletteDB>;
+	getNextTableID(): Promise<string>;
+	getSettings(): Promise<{ colorSpace: colors.ColorSpace } | null>;
+	getTable(id: string): Promise<idb.PaletteEntry[] | null>;
+	listTables(): Promise<string[]>;
+	logMutation(mutation: idb.MutationLog): Promise<void>;
+	renderPalette(tableId: string): Promise<void>;
+	saveData<T>(
+		storeName: keyof idb.PaletteSchema,
+		key: string,
+		data: T
+	): Promise<void>;
+	trackedTransaction<StoreName extends keyof idb.PaletteSchema>(
+		storeName: StoreName,
+		mode: 'readonly' | 'readwrite',
+		callback: (
+			store: IDBPObjectStore<
+				idb.PaletteSchema,
+				[StoreName],
+				StoreName,
+				typeof mode
+			>
+		) => Promise<void>
+	): Promise<void>;
+	updatePalette(
+		id: string,
+		entryIndex: number,
+		newEntry: idb.PaletteEntry
+	): Promise<void>;
+	updateTableEntry(
+		tableId: string,
+		entryIndex: number,
+		newEntry: idb.PaletteEntry
+	): Promise<void>;
 }
 
 export interface Palette {
-	genAnalogousHues(color: types.Color, numBoxes: number): number[];
+	genAnalogousHues(color: colors.Color, numBoxes: number): number[];
 	genDiadicHues(baseHue: number): number[];
-	genHexadicHues(hsl: types.HSL): number[];
+	genHexadicHues(hsl: colors.HSL): number[];
 	genSplitComplementaryHues(baseHue: number): number[];
 	genTetradicHues(baseHue: number): number[];
 	genTriadicHues(baseHue: number): number[];
 	genAnalogousPalette(
 		numBoxes: number,
-		customColor: types.Color | null,
-		colorSpace: types.ColorSpace
-	): types.Color[];
+		customColor: colors.Color | null,
+		colorSpace: colors.ColorSpace
+	): colors.Color[];
 	genComplementaryPalette(
 		numBoxes: number,
-		baseColor: types.Color | null,
-		colorSpace: types.ColorSpace
-	): types.Color[];
+		baseColor: colors.Color | null,
+		colorSpace: colors.ColorSpace
+	): colors.Color[];
 	genDiadicPalette(
 		numBoxes: number,
-		customColor: types.Color | null,
-		colorSpace: types.ColorSpace
-	): types.Color[];
+		customColor: colors.Color | null,
+		colorSpace: colors.ColorSpace
+	): colors.Color[];
 	genHexadicPalette(
 		numBoxes: number,
-		customColor: types.Color | null,
-		colorSpace: types.ColorSpace
-	): types.Color[];
+		customColor: colors.Color | null,
+		colorSpace: colors.ColorSpace
+	): colors.Color[];
 	genMonochromaticPalette(
 		numBoxes: number,
-		customColor: types.Color | null,
-		colorSpace: types.ColorSpace
-	): types.Color[];
+		customColor: colors.Color | null,
+		colorSpace: colors.ColorSpace
+	): colors.Color[];
 	genRandomPalette(
 		numBoxes: number,
-		customColor: types.Color | null,
-		colorSpace: types.ColorSpace
-	): types.Color[];
+		customColor: colors.Color | null,
+		colorSpace: colors.ColorSpace
+	): colors.Color[];
 	genSplitComplementaryPalette(
 		numBoxes: number,
-		customColor: types.Color | null,
-		colorSpace: types.ColorSpace
-	): types.Color[];
+		customColor: colors.Color | null,
+		colorSpace: colors.ColorSpace
+	): colors.Color[];
 	genTetradicPalette(
 		numBoxes: number,
-		customColor: types.Color | null,
-		colorSpace: types.ColorSpace
-	): types.Color[];
+		customColor: colors.Color | null,
+		colorSpace: colors.ColorSpace
+	): colors.Color[];
 	genTriadicPalette(
 		numBoxes: number,
-		customColor: types.Color | null,
-		colorSpace: types.ColorSpace
-	): types.Color[];
+		customColor: colors.Color | null,
+		colorSpace: colors.ColorSpace
+	): colors.Color[];
 }
 
 export interface PaletteHelpers {
-	adjustSL(color: types.HSL): types.HSL;
+	adjustSL(color: colors.HSL): colors.HSL;
 	getWeightedRandomInterval(): number;
 	sanitizeLAB(value: number): number;
 	sanitizePercentage(value: number): number;
 	sanitizeRadial(value: number): number;
 	sanitizeRGB(value: number): number;
-	validateColorValues(color: types.Color | types.SL | types.SV): boolean;
+	validateColorValues(color: colors.Color | colors.SL | colors.SV): boolean;
 }
 
 export interface Random {
-	randomCMYK(): types.CMYK;
-	randomHex(): types.Hex;
-	randomHSL(): types.HSL;
-	randomHSV(): types.HSV;
-	randomLAB(): types.LAB;
-	randomRGB(): types.RGB;
-	randomSL(): types.SL;
-	randomSV(): types.SV;
-	randomColor(colorSpace: types.ColorSpace): types.Color;
+	randomCMYK(): colors.CMYK;
+	randomHex(): colors.Hex;
+	randomHSL(): colors.HSL;
+	randomHSV(): colors.HSV;
+	randomLAB(): colors.LAB;
+	randomRGB(): colors.RGB;
+	randomSL(): colors.SL;
+	randomSV(): colors.SV;
+	randomColor(colorSpace: colors.ColorSpace): colors.Color;
 }
 
 export interface ToCMYK {
-	hexToCMYK(hex: types.Hex): types.CMYK;
-	hslToCMYK(hsl: types.HSL): types.CMYK;
-	hsvToCMYK(hsv: types.HSV): types.CMYK;
-	labToCMYK(lab: types.LAB): types.CMYK;
-	rgbToCMYK(rgb: types.RGB): types.CMYK;
-	xyzToCMYK(xyz: types.XYZ): types.CMYK;
+	hexToCMYK(hex: colors.Hex): colors.CMYK;
+	hslToCMYK(hsl: colors.HSL): colors.CMYK;
+	hsvToCMYK(hsv: colors.HSV): colors.CMYK;
+	labToCMYK(lab: colors.LAB): colors.CMYK;
+	rgbToCMYK(rgb: colors.RGB): colors.CMYK;
+	xyzToCMYK(xyz: colors.XYZ): colors.CMYK;
 }
 
 export interface ToHex {
-	cmykToHex(cmyk: types.CMYK): types.Hex;
-	hslToHex(hsl: types.HSL): types.Hex;
-	hsvToHex(hsv: types.HSV): types.Hex;
-	labToHex(lab: types.LAB): types.Hex;
-	rgbToHex(rgb: types.RGB): types.Hex;
-	xyzToHex(xyz: types.XYZ): types.Hex;
+	cmykToHex(cmyk: colors.CMYK): colors.Hex;
+	hslToHex(hsl: colors.HSL): colors.Hex;
+	hsvToHex(hsv: colors.HSV): colors.Hex;
+	labToHex(lab: colors.LAB): colors.Hex;
+	rgbToHex(rgb: colors.RGB): colors.Hex;
+	xyzToHex(xyz: colors.XYZ): colors.Hex;
 }
 
 export interface ToHSL {
-	cmykToHSL(cmyk: types.CMYK): types.HSL;
-	hexToHSL(hex: types.Hex): types.HSL;
-	hsvToHSL(hsv: types.HSV): types.HSL;
-	labToHSL(lab: types.LAB): types.HSL;
-	rgbToHSL(rgb: types.RGB): types.HSL;
-	xyzToHSL(xyz: types.XYZ): types.HSL;
+	cmykToHSL(cmyk: colors.CMYK): colors.HSL;
+	hexToHSL(hex: colors.Hex): colors.HSL;
+	hsvToHSL(hsv: colors.HSV): colors.HSL;
+	labToHSL(lab: colors.LAB): colors.HSL;
+	rgbToHSL(rgb: colors.RGB): colors.HSL;
+	xyzToHSL(xyz: colors.XYZ): colors.HSL;
 }
 
 export interface ToHSV {
-	cmykToHSV(cmyk: types.CMYK): types.HSV;
-	hexToHSV(hex: types.Hex): types.HSV;
-	hslToHSV(hsl: types.HSL): types.HSV;
-	labToHSV(lab: types.LAB): types.HSV;
-	rgbToHSV(rgb: types.RGB): types.HSV;
-	xyzToHSV(xyz: types.XYZ): types.HSV;
+	cmykToHSV(cmyk: colors.CMYK): colors.HSV;
+	hexToHSV(hex: colors.Hex): colors.HSV;
+	hslToHSV(hsl: colors.HSL): colors.HSV;
+	labToHSV(lab: colors.LAB): colors.HSV;
+	rgbToHSV(rgb: colors.RGB): colors.HSV;
+	xyzToHSV(xyz: colors.XYZ): colors.HSV;
 }
 
 export interface ToLAB {
-	cmykToLAB(cmyk: types.CMYK): types.LAB;
-	hexToLAB(hex: types.Hex): types.LAB;
-	hslToLAB(hsl: types.HSL): types.LAB;
-	hsvToLAB(hsv: types.HSV): types.LAB;
-	rgbToLAB(rgb: types.RGB): types.LAB;
-	xyzToLAB(xyz: types.XYZ): types.LAB;
+	cmykToLAB(cmyk: colors.CMYK): colors.LAB;
+	hexToLAB(hex: colors.Hex): colors.LAB;
+	hslToLAB(hsl: colors.HSL): colors.LAB;
+	hsvToLAB(hsv: colors.HSV): colors.LAB;
+	rgbToLAB(rgb: colors.RGB): colors.LAB;
+	xyzToLAB(xyz: colors.XYZ): colors.LAB;
 }
 
 export interface ToRGB {
-	cmykToRGB(cmyk: types.CMYK): types.RGB;
-	hexToRGB(hex: types.Hex): types.RGB;
-	hslToRGB(hsl: types.HSL): types.RGB;
-	hsvToRGB(hsv: types.HSV): types.RGB;
-	labToRGB(lab: types.LAB): types.RGB;
-	xyzToRGB(xyz: types.XYZ): types.RGB;
+	cmykToRGB(cmyk: colors.CMYK): colors.RGB;
+	hexToRGB(hex: colors.Hex): colors.RGB;
+	hslToRGB(hsl: colors.HSL): colors.RGB;
+	hsvToRGB(hsv: colors.HSV): colors.RGB;
+	labToRGB(lab: colors.LAB): colors.RGB;
+	xyzToRGB(xyz: colors.XYZ): colors.RGB;
 }
 
 export interface ToXYZ {
-	cmykToXYZ(cmyk: types.CMYK): types.XYZ;
-	hexToXYZ(hex: types.Hex): types.XYZ;
-	hslToXYZ(hsl: types.HSL): types.XYZ;
-	hsvToXYZ(hsv: types.HSV): types.XYZ;
-	labToXYZ(lab: types.LAB): types.XYZ;
-	rgbToXYZ(rgb: types.RGB): types.XYZ;
+	cmykToXYZ(cmyk: colors.CMYK): colors.XYZ;
+	hexToXYZ(hex: colors.Hex): colors.XYZ;
+	hslToXYZ(hsl: colors.HSL): colors.XYZ;
+	hsvToXYZ(hsv: colors.HSV): colors.XYZ;
+	labToXYZ(lab: colors.LAB): colors.XYZ;
+	rgbToXYZ(rgb: colors.RGB): colors.XYZ;
 }
 
 export interface Transforms {
-	addHashToHex(hex: types.Hex): types.Hex;
+	addHashToHex(hex: colors.Hex): colors.Hex;
 	colorStringToColor(
-		color: types.ColorString
-	): Exclude<types.Color, types.Hex | types.LAB | types.RGB>;
+		color: colors.ColorString
+	): Exclude<colors.Color, colors.Hex | colors.LAB | colors.RGB>;
 	colorToColorString(
-		color: Exclude<types.Color, types.Hex | types.LAB | types.RGB>
-	): types.ColorString;
+		color: Exclude<colors.Color, colors.Hex | colors.LAB | colors.RGB>
+	): colors.ColorString;
 	componentToHex(componment: number): string;
-	getColorString(color: types.Color): string | null;
-	getCSSColorString(color: types.Color): string;
-	parseColor(colorSpace: types.ColorSpace, value: string): types.Color | null;
+	getColorString(color: colors.Color): string | null;
+	getCSSColorString(color: colors.Color): string;
+	parseColor(
+		colorSpace: colors.ColorSpace,
+		value: string
+	): colors.Color | null;
 	parseColorComponents(value: string, expectedLength: number): number[];
 	parseCustomColor(
-		colorSpace: types.ColorSpace,
+		colorSpace: colors.ColorSpace,
 		rawValue: string
-	): types.Color | null;
-	stripHashFromHex(hex: types.Hex): types.Hex;
+	): colors.Color | null;
+	stripHashFromHex(hex: colors.Hex): colors.Hex;
 }
 
 export interface Wrappers {
-	hexToCMYKWrapper(input: string | types.Hex): types.CMYK;
-	hexToHSLWrapper(input: string | types.Hex): types.HSL;
-	hexToHSVWrapper(input: string | types.Hex): types.HSV;
-	hexToLABWrapper(input: string | types.Hex): types.LAB;
-	hexToRGBWrapper(input: string | types.Hex): types.RGB;
-	hexToXYZWrapper(input: string | types.Hex): types.XYZ;
+	hexToCMYKWrapper(input: string | colors.Hex): colors.CMYK;
+	hexToHSLWrapper(input: string | colors.Hex): colors.HSL;
+	hexToHSVWrapper(input: string | colors.Hex): colors.HSV;
+	hexToLABWrapper(input: string | colors.Hex): colors.LAB;
+	hexToRGBWrapper(input: string | colors.Hex): colors.RGB;
+	hexToXYZWrapper(input: string | colors.Hex): colors.XYZ;
 }

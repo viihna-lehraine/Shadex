@@ -1,5 +1,5 @@
 # ColorGen
-## version 0.5.22 (pre-release / unstable)
+## version 0.6.01 (pre-alpha)
 
 ***
 ColorGen is a web-based color palette generator. It produces 8 varieties of color scheme and can convert between 6 color formats.
@@ -201,12 +201,12 @@ This project is released under the GNU General Public License, version 3. See th
 ## Author
 
 - **Viihna Lehraine** - sole creator and contributor
-- **Built With** - Vanilla JavaScript, VS Code, Firefox, and unhealthy amounts of caffeine
+- **Built With** - TypeScript v5.6.3, Node v22.3.0, VS Code
 
 ***
 
 ## Contact Me
 
-- viihna@voidfucker.com
+- viihna@viihnatech.com
 - viihna.78 (Signal)
-- dr.face. (Discord)
+- viihna.the.shark (Discord)

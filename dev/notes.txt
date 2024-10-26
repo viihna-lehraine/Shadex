@@ -11,3 +11,8 @@ LAB Colorspace
 		L [0 100]%
 		A [-125, 125]
 		B [-125, 125]
+
+
+////////////////////////////////
+
+startPaletteGen() uses the same base color twice

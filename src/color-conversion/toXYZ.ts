@@ -1,11 +1,11 @@
 import { conversionHelpers } from '../helpers/conversion';
 import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { core } from '../utils/core';
 import { defaults } from '../utils/defaults';
 
-function cmykToXYZ(cmyk: types.CMYK): types.XYZ {
+function cmykToXYZ(cmyk: colors.CMYK): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(cmyk)) {
 			console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
@@ -21,7 +21,7 @@ function cmykToXYZ(cmyk: types.CMYK): types.XYZ {
 	}
 }
 
-function hexToXYZ(hex: types.Hex): types.XYZ {
+function hexToXYZ(hex: colors.Hex): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(hex)) {
 			console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
@@ -37,7 +37,7 @@ function hexToXYZ(hex: types.Hex): types.XYZ {
 	}
 }
 
-function hslToXYZ(hsl: types.HSL): types.XYZ {
+function hslToXYZ(hsl: colors.HSL): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
@@ -53,7 +53,7 @@ function hslToXYZ(hsl: types.HSL): types.XYZ {
 	}
 }
 
-function hsvToXYZ(hsv: types.HSV): types.XYZ {
+function hsvToXYZ(hsv: colors.HSV): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(hsv)) {
 			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
@@ -69,7 +69,7 @@ function hsvToXYZ(hsv: types.HSV): types.XYZ {
 	}
 }
 
-function labToXYZ(lab: types.LAB): types.XYZ {
+function labToXYZ(lab: colors.LAB): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(lab)) {
 			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
@@ -109,7 +109,7 @@ function labToXYZ(lab: types.LAB): types.XYZ {
 	}
 }
 
-function rgbToXYZ(rgb: types.RGB): types.XYZ {
+function rgbToXYZ(rgb: colors.RGB): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(rgb)) {
 			console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);

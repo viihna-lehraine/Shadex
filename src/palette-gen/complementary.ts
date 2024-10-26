@@ -1,17 +1,17 @@
 import { genAllColorValues } from '../color-conversion/conversion';
 import { dom } from '../dom/dom-main';
 import { paletteHelpers } from '../helpers/palette';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { random } from '../utils/color-randomizer';
 import { core } from '../utils/core';
 
 export function genComplementaryPalette(
 	numBoxes: number,
-	customColor: types.Color | null = null,
-	colorSpace: types.ColorSpace = 'hex'
-): types.Color[] {
+	customColor: colors.Color | null = null,
+	colorSpace: colors.ColorSpace = 'hex'
+): colors.Color[] {
 	try {
-		let clonedCustomColor: types.Color | null = null;
+		let clonedCustomColor: colors.Color | null = null;
 
 		if (customColor) {
 			if (!paletteHelpers.validateColorValues(customColor)) {
@@ -38,7 +38,7 @@ export function genComplementaryPalette(
 		const baseColorValues = genAllColorValues(
 			clonedCustomColor ?? random.randomColor(colorSpace)
 		);
-		const baseHSL = baseColorValues.hsl as types.HSL;
+		const baseHSL = baseColorValues.hsl as colors.HSL;
 
 		if (!baseHSL) {
 			throw new Error(
@@ -64,7 +64,7 @@ export function genComplementaryPalette(
 				genAllColorValues(adjustedHSLColor);
 			const complementaryColor = complementaryColorValues[
 				colorSpace
-			] as types.Color;
+			] as colors.Color;
 
 			if (complementaryColor) {
 				colors.push(complementaryColor);
@@ -74,7 +74,7 @@ export function genComplementaryPalette(
 
 			if (colorBox) {
 				const hexValue = complementaryColorValues.hex as
-					| types.Hex
+					| colors.Hex
 					| undefined;
 				colorBox.style.backgroundColor = hexValue
 					? hexValue.value.hex

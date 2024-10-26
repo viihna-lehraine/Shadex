@@ -1,13 +1,13 @@
 import { convert } from '../color-conversion/conversion-index';
 import { conversionHelpers } from '../helpers/conversion';
 import { paletteHelpers } from '../helpers/palette';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import * as fnObjects from '../index/fn-objects';
 import { defaults } from '../utils/defaults';
 import { core } from '../utils/core';
 import { transforms } from '../utils/transforms';
 
-function cmykToHex(cmyk: types.CMYK): types.Hex {
+function cmykToHex(cmyk: colors.CMYK): colors.Hex {
 	try {
 		if (!paletteHelpers.validateColorValues(cmyk)) {
 			console.error(`Invalid hex value ${JSON.stringify(cmyk)}`);
@@ -29,7 +29,7 @@ function cmykToHex(cmyk: types.CMYK): types.Hex {
 	}
 }
 
-function hslToHex(hsl: types.HSL): types.Hex {
+function hslToHex(hsl: colors.HSL): colors.Hex {
 	try {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
@@ -51,7 +51,7 @@ function hslToHex(hsl: types.HSL): types.Hex {
 	}
 }
 
-function hsvToHex(hsv: types.HSV): types.Hex {
+function hsvToHex(hsv: colors.HSV): colors.Hex {
 	try {
 		if (!paletteHelpers.validateColorValues(hsv)) {
 			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
@@ -73,7 +73,7 @@ function hsvToHex(hsv: types.HSV): types.Hex {
 	}
 }
 
-function labToHex(lab: types.LAB): types.Hex {
+function labToHex(lab: colors.LAB): colors.Hex {
 	try {
 		if (!paletteHelpers.validateColorValues(lab)) {
 			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
@@ -95,7 +95,7 @@ function labToHex(lab: types.LAB): types.Hex {
 	}
 }
 
-function rgbToHex(rgb: types.RGB): types.Hex {
+function rgbToHex(rgb: colors.RGB): colors.Hex {
 	try {
 		if (!paletteHelpers.validateColorValues(rgb)) {
 			console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
@@ -132,7 +132,7 @@ function rgbToHex(rgb: types.RGB): types.Hex {
 	}
 }
 
-function xyzToHex(xyz: types.XYZ): types.Hex {
+function xyzToHex(xyz: colors.XYZ): colors.Hex {
 	try {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);

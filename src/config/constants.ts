@@ -1,4 +1,4 @@
-import * as interfaces from '../index/interfaces';
+import * as constants from '../index/constants';
 
 const adjustSLAmount = 10;
 
@@ -38,11 +38,11 @@ const tooltipTimeout = 1000;
 
 // ***** Constructed Constants *****
 
-const adjustments: interfaces.Adjustments = {
+const adjustments: constants.Adjustments = {
 	adjustSLAmount
 };
 
-const boundaries: interfaces.Boundaries = {
+const boundaries: constants.Boundaries = {
 	xyzMaxX,
 	xyzMaxY,
 	xyzMaxZ,
@@ -51,17 +51,17 @@ const boundaries: interfaces.Boundaries = {
 	xyzMinZ
 };
 
-const debounce: interfaces.Debounce = {
+const debounce: constants.Debounce = {
 	buttonDebounce,
 	inputDebounce
 };
 
-const probabilityConstants: interfaces.ProbabilityConstants = {
+const probabilityConstants: constants.ProbabilityConstants = {
 	probabilities,
 	weights
 };
 
-const thresholds: interfaces.Thresholds = {
+const thresholds: constants.Thresholds = {
 	cmykBrightnessThreshold,
 	cmykDarknessThreshold,
 	cmykGrayThreshold,
@@ -80,7 +80,7 @@ const thresholds: interfaces.Thresholds = {
 	rgbGrayThreshold
 };
 
-const timeouts: interfaces.Timeouts = {
+const timeouts: constants.Timeouts = {
 	copyButtonTextTimeout,
 	toastTimeout,
 	tooltipTimeout
@@ -88,7 +88,7 @@ const timeouts: interfaces.Timeouts = {
 
 // **** Master Config Object ****
 
-export const config: interfaces.Config = {
+export const config: constants.Config = {
 	...adjustments,
 	...boundaries,
 	...debounce,

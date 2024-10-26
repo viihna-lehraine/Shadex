@@ -1,7 +1,7 @@
 import { convert } from '../color-conversion/conversion-index';
 import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { core } from '../utils/core';
 import { defaults } from '../utils/defaults';
 
@@ -17,7 +17,7 @@ function applyGammaCorrection(value: number): number {
 	}
 }
 
-function clampRGB(rgb: types.RGB): types.RGB {
+function clampRGB(rgb: colors.RGB): colors.RGB {
 	if (!paletteHelpers.validateColorValues(rgb)) {
 		console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
@@ -42,7 +42,7 @@ function clampRGB(rgb: types.RGB): types.RGB {
 	}
 }
 
-function cmykToXYZHelper(cmyk: types.CMYK): types.XYZ {
+function cmykToXYZHelper(cmyk: colors.CMYK): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(cmyk)) {
 			console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
@@ -50,7 +50,7 @@ function cmykToXYZHelper(cmyk: types.CMYK): types.XYZ {
 			return core.clone(defaults.defaultXYZ());
 		}
 
-		const rgb: types.RGB = convert.cmykToRGB(core.clone(cmyk));
+		const rgb: colors.RGB = convert.cmykToRGB(core.clone(cmyk));
 
 		return convert.rgbToXYZ(rgb);
 	} catch (error) {
@@ -60,7 +60,7 @@ function cmykToXYZHelper(cmyk: types.CMYK): types.XYZ {
 	}
 }
 
-function convertColorToCMYK(color: types.Color): types.CMYK | null {
+function convertColorToCMYK(color: colors.Color): colors.CMYK | null {
 	try {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
@@ -70,19 +70,19 @@ function convertColorToCMYK(color: types.Color): types.CMYK | null {
 
 		switch (color.format) {
 			case 'cmyk':
-				return color as types.CMYK;
+				return color as colors.CMYK;
 			case 'hex':
-				return hexToCMYKHelper(core.clone(color) as types.Hex);
+				return hexToCMYKHelper(core.clone(color) as colors.Hex);
 			case 'hsl':
-				return hslToCMYKHelper(core.clone(color) as types.HSL);
+				return hslToCMYKHelper(core.clone(color) as colors.HSL);
 			case 'hsv':
-				return hsvToCMYKHelper(core.clone(color) as types.HSV);
+				return hsvToCMYKHelper(core.clone(color) as colors.HSV);
 			case 'lab':
-				return labToCMYKHelper(core.clone(color) as types.LAB);
+				return labToCMYKHelper(core.clone(color) as colors.LAB);
 			case 'rgb':
-				return convert.rgbToCMYK(core.clone(color) as types.RGB);
+				return convert.rgbToCMYK(core.clone(color) as colors.RGB);
 			case 'xyz':
-				return convert.xyzToCMYK(core.clone(color) as types.XYZ);
+				return convert.xyzToCMYK(core.clone(color) as colors.XYZ);
 			default:
 				console.error('Unsupported color format');
 
@@ -95,7 +95,7 @@ function convertColorToCMYK(color: types.Color): types.CMYK | null {
 	}
 }
 
-function convertColorToHex(color: types.Color): types.Hex | null {
+function convertColorToHex(color: colors.Color): colors.Hex | null {
 	try {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
@@ -105,19 +105,19 @@ function convertColorToHex(color: types.Color): types.Hex | null {
 
 		switch (color.format) {
 			case 'cmyk':
-				return convert.cmykToHex(core.clone(color) as types.CMYK);
+				return convert.cmykToHex(core.clone(color) as colors.CMYK);
 			case 'hex':
-				return color as types.Hex;
+				return color as colors.Hex;
 			case 'hsl':
-				return convert.hslToHex(core.clone(color) as types.HSL);
+				return convert.hslToHex(core.clone(color) as colors.HSL);
 			case 'hsv':
-				return convert.hsvToHex(core.clone(color) as types.HSV);
+				return convert.hsvToHex(core.clone(color) as colors.HSV);
 			case 'lab':
-				return convert.labToHex(core.clone(color) as types.LAB);
+				return convert.labToHex(core.clone(color) as colors.LAB);
 			case 'rgb':
-				return convert.rgbToHex(core.clone(color) as types.RGB);
+				return convert.rgbToHex(core.clone(color) as colors.RGB);
 			case 'xyz':
-				return convert.xyzToHex(core.clone(color) as types.XYZ);
+				return convert.xyzToHex(core.clone(color) as colors.XYZ);
 			default:
 				console.error('Unsupported color format');
 
@@ -130,7 +130,7 @@ function convertColorToHex(color: types.Color): types.Hex | null {
 	}
 }
 
-function convertColorToHSL(color: types.Color): types.HSL | null {
+function convertColorToHSL(color: colors.Color): colors.HSL | null {
 	try {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
@@ -140,19 +140,19 @@ function convertColorToHSL(color: types.Color): types.HSL | null {
 
 		switch (color.format) {
 			case 'cmyk':
-				return convert.cmykToHSL(core.clone(color) as types.CMYK);
+				return convert.cmykToHSL(core.clone(color) as colors.CMYK);
 			case 'hex':
-				return convert.hexToHSL(core.clone(color) as types.Hex);
+				return convert.hexToHSL(core.clone(color) as colors.Hex);
 			case 'hsl':
-				return color as types.HSL;
+				return color as colors.HSL;
 			case 'hsv':
-				return convert.hsvToHSL(core.clone(color) as types.HSV);
+				return convert.hsvToHSL(core.clone(color) as colors.HSV);
 			case 'lab':
-				return convert.labToHSL(core.clone(color) as types.LAB);
+				return convert.labToHSL(core.clone(color) as colors.LAB);
 			case 'rgb':
-				return convert.rgbToHSL(core.clone(color) as types.RGB);
+				return convert.rgbToHSL(core.clone(color) as colors.RGB);
 			case 'xyz':
-				return convert.xyzToHSL(core.clone(color) as types.XYZ);
+				return convert.xyzToHSL(core.clone(color) as colors.XYZ);
 			default:
 				console.error('Unsupported color format');
 
@@ -165,7 +165,7 @@ function convertColorToHSL(color: types.Color): types.HSL | null {
 	}
 }
 
-function convertColorToHSV(color: types.Color): types.HSV | null {
+function convertColorToHSV(color: colors.Color): colors.HSV | null {
 	try {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
@@ -175,19 +175,19 @@ function convertColorToHSV(color: types.Color): types.HSV | null {
 
 		switch (color.format) {
 			case 'cmyk':
-				return convert.cmykToHSV(core.clone(color) as types.CMYK);
+				return convert.cmykToHSV(core.clone(color) as colors.CMYK);
 			case 'hex':
-				return convert.hexToHSV(core.clone(color) as types.Hex);
+				return convert.hexToHSV(core.clone(color) as colors.Hex);
 			case 'hsl':
-				return convert.hslToHSV(core.clone(color) as types.HSL);
+				return convert.hslToHSV(core.clone(color) as colors.HSL);
 			case 'hsv':
-				return color as types.HSV;
+				return color as colors.HSV;
 			case 'lab':
-				return convert.labToHSV(core.clone(color) as types.LAB);
+				return convert.labToHSV(core.clone(color) as colors.LAB);
 			case 'rgb':
-				return convert.rgbToHSV(core.clone(color) as types.RGB);
+				return convert.rgbToHSV(core.clone(color) as colors.RGB);
 			case 'xyz':
-				return convert.xyzToHSV(core.clone(color) as types.XYZ);
+				return convert.xyzToHSV(core.clone(color) as colors.XYZ);
 			default:
 				console.error('Unsupported color format');
 
@@ -200,7 +200,7 @@ function convertColorToHSV(color: types.Color): types.HSV | null {
 	}
 }
 
-function convertColorToLAB(color: types.Color): types.LAB | null {
+function convertColorToLAB(color: colors.Color): colors.LAB | null {
 	try {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
@@ -210,19 +210,19 @@ function convertColorToLAB(color: types.Color): types.LAB | null {
 
 		switch (color.format) {
 			case 'cmyk':
-				return convert.cmykToLAB(core.clone(color) as types.CMYK);
+				return convert.cmykToLAB(core.clone(color) as colors.CMYK);
 			case 'hex':
-				return convert.hexToLAB(core.clone(color) as types.Hex);
+				return convert.hexToLAB(core.clone(color) as colors.Hex);
 			case 'hsl':
-				return convert.hslToLAB(core.clone(color) as types.HSL);
+				return convert.hslToLAB(core.clone(color) as colors.HSL);
 			case 'hsv':
-				return convert.hsvToLAB(core.clone(color) as types.HSV);
+				return convert.hsvToLAB(core.clone(color) as colors.HSV);
 			case 'lab':
-				return color as types.LAB;
+				return color as colors.LAB;
 			case 'rgb':
-				return convert.rgbToLAB(core.clone(color) as types.RGB);
+				return convert.rgbToLAB(core.clone(color) as colors.RGB);
 			case 'xyz':
-				return convert.xyzToLAB(core.clone(color) as types.XYZ);
+				return convert.xyzToLAB(core.clone(color) as colors.XYZ);
 			default:
 				console.error('Unsupported color format');
 
@@ -235,7 +235,7 @@ function convertColorToLAB(color: types.Color): types.LAB | null {
 	}
 }
 
-function convertColorToRGB(color: types.Color): types.RGB | null {
+function convertColorToRGB(color: colors.Color): colors.RGB | null {
 	try {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
@@ -245,19 +245,19 @@ function convertColorToRGB(color: types.Color): types.RGB | null {
 
 		switch (color.format) {
 			case 'cmyk':
-				return convert.cmykToRGB(core.clone(color) as types.CMYK);
+				return convert.cmykToRGB(core.clone(color) as colors.CMYK);
 			case 'hex':
-				return convert.hexToRGB(core.clone(color) as types.Hex);
+				return convert.hexToRGB(core.clone(color) as colors.Hex);
 			case 'hsl':
-				return convert.hslToRGB(core.clone(color) as types.HSL);
+				return convert.hslToRGB(core.clone(color) as colors.HSL);
 			case 'hsv':
-				return convert.hsvToRGB(core.clone(color) as types.HSV);
+				return convert.hsvToRGB(core.clone(color) as colors.HSV);
 			case 'lab':
-				return convert.labToRGB(core.clone(color) as types.LAB);
+				return convert.labToRGB(core.clone(color) as colors.LAB);
 			case 'rgb':
-				return color as types.RGB;
+				return color as colors.RGB;
 			case 'xyz':
-				return convert.xyzToRGB(core.clone(color) as types.XYZ);
+				return convert.xyzToRGB(core.clone(color) as colors.XYZ);
 			default:
 				console.error('Unsupported color format');
 
@@ -270,7 +270,7 @@ function convertColorToRGB(color: types.Color): types.RGB | null {
 	}
 }
 
-function hexToCMYKHelper(hex: types.Hex): types.CMYK {
+function hexToCMYKHelper(hex: colors.Hex): colors.CMYK {
 	try {
 		if (!paletteHelpers.validateColorValues(hex)) {
 			console.error(`Invalid hex value ${JSON.stringify(hex)}`);
@@ -278,7 +278,7 @@ function hexToCMYKHelper(hex: types.Hex): types.CMYK {
 			return core.clone(defaults.defaultCMYK());
 		}
 
-		const rgb: types.RGB = convert.hexToRGB(core.clone(hex));
+		const rgb: colors.RGB = convert.hexToRGB(core.clone(hex));
 
 		return convert.rgbToCMYK(rgb);
 	} catch (error) {
@@ -288,7 +288,7 @@ function hexToCMYKHelper(hex: types.Hex): types.CMYK {
 	}
 }
 
-function hexToXYZHelper(hex: types.Hex): types.XYZ {
+function hexToXYZHelper(hex: colors.Hex): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(hex)) {
 			console.error(`Invalid hex value ${JSON.stringify(hex)}`);
@@ -296,8 +296,8 @@ function hexToXYZHelper(hex: types.Hex): types.XYZ {
 			return core.clone(defaults.defaultXYZ());
 		}
 
-		const lab: types.LAB = convert.hexToLAB(core.clone(hex));
-		const xyz: types.XYZ = convert.labToXYZ(lab);
+		const lab: colors.LAB = convert.hexToLAB(core.clone(hex));
+		const xyz: colors.XYZ = convert.labToXYZ(lab);
 
 		return xyz;
 	} catch (error) {
@@ -328,7 +328,7 @@ export function hueToRGB(p: number, q: number, t: number): number {
 	}
 }
 
-function hslAddFormat(value: types.HSLValue): types.HSL {
+function hslAddFormat(value: colors.HSLValue): colors.HSL {
 	try {
 		if (
 			!paletteHelpers.validateColorValues({ value: value, format: 'hsl' })
@@ -338,7 +338,7 @@ function hslAddFormat(value: types.HSLValue): types.HSL {
 			return core.clone(defaults.defaultHSL());
 		}
 
-		return { value: value, format: 'hsl' } as types.HSL;
+		return { value: value, format: 'hsl' } as colors.HSL;
 	} catch (error) {
 		console.error(`Error adding HSL format: ${error}`);
 
@@ -346,7 +346,7 @@ function hslAddFormat(value: types.HSLValue): types.HSL {
 	}
 }
 
-function hslToCMYKHelper(hsl: types.HSL): types.CMYK {
+function hslToCMYKHelper(hsl: colors.HSL): colors.CMYK {
 	try {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
@@ -354,7 +354,7 @@ function hslToCMYKHelper(hsl: types.HSL): types.CMYK {
 			return core.clone(defaults.defaultCMYK());
 		}
 
-		const rgb: types.RGB = convert.hslToRGB(core.clone(hsl));
+		const rgb: colors.RGB = convert.hslToRGB(core.clone(hsl));
 		return convert.rgbToCMYK(rgb);
 	} catch (error) {
 		console.error(`Error converting HSL to CMYK: ${error}`);
@@ -363,7 +363,7 @@ function hslToCMYKHelper(hsl: types.HSL): types.CMYK {
 	}
 }
 
-function hslToHexHelper(hsl: types.HSL): types.Hex {
+function hslToHexHelper(hsl: colors.HSL): colors.Hex {
 	try {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
@@ -371,7 +371,7 @@ function hslToHexHelper(hsl: types.HSL): types.Hex {
 			return core.clone(defaults.defaultHex());
 		}
 
-		const rgb: types.RGB = convert.hslToRGB(core.clone(hsl));
+		const rgb: colors.RGB = convert.hslToRGB(core.clone(hsl));
 
 		return convert.rgbToHex(rgb);
 	} catch (error) {
@@ -381,7 +381,7 @@ function hslToHexHelper(hsl: types.HSL): types.Hex {
 	}
 }
 
-function hslToXYZHelper(hsl: types.HSL): types.XYZ {
+function hslToXYZHelper(hsl: colors.HSL): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
@@ -389,7 +389,7 @@ function hslToXYZHelper(hsl: types.HSL): types.XYZ {
 			return core.clone(defaults.defaultXYZ());
 		}
 
-		const lab: types.LAB = convert.hslToLAB(core.clone(hsl));
+		const lab: colors.LAB = convert.hslToLAB(core.clone(hsl));
 
 		return convert.labToXYZ(lab);
 	} catch (error) {
@@ -399,7 +399,7 @@ function hslToXYZHelper(hsl: types.HSL): types.XYZ {
 	}
 }
 
-function hsvToCMYKHelper(hsv: types.HSV): types.CMYK {
+function hsvToCMYKHelper(hsv: colors.HSV): colors.CMYK {
 	try {
 		if (!paletteHelpers.validateColorValues(hsv)) {
 			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
@@ -407,7 +407,7 @@ function hsvToCMYKHelper(hsv: types.HSV): types.CMYK {
 			return core.clone(defaults.defaultCMYK());
 		}
 
-		const rgb: types.RGB = convert.hsvToRGB(core.clone(hsv));
+		const rgb: colors.RGB = convert.hsvToRGB(core.clone(hsv));
 
 		return convert.rgbToCMYK(rgb);
 	} catch (error) {
@@ -417,7 +417,7 @@ function hsvToCMYKHelper(hsv: types.HSV): types.CMYK {
 	}
 }
 
-function hsvToXYZHelper(hsv: types.HSV): types.XYZ {
+function hsvToXYZHelper(hsv: colors.HSV): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(hsv)) {
 			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
@@ -425,7 +425,7 @@ function hsvToXYZHelper(hsv: types.HSV): types.XYZ {
 			return core.clone(defaults.defaultXYZ());
 		}
 
-		const rgb: types.RGB = convert.hsvToRGB(core.clone(hsv));
+		const rgb: colors.RGB = convert.hsvToRGB(core.clone(hsv));
 
 		return convert.rgbToXYZ(rgb);
 	} catch (error) {
@@ -435,7 +435,7 @@ function hsvToXYZHelper(hsv: types.HSV): types.XYZ {
 	}
 }
 
-function labToCMYKHelper(lab: types.LAB): types.CMYK {
+function labToCMYKHelper(lab: colors.LAB): colors.CMYK {
 	try {
 		if (!paletteHelpers.validateColorValues(lab)) {
 			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
@@ -443,7 +443,7 @@ function labToCMYKHelper(lab: types.LAB): types.CMYK {
 			return core.clone(defaults.defaultCMYK());
 		}
 
-		const rgb: types.RGB = convert.labToRGB(core.clone(lab));
+		const rgb: colors.RGB = convert.labToRGB(core.clone(lab));
 
 		return convert.rgbToCMYK(rgb);
 	} catch (error) {
@@ -453,7 +453,7 @@ function labToCMYKHelper(lab: types.LAB): types.CMYK {
 	}
 }
 
-function labToXYZHelper(lab: types.LAB): types.XYZ {
+function labToXYZHelper(lab: colors.LAB): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(lab)) {
 			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
@@ -469,7 +469,7 @@ function labToXYZHelper(lab: types.LAB): types.XYZ {
 	}
 }
 
-function xyzToCMYKHelper(xyz: types.XYZ): types.CMYK {
+function xyzToCMYKHelper(xyz: colors.XYZ): colors.CMYK {
 	try {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
@@ -477,7 +477,7 @@ function xyzToCMYKHelper(xyz: types.XYZ): types.CMYK {
 			return core.clone(defaults.defaultCMYK());
 		}
 
-		const lab: types.LAB = convert.xyzToLAB(core.clone(xyz));
+		const lab: colors.LAB = convert.xyzToLAB(core.clone(xyz));
 
 		return convert.labToCMYK(lab);
 	} catch (error) {
@@ -487,7 +487,7 @@ function xyzToCMYKHelper(xyz: types.XYZ): types.CMYK {
 	}
 }
 
-function xyzToHexHelper(xyz: types.XYZ): types.Hex {
+function xyzToHexHelper(xyz: colors.XYZ): colors.Hex {
 	try {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
@@ -495,7 +495,7 @@ function xyzToHexHelper(xyz: types.XYZ): types.Hex {
 			return core.clone(defaults.defaultHex());
 		}
 
-		const lab: types.LAB = convert.xyzToLAB(core.clone(xyz));
+		const lab: colors.LAB = convert.xyzToLAB(core.clone(xyz));
 
 		return convert.labToHex(lab);
 	} catch (error) {
@@ -505,7 +505,7 @@ function xyzToHexHelper(xyz: types.XYZ): types.Hex {
 	}
 }
 
-function xyzToHSLHelper(xyz: types.XYZ): types.HSL {
+function xyzToHSLHelper(xyz: colors.XYZ): colors.HSL {
 	try {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
@@ -513,7 +513,7 @@ function xyzToHSLHelper(xyz: types.XYZ): types.HSL {
 			return core.clone(defaults.defaultHSL());
 		}
 
-		const lab: types.LAB = convert.xyzToLAB(core.clone(xyz));
+		const lab: colors.LAB = convert.xyzToLAB(core.clone(xyz));
 
 		return convert.labToHSL(lab);
 	} catch (error) {
@@ -523,7 +523,7 @@ function xyzToHSLHelper(xyz: types.XYZ): types.HSL {
 	}
 }
 
-function xyzToHSVHelper(xyz: types.XYZ): types.HSV {
+function xyzToHSVHelper(xyz: colors.XYZ): colors.HSV {
 	try {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
@@ -531,7 +531,7 @@ function xyzToHSVHelper(xyz: types.XYZ): types.HSV {
 			return core.clone(defaults.defaultHSV());
 		}
 
-		const lab: types.LAB = convert.xyzToLAB(core.clone(xyz));
+		const lab: colors.LAB = convert.xyzToLAB(core.clone(xyz));
 
 		return convert.labToHSV(lab);
 	} catch (error) {

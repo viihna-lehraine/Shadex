@@ -3,8 +3,8 @@ import { config } from '../config/constants';
 import { domHelpers } from '../helpers/dom';
 import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
-import * as interfaces from '../index/interfaces';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
+import * as domTypes from '../index/dom-types';
 import { generate } from '../palette-gen/generate';
 import { random } from '../utils/color-randomizer';
 import { core } from '../utils/core';
@@ -13,7 +13,7 @@ import { guards } from '../utils/type-guards';
 
 function addConversionButtonEventListeners(): void {
 	try {
-		const addListener = (id: string, colorSpace: types.ColorSpace) => {
+		const addListener = (id: string, colorSpace: colors.ColorSpace) => {
 			const button = document.getElementById(
 				id
 			) as HTMLButtonElement | null;
@@ -41,7 +41,7 @@ function addConversionButtonEventListeners(): void {
 	}
 }
 
-function applyCustomColor(): types.Color {
+function applyCustomColor(): colors.Color {
 	try {
 		const colorPicker = document.getElementById(
 			'custom-color-picker'
@@ -56,7 +56,7 @@ function applyCustomColor(): types.Color {
 			document.getElementById(
 				'custom-color-format'
 			) as HTMLSelectElement | null
-		)?.value as types.ColorSpace;
+		)?.value as colors.ColorSpace;
 
 		if (!guards.isColorSpace(selectedFormat)) {
 			throw new Error(`Unsupported color format: ${selectedFormat}`);
@@ -77,7 +77,7 @@ function applyCustomColor(): types.Color {
 	}
 }
 
-function applyFirstColorToUI(colorSpace: types.ColorSpace): types.Color {
+function applyFirstColorToUI(colorSpace: colors.ColorSpace): colors.Color {
 	try {
 		const color = random.randomColor(colorSpace);
 		const colorBox1 = document.getElementById('color-box-1');
@@ -105,7 +105,7 @@ function applyFirstColorToUI(colorSpace: types.ColorSpace): types.Color {
 	}
 }
 
-function applyUIColorSpace(): types.ColorSpace {
+function applySelectedColorSpace(): colors.ColorSpace {
 	try {
 		const element = document.getElementById(
 			'initial-colorspace-options'
@@ -114,7 +114,7 @@ function applyUIColorSpace(): types.ColorSpace {
 		const value = element.value;
 
 		if (guards.isColorSpace(value)) {
-			return value as types.ColorSpace;
+			return value as colors.ColorSpace;
 		} else {
 			return 'hex';
 		}
@@ -124,7 +124,7 @@ function applyUIColorSpace(): types.ColorSpace {
 	}
 }
 
-function convertColors(targetFormat: types.ColorSpace): void {
+function convertColors(targetFormat: colors.ColorSpace): void {
 	try {
 		const colorTextOutputBoxes =
 			document.querySelectorAll<HTMLInputElement>(
@@ -132,7 +132,7 @@ function convertColors(targetFormat: types.ColorSpace): void {
 			);
 
 		colorTextOutputBoxes.forEach(box => {
-			const inputBox = box as interfaces.ColorInputElement;
+			const inputBox = box as domTypes.ColorInputElement;
 			const colorValues = inputBox.colorValues;
 
 			if (
@@ -146,7 +146,7 @@ function convertColors(targetFormat: types.ColorSpace): void {
 
 			const currentFormat = inputBox.getAttribute(
 				'data-format'
-			) as types.ColorSpace;
+			) as colors.ColorSpace;
 
 			console.log(`Converting from ${currentFormat} to ${targetFormat}`);
 
@@ -234,7 +234,7 @@ function copyToClipboard(text: string, tooltipElement: HTMLElement): void {
 	}
 }
 
-function defineUIButtons(): interfaces.UIButtons {
+function defineUIButtons(): domTypes.UIButtons {
 	try {
 		const generateButton = document.getElementById('generate-button');
 		const saturateButton = document.getElementById('saturate-button');
@@ -296,7 +296,7 @@ function desaturateColor(selectedColor: number): void {
 
 function getElementsForSelectedColor(
 	selectedColor: number
-): interfaces.GetElementsForSelectedColor {
+): domTypes.GetElementsForSelectedColor {
 	const selectedColorBox = document.getElementById(
 		`color-box-${selectedColor}`
 	);
@@ -322,7 +322,7 @@ function getElementsForSelectedColor(
 	};
 }
 
-function getGenerateButtonParams(): interfaces.GenButtonParams | null {
+function getGenerateButtonParams(): domTypes.GenButtonParams | null {
 	try {
 		const paletteTypeOptions = document.getElementById(
 			'palette-type-options'
@@ -336,7 +336,7 @@ function getGenerateButtonParams(): interfaces.GenButtonParams | null {
 			) as HTMLSelectElement
 		)?.value;
 		const colorSpace = guards.isColorSpace(colorSpaceValue)
-			? (colorSpaceValue as types.ColorSpace)
+			? (colorSpaceValue as colors.ColorSpace)
 			: 'hex';
 		const customColorRaw = (
 			document.getElementById('custom-color') as HTMLInputElement
@@ -378,20 +378,26 @@ const handleGenButtonClick = core.debounce(() => {
 			return;
 		}
 
-		const space: types.ColorSpace = colorSpace ?? 'hex';
+		const space: colors.ColorSpace = colorSpace ?? 'hex';
+		const options: colors.PaletteOptions = {
+			paletteType,
+			numBoxes,
+			colorSpace,
+			customColor
+		};
 
-		generate.startPaletteGen(paletteType, numBoxes, space, customColor);
+		generate.startPaletteGen(options);
 	} catch (error) {
 		console.error(`Failed to handle generate button click: ${error}`);
 	}
 }, config.buttonDebounce || 300);
 
 function populateColorTextOutputBox(
-	color: types.Color | types.ColorString,
+	color: colors.Color | colors.ColorString,
 	boxNumber: number
 ): void {
 	try {
-		const clonedColor: types.Color = guards.isColor(color)
+		const clonedColor: colors.Color = guards.isColor(color)
 			? core.clone(color)
 			: transforms.colorStringToColor(color);
 
@@ -422,7 +428,7 @@ function populateColorTextOutputBox(
 	}
 }
 
-function pullParamsFromUI(): interfaces.PullParamsFromUI {
+function pullParamsFromUI(): domTypes.PullParamsFromUI {
 	try {
 		const paletteTypeElement = document.getElementById(
 			'palette-type-options'
@@ -442,7 +448,7 @@ function pullParamsFromUI(): interfaces.PullParamsFromUI {
 			: 0;
 		const colorSpace =
 			colorSpaceElement && guards.isColorSpace(colorSpaceElement.value)
-				? (colorSpaceElement.value as types.ColorSpace)
+				? (colorSpaceElement.value as colors.ColorSpace)
 				: 'hex';
 
 		return {
@@ -487,7 +493,7 @@ export const dom: fnObjects.DOM = {
 	addConversionButtonEventListeners,
 	applyCustomColor,
 	applyFirstColorToUI,
-	applyUIColorSpace,
+	applySelectedColorSpace,
 	convertColors,
 	copyToClipboard,
 	defineUIButtons,

@@ -1,12 +1,12 @@
 import { genAllColorValues } from '../color-conversion/conversion';
 import { conversionHelpers } from '../helpers/conversion';
 import { paletteHelpers } from '../helpers/palette';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { random } from '../utils/color-randomizer';
 import { core } from '../utils/core';
 
 export function genAnalogousHues(
-	color: types.Color,
+	color: colors.Color,
 	numBoxes: number
 ): number[] {
 	try {
@@ -19,7 +19,7 @@ export function genAnalogousHues(
 		const clonedColor = core.clone(color);
 		const hslColor =
 			clonedColor.format === 'hsl'
-				? (clonedColor as types.HSL)
+				? (clonedColor as colors.HSL)
 				: conversionHelpers.convertColorToHSL(clonedColor);
 
 		if (!hslColor) {
@@ -50,11 +50,11 @@ export function genAnalogousHues(
 
 export function genAnalogousPalette(
 	numBoxes: number,
-	customColor: types.Color | null = null,
-	colorSpace: types.ColorSpace = 'hex'
-): types.Color[] {
+	customColor: colors.Color | null = null,
+	colorSpace: colors.ColorSpace = 'hex'
+): colors.Color[] {
 	try {
-		let clonedCustomColor: types.Color | null = null;
+		let clonedCustomColor: colors.Color | null = null;
 
 		if (customColor) {
 			if (!paletteHelpers.validateColorValues(customColor)) {
@@ -76,7 +76,7 @@ export function genAnalogousPalette(
 			return [];
 		}
 
-		const colors: types.Color[] = [];
+		const colors: colors.Color[] = [];
 		const baseColorValues = clonedCustomColor
 			? genAllColorValues(clonedCustomColor)
 			: genAllColorValues(random.randomColor(colorSpace));
@@ -89,7 +89,7 @@ export function genAnalogousPalette(
 		colors.push(baseColor);
 
 		const analogousHues = genAnalogousHues(
-			baseColorValues.hsl as types.HSL,
+			baseColorValues.hsl as colors.HSL,
 			numBoxes
 		);
 
@@ -114,7 +114,7 @@ export function genAnalogousPalette(
 
 			if (colorBox) {
 				const hexValue = analogousColorValues.hex as
-					| types.Hex
+					| colors.Hex
 					| undefined;
 				colorBox.style.backgroundColor = hexValue
 					? hexValue.value.hex

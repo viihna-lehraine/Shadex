@@ -1,10 +1,10 @@
 import { config } from '../config/constants';
 import { domHelpers } from './dom';
 import * as fnObjects from '../index/fn-objects';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { core } from '../utils/core';
 
-function adjustSL(color: types.HSL): types.HSL {
+function adjustSL(color: colors.HSL): colors.HSL {
 	try {
 		if (!validateColorValues(color)) {
 			console.error('Invalid color valus for adjustment.');
@@ -75,7 +75,7 @@ function sanitizeRGB(value: number): number {
 }
 
 function validateColorValues(
-	color: types.Color | types.SL | types.SV
+	color: colors.Color | colors.SL | colors.SV
 ): boolean {
 	const clonedColor = core.clone(color);
 	const isNumericValid = (value: unknown): boolean =>

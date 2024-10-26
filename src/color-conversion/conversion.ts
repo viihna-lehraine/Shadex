@@ -1,20 +1,20 @@
 import { convert } from './conversion-index';
 import { paletteHelpers } from '../helpers/palette';
 import { wrappers } from '../helpers/wrappers';
-import * as interfaces from '../index/interfaces';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
+import * as conversion from '../index/conversion';
 import { core } from '../utils/core';
 
 export function getConversionFn<
-	From extends keyof interfaces.ConversionData,
-	To extends keyof interfaces.ConversionData
+	From extends keyof colors.ColorDataAssertion,
+	To extends keyof colors.ColorDataAssertion
 >(
 	from: From,
 	to: To
 ):
 	| ((
-			value: interfaces.ConversionData[From]
-	  ) => interfaces.ConversionData[To])
+			value: colors.ColorDataAssertion[From]
+	  ) => colors.ColorDataAssertion[To])
 	| undefined {
 	try {
 		const fromMap = conversionMap[from];
@@ -22,12 +22,12 @@ export function getConversionFn<
 		if (!fromMap || !(to in fromMap)) return undefined;
 
 		const conversionFn = fromMap[to] as unknown as (
-			input: interfaces.ConversionData[From]
-		) => interfaces.ConversionData[To];
+			input: colors.ColorDataAssertion[From]
+		) => colors.ColorDataAssertion[To];
 
 		return (
-			value: interfaces.ConversionData[From]
-		): interfaces.ConversionData[To] =>
+			value: colors.ColorDataAssertion[From]
+		): colors.ColorDataAssertion[To] =>
 			structuredClone(conversionFn(value));
 	} catch (error) {
 		console.error(`Error getting conversion function: ${error}`);
@@ -35,7 +35,7 @@ export function getConversionFn<
 	}
 }
 
-export const conversionMap: types.ConversionMap = core.clone({
+export const conversionMap: conversion.ConversionMap = core.clone({
 	cmyk: {
 		hex: convert.cmykToHex,
 		hsl: convert.cmykToHSL,
@@ -95,9 +95,9 @@ export const conversionMap: types.ConversionMap = core.clone({
 });
 
 export function genAllColorValues(
-	color: types.Color
-): Partial<interfaces.ColorData> {
-	const result: Partial<interfaces.ColorData> = {};
+	color: colors.Color
+): Partial<colors.ColorData> {
+	const result: Partial<colors.ColorData> = {};
 
 	try {
 		const clonedColor = core.clone(color);

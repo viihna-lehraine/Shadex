@@ -1,12 +1,12 @@
 import { conversionHelpers } from '../helpers/conversion';
 import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { core } from '../utils/core';
 import { defaults } from '../utils/defaults';
 import { transforms } from '../utils/transforms';
 
-export function cmykToRGB(cmyk: types.CMYK): types.RGB {
+export function cmykToRGB(cmyk: colors.CMYK): colors.RGB {
 	try {
 		if (!paletteHelpers.validateColorValues(cmyk)) {
 			console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
@@ -29,7 +29,7 @@ export function cmykToRGB(cmyk: types.CMYK): types.RGB {
 			(1 - clonedCMYK.value.yellow / 100) *
 			(1 - clonedCMYK.value.key / 100);
 
-		const rgb: types.RGB = {
+		const rgb: colors.RGB = {
 			value: { red: r, green: g, blue: b },
 			format: 'rgb'
 		};
@@ -42,7 +42,7 @@ export function cmykToRGB(cmyk: types.CMYK): types.RGB {
 	}
 }
 
-export function hexToRGB(hex: types.Hex): types.RGB {
+export function hexToRGB(hex: colors.Hex): colors.RGB {
 	try {
 		if (!paletteHelpers.validateColorValues(hex)) {
 			console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
@@ -69,7 +69,7 @@ export function hexToRGB(hex: types.Hex): types.RGB {
 	}
 }
 
-export function hslToRGB(hsl: types.HSL): types.RGB {
+export function hslToRGB(hsl: colors.HSL): colors.RGB {
 	try {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
@@ -114,7 +114,7 @@ export function hslToRGB(hsl: types.HSL): types.RGB {
 	}
 }
 
-export function hsvToRGB(hsv: types.HSV): types.RGB {
+export function hsvToRGB(hsv: colors.HSV): colors.RGB {
 	try {
 		if (!paletteHelpers.validateColorValues(hsv)) {
 			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
@@ -134,7 +134,7 @@ export function hsvToRGB(hsv: types.HSV): types.RGB {
 		const q = v * (1 - f * s);
 		const t = v * (1 - (1 - f) * s);
 
-		let rgb: types.RGB = {
+		let rgb: colors.RGB = {
 			value: { red: 0, green: 0, blue: 0 },
 			format: 'rgb'
 		};
@@ -168,7 +168,7 @@ export function hsvToRGB(hsv: types.HSV): types.RGB {
 	}
 }
 
-export function labToRGB(lab: types.LAB): types.RGB {
+export function labToRGB(lab: colors.LAB): colors.RGB {
 	try {
 		if (!paletteHelpers.validateColorValues(lab)) {
 			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
@@ -186,7 +186,7 @@ export function labToRGB(lab: types.LAB): types.RGB {
 	}
 }
 
-export function xyzToRGB(xyz: types.XYZ): types.RGB {
+export function xyzToRGB(xyz: colors.XYZ): colors.RGB {
 	try {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
@@ -217,7 +217,7 @@ export function xyzToRGB(xyz: types.XYZ): types.RGB {
 		green = conversionHelpers.applyGammaCorrection(green);
 		blue = conversionHelpers.applyGammaCorrection(blue);
 
-		const rgb: types.RGB = { value: { red, green, blue }, format: 'rgb' };
+		const rgb: colors.RGB = { value: { red, green, blue }, format: 'rgb' };
 
 		return conversionHelpers.clampRGB(rgb);
 	} catch (error) {

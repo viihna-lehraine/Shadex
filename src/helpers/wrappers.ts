@@ -1,10 +1,10 @@
 import { convert } from '../color-conversion/conversion-index';
 import * as fnObjects from '../index/fn-objects';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { core } from '../utils/core';
 import { defaults } from '../utils/defaults';
 
-function hexToCMYKWrapper(input: string | types.Hex): types.CMYK {
+function hexToCMYKWrapper(input: string | colors.Hex): colors.CMYK {
 	try {
 		const clonedInput = core.clone(input);
 		const hex =
@@ -20,7 +20,7 @@ function hexToCMYKWrapper(input: string | types.Hex): types.CMYK {
 	}
 }
 
-function hexToHSLWrapper(input: string | types.Hex): types.HSL {
+function hexToHSLWrapper(input: string | colors.Hex): colors.HSL {
 	try {
 		const clonedInput = core.clone(input);
 		const hex =
@@ -36,7 +36,7 @@ function hexToHSLWrapper(input: string | types.Hex): types.HSL {
 	}
 }
 
-function hexToHSVWrapper(input: string | types.Hex): types.HSV {
+function hexToHSVWrapper(input: string | colors.Hex): colors.HSV {
 	try {
 		const clonedInput = core.clone(input);
 		const hex =
@@ -52,7 +52,7 @@ function hexToHSVWrapper(input: string | types.Hex): types.HSV {
 	}
 }
 
-function hexToLABWrapper(input: string | types.Hex): types.LAB {
+function hexToLABWrapper(input: string | colors.Hex): colors.LAB {
 	try {
 		const clonedInput = core.clone(input);
 		const hex =
@@ -68,7 +68,7 @@ function hexToLABWrapper(input: string | types.Hex): types.LAB {
 	}
 }
 
-function hexToRGBWrapper(input: string | types.Hex): types.RGB {
+function hexToRGBWrapper(input: string | colors.Hex): colors.RGB {
 	try {
 		const clonedInput = core.clone(input);
 		const hex =
@@ -84,7 +84,7 @@ function hexToRGBWrapper(input: string | types.Hex): types.RGB {
 	}
 }
 
-function hexToXYZWrapper(input: string | types.Hex): types.XYZ {
+function hexToXYZWrapper(input: string | colors.Hex): colors.XYZ {
 	try {
 		const clonedInput = core.clone(input);
 		const hex =

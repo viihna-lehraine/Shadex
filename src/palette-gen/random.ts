@@ -1,16 +1,16 @@
 import { genAllColorValues } from '../color-conversion/conversion';
 import { paletteHelpers } from '../helpers/palette';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { random } from '../utils/color-randomizer';
 import { core } from '../utils/core';
 
 export function genRandomPalette(
 	numBoxes: number,
-	customColor: types.Color | null = null,
-	colorSpace: types.ColorSpace = 'hex'
-): types.Color[] {
+	customColor: colors.Color | null = null,
+	colorSpace: colors.ColorSpace = 'hex'
+): colors.Color[] {
 	try {
-		let clonedCustomColor: types.Color | null = null;
+		let clonedCustomColor: colors.Color | null = null;
 
 		if (customColor) {
 			if (!paletteHelpers.validateColorValues(customColor)) {
@@ -24,7 +24,7 @@ export function genRandomPalette(
 			clonedCustomColor = core.clone(customColor);
 		}
 
-		const colors: types.Color[] = [];
+		const colors: colors.Color[] = [];
 
 		for (let i = 0; i < numBoxes; i++) {
 			const colorValues =

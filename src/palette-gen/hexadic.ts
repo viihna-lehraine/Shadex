@@ -1,11 +1,11 @@
 import { genAllColorValues } from '../color-conversion/conversion';
 import { dom } from '../dom/dom-main';
 import { paletteHelpers } from '../helpers/palette';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { random } from '../utils/color-randomizer';
 import { core } from '../utils/core';
 
-export function genHexadicHues(color: types.Color): number[] {
+export function genHexadicHues(color: colors.Color): number[] {
 	try {
 		const clonedColor = core.clone(color);
 
@@ -16,7 +16,7 @@ export function genHexadicHues(color: types.Color): number[] {
 		}
 
 		const clonedColorValues = genAllColorValues(clonedColor);
-		const clonedBaseHSL = clonedColorValues.hsl as types.HSL;
+		const clonedBaseHSL = clonedColorValues.hsl as colors.HSL;
 
 		if (!clonedBaseHSL) {
 			throw new Error(
@@ -47,11 +47,11 @@ export function genHexadicHues(color: types.Color): number[] {
 
 export function genHexadicPalette(
 	numBoxes: number,
-	customColor: types.Color | null = null,
-	colorSpace: types.ColorSpace = 'hex'
-): types.Color[] {
+	customColor: colors.Color | null = null,
+	colorSpace: colors.ColorSpace = 'hex'
+): colors.Color[] {
 	try {
-		let clonedCustomColor: types.Color | null = null;
+		let clonedCustomColor: colors.Color | null = null;
 
 		if (customColor) {
 			if (!paletteHelpers.validateColorValues(customColor)) {
@@ -73,11 +73,11 @@ export function genHexadicPalette(
 			return [];
 		}
 
-		const colors: types.Color[] = [];
+		const colors: colors.Color[] = [];
 		const baseColorValues = genAllColorValues(
 			clonedCustomColor ?? random.randomColor(colorSpace)
 		);
-		const baseHSL = baseColorValues.hsl as types.HSL;
+		const baseHSL = baseColorValues.hsl as colors.HSL;
 
 		if (!baseHSL) {
 			throw new Error(
@@ -99,14 +99,14 @@ export function genHexadicPalette(
 				value: { hue, saturation, lightness },
 				format: 'hsl'
 			});
-			const newHSL = newColorValues.hsl as types.HSL;
+			const newHSL = newColorValues.hsl as colors.HSL;
 
 			colors.push(newHSL);
 
 			const colorBox = document.getElementById(`color-box-${i + 1}`);
 
 			if (colorBox) {
-				const hexColor = newColorValues.hex as types.Hex;
+				const hexColor = newColorValues.hex as colors.Hex;
 				colorBox.style.backgroundColor = hexColor.value.hex;
 
 				dom.populateColorTextOutputBox(newHSL, i + 1);

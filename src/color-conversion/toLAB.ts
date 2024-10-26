@@ -1,11 +1,11 @@
 import { convert } from './conversion-index';
 import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { core } from '../utils/core';
 import { defaults } from '../utils/defaults';
 
-function cmykToLAB(cmyk: types.CMYK): types.LAB {
+function cmykToLAB(cmyk: colors.CMYK): colors.LAB {
 	try {
 		if (!paletteHelpers.validateColorValues(cmyk)) {
 			console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
@@ -21,7 +21,7 @@ function cmykToLAB(cmyk: types.CMYK): types.LAB {
 	}
 }
 
-function hexToLAB(hex: types.Hex): types.LAB {
+function hexToLAB(hex: colors.Hex): colors.LAB {
 	try {
 		if (!paletteHelpers.validateColorValues(hex)) {
 			console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
@@ -37,7 +37,7 @@ function hexToLAB(hex: types.Hex): types.LAB {
 	}
 }
 
-function hslToLAB(hsl: types.HSL): types.LAB {
+function hslToLAB(hsl: colors.HSL): colors.LAB {
 	try {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
@@ -53,7 +53,7 @@ function hslToLAB(hsl: types.HSL): types.LAB {
 	}
 }
 
-function hsvToLAB(hsv: types.HSV): types.LAB {
+function hsvToLAB(hsv: colors.HSV): colors.LAB {
 	try {
 		if (!paletteHelpers.validateColorValues(hsv)) {
 			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
@@ -69,7 +69,7 @@ function hsvToLAB(hsv: types.HSV): types.LAB {
 	}
 }
 
-function rgbToLAB(rgb: types.RGB): types.LAB {
+function rgbToLAB(rgb: colors.RGB): colors.LAB {
 	try {
 		if (!paletteHelpers.validateColorValues(rgb)) {
 			console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
@@ -85,7 +85,7 @@ function rgbToLAB(rgb: types.RGB): types.LAB {
 	}
 }
 
-function xyzToLAB(xyz: types.XYZ): types.LAB {
+function xyzToLAB(xyz: colors.XYZ): colors.LAB {
 	try {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
@@ -128,7 +128,7 @@ function xyzToLAB(xyz: types.XYZ): types.LAB {
 				(200 * (clonedXYZ.value.y - clonedXYZ.value.z)).toFixed(2)
 			)
 		);
-		const lab: types.LAB = { value: { l, a, b }, format: 'lab' };
+		const lab: colors.LAB = { value: { l, a, b }, format: 'lab' };
 
 		if (!paletteHelpers.validateColorValues(lab)) {
 			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);

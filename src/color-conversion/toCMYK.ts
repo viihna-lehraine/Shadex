@@ -1,11 +1,11 @@
 import { conversionHelpers } from '../helpers/conversion';
 import { paletteHelpers } from '../helpers/palette';
+import * as colors from '../index/colors';
 import * as fnObjects from '../index/fn-objects';
-import * as types from '../index/types';
 import { core } from '../utils/core';
 import { defaults } from '../utils/defaults';
 
-function hexToCMYK(hex: types.Hex): types.CMYK {
+function hexToCMYK(hex: colors.Hex): colors.CMYK {
 	try {
 		if (!paletteHelpers.validateColorValues(hex)) {
 			console.error(`Invalid hex value ${JSON.stringify(hex)}`);
@@ -27,7 +27,7 @@ function hexToCMYK(hex: types.Hex): types.CMYK {
 	}
 }
 
-function hslToCMYK(hsl: types.HSL): types.CMYK {
+function hslToCMYK(hsl: colors.HSL): colors.CMYK {
 	try {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
@@ -51,7 +51,7 @@ function hslToCMYK(hsl: types.HSL): types.CMYK {
 	}
 }
 
-function hsvToCMYK(hsv: types.HSV): types.CMYK {
+function hsvToCMYK(hsv: colors.HSV): colors.CMYK {
 	try {
 		if (!paletteHelpers.validateColorValues(hsv)) {
 			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
@@ -75,7 +75,7 @@ function hsvToCMYK(hsv: types.HSV): types.CMYK {
 	}
 }
 
-function labToCMYK(lab: types.LAB): types.CMYK {
+function labToCMYK(lab: colors.LAB): colors.CMYK {
 	try {
 		if (!paletteHelpers.validateColorValues(lab)) {
 			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
@@ -97,7 +97,7 @@ function labToCMYK(lab: types.LAB): types.CMYK {
 	}
 }
 
-function rgbToCMYK(rgb: types.RGB): types.CMYK {
+function rgbToCMYK(rgb: colors.RGB): colors.CMYK {
 	try {
 		if (!paletteHelpers.validateColorValues(rgb)) {
 			console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
@@ -139,7 +139,7 @@ function rgbToCMYK(rgb: types.RGB): types.CMYK {
 	}
 }
 
-function xyzToCMYK(xyz: types.XYZ): types.CMYK {
+function xyzToCMYK(xyz: colors.XYZ): colors.CMYK {
 	try {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);

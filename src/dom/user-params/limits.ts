@@ -2,11 +2,10 @@ import { convert } from '../../color-conversion/conversion-index';
 import { config } from '../../config/constants';
 import { paletteHelpers } from '../../helpers/palette';
 import * as fnObjects from '../../index/fn-objects';
-import * as interfaces from '../../index/interfaces';
-import * as types from '../../index/types';
+import * as colors from '../../index/colors';
 import { core } from '../../utils/core';
 
-function isCMYKTooBright(cmyk: types.CMYK): boolean {
+function isCMYKTooBright(cmyk: colors.CMYK): boolean {
 	if (!paletteHelpers.validateColorValues(cmyk)) {
 		console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
 
@@ -20,7 +19,7 @@ function isCMYKTooBright(cmyk: types.CMYK): boolean {
 	);
 }
 
-export function isCMYKTooDark(cmyk: types.CMYK): boolean {
+export function isCMYKTooDark(cmyk: colors.CMYK): boolean {
 	if (!paletteHelpers.validateColorValues(cmyk)) {
 		console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
 
@@ -30,7 +29,7 @@ export function isCMYKTooDark(cmyk: types.CMYK): boolean {
 	return core.clone(cmyk).value.key > config.cmykDarknessThreshold;
 }
 
-function isCMYKTooGray(cmyk: types.CMYK): boolean {
+function isCMYKTooGray(cmyk: colors.CMYK): boolean {
 	if (!paletteHelpers.validateColorValues(cmyk)) {
 		console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
 
@@ -46,7 +45,7 @@ function isCMYKTooGray(cmyk: types.CMYK): boolean {
 	);
 }
 
-function isHexTooBright(hex: types.Hex): boolean {
+function isHexTooBright(hex: colors.Hex): boolean {
 	if (!paletteHelpers.validateColorValues(hex)) {
 		console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
 
@@ -56,7 +55,7 @@ function isHexTooBright(hex: types.Hex): boolean {
 	return isRGBTooBright(convert.hexToRGB(core.clone(hex)));
 }
 
-function isHexTooDark(hex: types.Hex): boolean {
+function isHexTooDark(hex: colors.Hex): boolean {
 	if (!paletteHelpers.validateColorValues(hex)) {
 		console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
 
@@ -66,7 +65,7 @@ function isHexTooDark(hex: types.Hex): boolean {
 	return isRGBTooBright(convert.hexToRGB(core.clone(hex)));
 }
 
-function isHexTooGray(hex: types.Hex): boolean {
+function isHexTooGray(hex: colors.Hex): boolean {
 	if (!paletteHelpers.validateColorValues(hex)) {
 		console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
 
@@ -76,7 +75,7 @@ function isHexTooGray(hex: types.Hex): boolean {
 	return isRGBTooGray(convert.hexToRGB(core.clone(hex)));
 }
 
-function isHSLTooBright(hsl: types.HSL): boolean {
+function isHSLTooBright(hsl: colors.HSL): boolean {
 	if (!paletteHelpers.validateColorValues(hsl)) {
 		console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
@@ -86,7 +85,7 @@ function isHSLTooBright(hsl: types.HSL): boolean {
 	return core.clone(hsl).value.lightness > config.hslBrightnessThreshold;
 }
 
-function isHSLTooDark(hsl: types.HSL): boolean {
+function isHSLTooDark(hsl: colors.HSL): boolean {
 	if (!paletteHelpers.validateColorValues(hsl)) {
 		console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
@@ -96,7 +95,7 @@ function isHSLTooDark(hsl: types.HSL): boolean {
 	return core.clone(hsl).value.lightness < config.hslDarknessThreshold;
 }
 
-function isHSLTooGray(hsl: types.HSL): boolean {
+function isHSLTooGray(hsl: colors.HSL): boolean {
 	if (!paletteHelpers.validateColorValues(hsl)) {
 		console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
@@ -106,7 +105,7 @@ function isHSLTooGray(hsl: types.HSL): boolean {
 	return core.clone(hsl).value.saturation < config.hslGrayThreshold;
 }
 
-function isHSVTooBright(hsv: types.HSV): boolean {
+function isHSVTooBright(hsv: colors.HSV): boolean {
 	if (!paletteHelpers.validateColorValues(hsv)) {
 		console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
 
@@ -120,7 +119,7 @@ function isHSVTooBright(hsv: types.HSV): boolean {
 	);
 }
 
-function isHSVTooDark(hsv: types.HSV): boolean {
+function isHSVTooDark(hsv: colors.HSV): boolean {
 	if (!paletteHelpers.validateColorValues(hsv)) {
 		console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
 
@@ -130,7 +129,7 @@ function isHSVTooDark(hsv: types.HSV): boolean {
 	return core.clone(hsv).value.value < config.hsvDarknessThreshold;
 }
 
-function isHSVTooGray(hsv: types.HSV): boolean {
+function isHSVTooGray(hsv: colors.HSV): boolean {
 	if (!paletteHelpers.validateColorValues(hsv)) {
 		console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
 
@@ -140,7 +139,7 @@ function isHSVTooGray(hsv: types.HSV): boolean {
 	return core.clone(hsv).value.saturation < config.hsvGrayThreshold;
 }
 
-function isLABTooBright(lab: types.LAB): boolean {
+function isLABTooBright(lab: colors.LAB): boolean {
 	if (!paletteHelpers.validateColorValues(lab)) {
 		console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
 
@@ -150,7 +149,7 @@ function isLABTooBright(lab: types.LAB): boolean {
 	return core.clone(lab).value.l > config.labBrightnessThreshold;
 }
 
-function isLABTooDark(lab: types.LAB): boolean {
+function isLABTooDark(lab: colors.LAB): boolean {
 	if (!paletteHelpers.validateColorValues(lab)) {
 		console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
 
@@ -160,7 +159,7 @@ function isLABTooDark(lab: types.LAB): boolean {
 	return core.clone(lab).value.l < config.labDarknessThreshold;
 }
 
-function isLABTooGray(lab: types.LAB): boolean {
+function isLABTooGray(lab: colors.LAB): boolean {
 	if (!paletteHelpers.validateColorValues(lab)) {
 		console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
 
@@ -173,7 +172,7 @@ function isLABTooGray(lab: types.LAB): boolean {
 	);
 }
 
-function isRGBTooBright(rgb: types.RGB): boolean {
+function isRGBTooBright(rgb: colors.RGB): boolean {
 	if (!paletteHelpers.validateColorValues(rgb)) {
 		console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
@@ -189,7 +188,7 @@ function isRGBTooBright(rgb: types.RGB): boolean {
 	);
 }
 
-function isRGBTooDark(rgb: types.RGB): boolean {
+function isRGBTooDark(rgb: colors.RGB): boolean {
 	if (!paletteHelpers.validateColorValues(rgb)) {
 		console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
@@ -205,7 +204,7 @@ function isRGBTooDark(rgb: types.RGB): boolean {
 	);
 }
 
-function isRGBTooGray(rgb: types.RGB): boolean {
+function isRGBTooGray(rgb: colors.RGB): boolean {
 	if (!paletteHelpers.validateColorValues(rgb)) {
 		console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
@@ -228,7 +227,7 @@ function getLimitChecker<K extends keyof fnObjects.ColorLimits>(
 	return colorLimits[limit];
 }
 
-function isColorInBounds(colors: interfaces.ConversionData): boolean {
+function isColorInBounds(colors: colors.ColorDataAssertion): boolean {
 	try {
 		const areAllColorsValid = Object.entries(colors).every(
 			([key, color]) => {

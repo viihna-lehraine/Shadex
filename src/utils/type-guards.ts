@@ -1,206 +1,15 @@
 import { transforms } from './transforms';
 import { conversionMap } from '../color-conversion/conversion';
 import * as fnObjects from '../index/fn-objects';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 
-function isCMYK(
-	color: types.Color | types.ColorString
-): color is types.CMYK | types.CMYKString {
-	return color.format === 'cmyk';
-}
+// ******** SECTION 1: Robust Type Guards ********
 
-function isHex(color: types.Color | types.ColorString): color is types.Hex {
-	return color.format === 'hex';
-}
-
-function isHSL(
-	color: types.Color | types.ColorString
-): color is types.HSL | types.HSLString {
-	return color.format === 'hsl';
-}
-
-function isHSV(
-	color: types.Color | types.ColorString
-): color is types.HSV | types.HSVString {
-	return color.format === 'hsv';
-}
-
-function isLAB(color: types.Color | types.ColorString): color is types.LAB {
-	return color.format === 'lab';
-}
-
-function isRGB(color: types.Color | types.ColorString): color is types.RGB {
-	return color.format === 'rgb';
-}
-
-function isSL(
-	color: types.Color | types.ColorString
-): color is types.SL | types.SLString {
-	return color.format === 'sl';
-}
-
-function isSV(
-	color: types.Color | types.ColorString
-): color is types.SV | types.SVString {
-	return color.format === 'sv';
-}
-
-function isXYZ(color: types.Color | types.ColorString): color is types.XYZ {
-	return color.format === 'xyz';
-}
-
-// ***** SECTION 2 *****
-
-function isCMYKColor(value: unknown): value is types.CMYK {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'format' in value &&
-		(value as types.CMYK).format === 'cmyk' &&
-		'value' in value &&
-		typeof (value as types.CMYK).value.cyan === 'number' &&
-		typeof (value as types.CMYK).value.magenta === 'number' &&
-		typeof (value as types.CMYK).value.yellow === 'number' &&
-		typeof (value as types.CMYK).value.key === 'number'
-	);
-}
-
-function isCMYKString(value: unknown): value is types.CMYKString {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'format' in value &&
-		(value as types.CMYKString).format === 'cmyk' &&
-		'value' in value &&
-		typeof (value as types.CMYKString).value.cyan === 'string' &&
-		typeof (value as types.CMYKString).value.magenta === 'string' &&
-		typeof (value as types.CMYKString).value.yellow === 'string' &&
-		typeof (value as types.CMYKString).value.key === 'string'
-	);
-}
-
-function isHexColor(value: unknown): value is types.Hex {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'format' in value &&
-		(value as types.Hex).format === 'hex' &&
-		'value' in value &&
-		typeof (value as types.Hex).value.hex === 'string'
-	);
-}
-
-function isHSLColor(value: unknown): value is types.HSL {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'format' in value &&
-		(value as types.HSL).format === 'hsl' &&
-		'value' in value &&
-		typeof (value as types.HSL).value.hue === 'number' &&
-		typeof (value as types.HSL).value.saturation === 'number' &&
-		typeof (value as types.HSL).value.lightness === 'number'
-	);
-}
-
-function isHSLString(value: unknown): value is types.HSLString {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'format' in value &&
-		(value as types.HSLString).format === 'hsl' &&
-		'value' in value &&
-		typeof (value as types.HSLString).value.hue === 'number' &&
-		typeof (value as types.HSLString).value.saturation === 'string' &&
-		typeof (value as types.HSLString).value.lightness === 'string'
-	);
-}
-
-function isHSVColor(value: unknown): value is types.HSV {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'format' in value &&
-		(value as types.HSV).format === 'hsv' &&
-		'value' in value &&
-		typeof (value as types.HSV).value.hue === 'number' &&
-		typeof (value as types.HSV).value.saturation === 'number' &&
-		typeof (value as types.HSV).value.value === 'number'
-	);
-}
-
-function isHSVString(value: unknown): value is types.HSVString {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'format' in value &&
-		(value as types.HSVString).format === 'hsv' &&
-		'value' in value &&
-		typeof (value as types.HSVString).value.hue === 'number' &&
-		typeof (value as types.HSVString).value.saturation === 'string' &&
-		typeof (value as types.HSVString).value.value === 'string'
-	);
-}
-
-function isSLColor(value: unknown): value is types.SL {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'format' in value &&
-		(value as types.SL).format === 'sl' &&
-		'value' in value &&
-		typeof (value as types.SL).value.saturation === 'number' &&
-		typeof (value as types.SL).value.lightness === 'number'
-	);
-}
-
-function isSLString(value: unknown): value is types.SLString {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'format' in value &&
-		(value as types.SLString).format === 'sl' &&
-		'value' in value &&
-		typeof (value as types.SLString).value.saturation === 'string' &&
-		typeof (value as types.SLString).value.lightness === 'string'
-	);
-}
-
-function isSVColor(value: unknown): value is types.SV {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'format' in value &&
-		(value as types.SV).format === 'sv' &&
-		'value' in value &&
-		typeof (value as types.SV).value.saturation === 'number' &&
-		typeof (value as types.SV).value.value === 'number'
-	);
-}
-
-function isSVString(value: unknown): value is types.SVString {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		'format' in value &&
-		(value as types.SVString).format === 'sv' &&
-		'value' in value &&
-		typeof (value as types.SVString).value.saturation === 'string' &&
-		typeof (value as types.SVString).value.value === 'string'
-	);
-}
-
-// ***** SECTION 3 *****
-
-function ensureHash(value: string): string {
-	return value.startsWith('#') ? value : `#${value}`;
-}
-
-function isColor(value: unknown): value is types.Color {
+function isColor(value: unknown): value is colors.Color {
 	if (typeof value !== 'object' || value === null) return false;
 
-	const color = value as types.Color;
-	const validFormats: types.Color['format'][] = [
+	const color = value as colors.Color;
+	const validFormats: colors.Color['format'][] = [
 		'cmyk',
 		'hex',
 		'hsl',
@@ -219,11 +28,31 @@ function isColor(value: unknown): value is types.Color {
 	);
 }
 
-export function isColorString(value: unknown): value is types.ColorString {
+function isColorSpace(value: string): value is colors.ColorSpace {
+	return ['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb', 'xyz'].includes(value);
+}
+
+function isColorSpaceExtended(
+	value: string
+): value is colors.ColorSpaceExtended {
+	return [
+		'cmyk',
+		'hex',
+		'hsl',
+		'hsv',
+		'lab',
+		'rgb',
+		'sl',
+		'sv',
+		'xyz'
+	].includes(value);
+}
+
+export function isColorString(value: unknown): value is colors.ColorString {
 	if (typeof value !== 'object' || value === null) return false;
 
-	const colorString = value as types.ColorString;
-	const validStringFormats: types.ColorString['format'][] = [
+	const colorString = value as colors.ColorString;
+	const validStringFormats: colors.ColorString['format'][] = [
 		'cmyk',
 		'hsl',
 		'hsv',
@@ -238,42 +67,223 @@ export function isColorString(value: unknown): value is types.ColorString {
 	);
 }
 
-function isColorSpace(value: string): value is types.ColorSpace {
-	return ['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb', 'xyz'].includes(value);
+function isFormat(format: unknown): format is colors.Format {
+	return (
+		typeof format === 'string' &&
+		['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb', 'sl', 'sv', 'xyz'].includes(
+			format
+		)
+	);
 }
 
-function isColorSpaceExtended(
-	value: string
-): value is types.ColorSpaceExtended {
-	return [
-		'cmyk',
-		'hex',
-		'hsl',
-		'hsv',
-		'lab',
-		'rgb',
-		'sl',
-		'sv',
-		'xyz'
-	].includes(value);
+// ******** SECTIOn 2: Narrower Type Guards ********
+
+function isCMYKColor(value: unknown): value is colors.CMYK {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.CMYK).format === 'cmyk' &&
+		'value' in value &&
+		typeof (value as colors.CMYK).value.cyan === 'number' &&
+		typeof (value as colors.CMYK).value.magenta === 'number' &&
+		typeof (value as colors.CMYK).value.yellow === 'number' &&
+		typeof (value as colors.CMYK).value.key === 'number'
+	);
+}
+
+function isCMYKString(value: unknown): value is colors.CMYKString {
+	return (
+		isColorString(value) &&
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.CMYKString).format === 'cmyk' &&
+		'value' in value &&
+		typeof (value as colors.CMYKString).value.cyan === 'string' &&
+		typeof (value as colors.CMYKString).value.magenta === 'string' &&
+		typeof (value as colors.CMYKString).value.yellow === 'string' &&
+		typeof (value as colors.CMYKString).value.key === 'string'
+	);
+}
+
+function isHex(value: unknown): value is colors.Hex {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.Hex).format === 'hex' &&
+		'value' in value &&
+		typeof (value as colors.Hex).value.hex === 'string'
+	);
+}
+
+function isHSLColor(value: unknown): value is colors.HSL {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.HSL).format === 'hsl' &&
+		'value' in value &&
+		typeof (value as colors.HSL).value.hue === 'number' &&
+		typeof (value as colors.HSL).value.saturation === 'number' &&
+		typeof (value as colors.HSL).value.lightness === 'number'
+	);
+}
+
+function isHSLString(value: unknown): value is colors.HSLString {
+	return (
+		isColorString(value) &&
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.HSLString).format === 'hsl' &&
+		'value' in value &&
+		typeof (value as colors.HSLString).value.hue === 'number' &&
+		typeof (value as colors.HSLString).value.saturation === 'string' &&
+		typeof (value as colors.HSLString).value.lightness === 'string'
+	);
+}
+
+function isHSVColor(value: unknown): value is colors.HSV {
+	return (
+		isColor(value) &&
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.HSV).format === 'hsv' &&
+		'value' in value &&
+		typeof (value as colors.HSV).value.hue === 'number' &&
+		typeof (value as colors.HSV).value.saturation === 'number' &&
+		typeof (value as colors.HSV).value.value === 'number'
+	);
+}
+
+function isHSVString(value: unknown): value is colors.HSVString {
+	return (
+		isColorString(value) &&
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.HSVString).format === 'hsv' &&
+		'value' in value &&
+		typeof (value as colors.HSVString).value.hue === 'number' &&
+		typeof (value as colors.HSVString).value.saturation === 'string' &&
+		typeof (value as colors.HSVString).value.value === 'string'
+	);
+}
+
+function isLAB(value: unknown): value is colors.LAB {
+	return (
+		isColor(value) &&
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.LAB).format === 'lab' &&
+		'value' in value &&
+		typeof (value as colors.LAB).value.l === 'number' &&
+		typeof (value as colors.LAB).value.a === 'number' &&
+		typeof (value as colors.LAB).value.b === 'number'
+	);
+}
+
+function isRGB(value: unknown): value is colors.RGB {
+	return (
+		isColor(value) &&
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.RGB).format === 'rgb' &&
+		'value' in value &&
+		typeof (value as colors.RGB).value.red === 'number' &&
+		typeof (value as colors.RGB).value.green === 'number' &&
+		typeof (value as colors.RGB).value.blue === 'number'
+	);
+}
+
+function isSLColor(value: unknown): value is colors.SL {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.SL).format === 'sl' &&
+		'value' in value &&
+		typeof (value as colors.SL).value.saturation === 'number' &&
+		typeof (value as colors.SL).value.lightness === 'number'
+	);
+}
+
+function isSLString(value: unknown): value is colors.SLString {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.SLString).format === 'sl' &&
+		'value' in value &&
+		typeof (value as colors.SLString).value.saturation === 'string' &&
+		typeof (value as colors.SLString).value.lightness === 'string'
+	);
+}
+
+function isSVColor(value: unknown): value is colors.SV {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.SV).format === 'sv' &&
+		'value' in value &&
+		typeof (value as colors.SV).value.saturation === 'number' &&
+		typeof (value as colors.SV).value.value === 'number'
+	);
+}
+
+function isSVString(value: unknown): value is colors.SVString {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.SVString).format === 'sv' &&
+		'value' in value &&
+		typeof (value as colors.SVString).value.saturation === 'string' &&
+		typeof (value as colors.SVString).value.value === 'string'
+	);
+}
+
+function isXYZ(value: unknown): value is colors.XYZ {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		'format' in value &&
+		(value as colors.XYZ).format === 'xyz' &&
+		'value' in value &&
+		typeof (value as colors.XYZ).value.x === 'number' &&
+		typeof (value as colors.XYZ).value.y === 'number' &&
+		typeof (value as colors.XYZ).value.z === 'number'
+	);
+}
+
+// ***** SECTION 3: Utility Guards *****
+
+function ensureHash(value: string): string {
+	return value.startsWith('#') ? value : `#${value}`;
 }
 
 function isConversion(
-	from: keyof types.ConversionMap,
-	to: keyof types.Color
+	from: keyof colors.ColorDataAssertion,
+	to: keyof colors.Color
 ): boolean {
 	return from in conversionMap && to in conversionMap[from];
 }
 
 function isConvertibleColor(
-	color: types.Color
+	color: colors.Color
 ): color is
-	| types.CMYK
-	| types.Hex
-	| types.HSL
-	| types.HSV
-	| types.LAB
-	| types.RGB {
+	| colors.CMYK
+	| colors.Hex
+	| colors.HSL
+	| colors.HSV
+	| colors.LAB
+	| colors.RGB {
 	return (
 		color.format === 'cmyk' ||
 		color.format === 'hex' ||
@@ -284,22 +294,13 @@ function isConvertibleColor(
 	);
 }
 
-function isFormat(format: unknown): format is types.Format {
-	return (
-		typeof format === 'string' &&
-		['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb', 'sl', 'sv', 'xyz'].includes(
-			format
-		)
-	);
-}
-
 function isInputElement(element: HTMLElement | null): element is HTMLElement {
 	return element instanceof HTMLInputElement;
 }
 
 function narrowToColor(
-	color: types.Color | types.ColorString
-): types.Color | null {
+	color: colors.Color | colors.ColorString
+): colors.Color | null {
 	if (isColorString(color)) {
 		return transforms.colorStringToColor(color);
 	}
@@ -322,7 +323,6 @@ function narrowToColor(
 
 export const guards: fnObjects.Guards = {
 	ensureHash,
-	isCMYK,
 	isCMYKColor,
 	isCMYKString,
 	isColor,
@@ -333,20 +333,15 @@ export const guards: fnObjects.Guards = {
 	isConvertibleColor,
 	isFormat,
 	isHex,
-	isHexColor,
-	isHSL,
 	isHSLColor,
 	isHSLString,
 	isInputElement,
-	isHSV,
 	isHSVColor,
 	isHSVString,
 	isLAB,
 	isRGB,
-	isSL,
 	isSLColor,
 	isSLString,
-	isSV,
 	isSVColor,
 	isSVString,
 	isXYZ,

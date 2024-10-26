@@ -1,12 +1,12 @@
 import { defaults } from './defaults';
 import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { core } from './core';
 
-function randomCMYK(): types.CMYK {
+function randomCMYK(): colors.CMYK {
 	try {
-		const cmyk: types.CMYK = {
+		const cmyk: colors.CMYK = {
 			value: {
 				cyan: paletteHelpers.sanitizePercentage(
 					Math.floor(Math.random() * 101)
@@ -42,14 +42,14 @@ function randomCMYK(): types.CMYK {
 	}
 }
 
-function randomHex(): types.Hex {
+function randomHex(): colors.Hex {
 	try {
 		const hexDigits = '0123456789ABCDEF';
 		const hexCodeArray = Array.from(
 			{ length: 6 },
 			() => hexDigits[Math.floor(Math.random() * hexDigits.length)]
 		);
-		const hex: types.Hex = {
+		const hex: colors.Hex = {
 			value: { hex: `#${hexCodeArray.join('')}` },
 			format: 'hex'
 		};
@@ -72,9 +72,9 @@ function randomHex(): types.Hex {
 	}
 }
 
-function randomHSL(): types.HSL {
+function randomHSL(): colors.HSL {
 	try {
-		const hsl: types.HSL = {
+		const hsl: colors.HSL = {
 			value: {
 				hue: paletteHelpers.sanitizeRadial(
 					Math.floor(Math.random() * 360)
@@ -107,9 +107,9 @@ function randomHSL(): types.HSL {
 	}
 }
 
-function randomHSV(): types.HSV {
+function randomHSV(): colors.HSV {
 	try {
-		const hsv: types.HSV = {
+		const hsv: colors.HSV = {
 			value: {
 				hue: paletteHelpers.sanitizeRadial(
 					Math.floor(Math.random() * 360)
@@ -142,9 +142,9 @@ function randomHSV(): types.HSV {
 	}
 }
 
-function randomLAB(): types.LAB {
+function randomLAB(): colors.LAB {
 	try {
-		const lab: types.LAB = {
+		const lab: colors.LAB = {
 			value: {
 				l: paletteHelpers.sanitizePercentage(Math.random() * 100),
 				a: paletteHelpers.sanitizeLAB(Math.random() * 251 - 125),
@@ -171,9 +171,9 @@ function randomLAB(): types.LAB {
 	}
 }
 
-function randomRGB(): types.RGB {
+function randomRGB(): colors.RGB {
 	try {
-		const rgb: types.RGB = {
+		const rgb: colors.RGB = {
 			value: {
 				red: paletteHelpers.sanitizeRGB(
 					Math.floor(Math.random() * 256)
@@ -206,9 +206,9 @@ function randomRGB(): types.RGB {
 	}
 }
 
-function randomSL(): types.SL {
+function randomSL(): colors.SL {
 	try {
-		const sl: types.SL = {
+		const sl: colors.SL = {
 			value: {
 				saturation: paletteHelpers.sanitizePercentage(
 					Math.max(0, Math.min(100, Math.random() * 100))
@@ -220,7 +220,7 @@ function randomSL(): types.SL {
 			format: 'sl'
 		};
 
-		if (!paletteHelpers.validateColorValues(sl as types.SL)) {
+		if (!paletteHelpers.validateColorValues(sl as colors.SL)) {
 			console.error(
 				`Invalid random SV color value ${JSON.stringify(sl)}`
 			);
@@ -238,9 +238,9 @@ function randomSL(): types.SL {
 	}
 }
 
-function randomSV(): types.SV {
+function randomSV(): colors.SV {
 	try {
-		const sv: types.SV = {
+		const sv: colors.SV = {
 			value: {
 				saturation: paletteHelpers.sanitizePercentage(
 					Math.max(0, Math.min(100, Math.random() * 100))
@@ -270,7 +270,7 @@ function randomSV(): types.SV {
 	}
 }
 
-function randomColor(colorSpace: types.ColorSpace): types.Color {
+function randomColor(colorSpace: colors.ColorSpace): colors.Color {
 	try {
 		switch (colorSpace) {
 			case 'cmyk':

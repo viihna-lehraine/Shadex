@@ -1,6 +1,6 @@
 import { genAllColorValues } from '../color-conversion/conversion';
 import { dom } from '../dom/dom-main';
-import * as types from '../index/types';
+import * as colors from '../index/colors';
 import { paletteHelpers } from '../helpers/palette';
 import { random } from '../utils/color-randomizer';
 import { core } from '../utils/core';
@@ -24,11 +24,11 @@ export function genDiadicHues(baseHue: number): number[] {
 
 export function genDiadicPalette(
 	numBoxes: number,
-	customColor: types.Color | null = null,
-	colorSpace: types.ColorSpace = 'hex'
-): types.Color[] {
+	customColor: colors.Color | null = null,
+	colorSpace: colors.ColorSpace = 'hex'
+): colors.Color[] {
 	try {
-		let clonedCustomColor: types.Color | null = null;
+		let clonedCustomColor: colors.Color | null = null;
 
 		if (customColor) {
 			if (!paletteHelpers.validateColorValues(customColor)) {
@@ -49,12 +49,12 @@ export function genDiadicPalette(
 			return [];
 		}
 
-		const colors: types.Color[] = [];
+		const colors: colors.Color[] = [];
 
 		const baseColorValues = genAllColorValues(
 			clonedCustomColor ?? random.randomColor(colorSpace)
 		);
-		const baseColor = baseColorValues[colorSpace] as types.Color;
+		const baseColor = baseColorValues[colorSpace] as colors.Color;
 
 		if (!baseColor) {
 			throw new Error('Base color is missing in the generated values');
@@ -62,7 +62,7 @@ export function genDiadicPalette(
 
 		colors.push(baseColor);
 
-		const baseHSL = baseColorValues.hsl as types.HSL;
+		const baseHSL = baseColorValues.hsl as colors.HSL;
 		const diadicHues = baseHSL
 			? genDiadicHues(baseHSL.value.hue)
 			: [0, 180];
@@ -76,7 +76,7 @@ export function genDiadicPalette(
 			},
 			format: 'hsl'
 		});
-		const diadicColor = diadicColorValues[colorSpace] as types.Color;
+		const diadicColor = diadicColorValues[colorSpace] as colors.Color;
 
 		if (diadicColor) {
 			colors.push(diadicColor);
@@ -90,12 +90,12 @@ export function genDiadicPalette(
 			const {
 				value: { saturation, lightness }
 			} = random.randomSL();
-			const newClonedHSL: types.HSL = core.clone({
+			const newClonedHSL: colors.HSL = core.clone({
 				value: { hue: newHue, saturation, lightness },
 				format: 'hsl'
 			});
 			const newColorValues = genAllColorValues(newClonedHSL);
-			const newColor = newColorValues[colorSpace] as types.Color;
+			const newColor = newColorValues[colorSpace] as colors.Color;
 
 			if (newColor) {
 				colors.push(newColor);
@@ -106,7 +106,7 @@ export function genDiadicPalette(
 			const colorBox = document.getElementById(`color-box-${index + 1}`);
 			const colorValues = genAllColorValues(color);
 
-			const hexColor = colorValues.hex as types.Hex;
+			const hexColor = colorValues.hex as colors.Hex;
 			if (colorBox && hexColor) {
 				colorBox.style.backgroundColor = hexColor.value.hex;
 				dom.populateColorTextOutputBox(color, index + 1);

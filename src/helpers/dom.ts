@@ -2,8 +2,8 @@ import { config } from '../config/constants';
 import { dragAndDrop } from '../dom/drag-and-drop';
 import { paletteHelpers } from './palette';
 import * as fnObjects from '../index/fn-objects';
-import * as interfaces from '../index/interfaces';
-import * as types from '../index/types';
+import * as domTypes from '../index/dom-types';
+import * as colors from '../index/colors';
 import { core } from '../utils/core';
 import { transforms } from '../utils/transforms';
 
@@ -29,9 +29,9 @@ function getElement<T extends HTMLElement>(id: string): T | null {
 }
 
 function makePaletteBox(
-	color: types.Color,
+	color: colors.Color,
 	paletteBoxCount: number
-): interfaces.MakePaletteBox {
+): domTypes.MakePaletteBox {
 	try {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(
@@ -56,7 +56,7 @@ function makePaletteBox(
 
 		const colorTextOutputBox = document.createElement(
 			'input'
-		) as interfaces.ColorInputElement;
+		) as domTypes.ColorInputElement;
 		colorTextOutputBox.type = 'text';
 		colorTextOutputBox.className = 'color-text-output-box tooltip';
 		colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
