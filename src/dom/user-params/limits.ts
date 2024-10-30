@@ -1,8 +1,8 @@
-import { convert } from '../../color-conversion/conversion-index';
+import { convert } from '../../color-spaces/color-space-index';
 import { config } from '../../config/constants';
 import { paletteHelpers } from '../../helpers/palette';
-import * as fnObjects from '../../index/fn-objects';
 import * as colors from '../../index/colors';
+import * as fnObjects from '../../index/fn-objects';
 import { core } from '../../utils/core';
 
 function isCMYKTooBright(cmyk: colors.CMYK): boolean {

@@ -1,4 +1,4 @@
-import { getConversionFn } from '../color-conversion/conversion';
+import { getConversionFn } from '../color-spaces/conversion';
 import { config } from '../config/constants';
 import { domHelpers } from '../helpers/dom';
 import { paletteHelpers } from '../helpers/palette';
@@ -6,9 +6,9 @@ import * as fnObjects from '../index/fn-objects';
 import * as colors from '../index/colors';
 import * as domTypes from '../index/dom-types';
 import { generate } from '../palette-gen/generate';
-import { random } from '../utils/color-randomizer';
+import { genRandomColor } from '../utils/color-randomizer';
 import { core } from '../utils/core';
-import { transforms } from '../utils/transforms';
+import { transform } from '../utils/transform';
 import { guards } from '../utils/type-guards';
 
 function addConversionButtonEventListeners(): void {
@@ -62,7 +62,7 @@ function applyCustomColor(): colors.Color {
 			throw new Error(`Unsupported color format: ${selectedFormat}`);
 		}
 
-		const parsedColor = transforms.parseColor(selectedFormat, rawValue);
+		const parsedColor = transform.parseColor(selectedFormat, rawValue);
 
 		if (!parsedColor) {
 			throw new Error(`Invalid color value: ${rawValue}`);
@@ -73,13 +73,13 @@ function applyCustomColor(): colors.Color {
 		console.error(
 			`Failed to apply custom color: ${error}. Returning randomly generated hex color`
 		);
-		return random.randomColor('hex');
+		return genRandomColor('hex');
 	}
 }
 
 function applyFirstColorToUI(colorSpace: colors.ColorSpace): colors.Color {
 	try {
-		const color = random.randomColor(colorSpace);
+		const color = genRandomColor(colorSpace);
 		const colorBox1 = document.getElementById('color-box-1');
 
 		if (!colorBox1) {
@@ -87,7 +87,7 @@ function applyFirstColorToUI(colorSpace: colors.ColorSpace): colors.Color {
 			return color;
 		}
 
-		const formatColorString = transforms.getColorString(color);
+		const formatColorString = transform.getColorString(color);
 
 		if (!formatColorString) {
 			console.error('Unexpected or unsupported color format.');
@@ -101,7 +101,7 @@ function applyFirstColorToUI(colorSpace: colors.ColorSpace): colors.Color {
 		return color;
 	} catch (error) {
 		console.error(`Failed to apply first color to UI: ${error}`);
-		return random.randomColor('hex');
+		return genRandomColor('hex');
 	}
 }
 
@@ -341,7 +341,7 @@ function getGenerateButtonParams(): domTypes.GenButtonParams | null {
 		const customColorRaw = (
 			document.getElementById('custom-color') as HTMLInputElement
 		)?.value;
-		const customColor = transforms.parseCustomColor(
+		const customColor = transform.parseCustomColor(
 			colorSpace,
 			customColorRaw
 		);
@@ -378,7 +378,6 @@ const handleGenButtonClick = core.debounce(() => {
 			return;
 		}
 
-		const space: colors.ColorSpace = colorSpace ?? 'hex';
 		const options: colors.PaletteOptions = {
 			paletteType,
 			numBoxes,
@@ -399,7 +398,7 @@ function populateColorTextOutputBox(
 	try {
 		const clonedColor: colors.Color = guards.isColor(color)
 			? core.clone(color)
-			: transforms.colorStringToColor(color);
+			: transform.colorStringToColor(color);
 
 		if (!paletteHelpers.validateColorValues(clonedColor)) {
 			console.error('Invalid color values.');
@@ -415,7 +414,7 @@ function populateColorTextOutputBox(
 
 		if (!colorTextOutputBox) return;
 
-		const stringifiedColor = transforms.getCSSColorString(clonedColor);
+		const stringifiedColor = transform.getCSSColorString(clonedColor);
 
 		console.log(`Adding CSS-formatted color to DOM ${stringifiedColor}`);
 
@@ -489,7 +488,7 @@ function showCustomColorPopupDiv(): void {
 	}
 }
 
-export const dom: fnObjects.DOM = {
+export const domFn: fnObjects.DOMFn = {
 	addConversionButtonEventListeners,
 	applyCustomColor,
 	applyFirstColorToUI,

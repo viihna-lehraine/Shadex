@@ -1,7 +1,8 @@
-import { transforms } from './transforms';
-import { conversionMap } from '../color-conversion/conversion';
-import * as fnObjects from '../index/fn-objects';
+import { transform } from './transform';
+import { conversionMap } from '../color-spaces/conversion';
 import * as colors from '../index/colors';
+import * as fnObjects from '../index/fn-objects';
+import * as idb from '../index/idb';
 
 // ******** SECTION 1: Robust Type Guards ********
 
@@ -298,11 +299,24 @@ function isInputElement(element: HTMLElement | null): element is HTMLElement {
 	return element instanceof HTMLInputElement;
 }
 
+function isStoredPalette(obj: unknown): obj is idb.StoredPalette {
+	if (typeof obj !== 'object' || obj === null) return false;
+
+	const candidate = obj as Partial<idb.StoredPalette>;
+
+	return (
+		typeof candidate.tableID === 'number' &&
+		typeof candidate.palette === 'object' &&
+		Array.isArray(candidate.palette.items) &&
+		typeof candidate.palette.id === 'string'
+	);
+}
+
 function narrowToColor(
 	color: colors.Color | colors.ColorString
 ): colors.Color | null {
 	if (isColorString(color)) {
-		return transforms.colorStringToColor(color);
+		return transform.colorStringToColor(color);
 	}
 
 	switch (color.format) {
@@ -342,6 +356,7 @@ export const guards: fnObjects.Guards = {
 	isRGB,
 	isSLColor,
 	isSLString,
+	isStoredPalette,
 	isSVColor,
 	isSVString,
 	isXYZ,

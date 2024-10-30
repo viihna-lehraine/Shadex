@@ -1,5 +1,5 @@
 import * as colors from './colors';
-import { conversionMap } from '../color-conversion/conversion';
+import { conversionMap } from '../color-spaces/conversion';
 
 export type ConversionFunction<From, To> = (input: From) => To;
 

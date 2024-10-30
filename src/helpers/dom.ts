@@ -5,7 +5,7 @@ import * as fnObjects from '../index/fn-objects';
 import * as domTypes from '../index/dom-types';
 import * as colors from '../index/colors';
 import { core } from '../utils/core';
-import { transforms } from '../utils/transforms';
+import { transform } from '../utils/transform';
 
 function attachDragAndDropEventListeners(element: HTMLElement | null): void {
 	try {
@@ -62,7 +62,7 @@ function makePaletteBox(
 		colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
 		colorTextOutputBox.setAttribute('data-format', 'hex');
 
-		const colorString = transforms.getCSSColorString(clonedColor);
+		const colorString = transform.getCSSColorString(clonedColor);
 
 		colorTextOutputBox.value = colorString || '';
 		colorTextOutputBox.colorValues = clonedColor;

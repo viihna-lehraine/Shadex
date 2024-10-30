@@ -10,6 +10,18 @@ export interface ColorData {
 	xyz?: XYZ;
 }
 
+export interface ColorDataExtended {
+	cmyk?: CMYK;
+	hex?: Hex;
+	hsl?: HSL;
+	hsv?: HSV;
+	lab?: LAB;
+	rgb?: RGB;
+	sl?: SL;
+	sv?: SV;
+	xyz?: XYZ;
+}
+
 export interface ColorDataAssertion {
 	cmyk: CMYK;
 	hex: Hex;
@@ -40,7 +52,6 @@ export type Format = keyof ColorSpace | 'sl' | 'sv';
 export interface PaletteOptions {
 	paletteType: number;
 	numBoxes: number;
-	baseColor: Color;
 	customColor?: Color | null;
 	colorSpace: ColorSpace;
 }
@@ -182,13 +193,13 @@ export type CMYKValueString = {
 };
 
 export type HSLValueString = {
-	hue: number;
+	hue: string;
 	saturation: string;
 	lightness: string;
 };
 
 export type HSVValueString = {
-	hue: number;
+	hue: string;
 	saturation: string;
 	value: string;
 };

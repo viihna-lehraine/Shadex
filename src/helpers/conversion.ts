@@ -1,9 +1,9 @@
-import { convert } from '../color-conversion/conversion-index';
+import { convert } from '../color-spaces/color-space-index';
 import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
 import * as colors from '../index/colors';
 import { core } from '../utils/core';
-import { defaults } from '../utils/defaults';
+import { defaults } from '../config/defaults';
 
 function applyGammaCorrection(value: number): number {
 	try {
@@ -21,7 +21,7 @@ function clampRGB(rgb: colors.RGB): colors.RGB {
 	if (!paletteHelpers.validateColorValues(rgb)) {
 		console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
-		return core.clone(defaults.defaultRGB());
+		return core.clone(defaults.rgb);
 	}
 
 	try {
@@ -42,12 +42,48 @@ function clampRGB(rgb: colors.RGB): colors.RGB {
 	}
 }
 
+function cmykToHSLHelper(cmyk: colors.CMYK): colors.HSL {
+	try {
+		if (!paletteHelpers.validateColorValues(cmyk)) {
+			console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
+
+			return core.clone(defaults.hsl);
+		}
+
+		const rgb: colors.RGB = convert.cmykToRGB(core.clone(cmyk));
+
+		return convert.rgbToHSL(rgb);
+	} catch (error) {
+		console.error(`Error converting CMYK to HSL: ${error}`);
+
+		return core.clone(defaults.hsl);
+	}
+}
+
+function cmykToHSVHelper(cmyk: colors.CMYK): colors.HSV {
+	try {
+		if (!paletteHelpers.validateColorValues(cmyk)) {
+			console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
+
+			return core.clone(defaults.hsv);
+		}
+
+		const rgb: colors.RGB = convert.cmykToRGB(core.clone(cmyk));
+
+		return convert.rgbToHSV(rgb);
+	} catch (error) {
+		console.error(`Error converting CMYK to HSV: ${error}`);
+
+		return core.clone(defaults.hsv);
+	}
+}
+
 function cmykToXYZHelper(cmyk: colors.CMYK): colors.XYZ {
 	try {
 		if (!paletteHelpers.validateColorValues(cmyk)) {
 			console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
 
-			return core.clone(defaults.defaultXYZ());
+			return core.clone(defaults.xyz);
 		}
 
 		const rgb: colors.RGB = convert.cmykToRGB(core.clone(cmyk));
@@ -56,7 +92,7 @@ function cmykToXYZHelper(cmyk: colors.CMYK): colors.XYZ {
 	} catch (error) {
 		console.error(`Error converting CMYK to XYZ: ${error}`);
 
-		return core.clone(defaults.defaultXYZ());
+		return core.clone(defaults.xyz);
 	}
 }
 
@@ -65,7 +101,7 @@ function convertColorToCMYK(color: colors.Color): colors.CMYK | null {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
 
-			return core.clone(defaults.defaultCMYK());
+			return core.clone(defaults.cmyk);
 		}
 
 		switch (color.format) {
@@ -100,7 +136,7 @@ function convertColorToHex(color: colors.Color): colors.Hex | null {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
 
-			return core.clone(defaults.defaultHex());
+			return core.clone(defaults.hex);
 		}
 
 		switch (color.format) {
@@ -135,7 +171,7 @@ function convertColorToHSL(color: colors.Color): colors.HSL | null {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
 
-			return core.clone(defaults.defaultHSL());
+			return core.clone(defaults.hsl);
 		}
 
 		switch (color.format) {
@@ -170,7 +206,7 @@ function convertColorToHSV(color: colors.Color): colors.HSV | null {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
 
-			return core.clone(defaults.defaultHSV());
+			return core.clone(defaults.hsv);
 		}
 
 		switch (color.format) {
@@ -205,7 +241,7 @@ function convertColorToLAB(color: colors.Color): colors.LAB | null {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
 
-			return core.clone(defaults.defaultLAB());
+			return core.clone(defaults.lab);
 		}
 
 		switch (color.format) {
@@ -240,7 +276,7 @@ function convertColorToRGB(color: colors.Color): colors.RGB | null {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
 
-			return core.clone(defaults.defaultRGB());
+			return core.clone(defaults.rgb);
 		}
 
 		switch (color.format) {
@@ -275,7 +311,7 @@ function hexToCMYKHelper(hex: colors.Hex): colors.CMYK {
 		if (!paletteHelpers.validateColorValues(hex)) {
 			console.error(`Invalid hex value ${JSON.stringify(hex)}`);
 
-			return core.clone(defaults.defaultCMYK());
+			return core.clone(defaults.cmyk);
 		}
 
 		const rgb: colors.RGB = convert.hexToRGB(core.clone(hex));
@@ -284,7 +320,43 @@ function hexToCMYKHelper(hex: colors.Hex): colors.CMYK {
 	} catch (error) {
 		console.error(`Error converting hex to CMYK: ${error}`);
 
-		return core.clone(defaults.defaultCMYK());
+		return core.clone(defaults.cmyk);
+	}
+}
+
+function hexToHSLHelper(hex: colors.Hex): colors.HSL {
+	try {
+		if (!paletteHelpers.validateColorValues(hex)) {
+			console.error(`Invalid hex value ${JSON.stringify(hex)}`);
+
+			return core.clone(defaults.hsl);
+		}
+
+		const rgb: colors.RGB = convert.hexToRGB(core.clone(hex));
+
+		return convert.rgbToHSL(rgb);
+	} catch (error) {
+		console.error(`Error converting hex to HSL: ${error}`);
+
+		return core.clone(defaults.hsl);
+	}
+}
+
+function hexToHSVHelper(hex: colors.Hex): colors.HSV {
+	try {
+		if (!paletteHelpers.validateColorValues(hex)) {
+			console.error(`Invalid hex value ${JSON.stringify(hex)}`);
+
+			return core.clone(defaults.hsv);
+		}
+
+		const rgb: colors.RGB = convert.hexToRGB(core.clone(hex));
+
+		return convert.rgbToHSV(rgb);
+	} catch (error) {
+		console.error(`Error converting hex to HSV: ${error}`);
+
+		return core.clone(defaults.hsv);
 	}
 }
 
@@ -293,7 +365,7 @@ function hexToXYZHelper(hex: colors.Hex): colors.XYZ {
 		if (!paletteHelpers.validateColorValues(hex)) {
 			console.error(`Invalid hex value ${JSON.stringify(hex)}`);
 
-			return core.clone(defaults.defaultXYZ());
+			return core.clone(defaults.xyz);
 		}
 
 		const lab: colors.LAB = convert.hexToLAB(core.clone(hex));
@@ -303,7 +375,7 @@ function hexToXYZHelper(hex: colors.Hex): colors.XYZ {
 	} catch (error) {
 		console.error(`Error converting hex to XYZ: ${error}`);
 
-		return core.clone(defaults.defaultXYZ());
+		return core.clone(defaults.xyz);
 	}
 }
 
@@ -335,14 +407,14 @@ function hslAddFormat(value: colors.HSLValue): colors.HSL {
 		) {
 			console.error(`Invalid HSL value ${JSON.stringify(value)}`);
 
-			return core.clone(defaults.defaultHSL());
+			return core.clone(defaults.hsl);
 		}
 
 		return { value: value, format: 'hsl' } as colors.HSL;
 	} catch (error) {
 		console.error(`Error adding HSL format: ${error}`);
 
-		return core.clone(defaults.defaultHSL());
+		return core.clone(defaults.hsl);
 	}
 }
 
@@ -351,7 +423,7 @@ function hslToCMYKHelper(hsl: colors.HSL): colors.CMYK {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
-			return core.clone(defaults.defaultCMYK());
+			return core.clone(defaults.cmyk);
 		}
 
 		const rgb: colors.RGB = convert.hslToRGB(core.clone(hsl));
@@ -359,7 +431,7 @@ function hslToCMYKHelper(hsl: colors.HSL): colors.CMYK {
 	} catch (error) {
 		console.error(`Error converting HSL to CMYK: ${error}`);
 
-		return core.clone(defaults.defaultCMYK());
+		return core.clone(defaults.cmyk);
 	}
 }
 
@@ -368,7 +440,7 @@ function hslToHexHelper(hsl: colors.HSL): colors.Hex {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
-			return core.clone(defaults.defaultHex());
+			return core.clone(defaults.hex);
 		}
 
 		const rgb: colors.RGB = convert.hslToRGB(core.clone(hsl));
@@ -377,7 +449,25 @@ function hslToHexHelper(hsl: colors.HSL): colors.Hex {
 	} catch (error) {
 		console.error(`Error converting HSL to hex: ${error}`);
 
-		return core.clone(defaults.defaultHex());
+		return core.clone(defaults.hex);
+	}
+}
+
+function hslToHSVHelper(hsl: colors.HSL): colors.HSV {
+	try {
+		if (!paletteHelpers.validateColorValues(hsl)) {
+			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+
+			return core.clone(defaults.hsv);
+		}
+
+		const rgb: colors.RGB = convert.hslToRGB(core.clone(hsl));
+
+		return convert.rgbToHSV(rgb);
+	} catch (error) {
+		console.error(`Error converting HSL to HSV: ${error}`);
+
+		return core.clone(defaults.hsv);
 	}
 }
 
@@ -386,7 +476,7 @@ function hslToXYZHelper(hsl: colors.HSL): colors.XYZ {
 		if (!paletteHelpers.validateColorValues(hsl)) {
 			console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
-			return core.clone(defaults.defaultXYZ());
+			return core.clone(defaults.xyz);
 		}
 
 		const lab: colors.LAB = convert.hslToLAB(core.clone(hsl));
@@ -395,7 +485,7 @@ function hslToXYZHelper(hsl: colors.HSL): colors.XYZ {
 	} catch (error) {
 		console.error(`Error converting HSL to XYZ: ${error}`);
 
-		return core.clone(defaults.defaultXYZ());
+		return core.clone(defaults.xyz);
 	}
 }
 
@@ -404,7 +494,7 @@ function hsvToCMYKHelper(hsv: colors.HSV): colors.CMYK {
 		if (!paletteHelpers.validateColorValues(hsv)) {
 			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
 
-			return core.clone(defaults.defaultCMYK());
+			return core.clone(defaults.cmyk);
 		}
 
 		const rgb: colors.RGB = convert.hsvToRGB(core.clone(hsv));
@@ -413,7 +503,25 @@ function hsvToCMYKHelper(hsv: colors.HSV): colors.CMYK {
 	} catch (error) {
 		console.error(`Error converting HSV to CMYK: ${error}`);
 
-		return core.clone(defaults.defaultCMYK());
+		return core.clone(defaults.cmyk);
+	}
+}
+
+function hsvToHSLHelper(hsv: colors.HSV): colors.HSL {
+	try {
+		if (!paletteHelpers.validateColorValues(hsv)) {
+			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
+
+			return core.clone(defaults.hsl);
+		}
+
+		const rgb: colors.RGB = convert.hsvToRGB(core.clone(hsv));
+
+		return convert.rgbToHSL(rgb);
+	} catch (error) {
+		console.error(`Error converting HSV to HSL: ${error}`);
+
+		return core.clone(defaults.hsl);
 	}
 }
 
@@ -422,7 +530,7 @@ function hsvToXYZHelper(hsv: colors.HSV): colors.XYZ {
 		if (!paletteHelpers.validateColorValues(hsv)) {
 			console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
 
-			return core.clone(defaults.defaultXYZ());
+			return core.clone(defaults.xyz);
 		}
 
 		const rgb: colors.RGB = convert.hsvToRGB(core.clone(hsv));
@@ -431,7 +539,7 @@ function hsvToXYZHelper(hsv: colors.HSV): colors.XYZ {
 	} catch (error) {
 		console.error(`Error converting HSV to XYZ: ${error}`);
 
-		return core.clone(defaults.defaultXYZ());
+		return core.clone(defaults.xyz);
 	}
 }
 
@@ -440,7 +548,7 @@ function labToCMYKHelper(lab: colors.LAB): colors.CMYK {
 		if (!paletteHelpers.validateColorValues(lab)) {
 			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
 
-			return core.clone(defaults.defaultCMYK());
+			return core.clone(defaults.cmyk);
 		}
 
 		const rgb: colors.RGB = convert.labToRGB(core.clone(lab));
@@ -449,7 +557,43 @@ function labToCMYKHelper(lab: colors.LAB): colors.CMYK {
 	} catch (error) {
 		console.error(`Error converting LAB to CMYK: ${error}`);
 
-		return core.clone(defaults.defaultCMYK());
+		return core.clone(defaults.cmyk);
+	}
+}
+
+function labToHSLHelper(lab: colors.LAB): colors.HSL {
+	try {
+		if (!paletteHelpers.validateColorValues(lab)) {
+			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
+
+			return core.clone(defaults.hsl);
+		}
+
+		const rgb: colors.RGB = convert.labToRGB(core.clone(lab));
+
+		return convert.rgbToHSL(rgb);
+	} catch (error) {
+		console.error(`Error converting LAB to HSL: ${error}`);
+
+		return core.clone(defaults.hsl);
+	}
+}
+
+function labToHSVHelper(lab: colors.LAB): colors.HSV {
+	try {
+		if (!paletteHelpers.validateColorValues(lab)) {
+			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
+
+			return core.clone(defaults.hsv);
+		}
+
+		const rgb: colors.RGB = convert.labToRGB(core.clone(lab));
+
+		return convert.rgbToHSV(rgb);
+	} catch (error) {
+		console.error(`Error converting LAB to HSV: ${error}`);
+
+		return core.clone(defaults.hsv);
 	}
 }
 
@@ -458,14 +602,46 @@ function labToXYZHelper(lab: colors.LAB): colors.XYZ {
 		if (!paletteHelpers.validateColorValues(lab)) {
 			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
 
-			return core.clone(defaults.defaultXYZ());
+			return core.clone(defaults.xyz);
 		}
 
 		return convert.labToXYZ(core.clone(lab));
 	} catch (error) {
 		console.error(`Error converting LAB to XYZ: ${error}`);
 
-		return defaults.defaultXYZ();
+		return defaults.xyz;
+	}
+}
+
+function rgbToHSLHelper(rgb: colors.RGB): colors.HSL {
+	try {
+		if (!paletteHelpers.validateColorValues(rgb)) {
+			console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+
+			return core.clone(defaults.hsl);
+		}
+
+		return convert.rgbToHSL(core.clone(rgb));
+	} catch (error) {
+		console.error(`Error converting RGB to HSL: ${error}`);
+
+		return core.clone(defaults.hsl);
+	}
+}
+
+function rgbToHSVHelper(rgb: colors.RGB): colors.HSV {
+	try {
+		if (!paletteHelpers.validateColorValues(rgb)) {
+			console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+
+			return core.clone(defaults.hsv);
+		}
+
+		return convert.rgbToHSV(core.clone(rgb));
+	} catch (error) {
+		console.error(`Error converting RGB to HSV: ${error}`);
+
+		return core.clone(defaults.hsv);
 	}
 }
 
@@ -474,7 +650,7 @@ function xyzToCMYKHelper(xyz: colors.XYZ): colors.CMYK {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
 
-			return core.clone(defaults.defaultCMYK());
+			return core.clone(defaults.cmyk);
 		}
 
 		const lab: colors.LAB = convert.xyzToLAB(core.clone(xyz));
@@ -483,7 +659,7 @@ function xyzToCMYKHelper(xyz: colors.XYZ): colors.CMYK {
 	} catch (error) {
 		console.error(`Error converting XYZ to CMYK: ${error}`);
 
-		return core.clone(defaults.defaultCMYK());
+		return core.clone(defaults.cmyk);
 	}
 }
 
@@ -492,7 +668,7 @@ function xyzToHexHelper(xyz: colors.XYZ): colors.Hex {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
 
-			return core.clone(defaults.defaultHex());
+			return core.clone(defaults.hex);
 		}
 
 		const lab: colors.LAB = convert.xyzToLAB(core.clone(xyz));
@@ -501,7 +677,7 @@ function xyzToHexHelper(xyz: colors.XYZ): colors.Hex {
 	} catch (error) {
 		console.error(`Error converting XYZ to hex: ${error}`);
 
-		return core.clone(defaults.defaultHex());
+		return core.clone(defaults.hex);
 	}
 }
 
@@ -510,7 +686,7 @@ function xyzToHSLHelper(xyz: colors.XYZ): colors.HSL {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
 
-			return core.clone(defaults.defaultHSL());
+			return core.clone(defaults.hsl);
 		}
 
 		const lab: colors.LAB = convert.xyzToLAB(core.clone(xyz));
@@ -519,7 +695,7 @@ function xyzToHSLHelper(xyz: colors.XYZ): colors.HSL {
 	} catch (error) {
 		console.error(`Error converting XYZ to HSL: ${error}`);
 
-		return core.clone(defaults.defaultHSL());
+		return core.clone(defaults.hsl);
 	}
 }
 
@@ -528,7 +704,7 @@ function xyzToHSVHelper(xyz: colors.XYZ): colors.HSV {
 		if (!paletteHelpers.validateColorValues(xyz)) {
 			console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
 
-			return core.clone(defaults.defaultHSV());
+			return core.clone(defaults.hsv);
 		}
 
 		const lab: colors.LAB = convert.xyzToLAB(core.clone(xyz));
@@ -537,13 +713,15 @@ function xyzToHSVHelper(xyz: colors.XYZ): colors.HSV {
 	} catch (error) {
 		console.error(`Error converting XYZ to HSV: ${error}`);
 
-		return core.clone(defaults.defaultHSV());
+		return core.clone(defaults.hsv);
 	}
 }
 
 export const conversionHelpers: fnObjects.ConversionHelpers = {
 	applyGammaCorrection,
 	clampRGB,
+	cmykToHSLHelper,
+	cmykToHSVHelper,
 	cmykToXYZHelper,
 	convertColorToCMYK,
 	convertColorToHex,
@@ -552,16 +730,24 @@ export const conversionHelpers: fnObjects.ConversionHelpers = {
 	convertColorToLAB,
 	convertColorToRGB,
 	hexToCMYKHelper,
+	hexToHSLHelper,
+	hexToHSVHelper,
 	hexToXYZHelper,
 	hslAddFormat,
 	hslToCMYKHelper,
 	hslToHexHelper,
+	hslToHSVHelper,
 	hslToXYZHelper,
 	hsvToCMYKHelper,
+	hsvToHSLHelper,
 	hsvToXYZHelper,
 	hueToRGB,
 	labToCMYKHelper,
+	labToHSLHelper,
+	labToHSVHelper,
 	labToXYZHelper,
+	rgbToHSLHelper,
+	rgbToHSVHelper,
 	xyzToCMYKHelper,
 	xyzToHexHelper,
 	xyzToHSLHelper,

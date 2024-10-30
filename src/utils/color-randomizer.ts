@@ -1,6 +1,5 @@
-import { defaults } from './defaults';
+import { defaults } from '../config/defaults';
 import { paletteHelpers } from '../helpers/palette';
-import * as fnObjects from '../index/fn-objects';
 import * as colors from '../index/colors';
 import { core } from './core';
 
@@ -29,7 +28,7 @@ function randomCMYK(): colors.CMYK {
 				`Invalid random CMYK color value ${JSON.stringify(cmyk)}`
 			);
 
-			return core.clone(defaults.defaultCMYK());
+			return core.clone(defaults.cmyk);
 		}
 
 		console.log(`Generated randomCMYK: ${JSON.stringify(cmyk)}`);
@@ -38,7 +37,7 @@ function randomCMYK(): colors.CMYK {
 	} catch (error) {
 		console.error(`Error generating random CMYK color: ${error}`);
 
-		return defaults.defaultCMYK();
+		return core.clone(defaults.cmyk);
 	}
 }
 
@@ -59,7 +58,7 @@ function randomHex(): colors.Hex {
 				`Invalid random hex color value ${JSON.stringify(hex)}`
 			);
 
-			return core.clone(defaults.defaultHex());
+			return core.clone(defaults.hex);
 		}
 
 		console.log(`Generated randomHex: ${JSON.stringify(hex)}`);
@@ -68,7 +67,7 @@ function randomHex(): colors.Hex {
 	} catch (error) {
 		console.error(`Error generating random hex color: ${error}`);
 
-		return defaults.defaultHex();
+		return core.clone(defaults.hex);
 	}
 }
 
@@ -94,7 +93,7 @@ function randomHSL(): colors.HSL {
 				`Invalid random HSL color value ${JSON.stringify(hsl)}`
 			);
 
-			return core.clone(defaults.defaultHSL());
+			return core.clone(defaults.hsl);
 		}
 
 		console.log(`Generated randomHSL: ${JSON.stringify(hsl)}`);
@@ -103,7 +102,7 @@ function randomHSL(): colors.HSL {
 	} catch (error) {
 		console.error(`Error generating random HSL color: ${error}`);
 
-		return defaults.defaultHSL();
+		return core.clone(defaults.hsl);
 	}
 }
 
@@ -129,7 +128,7 @@ function randomHSV(): colors.HSV {
 				`Invalid random HSV color value ${JSON.stringify(hsv)}`
 			);
 
-			return core.clone(defaults.defaultHSV());
+			return core.clone(defaults.hsv);
 		}
 
 		console.log(`Generated randomHSV: ${JSON.stringify(hsv)}`);
@@ -138,7 +137,7 @@ function randomHSV(): colors.HSV {
 	} catch (error) {
 		console.error(`Error generating random HSV color: ${error}`);
 
-		return defaults.defaultHSV();
+		return core.clone(defaults.hsv);
 	}
 }
 
@@ -158,7 +157,7 @@ function randomLAB(): colors.LAB {
 				`Invalid random LAB color value ${JSON.stringify(lab)}`
 			);
 
-			return core.clone(defaults.defaultLAB());
+			return core.clone(defaults.lab);
 		}
 
 		console.log(`Generated randomLAB: ${JSON.stringify(lab)}`);
@@ -167,7 +166,7 @@ function randomLAB(): colors.LAB {
 	} catch (error) {
 		console.error(`Error generating random LAB color: ${error}`);
 
-		return defaults.defaultLAB();
+		return core.clone(defaults.lab);
 	}
 }
 
@@ -193,7 +192,7 @@ function randomRGB(): colors.RGB {
 				`Invalid random RGB color value ${JSON.stringify(rgb)}`
 			);
 
-			return core.clone(defaults.defaultRGB());
+			return core.clone(defaults.rgb);
 		}
 
 		console.log(`Generated randomRGB: ${JSON.stringify(rgb)}`);
@@ -202,7 +201,7 @@ function randomRGB(): colors.RGB {
 	} catch (error) {
 		console.error(`Error generating random RGB color: ${error}`);
 
-		return defaults.defaultRGB();
+		return core.clone(defaults.rgb);
 	}
 }
 
@@ -225,7 +224,7 @@ function randomSL(): colors.SL {
 				`Invalid random SV color value ${JSON.stringify(sl)}`
 			);
 
-			return core.clone(defaults.defaultSL());
+			return core.clone(defaults.sl);
 		}
 
 		console.log(`Generated randomSL: ${JSON.stringify(sl)}`);
@@ -234,7 +233,7 @@ function randomSL(): colors.SL {
 	} catch (error) {
 		console.error(`Error generating random SL color: ${error}`);
 
-		return defaults.defaultSL();
+		return core.clone(defaults.sl);
 	}
 }
 
@@ -257,7 +256,7 @@ function randomSV(): colors.SV {
 				`Invalid random SV color value ${JSON.stringify(sv)}`
 			);
 
-			return core.clone(defaults.defaultSV());
+			return core.clone(defaults.sv);
 		}
 
 		console.log(`Generated randomSV: ${JSON.stringify(sv)}`);
@@ -266,43 +265,37 @@ function randomSV(): colors.SV {
 	} catch (error) {
 		console.error(`Error generating random SV color: ${error}`);
 
-		return defaults.defaultSV();
+		return core.clone(defaults.sv);
 	}
 }
 
-function randomColor(colorSpace: colors.ColorSpace): colors.Color {
+export function genRandomColor(
+	colorSpace: colors.ColorSpaceExtended
+): colors.Color {
 	try {
 		switch (colorSpace) {
 			case 'cmyk':
-				return random.randomCMYK();
+				return randomCMYK();
 			case 'hex':
-				return random.randomHex();
+				return randomHex();
 			case 'hsl':
-				return random.randomHSL();
+				return randomHSL();
 			case 'hsv':
-				return random.randomHSV();
+				return randomHSV();
 			case 'lab':
-				return random.randomLAB();
+				return randomLAB();
 			case 'rgb':
-				return random.randomRGB();
+				return randomRGB();
+			case 'sl':
+				return randomSL();
+			case 'sv':
+				return randomSV();
 			default:
-				return random.randomHex();
+				return randomHex();
 		}
 	} catch (error) {
 		console.error(`Error generating random color: ${error}`);
 
-		return random.randomHex();
+		return randomHex();
 	}
 }
-
-export const random: fnObjects.Random = {
-	randomCMYK,
-	randomHex,
-	randomHSL,
-	randomHSV,
-	randomLAB,
-	randomRGB,
-	randomSL,
-	randomSV,
-	randomColor
-};

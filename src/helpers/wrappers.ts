@@ -1,8 +1,8 @@
-import { convert } from '../color-conversion/conversion-index';
+import { convert } from '../color-spaces/color-space-index';
 import * as fnObjects from '../index/fn-objects';
 import * as colors from '../index/colors';
 import { core } from '../utils/core';
-import { defaults } from '../utils/defaults';
+import { defaults } from '../config/defaults';
 
 function hexToCMYKWrapper(input: string | colors.Hex): colors.CMYK {
 	try {
@@ -16,7 +16,7 @@ function hexToCMYKWrapper(input: string | colors.Hex): colors.CMYK {
 	} catch (error) {
 		console.error(`Error converting hex to CMYK: ${error}`);
 
-		return defaults.defaultCMYK();
+		return defaults.cmyk;
 	}
 }
 
@@ -32,7 +32,7 @@ function hexToHSLWrapper(input: string | colors.Hex): colors.HSL {
 	} catch (error) {
 		console.error(`Error converting hex to HSL: ${error}`);
 
-		return defaults.defaultHSL();
+		return defaults.hsl;
 	}
 }
 
@@ -48,7 +48,7 @@ function hexToHSVWrapper(input: string | colors.Hex): colors.HSV {
 	} catch (error) {
 		console.error(`Error converting hex to HSV: ${error}`);
 
-		return defaults.defaultHSV();
+		return defaults.hsv;
 	}
 }
 
@@ -64,7 +64,7 @@ function hexToLABWrapper(input: string | colors.Hex): colors.LAB {
 	} catch (error) {
 		console.error(`Error converting hex to LAB: ${error}`);
 
-		return defaults.defaultLAB();
+		return defaults.lab;
 	}
 }
 
@@ -80,7 +80,39 @@ function hexToRGBWrapper(input: string | colors.Hex): colors.RGB {
 	} catch (error) {
 		console.error(`Error converting hex to RGB: ${error}`);
 
-		return defaults.defaultRGB();
+		return defaults.rgb;
+	}
+}
+
+function hexToSLWrapper(input: string | colors.Hex): colors.SL {
+	try {
+		const clonedInput = core.clone(input);
+		const hex =
+			typeof clonedInput === 'string'
+				? { value: { hex: clonedInput }, format: 'hex' as const }
+				: clonedInput;
+
+		return convert.hexToSL(hex);
+	} catch (error) {
+		console.error(`Error converting hex to SL: ${error}`);
+
+		return defaults.sl;
+	}
+}
+
+function hexToSVWrapper(input: string | colors.Hex): colors.SV {
+	try {
+		const clonedInput = core.clone(input);
+		const hex =
+			typeof clonedInput === 'string'
+				? { value: { hex: clonedInput }, format: 'hex' as const }
+				: clonedInput;
+
+		return convert.hexToSV(hex);
+	} catch (error) {
+		console.error(`Error converting hex to SV: ${error}`);
+
+		return defaults.sv;
 	}
 }
 
@@ -96,7 +128,7 @@ function hexToXYZWrapper(input: string | colors.Hex): colors.XYZ {
 	} catch (error) {
 		console.error(`Error converting hex to XYZ: ${error}`);
 
-		return defaults.defaultXYZ();
+		return defaults.xyz;
 	}
 }
 
@@ -106,5 +138,7 @@ export const wrappers: fnObjects.Wrappers = {
 	hexToHSVWrapper,
 	hexToLABWrapper,
 	hexToRGBWrapper,
+	hexToSLWrapper,
+	hexToSVWrapper,
 	hexToXYZWrapper
 };

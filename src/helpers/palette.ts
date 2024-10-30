@@ -9,6 +9,7 @@ function adjustSL(color: colors.HSL): colors.HSL {
 		if (!validateColorValues(color)) {
 			console.error('Invalid color valus for adjustment.');
 			domHelpers.showToast('Invalid color values');
+
 			return color;
 		}
 
@@ -54,6 +55,7 @@ function getWeightedRandomInterval(): number {
 		return weights[weights.length - 1];
 	} catch (error) {
 		console.error(`Error generating weighted random interval: ${error}`);
+
 		return 50;
 	}
 }
@@ -84,6 +86,7 @@ function validateColorValues(
 		if (typeof value === 'string' && value.endsWith('%')) {
 			return parseFloat(value.slice(0, -1));
 		}
+
 		return typeof value === 'number' ? value : NaN;
 	};
 

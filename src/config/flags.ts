@@ -1,4 +1,4 @@
-import * as constants from '../index/constants';
+import * as constants from '../index/config';
 
 const enableAlpha: boolean = true;
 

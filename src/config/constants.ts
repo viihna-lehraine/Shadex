@@ -1,4 +1,4 @@
-import * as constants from '../index/constants';
+import * as constants from '../index/config';
 
 const adjustSLAmount = 10;
 
@@ -11,6 +11,18 @@ const xyzMinZ = 0;
 
 const buttonDebounce = 300;
 const inputDebounce = 200;
+
+const complementaryHueShiftRange = 10;
+const diadicLightnessShiftRange = 30;
+const diadicSaturationShiftRange = 30;
+const hexadicLightnessShiftRange = 30;
+const hexadicSaturationShiftRange = 30;
+const splitComplementaryLightnessShiftRange = 30;
+const splitComplementarySaturationShiftRange = 30;
+const tetradicLightnessShiftRange = 30;
+const tetradicSaturationShiftRange = 30;
+const triadicLightnessShiftRange = 30;
+const triadicSaturationShiftRange = 30;
 
 const probabilities = [40, 45, 50, 55, 60, 65, 70];
 const weights = [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05];
@@ -56,6 +68,20 @@ const debounce: constants.Debounce = {
 	inputDebounce
 };
 
+const paletteShiftRanges: constants.PaletteShiftRanges = {
+	complementaryHueShiftRange,
+	diadicLightnessShiftRange,
+	diadicSaturationShiftRange,
+	hexadicLightnessShiftRange,
+	hexadicSaturationShiftRange,
+	splitComplementaryLightnessShiftRange,
+	splitComplementarySaturationShiftRange,
+	tetradicLightnessShiftRange,
+	tetradicSaturationShiftRange,
+	triadicLightnessShiftRange,
+	triadicSaturationShiftRange
+};
+
 const probabilityConstants: constants.ProbabilityConstants = {
 	probabilities,
 	weights
@@ -92,6 +118,7 @@ export const config: constants.Config = {
 	...adjustments,
 	...boundaries,
 	...debounce,
+	...paletteShiftRanges,
 	...probabilityConstants,
 	...thresholds,
 	...timeouts

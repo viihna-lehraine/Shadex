@@ -1,52 +1,17 @@
 import { IDBPDatabase } from 'idb';
 import * as colors from './colors';
+import * as palette from './palette';
 
 export interface MutationLog {
-	timestamp: string;
-	key: string;
-	action: string;
-	newValue: unknown;
-	oldValue?: unknown;
-	origin: string;
+	timestamp: string; // ISO timestamp of when the mutation occurred
+	key: string; // ID or ke of mutated item
+	action: 'add' | 'delete' | 'update'; // what occurred
+	newValue: unknown; // new value of mutated item
+	oldValue: unknown; // previous value of mutated item
+	origin: string; // source of the mutation
 }
 
 export type PaletteDB = IDBPDatabase<PaletteSchema>;
-
-export interface PaletteEntry {
-	tableID: number;
-	colors: {
-		[colorID: string]: {
-			colorSpaces: {
-				cmyk: colors.CMYK;
-				cmykString: colors.CMYKString;
-				hex: colors.Hex;
-				hsl: colors.HSL;
-				hslString: colors.HSLString;
-				hsv: colors.HSV;
-				hsvString: colors.HSVString;
-				lab: colors.LAB;
-				rgb: colors.RGB;
-				xyz: colors.XYZ;
-			};
-			postSaturation?: colors.Color;
-			preSaturation?: colors.Color;
-		};
-	};
-	metadata: {
-		paletteType: string;
-		numBoxes: number;
-		customColor?: {
-			color: colors.Color;
-			colorString: colors.ColorString;
-		};
-		flags: {
-			enableAlpha: boolean;
-			limitDark: boolean;
-			limitGray: boolean;
-			limitLight: boolean;
-		};
-	};
-}
 
 export interface PaletteSchema {
 	customColor: {
@@ -63,11 +28,16 @@ export interface PaletteSchema {
 	};
 	tables: {
 		key: string;
-		value: PaletteEntry[];
+		value: StoredPalette[];
 	};
 }
 
 export interface Settings {
 	colorSpace: colors.ColorSpace;
 	lastTableID: number;
+}
+
+export interface StoredPalette {
+	tableID: number;
+	palette: palette.Palette;
 }

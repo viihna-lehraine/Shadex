@@ -1,16 +1,18 @@
-import { dom } from '../dom/dom-main';
+import { genPalette } from './palettes';
+import { defaults } from '../config/defaults';
+import { domFn } from '../dom/dom-main';
 import { idbFn } from '../dom/idb-fn';
 import { domHelpers } from '../helpers/dom';
 import { paletteHelpers } from '../helpers/palette';
-import * as fnObjects from '../index/fn-objects';
 import * as colors from '../index/colors';
-import { palette } from './palette-index';
-import { random } from '../utils/color-randomizer';
-import { transforms } from '../utils/transforms';
+import * as fnObjects from '../index/fn-objects';
+import * as palette from '../index/palette';
+import { genRandomColor } from '../utils/color-randomizer';
+import { transform } from '../utils/transform';
 import { guards } from '../utils/type-guards';
 
 async function genPaletteBox(
-	colors: colors.Color[],
+	items: palette.PaletteItem[],
 	numBoxes: number,
 	tableId: string
 ): Promise<void> {
@@ -19,6 +21,7 @@ async function genPaletteBox(
 
 		if (!paletteRow) {
 			console.error('paletteRow is undefined.');
+
 			return;
 		}
 
@@ -26,128 +29,105 @@ async function genPaletteBox(
 
 		const fragment = document.createDocumentFragment();
 
-		colors.slice(0, numBoxes).forEach((color, i) => {
+		items.slice(0, numBoxes).forEach((item, i) => {
+			const { color } = item;
 			const { colorStripe } = domHelpers.makePaletteBox(color, i + 1);
 			fragment.appendChild(colorStripe);
-			dom.populateColorTextOutputBox(color, i + 1);
+			domFn.populateColorTextOutputBox(color, i + 1);
 		});
 
 		paletteRow.appendChild(fragment);
 
 		console.log('Palette boxes generated and rendered.');
 
-		await idbFn.saveData('tables', tableId, { palette: colors });
+		await idbFn.saveData('tables', tableId, { palette: items });
 	} catch (error) {
 		console.error(`Error generating palette box: ${error}`);
 	}
 }
 
-function genSelectedPaletteType(
+function genSelectedPalette(
 	options: colors.PaletteOptions
-): colors.Color[] {
+): Promise<palette.Palette> {
 	try {
-		const { paletteType, numBoxes, baseColor, customColor, colorSpace } =
-			options;
+		const { paletteType, numBoxes, customColor, colorSpace } = options;
 
 		if (customColor === null || customColor === undefined) {
 			console.error('Custom color is null or undefined.');
-			return [];
+
+			return Promise.resolve(defaults.paletteData);
 		}
 
 		switch (paletteType) {
 			case 1:
-				return palette.genRandomPalette(
+				return genPalette().random(numBoxes, customColor, colorSpace);
+			case 2:
+				return genPalette().complementary(
 					numBoxes,
 					customColor,
 					colorSpace
 				);
-			case 2:
-				return palette.genComplementaryPalette(
-					numBoxes,
-					baseColor,
-					colorSpace
-				);
 			case 3:
-				return palette.genTriadicPalette(
-					numBoxes,
-					baseColor,
-					colorSpace
-				);
+				return genPalette().triadic(numBoxes, customColor, colorSpace);
 			case 4:
-				return palette.genTetradicPalette(
-					numBoxes,
-					baseColor,
-					colorSpace
-				);
+				return genPalette().tetradic(numBoxes, customColor, colorSpace);
 			case 5:
-				return palette.genSplitComplementaryPalette(
+				return genPalette().splitComplementary(
 					numBoxes,
-					baseColor,
+					customColor,
 					colorSpace
 				);
 			case 6:
-				return palette.genAnalogousPalette(
+				return genPalette().analogous(
 					numBoxes,
-					baseColor,
+					customColor,
 					colorSpace
 				);
 			case 7:
-				return palette.genHexadicPalette(
-					numBoxes,
-					baseColor,
-					colorSpace
-				);
-
+				return genPalette().hexadic(numBoxes, customColor, colorSpace);
 			case 8:
-				return palette.genDiadicPalette(
-					numBoxes,
-					baseColor,
-					colorSpace
-				);
+				return genPalette().diadic(numBoxes, customColor, colorSpace);
 			case 9:
-				return palette.genMonochromaticPalette(
+				return genPalette().monochromatic(
 					numBoxes,
-					baseColor,
+					customColor,
 					colorSpace
 				);
-
 			default:
 				console.error('Invalid palette type.');
-				return [];
+
+				return Promise.resolve(defaults.paletteData);
 		}
 	} catch (error) {
 		console.error(`Error generating palette: ${error}`);
-		return [];
+
+		return Promise.resolve(defaults.paletteData);
 	}
 }
 
 async function startPaletteGen(options: colors.PaletteOptions): Promise<void> {
 	try {
-		const { paletteType, numBoxes, colorSpace, baseColor, customColor } =
-			options;
+		const { paletteType, numBoxes, colorSpace, customColor } = options;
 
 		if (customColor === null || customColor === undefined) {
 			console.error('Custom color is null or undefined.');
+
 			return;
 		}
 
 		const validatedCustomColor =
-			validateAndConvertColor(customColor) ??
-			random.randomColor(colorSpace);
-		const validatedBaseColor =
-			validateAndConvertColor(baseColor) ??
-			random.randomColor(colorSpace);
+			validateAndConvertColor(customColor) ?? genRandomColor(colorSpace);
 
-		const colors = genSelectedPaletteType({
+		const palette = await genSelectedPalette({
 			paletteType,
 			numBoxes,
-			baseColor: validatedBaseColor,
 			customColor: validatedCustomColor,
 			colorSpace
 		});
 
-		if (colors.length === 0) {
+		if (palette.items.length === 0) {
 			console.error('Colors array is empty or invalid.');
+
 			return;
 		}
 
@@ -155,7 +135,7 @@ async function startPaletteGen(options: colors.PaletteOptions): Promise<void> {
 
 		const tableId = await idbFn.getNextTableID();
 
-		await genPaletteBox(colors, numBoxes, tableId);
+		await genPaletteBox(palette.items, numBoxes, tableId);
 	} catch (error) {
 		console.error(`Error starting palette generation: ${error}`);
 	}
@@ -167,7 +147,7 @@ function validateAndConvertColor(
 	if (!color) return null;
 
 	const convertedColor = guards.isColorString(color)
-		? transforms.colorStringToColor(color)
+		? transform.colorStringToColor(color)
 		: color;
 
 	if (!paletteHelpers.validateColorValues(convertedColor)) {
@@ -180,7 +160,7 @@ function validateAndConvertColor(
 
 export const generate: fnObjects.Generate = {
 	genPaletteBox,
-	genSelectedPaletteType,
+	genSelectedPalette,
 	startPaletteGen,
 	validateAndConvertColor
 };
