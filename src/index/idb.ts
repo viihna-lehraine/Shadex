@@ -16,7 +16,7 @@ export type PaletteDB = IDBPDatabase<PaletteSchema>;
 export interface PaletteSchema {
 	customColor: {
 		key: string;
-		value: { color: colors.Color };
+		value: { color: colors.HSL };
 	};
 	mutations: {
 		timestamp: string;

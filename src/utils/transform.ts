@@ -323,108 +323,40 @@ function parseColorComponents(value: string, expectedLength: number): number[] {
 	}
 }
 
-function parseCustomColor(
-	colorSpace: colors.ColorSpace,
-	rawValue: string
-): colors.Color | null {
+function parseCustomColor(rawValue: string): colors.HSL | null {
 	try {
 		console.log(`Parsing custom color: ${JSON.stringify(rawValue)}`);
 
-		switch (colorSpace) {
-			case 'cmyk': {
-				const match = rawValue.match(
-					/cmyk\((\d+)%?,\s*(\d+)%?,\s*(\d+)%?,\s*(\d+)%?\)/i
-				);
-				if (match) {
-					const [, cyan, magenta, yellow, key] = match.map(Number);
+		const match = rawValue.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
 
-					return {
-						value: { cyan, magenta, yellow, key },
-						format: 'cmyk'
-					};
-				}
+		if (match) {
+			const [, hue, saturation, lightness] = match.map(Number);
 
-				break;
-			}
-			case 'hex': {
-				if (!rawValue.startsWith('#')) {
-					return addHashToHex({
-						value: { hex: rawValue },
-						format: 'hex'
-					});
-				} else {
-					return { value: { hex: rawValue }, format: 'hex' };
-				}
-			}
-			case 'hsl': {
-				const match = rawValue.match(
-					/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/
-				);
-
-				if (match) {
-					const [, hue, saturation, lightness] = match.map(Number);
-					return {
-						value: { hue, saturation, lightness },
-
-						format: 'hsl'
-					};
-				}
-
-				break;
-			}
-			case 'hsv': {
-				const match = rawValue.match(
-					/hsv\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/i
-				);
-
-				if (match) {
-					const [, hue, saturation, value] = match.map(Number);
-
-					return { value: { hue, saturation, value }, format: 'hsv' };
-				}
-
-				break;
-			}
-			case 'lab': {
-				const match = rawValue.match(
-					/lab\(([-\d.]+),\s*([-\d.]+),\s*([-\d.]+)\)/i
-				);
-
-				if (match) {
-					const [, l, a, b] = match.map(Number);
-					return {
-						value: { l, a, b },
-
-						format: 'lab'
-					};
-				}
-
-				break;
-			}
-			case 'rgb': {
-				const match = rawValue.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/i);
-
-				if (match) {
-					const [, red, green, blue] = match.map(Number);
-
-					return { value: { red, green, blue }, format: 'rgb' };
-				}
-
-				break;
-			}
-			default:
-				console.warn(`Unsupported color space: ${colorSpace}`);
-
-				return null;
+			return {
+				value: { hue, saturation, lightness },
+				format: 'hsl'
+			};
+		} else {
+			console.error('Invalid HSL custom color');
+			return null;
 		}
-
-		console.error(`Failed to parse custom color: ${rawValue}`);
-
-		return null;
 	} catch (error) {
 		console.error(`parseCustomColor error: ${error}`);
 
 		return null;
+	}
+}
+
+function parseHex(hexValue: string): colors.HexValue {
+	const hex = hexValue.startsWith('#') ? hexValue.slice(1) : hexValue;
+
+	if (hex.length === 6) {
+		return { hex: `#${hex}` };
+	} else if (hex.length === 8) {
+		const alpha = parseInt(hex.slice(6, 8), 16) / 255;
+		return { hex: `#${hex.slice(0, 6)}`, alpha };
+	} else {
+		throw new Error(`Invalid hex color: ${hexValue}`);
 	}
 }
 
@@ -460,6 +392,24 @@ function stripPercentFromValues<T extends Record<string, number | string>>(
 	);
 }
 
+function toHexWithAlpha(rgbValue: colors.RGBValue): string {
+	const { red, green, blue, alpha } = rgbValue;
+
+	const hex = `#${((1 << 24) + (red << 16) + (green << 8) + blue)
+		.toString(16)
+		.slice(1)}`;
+
+	if (alpha !== undefined) {
+		const alphaHex = Math.round(alpha * 255)
+			.toString(16)
+			.padStart(2, '0');
+
+		return `${hex}${alphaHex}`;
+	}
+
+	return hex;
+}
+
 export const transform: fnObjects.Transform = {
 	addHashToHex,
 	colorToColorString,
@@ -471,6 +421,8 @@ export const transform: fnObjects.Transform = {
 	parseColor,
 	parseColorComponents,
 	parseCustomColor,
+	parseHex,
 	stripHashFromHex,
-	stripPercentFromValues
+	stripPercentFromValues,
+	toHexWithAlpha
 };

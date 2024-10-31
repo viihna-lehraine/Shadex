@@ -29,6 +29,13 @@ function isColor(value: unknown): value is colors.Color {
 	);
 }
 
+function isColorFormat<T extends colors.Color>(
+	color: colors.Color,
+	format: T['format']
+): color is T {
+	return color.format === format;
+}
+
 function isColorSpace(value: string): value is colors.ColorSpace {
 	return ['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb', 'xyz'].includes(value);
 }
@@ -93,6 +100,10 @@ function isCMYKColor(value: unknown): value is colors.CMYK {
 	);
 }
 
+function isCMYKFormat(color: colors.Color): color is colors.CMYK {
+	return isColorFormat(color, 'cmyk');
+}
+
 function isCMYKString(value: unknown): value is colors.CMYKString {
 	return (
 		isColorString(value) &&
@@ -119,6 +130,10 @@ function isHex(value: unknown): value is colors.Hex {
 	);
 }
 
+function isHexFormat(color: colors.Color): color is colors.Hex {
+	return isColorFormat(color, 'hex');
+}
+
 function isHSLColor(value: unknown): value is colors.HSL {
 	return (
 		typeof value === 'object' &&
@@ -130,6 +145,10 @@ function isHSLColor(value: unknown): value is colors.HSL {
 		typeof (value as colors.HSL).value.saturation === 'number' &&
 		typeof (value as colors.HSL).value.lightness === 'number'
 	);
+}
+
+function isHSLFormat(color: colors.Color): color is colors.HSL {
+	return isColorFormat(color, 'hsl');
 }
 
 function isHSLString(value: unknown): value is colors.HSLString {
@@ -160,6 +179,10 @@ function isHSVColor(value: unknown): value is colors.HSV {
 	);
 }
 
+function isHSVFormat(color: colors.Color): color is colors.HSV {
+	return isColorFormat(color, 'hsv');
+}
+
 function isHSVString(value: unknown): value is colors.HSVString {
 	return (
 		isColorString(value) &&
@@ -188,6 +211,10 @@ function isLAB(value: unknown): value is colors.LAB {
 	);
 }
 
+function isLABFormat(color: colors.Color): color is colors.LAB {
+	return isColorFormat(color, 'lab');
+}
+
 function isRGB(value: unknown): value is colors.RGB {
 	return (
 		isColor(value) &&
@@ -202,6 +229,10 @@ function isRGB(value: unknown): value is colors.RGB {
 	);
 }
 
+function isRGBFormat(color: colors.Color): color is colors.RGB {
+	return isColorFormat(color, 'rgb');
+}
+
 function isSLColor(value: unknown): value is colors.SL {
 	return (
 		typeof value === 'object' &&
@@ -212,6 +243,10 @@ function isSLColor(value: unknown): value is colors.SL {
 		typeof (value as colors.SL).value.saturation === 'number' &&
 		typeof (value as colors.SL).value.lightness === 'number'
 	);
+}
+
+function isSLFormat(color: colors.Color): color is colors.SL {
+	return isColorFormat(color, 'sl');
 }
 
 function isSLString(value: unknown): value is colors.SLString {
@@ -238,6 +273,10 @@ function isSVColor(value: unknown): value is colors.SV {
 	);
 }
 
+function isSVFormat(color: colors.Color): color is colors.SV {
+	return isColorFormat(color, 'sv');
+}
+
 function isSVString(value: unknown): value is colors.SVString {
 	return (
 		typeof value === 'object' &&
@@ -261,6 +300,10 @@ function isXYZ(value: unknown): value is colors.XYZ {
 		typeof (value as colors.XYZ).value.y === 'number' &&
 		typeof (value as colors.XYZ).value.z === 'number'
 	);
+}
+
+function isXYZFormat(color: colors.Color): color is colors.XYZ {
+	return isColorFormat(color, 'xyz');
 }
 
 // ***** SECTION 3: Utility Guards *****
@@ -338,8 +381,10 @@ function narrowToColor(
 export const guards: fnObjects.Guards = {
 	ensureHash,
 	isCMYKColor,
+	isCMYKFormat,
 	isCMYKString,
 	isColor,
+	isColorFormat,
 	isColorString,
 	isColorSpace,
 	isColorSpaceExtended,
@@ -347,18 +392,26 @@ export const guards: fnObjects.Guards = {
 	isConvertibleColor,
 	isFormat,
 	isHex,
+	isHexFormat,
 	isHSLColor,
+	isHSLFormat,
 	isHSLString,
 	isInputElement,
 	isHSVColor,
+	isHSVFormat,
 	isHSVString,
 	isLAB,
+	isLABFormat,
 	isRGB,
+	isRGBFormat,
 	isSLColor,
+	isSLFormat,
 	isSLString,
 	isStoredPalette,
 	isSVColor,
+	isSVFormat,
 	isSVString,
 	isXYZ,
+	isXYZFormat,
 	narrowToColor
 };

@@ -50,10 +50,13 @@ export type ColorStringExtended = ColorString | Hex | LAB | RGB | XYZ;
 export type Format = keyof ColorSpace | 'sl' | 'sv';
 
 export interface PaletteOptions {
-	paletteType: number;
 	numBoxes: number;
-	customColor?: Color | null;
-	colorSpace: ColorSpace;
+	customColor: HSL | null;
+	paletteType: number;
+	enableAlpha: boolean;
+	limitBright: boolean;
+	limitDark: boolean;
+	limitGray: boolean;
 }
 
 // ***** Colors *****
@@ -137,50 +140,59 @@ export type CMYKValue = {
 	magenta: number;
 	yellow: number;
 	key: number;
+	alpha: number;
 };
 
 export type HexValue = {
 	hex: string;
+	alpha: number;
 };
 
 export type HSLValue = {
 	hue: number;
 	saturation: number;
 	lightness: number;
+	alpha: number;
 };
 
 export type HSVValue = {
 	hue: number;
 	saturation: number;
 	value: number;
+	alpha: number;
 };
 
 export type LABValue = {
 	l: number;
 	a: number;
 	b: number;
+	alpha: number;
 };
 
 export type RGBValue = {
 	red: number;
 	green: number;
 	blue: number;
+	alpha: number;
 };
 
 export type SLValue = {
 	saturation: number;
 	lightness: number;
+	alpha: number;
 };
 
 export type SVValue = {
 	saturation: number;
 	value: number;
+	alpha: number;
 };
 
 export type XYZValue = {
 	x: number;
 	y: number;
 	z: number;
+	alpha: number;
 };
 
 // ***** Color Values (relevant props as strings, will have leading '%' character) *****
@@ -190,26 +202,31 @@ export type CMYKValueString = {
 	magenta: string;
 	yellow: string;
 	key: string;
+	alpha: string;
 };
 
 export type HSLValueString = {
 	hue: string;
 	saturation: string;
 	lightness: string;
+	alpha: string;
 };
 
 export type HSVValueString = {
 	hue: string;
 	saturation: string;
 	value: string;
+	alpha: string;
 };
 
 export type SLValueString = {
 	saturation: string;
 	lightness: string;
+	alpha: string;
 };
 
 export type SVValueString = {
 	saturation: string;
 	value: string;
+	alpha: string;
 };

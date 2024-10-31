@@ -1,4 +1,6 @@
 import { genHues } from './hues';
+import { limits } from './limits';
+import { convert } from '../color-spaces/convert-all';
 import { genAllColorValues } from '../color-spaces/conversion';
 import { config } from '../config/constants';
 import { defaults } from '../config/defaults';
@@ -7,117 +9,106 @@ import { idbFn } from '../dom/idb-fn';
 import * as colors from '../index/colors';
 import * as palette from '../index/palette';
 import * as fnObjects from '../index/fn-objects';
-import { genRandomColor } from '../utils/color-randomizer';
 import { core } from '../utils/core';
+import { randomHSL, randomSL } from '../utils/random-color';
 import { transform } from '../utils/transform';
 
 export function genPalette(): fnObjects.GenPalette {
 	const slColorSpace: colors.ColorSpaceExtended = 'sl';
 
-	function getBaseColor(
-		customColor: colors.Color | null,
-		colorSpace: colors.ColorSpace
-	): Exclude<colors.Color, colors.SL | colors.SV> {
-		const color = core.clone(customColor ?? genRandomColor(colorSpace));
+	let currentPaletteID: number;
 
-		if (color.format === 'sl' || color.format === 'sv') {
-			throw new Error(
-				`Invalid color format: ${color.format} in getBaseColor`
-			);
-		}
+	async function initializeCurrentPaletteID(): Promise<void> {
+		currentPaletteID = await idbFn.getCurrentPaletteID();
+	}
 
-		return color as Exclude<colors.Color, colors.SL | colors.SV>;
+	initializeCurrentPaletteID();
+
+	function getNextPaletteID(): number {
+		currentPaletteID += 1;
+
+		idbFn.updateCurrentPaletteID(currentPaletteID);
+
+		return currentPaletteID;
 	}
 
 	function createPaletteItem(
-		color: Exclude<colors.Color, colors.SL | colors.SV>
+		color: colors.HSL,
+		enableAlpha: boolean
 	): palette.PaletteItem {
-		const colorConversions = genAllColorValues(color);
+		const clonedColor = core.clone(color) as colors.HSL;
+
+		clonedColor.value.alpha = enableAlpha ? Math.random() : 1;
 
 		return {
-			id: `${color.format}_${Math.random()}`,
+			id: `${color.format}_${getNextPaletteID()}`,
 			color,
 			colorConversions: {
-				cmyk: colorConversions.cmyk as colors.CMYK,
-				hex: colorConversions.hex as colors.Hex,
-				hsl: colorConversions.hsl as colors.HSL,
-				hsv: colorConversions.hsv as colors.HSV,
-				lab: colorConversions.lab as colors.LAB,
-				rgb: colorConversions.rgb as colors.RGB,
-				sl: colorConversions.sl as colors.SL,
-				sv: colorConversions.sv as colors.SV,
-				xyz: colorConversions.xyz as colors.XYZ
+				cmyk: convert.hslToCMYK(clonedColor) as colors.CMYK,
+				hex: convert.hslToHex(clonedColor) as colors.Hex,
+				hsv: convert.hslToHSV(clonedColor) as colors.HSV,
+				lab: convert.hslToLAB(clonedColor) as colors.LAB,
+				rgb: convert.hslToRGB(clonedColor) as colors.RGB,
+				sl: convert.hslToSL(clonedColor) as colors.SL,
+				sv: convert.hslToSV(clonedColor) as colors.SV,
+				xyz: convert.hslToXYZ(clonedColor) as colors.XYZ
 			},
 			colorStringConversions: {
-				cmykString: colorConversions.cmyk
-					? (transform.colorToColorString(
-							colorConversions.cmyk
-						) as colors.CMYKString)
-					: defaults.cmykString,
-				hslString: colorConversions.hsl
-					? (transform.colorToColorString(
-							colorConversions.hsl
-						) as colors.HSLString)
-					: defaults.hslString,
-				hsvString: colorConversions.hsv
-					? (transform.colorToColorString(
-							colorConversions.hsv
-						) as colors.HSVString)
-					: defaults.hsvString,
-				slString: colorConversions.sl
-					? (transform.colorToColorString(
-							colorConversions.sl
-						) as colors.SLString)
-					: defaults.slString,
-				svString: colorConversions.sv
-					? (transform.colorToColorString(
-							colorConversions.sv
-						) as colors.SVString)
-					: defaults.svString
+				cmykString: transform.colorToColorString(
+					convert.hslToCMYK(clonedColor)
+				) as colors.CMYKString,
+				hslString: transform.colorToColorString(
+					clonedColor
+				) as colors.HSLString,
+				hsvString: transform.colorToColorString(
+					convert.hslToHSV(clonedColor)
+				) as colors.HSVString,
+				slString: transform.colorToColorString(
+					convert.hslToSL(clonedColor)
+				) as colors.SLString,
+				svString: transform.colorToColorString(
+					convert.hslToSV(clonedColor)
+				) as colors.SVString
 			},
 			cssStrings: {
-				cmykCSSString: colorConversions.cmyk
-					? transform.getCSSColorString(colorConversions.cmyk)
-					: '',
-				hexCSSString: colorConversions.hex?.value.hex ?? '',
-				hslCSSString: colorConversions.hsl
-					? transform.getCSSColorString(colorConversions.hsl)
-					: '',
-				hsvCSSString: colorConversions.hsv
-					? transform.getCSSColorString(colorConversions.hsv)
-					: '',
-				labCSSString: colorConversions.lab
-					? transform.getCSSColorString(colorConversions.lab)
-					: '',
-				xyzCSSString: colorConversions.xyz
-					? transform.getCSSColorString(colorConversions.xyz)
-					: ''
+				cmykCSSString: transform.getCSSColorString(
+					convert.hslToCMYK(clonedColor)
+				),
+				hexCSSString: convert.hslToHex(clonedColor).value.hex,
+				hslCSSString: transform.getCSSColorString(clonedColor),
+				hsvCSSString: transform.getCSSColorString(
+					convert.hslToHSV(clonedColor)
+				),
+				labCSSString: transform.getCSSColorString(
+					convert.hslToLAB(clonedColor)
+				),
+				xyzCSSString: transform.getCSSColorString(
+					convert.hslToXYZ(clonedColor)
+				)
 			},
 			rawColorStrings: {
-				cmykRawString: colorConversions.cmyk
-					? transform.getRawColorString(colorConversions.cmyk)
-					: '',
-				hexRawString: colorConversions.hex
-					? transform.getRawColorString(colorConversions.hex)
-					: '',
-				hslRawString: colorConversions.hsl
-					? transform.getRawColorString(colorConversions.hsl)
-					: '',
-				hsvRawString: colorConversions.hsv
-					? transform.getRawColorString(colorConversions.hsv)
-					: '',
-				labRawString: colorConversions.lab
-					? transform.getRawColorString(colorConversions.lab)
-					: '',
-				slRawString: colorConversions.sl
-					? transform.getRawColorString(colorConversions.sl)
-					: '',
-				svRawString: colorConversions.sv
-					? transform.getRawColorString(colorConversions.sv)
-					: '',
-				xyzRawString: colorConversions.xyz
-					? transform.getRawColorString(colorConversions.xyz)
-					: ''
+				cmykRawString: transform.getRawColorString(
+					convert.hslToCMYK(clonedColor)
+				),
+				hexRawString: transform.getRawColorString(
+					convert.hslToHex(clonedColor)
+				),
+				hslRawString: transform.getRawColorString(clonedColor),
+				hsvRawString: transform.getRawColorString(
+					convert.hslToHSV(clonedColor)
+				),
+				labRawString: transform.getRawColorString(
+					convert.hslToLAB(clonedColor)
+				),
+				slRawString: transform.getRawColorString(
+					convert.hslToSL(clonedColor)
+				),
+				svRawString: transform.getRawColorString(
+					convert.hslToSV(clonedColor)
+				),
+				xyzRawString: transform.getRawColorString(
+					convert.hslToXYZ(clonedColor)
+				)
 			}
 		};
 	}
@@ -125,74 +116,103 @@ export function genPalette(): fnObjects.GenPalette {
 	function createPaletteObject(
 		type: string,
 		items: palette.PaletteItem[],
-		baseColor: colors.Color,
-		numBoxes: number
+		baseColor: colors.HSL,
+		numBoxes: number,
+		paletteID: number,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
 	): palette.Palette {
-		const validColorSpace = (format: string): format is colors.ColorSpace =>
-			['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb', 'xyz'].includes(format);
-		const originalColorSpace: colors.ColorSpace = validColorSpace(
-			baseColor.format
-		)
-			? baseColor.format
-			: 'hex';
-
 		return {
-			id: `${type}_${Date.now()}`,
+			id: `${type}_${paletteID}`,
 			items,
 			flags: {
-				enableAlpha: false,
-				limitDark: false,
-				limitGray: false,
-				limitLight: false
+				enableAlpha: enableAlpha,
+				limitDark: limitDark,
+				limitGray: limitGray,
+				limitLight: limitBright
 			},
 			metadata: {
 				numBoxes,
-				originalColorSpace,
 				paletteType: type,
 				customColor: {
-					originalColor: baseColor,
-					colorConversions: items[0]?.colorConversions || {}
+					hslColor: baseColor,
+					convertedColors: items[0]?.colorConversions || {}
 				}
 			}
 		};
 	}
 
 	function generatePaletteItems(
-		baseColor: Exclude<colors.Color, colors.SL | colors.SV>,
-		colorSpace: colors.ColorSpace,
-		hues: number[]
+		baseColor: colors.HSL,
+		hues: number[],
+		enableAlpha: boolean,
+		limitDark: boolean,
+		limitGray: boolean,
+		limitBright: boolean
 	): palette.PaletteItem[] {
 		const paletteItems: palette.PaletteItem[] = [
-			createPaletteItem(baseColor)
+			createPaletteItem(baseColor, enableAlpha)
 		];
 
 		hues.forEach((hue, i) => {
-			const sl = genRandomColor(slColorSpace) as colors.SL;
-			const newColor = genAllColorValues({
-				value: { hue, ...sl.value },
-				format: 'hsl'
-			}).hsl;
+			let newColor: colors.HSL | null = null;
+
+			do {
+				const sl = randomSL(enableAlpha) as colors.SL;
+				newColor = genAllColorValues({
+					value: { hue, ...sl.value },
+					format: 'hsl'
+				}).hsl as colors.HSL;
+			} while (
+				newColor &&
+				((limitGray && limits.isTooGray(newColor)) ||
+					(limitDark && limits.isTooDark(newColor)) ||
+					(limitBright && limits.isTooBright(newColor)))
+			);
 
 			if (newColor) {
-				paletteItems.push(createPaletteItem(newColor));
-				updateColorBox(newColor, colorSpace, i + 1);
+				paletteItems.push(createPaletteItem(newColor, enableAlpha));
+
+				updateColorBox(newColor, i + 1);
 			}
 		});
 
 		return paletteItems;
 	}
 
+	function getBaseColor(
+		customColor: colors.HSL | null,
+		enableAlpha: boolean
+	): colors.HSL {
+		const color = core.clone(customColor ?? randomHSL(enableAlpha));
+
+		return color as colors.HSL;
+	}
+
 	async function savePaletteToDB(
 		type: string,
 		items: palette.PaletteItem[],
-		baseColor: colors.Color,
-		numBoxes: number
+		baseColor: colors.HSL,
+		numBoxes: number,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
 	): Promise<palette.Palette> {
+		const paletteID = getNextPaletteID();
+
 		const newPalette = createPaletteObject(
 			type,
 			items,
 			baseColor,
-			numBoxes
+			numBoxes,
+			paletteID,
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
 		);
 
 		await idbFn.savePalette(newPalette.id, {
@@ -201,31 +221,22 @@ export function genPalette(): fnObjects.GenPalette {
 		});
 
 		console.log(`Saved ${type} palette: ${JSON.stringify(newPalette)}`);
+
 		return newPalette;
 	}
 
-	function updateColorBox(
-		color: colors.Color,
-		colorSpace: colors.ColorSpace,
-		index: number
-	): void {
-		if (color.format === 'sl' || color.format === 'sv') {
-			console.error(`Invalid color format: ${color.format}`);
-			return;
-		}
-
+	function updateColorBox(color: colors.HSL, index: number): void {
 		const colorBox = document.getElementById(`color-box-${index + 1}`);
 
 		if (colorBox) {
-			const colorValues = genAllColorValues(
-				color as Exclude<colors.Color, colors.SL | colors.SV>
-			);
-			const selectedColor = colorValues[colorSpace] as colors.Color;
+			const colorValues = genAllColorValues(color);
+			const selectedColor = colorValues as colors.Color;
 
 			if (selectedColor) {
-				const hexColor = colorValues.hex as colors.Hex;
+				const hslColor = colorValues.hsl as colors.HSL;
+				const hslCSSString = transform.getCSSColorString(hslColor);
 
-				colorBox.style.backgroundColor = hexColor.value.hex;
+				colorBox.style.backgroundColor = hslCSSString;
 
 				domFn.populateColorTextOutputBox(selectedColor, index + 1);
 			}
@@ -234,61 +245,93 @@ export function genPalette(): fnObjects.GenPalette {
 
 	async function analogous(
 		numBoxes: number,
-		customColor: colors.Color | null,
-		colorSpace: colors.ColorSpace
+		customColor: colors.HSL | null,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
 	): Promise<palette.Palette> {
+		const currentAnalogousPaletteID = await idbFn.getCurrentPaletteID();
+
 		if (numBoxes < 2) {
 			console.warn('Analogous palette requires at least 2 swatches.');
 
-			return createPaletteObject('analogous', [], defaults.hex, 0);
+			return createPaletteObject(
+				'analogous',
+				[],
+				defaults.hsl,
+				0,
+				currentAnalogousPaletteID,
+				enableAlpha,
+				limitBright,
+				limitDark,
+				limitGray
+			);
 		}
 
-		const baseColor = getBaseColor(customColor, colorSpace);
-		const baseColorValues = genAllColorValues(baseColor);
-		const baseHSL = baseColorValues.hsl as colors.HSL;
-		const hues = genHues.analogous(baseHSL, numBoxes);
+		const baseColor = getBaseColor(customColor);
+		const hues = genHues.analogous(baseColor, numBoxes);
 		const paletteItems: palette.PaletteItem[] = hues.map((hue, i) => {
 			const saturation = Math.min(
 				100,
 				Math.max(
 					0,
-					baseHSL.value.saturation + (Math.random() - 0.5) * 10
+					baseColor.value.saturation + (Math.random() - 0.5) * 10
 				)
 			);
 			const lightness = Math.min(
 				100,
-				Math.max(0, baseHSL.value.lightness + (i % 2 === 0 ? 5 : -5))
+				Math.max(0, baseColor.value.lightness + (i % 2 === 0 ? 5 : -5))
 			);
+			const alpha = enableAlpha ? Math.random() : 1;
 			const newColor: colors.HSL = {
-				value: { hue, saturation, lightness },
+				value: { hue, saturation, lightness, alpha },
 				format: 'hsl'
 			};
 
-			return createPaletteItem(newColor);
+			return createPaletteItem(newColor, enableAlpha);
 		});
 
 		return await savePaletteToDB(
 			'analogous',
 			paletteItems,
 			baseColor,
-			numBoxes
+			numBoxes,
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
 		);
 	}
 
 	async function complementary(
 		numBoxes: number,
-		customColor: colors.Color | null,
-		colorSpace: colors.ColorSpace
+		customColor: colors.HSL | null,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
 	): Promise<palette.Palette> {
+		const currentComplementaryPaletteID = await idbFn.getCurrentPaletteID();
+
 		if (numBoxes < 2) {
 			console.warn('Complementary palette requires at least 2 swatches.');
 
-			return createPaletteObject('complementary', [], defaults.hex, 0);
+			return createPaletteObject(
+				'complementary',
+				[],
+				defaults.hsl,
+				0,
+				currentComplementaryPaletteID,
+				enableAlpha,
+				limitBright,
+				limitDark,
+				limitGray
+			);
 		}
 
-		const baseColor = getBaseColor(customColor, colorSpace);
-		const baseHSL = genAllColorValues(baseColor).hsl as colors.HSL;
-		const complementaryHue = (baseHSL.value.hue + 180) % 360;
+		const baseColor = getBaseColor(customColor);
+		const complementaryHue = (baseColor.value.hue + 180) % 360;
 		const hues = Array.from(
 			{ length: numBoxes - 1 },
 			(_, _i) =>
@@ -302,45 +345,67 @@ export function genPalette(): fnObjects.GenPalette {
 				100,
 				Math.max(
 					0,
-					baseHSL.value.saturation + (Math.random() - 0.5) * 15
+					baseColor.value.saturation + (Math.random() - 0.5) * 15
 				)
 			);
 			const lightness = Math.min(
 				100,
-				Math.max(0, baseHSL.value.lightness + (i % 2 === 0 ? -10 : 10))
+				Math.max(
+					0,
+					baseColor.value.lightness + (i % 2 === 0 ? -10 : 10)
+				)
 			);
+			const alpha = enableAlpha ? Math.random() : 1;
 			const newColor: colors.HSL = {
-				value: { hue, saturation, lightness },
+				value: { hue, saturation, lightness, alpha },
 				format: 'hsl'
 			};
 
-			return createPaletteItem(newColor);
+			return createPaletteItem(newColor, enableAlpha);
 		});
 
-		paletteItems.unshift(createPaletteItem(baseHSL));
+		paletteItems.unshift(createPaletteItem(baseColor, enableAlpha));
 
 		return await savePaletteToDB(
 			'complementary',
 			paletteItems,
 			baseColor,
-			numBoxes
+			numBoxes,
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
 		);
 	}
 
 	async function diadic(
 		numBoxes: number,
-		customColor: colors.Color | null,
-		colorSpace: colors.ColorSpace
+		customColor: colors.HSL | null,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
 	): Promise<palette.Palette> {
+		const currentDiadicPaletteID = await idbFn.getCurrentPaletteID();
+
 		if (numBoxes < 2) {
 			console.warn('Diadic palette requires at least 2 swatches.');
 
-			return createPaletteObject('diadic', [], defaults.hex, 0);
+			return createPaletteObject(
+				'diadic',
+				[],
+				defaults.hsl,
+				0,
+				currentDiadicPaletteID,
+				enableAlpha,
+				limitBright,
+				limitDark,
+				limitGray
+			);
 		}
 
-		const baseColor = getBaseColor(customColor, colorSpace);
-		const baseHSL = genAllColorValues(baseColor).hsl as colors.HSL;
-		const hues = genHues.diadic(baseHSL.value.hue);
+		const baseColor = getBaseColor(customColor);
+		const hues = genHues.diadic(baseColor.value.hue);
 		const paletteItems = Array.from({ length: numBoxes }, (_, i) => {
 			const hue = hues[i % hues.length];
 			const saturationShift =
@@ -351,45 +416,65 @@ export function genPalette(): fnObjects.GenPalette {
 				config.diadicLightnessShiftRange / 2;
 			const adjustedSaturation = Math.min(
 				100,
-				Math.max(0, baseHSL.value.saturation + saturationShift)
+				Math.max(0, baseColor.value.saturation + saturationShift)
 			);
 			const adjustedLightness = Math.min(
 				100,
-				Math.max(0, baseHSL.value.lightness + lightnessShift)
+				Math.max(0, baseColor.value.lightness + lightnessShift)
 			);
+			const alpha = enableAlpha ? Math.random() : 1;
 			const newColor: colors.HSL = {
-				format: 'hsl',
 				value: {
 					hue,
 					saturation: adjustedSaturation,
-					lightness: adjustedLightness
-				}
+					lightness: adjustedLightness,
+					alpha
+				},
+				format: 'hsl'
 			};
 
-			return createPaletteItem(newColor);
+			return createPaletteItem(newColor, enableAlpha);
 		});
 
 		return await savePaletteToDB(
 			'diadic',
 			paletteItems,
 			baseColor,
-			numBoxes
+			numBoxes,
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
 		);
 	}
 
 	async function hexadic(
 		numBoxes: number,
-		customColor: colors.Color | null = null,
-		colorSpace: colors.ColorSpace = 'hex'
+		customColor: colors.HSL | null,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
 	): Promise<palette.Palette> {
+		const currentHexadicPaletteID = await idbFn.getCurrentPaletteID();
+
 		if (numBoxes < 6) {
 			console.warn('Hexadic palette requires at least 6 swatches.');
 
-			return createPaletteObject('hexadic', [], defaults.hex, 0);
+			return createPaletteObject(
+				'hexadic',
+				[],
+				defaults.hsl,
+				0,
+				currentHexadicPaletteID,
+				enableAlpha,
+				limitBright,
+				limitDark,
+				limitGray
+			);
 		}
 
-		const baseColor = getBaseColor(customColor, colorSpace);
-		const baseHSL = genAllColorValues(baseColor).hsl as colors.HSL;
+		const baseColor = getBaseColor(customColor);
 		const hues = genHues.hexadic(baseColor);
 		const paletteItems = hues.map((hue, _i) => {
 			const saturationShift =
@@ -400,71 +485,93 @@ export function genPalette(): fnObjects.GenPalette {
 				config.hexadicLightnessShiftRange / 2;
 			const adjustedSaturation = Math.min(
 				100,
-				Math.max(0, baseHSL.value.saturation + saturationShift)
+				Math.max(0, baseColor.value.saturation + saturationShift)
 			);
 			const adjustedLightness = Math.min(
 				100,
-				Math.max(0, baseHSL.value.lightness + lightnessShift)
+				Math.max(0, baseColor.value.lightness + lightnessShift)
 			);
+			const alpha = enableAlpha ? Math.random() : 1;
 			const newColor: colors.HSL = {
 				value: {
 					hue,
 					saturation: adjustedSaturation,
-					lightness: adjustedLightness
+					lightness: adjustedLightness,
+					alpha
 				},
 				format: 'hsl'
 			};
 
-			return createPaletteItem(newColor);
+			return createPaletteItem(newColor, enableAlpha);
 		});
 
 		return await savePaletteToDB(
 			'hexadic',
 			paletteItems,
 			baseColor,
-			numBoxes
+			numBoxes,
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
 		);
 	}
 
 	async function monochromatic(
 		numBoxes: number,
-		customColor: colors.Color | null,
-		colorSpace: colors.ColorSpace
+		customColor: colors.HSL | null,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
 	): Promise<palette.Palette> {
+		const currentMonochromaticPaletteID = await idbFn.getCurrentPaletteID();
+
 		if (numBoxes < 2) {
 			console.warn('Monochromatic palette requires at least 2 swatches.');
 
-			return createPaletteObject('monochromatic', [], defaults.hex, 0);
+			return createPaletteObject(
+				'monochromatic',
+				[],
+				defaults.hsl,
+				0,
+				currentMonochromaticPaletteID,
+				enableAlpha,
+				limitBright,
+				limitDark,
+				limitGray
+			);
 		}
 
-		const baseColor = getBaseColor(customColor, colorSpace);
-		const baseHSL = genAllColorValues(baseColor).hsl as colors.HSL;
+		const baseColor = getBaseColor(customColor);
 		const paletteItems: palette.PaletteItem[] = [
-			createPaletteItem(baseColor)
+			createPaletteItem(baseColor, enableAlpha)
 		];
 
 		for (let i = 1; i < numBoxes; i++) {
 			const hueShift = Math.random() * 10 - 5;
-			const newHue = (baseHSL.value.hue + hueShift + 360) % 360;
+			const newHue = (baseColor.value.hue + hueShift + 360) % 360;
 			const adjustedLightness = Math.min(
 				100,
-				Math.max(0, baseHSL.value.lightness + (i * 10 - 20))
+				Math.max(0, baseColor.value.lightness + (i * 10 - 20))
 			);
 			const adjustedSaturation = Math.min(
 				100,
-				Math.max(0, baseHSL.value.saturation - i * 5)
+				Math.max(0, baseColor.value.saturation - i * 5)
 			);
+			const alpha = enableAlpha ? Math.random() : 1;
 			const newColor = genAllColorValues({
 				value: {
 					hue: newHue,
 					saturation: adjustedSaturation,
-					lightness: adjustedLightness
+					lightness: adjustedLightness,
+					alpha
 				},
 				format: 'hsl'
 			}).hsl;
 
 			if (newColor) {
-				paletteItems.push(createPaletteItem(newColor));
+				paletteItems.push(createPaletteItem(newColor, enableAlpha));
 			}
 		}
 
@@ -472,44 +579,58 @@ export function genPalette(): fnObjects.GenPalette {
 			'monochromatic',
 			paletteItems,
 			baseColor,
-			numBoxes
+			numBoxes,
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
 		);
 	}
 
 	async function random(
 		numBoxes: number,
-		customColor: colors.Color | null,
-		colorSpace: colors.ColorSpace
+		customColor: colors.HSL | null,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
 	): Promise<palette.Palette> {
-		const baseColor = getBaseColor(customColor, colorSpace);
+		const baseColor = getBaseColor(customColor);
 		const paletteItems: palette.PaletteItem[] = [
-			createPaletteItem(baseColor)
+			createPaletteItem(baseColor, enableAlpha)
 		];
 
 		for (let i = 1; i < numBoxes; i++) {
-			const randomColor = genRandomColor(colorSpace) as Exclude<
-				colors.Color,
-				colors.SL | colors.SV
-			>;
+			const randomColor = genRandomColor('hsl') as colors.HSL;
 
-			paletteItems.push(createPaletteItem(randomColor));
+			paletteItems.push(createPaletteItem(randomColor, enableAlpha));
 
-			updateColorBox(randomColor, colorSpace, i);
+			updateColorBox(randomColor, i);
 		}
 
 		return await savePaletteToDB(
 			'random',
 			paletteItems,
 			baseColor,
-			numBoxes
+			numBoxes,
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
 		);
 	}
 
 	async function splitComplementary(
 		numBoxes: number,
-		customColor: colors.Color | null,
-		colorSpace: colors.ColorSpace
+		customColor: colors.HSL | null,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
 	): Promise<palette.Palette> {
+		const currentSplitComplementaryPaletteID =
+			await idbFn.getCurrentPaletteID();
+
 		if (numBoxes < 3) {
 			console.warn(
 				'Split complementary palette requires at least 3 swatches.'
@@ -518,14 +639,18 @@ export function genPalette(): fnObjects.GenPalette {
 			return createPaletteObject(
 				'splitComplementary',
 				[],
-				defaults.hex,
-				0
+				defaults.hsl,
+				0,
+				currentSplitComplementaryPaletteID,
+				enableAlpha,
+				limitBright,
+				limitDark,
+				limitGray
 			);
 		}
 
-		const baseColor = getBaseColor(customColor, colorSpace);
-		const baseHSL = genAllColorValues(baseColor).hsl as colors.HSL;
-		const [hue1, hue2] = genHues.splitComplementary(baseHSL.value.hue);
+		const baseColor = getBaseColor(customColor);
+		const [hue1, hue2] = genHues.splitComplementary(baseColor.value.hue);
 		const paletteItems: palette.PaletteItem[] = [
 			createPaletteItem(baseColor),
 			...[hue1, hue2].map((hue, index) => {
@@ -536,7 +661,7 @@ export function genPalette(): fnObjects.GenPalette {
 						saturation: Math.max(
 							0,
 							Math.min(
-								baseHSL.value.saturation +
+								baseColor.value.saturation +
 									(index === 0
 										? -config.splitComplementarySaturationShiftRange
 										: config.splitComplementarySaturationShiftRange),
@@ -546,7 +671,7 @@ export function genPalette(): fnObjects.GenPalette {
 						lightness: Math.max(
 							0,
 							Math.min(
-								baseHSL.value.lightness +
+								baseColor.value.lightness +
 									(index === 0
 										? -config.splitComplementaryLightnessShiftRange
 										: config.splitComplementaryLightnessShiftRange),
@@ -555,18 +680,9 @@ export function genPalette(): fnObjects.GenPalette {
 						)
 					}
 				};
-				const adjustedColor = genAllColorValues(adjustedHSL)[
-					colorSpace
-				] as colors.Color;
-
-				if (
-					adjustedColor.format === 'sv' ||
-					adjustedColor.format === 'sl'
-				) {
-					throw new Error(
-						`Invalid color format: ${adjustedColor.format}`
-					);
-				}
+				const adjustedColor = genAllColorValues(
+					adjustedHSL
+				) as colors.HSL;
 
 				return createPaletteItem(adjustedColor);
 			})
@@ -576,24 +692,42 @@ export function genPalette(): fnObjects.GenPalette {
 			'splitComplementary',
 			paletteItems,
 			baseColor,
-			numBoxes
+			numBoxes,
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
 		);
 	}
 
 	async function tetradic(
 		numBoxes: number,
-		customColor: colors.Color | null,
-		colorSpace: colors.ColorSpace
+		customColor: colors.HSL | null,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
 	): Promise<palette.Palette> {
+		const currentTetradicPaletteID = await idbFn.getCurrentPaletteID();
+
 		if (numBoxes < 4) {
 			console.warn('Tetradic palette requires at least 4 swatches.');
 
-			return createPaletteObject('tetradic', [], defaults.hex, 0);
+			return createPaletteObject(
+				'tetradic',
+				[],
+				defaults.hsl,
+				0,
+				currentTetradicPaletteID,
+				enableAlpha,
+				limitBright,
+				limitDark,
+				limitGray
+			);
 		}
 
-		const baseColor = getBaseColor(customColor, colorSpace);
-		const baseHSL = genAllColorValues(baseColor).hsl as colors.HSL;
-		const tetradicHues = genHues.tetradic(baseHSL.value.hue);
+		const baseColor = getBaseColor(customColor);
+		const tetradicHues = genHues.tetradic(baseColor.value.hue);
 		const paletteItems: palette.PaletteItem[] = [
 			createPaletteItem(baseColor),
 			...tetradicHues.map((hue, index) => {
@@ -604,7 +738,7 @@ export function genPalette(): fnObjects.GenPalette {
 						saturation: Math.max(
 							0,
 							Math.min(
-								baseHSL.value.saturation +
+								baseColor.value.saturation +
 									(index % 2 === 0
 										? -config.tetradicSaturationShiftRange
 										: config.tetradicSaturationShiftRange),
@@ -614,7 +748,7 @@ export function genPalette(): fnObjects.GenPalette {
 						lightness: Math.max(
 							0,
 							Math.min(
-								baseHSL.value.lightness +
+								baseColor.value.lightness +
 									(index % 2 === 0
 										? -config.tetradicLightnessShiftRange
 										: config.tetradicLightnessShiftRange),
@@ -623,15 +757,9 @@ export function genPalette(): fnObjects.GenPalette {
 						)
 					}
 				};
-				const adjustedColor =
-					genAllColorValues(adjustedHSL)[colorSpace];
+				const adjustedColor = genAllColorValues(adjustedHSL);
 
-				return createPaletteItem(
-					adjustedColor as Exclude<
-						colors.Color,
-						colors.SL | colors.SV
-					>
-				);
+				return createPaletteItem(adjustedColor as colors.HSL);
 			})
 		];
 
@@ -639,25 +767,42 @@ export function genPalette(): fnObjects.GenPalette {
 			'tetradic',
 			paletteItems,
 			baseColor,
-			numBoxes
+			numBoxes,
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
 		);
 	}
 
 	async function triadic(
 		numBoxes: number,
-		customColor: colors.Color | null,
-		colorSpace: colors.ColorSpace
+		customColor: colors.HSL | null,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
 	): Promise<palette.Palette> {
-		// Ensure at least 3 swatches
+		const currentTriadicPaletteID = await idbFn.getCurrentPaletteID();
+
 		if (numBoxes < 3) {
 			console.warn('Triadic palette requires at least 3 swatches.');
 
-			return createPaletteObject('triadic', [], defaults.hex, 0);
+			return createPaletteObject(
+				'triadic',
+				[],
+				defaults.hsl,
+				0,
+				currentTriadicPaletteID,
+				enableAlpha,
+				limitBright,
+				limitDark,
+				limitGray
+			);
 		}
 
-		const baseColor = getBaseColor(customColor, colorSpace);
-		const baseHSL = genAllColorValues(baseColor).hsl as colors.HSL;
-		const hues = genHues.triadic(baseHSL.value.hue);
+		const baseColor = getBaseColor(customColor);
+		const hues = genHues.triadic(baseColor.value.hue);
 		const paletteItems: palette.PaletteItem[] = [
 			createPaletteItem(baseColor),
 			...hues.map((hue, index) => {
@@ -668,7 +813,7 @@ export function genPalette(): fnObjects.GenPalette {
 						saturation: Math.max(
 							0,
 							Math.min(
-								baseHSL.value.saturation +
+								baseColor.value.saturation +
 									(index % 2 === 0
 										? -config.triadicSaturationShiftRange
 										: config.triadicSaturationShiftRange),
@@ -678,7 +823,7 @@ export function genPalette(): fnObjects.GenPalette {
 						lightness: Math.max(
 							0,
 							Math.min(
-								baseHSL.value.lightness +
+								baseColor.value.lightness +
 									(index % 2 === 0
 										? -config.triadicLightnessShiftRange
 										: config.triadicLightnessShiftRange),
@@ -687,15 +832,9 @@ export function genPalette(): fnObjects.GenPalette {
 						)
 					}
 				};
-				const adjustedColor =
-					genAllColorValues(adjustedHSL)[colorSpace];
+				const adjustedColor = genAllColorValues(adjustedHSL);
 
-				return createPaletteItem(
-					adjustedColor as Exclude<
-						colors.Color,
-						colors.SL | colors.SV
-					>
-				);
+				return createPaletteItem(adjustedColor as colors.HSL);
 			})
 		];
 
@@ -703,14 +842,18 @@ export function genPalette(): fnObjects.GenPalette {
 			'triadic',
 			paletteItems,
 			baseColor,
-			numBoxes
+			numBoxes,
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
 		);
 	}
 
 	return {
 		getBaseColor,
-		createPaletteObject,
 		createPaletteItem,
+		createPaletteObject,
 		generatePaletteItems,
 		savePaletteToDB,
 		updateColorBox,

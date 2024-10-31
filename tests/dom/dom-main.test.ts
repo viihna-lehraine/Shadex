@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { domFn } from '../../src/dom/dom-main';
 import { domHelpers } from '../../src/helpers/dom';
 import * as colors from '../../src/index/colors';

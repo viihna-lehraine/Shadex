@@ -11,11 +11,10 @@ export interface Palette {
 	};
 	metadata: {
 		customColor?: {
-			originalColor: colors.Color;
-			colorConversions: PaletteItem['colorConversions'];
+			hslColor: colors.HSL;
+			convertedColors: PaletteItem['colorConversions'];
 		};
 		numBoxes: number;
-		originalColorSpace: colors.ColorSpace;
 		paletteType: string;
 	};
 }
@@ -26,7 +25,6 @@ export interface PaletteItem {
 	colorConversions: {
 		cmyk: colors.CMYK;
 		hex: colors.Hex;
-		hsl: colors.HSL;
 		hsv: colors.HSV;
 		lab: colors.LAB;
 		rgb: colors.RGB;

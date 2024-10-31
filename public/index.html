@@ -45,19 +45,19 @@
                     </div>
                     <div class="ui-row">
                         <div class="ui-column">
-                            <label for="limitDarkCheckbox" class="checkbox-label">Limit Darkness</label>
-                            <input id="limitDarkCheckbox" type="checkbox">
-                            <label for="limitLightCheckbox" class="checkbox-label">Limit Lightness</label>
-                            <input id="limitLightCheckbox" type="checkbox">
+                            <label for="limit-dark-checkbox" class="checkbox-label">Limit Darkness</label>
+                            <input id="limit-dark-checkbox" type="checkbox">
+                            <label for="limit-light-checkbox" class="checkbox-label">Limit Lightness</label>
+                            <input id="limit-light-checkbox" type="checkbox">
                         </div>
                         <div class="ui-column">
-                            <label for="limitGrayCheckbox" class="checkbox-label">Limit Gray</label>
-                            <input id="limitGrayCheckbox" type="checkbox">
+                            <label for="limit-gray-checkbox" class="checkbox-label">Limit Gray</label>
+                            <input id="limit-gray-checkbox" type="checkbox">
                         </div>
                     </div>
                     <div class="ui-row">
                         <div class="popup">
-                            <button id="custom-color-button" class="popup" type="button">Custom Color</button>
+                            <button id="custom-color-toggle-button" class="popup" type="button">Custom Color</button>
                             <div class="popuptext" id="popup-div">
                                 <div class="popup-div-row">
 									<label for="custom-color-picker">Select Custom Color</label>
@@ -91,6 +91,7 @@
                     <button id="advanced-menu-toggle-button" class="advanced-menu-toggle-button" type="button">Advanced</button>
                     <div id="advanced-menu" class="hidden">
                         <div class="ui-column bordered-ui-div">
+							<!-- DEPRECATED! REMOVE THIS SECTION -->
                             <form id="initial-colorspace-selection-form">
                                 <div class="ui-row">
                                     <label for="initial-color-space-options">Initial Colorspace</label>
@@ -114,25 +115,25 @@
             <div id="button-row">
                 <div id="button-box">
                     <div class="button-box-slice">
-                        <button id="hex-conversion-button" class="button-row-button">Hex Code</button>
+                        <button id="show-as-hex-button" class="button-row-button">Hex Code</button>
                     </div>
                     <div class="button-box-slice">
-                        <button id="rgb-conversion-button" class="button-row-button">RGB</button>
+                        <button id="show-as-rgb-button" class="button-row-button">RGB</button>
                     </div>
                     <div class="button-box-slice">
-                        <button id="hsv-conversion-button" class="button-row-button">HSV</button>
+                        <button id="show-as-hsv-button" class="button-row-button">HSV</button>
                     </div>
                     <div id="button-box-title-slice">
-                        <p>Conversion Buttons</p>
+                        <p>Change Color Space</p>
                     </div>
                     <div class="button-box-slice">
-                        <button id="hsl-conversion-button" class="button-row-button">HSL</button>
+                        <button id="show-as-hsl-button" class="button-row-button">HSL</button>
                     </div>
                     <div class="button-box-slice">
-                        <button id="cmyk-conversion-button" class="button-row-button">CMYK</button>
+                        <button id="show-as-cmyk-button" class="button-row-button">CMYK</button>
                     </div>
                     <div class="button-box-slice">
-                        <button id="lab-conversion-button" class="button-row-button">Lab (CIELAB)</button>
+                        <button id="show-as-lab-button" class="button-row-button">LAB (CIELAB)</button>
                     </div>
                 </div>
             </div>

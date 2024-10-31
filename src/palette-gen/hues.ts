@@ -1,37 +1,27 @@
 import { genAllColorValues } from '../color-spaces/conversion';
-import { conversionHelpers } from '../helpers/conversion';
 import { paletteHelpers } from '../helpers/palette';
 import * as colors from '../index/colors';
 import * as fnObjects from '../index/fn-objects';
 import { core } from '../utils/core';
 
-function analogous(color: colors.Color, numBoxes: number): number[] {
+function analogous(color: colors.HSL, numBoxes: number): number[] {
 	try {
 		if (!paletteHelpers.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
+
 			return [];
 		}
 
-		const clonedColor = core.clone(color);
-		const hslColor =
-			clonedColor.format === 'hsl'
-				? (clonedColor as colors.HSL)
-				: conversionHelpers.convertColorToHSL(clonedColor);
-
-		if (!hslColor) {
-			console.error(`Failed to retrieve HSL color from ${color.format}`);
-			return [];
-		}
+		const clonedColor = core.clone(color) as colors.HSL;
 
 		const analogousHues: number[] = [];
-		const baseHue = hslColor.value.hue;
+		const baseHue = clonedColor.value.hue;
 		const maxTotalDistance = 60;
 		const minTotalDistance = Math.max(20, 10 + (numBoxes - 2) * 12);
 		const totalIncrement =
 			Math.floor(
 				Math.random() * (maxTotalDistance - minTotalDistance + 1)
 			) + minTotalDistance;
-
 		const increment = Math.floor(totalIncrement / (numBoxes - 1));
 
 		for (let i = 1; i < numBoxes; i++) {
@@ -41,6 +31,7 @@ function analogous(color: colors.Color, numBoxes: number): number[] {
 		return analogousHues;
 	} catch (error) {
 		console.error(`Error generating analogous hues: ${error}`);
+
 		return [];
 	}
 }
@@ -62,14 +53,13 @@ function diadic(baseHue: number): number[] {
 	}
 }
 
-function hexadic(
-	color: Exclude<colors.Color, colors.SL | colors.SV>
-): number[] {
+function hexadic(color: colors.HSL): number[] {
 	try {
 		const clonedColor = core.clone(color);
 
 		if (!paletteHelpers.validateColorValues(clonedColor)) {
 			console.error(`Invalid color value ${JSON.stringify(clonedColor)}`);
+
 			return [];
 		}
 

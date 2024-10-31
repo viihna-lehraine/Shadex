@@ -77,8 +77,21 @@ async function getNextTableID(): Promise<string> {
 	return `palette_${nextID}`;
 }
 
-//
-// ******** IndexedDB Operations ********
+async function getCurrentPaletteID(): Promise<number> {
+	const db = await getDB();
+	const settings = await db.get('settings', 'appSettings');
+
+	return settings?.lastPaletteID ?? 0;
+}
+
+async function getCustomColor(): Promise<colors.HSL | null> {
+	const db = await getDB();
+	const entry = await db.get('customColor', 'customColor');
+
+	return entry?.color
+		? createMutationLogger(entry.color, 'customColor')
+		: null;
+}
 
 function getLoggedObject<T extends object>(
 	obj: T | null,
@@ -91,6 +104,19 @@ function getLoggedObject<T extends object>(
 	return null;
 }
 
+async function getSettings(): Promise<idb.Settings> {
+	try {
+		const db = await idbFn.getDB();
+		const settings = await db.get('settings', 'appSettings');
+
+		return settings ?? defaults.settings;
+	} catch (error) {
+		console.error('Error fetching settings:', error);
+
+		return { colorSpace: 'hex', lastTableID: 0 };
+	}
+}
+
 async function getTable(id: string): Promise<idb.StoredPalette | null> {
 	const db = await getDB();
 	const result = await db.get('tables', id);
@@ -98,39 +124,6 @@ async function getTable(id: string): Promise<idb.StoredPalette | null> {
 	if (!result) console.warn(`Table with ID ${id} not found.`);
 	return result;
 }
-
-async function saveData<T>(
-	storeName: keyof idb.PaletteSchema,
-	key: string,
-	data: T,
-	oldValue?: T
-): Promise<void> {
-	try {
-		const db = await getDB();
-		const tx = db.transaction(storeName, 'readwrite');
-		const store = tx.objectStore(storeName);
-
-		await store.put({ key, ...data });
-		await tx.done;
-
-		console.log(`${key} saved to ${storeName}.`);
-
-		await logMutation({
-			timestamp: new Date().toISOString(),
-			key,
-			action: 'update',
-			newValue: data,
-			oldValue: oldValue ? oldValue : null,
-			origin: 'saveData'
-		});
-	} catch (error) {
-		console.error(`Failed to save data to ${storeName}:`, error);
-		throw error;
-	}
-}
-
-//
-// ******** CRUD Functions for Entries ********
 
 async function getStore<StoreName extends keyof idb.PaletteSchema>(
 	storeName: StoreName,
@@ -152,6 +145,14 @@ async function getStore<StoreName extends keyof idb.PaletteSchema>(
 ) {
 	const db = await getDB();
 	return db.transaction(storeName, mode).objectStore(storeName);
+}
+
+async function logMutation(log: idb.MutationLog): Promise<void> {
+	const db = await getDB();
+
+	await db.put('mutations', log);
+
+	console.log(`Logged mutation: ${JSON.stringify(log)}`);
 }
 
 async function renderPalette(tableId: string): Promise<void> {
@@ -191,6 +192,36 @@ async function renderPalette(tableId: string): Promise<void> {
 	}
 }
 
+async function saveData<T>(
+	storeName: keyof idb.PaletteSchema,
+	key: string,
+	data: T,
+	oldValue?: T
+): Promise<void> {
+	try {
+		const db = await getDB();
+		const tx = db.transaction(storeName, 'readwrite');
+		const store = tx.objectStore(storeName);
+
+		await store.put({ key, ...data });
+		await tx.done;
+
+		console.log(`${key} saved to ${storeName}.`);
+
+		await logMutation({
+			timestamp: new Date().toISOString(),
+			key,
+			action: 'update',
+			newValue: data,
+			oldValue: oldValue ? oldValue : null,
+			origin: 'saveData'
+		});
+	} catch (error) {
+		console.error(`Failed to save data to ${storeName}:`, error);
+		throw error;
+	}
+}
+
 async function savePalette(
 	id: string,
 	newPalette: idb.StoredPalette
@@ -209,6 +240,57 @@ async function savePalette(
 		console.error(`Failed to save palette ${id}: ${error}`);
 		throw error;
 	}
+}
+
+async function saveSettings(newSettings: idb.Settings): Promise<void> {
+	try {
+		await saveData('settings', 'appSettings', newSettings);
+
+		console.log('Settings updated');
+	} catch (error) {
+		console.error(`Failed to save settings: ${error}`);
+
+		throw error;
+	}
+}
+
+async function trackedTransaction<StoreName extends keyof idb.PaletteSchema>(
+	storeName: StoreName,
+	mode: 'readonly' | 'readwrite',
+	callback: (
+		store: IDBPObjectStore<
+			idb.PaletteSchema,
+			[StoreName],
+			StoreName,
+			'readonly' | 'readwrite'
+		>
+	) => Promise<void>
+): Promise<void> {
+	try {
+		const store =
+			mode === 'readonly'
+				? await getStore(storeName, 'readonly')
+				: await getStore(storeName, 'readwrite');
+
+		await callback(store);
+
+		console.log(`Transaction on ${storeName} completed.`);
+	} catch (error) {
+		console.error(`Transaction on ${storeName} failed: ${error}`);
+
+		throw error;
+	}
+}
+
+async function updateCurrentPaletteID(newID: number): Promise<void> {
+	const db = await getDB();
+	const tx = db.transaction('settings', 'readwrite');
+	const store = tx.objectStore('settings');
+
+	await store.put({ key: 'appSettings', lastPaletteID: newID });
+	await tx.done;
+
+	console.log(`Current palette ID updated to ${newID}`);
 }
 
 async function updateEntryInPalette(
@@ -248,83 +330,6 @@ async function updateEntryInPalette(
 	}
 }
 
-//
-// ******** Settings and Custom Color Operations ********
-
-async function getCustomColor(): Promise<colors.Color | null> {
-	const db = await getDB();
-	const entry = await db.get('customColor', 'customColor');
-
-	return entry?.color
-		? createMutationLogger(entry.color, 'customColor')
-		: null;
-}
-
-async function getSettings(): Promise<idb.Settings> {
-	try {
-		const db = await idbFn.getDB();
-		const settings = await db.get('settings', 'appSettings');
-
-		return settings ?? defaults.settings;
-	} catch (error) {
-		console.error('Error fetching settings:', error);
-
-		return { colorSpace: 'hex', lastTableID: 0 };
-	}
-}
-
-async function saveSettings(newSettings: idb.Settings): Promise<void> {
-	try {
-		await saveData('settings', 'appSettings', newSettings);
-
-		console.log('Settings updated');
-	} catch (error) {
-		console.error(`Failed to save settings: ${error}`);
-
-		throw error;
-	}
-}
-
-// ******** Logging and Transactions ********
-
-async function logMutation(log: idb.MutationLog): Promise<void> {
-	const db = await getDB();
-
-	await db.put('mutations', log);
-
-	console.log(`Logged mutation: ${JSON.stringify(log)}`);
-}
-
-async function trackedTransaction<StoreName extends keyof idb.PaletteSchema>(
-	storeName: StoreName,
-	mode: 'readonly' | 'readwrite',
-	callback: (
-		store: IDBPObjectStore<
-			idb.PaletteSchema,
-			[StoreName],
-			StoreName,
-			'readonly' | 'readwrite'
-		>
-	) => Promise<void>
-): Promise<void> {
-	try {
-		const store =
-			mode === 'readonly'
-				? await getStore(storeName, 'readonly')
-				: await getStore(storeName, 'readwrite');
-
-		await callback(store);
-
-		console.log(`Transaction on ${storeName} completed.`);
-	} catch (error) {
-		console.error(`Transaction on ${storeName} failed: ${error}`);
-
-		throw error;
-	}
-}
-
-// ******** Bundled Export ********
-
 export const idbFn: fnObjects.IDBFn = {
 	createMutationLogger,
 	deleteTable: async (id: string) => {
@@ -332,6 +337,7 @@ export const idbFn: fnObjects.IDBFn = {
 		await db.delete('tables', id);
 		console.log(`Table ${id} deleted.`);
 	},
+	getCurrentPaletteID,
 	getCustomColor,
 	getDB,
 	getLoggedObject,
@@ -350,5 +356,6 @@ export const idbFn: fnObjects.IDBFn = {
 	savePalette,
 	saveSettings,
 	trackedTransaction,
+	updateCurrentPaletteID,
 	updateEntryInPalette
 };

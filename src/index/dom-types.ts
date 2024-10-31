@@ -7,8 +7,11 @@ export interface ColorInputElement extends HTMLInputElement {
 export interface GenButtonParams {
 	numBoxes: number;
 	paletteType: number;
-	colorSpace: colors.ColorSpace;
-	customColor: colors.Color | null;
+	customColor: colors.HSL | null;
+	enableAlpha: boolean;
+	limitBright: boolean;
+	limitDark: boolean;
+	limitGray: boolean;
 }
 
 export interface GetElementsForSelectedColor {
@@ -25,17 +28,20 @@ export interface MakePaletteBox {
 export interface PullParamsFromUI {
 	paletteType: number;
 	numBoxes: number;
-	colorSpace: colors.ColorSpace | undefined;
 }
 
-export interface UIButtons {
-	generateButton: HTMLElement | null;
-	saturateButton: HTMLElement | null;
-	desaturateButton: HTMLElement | null;
-	popupDivButton: HTMLElement | null;
+export interface UIElements {
+	advancedMenuToggleButton: HTMLElement | null;
 	applyCustomColorButton: HTMLElement | null;
 	clearCustomColorButton: HTMLElement | null;
-	advancedMenuToggleButton: HTMLElement | null;
-	applyColorSpaceButton: HTMLElement | null;
+	customColorToggleButton: HTMLElement | null;
+	desaturateButton: HTMLElement | null;
+	enableAlphaCheckbox: HTMLInputElement | null;
+	generateButton: HTMLElement | null;
+	limitBrightCheckbox: HTMLInputElement | null;
+	limitDarkCheckbox: HTMLInputElement | null;
+	limitGrayCheckbox: HTMLInputElement | null;
+	popupDivButton: HTMLElement | null;
+	saturateButton: HTMLElement | null;
 	selectedColor: number;
 }

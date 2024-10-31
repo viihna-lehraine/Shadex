@@ -98,14 +98,12 @@ const paletteData: palette.Palette = {
 	},
 	metadata: {
 		numBoxes: 5,
-		originalColorSpace: 'hex',
 		paletteType: 'ERROR',
 		customColor: {
-			originalColor: hex,
-			colorConversions: {
+			hslColor: hsl,
+			convertedColors: {
 				cmyk: cmyk,
 				hex: hex,
-				hsl: hsl,
 				hsv: hsv,
 				lab: lab,
 				rgb: rgb,
@@ -123,7 +121,6 @@ const paletteItem: palette.PaletteItem = {
 	colorConversions: {
 		cmyk: cmyk,
 		hex: hex,
-		hsl: hsl,
 		hsv: hsv,
 		lab: lab,
 		rgb: rgb,

@@ -27,9 +27,11 @@ function handleDragOver(e: DragEvent): boolean {
 		}
 
 		console.log('handleDragOver complete');
+
 		return false;
 	} catch (error) {
 		console.error(`Error in handleDragOver: ${error}`);
+
 		return false;
 	}
 }
@@ -37,6 +39,7 @@ function handleDragOver(e: DragEvent): boolean {
 function handleDragEnd(e: DragEvent): void {
 	try {
 		const target = e.currentTarget as HTMLElement;
+
 		target.classList.remove('dragging');
 
 		document.querySelectorAll('.color-stripe').forEach(el => {
@@ -98,7 +101,9 @@ function handleDrop(e: DragEvent): void {
 			console.log(
 				'calling attachDragAndDropEventListeners for new elements'
 			);
+
 			domHelpers.attachDragAndDropEventListeners(newDragSrcEl);
+
 			domHelpers.attachDragAndDropEventListeners(newDropTargetEl);
 		}
 

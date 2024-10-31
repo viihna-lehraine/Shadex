@@ -20,6 +20,25 @@ export interface Debounce {
 	inputDebounce: number;
 }
 
+export interface DOMElements {
+	advancedMenuToggleButton: HTMLButtonElement | null;
+	applyCustomColorButton: HTMLButtonElement | null;
+	clearCustomColorButton: HTMLButtonElement | null;
+	customColorElement: HTMLInputElement | null;
+	customColorToggleButton: HTMLButtonElement | null;
+	desaturateButton: HTMLButtonElement | null;
+	enableAlphaCheckbox: HTMLInputElement | null;
+	generateButton: HTMLButtonElement | null;
+	limitBrightCheckbox: HTMLInputElement | null;
+	limitDarkCheckbox: HTMLInputElement | null;
+	limitGrayCheckbox: HTMLInputElement | null;
+	paletteNumberOptions: HTMLInputElement | null;
+	paletteTypeOptions: HTMLSelectElement | null;
+	popupDivButton: HTMLButtonElement | null;
+	saturateButton: HTMLButtonElement | null;
+	selectedColorOptions: HTMLSelectElement | null;
+}
+
 export interface Defaults {
 	cmyk: colors.CMYK;
 	cmykString: colors.CMYKString;
@@ -66,22 +85,9 @@ export interface ProbabilityConstants {
 }
 
 export interface Thresholds {
-	cmykBrightnessThreshold: number;
-	cmykDarknessThreshold: number;
-	cmykGrayThreshold: number;
-	hslBrightnessThreshold: number;
-	hslDarknessThreshold: number;
-	hslGrayThreshold: number;
-	hsvBrightnessValueThreshold: number;
-	hsvBrightnessSaturationThreshold: number;
-	hsvDarknessThreshold: number;
-	hsvGrayThreshold: number;
-	labBrightnessThreshold: number;
-	labDarknessThreshold: number;
-	labGrayThreshold: number;
-	rgbMaxBrightness: number;
-	rgbMinBrightness: number;
-	rgbGrayThreshold: number;
+	brightnessThreshold: number;
+	darknessThreshold: number;
+	grayThreshold: number;
 }
 
 export interface Timeouts {
@@ -95,6 +101,7 @@ export interface Timeouts {
 export type Config = Adjustments &
 	Boundaries &
 	Debounce &
+	DOMElements &
 	PaletteShiftRanges &
 	ProbabilityConstants &
 	Thresholds &

@@ -1,4 +1,4 @@
-import { convert } from '../color-spaces/color-space-index';
+import { convert } from '../color-spaces/convert-all';
 import * as fnObjects from '../index/fn-objects';
 import * as colors from '../index/colors';
 import { core } from '../utils/core';

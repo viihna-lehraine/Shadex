@@ -12,6 +12,7 @@ import { idbFn } from './dom/idb-fn';
 import { domHelpers } from './helpers/dom';
 import * as colors from './index/colors';
 import { generate } from './palette-gen/generate';
+import { genRandomColor } from './utils/random-color';
 import { core } from './utils/core';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,9 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const {
 		advancedMenuToggleButton,
-		applyColorSpaceButton,
 		applyCustomColorButton,
 		clearCustomColorButton,
+		customColorToggleButton,
 		desaturateButton,
 		generateButton,
 		popupDivButton,
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// confirm that all elements are accessible
 	console.log(
-		`generateButton: ${generateButton}\nsaturateButton: ${saturateButton}\ndesaturateButton: ${desaturateButton}\npopupDivButton: ${popupDivButton}\napplyCustomColorButton: ${applyCustomColorButton}\nclearCustomColorButton: ${clearCustomColorButton}\nadvancedMenuToggleButton: ${advancedMenuToggleButton}\napplyColorSpaceButton: ${applyColorSpaceButton}\nselectedColorOptions: ${selectedColorOptions}`
+		`generateButton: ${generateButton}\nsaturateButton: ${saturateButton}\ndesaturateButton: ${desaturateButton}\npopupDivButton: ${popupDivButton}\napplyCustomColorButton: ${applyCustomColorButton}\nclearCustomColorButton: ${clearCustomColorButton}\nadvancedMenuToggleButton: ${advancedMenuToggleButton}\nselectedColorOptions: ${selectedColorOptions}\ncustomColorToggleButton: ${customColorToggleButton}`
 	);
 
 	const selectedColor = selectedColorOptions
@@ -52,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	try {
 		domFn.addConversionButtonEventListeners();
+
 		console.log('Conversion button event listeners attached');
 	} catch (error) {
 		console.error(
@@ -67,49 +69,67 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (advancedMenu) {
 			const clonedClasses = [...advancedMenu.classList];
 			const isHidden = clonedClasses.includes('hidden');
+
 			advancedMenu.classList.toggle('hidden');
 			advancedMenu.style.display = isHidden ? 'block' : 'none';
 		}
 	});
 
-	applyColorSpaceButton?.addEventListener('click', async e => {
-		e.preventDefault();
-		const colorSpace: colors.ColorSpace = domFn.applySelectedColorSpace();
-		await idbFn.saveData('settings', 'appSettings', { colorSpace });
-		console.log('Color space saved to IndexedDB');
-	});
-
 	applyCustomColorButton?.addEventListener('click', async e => {
 		e.preventDefault();
-		const color = domFn.applyCustomColor();
-		const customColorClone: colors.Color = core.clone(color);
-		await idbFn.saveData('customColor', 'appSettings', customColorClone);
+
+		const customHSLColor = domFn.applyCustomColor();
+		const customHSLColorClone: colors.HSL = core.clone(customHSLColor);
+
+		await idbFn.saveData('customColor', 'appSettings', customHSLColorClone);
+
 		console.log('Custom color saved to IndexedDB');
-		domFn.showCustomColorPopupDiv();
 	});
 
 	clearCustomColorButton?.addEventListener('click', async e => {
 		e.preventDefault();
+
 		await idbFn.deleteTable('customColor');
+
 		console.log('Custom color cleared from IndexedDB');
+
+		domFn.showCustomColorPopupDiv();
+	});
+
+	customColorToggleButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		console.log('customColorToggleButton clicked');
+
 		domFn.showCustomColorPopupDiv();
 	});
 
 	desaturateButton?.addEventListener('click', e => {
 		e.preventDefault();
+
 		console.log('desaturateButton clicked');
+
 		domFn.desaturateColor(selectedColor);
 	});
 
 	generateButton?.addEventListener('click', async e => {
 		e.preventDefault();
+
 		console.log('generateButton clicked');
-		const { paletteType, numBoxes, colorSpace } = domFn.pullParamsFromUI();
-		const customColor = await idbFn.getCustomColor();
+
+		const { paletteType, numBoxes } = domFn.pullParamsFromUI();
+
+		let customColor = (await idbFn.getCustomColor()) as colors.HSL | null;
+
+		if (!customColor) {
+			console.info('No custom color found. Using a random color');
+
+			customColor = genRandomColor('hsl') as colors.HSL;
+		}
+
 		const paletteOptions: colors.PaletteOptions = {
 			paletteType,
 			numBoxes,
-			colorSpace: colorSpace ?? 'hex',
 			customColor: core.clone(customColor)
 		};
 
@@ -118,13 +138,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	popupDivButton?.addEventListener('click', e => {
 		e.preventDefault();
+
 		console.log('popupDivButton clicked');
+
 		domFn.showCustomColorPopupDiv();
 	});
 
 	saturateButton?.addEventListener('click', e => {
 		e.preventDefault();
+
 		console.log('saturateButton clicked');
+
 		domFn.saturateColor(selectedColor);
 	});
 });
