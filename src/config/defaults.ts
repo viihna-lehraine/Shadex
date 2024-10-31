@@ -4,77 +4,81 @@ import * as idb from '../index/idb';
 import * as palette from '../index/palette';
 
 const cmyk: colors.CMYK = {
-	value: { cyan: 0, magenta: 0, yellow: 0, key: 0 },
+	value: { cyan: 0, magenta: 0, yellow: 0, key: 0, alpha: 1 },
 	format: 'cmyk'
 };
 
 const cmykString: colors.CMYKString = {
-	value: { cyan: '0', magenta: '0', yellow: '0', key: '0' },
+	value: { cyan: '0%', magenta: '0%', yellow: '0%', key: '0%', alpha: '1' },
 	format: 'cmyk'
 };
 
 const hex: colors.Hex = {
-	value: { hex: '#000000' },
+	value: {
+		hex: '#000000FF',
+		alpha: 'FF',
+		numericAlpha: 1
+	},
 	format: 'hex'
 };
 
 const hsl: colors.HSL = {
-	value: { hue: 0, saturation: 0, lightness: 0 },
+	value: { hue: 0, saturation: 0, lightness: 0, alpha: 1 },
 	format: 'hsl'
 };
 
 const hslString: colors.HSLString = {
-	value: { hue: '0', saturation: '0', lightness: '0' },
+	value: { hue: '0', saturation: '0%', lightness: '0%', alpha: '1' },
 	format: 'hsl'
 };
 
 const hsv: colors.HSV = {
-	value: { hue: 0, saturation: 0, value: 0 },
+	value: { hue: 0, saturation: 0, value: 0, alpha: 1 },
 	format: 'hsv'
 };
 
 const hsvString: colors.HSVString = {
-	value: { hue: '0', saturation: '0', value: '0' },
+	value: { hue: '0', saturation: '0%', value: '0%', alpha: '1' },
 	format: 'hsv'
 };
 
 const lab: colors.LAB = {
-	value: { l: 0, a: 0, b: 0 },
+	value: { l: 0, a: 0, b: 0, alpha: 1 },
 	format: 'lab'
 };
 
 const rgb: colors.RGB = {
-	value: { red: 0, green: 0, blue: 0 },
+	value: { red: 0, green: 0, blue: 0, alpha: 1 },
 	format: 'rgb'
 };
 
 const settings: idb.Settings = {
-	colorSpace: 'hex',
+	colorSpace: 'hsl',
 	lastTableID: 0
 };
 
 const sl: colors.SL = {
-	value: { saturation: 0, lightness: 0 },
+	value: { saturation: 0, lightness: 0, alpha: 1 },
 	format: 'sl'
 };
 
 const slString: colors.SLString = {
-	value: { saturation: '0', lightness: '0' },
+	value: { saturation: '0%', lightness: '0%', alpha: '1' },
 	format: 'sl'
 };
 
 const sv: colors.SV = {
-	value: { saturation: 0, value: 0 },
+	value: { saturation: 0, value: 0, alpha: 1 },
 	format: 'sv'
 };
 
 const svString: colors.SVString = {
-	value: { saturation: '0', value: '0' },
+	value: { saturation: '0%', value: '0%', alpha: '1' },
 	format: 'sv'
 };
 
 const xyz: colors.XYZ = {
-	value: { x: 0, y: 0, z: 0 },
+	value: { x: 0, y: 0, z: 0, alpha: 1 },
 	format: 'xyz'
 };
 
@@ -136,22 +140,22 @@ const paletteItem: palette.PaletteItem = {
 		svString: svString
 	},
 	cssStrings: {
-		cmykCSSString: 'cmyk(0%, 0%, 0%, 100%)',
-		hexCSSString: '#000000',
-		hslCSSString: 'hsl(0, 0%, 0%)',
-		hsvCSSString: 'hsv(0, 0%, 0%)',
-		labCSSString: 'lab(0, 0, 0)',
-		xyzCSSString: 'xyz(0, 0, 0)'
+		cmykCSSString: 'cmyk(0%, 0%, 0%, 100%, 1)',
+		hexCSSString: '#000000FF',
+		hslCSSString: 'hsl(0, 0%, 0%, 0)',
+		hsvCSSString: 'hsv(0, 0%, 0%, 0)',
+		labCSSString: 'lab(0, 0, 0, 0)',
+		xyzCSSString: 'xyz(0, 0, 0, 0)'
 	},
 	rawColorStrings: {
-		cmykRawString: '0,0,0,100',
-		hexRawString: '000000',
-		hslRawString: '0,0,0',
-		hsvRawString: '0,0,0',
-		labRawString: '0,0,0',
-		slRawString: '0,0',
-		svRawString: '0,0',
-		xyzRawString: '0,0,0'
+		cmykRawString: '0,0,0,100,1',
+		hexRawString: '000000FF',
+		hslRawString: '0,0,0,1',
+		hsvRawString: '0,0,0,1',
+		labRawString: '0,0,0,1',
+		slRawString: '0,0,1',
+		svRawString: '0,0,1',
+		xyzRawString: '0,0,0,1'
 	}
 };
 

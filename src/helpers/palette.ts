@@ -23,7 +23,8 @@ function adjustSL(color: colors.HSL): colors.HSL {
 			value: {
 				hue: color.value.hue,
 				saturation: adjustedSaturation,
-				lightness: adjustedLightness
+				lightness: adjustedLightness,
+				alpha: color.value.alpha
 			},
 			format: 'hsl'
 		};

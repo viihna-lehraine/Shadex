@@ -159,7 +159,10 @@ export interface GenHues {
 }
 
 export interface GenPalette {
-	createPaletteItem(color: colors.Color): palette.PaletteItem;
+	createPaletteItem(
+		color: colors.HSL,
+		enableAlpha: boolean
+	): palette.PaletteItem;
 	createPaletteObject(
 		type: string,
 		items: palette.PaletteItem[],
@@ -174,11 +177,15 @@ export interface GenPalette {
 	generatePaletteItems(
 		baseColor: colors.HSL,
 		hues: number[],
+		enableAlpha: boolean,
 		limitDark: boolean,
 		limitGray: boolean,
 		limitBright: boolean
 	): palette.PaletteItem[];
-	getBaseColor(customColor: colors.HSL | null): colors.HSL;
+	getBaseColor(
+		customColor: colors.HSL | null,
+		enableAlpha: boolean
+	): colors.HSL;
 	savePaletteToDB(
 		type: string,
 		items: palette.PaletteItem[],
@@ -388,16 +395,18 @@ export interface Transform {
 		color: Exclude<colors.Color, colors.Hex | colors.LAB | colors.RGB>
 	): colors.ColorString;
 	componentToHex(componment: number): string;
+	getAlphaFromHex(hex: string): number;
 	getColorString(color: colors.Color): string | null;
 	getCSSColorString(color: colors.Color): string;
 	getRawColorString(color: colors.Color): string;
+	hexAlphaToNumericAlpha(hexAlpha: string): number;
 	parseColor(
 		colorSpace: colors.ColorSpace,
 		value: string
 	): colors.Color | null;
 	parseColorComponents(value: string, expectedLength: number): number[];
 	parseCustomColor(rawValue: string): colors.Color | null;
-	parseHex(hexValue: string): colors.HexValue;
+	parseHex(hexValue: string): colors.Hex;
 	stripHashFromHex(hex: colors.Hex): colors.Hex;
 	stripPercentFromValues<T extends Record<string, number | string>>(
 		value: T

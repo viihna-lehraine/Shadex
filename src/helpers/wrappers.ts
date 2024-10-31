@@ -3,14 +3,32 @@ import * as fnObjects from '../index/fn-objects';
 import * as colors from '../index/colors';
 import { core } from '../utils/core';
 import { defaults } from '../config/defaults';
+import { transform } from '../utils/transform';
 
 function hexToCMYKWrapper(input: string | colors.Hex): colors.CMYK {
 	try {
 		const clonedInput = core.clone(input);
-		const hex =
+		const hex: colors.Hex =
 			typeof clonedInput === 'string'
-				? { value: { hex: clonedInput }, format: 'hex' as const }
-				: clonedInput;
+				? {
+						value: {
+							hex: clonedInput,
+							alpha: clonedInput.slice(-2),
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.slice(-2)
+							)
+						},
+						format: 'hex'
+					}
+				: {
+						...clonedInput,
+						value: {
+							...clonedInput.value,
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.value.alpha
+							)
+						}
+					};
 
 		return convert.hexToCMYK(hex);
 	} catch (error) {
@@ -23,10 +41,27 @@ function hexToCMYKWrapper(input: string | colors.Hex): colors.CMYK {
 function hexToHSLWrapper(input: string | colors.Hex): colors.HSL {
 	try {
 		const clonedInput = core.clone(input);
-		const hex =
+		const hex: colors.Hex =
 			typeof clonedInput === 'string'
-				? { value: { hex: clonedInput }, format: 'hex' as const }
-				: clonedInput;
+				? {
+						value: {
+							hex: clonedInput,
+							alpha: clonedInput.slice(-2),
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.slice(-2)
+							)
+						},
+						format: 'hex'
+					}
+				: {
+						...clonedInput,
+						value: {
+							...clonedInput.value,
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.value.alpha
+							)
+						}
+					};
 
 		return convert.hexToHSL(hex);
 	} catch (error) {
@@ -39,10 +74,27 @@ function hexToHSLWrapper(input: string | colors.Hex): colors.HSL {
 function hexToHSVWrapper(input: string | colors.Hex): colors.HSV {
 	try {
 		const clonedInput = core.clone(input);
-		const hex =
+		const hex: colors.Hex =
 			typeof clonedInput === 'string'
-				? { value: { hex: clonedInput }, format: 'hex' as const }
-				: clonedInput;
+				? {
+						value: {
+							hex: clonedInput,
+							alpha: clonedInput.slice(-2),
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.slice(-2)
+							)
+						},
+						format: 'hex'
+					}
+				: {
+						...clonedInput,
+						value: {
+							...clonedInput.value,
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.value.alpha
+							)
+						}
+					};
 
 		return convert.hexToHSV(hex);
 	} catch (error) {
@@ -55,10 +107,27 @@ function hexToHSVWrapper(input: string | colors.Hex): colors.HSV {
 function hexToLABWrapper(input: string | colors.Hex): colors.LAB {
 	try {
 		const clonedInput = core.clone(input);
-		const hex =
+		const hex: colors.Hex =
 			typeof clonedInput === 'string'
-				? { value: { hex: clonedInput }, format: 'hex' as const }
-				: clonedInput;
+				? {
+						value: {
+							hex: clonedInput,
+							alpha: clonedInput.slice(-2),
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.slice(-2)
+							)
+						},
+						format: 'hex'
+					}
+				: {
+						...clonedInput,
+						value: {
+							...clonedInput.value,
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.value.alpha
+							)
+						}
+					};
 
 		return convert.hexToLAB(hex);
 	} catch (error) {
@@ -71,10 +140,27 @@ function hexToLABWrapper(input: string | colors.Hex): colors.LAB {
 function hexToRGBWrapper(input: string | colors.Hex): colors.RGB {
 	try {
 		const clonedInput = core.clone(input);
-		const hex =
+		const hex: colors.Hex =
 			typeof clonedInput === 'string'
-				? { value: { hex: clonedInput }, format: 'hex' as const }
-				: clonedInput;
+				? {
+						value: {
+							hex: clonedInput,
+							alpha: clonedInput.slice(-2),
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.slice(-2)
+							)
+						},
+						format: 'hex'
+					}
+				: {
+						...clonedInput,
+						value: {
+							...clonedInput.value,
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.value.alpha
+							)
+						}
+					};
 
 		return convert.hexToRGB(hex);
 	} catch (error) {
@@ -87,10 +173,27 @@ function hexToRGBWrapper(input: string | colors.Hex): colors.RGB {
 function hexToSLWrapper(input: string | colors.Hex): colors.SL {
 	try {
 		const clonedInput = core.clone(input);
-		const hex =
+		const hex: colors.Hex =
 			typeof clonedInput === 'string'
-				? { value: { hex: clonedInput }, format: 'hex' as const }
-				: clonedInput;
+				? {
+						value: {
+							hex: clonedInput,
+							alpha: clonedInput.slice(-2),
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.slice(-2)
+							)
+						},
+						format: 'hex'
+					}
+				: {
+						...clonedInput,
+						value: {
+							...clonedInput.value,
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.value.alpha
+							)
+						}
+					};
 
 		return convert.hexToSL(hex);
 	} catch (error) {
@@ -103,10 +206,27 @@ function hexToSLWrapper(input: string | colors.Hex): colors.SL {
 function hexToSVWrapper(input: string | colors.Hex): colors.SV {
 	try {
 		const clonedInput = core.clone(input);
-		const hex =
+		const hex: colors.Hex =
 			typeof clonedInput === 'string'
-				? { value: { hex: clonedInput }, format: 'hex' as const }
-				: clonedInput;
+				? {
+						value: {
+							hex: clonedInput,
+							alpha: clonedInput.slice(-2),
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.slice(-2)
+							)
+						},
+						format: 'hex'
+					}
+				: {
+						...clonedInput,
+						value: {
+							...clonedInput.value,
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.value.alpha
+							)
+						}
+					};
 
 		return convert.hexToSV(hex);
 	} catch (error) {
@@ -119,10 +239,27 @@ function hexToSVWrapper(input: string | colors.Hex): colors.SV {
 function hexToXYZWrapper(input: string | colors.Hex): colors.XYZ {
 	try {
 		const clonedInput = core.clone(input);
-		const hex =
+		const hex: colors.Hex =
 			typeof clonedInput === 'string'
-				? { value: { hex: clonedInput }, format: 'hex' as const }
-				: clonedInput;
+				? {
+						value: {
+							hex: clonedInput,
+							alpha: clonedInput.slice(-2),
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.slice(-2)
+							)
+						},
+						format: 'hex'
+					}
+				: {
+						...clonedInput,
+						value: {
+							...clonedInput.value,
+							numericAlpha: transform.hexAlphaToNumericAlpha(
+								clonedInput.value.alpha
+							)
+						}
+					};
 
 		return convert.hexToXYZ(hex);
 	} catch (error) {

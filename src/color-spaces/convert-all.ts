@@ -91,9 +91,9 @@ export function cmykToRGB(cmyk: colors.CMYK): colors.RGB {
 			255 *
 			(1 - clonedCMYK.value.yellow / 100) *
 			(1 - clonedCMYK.value.key / 100);
-
+		const alpha = cmyk.value.alpha;
 		const rgb: colors.RGB = {
-			value: { red: r, green: g, blue: b },
+			value: { red: r, green: g, blue: b, alpha },
 			format: 'rgb'
 		};
 
@@ -233,7 +233,8 @@ export function hexToRGB(hex: colors.Hex): colors.RGB {
 			value: {
 				red: (bigint >> 16) & 255,
 				green: (bigint >> 8) & 255,
-				blue: bigint & 255
+				blue: bigint & 255,
+				alpha: hex.value.numericAlpha
 			},
 			format: 'rgb'
 		};
@@ -344,7 +345,8 @@ function hslToHSV(hsl: colors.HSL): colors.HSV {
 			value: {
 				hue: Math.round(clonedHSL.value.hue),
 				saturation: Math.round(newSaturation * 100),
-				value: Math.round(value * 100)
+				value: Math.round(value * 100),
+				alpha: hsl.value.alpha
 			},
 			format: 'hsv'
 		};
@@ -380,10 +382,8 @@ export function hslToRGB(hsl: colors.HSL): colors.RGB {
 		}
 
 		const clonedHSL = core.clone(hsl);
-
 		const s = clonedHSL.value.saturation / 100;
 		const l = clonedHSL.value.lightness / 100;
-
 		const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
 		const p = 2 * l - q;
 
@@ -405,7 +405,8 @@ export function hslToRGB(hsl: colors.HSL): colors.RGB {
 						q,
 						clonedHSL.value.hue - 1 / 3
 					) * 255
-				)
+				),
+				alpha: hsl.value.alpha
 			},
 			format: 'rgb'
 		};
@@ -427,7 +428,8 @@ function hslToSL(hsl: colors.HSL): colors.SL {
 		return {
 			value: {
 				saturation: hsl.value.saturation,
-				lightness: hsl.value.lightness
+				lightness: hsl.value.lightness,
+				alpha: hsl.value.alpha
 			},
 			format: 'sl' as 'sl'
 		};
@@ -531,7 +533,8 @@ function hsvToHSL(hsv: colors.HSV): colors.HSL {
 			value: {
 				hue: Math.round(clonedHSV.value.hue),
 				saturation: Math.round(newSaturation * 100),
-				lightness: Math.round(lightness)
+				lightness: Math.round(lightness),
+				alpha: hsv.value.alpha
 			},
 			format: 'hsl'
 		};
@@ -576,28 +579,76 @@ export function hsvToRGB(hsv: colors.HSV): colors.RGB {
 		const t = v * (1 - (1 - f) * s);
 
 		let rgb: colors.RGB = {
-			value: { red: 0, green: 0, blue: 0 },
+			value: { red: 0, green: 0, blue: 0, alpha: 1 },
 			format: 'rgb'
 		};
 
 		switch (i) {
 			case 0:
-				rgb = { value: { red: v, green: t, blue: p }, format: 'rgb' };
+				rgb = {
+					value: {
+						red: v,
+						green: t,
+						blue: p,
+						alpha: hsv.value.alpha
+					},
+					format: 'rgb'
+				};
 				break;
 			case 1:
-				rgb = { value: { red: q, green: v, blue: p }, format: 'rgb' };
+				rgb = {
+					value: {
+						red: q,
+						green: v,
+						blue: p,
+						alpha: hsv.value.alpha
+					},
+					format: 'rgb'
+				};
 				break;
 			case 2:
-				rgb = { value: { red: p, green: v, blue: t }, format: 'rgb' };
+				rgb = {
+					value: {
+						red: p,
+						green: v,
+						blue: t,
+						alpha: hsv.value.alpha
+					},
+					format: 'rgb'
+				};
 				break;
 			case 3:
-				rgb = { value: { red: p, green: q, blue: v }, format: 'rgb' };
+				rgb = {
+					value: {
+						red: p,
+						green: q,
+						blue: v,
+						alpha: hsv.value.alpha
+					},
+					format: 'rgb'
+				};
 				break;
 			case 4:
-				rgb = { value: { red: t, green: p, blue: v }, format: 'rgb' };
+				rgb = {
+					value: {
+						red: t,
+						green: p,
+						blue: v,
+						alpha: hsv.value.alpha
+					},
+					format: 'rgb'
+				};
 				break;
 			case 5:
-				rgb = { value: { red: v, green: p, blue: q }, format: 'rgb' };
+				rgb = {
+					value: {
+						red: v,
+						green: p,
+						blue: q,
+						alpha: hsv.value.alpha
+					},
+					format: 'rgb'
+				};
 				break;
 		}
 
@@ -636,7 +687,8 @@ function hsvToSV(hsv: colors.HSV): colors.SV {
 		return {
 			value: {
 				saturation: hsv.value.saturation,
-				value: hsv.value.value
+				value: hsv.value.value,
+				alpha: hsv.value.alpha
 			},
 			format: 'sv' as 'sv'
 		};
@@ -804,7 +856,8 @@ function labToXYZ(lab: colors.LAB): colors.XYZ {
 					(pow(y, 3) > 0.008856 ? pow(y, 3) : (y - 16 / 116) / 7.787),
 				z:
 					refZ *
-					(pow(z, 3) > 0.008856 ? pow(z, 3) : (z - 16 / 116) / 7.787)
+					(pow(z, 3) > 0.008856 ? pow(z, 3) : (z - 16 / 116) / 7.787),
+				alpha: lab.value.alpha
 			},
 			format: 'xyz'
 		};
@@ -841,9 +894,10 @@ function rgbToCMYK(rgb: colors.RGB): colors.CMYK {
 		const yellow = paletteHelpers.sanitizePercentage(
 			(1 - bluePrime - key) / (1 - key) || 0
 		);
+		const alpha: number = rgb.value.alpha;
 		const format: 'cmyk' = 'cmyk';
 
-		const cmyk = { value: { cyan, magenta, yellow, key }, format };
+		const cmyk = { value: { cyan, magenta, yellow, key, alpha }, format };
 
 		console.log(
 			`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(core.clone(cmyk))}`
@@ -872,20 +926,30 @@ function rgbToHex(rgb: colors.RGB): colors.Hex {
 				clonedRGB.value.red,
 				clonedRGB.value.green,
 				clonedRGB.value.blue
-			].some(v => isNaN(v) || v < 0 || v > 255)
+			].some(v => isNaN(v) || v < 0 || v > 255) ||
+			[clonedRGB.value.alpha].some(v => isNaN(v) || v < 0 || v > 1)
 		) {
 			console.warn(
-				`Invalid RGB values: R=${JSON.stringify(clonedRGB.value.red)}, G=${JSON.stringify(clonedRGB.value.green)}, B=${JSON.stringify(clonedRGB.value.blue)}`
+				`Invalid RGB values: R=${JSON.stringify(clonedRGB.value.red)}, G=${JSON.stringify(clonedRGB.value.green)}, B=${JSON.stringify(clonedRGB.value.blue)}, A=${JSON.stringify(clonedRGB.value.alpha)}`
 			);
 
-			return { value: { hex: '#000000' }, format: 'hex' };
+			return {
+				value: {
+					hex: '#000000FF',
+					alpha: 'FF',
+					numericAlpha: 1
+				},
+				format: 'hex' as 'hex'
+			};
 		}
 
 		return {
 			value: {
-				hex: `#${transform.componentToHex(clonedRGB.value.red)}${transform.componentToHex(clonedRGB.value.green)}${transform.componentToHex(clonedRGB.value.blue)}`
+				hex: `#${transform.componentToHex(clonedRGB.value.red)}${transform.componentToHex(clonedRGB.value.green)}${transform.componentToHex(clonedRGB.value.blue)}`,
+				alpha: transform.componentToHex(clonedRGB.value.alpha),
+				numericAlpha: clonedRGB.value.alpha
 			},
-			format: 'hex'
+			format: 'hex' as 'hex'
 		};
 	} catch (error) {
 		console.warn(`rgbToHex error: ${error}`);
@@ -953,7 +1017,8 @@ function rgbToHSL(rgb: colors.RGB): colors.HSL {
 			value: {
 				hue: Math.round(hue),
 				saturation: Math.round(saturation * 100),
-				lightness: Math.round(lightness * 100)
+				lightness: Math.round(lightness * 100),
+				alpha: rgb.value.alpha
 			},
 			format: 'hsl'
 		};
@@ -1021,7 +1086,8 @@ function rgbToHSV(rgb: colors.RGB): colors.HSV {
 			value: {
 				hue: Math.round(hue),
 				saturation: Math.round(saturation * 100),
-				value: Math.round(value * 100)
+				value: Math.round(value * 100),
+				alpha: rgb.value.alpha
 			},
 			format: 'hsv'
 		};
@@ -1124,7 +1190,8 @@ function rgbToXYZ(rgb: colors.RGB): colors.XYZ {
 				z:
 					clonedRGB.value.red * 0.0193 +
 					clonedRGB.value.green * 0.1192 +
-					clonedRGB.value.blue * 0.9505
+					clonedRGB.value.blue * 0.9505,
+				alpha: rgb.value.alpha
 			},
 			format: 'xyz'
 		};
@@ -1244,7 +1311,10 @@ function xyzToLAB(xyz: colors.XYZ): colors.LAB {
 				(200 * (clonedXYZ.value.y - clonedXYZ.value.z)).toFixed(2)
 			)
 		);
-		const lab: colors.LAB = { value: { l, a, b }, format: 'lab' };
+		const lab: colors.LAB = {
+			value: { l, a, b, alpha: xyz.value.alpha },
+			format: 'lab'
+		};
 
 		if (!paletteHelpers.validateColorValues(lab)) {
 			console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
@@ -1252,7 +1322,7 @@ function xyzToLAB(xyz: colors.XYZ): colors.LAB {
 			return core.clone(defaults.lab);
 		}
 
-		return { value: { l, a, b }, format: 'lab' };
+		return lab;
 	} catch (error) {
 		console.error(`xyzToLab() error: ${error}`);
 
@@ -1292,7 +1362,7 @@ export function xyzToRGB(xyz: colors.XYZ): colors.RGB {
 		blue = conversionHelpers.applyGammaCorrection(blue);
 
 		return conversionHelpers.clampRGB({
-			value: { red, green, blue },
+			value: { red, green, blue, alpha: xyz.value.alpha },
 			format: 'rgb'
 		});
 	} catch (error) {

@@ -30,7 +30,12 @@ function clampRGB(rgb: colors.RGB): colors.RGB {
 				green: Math.round(
 					Math.min(Math.max(0, rgb.value.green), 1) * 255
 				),
-				blue: Math.round(Math.min(Math.max(0, rgb.value.blue), 1) * 255)
+				blue: Math.round(
+					Math.min(Math.max(0, rgb.value.blue), 1) * 255
+				),
+				alpha: parseFloat(
+					Math.min(Math.max(0, rgb.value.alpha), 1).toFixed(2)
+				)
 			},
 			format: 'rgb'
 		};

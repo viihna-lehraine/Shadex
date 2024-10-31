@@ -7,7 +7,7 @@ import * as colors from '../index/colors';
 import * as domTypes from '../index/dom-types';
 import { toHSL } from '../color-spaces/conversion-index';
 import { generate } from '../palette-gen/generate';
-import { genRandomColor } from '../utils/random-color';
+import { randomHSL } from '../utils/random-color';
 import { core } from '../utils/core';
 import { transform } from '../utils/transform';
 import { guards } from '../utils/type-guards';
@@ -80,7 +80,7 @@ function applyCustomColor(): colors.HSL {
 			`Failed to apply custom color: ${error}. Returning randomly generated hex color`
 		);
 
-		return genRandomColor('hsl') as colors.HSL;
+		return randomHSL(false) as colors.HSL;
 	}
 }
 
@@ -110,7 +110,7 @@ function applyFirstColorToUI(color: colors.HSL): colors.HSL {
 	} catch (error) {
 		console.error(`Failed to apply first color to UI: ${error}`);
 
-		return genRandomColor('hsl') as colors.HSL;
+		return randomHSL(false) as colors.HSL;
 	}
 }
 
@@ -209,7 +209,9 @@ function getElementsForSelectedColor(
 
 	if (!selectedColorBox) {
 		console.warn(`Element not found for color ${selectedColor}`);
+
 		domHelpers.showToast('Please select a valid color.');
+
 		return {
 			selectedColorTextOutputBox: null,
 			selectedColorBox: null,
@@ -357,29 +359,32 @@ function populateColorTextOutputBox(
 
 function pullParamsFromUI(): domTypes.PullParamsFromUI {
 	try {
-		const paletteTypeElement = document.getElementById(
-			'palette-type-options'
-		) as HTMLSelectElement | null;
-		const numBoxesElement = document.getElementById(
-			'palette-number-options'
-		) as HTMLSelectElement | null;
-
-		const paletteType = paletteTypeElement
-			? parseInt(paletteTypeElement.value, 10)
-			: 0;
-		const numBoxes = numBoxesElement
-			? parseInt(numBoxesElement.value, 10)
-			: 0;
+		const paletteTypeOptionsElement = config.paletteTypeOptions;
+		const numBoxesElement = config.paletteNumberOptions;
+		const enableAlphaCheckbox = config.enableAlphaCheckbox;
+		const limitBrightCheckbox = config.limitBrightCheckbox;
+		const limitDarkCheckbox = config.limitDarkCheckbox;
+		const limitGrayCheckbox = config.limitGrayCheckbox;
 
 		return {
-			paletteType,
-			numBoxes
+			paletteType: paletteTypeOptionsElement
+				? parseInt(paletteTypeOptionsElement.value, 10)
+				: 0,
+			numBoxes: numBoxesElement ? parseInt(numBoxesElement.value, 10) : 0,
+			enableAlpha: enableAlphaCheckbox?.checked || false,
+			limitBright: limitBrightCheckbox?.checked || false,
+			limitDark: limitDarkCheckbox?.checked || false,
+			limitGray: limitGrayCheckbox?.checked || false
 		};
 	} catch (error) {
 		console.error(`Failed to pull parameters from UI: ${error}`);
 		return {
 			paletteType: 0,
-			numBoxes: 0
+			numBoxes: 0,
+			enableAlpha: false,
+			limitBright: false,
+			limitDark: false,
+			limitGray: false
 		};
 	}
 }
@@ -439,7 +444,9 @@ function switchColorSpace(targetFormat: colors.ColorSpace): void {
 				console.error(
 					`Conversion from ${currentFormat} to ${targetFormat} is not supported.`
 				);
+
 				domHelpers.showToast('Conversion not supported.');
+
 				return;
 			}
 
@@ -447,7 +454,9 @@ function switchColorSpace(targetFormat: colors.ColorSpace): void {
 				console.error(
 					'Cannot convert from XYZ to another color space.'
 				);
+
 				domHelpers.showToast('Conversion not supported.');
+
 				return;
 			}
 
@@ -487,10 +496,11 @@ function switchColorSpace(targetFormat: colors.ColorSpace): void {
 			}
 
 			inputBox.value = String(newColor);
+
 			inputBox.setAttribute('data-format', targetFormat);
 		});
 	} catch (error) {
-		console.error('Failed to convert colors:', error);
+		throw new Error(`Failed to convert colors: ${error as Error}`);
 	}
 }
 

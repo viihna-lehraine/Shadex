@@ -145,7 +145,8 @@ export type CMYKValue = {
 
 export type HexValue = {
 	hex: string;
-	alpha: number;
+	alpha: string;
+	numericAlpha: number;
 };
 
 export type HSLValue = {

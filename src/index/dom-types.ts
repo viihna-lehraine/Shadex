@@ -28,6 +28,10 @@ export interface MakePaletteBox {
 export interface PullParamsFromUI {
 	paletteType: number;
 	numBoxes: number;
+	enableAlpha: boolean;
+	limitBright: boolean;
+	limitDark: boolean;
+	limitGray: boolean;
 }
 
 export interface UIElements {

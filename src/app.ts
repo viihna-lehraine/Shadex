@@ -12,13 +12,13 @@ import { idbFn } from './dom/idb-fn';
 import { domHelpers } from './helpers/dom';
 import * as colors from './index/colors';
 import { generate } from './palette-gen/generate';
-import { genRandomColor } from './utils/random-color';
+import { randomHSL } from './utils/random-color';
 import { core } from './utils/core';
 
 document.addEventListener('DOMContentLoaded', () => {
 	console.log('DOM content loaded - Initializing application');
 
-	const buttons = domFn.defineUIButtons();
+	const buttons = domFn.defineUIElements();
 
 	if (!buttons) {
 		console.error('Failed to initialize UI buttons');
@@ -117,20 +117,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		console.log('generateButton clicked');
 
-		const { paletteType, numBoxes } = domFn.pullParamsFromUI();
+		const {
+			paletteType,
+			numBoxes,
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
+		} = domFn.pullParamsFromUI();
 
 		let customColor = (await idbFn.getCustomColor()) as colors.HSL | null;
 
 		if (!customColor) {
 			console.info('No custom color found. Using a random color');
 
-			customColor = genRandomColor('hsl') as colors.HSL;
+			customColor = randomHSL(true);
 		}
 
 		const paletteOptions: colors.PaletteOptions = {
 			paletteType,
 			numBoxes,
-			customColor: core.clone(customColor)
+			customColor: core.clone(customColor),
+			enableAlpha,
+			limitBright,
+			limitDark,
+			limitGray
 		};
 
 		await generate.startPaletteGen(paletteOptions);

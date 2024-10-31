@@ -8,11 +8,18 @@ function addHashToHex(hex: colors.Hex): colors.Hex {
 	try {
 		return hex.value.hex.startsWith('#')
 			? hex
-			: { value: { hex: `#${hex.value}}` }, format: 'hex' as const };
+			: {
+					value: {
+						hex: `#${hex.value}}`,
+						alpha: hex.value.alpha,
+						numericAlpha: hex.value.numericAlpha
+					},
+					format: 'hex' as 'hex'
+				};
 	} catch (error) {
 		console.error(`addHashToHex error: ${error}`);
 
-		return { value: { hex: '#FFFFFF' }, format: 'hex' as const };
+		return defaults.hex;
 	}
 }
 
@@ -122,6 +129,17 @@ function colorStringToColor(
 	}
 }
 
+function getAlphaFromHex(hex: string): number {
+	if (hex.length !== 9 || !hex.startsWith('#')) {
+		throw new Error(`Invalid hex color: ${hex}. Expected format #RRGGBBAA`);
+	}
+
+	const alphaHex = hex.slice(-2);
+	const alphaDecimal = parseInt(alphaHex, 16);
+
+	return alphaDecimal / 255;
+}
+
 function componentToHex(component: number): string {
 	try {
 		const hex = Math.max(0, Math.min(255, component)).toString(16);
@@ -138,18 +156,18 @@ function getColorString(color: colors.Color): string | null {
 	try {
 		const formatters = {
 			cmyk: (c: colors.CMYK) =>
-				`cmyk(${c.value.cyan}, ${c.value.magenta}, ${c.value.yellow}, ${c.value.key})`,
+				`cmyk(${c.value.cyan}, ${c.value.magenta}, ${c.value.yellow}, ${c.value.key}, ${c.value.alpha})`,
 			hex: (c: colors.Hex) => c.value.hex,
 			hsl: (c: colors.HSL) =>
-				`hsl(${c.value.hue}, ${c.value.saturation}%, ${c.value.lightness}%)`,
+				`hsl(${c.value.hue}, ${c.value.saturation}%, ${c.value.lightness}%,${c.value.alpha})`,
 			hsv: (c: colors.HSV) =>
-				`hsv(${c.value.hue}, ${c.value.saturation}%, ${c.value.value}%)`,
+				`hsv(${c.value.hue}, ${c.value.saturation}%, ${c.value.value}%,${c.value.alpha})`,
 			lab: (c: colors.LAB) =>
-				`lab(${c.value.l}, ${c.value.a}, ${c.value.b})`,
+				`lab(${c.value.l}, ${c.value.a}, ${c.value.b},${c.value.alpha})`,
 			rgb: (c: colors.RGB) =>
-				`rgb(${c.value.red}, ${c.value.green}, ${c.value.blue})`,
+				`rgb(${c.value.red}, ${c.value.green}, ${c.value.blue},${c.value.alpha})`,
 			xyz: (c: colors.XYZ) =>
-				`xyz(${c.value.x}, ${c.value.y}, ${c.value.z})`
+				`xyz(${c.value.x}, ${c.value.y}, ${c.value.z},${c.value.alpha})`
 		};
 
 		switch (color.format) {
@@ -183,28 +201,28 @@ function getCSSColorString(color: colors.Color): string {
 	try {
 		switch (color.format) {
 			case 'cmyk':
-				return `cmyk(${color.value.cyan},${color.value.magenta},${color.value.yellow},${color.value.key})`;
+				return `cmyk(${color.value.cyan},${color.value.magenta},${color.value.yellow},${color.value.key}${color.value.alpha})`;
 			case 'hex':
 				return String(color.value.hex);
 			case 'hsl':
-				return `hsl(${color.value.hue},${color.value.saturation}%,${color.value.lightness}%)`;
+				return `hsl(${color.value.hue},${color.value.saturation}%,${color.value.lightness}%,${color.value.alpha})`;
 			case 'hsv':
-				return `hsv(${color.value.hue},${color.value.saturation}%,${color.value.value}%)`;
+				return `hsv(${color.value.hue},${color.value.saturation}%,${color.value.value}%,${color.value.alpha})`;
 			case 'lab':
-				return `lab(${color.value.l},${color.value.a},${color.value.b})`;
+				return `lab(${color.value.l},${color.value.a},${color.value.b},${color.value.alpha})`;
 			case 'rgb':
-				return `rgb(${color.value.red},${color.value.green},${color.value.blue})`;
+				return `rgb(${color.value.red},${color.value.green},${color.value.blue},${color.value.alpha})`;
 			case 'xyz':
-				return `xyz(${color.value.x},${color.value.y},${color.value.z})`;
+				return `xyz(${color.value.x},${color.value.y},${color.value.z},${color.value.alpha})`;
 			default:
 				console.error('Unexpected color format');
 
-				return '#FFFFFF';
+				return '#FFFFFFFF';
 		}
 	} catch (error) {
 		console.error(`getCSSColorString error: ${error}`);
 
-		return '#FFFFFF';
+		return '#FFFFFFFF';
 	}
 }
 
@@ -249,6 +267,10 @@ function getRawColorString(color: colors.Color): string {
 	}
 }
 
+function hexAlphaToNumericAlpha(hexAlpha: string): number {
+	return parseInt(hexAlpha, 16) / 255;
+}
+
 const parseColor = (
 	colorSpace: colors.ColorSpace,
 	value: string
@@ -256,42 +278,53 @@ const parseColor = (
 	try {
 		switch (colorSpace) {
 			case 'cmyk': {
-				const [c, m, y, k] = parseColorComponents(value, 4);
+				const [c, m, y, k, a] = parseColorComponents(value, 5);
 
 				return {
-					value: { cyan: c, magenta: m, yellow: y, key: k },
+					value: { cyan: c, magenta: m, yellow: y, key: k, alpha: a },
 					format: 'cmyk'
 				};
 			}
 			case 'hex':
+				const hexValue = value.startsWith('#') ? value : `#${value}`;
+				const alpha = hexValue.length === 9 ? hexValue.slice(-2) : 'FF';
+				const numericAlpha = transform.hexAlphaToNumericAlpha(alpha);
+
 				return {
-					value: { hex: guards.ensureHash(value) },
+					value: {
+						hex: hexValue,
+						alpha,
+						numericAlpha
+					},
 					format: 'hex'
 				};
 			case 'hsl': {
-				const [h, s, l] = parseColorComponents(value, 3);
+				const [h, s, l, a] = parseColorComponents(value, 4);
 
 				return {
-					value: { hue: h, saturation: s, lightness: l },
+					value: { hue: h, saturation: s, lightness: l, alpha: a },
 					format: 'hsl'
 				};
 			}
 			case 'hsv': {
-				const [h, s, v] = parseColorComponents(value, 3);
+				const [h, s, v, a] = parseColorComponents(value, 4);
 
 				return {
-					value: { hue: h, saturation: s, value: v },
+					value: { hue: h, saturation: s, value: v, alpha: a },
 					format: 'hsv'
 				};
 			}
 			case 'lab': {
-				const [l, a, b] = parseColorComponents(value, 3);
-				return { value: { l, a, b }, format: 'lab' };
+				const [l, a, b, alpha] = parseColorComponents(value, 4);
+				return { value: { l, a, b, alpha }, format: 'lab' };
 			}
 			case 'rgb': {
-				const [r, g, b] = value.split(',').map(Number);
+				const [r, g, b, a] = value.split(',').map(Number);
 
-				return { value: { red: r, green: g, blue: b }, format: 'rgb' };
+				return {
+					value: { red: r, green: g, blue: b, alpha: a },
+					format: 'rgb'
+				};
 			}
 			default:
 				throw new Error(`Unsupported color format: ${colorSpace}`);
@@ -327,17 +360,26 @@ function parseCustomColor(rawValue: string): colors.HSL | null {
 	try {
 		console.log(`Parsing custom color: ${JSON.stringify(rawValue)}`);
 
-		const match = rawValue.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+		const match = rawValue.match(
+			/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?,\s*(\d*\.?\d+)\)/
+		);
 
 		if (match) {
-			const [, hue, saturation, lightness] = match.map(Number);
+			const [, hue, saturation, lightness, alpha] = match;
 
 			return {
-				value: { hue, saturation, lightness },
+				value: {
+					hue: Number(hue),
+					saturation: Number(saturation),
+					lightness: Number(lightness),
+					alpha: Number(alpha)
+				},
 				format: 'hsl'
 			};
 		} else {
-			console.error('Invalid HSL custom color');
+			console.error(
+				'Invalid HSL custom color. Expected format: hsl(H, S%, L%, A)'
+			);
 			return null;
 		}
 	} catch (error) {
@@ -347,14 +389,20 @@ function parseCustomColor(rawValue: string): colors.HSL | null {
 	}
 }
 
-function parseHex(hexValue: string): colors.HexValue {
+function parseHex(hexValue: string): colors.Hex {
 	const hex = hexValue.startsWith('#') ? hexValue.slice(1) : hexValue;
 
-	if (hex.length === 6) {
-		return { hex: `#${hex}` };
-	} else if (hex.length === 8) {
-		const alpha = parseInt(hex.slice(6, 8), 16) / 255;
-		return { hex: `#${hex.slice(0, 6)}`, alpha };
+	if (hex.length === 8) {
+		return {
+			value: {
+				hex: `#${hexValue.slice(0, 6)}`,
+				alpha: (parseInt(hexValue.slice(6, 8), 16) / 255).toFixed(2),
+				numericAlpha: hexAlphaToNumericAlpha(
+					(parseInt(hexValue.slice(6, 8), 16) / 255).toFixed(2)
+				)
+			},
+			format: 'hex' as 'hex'
+		};
 	} else {
 		throw new Error(`Invalid hex color: ${hexValue}`);
 	}
@@ -362,10 +410,17 @@ function parseHex(hexValue: string): colors.HexValue {
 
 function stripHashFromHex(hex: colors.Hex): colors.Hex {
 	try {
-		const hexString = hex.value.hex;
+		const hexString = `${hex.value.hex}${hex.value.alpha}`;
 
 		return hex.value.hex.startsWith('#')
-			? { value: { hex: hexString.slice(1) }, format: 'hex' as const }
+			? {
+					value: {
+						hex: hexString.slice(1),
+						alpha: hex.value.alpha,
+						numericAlpha: hexAlphaToNumericAlpha(hex.value.alpha)
+					},
+					format: 'hex' as 'hex'
+				}
 			: hex;
 	} catch (error) {
 		console.error(`stripHashFromHex error: ${error}`);
@@ -398,16 +453,11 @@ function toHexWithAlpha(rgbValue: colors.RGBValue): string {
 	const hex = `#${((1 << 24) + (red << 16) + (green << 8) + blue)
 		.toString(16)
 		.slice(1)}`;
+	const alphaHex = Math.round(alpha * 255)
+		.toString(16)
+		.padStart(2, '0');
 
-	if (alpha !== undefined) {
-		const alphaHex = Math.round(alpha * 255)
-			.toString(16)
-			.padStart(2, '0');
-
-		return `${hex}${alphaHex}`;
-	}
-
-	return hex;
+	return `${hex}${alphaHex}`;
 }
 
 export const transform: fnObjects.Transform = {
@@ -415,9 +465,11 @@ export const transform: fnObjects.Transform = {
 	colorToColorString,
 	colorStringToColor,
 	componentToHex,
+	getAlphaFromHex,
 	getColorString,
 	getCSSColorString,
 	getRawColorString,
+	hexAlphaToNumericAlpha,
 	parseColor,
 	parseColorComponents,
 	parseCustomColor,
