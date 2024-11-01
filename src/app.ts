@@ -7,13 +7,13 @@
 
 // This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND.
 
+import { config } from './config/constants';
 import { domFn } from './dom/dom-main';
-import { idbFn } from './dom/idb-fn';
-import { domHelpers } from './helpers/dom';
+import { database } from './database/database';
 import * as colors from './index/colors';
 import { generate } from './palette-gen/generate';
-import { randomHSL } from './utils/random-color';
-import { core } from './utils/core';
+import { randomHSL } from './utils/random-color-utils';
+import { core } from './utils/core-utils';
 
 document.addEventListener('DOMContentLoaded', () => {
 	console.log('DOM content loaded - Initializing application');
@@ -25,24 +25,32 @@ document.addEventListener('DOMContentLoaded', () => {
 		return;
 	}
 
-	const selectedColorOptions = domHelpers.getElement<HTMLSelectElement>(
-		'selected-color-options'
-	);
+	const selectedColorOptions = config.selectedColorOptions;
 
 	const {
-		advancedMenuToggleButton,
 		applyCustomColorButton,
 		clearCustomColorButton,
+		closeHelpMenuButton,
+		closeHistoryMenuButton,
 		customColorToggleButton,
 		desaturateButton,
 		generateButton,
-		popupDivButton,
-		saturateButton
+		saturateButton,
+		showAsCMYKButton,
+		showAsHexButton,
+		showAsHSLButton,
+		showAsHSVButton,
+		showAsLABButton,
+		showAsRGBButton,
+		showHelpMenuButton,
+		showHistoryMenuButton,
+		subMenuToggleButtonA,
+		subMenuToggleButtonB
 	} = buttons;
 
 	// confirm that all elements are accessible
 	console.log(
-		`generateButton: ${generateButton}\nsaturateButton: ${saturateButton}\ndesaturateButton: ${desaturateButton}\npopupDivButton: ${popupDivButton}\napplyCustomColorButton: ${applyCustomColorButton}\nclearCustomColorButton: ${clearCustomColorButton}\nadvancedMenuToggleButton: ${advancedMenuToggleButton}\nselectedColorOptions: ${selectedColorOptions}\ncustomColorToggleButton: ${customColorToggleButton}`
+		`Apply Custom Color Button: ${applyCustomColorButton ? 'found' : 'not found'}\nClear Custom Color Button: ${clearCustomColorButton ? 'found' : 'not found'}\nClose Help Menu Button: ${closeHelpMenuButton ? 'found' : 'not found'}\nClose History Menu Button: ${closeHistoryMenuButton ? 'found' : 'not found'}\nCustom Color Toggle Button: ${customColorToggleButton ? 'found' : 'not found'}\nDesaturate Button: ${desaturateButton ? 'found' : 'not found'}\nGenerate Button: ${generateButton ? 'found' : 'not found'}\nSaturate Button: ${saturateButton ? 'found' : 'not found'}\nShow as CMYK Button: ${showAsCMYKButton ? 'found' : 'not found'}\nShow as Hex Button: ${showAsHexButton ? 'found' : 'not found'}\nShow as HSL Button: ${showAsHSLButton ? 'found' : 'not found'}\nShow as HSV Button: ${showAsHSVButton ? 'found' : 'not found'}\nShow as LAB Button: ${showAsLABButton ? 'found' : 'not found'}\nShow as RGB Button: ${showAsRGBButton ? 'found' : 'not found'}\nShow Help Menu Button: ${showHelpMenuButton ? 'found' : 'not found'}\nShow History Menu Button${showHistoryMenuButton ? 'found' : 'not found'}\nSub Menu Toggle Button A: ${subMenuToggleButtonA ? 'found' : 'not found'}\nSub Menu Toggle Button B: ${subMenuToggleButtonB ? 'found' : 'not found'}`
 	);
 
 	const selectedColor = selectedColorOptions
@@ -61,27 +69,17 @@ document.addEventListener('DOMContentLoaded', () => {
 		);
 	}
 
-	advancedMenuToggleButton?.addEventListener('click', e => {
-		e.preventDefault();
-		const advancedMenu =
-			domHelpers.getElement<HTMLDivElement>('advanced-menu');
-
-		if (advancedMenu) {
-			const clonedClasses = [...advancedMenu.classList];
-			const isHidden = clonedClasses.includes('hidden');
-
-			advancedMenu.classList.toggle('hidden');
-			advancedMenu.style.display = isHidden ? 'block' : 'none';
-		}
-	});
-
 	applyCustomColorButton?.addEventListener('click', async e => {
 		e.preventDefault();
 
 		const customHSLColor = domFn.applyCustomColor();
 		const customHSLColorClone: colors.HSL = core.clone(customHSLColor);
 
-		await idbFn.saveData('customColor', 'appSettings', customHSLColorClone);
+		await database.saveData(
+			'customColor',
+			'appSettings',
+			customHSLColorClone
+		);
 
 		console.log('Custom color saved to IndexedDB');
 	});
@@ -89,11 +87,23 @@ document.addEventListener('DOMContentLoaded', () => {
 	clearCustomColorButton?.addEventListener('click', async e => {
 		e.preventDefault();
 
-		await idbFn.deleteTable('customColor');
+		await database.deleteTable('customColor');
 
 		console.log('Custom color cleared from IndexedDB');
 
 		domFn.showCustomColorPopupDiv();
+	});
+
+	closeHelpMenuButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		console.log('closeHelpMenuButton clicked');
+	});
+
+	closeHistoryMenuButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		console.log('closeHistoryMenuButton clicked');
 	});
 
 	customColorToggleButton?.addEventListener('click', e => {
@@ -126,7 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			limitGray
 		} = domFn.pullParamsFromUI();
 
-		let customColor = (await idbFn.getCustomColor()) as colors.HSL | null;
+		let customColor =
+			(await database.getCustomColor()) as colors.HSL | null;
 
 		if (!customColor) {
 			console.info('No custom color found. Using a random color');
@@ -147,19 +158,103 @@ document.addEventListener('DOMContentLoaded', () => {
 		await generate.startPaletteGen(paletteOptions);
 	});
 
-	popupDivButton?.addEventListener('click', e => {
-		e.preventDefault();
-
-		console.log('popupDivButton clicked');
-
-		domFn.showCustomColorPopupDiv();
-	});
-
 	saturateButton?.addEventListener('click', e => {
 		e.preventDefault();
 
 		console.log('saturateButton clicked');
 
 		domFn.saturateColor(selectedColor);
+	});
+
+	showAsCMYKButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		console.log('showAsCMYKButton clicked');
+	});
+
+	showAsHexButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		console.log('showAsHexButton clicked');
+	});
+
+	showAsHSLButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		console.log('showAsHSLButton clicked');
+	});
+
+	showAsHSVButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		console.log('showAsHSVButton clicked');
+	});
+
+	showAsLABButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		console.log('showAsLABButton clicked');
+	});
+
+	showAsRGBButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		console.log('showAsRGBButton clicked');
+	});
+
+	showHelpMenuButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		if (showHelpMenuButton) {
+			const clonedClasses = [...showHelpMenuButton.classList];
+			const isHidden = clonedClasses.includes('hidden');
+
+			showHelpMenuButton.classList.toggle('hidden');
+			showHelpMenuButton.style.display = isHidden ? 'block' : 'none';
+		}
+
+		console.log('showHelpMenuButton clicked');
+	});
+
+	showHistoryMenuButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		if (showHistoryMenuButton) {
+			const clonedClasses = [...showHistoryMenuButton.classList];
+			const isHidden = clonedClasses.includes('hidden');
+
+			showHistoryMenuButton.classList.toggle('hidden');
+			showHistoryMenuButton.style.display = isHidden ? 'block' : 'none';
+		}
+
+		console.log('showHistoryMenuButton clicked');
+	});
+
+	subMenuToggleButtonA?.addEventListener('click', e => {
+		e.preventDefault();
+
+		if (subMenuToggleButtonA) {
+			const clonedClasses = [...subMenuToggleButtonA.classList];
+			const isHidden = clonedClasses.includes('hidden');
+
+			subMenuToggleButtonA.classList.toggle('hidden');
+			subMenuToggleButtonA.style.display = isHidden ? 'block' : 'none';
+		}
+
+		console.log('subMenuToggleButtonA clicked');
+	});
+
+	subMenuToggleButtonB?.addEventListener('click', e => {
+		e.preventDefault();
+
+		if (subMenuToggleButtonB) {
+			const clonedClasses = [...subMenuToggleButtonB.classList];
+			const isHidden = clonedClasses.includes('hidden');
+
+			subMenuToggleButtonB.classList.toggle('hidden');
+			subMenuToggleButtonB.style.display = isHidden ? 'block' : 'none';
+		}
+
+		console.log('subMenuToggleButtonB clicked');
 	});
 });

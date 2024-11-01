@@ -35,17 +35,29 @@ export interface PullParamsFromUI {
 }
 
 export interface UIElements {
-	advancedMenuToggleButton: HTMLElement | null;
-	applyCustomColorButton: HTMLElement | null;
-	clearCustomColorButton: HTMLElement | null;
-	customColorToggleButton: HTMLElement | null;
-	desaturateButton: HTMLElement | null;
+	applyCustomColorButton: HTMLButtonElement | null;
+	clearCustomColorButton: HTMLButtonElement | null;
+	closeHelpMenuButton: HTMLButtonElement | null;
+	closeHistoryMenuButton: HTMLButtonElement | null;
+	closeSubMenuAButton: HTMLButtonElement | null;
+	closeSubMenuBButton: HTMLButtonElement | null;
+	customColorToggleButton: HTMLButtonElement | null;
+	desaturateButton: HTMLButtonElement | null;
 	enableAlphaCheckbox: HTMLInputElement | null;
-	generateButton: HTMLElement | null;
+	generateButton: HTMLButtonElement | null;
 	limitBrightCheckbox: HTMLInputElement | null;
 	limitDarkCheckbox: HTMLInputElement | null;
 	limitGrayCheckbox: HTMLInputElement | null;
-	popupDivButton: HTMLElement | null;
-	saturateButton: HTMLElement | null;
+	saturateButton: HTMLButtonElement | null;
 	selectedColor: number;
+	showAsCMYKButton: HTMLButtonElement | null;
+	showAsHexButton: HTMLButtonElement | null;
+	showAsHSLButton: HTMLButtonElement | null;
+	showAsHSVButton: HTMLButtonElement | null;
+	showAsLABButton: HTMLButtonElement | null;
+	showAsRGBButton: HTMLButtonElement | null;
+	showHelpMenuButton: HTMLButtonElement | null;
+	showHistoryMenuButton: HTMLButtonElement | null;
+	subMenuToggleButtonA: HTMLButtonElement | null;
+	subMenuToggleButtonB: HTMLButtonElement | null;
 }

@@ -1,6 +1,6 @@
 import * as colors from '../index/colors';
 import * as config from '../index/config';
-import * as idb from '../index/idb';
+import * as idb from '../index/database';
 import * as palette from '../index/palette';
 
 const cmyk: colors.CMYK = {
@@ -47,8 +47,18 @@ const lab: colors.LAB = {
 	format: 'lab'
 };
 
+const labString: colors.LABString = {
+	value: { l: '0', a: '0', b: '0', alpha: '1' },
+	format: 'lab'
+};
+
 const rgb: colors.RGB = {
 	value: { red: 0, green: 0, blue: 0, alpha: 1 },
+	format: 'rgb'
+};
+
+const rgbString: colors.RGBString = {
+	value: { red: '0', green: '0', blue: '0', alpha: '1' },
 	format: 'rgb'
 };
 
@@ -82,6 +92,11 @@ const xyz: colors.XYZ = {
 	format: 'xyz'
 };
 
+const xyzString: colors.XYZString = {
+	value: { x: '0', y: '0', z: '0', alpha: '1' },
+	format: 'xyz'
+};
+
 const mutation: idb.MutationLog = {
 	timestamp: new Date().toISOString(),
 	key: 'test_key',
@@ -106,14 +121,13 @@ const paletteData: palette.Palette = {
 		customColor: {
 			hslColor: hsl,
 			convertedColors: {
-				cmyk: cmyk,
-				hex: hex,
-				hsv: hsv,
-				lab: lab,
-				rgb: rgb,
-				sl: sl,
-				sv: sv,
-				xyz: xyz
+				cmyk: cmyk.value,
+				hex: hex.value,
+				hsl: hsl.value,
+				hsv: hsv.value,
+				lab: lab.value,
+				rgb: rgb.value,
+				xyz: xyz.value
 			}
 		}
 	}
@@ -121,23 +135,23 @@ const paletteData: palette.Palette = {
 
 const paletteItem: palette.PaletteItem = {
 	id: 'fake',
-	color: hex,
-	colorConversions: {
-		cmyk: cmyk,
-		hex: hex,
-		hsv: hsv,
-		lab: lab,
-		rgb: rgb,
-		sl: sl,
-		sv: sv,
-		xyz: xyz
+	colors: {
+		cmyk: cmyk.value,
+		hex: hex.value,
+		hsl: hsl.value,
+		hsv: hsv.value,
+		lab: lab.value,
+		rgb: rgb.value,
+		xyz: xyz.value
 	},
-	colorStringConversions: {
-		cmykString: cmykString,
-		hslString: hslString,
-		hsvString: hsvString,
-		slString: slString,
-		svString: svString
+	colorStrings: {
+		cmykString: cmykString.value,
+		hexString: hex.value,
+		hslString: hslString.value,
+		hsvString: hsvString.value,
+		labString: labString.value,
+		rgbString: rgbString.value,
+		xyzString: xyzString.value
 	},
 	cssStrings: {
 		cmykCSSString: 'cmyk(0%, 0%, 0%, 100%, 1)',
@@ -145,17 +159,8 @@ const paletteItem: palette.PaletteItem = {
 		hslCSSString: 'hsl(0, 0%, 0%, 0)',
 		hsvCSSString: 'hsv(0, 0%, 0%, 0)',
 		labCSSString: 'lab(0, 0, 0, 0)',
+		rgbCSSString: 'rgb(0, 0, 0, 1)',
 		xyzCSSString: 'xyz(0, 0, 0, 0)'
-	},
-	rawColorStrings: {
-		cmykRawString: '0,0,0,100,1',
-		hexRawString: '000000FF',
-		hslRawString: '0,0,0,1',
-		hsvRawString: '0,0,0,1',
-		labRawString: '0,0,0,1',
-		slRawString: '0,0,1',
-		svRawString: '0,0,1',
-		xyzRawString: '0,0,0,1'
 	}
 };
 
@@ -173,15 +178,18 @@ export const defaults: config.Defaults = {
 	hsv,
 	hsvString,
 	lab,
+	labString,
 	mutation,
 	paletteData,
 	paletteItem,
 	rgb,
+	rgbString,
 	settings,
 	sl,
 	slString,
 	storedPalette,
 	sv,
 	svString,
-	xyz
+	xyz,
+	xyzString
 };

@@ -1,5 +1,5 @@
 import * as colors from './colors';
-import * as idb from './idb';
+import * as idb from './database';
 import * as palette from './palette';
 
 export interface Adjustments {
@@ -21,14 +21,19 @@ export interface Debounce {
 }
 
 export interface DOMElements {
-	advancedMenuToggleButton: HTMLButtonElement | null;
 	applyCustomColorButton: HTMLButtonElement | null;
 	clearCustomColorButton: HTMLButtonElement | null;
+	closeHelpMenuButton: HTMLButtonElement | null;
+	closeHistoryMenuButton: HTMLButtonElement | null;
+	closeSubMenuAButton: HTMLButtonElement | null;
+	closeSubMenuBButton: HTMLButtonElement | null;
 	customColorElement: HTMLInputElement | null;
 	customColorToggleButton: HTMLButtonElement | null;
 	desaturateButton: HTMLButtonElement | null;
 	enableAlphaCheckbox: HTMLInputElement | null;
 	generateButton: HTMLButtonElement | null;
+	helpMenu: HTMLDivElement | null;
+	historyMenu: HTMLDivElement | null;
 	limitBrightCheckbox: HTMLInputElement | null;
 	limitDarkCheckbox: HTMLInputElement | null;
 	limitGrayCheckbox: HTMLInputElement | null;
@@ -37,6 +42,18 @@ export interface DOMElements {
 	popupDivButton: HTMLButtonElement | null;
 	saturateButton: HTMLButtonElement | null;
 	selectedColorOptions: HTMLSelectElement | null;
+	showAsCMYKButton: HTMLButtonElement | null;
+	showAsHexButton: HTMLButtonElement | null;
+	showAsHSLButton: HTMLButtonElement | null;
+	showAsHSVButton: HTMLButtonElement | null;
+	showAsLABButton: HTMLButtonElement | null;
+	showAsRGBButton: HTMLButtonElement | null;
+	showHelpMenuButton: HTMLButtonElement | null;
+	showHistoryMenuButton: HTMLButtonElement | null;
+	subMenuA: HTMLDivElement | null;
+	subMenuB: HTMLDivElement | null;
+	subMenuToggleButtonA: HTMLButtonElement | null;
+	subMenuToggleButtonB: HTMLButtonElement | null;
 }
 
 export interface Defaults {
@@ -48,10 +65,12 @@ export interface Defaults {
 	hsv: colors.HSV;
 	hsvString: colors.HSVString;
 	lab: colors.LAB;
+	labString: colors.LABString;
 	mutation: idb.MutationLog;
 	paletteData: palette.Palette;
 	paletteItem: palette.PaletteItem;
 	rgb: colors.RGB;
+	rgbString: colors.RGBString;
 	settings: idb.Settings;
 	sl: colors.SL;
 	slString: colors.SLString;
@@ -59,6 +78,7 @@ export interface Defaults {
 	sv: colors.SV;
 	svString: colors.SVString;
 	xyz: colors.XYZ;
+	xyzString: colors.XYZString;
 }
 
 export interface Flags {

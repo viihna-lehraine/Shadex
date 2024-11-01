@@ -1,7 +1,23 @@
-import { domHelpers } from '../helpers/dom';
 import * as fnObjects from '../index/fn-objects';
 
 let dragSrcEl: HTMLElement | null = null;
+
+function attachDragAndDropEventListeners(element: HTMLElement | null): void {
+	try {
+		if (element) {
+			element.addEventListener('dragstart', dragAndDrop.handleDragStart);
+			element.addEventListener('dragover', dragAndDrop.handleDragOver);
+			element.addEventListener('drop', dragAndDrop.handleDrop);
+			element.addEventListener('dragend', dragAndDrop.handleDragEnd);
+		}
+
+		console.log('Drag and drop event listeners successfully attached');
+	} catch (error) {
+		console.error(
+			`Failed to execute attachDragAndDropEventListeners: ${error}`
+		);
+	}
+}
 
 function handleDragStart(e: DragEvent): void {
 	try {
@@ -102,9 +118,9 @@ function handleDrop(e: DragEvent): void {
 				'calling attachDragAndDropEventListeners for new elements'
 			);
 
-			domHelpers.attachDragAndDropEventListeners(newDragSrcEl);
+			attachDragAndDropEventListeners(newDragSrcEl);
 
-			domHelpers.attachDragAndDropEventListeners(newDropTargetEl);
+			attachDragAndDropEventListeners(newDropTargetEl);
 		}
 
 		console.log('handleDrop complete');
@@ -114,6 +130,7 @@ function handleDrop(e: DragEvent): void {
 }
 
 export const dragAndDrop: fnObjects.DragAndDrop = {
+	attachDragAndDropEventListeners,
 	handleDragEnd,
 	handleDragOver,
 	handleDragStart,

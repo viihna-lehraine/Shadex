@@ -1,16 +1,17 @@
-import { getConversionFn } from '../color-spaces/conversion';
+import { getConversionFn } from '../utils/conversion-utils';
 import { config } from '../config/constants';
 import { domHelpers } from '../helpers/dom';
-import { paletteHelpers } from '../helpers/palette';
+import { notification } from '../helpers/notification';
 import * as fnObjects from '../index/fn-objects';
 import * as colors from '../index/colors';
 import * as domTypes from '../index/dom-types';
-import { toHSL } from '../color-spaces/conversion-index';
+import { toHSL } from '../palette-gen/conversion-index';
 import { generate } from '../palette-gen/generate';
-import { randomHSL } from '../utils/random-color';
-import { core } from '../utils/core';
-import { transform } from '../utils/transform';
-import { guards } from '../utils/type-guards';
+import { randomHSL } from '../utils/random-color-utils';
+import { core } from '../utils/core-utils';
+import { colorUtils } from '../utils/color-utils';
+import { commonUtils } from '../utils/common-utils';
+import { paletteUtils } from '../utils/palette-utils';
 
 function addConversionButtonEventListeners(): void {
 	try {
@@ -28,12 +29,12 @@ function addConversionButtonEventListeners(): void {
 			}
 		};
 
-		addListener('show-hex-button', 'hex');
-		addListener('show-rgb-button', 'rgb');
-		addListener('show-hsv-button', 'hsv');
-		addListener('show-hsl-button', 'hsl');
-		addListener('show-cmyk-button', 'cmyk');
-		addListener('show-lab-button', 'lab');
+		addListener('show-as-cmyk-button', 'cmyk');
+		addListener('show-as-hex-button', 'hex');
+		addListener('show-as-hsl-button', 'hsl');
+		addListener('show-as-hsv-button', 'hsv');
+		addListener('show-as-lab-button', 'lab');
+		addListener('show-as-rgb-button', 'rgb');
 	} catch (error) {
 		console.error(
 			`Failed to add event listeners to conversion buttons: ${error}`
@@ -60,17 +61,20 @@ function applyCustomColor(): colors.HSL {
 			) as HTMLSelectElement | null
 		)?.value as colors.ColorSpace;
 
-		if (!guards.isColorSpace(selectedFormat)) {
+		if (!colorUtils.isColorSpace(selectedFormat)) {
 			throw new Error(`Unsupported color format: ${selectedFormat}`);
 		}
 
-		const parsedColor = transform.parseColor(selectedFormat, rawValue);
+		const parsedColor = colorUtils.parseColor(
+			selectedFormat,
+			rawValue
+		) as Exclude<colors.Color, colors.SL | colors.SV>;
 
 		if (!parsedColor) {
 			throw new Error(`Invalid color value: ${rawValue}`);
 		}
 
-		const hslColor = guards.isHSLColor(parsedColor)
+		const hslColor = colorUtils.isHSLColor(parsedColor)
 			? parsedColor
 			: toHSL(parsedColor);
 
@@ -94,7 +98,7 @@ function applyFirstColorToUI(color: colors.HSL): colors.HSL {
 			return color;
 		}
 
-		const formatColorString = transform.getCSSColorString(color);
+		const formatColorString = colorUtils.getCSSColorString(color);
 
 		if (!formatColorString) {
 			console.error('Unexpected or unsupported color format.');
@@ -104,7 +108,7 @@ function applyFirstColorToUI(color: colors.HSL): colors.HSL {
 
 		colorBox1.style.backgroundColor = formatColorString;
 
-		populateColorTextOutputBox(color, 1);
+		paletteUtils.populateColorTextOutputBox(color, 1);
 
 		return color;
 	} catch (error) {
@@ -139,28 +143,43 @@ function copyToClipboard(text: string, tooltipElement: HTMLElement): void {
 
 function defineUIElements(): domTypes.UIElements {
 	try {
-		const advancedMenuToggleButton = config.advancedMenuToggleButton;
-		const applyCustomColorButton = config.advancedMenuToggleButton;
+		const applyCustomColorButton = config.applyCustomColorButton;
 		const clearCustomColorButton = config.clearCustomColorButton;
 		const customColorToggleButton = config.customColorToggleButton;
+		const closeHelpMenuButton = config.closeHelpMenuButton;
+		const closeHistoryMenuButton = config.closeHistoryMenuButton;
+		const closeSubMenuAButton = config.closeSubMenuAButton;
+		const closeSubMenuBButton = config.closeSubMenuBButton;
 		const desaturateButton = config.desaturateButton;
 		const enableAlphaCheckbox = config.enableAlphaCheckbox;
 		const generateButton = config.generateButton;
 		const limitBrightCheckbox = config.limitBrightCheckbox;
 		const limitDarkCheckbox = config.limitDarkCheckbox;
 		const limitGrayCheckbox = config.limitGrayCheckbox;
-		const popupDivButton = config.popupDivButton;
 		const saturateButton = config.saturateButton;
 		const selectedColorOptions = config.selectedColorOptions;
+		const showAsCMYKButton = config.showAsCMYKButton;
+		const showAsHexButton = config.showAsHexButton;
+		const showAsHSLButton = config.showAsHSLButton;
+		const showAsHSVButton = config.showAsHSVButton;
+		const showAsLABButton = config.showAsLABButton;
+		const showAsRGBButton = config.showAsRGBButton;
+		const showHelpMenuButton = config.showHelpMenuButton;
+		const showHistoryMenuButton = config.showHistoryMenuButton;
+		const subMenuToggleButtonA = config.subMenuToggleButtonA;
+		const subMenuToggleButtonB = config.subMenuToggleButtonB;
 
 		const selectedColor = selectedColorOptions
 			? parseInt(selectedColorOptions.value, 10)
 			: 0;
 
 		return {
-			advancedMenuToggleButton,
 			applyCustomColorButton,
 			clearCustomColorButton,
+			closeHelpMenuButton,
+			closeHistoryMenuButton,
+			closeSubMenuAButton,
+			closeSubMenuBButton,
 			customColorToggleButton,
 			desaturateButton,
 			enableAlphaCheckbox,
@@ -168,16 +187,29 @@ function defineUIElements(): domTypes.UIElements {
 			limitBrightCheckbox,
 			limitDarkCheckbox,
 			limitGrayCheckbox,
-			popupDivButton,
 			saturateButton,
-			selectedColor
+			selectedColor,
+			showAsCMYKButton,
+			showAsHexButton,
+			showAsHSLButton,
+			showAsHSVButton,
+			showAsLABButton,
+			showAsRGBButton,
+			showHelpMenuButton,
+			showHistoryMenuButton,
+			subMenuToggleButtonA,
+			subMenuToggleButtonB
 		};
 	} catch (error) {
 		console.error('Failed to define UI buttons:', error);
+
 		return {
-			advancedMenuToggleButton: null,
 			applyCustomColorButton: null,
 			clearCustomColorButton: null,
+			closeHelpMenuButton: null,
+			closeHistoryMenuButton: null,
+			closeSubMenuAButton: null,
+			closeSubMenuBButton: null,
 			customColorToggleButton: null,
 			desaturateButton: null,
 			enableAlphaCheckbox: null,
@@ -185,9 +217,18 @@ function defineUIElements(): domTypes.UIElements {
 			limitBrightCheckbox: null,
 			limitDarkCheckbox: null,
 			limitGrayCheckbox: null,
-			popupDivButton: null,
 			saturateButton: null,
-			selectedColor: 0
+			selectedColor: 0,
+			showAsCMYKButton: null,
+			showAsHexButton: null,
+			showAsHSLButton: null,
+			showAsHSVButton: null,
+			showAsLABButton: null,
+			showAsRGBButton: null,
+			showHelpMenuButton: null,
+			showHistoryMenuButton: null,
+			subMenuToggleButtonA: null,
+			subMenuToggleButtonB: null
 		};
 	}
 }
@@ -210,7 +251,7 @@ function getElementsForSelectedColor(
 	if (!selectedColorBox) {
 		console.warn(`Element not found for color ${selectedColor}`);
 
-		domHelpers.showToast('Please select a valid color.');
+		notification.showToast('Please select a valid color.');
 
 		return {
 			selectedColorTextOutputBox: null,
@@ -253,14 +294,6 @@ function getGenerateButtonParams(): domTypes.GenButtonParams | null {
 			return null;
 		}
 
-		const customColor = customColorRaw
-			? (transform.parseCustomColor(customColorRaw) as colors.HSL | null)
-			: null;
-		const enableAlpha = enableAlphaCheckbox.checked;
-		const limitBright = limitBrightCheckbox.checked;
-		const limitDark = limitDarkCheckbox.checked;
-		const limitGray = limitGrayCheckbox.checked;
-
 		console.log(
 			`numBoxes: ${parseInt(paletteNumberOptions.value, 10)}\npaletteType: ${parseInt(paletteTypeOptions.value, 10)}`
 		);
@@ -268,11 +301,15 @@ function getGenerateButtonParams(): domTypes.GenButtonParams | null {
 		return {
 			numBoxes: parseInt(paletteNumberOptions.value, 10),
 			paletteType: parseInt(paletteTypeOptions.value, 10),
-			customColor,
-			enableAlpha,
-			limitBright,
-			limitDark,
-			limitGray
+			customColor: customColorRaw
+				? (colorUtils.parseCustomColor(
+						customColorRaw
+					) as colors.HSL | null)
+				: null,
+			enableAlpha: enableAlphaCheckbox.checked,
+			limitBright: limitBrightCheckbox.checked,
+			limitDark: limitDarkCheckbox.checked,
+			limitGray: limitGrayCheckbox.checked
 		};
 	} catch (error) {
 		console.error('Failed to retrieve generateButton parameters:', error);
@@ -302,6 +339,7 @@ const handleGenButtonClick = core.debounce(() => {
 
 		if (!paletteType || !numBoxes) {
 			console.error('paletteType and/or numBoxes are undefined');
+
 			return;
 		}
 
@@ -320,42 +358,6 @@ const handleGenButtonClick = core.debounce(() => {
 		console.error(`Failed to handle generate button click: ${error}`);
 	}
 }, config.buttonDebounce || 300);
-
-function populateColorTextOutputBox(
-	color: colors.Color | colors.ColorString,
-	boxNumber: number
-): void {
-	try {
-		const clonedColor: colors.Color = guards.isColor(color)
-			? core.clone(color)
-			: transform.colorStringToColor(color);
-
-		if (!paletteHelpers.validateColorValues(clonedColor)) {
-			console.error('Invalid color values.');
-
-			domHelpers.showToast('Invalid color values.');
-
-			return;
-		}
-
-		const colorTextOutputBox = document.getElementById(
-			`color-text-output-box-${boxNumber}`
-		) as HTMLInputElement | null;
-
-		if (!colorTextOutputBox) return;
-
-		const stringifiedColor = transform.getCSSColorString(clonedColor);
-
-		console.log(`Adding CSS-formatted color to DOM ${stringifiedColor}`);
-
-		colorTextOutputBox.value = stringifiedColor;
-		colorTextOutputBox.setAttribute('data-format', color.format);
-	} catch (error) {
-		console.error('Failed to populate color text output box:', error);
-
-		return;
-	}
-}
 
 function pullParamsFromUI(): domTypes.PullParamsFromUI {
 	try {
@@ -405,6 +407,7 @@ function showCustomColorPopupDiv(): void {
 			popup.classList.toggle('show');
 		} else {
 			console.error("document.getElementById('popup-div') is undefined");
+
 			return;
 		}
 	} catch (error) {
@@ -423,12 +426,11 @@ function switchColorSpace(targetFormat: colors.ColorSpace): void {
 			const inputBox = box as domTypes.ColorInputElement;
 			const colorValues = inputBox.colorValues;
 
-			if (
-				!colorValues ||
-				!paletteHelpers.validateColorValues(colorValues)
-			) {
+			if (!colorValues || !commonUtils.validateColorValues(colorValues)) {
 				console.error('Invalid color values.');
-				domHelpers.showToast('Invalid color values.');
+
+				notification.showToast('Invalid color values.');
+
 				return;
 			}
 
@@ -445,7 +447,7 @@ function switchColorSpace(targetFormat: colors.ColorSpace): void {
 					`Conversion from ${currentFormat} to ${targetFormat} is not supported.`
 				);
 
-				domHelpers.showToast('Conversion not supported.');
+				notification.showToast('Conversion not supported.');
 
 				return;
 			}
@@ -455,24 +457,24 @@ function switchColorSpace(targetFormat: colors.ColorSpace): void {
 					'Cannot convert from XYZ to another color space.'
 				);
 
-				domHelpers.showToast('Conversion not supported.');
+				notification.showToast('Conversion not supported.');
 
 				return;
 			}
 
-			const clonedColor = guards.narrowToColor(colorValues);
+			const clonedColor = colorUtils.narrowToColor(colorValues);
 
 			if (
 				!clonedColor ||
-				guards.isSLColor(clonedColor) ||
-				guards.isSVColor(clonedColor) ||
-				guards.isXYZ(clonedColor)
+				colorUtils.isSLColor(clonedColor) ||
+				colorUtils.isSVColor(clonedColor) ||
+				colorUtils.isXYZ(clonedColor)
 			) {
 				console.error(
 					'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.'
 				);
 
-				domHelpers.showToast('Conversion not supported.');
+				notification.showToast('Conversion not supported.');
 
 				return;
 			}
@@ -480,7 +482,7 @@ function switchColorSpace(targetFormat: colors.ColorSpace): void {
 			if (!clonedColor) {
 				console.error(`Conversion to ${targetFormat} failed.`);
 
-				domHelpers.showToast('Conversion failed.');
+				notification.showToast('Conversion failed.');
 
 				return;
 			}
@@ -490,7 +492,7 @@ function switchColorSpace(targetFormat: colors.ColorSpace): void {
 			if (!newColor) {
 				console.error(`Conversion to ${targetFormat} failed.`);
 
-				domHelpers.showToast('Conversion failed.');
+				notification.showToast('Conversion failed.');
 
 				return;
 			}
@@ -514,7 +516,6 @@ export const domFn: fnObjects.DOMFn = {
 	getElementsForSelectedColor,
 	getGenerateButtonParams,
 	handleGenButtonClick,
-	populateColorTextOutputBox,
 	pullParamsFromUI,
 	saturateColor,
 	showCustomColorPopupDiv,

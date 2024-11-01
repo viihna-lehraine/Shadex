@@ -1,14 +1,19 @@
 import { config } from '../config/constants';
-import { domHelpers } from './dom';
+import { defaults } from '../config/defaults';
 import * as fnObjects from '../index/fn-objects';
 import * as colors from '../index/colors';
-import { core } from '../utils/core';
+import { notification } from './notification';
+import { convert } from '../palette-gen/conversion-index';
+import { colorUtils } from '../utils/color-utils';
+import { commonUtils } from '../utils/common-utils';
+import { core } from '../utils/core-utils';
 
 function adjustSL(color: colors.HSL): colors.HSL {
 	try {
-		if (!validateColorValues(color)) {
+		if (!commonUtils.validateColorValues(color)) {
 			console.error('Invalid color valus for adjustment.');
-			domHelpers.showToast('Invalid color values');
+
+			notification.showToast('Invalid color values');
 
 			return color;
 		}
@@ -30,6 +35,7 @@ function adjustSL(color: colors.HSL): colors.HSL {
 		};
 	} catch (error) {
 		console.error(`Error adjusting saturation and lightness: ${error}`);
+
 		return color;
 	}
 }
@@ -61,160 +67,41 @@ function getWeightedRandomInterval(): number {
 	}
 }
 
-function sanitizeLAB(value: number): number {
-	return Math.round(Math.min(Math.max(value, -125), 125));
-}
+function hexToHSLWrapper(input: string | colors.Hex): colors.HSL {
+	try {
+		const clonedInput = core.clone(input);
+		const hex: colors.Hex =
+			typeof clonedInput === 'string'
+				? {
+						value: {
+							hex: clonedInput,
+							alpha: clonedInput.slice(-2),
+							numericAlpha: colorUtils.hexAlphaToNumericAlpha(
+								clonedInput.slice(-2)
+							)
+						},
+						format: 'hex'
+					}
+				: {
+						...clonedInput,
+						value: {
+							...clonedInput.value,
+							numericAlpha: colorUtils.hexAlphaToNumericAlpha(
+								clonedInput.value.alpha
+							)
+						}
+					};
 
-function sanitizePercentage(value: number): number {
-	return Math.round(Math.min(Math.max(value, 0), 100));
-}
+		return convert.hexToHSL(hex);
+	} catch (error) {
+		console.error(`Error converting hex to HSL: ${error}`);
 
-function sanitizeRadial(value: number): number {
-	return Math.round(Math.min(Math.max(value, 0), 360)) & 360;
-}
-
-function sanitizeRGB(value: number): number {
-	return Math.round(Math.min(Math.max(value, 0), 255));
-}
-
-function validateColorValues(
-	color: colors.Color | colors.SL | colors.SV
-): boolean {
-	const clonedColor = core.clone(color);
-	const isNumericValid = (value: unknown): boolean =>
-		typeof value === 'number' && !isNaN(value);
-	const normalizePercentage = (value: string | number): number => {
-		if (typeof value === 'string' && value.endsWith('%')) {
-			return parseFloat(value.slice(0, -1));
-		}
-
-		return typeof value === 'number' ? value : NaN;
-	};
-
-	switch (clonedColor.format) {
-		case 'cmyk':
-			return (
-				[
-					clonedColor.value.cyan,
-					clonedColor.value.magenta,
-					clonedColor.value.yellow,
-					clonedColor.value.key
-				].every(isNumericValid) &&
-				clonedColor.value.cyan >= 0 &&
-				clonedColor.value.cyan <= 100 &&
-				clonedColor.value.magenta >= 0 &&
-				clonedColor.value.magenta <= 100 &&
-				clonedColor.value.yellow >= 0 &&
-				clonedColor.value.yellow <= 100 &&
-				clonedColor.value.key >= 0 &&
-				clonedColor.value.key <= 100
-			);
-		case 'hex':
-			return /^#[0-9A-Fa-f]{6}$/.test(clonedColor.value.hex);
-		case 'hsl':
-			const isValidHSLHue =
-				isNumericValid(clonedColor.value.hue) &&
-				clonedColor.value.hue >= 0 &&
-				clonedColor.value.hue <= 360;
-			const isValidHSLSaturation =
-				normalizePercentage(clonedColor.value.saturation) >= 0 &&
-				normalizePercentage(clonedColor.value.saturation) <= 100;
-			const isValidHSLLightness = clonedColor.value.lightness
-				? normalizePercentage(clonedColor.value.lightness) >= 0 &&
-					normalizePercentage(clonedColor.value.lightness) <= 100
-				: true;
-
-			return isValidHSLHue && isValidHSLSaturation && isValidHSLLightness;
-		case 'hsv':
-			const isValidHSVHue =
-				isNumericValid(clonedColor.value.hue) &&
-				clonedColor.value.hue >= 0 &&
-				clonedColor.value.hue <= 360;
-			const isValidHSVSaturation =
-				normalizePercentage(clonedColor.value.saturation) >= 0 &&
-				normalizePercentage(clonedColor.value.saturation) <= 100;
-			const isValidHSVValue = clonedColor.value.value
-				? normalizePercentage(clonedColor.value.value) >= 0 &&
-					normalizePercentage(clonedColor.value.value) <= 100
-				: true;
-
-			return isValidHSVHue && isValidHSVSaturation && isValidHSVValue;
-		case 'lab':
-			return (
-				[
-					clonedColor.value.l,
-					clonedColor.value.a,
-					clonedColor.value.b
-				].every(isNumericValid) &&
-				clonedColor.value.l >= 0 &&
-				clonedColor.value.l <= 100 &&
-				clonedColor.value.a >= -125 &&
-				clonedColor.value.a <= 125 &&
-				clonedColor.value.b >= -125 &&
-				clonedColor.value.b <= 125
-			);
-		case 'rgb':
-			return (
-				[
-					clonedColor.value.red,
-					clonedColor.value.green,
-					clonedColor.value.blue
-				].every(isNumericValid) &&
-				clonedColor.value.red >= 0 &&
-				clonedColor.value.red <= 255 &&
-				clonedColor.value.green >= 0 &&
-				clonedColor.value.green <= 255 &&
-				clonedColor.value.blue >= 0 &&
-				clonedColor.value.blue <= 255
-			);
-		case 'sl':
-			return (
-				[
-					clonedColor.value.saturation,
-					clonedColor.value.lightness
-				].every(isNumericValid) &&
-				clonedColor.value.saturation >= 0 &&
-				clonedColor.value.saturation <= 100 &&
-				clonedColor.value.lightness >= 0 &&
-				clonedColor.value.lightness <= 100
-			);
-		case 'sv':
-			return (
-				[clonedColor.value.saturation, clonedColor.value.value].every(
-					isNumericValid
-				) &&
-				clonedColor.value.saturation >= 0 &&
-				clonedColor.value.saturation <= 100 &&
-				clonedColor.value.value >= 0 &&
-				clonedColor.value.value <= 100
-			);
-		case 'xyz':
-			return (
-				[
-					clonedColor.value.x,
-					clonedColor.value.y,
-					clonedColor.value.z
-				].every(isNumericValid) &&
-				clonedColor.value.x >= 0 &&
-				clonedColor.value.x <= 95.047 &&
-				clonedColor.value.y >= 0 &&
-				clonedColor.value.y <= 100.0 &&
-				clonedColor.value.z >= 0 &&
-				clonedColor.value.z <= 108.883
-			);
-		default:
-			console.error(`Unsupported color format: ${color.format}`);
-
-			return false;
+		return defaults.hsl;
 	}
 }
 
 export const paletteHelpers: fnObjects.PaletteHelpers = {
 	adjustSL,
 	getWeightedRandomInterval,
-	sanitizeLAB,
-	sanitizePercentage,
-	sanitizeRadial,
-	sanitizeRGB,
-	validateColorValues
+	hexToHSLWrapper
 };

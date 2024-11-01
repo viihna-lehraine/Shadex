@@ -8,7 +8,9 @@
 	"description": "*** Web-based color palette generator. Produces 8 varieties of color scheme and can convert between 6 colorspaces.",
 	"main": "./public/app.js",
 	"scripts": {
-		"build:tsc": "rm -rf ./public/js && tsc && node scripts/add-js-extensions.js",
+		"build": "npm run build:tsc && npm run build:rollup",
+		"build:rollup": "rollup -c",
+		"build:tsc": "rm -rf ./public/js && tsc && node scripts/add-js-extensions.mjs",
 		"format": "npx prettier . --write",
 		"lint": "npx eslint",
 		"lint:fix": "npx eslint --fix",
@@ -20,6 +22,8 @@
 		"watch:lint": "npx eslint --watch"
 	},
 	"devDependencies": {
+		"@rollup/plugin-commonjs": "^28.0.1",
+		"@rollup/plugin-node-resolve": "^15.3.0",
 		"@types/jest": "^29.5.14",
 		"@typescript-eslint/eslint-plugin": "^8.11.0",
 		"@typescript-eslint/parser": "^8.11.0",
@@ -31,6 +35,7 @@
 		"jsdom": "^25.0.1",
 		"prettier": "^3.3.3",
 		"replace-in-file": "^8.2.0",
+		"rollup": "^4.24.3",
 		"ts-jest": "^29.2.5",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.6.3"

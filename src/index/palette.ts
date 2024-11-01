@@ -12,7 +12,7 @@ export interface Palette {
 	metadata: {
 		customColor?: {
 			hslColor: colors.HSL;
-			convertedColors: PaletteItem['colorConversions'];
+			convertedColors: PaletteItem['colors'];
 		};
 		numBoxes: number;
 		paletteType: string;
@@ -21,23 +21,23 @@ export interface Palette {
 
 export interface PaletteItem {
 	id: string;
-	color: colors.Color;
-	colorConversions: {
-		cmyk: colors.CMYK;
-		hex: colors.Hex;
-		hsv: colors.HSV;
-		lab: colors.LAB;
-		rgb: colors.RGB;
-		sl: colors.SL;
-		sv: colors.SV;
-		xyz: colors.XYZ;
+	colors: {
+		cmyk: colors.CMYKValue;
+		hex: colors.HexValue;
+		hsl: colors.HSLValue;
+		hsv: colors.HSVValue;
+		lab: colors.LABValue;
+		rgb: colors.RGBValue;
+		xyz: colors.XYZValue;
 	};
-	colorStringConversions: {
-		cmykString: colors.CMYKString;
-		hslString: colors.HSLString;
-		hsvString: colors.HSVString;
-		slString: colors.SLString;
-		svString: colors.SVString;
+	colorStrings: {
+		cmykString: colors.CMYKValueString;
+		hexString: colors.HexValueString;
+		hslString: colors.HSLValueString;
+		hsvString: colors.HSVValueString;
+		labString: colors.LABValueString;
+		rgbString: colors.RGBValueString;
+		xyzString: colors.XYZValueString;
 	};
 	cssStrings: {
 		cmykCSSString: string;
@@ -45,16 +45,7 @@ export interface PaletteItem {
 		hslCSSString: string;
 		hsvCSSString: string;
 		labCSSString: string;
+		rgbCSSString: string;
 		xyzCSSString: string;
-	};
-	rawColorStrings: {
-		cmykRawString: string;
-		hexRawString: string;
-		hslRawString: string;
-		hsvRawString: string;
-		labRawString: string;
-		slRawString: string;
-		svRawString: string;
-		xyzRawString: string;
 	};
 }

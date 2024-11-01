@@ -1,11 +1,11 @@
 import { config } from '../config/constants';
-import { paletteHelpers } from '../helpers/palette';
 import * as colors from '../index/colors';
 import * as fnObjects from '../index/fn-objects';
-import { core } from '../utils/core';
+import { commonUtils } from '../utils/common-utils';
+import { core } from '../utils/core-utils';
 
 function isColorInBounds(hsl: colors.HSL): boolean {
-	if (!paletteHelpers.validateColorValues(hsl)) {
+	if (!commonUtils.validateColorValues(hsl)) {
 		console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 		return false;
@@ -15,7 +15,7 @@ function isColorInBounds(hsl: colors.HSL): boolean {
 }
 
 function isTooBright(hsl: colors.HSL): boolean {
-	if (!paletteHelpers.validateColorValues(hsl)) {
+	if (!commonUtils.validateColorValues(hsl)) {
 		console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 		return false;
@@ -25,7 +25,7 @@ function isTooBright(hsl: colors.HSL): boolean {
 }
 
 function isTooDark(hsl: colors.HSL): boolean {
-	if (!paletteHelpers.validateColorValues(hsl)) {
+	if (!commonUtils.validateColorValues(hsl)) {
 		console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 		return false;
@@ -35,7 +35,7 @@ function isTooDark(hsl: colors.HSL): boolean {
 }
 
 function isTooGray(hsl: colors.HSL): boolean {
-	if (!paletteHelpers.validateColorValues(hsl)) {
+	if (!commonUtils.validateColorValues(hsl)) {
 		console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 		return false;

@@ -1,20 +1,8 @@
 import { IDBPObjectStore } from 'idb';
-import * as idb from './idb';
+import * as idb from './database';
 import * as colors from './colors';
-import * as conversion from './conversion';
 import * as domTypes from './dom-types';
 import * as palette from './palette';
-
-export interface CMYKTo {
-	cmykToHex(cmyk: colors.CMYK): colors.Hex;
-	cmykToHSL(cmyk: colors.CMYK): colors.HSL;
-	cmykToHSV(cmyk: colors.CMYK): colors.HSV;
-	cmykToLAB(cmyk: colors.CMYK): colors.LAB;
-	cmykToRGB(cmyk: colors.CMYK): colors.RGB;
-	cmykToSL(cmyk: colors.CMYK): colors.SL;
-	cmykToSV(cmyk: colors.CMYK): colors.SV;
-	cmykToXYZ(cmyk: colors.CMYK): colors.XYZ;
-}
 
 export interface ConversionHelpers {
 	applyGammaCorrection(value: number): number;
@@ -24,22 +12,8 @@ export interface ConversionHelpers {
 }
 
 export interface Convert {
-	cmykToHex(cmyk: colors.CMYK): colors.Hex;
 	cmykToHSL(cmyk: colors.CMYK): colors.HSL;
-	cmykToHSV(cmyk: colors.CMYK): colors.HSV;
-	cmykToLAB(cmyk: colors.CMYK): colors.LAB;
-	cmykToRGB(cmyk: colors.CMYK): colors.RGB;
-	cmykToSL(cmyk: colors.CMYK): colors.SL;
-	cmykToSV(cmyk: colors.CMYK): colors.SV;
-	cmykToXYZ(cmyk: colors.CMYK): colors.XYZ;
-	hexToCMYK(hex: colors.Hex): colors.CMYK;
 	hexToHSL(hex: colors.Hex): colors.HSL;
-	hexToHSV(hex: colors.Hex): colors.HSV;
-	hexToLAB(hex: colors.Hex): colors.LAB;
-	hexToRGB(hex: colors.Hex): colors.RGB;
-	hexToSL(hex: colors.Hex): colors.SL;
-	hexToSV(hex: colors.Hex): colors.SV;
-	hexToXYZ(hex: colors.Hex): colors.XYZ;
 	hslToCMYK(hsl: colors.HSL): colors.CMYK;
 	hslToHex(hsl: colors.HSL): colors.Hex;
 	hslToHSV(hsl: colors.HSL): colors.HSV;
@@ -48,38 +22,98 @@ export interface Convert {
 	hslToSL(hsl: colors.HSL): colors.SL;
 	hslToSV(hsl: colors.HSL): colors.SV;
 	hslToXYZ(hsl: colors.HSL): colors.XYZ;
-	hsvToCMYK(hsv: colors.HSV): colors.CMYK;
-	hsvToHex(hsv: colors.HSV): colors.Hex;
 	hsvToHSL(hsv: colors.HSV): colors.HSL;
-	hsvToLAB(hsv: colors.HSV): colors.LAB;
-	hsvToRGB(hsv: colors.HSV): colors.RGB;
-	hsvToSL(hsv: colors.HSV): colors.SL;
 	hsvToSV(hsv: colors.HSV): colors.SV;
-	hsvToXYZ(hsv: colors.HSV): colors.XYZ;
-	labToCMYK(lab: colors.LAB): colors.CMYK;
-	labToHex(lab: colors.LAB): colors.Hex;
 	labToHSL(lab: colors.LAB): colors.HSL;
-	labToHSV(lab: colors.LAB): colors.HSV;
-	labToRGB(lab: colors.LAB): colors.RGB;
-	labToSL(lab: colors.LAB): colors.SL;
-	labToSV(lab: colors.LAB): colors.SV;
 	labToXYZ(lab: colors.LAB): colors.XYZ;
 	rgbToCMYK(rgb: colors.RGB): colors.CMYK;
 	rgbToHex(rgb: colors.RGB): colors.Hex;
 	rgbToHSL(rgb: colors.RGB): colors.HSL;
 	rgbToHSV(rgb: colors.RGB): colors.HSV;
-	rgbToLAB(rgb: colors.RGB): colors.LAB;
-	rgbToSL(rgb: colors.RGB): colors.SL;
-	rgbToSV(rgb: colors.RGB): colors.SV;
 	rgbToXYZ(rgb: colors.RGB): colors.XYZ;
-	xyzToCMYK(xyz: colors.XYZ): colors.CMYK;
-	xyzToHex(xyz: colors.XYZ): colors.Hex;
 	xyzToHSL(xyz: colors.XYZ): colors.HSL;
-	xyzToHSV(xyz: colors.XYZ): colors.HSV;
 	xyzToLAB(xyz: colors.XYZ): colors.LAB;
-	xyzToRGB(xyz: colors.XYZ): colors.RGB;
-	xyzToSL(xyz: colors.XYZ): colors.SL;
-	xyzToSV(xyz: colors.XYZ): colors.SV;
+}
+
+export interface ColorUtils {
+	addHashToHex(hex: colors.Hex): colors.Hex;
+	colorStringToColor(colorString: colors.ColorString): colors.Color;
+	colorToColorString(
+		color: Exclude<colors.Color, colors.Hex | colors.LAB | colors.RGB>
+	): colors.ColorString | null;
+	componentToHex(componment: number): string;
+	ensureHash(value: string): string;
+	formatColor(
+		color: colors.Color,
+		asColorString: boolean,
+		asCSSString: boolean
+	): {
+		baseColor: colors.Color;
+		formattedString?: colors.ColorString | string;
+	};
+	formatPercentageValues<T extends Record<string, unknown>>(value: T): T;
+	getAlphaFromHex(hex: string): number;
+	getColorString(color: colors.Color): string | null;
+	getCSSColorString(color: colors.Color): string;
+	hexAlphaToNumericAlpha(hexAlpha: string): number;
+	isCMYKColor(value: unknown): value is colors.CMYK;
+	isCMYKFormat(color: colors.Color): color is colors.CMYK;
+	isCMYKString(value: unknown): value is colors.CMYKString;
+	isColor(value: unknown): value is colors.Color;
+	isColorFormat<T extends colors.Color>(
+		color: colors.Color,
+		format: T['format']
+	): color is T;
+	isColorSpace(value: string): boolean;
+	isColorSpaceExtended(value: string): boolean;
+	isColorString(value: unknown): value is colors.ColorString;
+	isConvertibleColor(color: colors.Color): boolean;
+	isFormat(format: unknown): boolean;
+	isHex(color: colors.Color | colors.ColorString): color is colors.Hex;
+	isHexFormat(color: colors.Color): color is colors.Hex;
+	isHSLColor(value: unknown): value is colors.HSL;
+	isHSLFormat(color: colors.Color): color is colors.HSL;
+	isHSLString(value: unknown): value is colors.HSLString;
+	isHSVColor(value: unknown): value is colors.HSV;
+	isHSVFormat(color: colors.Color): color is colors.HSV;
+	isHSVString(value: unknown): value is colors.HSVString;
+	isInputElement(element: HTMLElement | null): element is HTMLElement;
+	isLAB(color: colors.Color | colors.ColorString): color is colors.LAB;
+	isLABFormat(color: colors.Color): color is colors.LAB;
+	isRGB(color: colors.Color | colors.ColorString): color is colors.RGB;
+	isRGBFormat(color: colors.Color): color is colors.RGB;
+	isSLColor(value: unknown): value is colors.SL;
+	isSLFormat(color: colors.Color): color is colors.SL;
+	isSLString(value: unknown): value is colors.SLString;
+	isStoredPalette(obj: unknown): obj is idb.StoredPalette;
+	isSVColor(value: unknown): value is colors.SV;
+	isSVFormat(color: colors.Color): color is colors.SV;
+	isSVString(value: unknown): value is colors.SVString;
+	isXYZ(color: colors.Color | colors.ColorString): color is colors.XYZ;
+	isXYZFormat(color: colors.Color): color is colors.XYZ;
+	narrowToColor(
+		color: colors.Color | colors.ColorString
+	): colors.Color | null;
+	parseColor(
+		colorSpace: colors.ColorSpace,
+		value: string
+	): colors.Color | null;
+	parseComponents(value: string, count: number): number[];
+	parseCustomColor(rawValue: string): colors.Color | null;
+	parseHexWithAlpha(hexValue: string): colors.HexValue | null;
+	stripHashFromHex(hex: colors.Hex): colors.Hex;
+	stripPercentFromValues<T extends Record<string, number | string>>(
+		value: T
+	): { [K in keyof T]: T[K] extends `${number}%` ? number : T[K] };
+	toHexWithAlpha(rgbValue: colors.RGBValue): string;
+}
+
+export interface CommonUtils {
+	sanitizeLAB(value: number): number;
+	sanitizePercentage(value: number): number;
+	sanitizeRadial(value: number): number;
+	sanitizeRGB(value: number): number;
+	validateColorValues(color: colors.Color | colors.SL | colors.SV): boolean;
 }
 
 export interface Core {
@@ -89,6 +123,70 @@ export interface Core {
 		delay: number
 	) => (...args: Parameters<T>) => void;
 	isInRange(value: number, min: number, max: number): boolean;
+}
+
+export interface Database {
+	createMutationLogger<T extends object>(obj: T, key: string): T;
+	deleteTable(id: string): Promise<void>;
+	getCurrentPaletteID(): Promise<number>;
+	getCustomColor(): Promise<colors.HSL | null>;
+	getDB(): Promise<idb.PaletteDB>;
+	getLoggedObject<T extends object>(obj: T | null, key: string): T | null;
+	getNextPaletteID(): Promise<number>;
+	getNextTableID(): Promise<string>;
+	getSettings(): Promise<{ colorSpace: colors.ColorSpace } | null>;
+	getStore<StoreName extends keyof idb.PaletteSchema>(
+		storeName: StoreName,
+		mode: 'readonly' | 'readwrite'
+	): Promise<
+		IDBPObjectStore<
+			idb.PaletteSchema,
+			[StoreName],
+			StoreName,
+			'readonly' | 'readwrite'
+		>
+	>;
+	getTable(id: string): Promise<idb.StoredPalette | null>;
+	initializeCurrentPaletteID(): Promise<number>;
+	listTables(): Promise<string[]>;
+	logMutation(mutation: idb.MutationLog): Promise<void>;
+	renderPalette(tableId: string): Promise<void>;
+	saveData<T>(
+		storeName: keyof idb.PaletteSchema,
+		key: string,
+		data: T,
+		oldValue?: T
+	): Promise<void>;
+	savePalette(id: string, newPalette: idb.StoredPalette): Promise<void>;
+	savePaletteToDB(
+		type: string,
+		items: palette.PaletteItem[],
+		baseColor: colors.HSL,
+		numBoxes: number,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
+	): Promise<palette.Palette>;
+	saveSettings(newSettings: idb.Settings): Promise<void>;
+	trackedTransaction<StoreName extends keyof idb.PaletteSchema>(
+		storeName: StoreName,
+		mode: 'readonly' | 'readwrite',
+		callback: (
+			store: IDBPObjectStore<
+				idb.PaletteSchema,
+				[StoreName],
+				StoreName,
+				typeof mode
+			>
+		) => Promise<void>
+	): Promise<void>;
+	updateCurrentPaletteID(newID: number): Promise<void>;
+	updateEntryInPalette(
+		tableID: string,
+		entryIndex: number,
+		newEntry: palette.PaletteItem
+	): Promise<void>;
 }
 
 export interface DOMFn {
@@ -103,7 +201,6 @@ export interface DOMFn {
 	): domTypes.GetElementsForSelectedColor;
 	getGenerateButtonParams(): domTypes.GenButtonParams | null;
 	handleGenButtonClick(): void;
-	populateColorTextOutputBox(color: colors.Color, boxNumber: number): void;
 	pullParamsFromUI(): domTypes.PullParamsFromUI;
 	saturateColor(selectedColor: number): void;
 	showCustomColorPopupDiv(): void;
@@ -111,21 +208,34 @@ export interface DOMFn {
 }
 
 export interface DOMHelpers {
-	attachDragAndDropEventListeners(element: HTMLElement | null): void;
-	getElement<T extends HTMLElement>(id: string): T | null;
 	makePaletteBox(
 		color: colors.Color,
 		paletteBoxCount: number
 	): domTypes.MakePaletteBox;
-	showToast(message: string): void;
 	showTooltip(tooltipElement: HTMLElement): void;
 }
 
+export interface DOMUtils {
+	genPaletteBox(
+		items: palette.PaletteItem[],
+		numBoxes: number,
+		tableId: string
+	): Promise<void>;
+}
+
 export interface DragAndDrop {
+	attachDragAndDropEventListeners(element: HTMLElement | null): void;
 	handleDragEnd(e: DragEvent): void;
 	handleDragOver(e: DragEvent): void;
 	handleDragStart(e: DragEvent): void;
 	handleDrop(e: DragEvent): void;
+}
+
+export interface ExportPalette {
+	asCSS(palette: palette.Palette, colorSpace: colors.ColorSpace): void;
+	asJSON(palette: palette.Palette): void;
+	asPNG(palette: palette.Palette, colorSpace: colors.ColorSpace): void;
+	asXML(palette: palette.Palette): void;
 }
 
 export interface Generate {
@@ -133,13 +243,9 @@ export interface Generate {
 		baseHue: number,
 		limitBright: boolean,
 		limitDark: boolean,
-		limitGray: boolean
+		limitGray: boolean,
+		alpha: number | null
 	): colors.HSL;
-	genPaletteBox(
-		items: palette.PaletteItem[],
-		numBoxes: number,
-		tableId: string
-	): Promise<void>;
 	genSelectedPalette(
 		options: colors.PaletteOptions
 	): Promise<palette.Palette>;
@@ -163,17 +269,6 @@ export interface GenPalette {
 		color: colors.HSL,
 		enableAlpha: boolean
 	): palette.PaletteItem;
-	createPaletteObject(
-		type: string,
-		items: palette.PaletteItem[],
-		baseColor: colors.HSL,
-		numBoxes: number,
-		paletteID: number,
-		enableAlpha: boolean,
-		limitBright: boolean,
-		limitDark: boolean,
-		limitGray: boolean
-	): palette.Palette;
 	generatePaletteItems(
 		baseColor: colors.HSL,
 		hues: number[],
@@ -186,16 +281,6 @@ export interface GenPalette {
 		customColor: colors.HSL | null,
 		enableAlpha: boolean
 	): colors.HSL;
-	savePaletteToDB(
-		type: string,
-		items: palette.PaletteItem[],
-		baseColor: colors.HSL,
-		numBoxes: number,
-		enableAlpha: boolean,
-		limitBright: boolean,
-		limitDark: boolean,
-		limitGray: boolean
-	): Promise<palette.Palette>;
 	updateColorBox(color: colors.Color, index: number): void;
 	analogous(
 		numBoxes: number,
@@ -271,102 +356,9 @@ export interface GenPalette {
 	): Promise<palette.Palette>;
 }
 
-export interface Guards {
-	ensureHash(value: string): string;
-	isCMYKColor(value: unknown): value is colors.CMYK;
-	isCMYKFormat(color: colors.Color): color is colors.CMYK;
-	isCMYKString(value: unknown): value is colors.CMYKString;
-	isColor(value: unknown): value is colors.Color;
-	isColorFormat<T extends colors.Color>(
-		color: colors.Color,
-		format: T['format']
-	): color is T;
-	isColorSpace(value: string): boolean;
-	isColorSpaceExtended(value: string): boolean;
-	isColorString(value: unknown): value is colors.ColorString;
-	isConversion(
-		from: keyof conversion.ConversionMap,
-		to: keyof colors.Color
-	): boolean;
-	isConvertibleColor(color: colors.Color): boolean;
-	isFormat(format: unknown): boolean;
-	isHex(color: colors.Color | colors.ColorString): color is colors.Hex;
-	isHexFormat(color: colors.Color): color is colors.Hex;
-	isHSLColor(value: unknown): value is colors.HSL;
-	isHSLFormat(color: colors.Color): color is colors.HSL;
-	isHSLString(value: unknown): value is colors.HSLString;
-	isHSVColor(value: unknown): value is colors.HSV;
-	isHSVFormat(color: colors.Color): color is colors.HSV;
-	isHSVString(value: unknown): value is colors.HSVString;
-	isInputElement(element: HTMLElement | null): element is HTMLElement;
-	isLAB(color: colors.Color | colors.ColorString): color is colors.LAB;
-	isLABFormat(color: colors.Color): color is colors.LAB;
-	isRGB(color: colors.Color | colors.ColorString): color is colors.RGB;
-	isRGBFormat(color: colors.Color): color is colors.RGB;
-	isSLColor(value: unknown): value is colors.SL;
-	isSLFormat(color: colors.Color): color is colors.SL;
-	isSLString(value: unknown): value is colors.SLString;
-	isStoredPalette(obj: unknown): obj is idb.StoredPalette;
-	isSVColor(value: unknown): value is colors.SV;
-	isSVFormat(color: colors.Color): color is colors.SV;
-	isSVString(value: unknown): value is colors.SVString;
-	isXYZ(color: colors.Color | colors.ColorString): color is colors.XYZ;
-	isXYZFormat(color: colors.Color): color is colors.XYZ;
-	narrowToColor(
-		color: colors.Color | colors.ColorString
-	): colors.Color | null;
-}
-
-export interface IDBFn {
-	createMutationLogger<T extends object>(obj: T, key: string): T;
-	deleteTable(id: string): Promise<void>;
-	getCurrentPaletteID(): Promise<number>;
-	getCustomColor(): Promise<colors.HSL | null>;
-	getDB(): Promise<idb.PaletteDB>;
-	getLoggedObject<T extends object>(obj: T | null, key: string): T | null;
-	getNextTableID(): Promise<string>;
-	getSettings(): Promise<{ colorSpace: colors.ColorSpace } | null>;
-	getStore<StoreName extends keyof idb.PaletteSchema>(
-		storeName: StoreName,
-		mode: 'readonly' | 'readwrite'
-	): Promise<
-		IDBPObjectStore<
-			idb.PaletteSchema,
-			[StoreName],
-			StoreName,
-			'readonly' | 'readwrite'
-		>
-	>;
-	getTable(id: string): Promise<idb.StoredPalette | null>;
-	listTables(): Promise<string[]>;
-	logMutation(mutation: idb.MutationLog): Promise<void>;
-	renderPalette(tableId: string): Promise<void>;
-	saveData<T>(
-		storeName: keyof idb.PaletteSchema,
-		key: string,
-		data: T,
-		oldValue?: T
-	): Promise<void>;
-	savePalette(id: string, newPalette: idb.StoredPalette): Promise<void>;
-	saveSettings(newSettings: idb.Settings): Promise<void>;
-	trackedTransaction<StoreName extends keyof idb.PaletteSchema>(
-		storeName: StoreName,
-		mode: 'readonly' | 'readwrite',
-		callback: (
-			store: IDBPObjectStore<
-				idb.PaletteSchema,
-				[StoreName],
-				StoreName,
-				typeof mode
-			>
-		) => Promise<void>
-	): Promise<void>;
-	updateCurrentPaletteID(newID: number): Promise<void>;
-	updateEntryInPalette(
-		tableID: string,
-		entryIndex: number,
-		newEntry: palette.PaletteItem
-	): Promise<void>;
+export interface History {
+	addPaletteToHistory(palette: palette.Palette): void;
+	renderPaletteHistory(displayFormat: colors.ColorSpace): void;
 }
 
 export interface Limits {
@@ -376,42 +368,29 @@ export interface Limits {
 	isTooGray(hsl: colors.HSL, hslGrayThreshold?: number): boolean;
 }
 
+export interface Notification {
+	showToast(message: string): void;
+}
+
 export interface PaletteHelpers {
 	adjustSL(color: colors.HSL): colors.HSL;
 	getWeightedRandomInterval(): number;
-	sanitizeLAB(value: number): number;
-	sanitizePercentage(value: number): number;
-	sanitizeRadial(value: number): number;
-	sanitizeRGB(value: number): number;
-	validateColorValues(color: colors.Color | colors.SL | colors.SV): boolean;
+	hexToHSLWrapper(input: string | colors.Hex): colors.HSL;
 }
 
-export interface Transform {
-	addHashToHex(hex: colors.Hex): colors.Hex;
-	colorStringToColor(
-		color: colors.ColorString
-	): Exclude<colors.Color, colors.Hex | colors.LAB | colors.RGB>;
-	colorToColorString(
-		color: Exclude<colors.Color, colors.Hex | colors.LAB | colors.RGB>
-	): colors.ColorString;
-	componentToHex(componment: number): string;
-	getAlphaFromHex(hex: string): number;
-	getColorString(color: colors.Color): string | null;
-	getCSSColorString(color: colors.Color): string;
-	getRawColorString(color: colors.Color): string;
-	hexAlphaToNumericAlpha(hexAlpha: string): number;
-	parseColor(
-		colorSpace: colors.ColorSpace,
-		value: string
-	): colors.Color | null;
-	parseColorComponents(value: string, expectedLength: number): number[];
-	parseCustomColor(rawValue: string): colors.Color | null;
-	parseHex(hexValue: string): colors.Hex;
-	stripHashFromHex(hex: colors.Hex): colors.Hex;
-	stripPercentFromValues<T extends Record<string, number | string>>(
-		value: T
-	): { [K in keyof T]: T[K] extends `${number}%` ? number : T[K] };
-	toHexWithAlpha(rgbValue: colors.RGBValue): string;
+export interface PaletteUtils {
+	createPaletteObject(
+		type: string,
+		items: palette.PaletteItem[],
+		baseColor: colors.HSL,
+		numBoxes: number,
+		paletteID: number,
+		enableAlpha: boolean,
+		limitBright: boolean,
+		limitDark: boolean,
+		limitGray: boolean
+	): palette.Palette;
+	populateColorTextOutputBox(color: colors.Color, boxNumber: number): void;
 }
 
 export interface Wrappers {

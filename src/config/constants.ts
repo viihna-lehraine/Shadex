@@ -1,5 +1,9 @@
 import * as constants from '../index/config';
 
+function getElement<T extends HTMLElement>(id: string): T | null {
+	return document.getElementById(id) as T | null;
+}
+
 const adjustSLAmount = 10;
 
 const xyzMaxX = 95.047;
@@ -12,54 +16,69 @@ const xyzMinZ = 0;
 const buttonDebounce = 300;
 const inputDebounce = 200;
 
-const advancedMenuToggleButton = document.getElementById(
-	'advanced-menu-toggle-button'
-) as HTMLButtonElement | null;
-const applyCustomColorButton = document.getElementById(
+const applyCustomColorButton = getElement<HTMLButtonElement>(
 	'apply-custom-color-button'
-) as HTMLButtonElement | null;
-const clearCustomColorButton = document.getElementById(
+);
+const clearCustomColorButton = getElement<HTMLButtonElement>(
 	'clear-custom-color-button'
-) as HTMLButtonElement | null;
-const customColorElement = document.getElementById(
-	'custom-color'
-) as HTMLInputElement;
-const customColorToggleButton = document.getElementById(
+);
+const closeHelpMenuButton = getElement<HTMLButtonElement>(
+	'close-help-menu-button'
+);
+const closeHistoryMenuButton = getElement<HTMLButtonElement>(
+	'close-history-menu-button'
+);
+const closeSubMenuAButton = getElement<HTMLButtonElement>(
+	'close-sub-menu-A-button'
+);
+const closeSubMenuBButton = getElement<HTMLButtonElement>(
+	'close-sub-menu-B-button'
+);
+const customColorElement = getElement<HTMLInputElement>('custom-color');
+const customColorToggleButton = getElement<HTMLButtonElement>(
 	'custom-color-toggle-button'
-) as HTMLButtonElement | null;
-const desaturateButton = document.getElementById(
-	'desaturate-button'
-) as HTMLButtonElement | null;
-const enableAlphaCheckbox = document.getElementById(
+);
+const desaturateButton = getElement<HTMLButtonElement>('desaturate-button');
+const enableAlphaCheckbox = getElement<HTMLInputElement>(
 	'enable-alpha-checkbox'
-) as HTMLInputElement | null;
-const generateButton = document.getElementById(
-	'generate-button'
-) as HTMLButtonElement | null;
-const limitBrightCheckbox = document.getElementById(
+);
+const generateButton = getElement<HTMLButtonElement>('generate-button');
+const helpMenu = getElement<HTMLDivElement>('help-modal');
+const historyMenu = getElement<HTMLDivElement>('history-modal');
+const limitBrightCheckbox = getElement<HTMLInputElement>(
 	'limit-light-checkbox'
-) as HTMLInputElement | null;
-const limitDarkCheckbox = document.getElementById(
-	'limit-dark-checkbox'
-) as HTMLInputElement | null;
-const limitGrayCheckbox = document.getElementById(
-	'limit-gray-checkbox'
-) as HTMLInputElement | null;
-const paletteNumberOptions = document.getElementById(
+);
+const limitDarkCheckbox = getElement<HTMLInputElement>('limit-dark-checkbox');
+const limitGrayCheckbox = getElement<HTMLInputElement>('limit-gray-checkbox');
+const paletteNumberOptions = getElement<HTMLInputElement>(
 	'palette-number-options'
-) as HTMLInputElement;
-const paletteTypeOptions = document.getElementById(
+);
+const paletteTypeOptions = getElement<HTMLSelectElement>(
 	'palette-type-options'
-) as HTMLSelectElement;
-const popupDivButton = document.getElementById(
-	'custom-color-button'
-) as HTMLButtonElement | null;
-const saturateButton = document.getElementById(
-	'saturate-button'
-) as HTMLButtonElement | null;
-const selectedColorOptions = document.getElementById(
+);
+const popupDivButton = getElement<HTMLButtonElement>('custom-color-button');
+const saturateButton = getElement<HTMLButtonElement>('saturate-button');
+const selectedColorOptions = getElement<HTMLSelectElement>(
 	'selected-color-options'
 ) as HTMLSelectElement | null;
+const showAsCMYKButton = getElement<HTMLButtonElement>('show-as-cmyk-button');
+const showAsHexButton = getElement<HTMLButtonElement>('show-as-hex-button');
+const showAsHSLButton = getElement<HTMLButtonElement>('show-as-hsl-button');
+const showAsHSVButton = getElement<HTMLButtonElement>('show-as-hsv-button');
+const showAsLABButton = getElement<HTMLButtonElement>('show-as-lab-button');
+const showAsRGBButton = getElement<HTMLButtonElement>('show-as-rgb-button');
+const showHelpMenuButton = getElement<HTMLButtonElement>('help-button');
+const showHistoryMenuButton = getElement<HTMLButtonElement>(
+	'show-history-menu-button'
+);
+const subMenuA = getElement<HTMLDivElement>('sub-menu-menu-A');
+const subMenuB = getElement<HTMLDivElement>('sub-menu-menu-B');
+const subMenuToggleButtonA = getElement<HTMLButtonElement>(
+	'sub-menu-toggle-button-A'
+);
+const subMenuToggleButtonB = getElement<HTMLButtonElement>(
+	'sub-menu-toggle-button-B'
+);
 
 const complementaryHueShiftRange = 10;
 const diadicLightnessShiftRange = 30;
@@ -105,14 +124,19 @@ const debounce: constants.Debounce = {
 };
 
 const domElements: constants.DOMElements = {
-	advancedMenuToggleButton,
 	applyCustomColorButton,
 	clearCustomColorButton,
+	closeHelpMenuButton,
+	closeHistoryMenuButton,
+	closeSubMenuAButton,
+	closeSubMenuBButton,
 	customColorElement,
 	customColorToggleButton,
 	desaturateButton,
 	enableAlphaCheckbox,
 	generateButton,
+	helpMenu,
+	historyMenu,
 	limitBrightCheckbox,
 	limitDarkCheckbox,
 	limitGrayCheckbox,
@@ -120,7 +144,19 @@ const domElements: constants.DOMElements = {
 	paletteTypeOptions,
 	popupDivButton,
 	saturateButton,
-	selectedColorOptions
+	selectedColorOptions,
+	showAsCMYKButton,
+	showAsHexButton,
+	showAsHSLButton,
+	showAsHSVButton,
+	showAsLABButton,
+	showAsRGBButton,
+	showHelpMenuButton,
+	showHistoryMenuButton,
+	subMenuA,
+	subMenuB,
+	subMenuToggleButtonA,
+	subMenuToggleButtonB
 };
 
 const paletteShiftRanges: constants.PaletteShiftRanges = {

@@ -1,8 +1,8 @@
-import { paletteHelpers } from '../helpers/palette';
 import * as fnObjects from '../index/fn-objects';
 import * as colors from '../index/colors';
-import { core } from '../utils/core';
+import { core } from '../utils/core-utils';
 import { defaults } from '../config/defaults';
+import { commonUtils } from '../utils/common-utils';
 
 function applyGammaCorrection(value: number): number {
 	try {
@@ -17,7 +17,7 @@ function applyGammaCorrection(value: number): number {
 }
 
 function clampRGB(rgb: colors.RGB): colors.RGB {
-	if (!paletteHelpers.validateColorValues(rgb)) {
+	if (!commonUtils.validateColorValues(rgb)) {
 		console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
 		return core.clone(defaults.rgb);
@@ -70,9 +70,7 @@ export function hueToRGB(p: number, q: number, t: number): number {
 
 function hslAddFormat(value: colors.HSLValue): colors.HSL {
 	try {
-		if (
-			!paletteHelpers.validateColorValues({ value: value, format: 'hsl' })
-		) {
+		if (!commonUtils.validateColorValues({ value: value, format: 'hsl' })) {
 			console.error(`Invalid HSL value ${JSON.stringify(value)}`);
 
 			return core.clone(defaults.hsl);

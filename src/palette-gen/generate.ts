@@ -1,16 +1,14 @@
 import { limits } from './limits';
 import { genPalette } from './palettes';
 import { defaults } from '../config/defaults';
-import { domFn } from '../dom/dom-main';
-import { idbFn } from '../dom/idb-fn';
-import { domHelpers } from '../helpers/dom';
-import { paletteHelpers } from '../helpers/palette';
+import { database } from '../database/database';
 import * as colors from '../index/colors';
 import * as fnObjects from '../index/fn-objects';
 import * as palette from '../index/palette';
-import { genRandomColor } from '../utils/random-color';
-import { transform } from '../utils/transform';
-import { guards } from '../utils/type-guards';
+import { colorUtils } from '../utils/color-utils';
+import { commonUtils } from '../utils/common-utils';
+import { domUtils } from '../utils/dom-utils';
+import { randomHSL } from '../utils/random-color-utils';
 
 function genLimitedHSL(
 	baseHue: number,
@@ -40,42 +38,7 @@ function genLimitedHSL(
 	return hsl;
 }
 
-async function genPaletteBox(
-	items: palette.PaletteItem[],
-	numBoxes: number,
-	tableId: string
-): Promise<void> {
-	try {
-		const paletteRow = document.getElementById('palette-row');
-
-		if (!paletteRow) {
-			console.error('paletteRow is undefined.');
-
-			return;
-		}
-
-		paletteRow.innerHTML = '';
-
-		const fragment = document.createDocumentFragment();
-
-		items.slice(0, numBoxes).forEach((item, i) => {
-			const { color } = item;
-			const { colorStripe } = domHelpers.makePaletteBox(color, i + 1);
-			fragment.appendChild(colorStripe);
-			domFn.populateColorTextOutputBox(color, i + 1);
-		});
-
-		paletteRow.appendChild(fragment);
-
-		console.log('Palette boxes generated and rendered.');
-
-		await idbFn.saveData('tables', tableId, { palette: items });
-	} catch (error) {
-		console.error(`Error generating palette box: ${error}`);
-	}
-}
-
-function genSelectedPalette(
+async function genSelectedPalette(
 	options: colors.PaletteOptions
 ): Promise<palette.Palette> {
 	try {
@@ -89,9 +52,11 @@ function genSelectedPalette(
 			limitGray
 		} = options;
 
+		const palette = await genPalette();
+
 		switch (paletteType) {
 			case 1:
-				return genPalette().random(
+				return palette.random(
 					numBoxes,
 					customColor,
 					enableAlpha,
@@ -100,7 +65,7 @@ function genSelectedPalette(
 					limitGray
 				);
 			case 2:
-				return genPalette().complementary(
+				return palette.complementary(
 					numBoxes,
 					customColor,
 					enableAlpha,
@@ -109,7 +74,7 @@ function genSelectedPalette(
 					limitGray
 				);
 			case 3:
-				return genPalette().triadic(
+				return palette.triadic(
 					numBoxes,
 					customColor,
 					enableAlpha,
@@ -118,7 +83,7 @@ function genSelectedPalette(
 					limitGray
 				);
 			case 4:
-				return genPalette().tetradic(
+				return palette.tetradic(
 					numBoxes,
 					customColor,
 					enableAlpha,
@@ -127,7 +92,7 @@ function genSelectedPalette(
 					limitGray
 				);
 			case 5:
-				return genPalette().splitComplementary(
+				return palette.splitComplementary(
 					numBoxes,
 					customColor,
 					enableAlpha,
@@ -136,7 +101,7 @@ function genSelectedPalette(
 					limitGray
 				);
 			case 6:
-				return genPalette().analogous(
+				return palette.analogous(
 					numBoxes,
 					customColor,
 					enableAlpha,
@@ -145,7 +110,7 @@ function genSelectedPalette(
 					limitGray
 				);
 			case 7:
-				return genPalette().hexadic(
+				return palette.hexadic(
 					numBoxes,
 					customColor,
 					enableAlpha,
@@ -154,7 +119,7 @@ function genSelectedPalette(
 					limitGray
 				);
 			case 8:
-				return genPalette().diadic(
+				return palette.diadic(
 					numBoxes,
 					customColor,
 					enableAlpha,
@@ -163,7 +128,7 @@ function genSelectedPalette(
 					limitGray
 				);
 			case 9:
-				return genPalette().monochromatic(
+				return palette.monochromatic(
 					numBoxes,
 					customColor,
 					enableAlpha,
@@ -195,7 +160,7 @@ async function startPaletteGen(options: colors.PaletteOptions): Promise<void> {
 
 		const validatedCustomColor: colors.HSL =
 			(validateAndConvertColor(customColor) as colors.HSL) ??
-			genRandomColor('hsl');
+			randomHSL(options.enableAlpha);
 
 		options.customColor = validatedCustomColor;
 
@@ -209,9 +174,9 @@ async function startPaletteGen(options: colors.PaletteOptions): Promise<void> {
 
 		console.log(`Colors array generated: ${JSON.stringify(colors)}`);
 
-		const tableId = await idbFn.getNextTableID();
+		const tableId = await database.getNextTableID();
 
-		await genPaletteBox(palette.items, numBoxes, tableId);
+		await domUtils.genPaletteBox(palette.items, numBoxes, tableId);
 	} catch (error) {
 		console.error(`Error starting palette generation: ${error}`);
 	}
@@ -222,12 +187,13 @@ function validateAndConvertColor(
 ): colors.Color | null {
 	if (!color) return null;
 
-	const convertedColor = guards.isColorString(color)
-		? transform.colorStringToColor(color)
+	const convertedColor = colorUtils.isColorString(color)
+		? colorUtils.colorStringToColor(color)
 		: color;
 
-	if (!paletteHelpers.validateColorValues(convertedColor)) {
+	if (!commonUtils.validateColorValues(convertedColor)) {
 		console.error(`Invalid color: ${JSON.stringify(convertedColor)}`);
+
 		return null;
 	}
 
@@ -236,7 +202,6 @@ function validateAndConvertColor(
 
 export const generate: fnObjects.Generate = {
 	genLimitedHSL,
-	genPaletteBox,
 	genSelectedPalette,
 	startPaletteGen,
 	validateAndConvertColor

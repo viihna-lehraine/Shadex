@@ -5,9 +5,7 @@ public/assets/
 
 # extensions
 **/*d.ts
-**/*.css
 **/*.json
-**/*.html
 **/*.md
 **/*.txt
 **/*.xml

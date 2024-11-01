@@ -1,39 +1,18 @@
 import { config } from '../config/constants';
 import { dragAndDrop } from '../dom/drag-and-drop';
-import { paletteHelpers } from './palette';
 import * as fnObjects from '../index/fn-objects';
 import * as domTypes from '../index/dom-types';
 import * as colors from '../index/colors';
-import { core } from '../utils/core';
-import { transform } from '../utils/transform';
-
-function attachDragAndDropEventListeners(element: HTMLElement | null): void {
-	try {
-		if (element) {
-			element.addEventListener('dragstart', dragAndDrop.handleDragStart);
-			element.addEventListener('dragover', dragAndDrop.handleDragOver);
-			element.addEventListener('drop', dragAndDrop.handleDrop);
-			element.addEventListener('dragend', dragAndDrop.handleDragEnd);
-		}
-
-		console.log('Drag and drop event listeners successfully attached');
-	} catch (error) {
-		console.error(
-			`Failed to execute attachDragAndDropEventListeners: ${error}`
-		);
-	}
-}
-
-function getElement<T extends HTMLElement>(id: string): T | null {
-	return document.getElementById(id) as T | null;
-}
+import { colorUtils } from '../utils/color-utils';
+import { commonUtils } from '../utils/common-utils';
+import { core } from '../utils/core-utils';
 
 function makePaletteBox(
 	color: colors.Color,
 	paletteBoxCount: number
 ): domTypes.MakePaletteBox {
 	try {
-		if (!paletteHelpers.validateColorValues(color)) {
+		if (!commonUtils.validateColorValues(color)) {
 			console.error(
 				`Invalid ${color.format} color value ${JSON.stringify(color)}`
 			);
@@ -62,7 +41,7 @@ function makePaletteBox(
 		colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
 		colorTextOutputBox.setAttribute('data-format', 'hex');
 
-		const colorString = transform.getCSSColorString(clonedColor);
+		const colorString = colorUtils.getCSSColorString(clonedColor);
 
 		colorTextOutputBox.value = colorString || '';
 		colorTextOutputBox.colorValues = clonedColor;
@@ -138,7 +117,8 @@ function makePaletteBox(
 		colorStripe.style.backgroundColor = colorString || '#ffffff';
 
 		colorStripe.setAttribute('draggable', 'true');
-		attachDragAndDropEventListeners(colorStripe);
+
+		dragAndDrop.attachDragAndDropEventListeners(colorStripe);
 
 		colorStripe.appendChild(paletteBox);
 
@@ -153,19 +133,6 @@ function makePaletteBox(
 			paletteBoxCount
 		};
 	}
-}
-
-function showToast(message: string): void {
-	const toast = document.createElement('div');
-	toast.className = 'toast-message';
-	toast.textContent = message;
-
-	document.body.appendChild(toast);
-
-	setTimeout(() => {
-		toast.classList.add('fade-out');
-		toast.addEventListener('transitioned', () => toast.remove());
-	}, config.toastTimeout || 3000);
 }
 
 function showTooltip(tooltipElement: HTMLElement): void {
@@ -189,9 +156,6 @@ function showTooltip(tooltipElement: HTMLElement): void {
 }
 
 export const domHelpers: fnObjects.DOMHelpers = {
-	attachDragAndDropEventListeners,
-	getElement,
 	makePaletteBox,
-	showToast,
 	showTooltip
 };

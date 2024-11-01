@@ -7,14 +7,15 @@
         <meta name="description" content="Color Palette Generator">
         <meta name="keywords" content="colors, palettes, color generator, palette generator, art, art tools">
         <meta name="author" content="Viihna Lehraine">
-        <link rel="stylesheet" href="./css/styles.css">
+        <link rel="stylesheet" href="./css/index.css">
+		<link rel="stylesheet" href="./css/help-modal.css">
         <link rel="icon" type="img/svg+xml" href="./assets/favicons/favicon.svg">
         <link rel="shortcut icon" type="image/png" size="16x16" href="./assets/favicons/favicon-android-chrome.png">
     </head>
     <body>
         <div id="container">
             <div id="the-box">
-                <h3 id="the-box-title">ColorGen</h3>
+                <h2 id="the-box-title">ColorGen</h2>
                 <form id="ui-form">
                     <div class="ui-row">
                         <div class="ui-column">
@@ -43,21 +44,22 @@
                             </select>
                         </div>
                     </div>
-                    <div class="ui-row">
-                        <div class="ui-column">
-                            <label for="limit-dark-checkbox" class="checkbox-label">Limit Darkness</label>
-                            <input id="limit-dark-checkbox" type="checkbox">
-                            <label for="limit-light-checkbox" class="checkbox-label">Limit Lightness</label>
-                            <input id="limit-light-checkbox" type="checkbox">
-                        </div>
-                        <div class="ui-column">
-                            <label for="limit-gray-checkbox" class="checkbox-label">Limit Gray</label>
-                            <input id="limit-gray-checkbox" type="checkbox">
-                        </div>
+					<div class="ui-column color-limits-section">
+						<div class="ui-row color-limits-title-row">
+							<h4>Color Limit Options</h4>
+						</div>
+                    	<div class="ui-row">
+                    	    <label for="limit-dark-checkbox" class="checkbox-label"> Darkness</label>
+                    	    <input id="limit-dark-checkbox" type="checkbox">
+                    	    <label for="limit-light-checkbox" class="checkbox-label">Brightness</label>
+                    	    <input id="limit-light-checkbox" type="checkbox">
+							<label for="limit-gray-checkbox" class="checkbox-label"> Grayness</label>
+                    	    <input id="limit-gray-checkbox" type="checkbox">
+						</div>
                     </div>
                     <div class="ui-row">
                         <div class="popup">
-                            <button id="custom-color-toggle-button" class="popup" type="button">Custom Color</button>
+                            <button id="custom-color-toggle-button" class="popup" type="button">Add Custom Color</button>
                             <div class="popuptext" id="popup-div">
                                 <div class="popup-div-row">
 									<label for="custom-color-picker">Select Custom Color</label>
@@ -71,7 +73,7 @@
                         </div>
                     </div>
                     <div class="ui-row">
-                        <label for="selected-color-options">Select Color Swatch</label>
+                        <label for="selected-color-options">Select Color Box #</label>
                         <select id="selected-color-options">
                             <option value="1">1</option>
                             <option value="2">2</option>
@@ -87,35 +89,25 @@
                         <button id="desaturate-button" class="saturate-desaturate-buttons" type="button">Desaturate</button>
                     </div>
                 </form>
-                <div id="advanced-menu-wrapper">
-                    <button id="advanced-menu-toggle-button" class="advanced-menu-toggle-button" type="button">Advanced</button>
-                    <div id="advanced-menu" class="hidden">
+                <div id="sub-menu-wrapper-A">
+                    <button id="sub-menu-toggle-button-A" class="sub-menu-toggle-button-A" type="button"><b>EXPAND</b></button>
+                    <div id="sub-menu-A-menu" class="hidden">
                         <div class="ui-column bordered-ui-div">
-							<!-- DEPRECATED! REMOVE THIS SECTION -->
-                            <form id="initial-colorspace-selection-form">
-                                <div class="ui-row">
-                                    <label for="initial-color-space-options">Initial Colorspace</label>
-                                    <select id="initial-color-space-options">
-                                        <option value="hex">Hex</option>
-                                        <option value="rgb">RGB</option>
-                                        <option value="hsl">HSL</option>
-                                        <option value="hsv">HSV</option>
-                                        <option value="cmyk">CMYK</option>
-                                        <option value="lab">Lab (CIELAB)</option>
-                                    </select>
-                                </div>
-                                <div class="ui-row">
-                                    <button id="apply-color-space-button" type="button">Apply</button>
-                                </div>
-                            </form>
                         </div>
                     </div>
                 </div>
+				<div id="sub-menu-wrapper-B">
+					<button id="sub-menu-toggle-button-B" class="sub-menu-toggle-button-B" type="button"><b>EXPAND</b></button>
+					<div id="sub-menu-B-menu" class="hidden">
+						<div class="ui-column bordered-ui-div">
+						</div>
+					</div>
+				</div>
             </div>
             <div id="button-row">
                 <div id="button-box">
                     <div class="button-box-slice">
-                        <button id="show-as-hex-button" class="button-row-button">Hex Code</button>
+                        <button id="show-as-hex-button" class="button-row-button">Hex</button>
                     </div>
                     <div class="button-box-slice">
                         <button id="show-as-rgb-button" class="button-row-button">RGB</button>
@@ -133,12 +125,20 @@
                         <button id="show-as-cmyk-button" class="button-row-button">CMYK</button>
                     </div>
                     <div class="button-box-slice">
-                        <button id="show-as-lab-button" class="button-row-button">LAB (CIELAB)</button>
+                        <button id="show-as-lab-button" class="button-row-button">LAB</button>
                     </div>
                 </div>
             </div>
             <div id="palette-row"></div>
+			<div id="history-modal" class="modal hidden">
+				<button type="button" id="close-button" class="close-button">X</button>
+				<div class="modal-content">
+					<h2>Palette History</h2>
+					<div id="palette-list" class="palette-list"></div>
+					<div id="modal-footer"></div>
+				</div>
+			</div>
         </div>
-        <script type="module" src="./js/app.js"></script>
+        <script type="module" src="./dist/bundle.js"></script>
     </body>
 <html>

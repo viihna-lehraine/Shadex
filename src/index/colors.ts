@@ -34,7 +34,7 @@ export interface ColorDataAssertion {
 
 export type ColorPartial = SL | SV;
 
-export type ColorSpace = 'cmyk' | 'hex' | 'hsl' | 'hsv' | 'lab' | 'rgb';
+export type ColorSpace = 'cmyk' | 'hex' | 'hsl' | 'hsv' | 'lab' | 'rgb' | 'xyz';
 
 export type ColorSpaceExtended = ColorSpace | 'sl' | 'sv';
 
@@ -113,6 +113,8 @@ export type CMYKString = {
 	format: 'cmyk';
 };
 
+export type HexString = Hex;
+
 export type HSLString = {
 	value: HSLValueString;
 	format: 'hsl';
@@ -123,6 +125,16 @@ export type HSVString = {
 	format: 'hsv';
 };
 
+export type LABString = {
+	value: LABValueString;
+	format: 'lab';
+};
+
+export type RGBString = {
+	value: RGBValueString;
+	format: 'rgb';
+};
+
 export type SLString = {
 	value: SLValueString;
 	format: 'sl';
@@ -131,6 +143,11 @@ export type SLString = {
 export type SVString = {
 	value: SVValueString;
 	format: 'sv';
+};
+
+export type XYZString = {
+	value: XYZValueString;
+	format: 'xyz';
 };
 
 // ***** Color Values *****
@@ -206,6 +223,8 @@ export type CMYKValueString = {
 	alpha: string;
 };
 
+export type HexValueString = HexValue;
+
 export type HSLValueString = {
 	hue: string;
 	saturation: string;
@@ -220,6 +239,20 @@ export type HSVValueString = {
 	alpha: string;
 };
 
+export type LABValueString = {
+	l: string;
+	a: string;
+	b: string;
+	alpha: string;
+};
+
+export type RGBValueString = {
+	red: string;
+	green: string;
+	blue: string;
+	alpha: string;
+};
+
 export type SLValueString = {
 	saturation: string;
 	lightness: string;
@@ -229,5 +262,12 @@ export type SLValueString = {
 export type SVValueString = {
 	saturation: string;
 	value: string;
+	alpha: string;
+};
+
+export type XYZValueString = {
+	x: string;
+	y: string;
+	z: string;
 	alpha: string;
 };

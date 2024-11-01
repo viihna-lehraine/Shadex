@@ -1,12 +1,13 @@
-import { genAllColorValues } from '../color-spaces/conversion';
 import { paletteHelpers } from '../helpers/palette';
 import * as colors from '../index/colors';
 import * as fnObjects from '../index/fn-objects';
-import { core } from '../utils/core';
+import { commonUtils } from '../utils/common-utils';
+import { genAllColorValues } from '../utils/conversion-utils';
+import { core } from '../utils/core-utils';
 
 function analogous(color: colors.HSL, numBoxes: number): number[] {
 	try {
-		if (!paletteHelpers.validateColorValues(color)) {
+		if (!commonUtils.validateColorValues(color)) {
 			console.error(`Invalid color value ${JSON.stringify(color)}`);
 
 			return [];
@@ -57,7 +58,7 @@ function hexadic(color: colors.HSL): number[] {
 	try {
 		const clonedColor = core.clone(color);
 
-		if (!paletteHelpers.validateColorValues(clonedColor)) {
+		if (!commonUtils.validateColorValues(clonedColor)) {
 			console.error(`Invalid color value ${JSON.stringify(clonedColor)}`);
 
 			return [];
