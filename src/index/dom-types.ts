@@ -35,6 +35,7 @@ export interface PullParamsFromUI {
 }
 
 export interface UIElements {
+	advancedMenuToggleButton: HTMLButtonElement | null;
 	applyCustomColorButton: HTMLButtonElement | null;
 	clearCustomColorButton: HTMLButtonElement | null;
 	closeHelpMenuButton: HTMLButtonElement | null;
@@ -45,6 +46,8 @@ export interface UIElements {
 	desaturateButton: HTMLButtonElement | null;
 	enableAlphaCheckbox: HTMLInputElement | null;
 	generateButton: HTMLButtonElement | null;
+	helpMenuToggleButton: HTMLButtonElement | null;
+	historyMenuToggleButton: HTMLButtonElement | null;
 	limitBrightCheckbox: HTMLInputElement | null;
 	limitDarkCheckbox: HTMLInputElement | null;
 	limitGrayCheckbox: HTMLInputElement | null;
@@ -56,8 +59,4 @@ export interface UIElements {
 	showAsHSVButton: HTMLButtonElement | null;
 	showAsLABButton: HTMLButtonElement | null;
 	showAsRGBButton: HTMLButtonElement | null;
-	showHelpMenuButton: HTMLButtonElement | null;
-	showHistoryMenuButton: HTMLButtonElement | null;
-	subMenuToggleButtonA: HTMLButtonElement | null;
-	subMenuToggleButtonB: HTMLButtonElement | null;
 }

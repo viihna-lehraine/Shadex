@@ -5,5 +5,6 @@
 @import url('./partials/components/base.css');
 @import url('./partials/components/buttons.css');
 @import url('./partials/components/modals.css');
+@import url('./partials/components/palette-section.css');
 @import url('./partials/components/tooltips.css');
 @import url('./partials/components/ui.css');

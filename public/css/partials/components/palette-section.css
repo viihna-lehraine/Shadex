@@ -1,7 +1,15 @@
 #button-box {
 	display: flex;
+	flex-direction: row;
 	height: fit-content;
 	width: 80%;
+	justify-content: center;
+	align-items: center;
+}
+
+#button-row {
+	display: flex;
+	flex-direction: row;
 	justify-content: center;
 	align-items: center;
 }
@@ -15,10 +23,10 @@
 	padding: 0 13px;
 	font-size: 0.8em;
 	font-weight: bold;
-	background-color: #ffffffff;
+	background-color: var(--background-color-3);
 	border: 2px solid #707070ff;
 	border-radius: 5px;
-	box-shadow: 1px 3px 1px rgba(0, 0, 0, 0.8);
+	box-shadow: 1px 3px 1px var(--box-shadow-color-1);
 }
 
 .button-box-slice {
@@ -51,7 +59,7 @@
 .color-text-output-box {
 	height: 5vh;
 	width: 70%;
-	border: 1px solid #ddddddff;
+	border: 1px solid var(--border-color-5);
 	border-radius: 3px;
 	text-align: center;
 	align-content: center;
@@ -59,7 +67,7 @@
 }
 
 .palette-box {
-	background-color: #f9f9f9;
+	background-color: var(--background-color-3);
 	display: flex;
 	flex-direction: column;
 	margin-top: 2.5vh;
@@ -67,9 +75,9 @@
 	margin: 10px;
 	height: 90%;
 	width: 13vw;
-	border: 2px solid #707070ff;
+	border: 2px solid var(--border-color-3);
 	border-radius: 5px;
-	box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.75);
+	box-shadow: 2px 4px 5px var(--box-shadow-color-1);
 }
 
 .palette-box-half {
@@ -85,7 +93,7 @@
 	justify-content: center;
 	align-items: center;
 	padding: 7px;
-	border-top: 1px solid black;
+	border-top: 1px solid var(--border-color-1);
 }
 
 .palette-box-top-half {
@@ -94,7 +102,7 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: 8px 10px;
-	border-bottom: 1px solid black;
+	border-bottom: 1px solid var(--border-color-1);
 	width: 100%;
 }
 

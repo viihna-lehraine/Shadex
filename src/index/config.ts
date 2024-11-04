@@ -21,6 +21,7 @@ export interface Debounce {
 }
 
 export interface DOMElements {
+	advancedMenuToggleButton: HTMLButtonElement | null;
 	applyCustomColorButton: HTMLButtonElement | null;
 	clearCustomColorButton: HTMLButtonElement | null;
 	closeHelpMenuButton: HTMLButtonElement | null;
@@ -28,12 +29,12 @@ export interface DOMElements {
 	closeSubMenuAButton: HTMLButtonElement | null;
 	closeSubMenuBButton: HTMLButtonElement | null;
 	customColorElement: HTMLInputElement | null;
-	customColorToggleButton: HTMLButtonElement | null;
+	customColorMenuButton: HTMLButtonElement | null;
 	desaturateButton: HTMLButtonElement | null;
 	enableAlphaCheckbox: HTMLInputElement | null;
 	generateButton: HTMLButtonElement | null;
-	helpMenu: HTMLDivElement | null;
-	historyMenu: HTMLDivElement | null;
+	helpMenuToggleButton: HTMLButtonElement | null;
+	historyMenuToggleButton: HTMLButtonElement | null;
 	limitBrightCheckbox: HTMLInputElement | null;
 	limitDarkCheckbox: HTMLInputElement | null;
 	limitGrayCheckbox: HTMLInputElement | null;
@@ -48,12 +49,6 @@ export interface DOMElements {
 	showAsHSVButton: HTMLButtonElement | null;
 	showAsLABButton: HTMLButtonElement | null;
 	showAsRGBButton: HTMLButtonElement | null;
-	showHelpMenuButton: HTMLButtonElement | null;
-	showHistoryMenuButton: HTMLButtonElement | null;
-	subMenuA: HTMLDivElement | null;
-	subMenuB: HTMLDivElement | null;
-	subMenuToggleButtonA: HTMLButtonElement | null;
-	subMenuToggleButtonB: HTMLButtonElement | null;
 }
 
 export interface Defaults {

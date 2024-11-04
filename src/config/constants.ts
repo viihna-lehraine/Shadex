@@ -16,6 +16,9 @@ const xyzMinZ = 0;
 const buttonDebounce = 300;
 const inputDebounce = 200;
 
+const advancedMenuToggleButton = getElement<HTMLButtonElement>(
+	'advanced-menu-toggle-button'
+);
 const applyCustomColorButton = getElement<HTMLButtonElement>(
 	'apply-custom-color-button'
 );
@@ -35,18 +38,22 @@ const closeSubMenuBButton = getElement<HTMLButtonElement>(
 	'close-sub-menu-B-button'
 );
 const customColorElement = getElement<HTMLInputElement>('custom-color');
-const customColorToggleButton = getElement<HTMLButtonElement>(
-	'custom-color-toggle-button'
+const customColorMenuButton = getElement<HTMLButtonElement>(
+	'custom-color-menu-button'
 );
 const desaturateButton = getElement<HTMLButtonElement>('desaturate-button');
 const enableAlphaCheckbox = getElement<HTMLInputElement>(
 	'enable-alpha-checkbox'
 );
 const generateButton = getElement<HTMLButtonElement>('generate-button');
-const helpMenu = getElement<HTMLDivElement>('help-modal');
-const historyMenu = getElement<HTMLDivElement>('history-modal');
+const helpMenuToggleButton = getElement<HTMLButtonElement>(
+	'help-menu-toggle-button'
+);
+const historyMenuToggleButton = getElement<HTMLButtonElement>(
+	'history-menu-toggle-button'
+);
 const limitBrightCheckbox = getElement<HTMLInputElement>(
-	'limit-light-checkbox'
+	'limit-bright-checkbox'
 );
 const limitDarkCheckbox = getElement<HTMLInputElement>('limit-dark-checkbox');
 const limitGrayCheckbox = getElement<HTMLInputElement>('limit-gray-checkbox');
@@ -67,18 +74,6 @@ const showAsHSLButton = getElement<HTMLButtonElement>('show-as-hsl-button');
 const showAsHSVButton = getElement<HTMLButtonElement>('show-as-hsv-button');
 const showAsLABButton = getElement<HTMLButtonElement>('show-as-lab-button');
 const showAsRGBButton = getElement<HTMLButtonElement>('show-as-rgb-button');
-const showHelpMenuButton = getElement<HTMLButtonElement>('help-button');
-const showHistoryMenuButton = getElement<HTMLButtonElement>(
-	'show-history-menu-button'
-);
-const subMenuA = getElement<HTMLDivElement>('sub-menu-menu-A');
-const subMenuB = getElement<HTMLDivElement>('sub-menu-menu-B');
-const subMenuToggleButtonA = getElement<HTMLButtonElement>(
-	'sub-menu-toggle-button-A'
-);
-const subMenuToggleButtonB = getElement<HTMLButtonElement>(
-	'sub-menu-toggle-button-B'
-);
 
 const complementaryHueShiftRange = 10;
 const diadicLightnessShiftRange = 30;
@@ -124,6 +119,7 @@ const debounce: constants.Debounce = {
 };
 
 const domElements: constants.DOMElements = {
+	advancedMenuToggleButton,
 	applyCustomColorButton,
 	clearCustomColorButton,
 	closeHelpMenuButton,
@@ -131,12 +127,12 @@ const domElements: constants.DOMElements = {
 	closeSubMenuAButton,
 	closeSubMenuBButton,
 	customColorElement,
-	customColorToggleButton,
+	customColorMenuButton,
 	desaturateButton,
 	enableAlphaCheckbox,
 	generateButton,
-	helpMenu,
-	historyMenu,
+	helpMenuToggleButton,
+	historyMenuToggleButton,
 	limitBrightCheckbox,
 	limitDarkCheckbox,
 	limitGrayCheckbox,
@@ -150,13 +146,7 @@ const domElements: constants.DOMElements = {
 	showAsHSLButton,
 	showAsHSVButton,
 	showAsLABButton,
-	showAsRGBButton,
-	showHelpMenuButton,
-	showHistoryMenuButton,
-	subMenuA,
-	subMenuB,
-	subMenuToggleButtonA,
-	subMenuToggleButtonB
+	showAsRGBButton
 };
 
 const paletteShiftRanges: constants.PaletteShiftRanges = {

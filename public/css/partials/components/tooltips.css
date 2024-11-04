@@ -7,8 +7,8 @@
 .tooltip .tooltiptext {
 	visibility: hidden;
 	width: 140px;
-	background-color: #555555ff;
-	color: #ffffffff;
+	background-color: var(--background-color-11);
+	color: var(--font-color-3);
 	text-align: center;
 	border-radius: 6px;
 	padding: 5px;
@@ -28,7 +28,7 @@
 	margin-left: -5px;
 	border-width: 5px;
 	border-style: solid;
-	border-color: black transparent transparent transparent;
+	border-color: var(--border-color-1) transparent transparent transparent;
 	visibility: visible;
 	opacity: 1;
 	content: '';

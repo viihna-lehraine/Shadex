@@ -1,3 +1,40 @@
+.advanced-menu-toggle-button {
+	height: auto;
+	transform: translateX(-2vw);
+	color: var(--font-color-3);
+	background-color: var(--background-color-4);
+	padding: 10px;
+	border: 1px solid var(--border-color-4);
+	border-radius: 5px;
+	margin-top: -2.5vh;
+	text-orientation: upright;
+	writing-mode: vertical-lr;
+	cursor: pointer;
+}
+
+.button-row-button {
+	width: 90%;
+	background-color: var(--background-color-4);
+	color: var(--font-color-3);
+	padding: 5px 0;
+	border: 1px solid var(--border-color-4);
+	border-radius: 5px;
+}
+
+.copy-button {
+	font-size: 0.75em;
+	height: 70%;
+}
+
+#custom-color-button {
+	background-color: var(--background-color-6);
+	color: var(--font-color-4);
+}
+
+#custom-color-button:hover {
+	background-color: var(--background-color-7);
+}
+
 #generate-button {
 	background-color: var(--background-color-4);
 	color: var(--font-color-3);
@@ -21,39 +58,7 @@
 	background-color: var(--background-color-5);
 }
 
-#custom-color-button {
-	background-color: var(--background-color-6);
-	color: var(--font-color-4);
-}
-
-#custom-color-button:hover {
-	background-color: var(--background-color-7);
-}
-
-.button-row-button {
-	width: 90%;
-	background-color: var(--background-color-4);
-	color: var(--font-color-3);
-	padding: 5px 0;
-	border: 1px solid var(--border-color-4);
-	border-radius: 5px;
-}
-
-.sub-menu-toggle-button-A {
-	height: auto;
-	transform: translateX(-2vw);
-	color: var(--font-color-3);
-	background-color: var(--background-color-4);
-	padding: 10px;
-	border: 1px solid var(--border-color-4);
-	border-radius: 5px;
-	margin-top: -2.5vh;
-	text-orientation: upright;
-	writing-mode: vertical-lr;
-	cursor: pointer;
-}
-
-.sub-menu-toggle-button-B {
+.history-menu-button {
 	height: auto;
 	transform: translateX(2vw);
 	color: var(--font-color-3);
@@ -65,9 +70,4 @@
 	text-orientation: upright;
 	writing-mode: vertical-lr;
 	cursor: pointer;
-}
-
-.copy-button {
-	font-size: 0.75em;
-	height: 70%;
 }

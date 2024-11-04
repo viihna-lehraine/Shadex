@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const selectedColorOptions = config.selectedColorOptions;
 
 	const {
+		advancedMenuToggleButton,
 		applyCustomColorButton,
 		clearCustomColorButton,
 		closeHelpMenuButton,
@@ -35,22 +36,20 @@ document.addEventListener('DOMContentLoaded', () => {
 		customColorToggleButton,
 		desaturateButton,
 		generateButton,
+		helpMenuToggleButton,
+		historyMenuToggleButton,
 		saturateButton,
 		showAsCMYKButton,
 		showAsHexButton,
 		showAsHSLButton,
 		showAsHSVButton,
 		showAsLABButton,
-		showAsRGBButton,
-		showHelpMenuButton,
-		showHistoryMenuButton,
-		subMenuToggleButtonA,
-		subMenuToggleButtonB
+		showAsRGBButton
 	} = buttons;
 
 	// confirm that all elements are accessible
 	console.log(
-		`Apply Custom Color Button: ${applyCustomColorButton ? 'found' : 'not found'}\nClear Custom Color Button: ${clearCustomColorButton ? 'found' : 'not found'}\nClose Help Menu Button: ${closeHelpMenuButton ? 'found' : 'not found'}\nClose History Menu Button: ${closeHistoryMenuButton ? 'found' : 'not found'}\nCustom Color Toggle Button: ${customColorToggleButton ? 'found' : 'not found'}\nDesaturate Button: ${desaturateButton ? 'found' : 'not found'}\nGenerate Button: ${generateButton ? 'found' : 'not found'}\nSaturate Button: ${saturateButton ? 'found' : 'not found'}\nShow as CMYK Button: ${showAsCMYKButton ? 'found' : 'not found'}\nShow as Hex Button: ${showAsHexButton ? 'found' : 'not found'}\nShow as HSL Button: ${showAsHSLButton ? 'found' : 'not found'}\nShow as HSV Button: ${showAsHSVButton ? 'found' : 'not found'}\nShow as LAB Button: ${showAsLABButton ? 'found' : 'not found'}\nShow as RGB Button: ${showAsRGBButton ? 'found' : 'not found'}\nShow Help Menu Button: ${showHelpMenuButton ? 'found' : 'not found'}\nShow History Menu Button${showHistoryMenuButton ? 'found' : 'not found'}\nSub Menu Toggle Button A: ${subMenuToggleButtonA ? 'found' : 'not found'}\nSub Menu Toggle Button B: ${subMenuToggleButtonB ? 'found' : 'not found'}`
+		`Advanced Menu Toggle Button${advancedMenuToggleButton ? 'found' : 'not found'}\nApply Custom Color Button: ${applyCustomColorButton ? 'found' : 'not found'}\nClear Custom Color Button: ${clearCustomColorButton ? 'found' : 'not found'}\nClose Help Menu Button: ${closeHelpMenuButton ? 'found' : 'not found'}\nClose History Menu Button: ${closeHistoryMenuButton ? 'found' : 'not found'}\nCustom Color Toggle Button: ${customColorToggleButton ? 'found' : 'not found'}\nDesaturate Button: ${desaturateButton ? 'found' : 'not found'}\nGenerate Button: ${generateButton ? 'found' : 'not found'}\nHistory Toggle Menu Button: ${historyMenuToggleButton ? 'found' : 'not found'}\nSaturate Button: ${saturateButton ? 'found' : 'not found'}\nShow as CMYK Button: ${showAsCMYKButton ? 'found' : 'not found'}\nShow as Hex Button: ${showAsHexButton ? 'found' : 'not found'}\nShow as HSL Button: ${showAsHSLButton ? 'found' : 'not found'}\nShow as HSV Button: ${showAsHSVButton ? 'found' : 'not found'}\nShow as LAB Button: ${showAsLABButton ? 'found' : 'not found'}\nShow as RGB Button: ${showAsRGBButton ? 'found' : 'not found'}`
 	);
 
 	const selectedColor = selectedColorOptions
@@ -68,6 +67,22 @@ document.addEventListener('DOMContentLoaded', () => {
 			`Unable to attach conversion button event listeners: ${error}`
 		);
 	}
+
+	advancedMenuToggleButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		if (advancedMenuToggleButton) {
+			const clonedClasses = [...advancedMenuToggleButton.classList];
+			const isHidden = clonedClasses.includes('hidden');
+
+			advancedMenuToggleButton.classList.toggle('hidden');
+			advancedMenuToggleButton.style.display = isHidden
+				? 'block'
+				: 'none';
+		}
+
+		console.log('advancedMenuToggleButton clicked');
+	});
 
 	applyCustomColorButton?.addEventListener('click', async e => {
 		e.preventDefault();
@@ -158,6 +173,34 @@ document.addEventListener('DOMContentLoaded', () => {
 		await generate.startPaletteGen(paletteOptions);
 	});
 
+	helpMenuToggleButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		if (helpMenuToggleButton) {
+			const clonedClasses = [...helpMenuToggleButton.classList];
+			const isHidden = clonedClasses.includes('hidden');
+
+			helpMenuToggleButton.classList.toggle('hidden');
+			helpMenuToggleButton.style.display = isHidden ? 'block' : 'none';
+		}
+
+		console.log('showHelpMenuButton clicked');
+	});
+
+	historyMenuToggleButton?.addEventListener('click', e => {
+		e.preventDefault();
+
+		if (historyMenuToggleButton) {
+			const clonedClasses = [...historyMenuToggleButton.classList];
+			const isHidden = clonedClasses.includes('hidden');
+
+			historyMenuToggleButton.classList.toggle('hidden');
+			historyMenuToggleButton.style.display = isHidden ? 'block' : 'none';
+		}
+
+		console.log('showHistoryMenuButton clicked');
+	});
+
 	saturateButton?.addEventListener('click', e => {
 		e.preventDefault();
 
@@ -200,61 +243,5 @@ document.addEventListener('DOMContentLoaded', () => {
 		e.preventDefault();
 
 		console.log('showAsRGBButton clicked');
-	});
-
-	showHelpMenuButton?.addEventListener('click', e => {
-		e.preventDefault();
-
-		if (showHelpMenuButton) {
-			const clonedClasses = [...showHelpMenuButton.classList];
-			const isHidden = clonedClasses.includes('hidden');
-
-			showHelpMenuButton.classList.toggle('hidden');
-			showHelpMenuButton.style.display = isHidden ? 'block' : 'none';
-		}
-
-		console.log('showHelpMenuButton clicked');
-	});
-
-	showHistoryMenuButton?.addEventListener('click', e => {
-		e.preventDefault();
-
-		if (showHistoryMenuButton) {
-			const clonedClasses = [...showHistoryMenuButton.classList];
-			const isHidden = clonedClasses.includes('hidden');
-
-			showHistoryMenuButton.classList.toggle('hidden');
-			showHistoryMenuButton.style.display = isHidden ? 'block' : 'none';
-		}
-
-		console.log('showHistoryMenuButton clicked');
-	});
-
-	subMenuToggleButtonA?.addEventListener('click', e => {
-		e.preventDefault();
-
-		if (subMenuToggleButtonA) {
-			const clonedClasses = [...subMenuToggleButtonA.classList];
-			const isHidden = clonedClasses.includes('hidden');
-
-			subMenuToggleButtonA.classList.toggle('hidden');
-			subMenuToggleButtonA.style.display = isHidden ? 'block' : 'none';
-		}
-
-		console.log('subMenuToggleButtonA clicked');
-	});
-
-	subMenuToggleButtonB?.addEventListener('click', e => {
-		e.preventDefault();
-
-		if (subMenuToggleButtonB) {
-			const clonedClasses = [...subMenuToggleButtonB.classList];
-			const isHidden = clonedClasses.includes('hidden');
-
-			subMenuToggleButtonB.classList.toggle('hidden');
-			subMenuToggleButtonB.style.display = isHidden ? 'block' : 'none';
-		}
-
-		console.log('subMenuToggleButtonB clicked');
 	});
 });

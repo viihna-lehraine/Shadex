@@ -143,9 +143,10 @@ function copyToClipboard(text: string, tooltipElement: HTMLElement): void {
 
 function defineUIElements(): domTypes.UIElements {
 	try {
+		const advancedMenuToggleButton = config.advancedMenuToggleButton;
 		const applyCustomColorButton = config.applyCustomColorButton;
 		const clearCustomColorButton = config.clearCustomColorButton;
-		const customColorToggleButton = config.customColorToggleButton;
+		const customColorToggleButton = config.customColorMenuButton;
 		const closeHelpMenuButton = config.closeHelpMenuButton;
 		const closeHistoryMenuButton = config.closeHistoryMenuButton;
 		const closeSubMenuAButton = config.closeSubMenuAButton;
@@ -153,6 +154,8 @@ function defineUIElements(): domTypes.UIElements {
 		const desaturateButton = config.desaturateButton;
 		const enableAlphaCheckbox = config.enableAlphaCheckbox;
 		const generateButton = config.generateButton;
+		const helpMenuToggleButton = config.helpMenuToggleButton;
+		const historyMenuToggleButton = config.historyMenuToggleButton;
 		const limitBrightCheckbox = config.limitBrightCheckbox;
 		const limitDarkCheckbox = config.limitDarkCheckbox;
 		const limitGrayCheckbox = config.limitGrayCheckbox;
@@ -164,16 +167,13 @@ function defineUIElements(): domTypes.UIElements {
 		const showAsHSVButton = config.showAsHSVButton;
 		const showAsLABButton = config.showAsLABButton;
 		const showAsRGBButton = config.showAsRGBButton;
-		const showHelpMenuButton = config.showHelpMenuButton;
-		const showHistoryMenuButton = config.showHistoryMenuButton;
-		const subMenuToggleButtonA = config.subMenuToggleButtonA;
-		const subMenuToggleButtonB = config.subMenuToggleButtonB;
 
 		const selectedColor = selectedColorOptions
 			? parseInt(selectedColorOptions.value, 10)
 			: 0;
 
 		return {
+			advancedMenuToggleButton,
 			applyCustomColorButton,
 			clearCustomColorButton,
 			closeHelpMenuButton,
@@ -184,6 +184,8 @@ function defineUIElements(): domTypes.UIElements {
 			desaturateButton,
 			enableAlphaCheckbox,
 			generateButton,
+			helpMenuToggleButton,
+			historyMenuToggleButton,
 			limitBrightCheckbox,
 			limitDarkCheckbox,
 			limitGrayCheckbox,
@@ -194,16 +196,13 @@ function defineUIElements(): domTypes.UIElements {
 			showAsHSLButton,
 			showAsHSVButton,
 			showAsLABButton,
-			showAsRGBButton,
-			showHelpMenuButton,
-			showHistoryMenuButton,
-			subMenuToggleButtonA,
-			subMenuToggleButtonB
+			showAsRGBButton
 		};
 	} catch (error) {
 		console.error('Failed to define UI buttons:', error);
 
 		return {
+			advancedMenuToggleButton: null,
 			applyCustomColorButton: null,
 			clearCustomColorButton: null,
 			closeHelpMenuButton: null,
@@ -214,6 +213,8 @@ function defineUIElements(): domTypes.UIElements {
 			desaturateButton: null,
 			enableAlphaCheckbox: null,
 			generateButton: null,
+			helpMenuToggleButton: null,
+			historyMenuToggleButton: null,
 			limitBrightCheckbox: null,
 			limitDarkCheckbox: null,
 			limitGrayCheckbox: null,
@@ -224,11 +225,7 @@ function defineUIElements(): domTypes.UIElements {
 			showAsHSLButton: null,
 			showAsHSVButton: null,
 			showAsLABButton: null,
-			showAsRGBButton: null,
-			showHelpMenuButton: null,
-			showHistoryMenuButton: null,
-			subMenuToggleButtonA: null,
-			subMenuToggleButtonB: null
+			showAsRGBButton: null
 		};
 	}
 }

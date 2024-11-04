@@ -58,7 +58,7 @@
                     </div>
                     <div class="ui-row">
                         <div class="popup">
-                            <button id="custom-color-toggle-button" class="popup" type="button">Add Custom Color</button>
+                            <button id="custom-color-menu-button" class="popup" type="button">Add Custom Color</button>
                             <div class="popuptext" id="popup-div">
                                 <div class="popup-div-row">
 									<label for="custom-color-picker">Select Custom Color</label>
@@ -88,23 +88,23 @@
                         <button id="desaturate-button" class="saturate-desaturate-buttons" type="button">Desaturate</button>
                     </div>
                 </form>
-                <div id="sub-menu-wrapper-A">
-                    <button id="sub-menu-toggle-button-A" class="sub-menu-toggle-button-A" type="button"><b>EXPAND</b></button>
-                    <div id="sub-menu-A-menu" class="hidden">
+                <div id="advanced-menu-wrapper">
+                    <button id="advanced-menu-toggle-button" class="advanced-menu-toggle-button" type="button"><b>Advanced Menu</b></button>
+                    <div id="advanced-menu-content" class="hidden">
                         <div class="ui-column bordered-ui-div">
                         </div>
                     </div>
                 </div>
-				<div id="sub-menu-wrapper-B">
-					<button id="sub-menu-toggle-button-B" class="sub-menu-toggle-button-B" type="button"><b>EXPAND</b></button>
-					<div id="sub-menu-B-menu" class="hidden">
+				<div id="history-menu-wrapper">
+					<button id="history-menu-toggle-button" class="history-menu-toggle-button" type="button"><b>EXPAND</b></button>
+					<div id="history-menu-content" class="hidden">
 						<div class="ui-column bordered-ui-div">
 						</div>
 					</div>
 				</div>
             </div>
             <div id="button-row">
-                <div id="button-box">
+                <div class="button-box">
                     <div class="button-box-slice">
                         <button id="show-as-hex-button" class="button-row-button">Hex</button>
                     </div>
@@ -129,16 +129,8 @@
                 </div>
             </div>
             <div id="palette-row"></div>
-			<div id="history-modal" class="modal hidden">
-				<button type="button" id="close-button" class="close-button">X</button>
-				<div class="modal-content">
-					<h2>Palette History</h2>
-					<div id="palette-list" class="palette-list"></div>
-					<div id="modal-footer"></div>
-				</div>
-			</div>
         </div>
         <script type="module" src="./dist/bundle.js"></script>
-		<script type="module" src="./scripts/render-help-menu.js"></script>
+		<script type="module" src="./scripts/load-html-partials.js"></script>
     </body>
 <html>
