@@ -1,5 +1,6 @@
 import { database } from '../database/database';
 import { domHelpers } from '../helpers/dom';
+import * as colors from '../index/colors';
 import * as fnObjects from '../index/fn-objects';
 import * as palette from '../index/palette';
 import { paletteUtils } from '../utils/palette-utils';
@@ -23,7 +24,7 @@ async function genPaletteBox(
 		const fragment = document.createDocumentFragment();
 
 		items.slice(0, numBoxes).forEach((item, i) => {
-			const { hsl: color } = item.colors;
+			const color: colors.HSL = { value: item.colors.hsl, format: 'hsl' };
 			const { colorStripe } = domHelpers.makePaletteBox(color, i + 1);
 
 			fragment.appendChild(colorStripe);

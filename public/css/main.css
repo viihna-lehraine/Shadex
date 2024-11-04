@@ -1,0 +1,9 @@
+@import url('./partials/keyframes.css');
+@import url('./partials/media-queries.css');
+@import url('./partials/variables.css');
+
+@import url('./partials/components/base.css');
+@import url('./partials/components/buttons.css');
+@import url('./partials/components/modals.css');
+@import url('./partials/components/tooltips.css');
+@import url('./partials/components/ui.css');

@@ -10,18 +10,19 @@ const xyzMinY = 0;
 const xyzMinZ = 0;
 const buttonDebounce = 300;
 const inputDebounce = 200;
-const advancedMenu = getElement('advanced-menu');
-const advancedMenuToggleButton = getElement('advanced-menu-toggle-button');
 const applyCustomColorButton = getElement('apply-custom-color-button');
 const clearCustomColorButton = getElement('clear-custom-color-button');
-const closeButton = getElement('close-button');
+const closeHelpMenuButton = getElement('close-help-menu-button');
+const closeHistoryMenuButton = getElement('close-history-menu-button');
+const closeSubMenuAButton = getElement('close-sub-menu-A-button');
+const closeSubMenuBButton = getElement('close-sub-menu-B-button');
 const customColorElement = getElement('custom-color');
 const customColorToggleButton = getElement('custom-color-toggle-button');
 const desaturateButton = getElement('desaturate-button');
 const enableAlphaCheckbox = getElement('enable-alpha-checkbox');
 const generateButton = getElement('generate-button');
-const historyMenuButton = getElement('history-menu-button');
-const historyModal = getElement('history-modal');
+const helpMenu = getElement('help-modal');
+const historyMenu = getElement('history-modal');
 const limitBrightCheckbox = getElement('limit-light-checkbox');
 const limitDarkCheckbox = getElement('limit-dark-checkbox');
 const limitGrayCheckbox = getElement('limit-gray-checkbox');
@@ -36,6 +37,12 @@ const showAsHSLButton = getElement('show-as-hsl-button');
 const showAsHSVButton = getElement('show-as-hsv-button');
 const showAsLABButton = getElement('show-as-lab-button');
 const showAsRGBButton = getElement('show-as-rgb-button');
+const showHelpMenuButton = getElement('help-button');
+const showHistoryMenuButton = getElement('show-history-menu-button');
+const subMenuA = getElement('sub-menu-menu-A');
+const subMenuB = getElement('sub-menu-menu-B');
+const subMenuToggleButtonA = getElement('sub-menu-toggle-button-A');
+const subMenuToggleButtonB = getElement('sub-menu-toggle-button-B');
 const complementaryHueShiftRange = 10;
 const diadicLightnessShiftRange = 30;
 const diadicSaturationShiftRange = 30;
@@ -72,18 +79,19 @@ const debounce$1 = {
     inputDebounce
 };
 const domElements = {
-    advancedMenu,
-    advancedMenuToggleButton,
     applyCustomColorButton,
     clearCustomColorButton,
-    closeButton,
+    closeHelpMenuButton,
+    closeHistoryMenuButton,
+    closeSubMenuAButton,
+    closeSubMenuBButton,
     customColorElement,
     customColorToggleButton,
     desaturateButton,
     enableAlphaCheckbox,
     generateButton,
-    historyMenuButton,
-    historyModal,
+    helpMenu,
+    historyMenu,
     limitBrightCheckbox,
     limitDarkCheckbox,
     limitGrayCheckbox,
@@ -97,7 +105,13 @@ const domElements = {
     showAsHSLButton,
     showAsHSVButton,
     showAsLABButton,
-    showAsRGBButton
+    showAsRGBButton,
+    showHelpMenuButton,
+    showHistoryMenuButton,
+    subMenuA,
+    subMenuB,
+    subMenuToggleButtonA,
+    subMenuToggleButtonB
 };
 const paletteShiftRanges = {
     complementaryHueShiftRange,
@@ -317,8 +331,16 @@ const lab = {
     value: { l: 0, a: 0, b: 0, alpha: 1 },
     format: 'lab'
 };
+const labString = {
+    value: { l: '0', a: '0', b: '0', alpha: '1' },
+    format: 'lab'
+};
 const rgb = {
     value: { red: 0, green: 0, blue: 0, alpha: 1 },
+    format: 'rgb'
+};
+const rgbString = {
+    value: { red: '0', green: '0', blue: '0', alpha: '1' },
     format: 'rgb'
 };
 const settings = {
@@ -345,6 +367,10 @@ const xyz = {
     value: { x: 0, y: 0, z: 0, alpha: 1 },
     format: 'xyz'
 };
+const xyzString = {
+    value: { x: '0', y: '0', z: '0', alpha: '1' },
+    format: 'xyz'
+};
 const mutation = {
     timestamp: new Date().toISOString(),
     key: 'test_key',
@@ -368,13 +394,13 @@ const paletteData = {
         customColor: {
             hslColor: hsl,
             convertedColors: {
-                cmyk: cmyk,
-                hex: hex,
-                hsl: hsl,
-                hsv: hsv,
-                lab: lab,
-                rgb: rgb,
-                xyz: xyz
+                cmyk: cmyk.value,
+                hex: hex.value,
+                hsl: hsl.value,
+                hsv: hsv.value,
+                lab: lab.value,
+                rgb: rgb.value,
+                xyz: xyz.value
             }
         }
     }
@@ -382,20 +408,22 @@ const paletteData = {
 const paletteItem = {
     id: 'fake',
     colors: {
-        cmyk: cmyk,
-        hex: hex,
-        hsl: hsl,
-        hsv: hsv,
-        lab: lab,
-        rgb: rgb,
-        xyz: xyz
+        cmyk: cmyk.value,
+        hex: hex.value,
+        hsl: hsl.value,
+        hsv: hsv.value,
+        lab: lab.value,
+        rgb: rgb.value,
+        xyz: xyz.value
     },
     colorStrings: {
-        cmykString: cmykString,
-        hslString: hslString,
-        hsvString: hsvString,
-        slString: slString,
-        svString: svString
+        cmykString: cmykString.value,
+        hexString: hex.value,
+        hslString: hslString.value,
+        hsvString: hsvString.value,
+        labString: labString.value,
+        rgbString: rgbString.value,
+        xyzString: xyzString.value
     },
     cssStrings: {
         cmykCSSString: 'cmyk(0%, 0%, 0%, 100%, 1)',
@@ -403,6 +431,7 @@ const paletteItem = {
         hslCSSString: 'hsl(0, 0%, 0%, 0)',
         hsvCSSString: 'hsv(0, 0%, 0%, 0)',
         labCSSString: 'lab(0, 0, 0, 0)',
+        rgbCSSString: 'rgb(0, 0, 0, 1)',
         xyzCSSString: 'xyz(0, 0, 0, 0)'
     }
 };
@@ -419,17 +448,20 @@ const defaults = {
     hsv,
     hsvString,
     lab,
+    labString,
     mutation,
     paletteData,
     paletteItem,
     rgb,
+    rgbString,
     settings,
     sl,
     slString,
     storedPalette,
     sv,
     svString,
-    xyz
+    xyz,
+    xyzString
 };
 
 function applyGammaCorrection(value) {
@@ -833,6 +865,12 @@ function colorToColorString(color) {
             value: newValue
         };
     }
+    else if (isHex(clonedColor)) {
+        return {
+            format: 'hex',
+            value: newValue
+        };
+    }
     else if (isHSLColor(clonedColor)) {
         return {
             format: 'hsl',
@@ -842,6 +880,24 @@ function colorToColorString(color) {
     else if (isHSVColor(clonedColor)) {
         return {
             format: 'hsv',
+            value: newValue
+        };
+    }
+    else if (isLAB(clonedColor)) {
+        return {
+            format: 'lab',
+            value: newValue
+        };
+    }
+    else if (isRGB(clonedColor)) {
+        return {
+            format: 'rgb',
+            value: newValue
+        };
+    }
+    else if (isXYZ(clonedColor)) {
+        return {
+            format: 'xyz',
             value: newValue
         };
     }
@@ -2651,8 +2707,25 @@ const paletteUtils = {
     populateColorTextOutputBox
 };
 
-//
-// ******** DB Initialization ********
+function createMutationLogger(obj, key) {
+    return new Proxy(obj, {
+        set(target, property, value) {
+            const oldValue = target[property];
+            const success = Reflect.set(target, property, value);
+            if (success) {
+                logMutation({
+                    timestamp: new Date().toISOString(),
+                    key,
+                    action: 'update',
+                    newValue: { [property]: value },
+                    oldValue: { [property]: oldValue },
+                    origin: 'Proxy'
+                });
+            }
+            return success;
+        }
+    });
+}
 const dbPromise = openDB('paletteDatabase', 1, {
     upgrade(db) {
         try {
@@ -2676,38 +2749,8 @@ const dbPromise = openDB('paletteDatabase', 1, {
         }
     }
 });
-//
-// ******** Utility Functions ********
-function createMutationLogger(obj, key) {
-    return new Proxy(obj, {
-        set(target, property, value) {
-            const oldValue = target[property];
-            const success = Reflect.set(target, property, value);
-            if (success) {
-                logMutation({
-                    timestamp: new Date().toISOString(),
-                    key,
-                    action: 'update',
-                    newValue: { [property]: value },
-                    oldValue: { [property]: oldValue },
-                    origin: 'Proxy'
-                });
-            }
-            return success;
-        }
-    });
-}
 async function getDB() {
     return dbPromise;
-}
-async function getNextTableID() {
-    const settings = await getSettings();
-    const nextID = settings.lastTableID + 1;
-    await saveData('settings', 'appSettings', {
-        ...settings,
-        lastTableID: nextID
-    });
-    return `palette_${nextID}`;
 }
 async function getCurrentPaletteID() {
     const db = await getDB();
@@ -2726,6 +2769,21 @@ function getLoggedObject(obj, key) {
         return createMutationLogger(obj, key);
     }
     return null;
+}
+async function getNextPaletteID() {
+    const currentID = await getCurrentPaletteID();
+    const newID = currentID + 1;
+    await updateCurrentPaletteID(newID);
+    return newID;
+}
+async function getNextTableID() {
+    const settings = await getSettings();
+    const nextID = settings.lastTableID + 1;
+    await saveData('settings', 'appSettings', {
+        ...settings,
+        lastTableID: nextID
+    });
+    return `palette_${nextID}`;
 }
 async function getSettings() {
     try {
@@ -2843,26 +2901,18 @@ async function saveSettings(newSettings) {
     }
 }
 async function trackedTransaction(storeName, mode, callback) {
+    const db = await getDB();
+    const tx = db.transaction(storeName, mode);
+    const store = tx.objectStore(storeName);
     try {
-        const store = mode === 'readonly'
-            ? await getStore(storeName, 'readonly')
-            : await getStore(storeName, 'readwrite');
         await callback(store);
+        await tx.done;
         console.log(`Transaction on ${storeName} completed.`);
     }
     catch (error) {
         console.error(`Transaction on ${storeName} failed: ${error}`);
         throw error;
     }
-}
-async function getNextPaletteID() {
-    const currentID = await getCurrentPaletteID();
-    const newID = currentID + 1;
-    await updateCurrentPaletteID(newID);
-    return newID;
-}
-async function initializeCurrentPaletteID() {
-    return getCurrentPaletteID();
 }
 async function updateCurrentPaletteID(newID) {
     const db = await getDB();
@@ -2914,7 +2964,6 @@ const database = {
     getSettings,
     getStore,
     getTable,
-    initializeCurrentPaletteID,
     listTables: async () => {
         const db = await getDB();
         const keys = await db.getAllKeys('tables');
@@ -2986,20 +3035,22 @@ async function genPalette() {
         return {
             id: `${color.format}_${database.getNextPaletteID()}`,
             colors: {
-                cmyk: convert.hslToCMYK(clonedColor),
-                hex: convert.hslToHex(clonedColor),
-                hsl: clonedColor,
-                hsv: convert.hslToHSV(clonedColor),
-                lab: convert.hslToLAB(clonedColor),
-                rgb: convert.hslToRGB(clonedColor),
-                xyz: convert.hslToXYZ(clonedColor)
+                cmyk: convert.hslToCMYK(clonedColor).value,
+                hex: convert.hslToHex(clonedColor).value,
+                hsl: clonedColor.value,
+                hsv: convert.hslToHSV(clonedColor).value,
+                lab: convert.hslToLAB(clonedColor).value,
+                rgb: convert.hslToRGB(clonedColor).value,
+                xyz: convert.hslToXYZ(clonedColor).value
             },
             colorStrings: {
-                cmykString: colorUtils.colorToColorString(convert.hslToCMYK(clonedColor)),
-                hslString: colorUtils.colorToColorString(clonedColor),
-                hsvString: colorUtils.colorToColorString(convert.hslToHSV(clonedColor)),
-                slString: colorUtils.colorToColorString(convert.hslToSL(clonedColor)),
-                svString: colorUtils.colorToColorString(convert.hslToSV(clonedColor))
+                cmykString: colorUtils.colorToColorString(convert.hslToCMYK(clonedColor)).value,
+                hexString: colorUtils.colorToColorString(convert.hslToHex(clonedColor)).value,
+                hslString: colorUtils.colorToColorString(clonedColor).value,
+                hsvString: colorUtils.colorToColorString(convert.hslToHSV(clonedColor)).value,
+                labString: colorUtils.colorToColorString(convert.hslToLAB(clonedColor)).value,
+                rgbString: colorUtils.colorToColorString(convert.hslToRGB(clonedColor)).value,
+                xyzString: colorUtils.colorToColorString(convert.hslToXYZ(clonedColor)).value
             },
             cssStrings: {
                 cmykCSSString: colorUtils.getCSSColorString(convert.hslToCMYK(clonedColor)),
@@ -3007,6 +3058,7 @@ async function genPalette() {
                 hslCSSString: colorUtils.getCSSColorString(clonedColor),
                 hsvCSSString: colorUtils.getCSSColorString(convert.hslToHSV(clonedColor)),
                 labCSSString: colorUtils.getCSSColorString(convert.hslToLAB(clonedColor)),
+                rgbCSSString: colorUtils.getCSSColorString(convert.hslToRGB(clonedColor)),
                 xyzCSSString: colorUtils.getCSSColorString(convert.hslToXYZ(clonedColor))
             }
         };
@@ -3317,7 +3369,7 @@ async function genPaletteBox(items, numBoxes, tableId) {
         paletteRow.innerHTML = '';
         const fragment = document.createDocumentFragment();
         items.slice(0, numBoxes).forEach((item, i) => {
-            const { hsl: color } = item.colors;
+            const color = { value: item.colors.hsl, format: 'hsl' };
             const { colorStripe } = domHelpers.makePaletteBox(color, i + 1);
             fragment.appendChild(colorStripe);
             paletteUtils.populateColorTextOutputBox(color, i + 1);
@@ -3515,14 +3567,16 @@ function copyToClipboard(text, tooltipElement) {
 }
 function defineUIElements() {
     try {
-        const advancedMenuToggleButton = config.advancedMenuToggleButton;
-        const applyCustomColorButton = config.advancedMenuToggleButton;
+        const applyCustomColorButton = config.applyCustomColorButton;
         const clearCustomColorButton = config.clearCustomColorButton;
         const customColorToggleButton = config.customColorToggleButton;
+        const closeHelpMenuButton = config.closeHelpMenuButton;
+        const closeHistoryMenuButton = config.closeHistoryMenuButton;
+        const closeSubMenuAButton = config.closeSubMenuAButton;
+        const closeSubMenuBButton = config.closeSubMenuBButton;
         const desaturateButton = config.desaturateButton;
         const enableAlphaCheckbox = config.enableAlphaCheckbox;
         const generateButton = config.generateButton;
-        const historyMenuButton = config.historyMenuButton;
         const limitBrightCheckbox = config.limitBrightCheckbox;
         const limitDarkCheckbox = config.limitDarkCheckbox;
         const limitGrayCheckbox = config.limitGrayCheckbox;
@@ -3534,18 +3588,24 @@ function defineUIElements() {
         const showAsHSVButton = config.showAsHSVButton;
         const showAsLABButton = config.showAsLABButton;
         const showAsRGBButton = config.showAsRGBButton;
+        const showHelpMenuButton = config.showHelpMenuButton;
+        const showHistoryMenuButton = config.showHistoryMenuButton;
+        const subMenuToggleButtonA = config.subMenuToggleButtonA;
+        const subMenuToggleButtonB = config.subMenuToggleButtonB;
         const selectedColor = selectedColorOptions
             ? parseInt(selectedColorOptions.value, 10)
             : 0;
         return {
-            advancedMenuToggleButton,
             applyCustomColorButton,
             clearCustomColorButton,
+            closeHelpMenuButton,
+            closeHistoryMenuButton,
+            closeSubMenuAButton,
+            closeSubMenuBButton,
             customColorToggleButton,
             desaturateButton,
             enableAlphaCheckbox,
             generateButton,
-            historyMenuButton,
             limitBrightCheckbox,
             limitDarkCheckbox,
             limitGrayCheckbox,
@@ -3556,20 +3616,26 @@ function defineUIElements() {
             showAsHSLButton,
             showAsHSVButton,
             showAsLABButton,
-            showAsRGBButton
+            showAsRGBButton,
+            showHelpMenuButton,
+            showHistoryMenuButton,
+            subMenuToggleButtonA,
+            subMenuToggleButtonB
         };
     }
     catch (error) {
         console.error('Failed to define UI buttons:', error);
         return {
-            advancedMenuToggleButton: null,
             applyCustomColorButton: null,
             clearCustomColorButton: null,
+            closeHelpMenuButton: null,
+            closeHistoryMenuButton: null,
+            closeSubMenuAButton: null,
+            closeSubMenuBButton: null,
             customColorToggleButton: null,
             desaturateButton: null,
             enableAlphaCheckbox: null,
             generateButton: null,
-            historyMenuButton: null,
             limitBrightCheckbox: null,
             limitDarkCheckbox: null,
             limitGrayCheckbox: null,
@@ -3580,7 +3646,11 @@ function defineUIElements() {
             showAsHSLButton: null,
             showAsHSVButton: null,
             showAsLABButton: null,
-            showAsRGBButton: null
+            showAsRGBButton: null,
+            showHelpMenuButton: null,
+            showHistoryMenuButton: null,
+            subMenuToggleButtonA: null,
+            subMenuToggleButtonB: null
         };
     }
 }
@@ -3807,9 +3877,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     const selectedColorOptions = config.selectedColorOptions;
-    const { advancedMenuToggleButton, applyCustomColorButton, clearCustomColorButton, customColorToggleButton, desaturateButton, historyMenuButton, generateButton, saturateButton, showAsCMYKButton, showAsHexButton, showAsHSLButton, showAsHSVButton, showAsLABButton, showAsRGBButton } = buttons;
+    const { applyCustomColorButton, clearCustomColorButton, closeHelpMenuButton, closeHistoryMenuButton, customColorToggleButton, desaturateButton, generateButton, saturateButton, showAsCMYKButton, showAsHexButton, showAsHSLButton, showAsHSVButton, showAsLABButton, showAsRGBButton, showHelpMenuButton, showHistoryMenuButton, subMenuToggleButtonA, subMenuToggleButtonB } = buttons;
     // confirm that all elements are accessible
-    console.log(`Advanced Menu Toggle Button: ${advancedMenuToggleButton ? 'found' : 'not found'}\nApply Custom Color Button: ${applyCustomColorButton ? 'found' : 'not found'}\nClear Custom Color Button: ${clearCustomColorButton ? 'found' : 'not found'}\nCustom Color Toggle Button: ${customColorToggleButton ? 'found' : 'not found'}\nDesaturate Button: ${desaturateButton ? 'found' : 'not found'}\nGenerate Button: ${generateButton ? 'found' : 'not found'}\nSaturate Button: ${saturateButton ? 'found' : 'not found'}\nShow as CMYK Button: ${showAsCMYKButton ? 'found' : 'not found'}\nShow as Hex Button: ${showAsHexButton ? 'found' : 'not found'}\nShow as HSL Button: ${showAsHSLButton ? 'found' : 'not found'}\nShow as HSV Button: ${showAsHSVButton ? 'found' : 'not found'}\nShow as LAB Button: ${showAsLABButton ? 'found' : 'not found'}\nShow as RGB Button: ${showAsRGBButton ? 'found' : 'not found'}`);
+    console.log(`Apply Custom Color Button: ${applyCustomColorButton ? 'found' : 'not found'}\nClear Custom Color Button: ${clearCustomColorButton ? 'found' : 'not found'}\nClose Help Menu Button: ${closeHelpMenuButton ? 'found' : 'not found'}\nClose History Menu Button: ${closeHistoryMenuButton ? 'found' : 'not found'}\nCustom Color Toggle Button: ${customColorToggleButton ? 'found' : 'not found'}\nDesaturate Button: ${desaturateButton ? 'found' : 'not found'}\nGenerate Button: ${generateButton ? 'found' : 'not found'}\nSaturate Button: ${saturateButton ? 'found' : 'not found'}\nShow as CMYK Button: ${showAsCMYKButton ? 'found' : 'not found'}\nShow as Hex Button: ${showAsHexButton ? 'found' : 'not found'}\nShow as HSL Button: ${showAsHSLButton ? 'found' : 'not found'}\nShow as HSV Button: ${showAsHSVButton ? 'found' : 'not found'}\nShow as LAB Button: ${showAsLABButton ? 'found' : 'not found'}\nShow as RGB Button: ${showAsRGBButton ? 'found' : 'not found'}\nShow Help Menu Button: ${showHelpMenuButton ? 'found' : 'not found'}\nShow History Menu Button${showHistoryMenuButton ? 'found' : 'not found'}\nSub Menu Toggle Button A: ${subMenuToggleButtonA ? 'found' : 'not found'}\nSub Menu Toggle Button B: ${subMenuToggleButtonB ? 'found' : 'not found'}`);
     const selectedColor = selectedColorOptions
         ? parseInt(selectedColorOptions.value, 10)
         : 0;
@@ -3821,15 +3891,6 @@ document.addEventListener('DOMContentLoaded', () => {
     catch (error) {
         console.error(`Unable to attach conversion button event listeners: ${error}`);
     }
-    advancedMenuToggleButton?.addEventListener('click', e => {
-        e.preventDefault();
-        if (config.advancedMenu) {
-            const clonedClasses = [...config.advancedMenu.classList];
-            const isHidden = clonedClasses.includes('hidden');
-            config.advancedMenu.classList.toggle('hidden');
-            config.advancedMenu.style.display = isHidden ? 'block' : 'none';
-        }
-    });
     applyCustomColorButton?.addEventListener('click', async (e) => {
         e.preventDefault();
         const customHSLColor = domFn.applyCustomColor();
@@ -3842,6 +3903,14 @@ document.addEventListener('DOMContentLoaded', () => {
         await database.deleteTable('customColor');
         console.log('Custom color cleared from IndexedDB');
         domFn.showCustomColorPopupDiv();
+    });
+    closeHelpMenuButton?.addEventListener('click', e => {
+        e.preventDefault();
+        console.log('closeHelpMenuButton clicked');
+    });
+    closeHistoryMenuButton?.addEventListener('click', e => {
+        e.preventDefault();
+        console.log('closeHistoryMenuButton clicked');
     });
     customColorToggleButton?.addEventListener('click', e => {
         e.preventDefault();
@@ -3873,14 +3942,74 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         await generate.startPaletteGen(paletteOptions);
     });
-    historyMenuButton?.addEventListener('click', e => {
-        e.preventDefault();
-        console.log('historyMenuButton clicked');
-    });
     saturateButton?.addEventListener('click', e => {
         e.preventDefault();
         console.log('saturateButton clicked');
         domFn.saturateColor(selectedColor);
+    });
+    showAsCMYKButton?.addEventListener('click', e => {
+        e.preventDefault();
+        console.log('showAsCMYKButton clicked');
+    });
+    showAsHexButton?.addEventListener('click', e => {
+        e.preventDefault();
+        console.log('showAsHexButton clicked');
+    });
+    showAsHSLButton?.addEventListener('click', e => {
+        e.preventDefault();
+        console.log('showAsHSLButton clicked');
+    });
+    showAsHSVButton?.addEventListener('click', e => {
+        e.preventDefault();
+        console.log('showAsHSVButton clicked');
+    });
+    showAsLABButton?.addEventListener('click', e => {
+        e.preventDefault();
+        console.log('showAsLABButton clicked');
+    });
+    showAsRGBButton?.addEventListener('click', e => {
+        e.preventDefault();
+        console.log('showAsRGBButton clicked');
+    });
+    showHelpMenuButton?.addEventListener('click', e => {
+        e.preventDefault();
+        if (showHelpMenuButton) {
+            const clonedClasses = [...showHelpMenuButton.classList];
+            const isHidden = clonedClasses.includes('hidden');
+            showHelpMenuButton.classList.toggle('hidden');
+            showHelpMenuButton.style.display = isHidden ? 'block' : 'none';
+        }
+        console.log('showHelpMenuButton clicked');
+    });
+    showHistoryMenuButton?.addEventListener('click', e => {
+        e.preventDefault();
+        if (showHistoryMenuButton) {
+            const clonedClasses = [...showHistoryMenuButton.classList];
+            const isHidden = clonedClasses.includes('hidden');
+            showHistoryMenuButton.classList.toggle('hidden');
+            showHistoryMenuButton.style.display = isHidden ? 'block' : 'none';
+        }
+        console.log('showHistoryMenuButton clicked');
+    });
+    subMenuToggleButtonA?.addEventListener('click', e => {
+        e.preventDefault();
+        if (subMenuToggleButtonA) {
+            const clonedClasses = [...subMenuToggleButtonA.classList];
+            const isHidden = clonedClasses.includes('hidden');
+            subMenuToggleButtonA.classList.toggle('hidden');
+            subMenuToggleButtonA.style.display = isHidden ? 'block' : 'none';
+        }
+        console.log('subMenuToggleButtonA clicked');
+    });
+    subMenuToggleButtonB?.addEventListener('click', e => {
+        e.preventDefault();
+        if (subMenuToggleButtonB) {
+            const clonedClasses = [...subMenuToggleButtonB.classList];
+            const isHidden = clonedClasses.includes('hidden');
+            subMenuToggleButtonB.classList.toggle('hidden');
+            subMenuToggleButtonB.style.display = isHidden ? 'block' : 'none';
+        }
+        console.log('subMenuToggleButtonB clicked');
     });
 });
 //# sourceMappingURL=bundle.js.map

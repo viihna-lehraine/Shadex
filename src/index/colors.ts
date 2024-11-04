@@ -40,10 +40,14 @@ export type ColorSpaceExtended = ColorSpace | 'sl' | 'sv';
 
 export type ColorString =
 	| CMYKString
+	| Hex
 	| HSLString
 	| HSVString
+	| LABString
+	| RGBString
 	| SLString
-	| SVString;
+	| SVString
+	| XYZString;
 
 export type ColorStringExtended = ColorString | Hex | LAB | RGB | XYZ;
 

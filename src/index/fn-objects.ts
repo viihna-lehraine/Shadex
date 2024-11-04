@@ -38,9 +38,7 @@ export interface Convert {
 export interface ColorUtils {
 	addHashToHex(hex: colors.Hex): colors.Hex;
 	colorStringToColor(colorString: colors.ColorString): colors.Color;
-	colorToColorString(
-		color: Exclude<colors.Color, colors.Hex | colors.LAB | colors.RGB>
-	): colors.ColorString | null;
+	colorToColorString(color: colors.Color): colors.ColorString | null;
 	componentToHex(componment: number): string;
 	ensureHash(value: string): string;
 	formatColor(
@@ -147,7 +145,6 @@ export interface Database {
 		>
 	>;
 	getTable(id: string): Promise<idb.StoredPalette | null>;
-	initializeCurrentPaletteID(): Promise<number>;
 	listTables(): Promise<string[]>;
 	logMutation(mutation: idb.MutationLog): Promise<void>;
 	renderPalette(tableId: string): Promise<void>;

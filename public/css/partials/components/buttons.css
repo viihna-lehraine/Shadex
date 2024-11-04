@@ -1,0 +1,73 @@
+#generate-button {
+	background-color: var(--background-color-4);
+	color: var(--font-color-3);
+}
+
+#generate-button,
+#custom-color-button {
+	padding: 10px 20px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 0.9em;
+	margin: 0 2px;
+	cursor: pointer;
+	border: 1px solid var(--border-color-4);
+	border-radius: 5px;
+}
+
+#generate-button:hover,
+.button-box-slice > button:hover {
+	background-color: var(--background-color-5);
+}
+
+#custom-color-button {
+	background-color: var(--background-color-6);
+	color: var(--font-color-4);
+}
+
+#custom-color-button:hover {
+	background-color: var(--background-color-7);
+}
+
+.button-row-button {
+	width: 90%;
+	background-color: var(--background-color-4);
+	color: var(--font-color-3);
+	padding: 5px 0;
+	border: 1px solid var(--border-color-4);
+	border-radius: 5px;
+}
+
+.sub-menu-toggle-button-A {
+	height: auto;
+	transform: translateX(-2vw);
+	color: var(--font-color-3);
+	background-color: var(--background-color-4);
+	padding: 10px;
+	border: 1px solid var(--border-color-4);
+	border-radius: 5px;
+	margin-top: -2.5vh;
+	text-orientation: upright;
+	writing-mode: vertical-lr;
+	cursor: pointer;
+}
+
+.sub-menu-toggle-button-B {
+	height: auto;
+	transform: translateX(2vw);
+	color: var(--font-color-3);
+	background-color: var(--background-color-4);
+	padding: 10px;
+	border: 1px solid var(--border-color-4);
+	border-radius: 5px;
+	margin-top: -2.5vh;
+	text-orientation: upright;
+	writing-mode: vertical-lr;
+	cursor: pointer;
+}
+
+.copy-button {
+	font-size: 0.75em;
+	height: 70%;
+}

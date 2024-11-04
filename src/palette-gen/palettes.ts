@@ -39,18 +39,36 @@ export async function genPalette(): Promise<fnObjects.GenPalette> {
 						convert.hslToCMYK(clonedColor)
 					) as colors.CMYKString
 				).value,
-				hslString: colorUtils.colorToColorString(
-					clonedColor
-				) as colors.HSLString,
-				hsvString: colorUtils.colorToColorString(
-					convert.hslToHSV(clonedColor)
-				) as colors.HSVString,
-				slString: colorUtils.colorToColorString(
-					convert.hslToSL(clonedColor)
-				) as colors.SLString,
-				svString: colorUtils.colorToColorString(
-					convert.hslToSV(clonedColor)
-				) as colors.SVString
+				hexString: (
+					colorUtils.colorToColorString(
+						convert.hslToHex(clonedColor)
+					) as colors.HexString
+				).value,
+				hslString: (
+					colorUtils.colorToColorString(
+						clonedColor
+					) as colors.HSLString
+				).value,
+				hsvString: (
+					colorUtils.colorToColorString(
+						convert.hslToHSV(clonedColor)
+					) as colors.HSVString
+				).value,
+				labString: (
+					colorUtils.colorToColorString(
+						convert.hslToLAB(clonedColor)
+					) as colors.LABString
+				).value,
+				rgbString: (
+					colorUtils.colorToColorString(
+						convert.hslToRGB(clonedColor)
+					) as colors.RGBString
+				).value,
+				xyzString: (
+					colorUtils.colorToColorString(
+						convert.hslToXYZ(clonedColor)
+					) as colors.XYZString
+				).value
 			},
 			cssStrings: {
 				cmykCSSString: colorUtils.getCSSColorString(
@@ -63,6 +81,9 @@ export async function genPalette(): Promise<fnObjects.GenPalette> {
 				),
 				labCSSString: colorUtils.getCSSColorString(
 					convert.hslToLAB(clonedColor)
+				),
+				rgbCSSString: colorUtils.getCSSColorString(
+					convert.hslToRGB(clonedColor)
 				),
 				xyzCSSString: colorUtils.getCSSColorString(
 					convert.hslToXYZ(clonedColor)

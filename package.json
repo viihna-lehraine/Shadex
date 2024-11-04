@@ -10,11 +10,12 @@
 	"scripts": {
 		"build": "npm run build:tsc && npm run build:rollup",
 		"build:rollup": "rollup -c",
-		"build:tsc": "rm -rf ./public/js && tsc && node scripts/add-js-extensions.mjs",
+		"build:tsc": "rm -rf ./public/js && tsc && node scripts/add-js-extensions.js",
 		"format": "npx prettier . --write",
 		"lint": "npx eslint",
 		"lint:fix": "npx eslint --fix",
 		"lint:watch": "npx eslint --watch",
+		"sass": "sass --watch ./public/sass/main.sass:./public/css/main.css",
 		"scan:tsc:errors": "tsc --noEmit",
 		"start": "node ./public/app.js",
 		"test": "jest",

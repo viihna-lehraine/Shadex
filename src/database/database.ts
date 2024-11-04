@@ -6,8 +6,27 @@ import * as idb from '../index/database';
 import * as palette from '../index/palette';
 import { paletteUtils } from '../utils/palette-utils';
 
-//
-// ******** DB Initialization ********
+function createMutationLogger<T extends object>(obj: T, key: string): T {
+	return new Proxy(obj, {
+		set(target, property, value) {
+			const oldValue = target[property as keyof T];
+			const success = Reflect.set(target, property, value);
+
+			if (success) {
+				logMutation({
+					timestamp: new Date().toISOString(),
+					key,
+					action: 'update',
+					newValue: { [property]: value },
+					oldValue: { [property]: oldValue },
+					origin: 'Proxy'
+				});
+			}
+
+			return success;
+		}
+	});
+}
 
 const dbPromise: Promise<idb.PaletteDB> = openDB<idb.PaletteSchema>(
 	'paletteDatabase',
@@ -38,45 +57,8 @@ const dbPromise: Promise<idb.PaletteDB> = openDB<idb.PaletteSchema>(
 	}
 );
 
-//
-// ******** Utility Functions ********
-
-function createMutationLogger<T extends object>(obj: T, key: string): T {
-	return new Proxy(obj, {
-		set(target, property, value) {
-			const oldValue = target[property as keyof T];
-			const success = Reflect.set(target, property, value);
-
-			if (success) {
-				logMutation({
-					timestamp: new Date().toISOString(),
-					key,
-					action: 'update',
-					newValue: { [property]: value },
-					oldValue: { [property]: oldValue },
-					origin: 'Proxy'
-				});
-			}
-
-			return success;
-		}
-	});
-}
-
 async function getDB(): Promise<idb.PaletteDB> {
 	return dbPromise;
-}
-
-async function getNextTableID(): Promise<string> {
-	const settings = await getSettings();
-	const nextID = settings.lastTableID + 1;
-
-	await saveData('settings', 'appSettings', {
-		...settings,
-		lastTableID: nextID
-	});
-
-	return `palette_${nextID}`;
 }
 
 async function getCurrentPaletteID(): Promise<number> {
@@ -104,6 +86,27 @@ function getLoggedObject<T extends object>(
 	}
 
 	return null;
+}
+
+async function getNextPaletteID(): Promise<number> {
+	const currentID = await getCurrentPaletteID();
+	const newID = currentID + 1;
+
+	await updateCurrentPaletteID(newID);
+
+	return newID;
+}
+
+async function getNextTableID(): Promise<string> {
+	const settings = await getSettings();
+	const nextID = settings.lastTableID + 1;
+
+	await saveData('settings', 'appSettings', {
+		...settings,
+		lastTableID: nextID
+	});
+
+	return `palette_${nextID}`;
 }
 
 async function getSettings(): Promise<idb.Settings> {
@@ -220,6 +223,7 @@ async function saveData<T>(
 		});
 	} catch (error) {
 		console.error(`Failed to save data to ${storeName}:`, error);
+
 		throw error;
 	}
 }
@@ -302,13 +306,13 @@ async function trackedTransaction<StoreName extends keyof idb.PaletteSchema>(
 		>
 	) => Promise<void>
 ): Promise<void> {
-	try {
-		const store =
-			mode === 'readonly'
-				? await getStore(storeName, 'readonly')
-				: await getStore(storeName, 'readwrite');
+	const db = await getDB();
+	const tx = db.transaction(storeName, mode);
+	const store = tx.objectStore(storeName);
 
+	try {
 		await callback(store);
+		await tx.done;
 
 		console.log(`Transaction on ${storeName} completed.`);
 	} catch (error) {
@@ -316,19 +320,6 @@ async function trackedTransaction<StoreName extends keyof idb.PaletteSchema>(
 
 		throw error;
 	}
-}
-
-async function getNextPaletteID(): Promise<number> {
-	const currentID = await getCurrentPaletteID();
-	const newID = currentID + 1;
-
-	await updateCurrentPaletteID(newID);
-
-	return newID;
-}
-
-async function initializeCurrentPaletteID(): Promise<number> {
-	return getCurrentPaletteID();
 }
 
 async function updateCurrentPaletteID(newID: number): Promise<void> {
@@ -396,7 +387,6 @@ export const database: fnObjects.Database = {
 	getSettings,
 	getStore,
 	getTable,
-	initializeCurrentPaletteID,
 	listTables: async () => {
 		const db = await getDB();
 		const keys = await db.getAllKeys('tables');

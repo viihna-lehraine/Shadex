@@ -1,0 +1,55 @@
+@media (max-width: 600px) {
+	#container {
+		padding: 15px;
+		overflow-x: auto;
+		overflow-y: scroll;
+	}
+
+	#ui-row {
+		flex-wrap: wrap;
+	}
+
+	.palette-box {
+		height: 20%;
+		margin: 10px 5px;
+	}
+
+	button {
+		font-size: 12px;
+		height: fit-content;
+		width: 80%;
+	}
+
+	button:first-child {
+		font-size: 14px;
+		height: fit-content;
+		width: 40%;
+	}
+
+	#the-box {
+		width: 90%;
+		margin-bottom: -2vh;
+	}
+
+	#button-box {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.button-box-slice {
+		width: 100%;
+		margin-bottom: 10px;
+	}
+
+	#button-box-title-slice {
+		order: -1;
+	}
+
+	.color-text-output-box {
+		font-size: 0.5em;
+		user-select: text;
+		-webkit-user-select: text;
+		-moz-user-select: text;
+		-ms-user-select: text;
+	}
+}

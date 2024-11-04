@@ -355,7 +355,7 @@ function narrowToColor(
 		return colorStringToColor(color);
 	}
 
-	switch (color.format) {
+	switch (color.format as colors.ColorSpaceExtended) {
 		case 'cmyk':
 		case 'hex':
 		case 'hsl':
@@ -426,13 +426,8 @@ function colorStringToColor(colorString: colors.ColorString): colors.Color {
 	}
 }
 
-function colorToColorString(
-	color: Exclude<colors.Color, colors.Hex | colors.LAB | colors.RGB>
-): colors.ColorString {
-	const clonedColor = core.clone(color) as Exclude<
-		colors.Color,
-		colors.Hex | colors.LAB | colors.RGB
-	>;
+function colorToColorString(color: colors.Color): colors.ColorString {
+	const clonedColor = core.clone(color) as Exclude<colors.Color, colors.Hex>;
 
 	if (isColorString(clonedColor)) {
 		console.log(
@@ -449,6 +444,11 @@ function colorToColorString(
 			format: 'cmyk',
 			value: newValue as unknown as colors.CMYKValueString
 		};
+	} else if (isHex(clonedColor)) {
+		return {
+			format: 'hex',
+			value: newValue as unknown as colors.HexValueString
+		};
 	} else if (isHSLColor(clonedColor)) {
 		return {
 			format: 'hsl',
@@ -458,6 +458,21 @@ function colorToColorString(
 		return {
 			format: 'hsv',
 			value: newValue as unknown as colors.HSVValueString
+		};
+	} else if (isLAB(clonedColor)) {
+		return {
+			format: 'lab',
+			value: newValue as unknown as colors.LABValueString
+		};
+	} else if (isRGB(clonedColor)) {
+		return {
+			format: 'rgb',
+			value: newValue as unknown as colors.RGBValueString
+		};
+	} else if (isXYZ(clonedColor)) {
+		return {
+			format: 'xyz',
+			value: newValue as unknown as colors.XYZValueString
 		};
 	} else {
 		throw new Error(`Unsupported format: ${clonedColor.format}`);
