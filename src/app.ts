@@ -71,14 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
 	advancedMenuToggleButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		if (advancedMenuToggleButton) {
-			const clonedClasses = [...advancedMenuToggleButton.classList];
-			const isHidden = clonedClasses.includes('hidden');
+		const advancedMenuContent = document.querySelector(
+			'.advanced-menu-content'
+		) as HTMLElement | null;
 
-			advancedMenuToggleButton.classList.toggle('hidden');
-			advancedMenuToggleButton.style.display = isHidden
-				? 'block'
-				: 'none';
+		if (advancedMenuContent) {
+			const isHidden =
+				getComputedStyle(advancedMenuContent).display === 'none';
+
+			advancedMenuContent.style.display = isHidden ? 'flex' : 'none';
 		}
 
 		console.log('advancedMenuToggleButton clicked');
@@ -176,29 +177,35 @@ document.addEventListener('DOMContentLoaded', () => {
 	helpMenuToggleButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		if (helpMenuToggleButton) {
-			const clonedClasses = [...helpMenuToggleButton.classList];
-			const isHidden = clonedClasses.includes('hidden');
+		const helpMenuContent = document.querySelector(
+			'.help-menu-content'
+		) as HTMLElement | null;
 
-			helpMenuToggleButton.classList.toggle('hidden');
-			helpMenuToggleButton.style.display = isHidden ? 'block' : 'none';
+		if (helpMenuContent) {
+			const isHidden =
+				getComputedStyle(helpMenuContent).display === 'none';
+
+			helpMenuContent.style.display = isHidden ? 'flex' : 'none';
 		}
 
-		console.log('showHelpMenuButton clicked');
+		console.log('helpMenuToggleButton clicked');
 	});
 
 	historyMenuToggleButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		if (historyMenuToggleButton) {
-			const clonedClasses = [...historyMenuToggleButton.classList];
-			const isHidden = clonedClasses.includes('hidden');
+		const historyMenuContent = document.querySelector(
+			'history-menu-content'
+		) as HTMLElement | null;
 
-			historyMenuToggleButton.classList.toggle('hidden');
-			historyMenuToggleButton.style.display = isHidden ? 'block' : 'none';
+		if (historyMenuContent) {
+			const isHidden =
+				getComputedStyle(historyMenuContent).display === 'none';
+
+			historyMenuContent.style.display = isHidden ? 'flex' : 'none';
 		}
 
-		console.log('showHistoryMenuButton clicked');
+		console.log('historyMenuToggleButton clicked');
 	});
 
 	saturateButton?.addEventListener('click', e => {
