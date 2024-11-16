@@ -8,67 +8,85 @@ import { guards } from '../../src/utils/type-guards';
 const paletteGen = genPalette();
 
 describe('Palette Generation Module', () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
 
-    describe('getBaseColor', () => {
-        it('should return the provided custom color if not null', () => {
-            const customColor: colors.Color = { format: 'rgb', value: { red: 255, green: 0, blue: 0 } };
-            const result = paletteGen.getBaseColor(customColor, 'rgb');
+	describe('getBaseColor', () => {
+		it('should return the provided custom color if not null', () => {
+			const customColor: colors.Color = {
+				format: 'rgb',
+				value: { red: 255, green: 0, blue: 0 }
+			};
+			const result = paletteGen.getBaseColor(customColor, 'rgb');
 
-            expect(result).toEqual(customColor);
-        });
+			expect(result).toEqual(customColor);
+		});
 
-        it('should generate a random color if customColor is null', () => {
-            jest.spyOn(colorRandomizer, 'genRandomColor').mockReturnValue({
-                format: 'rgb',
-                value: { red: 0, green: 255, blue: 0 }
-            });
+		it('should generate a random color if customColor is null', () => {
+			jest.spyOn(colorRandomizer, 'genRandomColor').mockReturnValue({
+				format: 'rgb',
+				value: { red: 0, green: 255, blue: 0 }
+			});
 
-            const result = paletteGen.getBaseColor(null, 'rgb');
+			const result = paletteGen.getBaseColor(null, 'rgb');
 
-            expect(result.format).toBe('rgb');
-        });
-    });
+			expect(result.format).toBe('rgb');
+		});
+	});
 
-    describe('createPaletteItem', () => {
-        it('should create a valid palette item from a color', () => {
-            const color: colors.RGB = { format: 'rgb', value: { red: 0, green: 255, blue: 0 } };
-            const item = paletteGen.createPaletteItem(color);
+	describe('createPaletteItem', () => {
+		it('should create a valid palette item from a color', () => {
+			const color: colors.RGB = {
+				format: 'rgb',
+				value: { red: 0, green: 255, blue: 0 }
+			};
+			const item = paletteGen.createPaletteItem(color);
 
-            expect(item.color).toEqual(color);
-            expect(item.colorConversions).toBeDefined();
-            expect(item.id).toMatch(/^rgb_/);
-        });
-    });
+			expect(item.color).toEqual(color);
+			expect(item.colorConversions).toBeDefined();
+			expect(item.id).toMatch(/^rgb_/);
+		});
+	});
 
-    describe('savePaletteToDB', () => {
-        it('should save the palette to IndexedDB', async () => {
-            const mockPaletteItem = paletteGen.createPaletteItem({
-                format: 'rgb',
-                value: { red: 0, green: 255, blue: 0 }
-            });
-            const palette = {
-                id: 'test_123',
-                items: [mockPaletteItem],
-                metadata: { numBoxes: 1, originalColorSpace: 'rgb', paletteType: 'test' }
-            };
+	describe('savePaletteToDB', () => {
+		it('should save the palette to IndexedDB', async () => {
+			const mockPaletteItem = paletteGen.createPaletteItem({
+				format: 'rgb',
+				value: { red: 0, green: 255, blue: 0 }
+			});
+			const palette = {
+				id: 'test_123',
+				items: [mockPaletteItem],
+				metadata: {
+					numBoxes: 1,
+					originalColorSpace: 'rgb',
+					paletteType: 'test'
+				}
+			};
 
-            jest.spyOn(idbFn, 'savePalette').mockResolvedValueOnce();
+			jest.spyOn(idbFn, 'savePalette').mockResolvedValueOnce();
 
-            await paletteGen.savePaletteToDB('test', palette.items, palette.items[0].color, 1);
+			await paletteGen.savePaletteToDB(
+				'test',
+				palette.items,
+				palette.items[0].color,
+				1
+			);
 
-            expect(idbFn.savePalette).toHaveBeenCalledWith('test_123', {
-                tableID: 123,
-                palette
-            });
-        });
-    });
+			expect(idbFn.savePalette).toHaveBeenCalledWith('test_123', {
+				tableID: 123,
+				palette
+			});
+		});
+	});
 
-    describe('analogous', () => {
+	describe('analogous', () => {
 		it('should generate an analogous palette with valid hues', async () => {
-			const color: colors.HSL = { format: 'hsl', value: { hue: 120, saturation: 50, lightness: 50 } };
+			const color: colors.HSL = {
+				format: 'hsl',
+				value: { hue: 120, saturation: 50, lightness: 50 }
+			};
 
 			jest.spyOn(genHues, 'analogous').mockReturnValue([120, 140]);
 
@@ -91,14 +109,18 @@ describe('Palette Generation Module', () => {
 			const result = await paletteGen.analogous(1, null, 'hsl');
 
 			expect(result.items.length).toBe(0);
-			expect(console.warn).toHaveBeenCalledWith('Analogous palette requires at least 2 swatches.');
+			expect(console.warn).toHaveBeenCalledWith(
+				'Analogous palette requires at least 2 swatches.'
+			);
 		});
 	});
 
-
-    describe('complementary', () => {
+	describe('complementary', () => {
 		it('should generate a complementary palette', async () => {
-			const color: colors.HSL = { format: 'hsl', value: { hue: 60, saturation: 50, lightness: 50 } };
+			const color: colors.HSL = {
+				format: 'hsl',
+				value: { hue: 60, saturation: 50, lightness: 50 }
+			};
 			const result = await paletteGen.complementary(2, color, 'hsl');
 
 			expect(result.items.length).toBe(2);
@@ -113,14 +135,18 @@ describe('Palette Generation Module', () => {
 			const result = await paletteGen.complementary(1, null, 'hsl');
 
 			expect(result.items.length).toBe(0);
-			expect(console.warn).toHaveBeenCalledWith('Complementary palette requires at least 2 swatches.');
+			expect(console.warn).toHaveBeenCalledWith(
+				'Complementary palette requires at least 2 swatches.'
+			);
 		});
 	});
 
-
-    describe('monochromatic', () => {
+	describe('monochromatic', () => {
 		it('should generate a monochromatic palette', async () => {
-			const color: colors.HSL = { format: 'hsl', value: { hue: 120, saturation: 50, lightness: 50 } };
+			const color: colors.HSL = {
+				format: 'hsl',
+				value: { hue: 120, saturation: 50, lightness: 50 }
+			};
 			const result = await paletteGen.monochromatic(3, color, 'hsl');
 
 			expect(result.items.length).toBe(3);
@@ -135,12 +161,13 @@ describe('Palette Generation Module', () => {
 			const result = await paletteGen.monochromatic(1, null, 'hsl');
 
 			expect(result.items.length).toBe(0);
-			expect(console.warn).toHaveBeenCalledWith('Monochromatic palette requires at least 2 swatches.');
+			expect(console.warn).toHaveBeenCalledWith(
+				'Monochromatic palette requires at least 2 swatches.'
+			);
 		});
 	});
 
-
-    describe('random', () => {
+	describe('random', () => {
 		it('should generate a random palette with random colors', async () => {
 			jest.spyOn(colorRandomizer, 'genRandomColor').mockReturnValue({
 				format: 'rgb',
@@ -155,10 +182,12 @@ describe('Palette Generation Module', () => {
 		});
 	});
 
-
-    describe('splitComplementary', () => {
+	describe('splitComplementary', () => {
 		it('should generate a split complementary palette', async () => {
-			const color: colors.HSL = { format: 'hsl', value: { hue: 60, saturation: 50, lightness: 50 } };
+			const color: colors.HSL = {
+				format: 'hsl',
+				value: { hue: 60, saturation: 50, lightness: 50 }
+			};
 
 			jest.spyOn(genHues, 'splitComplementary').mockReturnValue([80, 40]);
 
@@ -172,10 +201,12 @@ describe('Palette Generation Module', () => {
 		});
 	});
 
-
-    describe('tetradic', () => {
+	describe('tetradic', () => {
 		it('should generate a tetradic palette', async () => {
-			const color: colors.HSL = { format: 'hsl', value: { hue: 0, saturation: 50, lightness: 50 } };
+			const color: colors.HSL = {
+				format: 'hsl',
+				value: { hue: 0, saturation: 50, lightness: 50 }
+			};
 
 			jest.spyOn(genHues, 'tetradic').mockReturnValue([0, 180, 90, 270]);
 
@@ -193,13 +224,18 @@ describe('Palette Generation Module', () => {
 			const result = await paletteGen.tetradic(3, null, 'hsl');
 
 			expect(result.items.length).toBe(0);
-			expect(console.warn).toHaveBeenCalledWith('Tetradic palette requires at least 4 swatches.');
+			expect(console.warn).toHaveBeenCalledWith(
+				'Tetradic palette requires at least 4 swatches.'
+			);
 		});
 	});
 
 	describe('triadic', () => {
 		it('should generate a triadic palette with valid hues', async () => {
-			const color: colors.HSL = { format: 'hsl', value: { hue: 30, saturation: 50, lightness: 50 } };
+			const color: colors.HSL = {
+				format: 'hsl',
+				value: { hue: 30, saturation: 50, lightness: 50 }
+			};
 
 			jest.spyOn(genHues, 'triadic').mockReturnValue([150, 270]);
 
@@ -218,22 +254,25 @@ describe('Palette Generation Module', () => {
 			const result = await paletteGen.triadic(2, null, 'hsl');
 
 			expect(result.items.length).toBe(0);
-			expect(console.warn).toHaveBeenCalledWith('Triadic palette requires at least 3 swatches.');
+			expect(console.warn).toHaveBeenCalledWith(
+				'Triadic palette requires at least 3 swatches.'
+			);
 		});
 	});
 
+	describe('updateColorBox', () => {
+		it('should update the color box in the DOM', () => {
+			const color: colors.Hex = {
+				format: 'hex',
+				value: { hex: '#00ff00' }
+			};
+			const box = document.createElement('div');
+			box.id = 'color-box-1';
+			document.body.appendChild(box);
 
+			paletteGen.updateColorBox(color, 'hex', 0);
 
-    describe('updateColorBox', () => {
-        it('should update the color box in the DOM', () => {
-            const color: colors.Hex = { format: 'hex', value: { hex: '#00ff00' } };
-            const box = document.createElement('div');
-            box.id = 'color-box-1';
-            document.body.appendChild(box);
-
-            paletteGen.updateColorBox(color, 'hex', 0);
-
-            expect(box.style.backgroundColor).toBe('#00ff00');
-        });
-    });
+			expect(box.style.backgroundColor).toBe('#00ff00');
+		});
+	});
 });

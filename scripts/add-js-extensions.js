@@ -6,8 +6,8 @@ async function addJsExtensions() {
 	try {
 		const results = await replaceInFile({
 			files: 'public/js/**/*.js',
-      		from: /(import\s+.*?['"])(\..*?)(['"])/g,
-      		to: '$1$2.js$3',
+			from: /(import\s+.*?['"])(\..*?)(['"])/g,
+			to: '$1$2.js$3',
 			dry: false
 		});
 

@@ -5,16 +5,18 @@ import { defaults } from '../../src/config/defaults';
 import * as idb from '../../src/index/idb';
 
 describe('idb-fn: IndexedDB Operations', () => {
-    beforeAll(async () => {
+	beforeAll(async () => {
+		const db: idb.PaletteDB = await openDB('paletteDatabase', 1, {
+			upgrade(db) {
+				db.createObjectStore('tables', { keyPath: 'key' });
+			}
+		});
 
-        const db: idb.PaletteDB = await openDB('paletteDatabase', 1, {
-            upgrade(db) {
-                db.createObjectStore('tables', { keyPath: 'key' });
-            }
-        });
-
-        await db.put('tables', { key: 'test_palette_1', ...defaults.storedPalette });
-    });
+		await db.put('tables', {
+			key: 'test_palette_1',
+			...defaults.storedPalette
+		});
+	});
 
 	afterAll(async () => {
 		const db = await idbFn.getDB();
@@ -23,35 +25,41 @@ describe('idb-fn: IndexedDB Operations', () => {
 	});
 
 	it('should retrieve a stored palette from the database', async () => {
-        const result = await idbFn.getTable('test_palette_1');
+		const result = await idbFn.getTable('test_palette_1');
 
-        expect(result).toEqual(defaults.storedPalette);
-    });
+		expect(result).toEqual(defaults.storedPalette);
+	});
 
 	it('should log a mutation correctly', async () => {
-        const logSpy = jest.spyOn(console, 'log');
+		const logSpy = jest.spyOn(console, 'log');
 
-        await idbFn.logMutation(defaults.mutation);
+		await idbFn.logMutation(defaults.mutation);
 
-        expect(logSpy).toHaveBeenCalledWith(`Logged mutation: ${JSON.stringify(defaults.mutation)}`);
-    });
+		expect(logSpy).toHaveBeenCalledWith(
+			`Logged mutation: ${JSON.stringify(defaults.mutation)}`
+		);
+	});
 
 	it('should save a new palette to IndexedDB', async () => {
 		const newPalette = {
-            ...defaults.storedPalette,
-            tableID: 2,
-            palette: { ...defaults.storedPalette.palette, id: 'test_palette_2' }
-        };
+			...defaults.storedPalette,
+			tableID: 2,
+			palette: { ...defaults.storedPalette.palette, id: 'test_palette_2' }
+		};
 
-        await idbFn.savePalette('test_palette_2', newPalette);
+		await idbFn.savePalette('test_palette_2', newPalette);
 
-        const savedPalette = await idbFn.getTable('test_palette_2');
+		const savedPalette = await idbFn.getTable('test_palette_2');
 
-        expect(savedPalette).toEqual(newPalette);
+		expect(savedPalette).toEqual(newPalette);
 	});
 
 	it('should update an entry in a palette', async () => {
-		await idbFn.updateEntryInPalette('test_palette_1', 0, defaults.paletteItem);
+		await idbFn.updateEntryInPalette(
+			'test_palette_1',
+			0,
+			defaults.paletteItem
+		);
 
 		const updatedPalette = await idbFn.getTable('test_palette_1');
 
@@ -59,15 +67,18 @@ describe('idb-fn: IndexedDB Operations', () => {
 	});
 
 	it('should handle non-existent palettes gracefully', async () => {
-        const result = await idbFn.getTable('non_existent_palette');
+		const result = await idbFn.getTable('non_existent_palette');
 
-        expect(result).toBeNull();
-    });
+		expect(result).toBeNull();
+	});
 
 	it('should throw an error if updating a non-existent entry', async () => {
 		await expect(
-			idbFn.updateEntryInPalette('test_palette_1', 99, defaults.paletteItem)
+			idbFn.updateEntryInPalette(
+				'test_palette_1',
+				99,
+				defaults.paletteItem
+			)
 		).rejects.toThrow('Entry 99 not found in palette test_palette_1.');
 	});
-
-})
+});

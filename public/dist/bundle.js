@@ -10,6 +10,7 @@ const xyzMinY = 0;
 const xyzMinZ = 0;
 const buttonDebounce = 300;
 const inputDebounce = 200;
+const advancedMenuToggleButton = getElement('advanced-menu-toggle-button');
 const applyCustomColorButton = getElement('apply-custom-color-button');
 const clearCustomColorButton = getElement('clear-custom-color-button');
 const closeHelpMenuButton = getElement('close-help-menu-button');
@@ -17,13 +18,13 @@ const closeHistoryMenuButton = getElement('close-history-menu-button');
 const closeSubMenuAButton = getElement('close-sub-menu-A-button');
 const closeSubMenuBButton = getElement('close-sub-menu-B-button');
 const customColorElement = getElement('custom-color');
-const customColorToggleButton = getElement('custom-color-toggle-button');
+const customColorMenuButton = getElement('custom-color-menu-button');
 const desaturateButton = getElement('desaturate-button');
 const enableAlphaCheckbox = getElement('enable-alpha-checkbox');
 const generateButton = getElement('generate-button');
-const helpMenu = getElement('help-modal');
-const historyMenu = getElement('history-modal');
-const limitBrightCheckbox = getElement('limit-light-checkbox');
+const helpMenuToggleButton = getElement('help-menu-toggle-button');
+const historyMenuToggleButton = getElement('history-menu-toggle-button');
+const limitBrightCheckbox = getElement('limit-bright-checkbox');
 const limitDarkCheckbox = getElement('limit-dark-checkbox');
 const limitGrayCheckbox = getElement('limit-gray-checkbox');
 const paletteNumberOptions = getElement('palette-number-options');
@@ -37,12 +38,6 @@ const showAsHSLButton = getElement('show-as-hsl-button');
 const showAsHSVButton = getElement('show-as-hsv-button');
 const showAsLABButton = getElement('show-as-lab-button');
 const showAsRGBButton = getElement('show-as-rgb-button');
-const showHelpMenuButton = getElement('help-button');
-const showHistoryMenuButton = getElement('show-history-menu-button');
-const subMenuA = getElement('sub-menu-menu-A');
-const subMenuB = getElement('sub-menu-menu-B');
-const subMenuToggleButtonA = getElement('sub-menu-toggle-button-A');
-const subMenuToggleButtonB = getElement('sub-menu-toggle-button-B');
 const complementaryHueShiftRange = 10;
 const diadicLightnessShiftRange = 30;
 const diadicSaturationShiftRange = 30;
@@ -79,6 +74,7 @@ const debounce$1 = {
     inputDebounce
 };
 const domElements = {
+    advancedMenuToggleButton,
     applyCustomColorButton,
     clearCustomColorButton,
     closeHelpMenuButton,
@@ -86,12 +82,12 @@ const domElements = {
     closeSubMenuAButton,
     closeSubMenuBButton,
     customColorElement,
-    customColorToggleButton,
+    customColorMenuButton,
     desaturateButton,
     enableAlphaCheckbox,
     generateButton,
-    helpMenu,
-    historyMenu,
+    helpMenuToggleButton,
+    historyMenuToggleButton,
     limitBrightCheckbox,
     limitDarkCheckbox,
     limitGrayCheckbox,
@@ -105,13 +101,7 @@ const domElements = {
     showAsHSLButton,
     showAsHSVButton,
     showAsLABButton,
-    showAsRGBButton,
-    showHelpMenuButton,
-    showHistoryMenuButton,
-    subMenuA,
-    subMenuB,
-    subMenuToggleButtonA,
-    subMenuToggleButtonB
+    showAsRGBButton
 };
 const paletteShiftRanges = {
     complementaryHueShiftRange,
@@ -3567,9 +3557,10 @@ function copyToClipboard(text, tooltipElement) {
 }
 function defineUIElements() {
     try {
+        const advancedMenuToggleButton = config.advancedMenuToggleButton;
         const applyCustomColorButton = config.applyCustomColorButton;
         const clearCustomColorButton = config.clearCustomColorButton;
-        const customColorToggleButton = config.customColorToggleButton;
+        const customColorToggleButton = config.customColorMenuButton;
         const closeHelpMenuButton = config.closeHelpMenuButton;
         const closeHistoryMenuButton = config.closeHistoryMenuButton;
         const closeSubMenuAButton = config.closeSubMenuAButton;
@@ -3577,6 +3568,8 @@ function defineUIElements() {
         const desaturateButton = config.desaturateButton;
         const enableAlphaCheckbox = config.enableAlphaCheckbox;
         const generateButton = config.generateButton;
+        const helpMenuToggleButton = config.helpMenuToggleButton;
+        const historyMenuToggleButton = config.historyMenuToggleButton;
         const limitBrightCheckbox = config.limitBrightCheckbox;
         const limitDarkCheckbox = config.limitDarkCheckbox;
         const limitGrayCheckbox = config.limitGrayCheckbox;
@@ -3588,14 +3581,11 @@ function defineUIElements() {
         const showAsHSVButton = config.showAsHSVButton;
         const showAsLABButton = config.showAsLABButton;
         const showAsRGBButton = config.showAsRGBButton;
-        const showHelpMenuButton = config.showHelpMenuButton;
-        const showHistoryMenuButton = config.showHistoryMenuButton;
-        const subMenuToggleButtonA = config.subMenuToggleButtonA;
-        const subMenuToggleButtonB = config.subMenuToggleButtonB;
         const selectedColor = selectedColorOptions
             ? parseInt(selectedColorOptions.value, 10)
             : 0;
         return {
+            advancedMenuToggleButton,
             applyCustomColorButton,
             clearCustomColorButton,
             closeHelpMenuButton,
@@ -3606,6 +3596,8 @@ function defineUIElements() {
             desaturateButton,
             enableAlphaCheckbox,
             generateButton,
+            helpMenuToggleButton,
+            historyMenuToggleButton,
             limitBrightCheckbox,
             limitDarkCheckbox,
             limitGrayCheckbox,
@@ -3616,16 +3608,13 @@ function defineUIElements() {
             showAsHSLButton,
             showAsHSVButton,
             showAsLABButton,
-            showAsRGBButton,
-            showHelpMenuButton,
-            showHistoryMenuButton,
-            subMenuToggleButtonA,
-            subMenuToggleButtonB
+            showAsRGBButton
         };
     }
     catch (error) {
         console.error('Failed to define UI buttons:', error);
         return {
+            advancedMenuToggleButton: null,
             applyCustomColorButton: null,
             clearCustomColorButton: null,
             closeHelpMenuButton: null,
@@ -3636,6 +3625,8 @@ function defineUIElements() {
             desaturateButton: null,
             enableAlphaCheckbox: null,
             generateButton: null,
+            helpMenuToggleButton: null,
+            historyMenuToggleButton: null,
             limitBrightCheckbox: null,
             limitDarkCheckbox: null,
             limitGrayCheckbox: null,
@@ -3646,11 +3637,7 @@ function defineUIElements() {
             showAsHSLButton: null,
             showAsHSVButton: null,
             showAsLABButton: null,
-            showAsRGBButton: null,
-            showHelpMenuButton: null,
-            showHistoryMenuButton: null,
-            subMenuToggleButtonA: null,
-            subMenuToggleButtonB: null
+            showAsRGBButton: null
         };
     }
 }
@@ -3877,9 +3864,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     const selectedColorOptions = config.selectedColorOptions;
-    const { applyCustomColorButton, clearCustomColorButton, closeHelpMenuButton, closeHistoryMenuButton, customColorToggleButton, desaturateButton, generateButton, saturateButton, showAsCMYKButton, showAsHexButton, showAsHSLButton, showAsHSVButton, showAsLABButton, showAsRGBButton, showHelpMenuButton, showHistoryMenuButton, subMenuToggleButtonA, subMenuToggleButtonB } = buttons;
+    const { advancedMenuToggleButton, applyCustomColorButton, clearCustomColorButton, closeHelpMenuButton, closeHistoryMenuButton, customColorToggleButton, desaturateButton, generateButton, helpMenuToggleButton, historyMenuToggleButton, saturateButton, showAsCMYKButton, showAsHexButton, showAsHSLButton, showAsHSVButton, showAsLABButton, showAsRGBButton } = buttons;
     // confirm that all elements are accessible
-    console.log(`Apply Custom Color Button: ${applyCustomColorButton ? 'found' : 'not found'}\nClear Custom Color Button: ${clearCustomColorButton ? 'found' : 'not found'}\nClose Help Menu Button: ${closeHelpMenuButton ? 'found' : 'not found'}\nClose History Menu Button: ${closeHistoryMenuButton ? 'found' : 'not found'}\nCustom Color Toggle Button: ${customColorToggleButton ? 'found' : 'not found'}\nDesaturate Button: ${desaturateButton ? 'found' : 'not found'}\nGenerate Button: ${generateButton ? 'found' : 'not found'}\nSaturate Button: ${saturateButton ? 'found' : 'not found'}\nShow as CMYK Button: ${showAsCMYKButton ? 'found' : 'not found'}\nShow as Hex Button: ${showAsHexButton ? 'found' : 'not found'}\nShow as HSL Button: ${showAsHSLButton ? 'found' : 'not found'}\nShow as HSV Button: ${showAsHSVButton ? 'found' : 'not found'}\nShow as LAB Button: ${showAsLABButton ? 'found' : 'not found'}\nShow as RGB Button: ${showAsRGBButton ? 'found' : 'not found'}\nShow Help Menu Button: ${showHelpMenuButton ? 'found' : 'not found'}\nShow History Menu Button${showHistoryMenuButton ? 'found' : 'not found'}\nSub Menu Toggle Button A: ${subMenuToggleButtonA ? 'found' : 'not found'}\nSub Menu Toggle Button B: ${subMenuToggleButtonB ? 'found' : 'not found'}`);
+    console.log(`Advanced Menu Toggle Button${advancedMenuToggleButton ? 'found' : 'not found'}\nApply Custom Color Button: ${applyCustomColorButton ? 'found' : 'not found'}\nClear Custom Color Button: ${clearCustomColorButton ? 'found' : 'not found'}\nClose Help Menu Button: ${closeHelpMenuButton ? 'found' : 'not found'}\nClose History Menu Button: ${closeHistoryMenuButton ? 'found' : 'not found'}\nCustom Color Toggle Button: ${customColorToggleButton ? 'found' : 'not found'}\nDesaturate Button: ${desaturateButton ? 'found' : 'not found'}\nGenerate Button: ${generateButton ? 'found' : 'not found'}\nHistory Toggle Menu Button: ${historyMenuToggleButton ? 'found' : 'not found'}\nSaturate Button: ${saturateButton ? 'found' : 'not found'}\nShow as CMYK Button: ${showAsCMYKButton ? 'found' : 'not found'}\nShow as Hex Button: ${showAsHexButton ? 'found' : 'not found'}\nShow as HSL Button: ${showAsHSLButton ? 'found' : 'not found'}\nShow as HSV Button: ${showAsHSVButton ? 'found' : 'not found'}\nShow as LAB Button: ${showAsLABButton ? 'found' : 'not found'}\nShow as RGB Button: ${showAsRGBButton ? 'found' : 'not found'}`);
     const selectedColor = selectedColorOptions
         ? parseInt(selectedColorOptions.value, 10)
         : 0;
@@ -3891,6 +3878,15 @@ document.addEventListener('DOMContentLoaded', () => {
     catch (error) {
         console.error(`Unable to attach conversion button event listeners: ${error}`);
     }
+    advancedMenuToggleButton?.addEventListener('click', e => {
+        e.preventDefault();
+        const advancedMenuContent = document.querySelector('.advanced-menu-content');
+        if (advancedMenuContent) {
+            const isHidden = getComputedStyle(advancedMenuContent).display === 'none';
+            advancedMenuContent.style.display = isHidden ? 'flex' : 'none';
+        }
+        console.log('advancedMenuToggleButton clicked');
+    });
     applyCustomColorButton?.addEventListener('click', async (e) => {
         e.preventDefault();
         const customHSLColor = domFn.applyCustomColor();
@@ -3942,6 +3938,24 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         await generate.startPaletteGen(paletteOptions);
     });
+    helpMenuToggleButton?.addEventListener('click', e => {
+        e.preventDefault();
+        const helpMenuContent = document.querySelector('.help-menu-content');
+        if (helpMenuContent) {
+            const isHidden = getComputedStyle(helpMenuContent).display === 'none';
+            helpMenuContent.style.display = isHidden ? 'flex' : 'none';
+        }
+        console.log('helpMenuToggleButton clicked');
+    });
+    historyMenuToggleButton?.addEventListener('click', e => {
+        e.preventDefault();
+        const historyMenuContent = document.querySelector('history-menu-content');
+        if (historyMenuContent) {
+            const isHidden = getComputedStyle(historyMenuContent).display === 'none';
+            historyMenuContent.style.display = isHidden ? 'flex' : 'none';
+        }
+        console.log('historyMenuToggleButton clicked');
+    });
     saturateButton?.addEventListener('click', e => {
         e.preventDefault();
         console.log('saturateButton clicked');
@@ -3970,46 +3984,6 @@ document.addEventListener('DOMContentLoaded', () => {
     showAsRGBButton?.addEventListener('click', e => {
         e.preventDefault();
         console.log('showAsRGBButton clicked');
-    });
-    showHelpMenuButton?.addEventListener('click', e => {
-        e.preventDefault();
-        if (showHelpMenuButton) {
-            const clonedClasses = [...showHelpMenuButton.classList];
-            const isHidden = clonedClasses.includes('hidden');
-            showHelpMenuButton.classList.toggle('hidden');
-            showHelpMenuButton.style.display = isHidden ? 'block' : 'none';
-        }
-        console.log('showHelpMenuButton clicked');
-    });
-    showHistoryMenuButton?.addEventListener('click', e => {
-        e.preventDefault();
-        if (showHistoryMenuButton) {
-            const clonedClasses = [...showHistoryMenuButton.classList];
-            const isHidden = clonedClasses.includes('hidden');
-            showHistoryMenuButton.classList.toggle('hidden');
-            showHistoryMenuButton.style.display = isHidden ? 'block' : 'none';
-        }
-        console.log('showHistoryMenuButton clicked');
-    });
-    subMenuToggleButtonA?.addEventListener('click', e => {
-        e.preventDefault();
-        if (subMenuToggleButtonA) {
-            const clonedClasses = [...subMenuToggleButtonA.classList];
-            const isHidden = clonedClasses.includes('hidden');
-            subMenuToggleButtonA.classList.toggle('hidden');
-            subMenuToggleButtonA.style.display = isHidden ? 'block' : 'none';
-        }
-        console.log('subMenuToggleButtonA clicked');
-    });
-    subMenuToggleButtonB?.addEventListener('click', e => {
-        e.preventDefault();
-        if (subMenuToggleButtonB) {
-            const clonedClasses = [...subMenuToggleButtonB.classList];
-            const isHidden = clonedClasses.includes('hidden');
-            subMenuToggleButtonB.classList.toggle('hidden');
-            subMenuToggleButtonB.style.display = isHidden ? 'block' : 'none';
-        }
-        console.log('subMenuToggleButtonB clicked');
     });
 });
 //# sourceMappingURL=bundle.js.map
