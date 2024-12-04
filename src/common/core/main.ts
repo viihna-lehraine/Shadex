@@ -12,6 +12,10 @@ import {
 	SV,
 	SVValue
 } from '../../index';
+import { config } from '../../config';
+
+const defaultColors = config.defaults.colors;
+const mode = config.mode;
 
 function clone<T>(value: T): T {
 	return structuredClone(value);
@@ -33,7 +37,7 @@ function debounce<T extends (...args: Parameters<T>) => void>(
 }
 
 function colorStringToColor(colorString: ColorString): Color {
-	const clonedColor = core.clone(colorString);
+	const clonedColor = clone(colorString);
 
 	const parseValue = (value: string | number): number =>
 		typeof value === 'string' && value.endsWith('%')
@@ -62,7 +66,10 @@ function colorStringToColor(colorString: ColorString): Color {
 		case 'sv':
 			return { format: 'sv', value: newValue as SVValue };
 		default:
-			throw new Error('Unsupported format for colorStringToColor');
+			if (mode.logErrors)
+				console.error('Unsupported format for colorStringToColor');
+
+			return defaultColors.hsl;
 	}
 }
 
@@ -84,14 +91,13 @@ function getCSSColorString(color: Color): string {
 			case 'xyz':
 				return `xyz(${color.value.x},${color.value.y},${color.value.z},${color.value.alpha})`;
 			default:
-				console.error('Unexpected color format');
+				if (mode.logErrors)
+					console.error(`Unexpected color format: ${color.format}`);
 
 				return '#FFFFFFFF';
 		}
 	} catch (error) {
-		console.error(`getCSSColorString error: ${error}`);
-
-		return '#FFFFFFFF';
+		throw new Error(`getCSSColorString error: ${error}`);
 	}
 }
 
@@ -151,7 +157,8 @@ function isInRange(value: number, min: number, max: number): boolean {
 
 function parseCustomColor(rawValue: string): HSL | null {
 	try {
-		console.log(`Parsing custom color: ${JSON.stringify(rawValue)}`);
+		if (!mode.quiet)
+			console.log(`Parsing custom color: ${JSON.stringify(rawValue)}`);
 
 		const match = rawValue.match(
 			/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?,\s*(\d*\.?\d+)\)/
@@ -170,13 +177,15 @@ function parseCustomColor(rawValue: string): HSL | null {
 				format: 'hsl'
 			};
 		} else {
-			console.error(
-				'Invalid HSL custom color. Expected format: hsl(H, S%, L%, A)'
-			);
+			if (mode.logErrors)
+				console.error(
+					'Invalid HSL custom color. Expected format: hsl(H, S%, L%, A)'
+				);
+
 			return null;
 		}
 	} catch (error) {
-		console.error(`parseCustomColor error: ${error}`);
+		if (mode.logErrors) console.error(`parseCustomColor error: ${error}`);
 
 		return null;
 	}
@@ -322,13 +331,14 @@ function validateColorValues(color: Color | SL | SV): boolean {
 				clonedColor.value.z <= 108.883
 			);
 		default:
-			console.error(`Unsupported color format: ${color.format}`);
+			if (mode.logErrors)
+				console.error(`Unsupported color format: ${color.format}`);
 
 			return false;
 	}
 }
 
-export const core = {
+export const main = {
 	clone,
 	colorStringToColor,
 	debounce,
@@ -344,4 +354,4 @@ export const core = {
 	sanitizeRadial,
 	sanitizeRGB,
 	validateColorValues
-};
+} as const;

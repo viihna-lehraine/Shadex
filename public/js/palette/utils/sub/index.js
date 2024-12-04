@@ -1,8 +1,0 @@
-// File: src/palette/utils/sub/index.ts
-import { limits } from './limits.js';
-import { update } from './update.js';
-export const sub = {
-    limits,
-    update
-};
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi9zcmMvcGFsZXR0ZS91dGlscy9zdWIvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsdUNBQXVDO0FBRXZDLE9BQU8sRUFBRSxNQUFNLEVBQUUsTUFBTSxVQUFVLENBQUM7QUFDbEMsT0FBTyxFQUFFLE1BQU0sRUFBRSxNQUFNLFVBQVUsQ0FBQztBQUVsQyxNQUFNLENBQUMsTUFBTSxHQUFHLEdBQUc7SUFDbEIsTUFBTTtJQUNOLE1BQU07Q0FDTixDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLy8gRmlsZTogc3JjL3BhbGV0dGUvdXRpbHMvc3ViL2luZGV4LnRzXG5cbmltcG9ydCB7IGxpbWl0cyB9IGZyb20gJy4vbGltaXRzJztcbmltcG9ydCB7IHVwZGF0ZSB9IGZyb20gJy4vdXBkYXRlJztcblxuZXhwb3J0IGNvbnN0IHN1YiA9IHtcblx0bGltaXRzLFxuXHR1cGRhdGVcbn07XG4iXX0=

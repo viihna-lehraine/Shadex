@@ -1,22 +1,29 @@
-import { ColorSpace } from '../index/colors';
-import { Palette } from '../index/palette';
+// File: src/dom/history.ts
+
+import { ColorSpace, Palette } from '../index';
 
 let paletteHistory: Palette[] = [];
 
-export function addPaletteToHistory(palette: Palette): void {
+function addPalette(palette: Palette): void {
 	paletteHistory.unshift(palette);
 
 	if (paletteHistory.length >= 50) paletteHistory.pop();
 }
 
-export function renderPaletteHistory(displayFormat: ColorSpace): void {
+function renderPalette(displayFormat: ColorSpace): void {
 	paletteHistory.forEach(palette => {
 		console.log(`Palette ID: ${palette.id}`);
 
 		console.log(`${displayFormat}`);
 
+		// *DEV-NOTE* FINISH THIS
 		// palette.items.forEach(item => {
 		// 	const colorString = palette.items.
 		// });
 	});
 }
+
+export const history = {
+	addPalette,
+	renderPalette
+};

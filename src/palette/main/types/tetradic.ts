@@ -1,28 +1,32 @@
 // File: src/palette/main/types/tetradic.ts
 
 import { HSL, Palette, PaletteItem } from '../../../index/index';
-import { idb } from '../../../idb';
 import { config } from '../../../config';
+import { IndexedDB } from '../../../idb';
 import { utils } from '../../../common';
-import { paletteUtils } from '../../utils';
+import { paletteSuperUtils } from '../../common';
 
-const create = paletteUtils.create;
+const create = paletteSuperUtils.create;
 const defaults = config.defaults;
-const genHues = paletteUtils.genHues;
+const genHues = paletteSuperUtils.genHues;
+const mode = config.mode;
 const paletteRanges = config.consts.palette.ranges;
+
+const idb = IndexedDB.getInstance();
 
 export async function tetradic(
 	numBoxes: number,
 	customColor: HSL | null,
 	enableAlpha: boolean,
-	limitBright: boolean,
 	limitDark: boolean,
-	limitGray: boolean
+	limitGray: boolean,
+	limitLight: boolean
 ): Promise<Palette> {
 	const currentTetradicPaletteID = await idb.getCurrentPaletteID();
 
 	if (numBoxes < 4) {
-		console.warn('Tetradic palette requires at least 4 swatches.');
+		if (mode.logWarnings)
+			console.warn('Tetradic palette requires at least 4 swatches.');
 
 		return utils.palette.createObject(
 			'tetradic',
@@ -31,16 +35,16 @@ export async function tetradic(
 			0,
 			currentTetradicPaletteID,
 			enableAlpha,
-			limitBright,
 			limitDark,
-			limitGray
+			limitGray,
+			limitLight
 		);
 	}
 
 	const baseColor = create.baseColor(customColor, enableAlpha);
 	const tetradicHues = genHues.tetradic(baseColor.value.hue);
 	const paletteItems: PaletteItem[] = [
-		paletteUtils.create.paletteItem(baseColor, enableAlpha),
+		create.paletteItem(baseColor, enableAlpha),
 		...tetradicHues.map((hue, index) => {
 			const adjustedHSL: HSL = {
 				value: {
@@ -72,10 +76,7 @@ export async function tetradic(
 			const adjustedColor =
 				utils.conversion.genAllColorValues(adjustedHSL);
 
-			return paletteUtils.create.paletteItem(
-				adjustedColor.hsl as HSL,
-				enableAlpha
-			);
+			return create.paletteItem(adjustedColor.hsl as HSL, enableAlpha);
 		})
 	];
 
@@ -85,8 +86,8 @@ export async function tetradic(
 		baseColor,
 		numBoxes,
 		enableAlpha,
-		limitBright,
 		limitDark,
-		limitGray
+		limitGray,
+		limitLight
 	);
 }

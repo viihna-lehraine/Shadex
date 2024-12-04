@@ -1,0 +1,12 @@
+// File: src/dom/index.ts
+import { base } from './base';
+import { buttons } from './buttons';
+import { exportPalette } from './exportPalette';
+import { history } from './history';
+export const dom = {
+    ...base,
+    buttons,
+    exportPalette,
+    history
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvZG9tL2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLHlCQUF5QjtBQUV6QixPQUFPLEVBQUUsSUFBSSxFQUFFLE1BQU0sUUFBUSxDQUFDO0FBQzlCLE9BQU8sRUFBRSxPQUFPLEVBQUUsTUFBTSxXQUFXLENBQUM7QUFDcEMsT0FBTyxFQUFFLGFBQWEsRUFBRSxNQUFNLGlCQUFpQixDQUFDO0FBQ2hELE9BQU8sRUFBRSxPQUFPLEVBQUUsTUFBTSxXQUFXLENBQUM7QUFFcEMsTUFBTSxDQUFDLE1BQU0sR0FBRyxHQUFHO0lBQ2xCLEdBQUcsSUFBSTtJQUNQLE9BQU87SUFDUCxhQUFhO0lBQ2IsT0FBTztDQUNQLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvLyBGaWxlOiBzcmMvZG9tL2luZGV4LnRzXG5cbmltcG9ydCB7IGJhc2UgfSBmcm9tICcuL2Jhc2UnO1xuaW1wb3J0IHsgYnV0dG9ucyB9IGZyb20gJy4vYnV0dG9ucyc7XG5pbXBvcnQgeyBleHBvcnRQYWxldHRlIH0gZnJvbSAnLi9leHBvcnRQYWxldHRlJztcbmltcG9ydCB7IGhpc3RvcnkgfSBmcm9tICcuL2hpc3RvcnknO1xuXG5leHBvcnQgY29uc3QgZG9tID0ge1xuXHQuLi5iYXNlLFxuXHRidXR0b25zLFxuXHRleHBvcnRQYWxldHRlLFxuXHRoaXN0b3J5XG59O1xuIl19

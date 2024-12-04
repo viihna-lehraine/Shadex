@@ -1,24 +1,26 @@
 // File: src/paletteGen/palettes/types/random.ts
 
 import { HSL, Palette, PaletteItem } from '../../../index/index';
-import { idb } from '../../../idb';
+import { IndexedDB } from '../../../idb';
+import { paletteHelpers, paletteSuperUtils } from '../../common';
 import { utils } from '../../../common';
-import { paletteUtils } from '../../utils';
 
-const create = paletteUtils.create;
-const update = paletteUtils.sub.update;
+const create = paletteSuperUtils.create;
+const update = paletteHelpers.update;
+
+const idb = IndexedDB.getInstance();
 
 export async function random(
 	numBoxes: number,
 	customColor: HSL | null,
 	enableAlpha: boolean,
-	limitBright: boolean,
 	limitDark: boolean,
-	limitGray: boolean
+	limitGray: boolean,
+	limitLight: boolean
 ): Promise<Palette> {
 	const baseColor = create.baseColor(customColor, enableAlpha);
 	const paletteItems: PaletteItem[] = [
-		paletteUtils.create.paletteItem(baseColor, enableAlpha)
+		create.paletteItem(baseColor, enableAlpha)
 	];
 
 	for (let i = 1; i < numBoxes; i++) {
@@ -35,8 +37,8 @@ export async function random(
 		baseColor,
 		numBoxes,
 		enableAlpha,
-		limitBright,
 		limitDark,
-		limitGray
+		limitGray,
+		limitLight
 	);
 }

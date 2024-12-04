@@ -1,38 +1,42 @@
 // File: src/palette/main/types/analogous.ts
 
 import { HSL, Palette, PaletteItem } from '../../../index';
+import { IndexedDB } from '../../../idb';
 import { config } from '../../../config';
+import { paletteUtils, paletteSuperUtils } from '../../common';
 import { utils } from '../../../common';
-import { paletteUtils } from '../../utils';
-import { idb } from '../../../idb';
 
-const create = paletteUtils.create;
-const defaults = config.defaults;
+const create = paletteSuperUtils.create;
+const defaultHSL = config.defaults.colors.hsl;
 const genHues = paletteUtils.genHues;
+const mode = config.mode;
+
+const idb = IndexedDB.getInstance();
 
 export async function analogous(
 	numBoxes: number,
 	customColor: HSL | null,
 	enableAlpha: boolean,
-	limitBright: boolean,
 	limitDark: boolean,
-	limitGray: boolean
+	limitGray: boolean,
+	limitLight: boolean
 ): Promise<Palette> {
 	const currentAnalogousPaletteID = await idb.getCurrentPaletteID();
 
 	if (numBoxes < 2) {
-		console.warn('Analogous palette requires at least 2 swatches.');
+		if (mode.logWarnings)
+			console.warn('Analogous palette requires at least 2 swatches.');
 
 		return utils.palette.createObject(
 			'analogous',
 			[],
-			defaults.colors.hsl,
+			defaultHSL,
 			0,
 			currentAnalogousPaletteID,
 			enableAlpha,
-			limitBright,
 			limitDark,
-			limitGray
+			limitGray,
+			limitLight
 		);
 	}
 
@@ -70,8 +74,8 @@ export async function analogous(
 		baseColor,
 		numBoxes,
 		enableAlpha,
-		limitBright,
 		limitDark,
-		limitGray
+		limitGray,
+		limitLight
 	);
 }

@@ -1,0 +1,8 @@
+// File: src/logger/index.ts
+import { debug } from './debug';
+import { verbose } from './verbose';
+export const logger = {
+    debug,
+    verbose
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvbG9nZ2VyL2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLDRCQUE0QjtBQUU1QixPQUFPLEVBQUUsS0FBSyxFQUFFLE1BQU0sU0FBUyxDQUFDO0FBQ2hDLE9BQU8sRUFBRSxPQUFPLEVBQUUsTUFBTSxXQUFXLENBQUM7QUFFcEMsTUFBTSxDQUFDLE1BQU0sTUFBTSxHQUFHO0lBQ3JCLEtBQUs7SUFDTCxPQUFPO0NBQ0UsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEZpbGU6IHNyYy9sb2dnZXIvaW5kZXgudHNcblxuaW1wb3J0IHsgZGVidWcgfSBmcm9tICcuL2RlYnVnJztcbmltcG9ydCB7IHZlcmJvc2UgfSBmcm9tICcuL3ZlcmJvc2UnO1xuXG5leHBvcnQgY29uc3QgbG9nZ2VyID0ge1xuXHRkZWJ1Zyxcblx0dmVyYm9zZVxufSBhcyBjb25zdDtcbiJdfQ==

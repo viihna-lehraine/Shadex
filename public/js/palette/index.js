@@ -1,0 +1,9 @@
+// File: src/palette/index.ts
+import { generate } from './generate';
+import { start } from './start';
+export { generate, start };
+export const palette = {
+    generate,
+    start
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvcGFsZXR0ZS9pbmRleC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSw2QkFBNkI7QUFFN0IsT0FBTyxFQUFFLFFBQVEsRUFBRSxNQUFNLFlBQVksQ0FBQztBQUN0QyxPQUFPLEVBQUUsS0FBSyxFQUFFLE1BQU0sU0FBUyxDQUFDO0FBRWhDLE9BQU8sRUFBRSxRQUFRLEVBQUUsS0FBSyxFQUFFLENBQUM7QUFFM0IsTUFBTSxDQUFDLE1BQU0sT0FBTyxHQUFHO0lBQ3RCLFFBQVE7SUFDUixLQUFLO0NBQ0ksQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEZpbGU6IHNyYy9wYWxldHRlL2luZGV4LnRzXG5cbmltcG9ydCB7IGdlbmVyYXRlIH0gZnJvbSAnLi9nZW5lcmF0ZSc7XG5pbXBvcnQgeyBzdGFydCB9IGZyb20gJy4vc3RhcnQnO1xuXG5leHBvcnQgeyBnZW5lcmF0ZSwgc3RhcnQgfTtcblxuZXhwb3J0IGNvbnN0IHBhbGV0dGUgPSB7XG5cdGdlbmVyYXRlLFxuXHRzdGFydFxufSBhcyBjb25zdDtcbiJdfQ==

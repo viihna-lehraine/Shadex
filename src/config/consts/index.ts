@@ -18,4 +18,4 @@ export const consts = {
 	probabilities,
 	thresholds,
 	timeouts
-};
+} as const;

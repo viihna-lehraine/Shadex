@@ -1,29 +1,33 @@
 // File: src/palette/main/types/triadic.ts
 
-import { HSL, Palette, PaletteItem } from '../../../index/index';
-import { idb } from '../../../idb';
+import { HSL, Palette, PaletteItem } from '../../../index';
 import { config } from '../../../config';
+import { IndexedDB } from '../../../idb';
+import { paletteSuperUtils, paletteUtils } from '../../common';
 import { utils } from '../../../common';
-import { paletteUtils } from '../../utils';
 
 const conversion = utils.conversion;
-const create = paletteUtils.create;
+const create = paletteSuperUtils.create;
 const defaults = config.defaults;
 const genHues = paletteUtils.genHues;
+const mode = config.mode;
 const paletteRanges = config.consts.palette.ranges;
+
+const idb = IndexedDB.getInstance();
 
 export async function triadic(
 	numBoxes: number,
 	customColor: HSL | null,
 	enableAlpha: boolean,
-	limitBright: boolean,
 	limitDark: boolean,
-	limitGray: boolean
+	limitGray: boolean,
+	limitLight: boolean
 ): Promise<Palette> {
 	const currentTriadicPaletteID = await idb.getCurrentPaletteID();
 
 	if (numBoxes < 3) {
-		console.warn('Triadic palette requires at least 3 swatches.');
+		if (mode.logWarnings)
+			console.warn('Triadic palette requires at least 3 swatches.');
 
 		return utils.palette.createObject(
 			'triadic',
@@ -32,9 +36,9 @@ export async function triadic(
 			0,
 			currentTriadicPaletteID,
 			enableAlpha,
-			limitBright,
 			limitDark,
-			limitGray
+			limitGray,
+			limitLight
 		);
 	}
 
@@ -82,8 +86,8 @@ export async function triadic(
 		baseColor,
 		numBoxes,
 		enableAlpha,
-		limitBright,
 		limitDark,
-		limitGray
+		limitGray,
+		limitLight
 	);
 }

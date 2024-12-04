@@ -1,5 +1,6 @@
 // File: src/index/index.ts
 
+export type { IndexedDBInterface } from './classes';
 export type {
 	Color,
 	ColorData,

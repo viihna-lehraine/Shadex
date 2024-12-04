@@ -1,8 +1,11 @@
 // File: src/common/utils/palette.ts
 
 import { Color, ColorString, HSL, Palette, PaletteItem } from '../../index';
+import { config } from '../../config';
 import { core } from '../core';
 import { helpers } from '../helpers';
+
+const mode = config.mode;
 
 function createObject(
 	type: string,
@@ -11,18 +14,18 @@ function createObject(
 	numBoxes: number,
 	paletteID: number,
 	enableAlpha: boolean,
-	limitBright: boolean,
 	limitDark: boolean,
-	limitGray: boolean
+	limitGray: boolean,
+	limitLight: boolean
 ): Palette {
 	return {
 		id: `${type}_${paletteID}`,
 		items,
 		flags: {
 			enableAlpha: enableAlpha,
-			limitDark: limitDark,
-			limitGray: limitGray,
-			limitLight: limitBright
+			limitDarkness: limitDark,
+			limitGrayness: limitGray,
+			limitLightness: limitLight
 		},
 		metadata: {
 			numBoxes,
@@ -30,7 +33,8 @@ function createObject(
 			customColor: {
 				hslColor: baseColor,
 				convertedColors: items[0]?.colors || {}
-			}
+			},
+			timestamp: Date.now()
 		}
 	};
 }
@@ -45,9 +49,9 @@ export function populateOutputBox(
 			: core.colorStringToColor(color);
 
 		if (!core.validateColorValues(clonedColor)) {
-			console.error('Invalid color values.');
+			if (mode.logErrors) console.error('Invalid color values.');
 
-			helpers.dom.showToast('Invalid color values.');
+			helpers.dom.showToast('Invalid color.');
 
 			return;
 		}
@@ -60,15 +64,19 @@ export function populateOutputBox(
 
 		const stringifiedColor = core.getCSSColorString(clonedColor);
 
-		console.log(`Adding CSS-formatted color to DOM ${stringifiedColor}`);
+		if (!mode.quiet)
+			console.log(
+				`Adding CSS-formatted color to DOM ${stringifiedColor}`
+			);
 
 		colorTextOutputBox.value = stringifiedColor;
 		colorTextOutputBox.setAttribute('data-format', color.format);
 	} catch (error) {
-		console.error('Failed to populate color text output box:', error);
+		if (mode.logErrors)
+			console.error('Failed to populate color text output box:', error);
 
 		return;
 	}
 }
 
-export const palette = { createObject, populateOutputBox };
+export const palette = { createObject, populateOutputBox } as const;

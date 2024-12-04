@@ -1,48 +1,33 @@
 // File: src/palette/main/types/diadic.ts
 
 import { HSL, Palette } from '../../../index';
+import { IndexedDB } from '../../../idb';
 import { config } from '../../../config';
-import { core, utils } from '../../../common';
-import { idb } from '../../../idb';
-import { paletteUtils } from '../../utils';
+import { paletteSuperUtils } from '../../common';
+import { utils } from '../../../common';
 
 const consts = config.consts;
-const create = paletteUtils.create;
+const create = paletteSuperUtils.create;
 const defaults = config.defaults;
+const genHues = paletteSuperUtils.genHues;
+const mode = config.mode;
 const paletteRanges = consts.palette.ranges;
 
-const getWeightedRandomInterval =
-	paletteUtils.probability.getWeightedRandomInterval;
-
-function genHues(baseHue: number): number[] {
-	try {
-		const clonedBaseHue = core.clone(baseHue);
-		const diadicHues = [];
-		const randomDistance = getWeightedRandomInterval();
-		const hue1 = clonedBaseHue;
-		const hue2 = (hue1 + randomDistance) % 360;
-
-		diadicHues.push(hue1, hue2);
-
-		return diadicHues;
-	} catch (error) {
-		console.error(`Error generating diadic hues: ${error}`);
-		return [];
-	}
-}
+const idb = IndexedDB.getInstance();
 
 export async function diadic(
 	numBoxes: number,
 	customColor: HSL | null,
 	enableAlpha: boolean,
-	limitBright: boolean,
 	limitDark: boolean,
-	limitGray: boolean
+	limitGray: boolean,
+	limitLight: boolean
 ): Promise<Palette> {
 	const currentDiadicPaletteID = await idb.getCurrentPaletteID();
 
 	if (numBoxes < 2) {
-		console.warn('Diadic palette requires at least 2 swatches.');
+		if (mode.logWarnings)
+			console.warn('Diadic palette requires at least 2 swatches.');
 
 		return utils.palette.createObject(
 			'diadic',
@@ -51,14 +36,14 @@ export async function diadic(
 			0,
 			currentDiadicPaletteID,
 			enableAlpha,
-			limitBright,
 			limitDark,
-			limitGray
+			limitGray,
+			limitLight
 		);
 	}
 
 	const baseColor = create.baseColor(customColor, enableAlpha);
-	const hues = genHues(baseColor.value.hue);
+	const hues = genHues.diadic(baseColor.value.hue);
 	const paletteItems = Array.from({ length: numBoxes }, (_, i) => {
 		const saturationShift =
 			Math.random() * paletteRanges.diadic.satShift -
@@ -91,8 +76,8 @@ export async function diadic(
 		baseColor,
 		numBoxes,
 		enableAlpha,
-		limitBright,
 		limitDark,
-		limitGray
+		limitGray,
+		limitLight
 	);
 }

@@ -10,4 +10,4 @@ export const defaults = {
 	colorStrings,
 	idb,
 	palette
-};
+} as const;

@@ -23,9 +23,9 @@ export interface Palette {
 	items: PaletteItem[];
 	flags: {
 		enableAlpha: boolean;
-		limitDark: boolean;
-		limitGray: boolean;
-		limitLight: boolean;
+		limitDarkness: boolean;
+		limitGrayness: boolean;
+		limitLightness: boolean;
 	};
 	metadata: {
 		customColor?: {
@@ -34,6 +34,7 @@ export interface Palette {
 		};
 		numBoxes: number;
 		paletteType: string;
+		timestamp: number;
 	};
 }
 

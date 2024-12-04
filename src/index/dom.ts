@@ -1,6 +1,6 @@
 // File: src/index/colors.ts
 
-import { Color, HSL } from './index';
+import { Color, HSL } from '../index';
 
 export interface ColorInputElement extends HTMLInputElement {
 	colorValues?: Color;

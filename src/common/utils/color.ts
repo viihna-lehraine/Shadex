@@ -1,7 +1,5 @@
 // File: src/common/utils/color.ts
 
-import { core } from '../index';
-import { config } from '../../config';
 import {
 	CMYK,
 	CMYKString,
@@ -33,6 +31,10 @@ import {
 	XYZ,
 	XYZValueString
 } from '../../index';
+import { config } from '../../config';
+import { core } from '../core';
+
+const mode = config.mode;
 
 // ******** SECTION 1: Robust Type Guards ********
 
@@ -383,7 +385,7 @@ function addHashToHex(hex: Hex): Hex {
 					format: 'hex' as 'hex'
 				};
 	} catch (error) {
-		console.error(`addHashToHex error: ${error}`);
+		if (mode.logErrors) console.error(`addHashToHex error: ${error}`);
 
 		return config.defaults.colors.hex;
 	}
@@ -393,9 +395,10 @@ function colorToColorString(color: Color): ColorString {
 	const clonedColor = core.clone(color) as Exclude<Color, Hex>;
 
 	if (isColorString(clonedColor)) {
-		console.log(
-			`Already formatted as color string: ${JSON.stringify(color)}`
-		);
+		if (mode.logErrors)
+			console.log(
+				`Already formatted as color string: ${JSON.stringify(color)}`
+			);
 
 		return clonedColor;
 	}
@@ -438,7 +441,14 @@ function colorToColorString(color: Color): ColorString {
 			value: newValue as unknown as XYZValueString
 		};
 	} else {
-		throw new Error(`Unsupported format: ${clonedColor.format}`);
+		if (!mode.gracefulErrors)
+			throw new Error(`Unsupported format: ${clonedColor.format}`);
+		else if (mode.logErrors)
+			console.error(`Unsupported format: ${clonedColor.format}`);
+		else if (!mode.quiet)
+			console.warn('Failed to convert to color string.');
+
+		return config.defaults.colors.strings.hsl;
 	}
 }
 
@@ -448,7 +458,7 @@ function componentToHex(component: number): string {
 
 		return hex.length === 1 ? '0' + hex : hex;
 	} catch (error) {
-		console.error(`componentToHex error: ${error}`);
+		if (!mode.quiet) console.error(`componentToHex error: ${error}`);
 
 		return '00';
 	}
@@ -500,7 +510,16 @@ function formatPercentageValues<T extends Record<string, unknown>>(
 
 function getAlphaFromHex(hex: string): number {
 	if (hex.length !== 9 || !hex.startsWith('#')) {
-		throw new Error(`Invalid hex color: ${hex}. Expected format #RRGGBBAA`);
+		if (!mode.gracefulErrors)
+			throw new Error(
+				`Invalid hex color: ${hex}. Expected format #RRGGBBAA`
+			);
+		else if (mode.logErrors)
+			console.error(
+				`Invalid hex color: ${hex}. Expected format #RRGGBBAA`
+			);
+		else if (!mode.quiet)
+			console.warn('Failed to parse alpha from hex color.');
 	}
 
 	const alphaHex = hex.slice(-2);
@@ -543,12 +562,13 @@ function getColorString(color: Color): string | null {
 			case 'xyz':
 				return formatters.xyz(color);
 			default:
-				console.error(`Unsupported color format for ${color}`);
+				if (!mode.logErrors)
+					console.error(`Unsupported color format for ${color}`);
 
 				return null;
 		}
 	} catch (error) {
-		console.error(`getColorString error: ${error}`);
+		if (!mode.logErrors) console.error(`getColorString error: ${error}`);
 
 		return null;
 	}
@@ -611,10 +631,17 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 				};
 			}
 			default:
-				throw new Error(`Unsupported color format: ${colorSpace}`);
+				if (!mode.gracefulErrors)
+					throw new Error(`Unsupported color format: ${colorSpace}`);
+				else if (mode.logErrors)
+					console.error(`Unsupported color format: ${colorSpace}`);
+				else if (!mode.quiet)
+					console.warn(`Failed to parse color: ${colorSpace}`);
+
+				return null;
 		}
 	} catch (error) {
-		console.error(`parseColor error: ${error}`);
+		if (mode.logErrors) console.error(`parseColor error: ${error}`);
 
 		return null;
 	}
@@ -631,11 +658,19 @@ function parseComponents(value: string, count: number): number[] {
 			);
 
 		if (components.length !== count)
-			throw new Error(`Expected ${count} components.`);
+			if (!mode.gracefulErrors)
+				throw new Error(`Expected ${count} components.`);
+			else if (mode.logErrors) {
+				if (!mode.quiet) console.warn(`Expected ${count} components.`);
+
+				console.error(`Expected ${count} components.`);
+
+				return [];
+			}
 
 		return components;
 	} catch (error) {
-		console.error(`Error parsing components: ${error}`);
+		if (mode.logErrors) console.error(`Error parsing components: ${error}`);
 
 		return [];
 	}
@@ -664,7 +699,7 @@ function stripHashFromHex(hex: Hex): Hex {
 				}
 			: hex;
 	} catch (error) {
-		console.error(`stripHashFromHex error: ${error}`);
+		if (mode.logErrors) console.error(`stripHashFromHex error: ${error}`);
 
 		return core.clone(config.defaults.colors.hex);
 	}
@@ -749,4 +784,4 @@ export const color = {
 	stripHashFromHex,
 	stripPercentFromValues,
 	toHexWithAlpha
-};
+} as const;

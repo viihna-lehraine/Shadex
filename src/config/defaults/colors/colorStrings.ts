@@ -9,7 +9,7 @@ import {
 	SLString,
 	SVString,
 	XYZString
-} from '../../../index/index';
+} from '../../../index';
 
 const cmyk: CMYKString = {
 	value: { cyan: '0%', magenta: '0%', yellow: '0%', key: '0%', alpha: '1' },
@@ -51,4 +51,4 @@ const xyz: XYZString = {
 	format: 'xyz'
 };
 
-export const colorStrings = { cmyk, hsl, hsv, lab, rgb, sl, sv, xyz };
+export const colorStrings = { cmyk, hsl, hsv, lab, rgb, sl, sv, xyz } as const;

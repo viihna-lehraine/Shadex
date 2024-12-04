@@ -7,28 +7,22 @@
 
 // This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND.
 
-import { HSL, PaletteOptions } from './index/colors';
+import { HSL, PaletteOptions } from './index';
 import { config } from './config';
-import { core } from './common/core';
-import { utils } from './common';
-import {
-	addConversionButtonEventListeners,
-	applyCustomColor,
-	defineUIElements,
-	pullParamsFromUI,
-	desaturateColor,
-	saturateColor,
-	showCustomColorPopupDiv
-} from './dom/main';
+import { core } from './common';
+import { dom } from './dom';
 import { idb } from './idb';
-import { start } from './palette/start';
+import { logger } from './logger';
+import { start } from './palette';
+import { utils } from './common';
 
 const consts = config.consts;
+const mode = config.mode;
 
 document.addEventListener('DOMContentLoaded', () => {
 	console.log('DOM content loaded - Initializing application');
 
-	const buttons = defineUIElements();
+	const buttons = dom.defineUIElements();
 
 	if (!buttons) {
 		console.error('Failed to initialize UI buttons');
@@ -58,24 +52,34 @@ document.addEventListener('DOMContentLoaded', () => {
 	} = buttons;
 
 	// confirm that all elements are accessible
-	console.log(
-		`Advanced Menu Button: ${advancedMenuButton ? 'found' : 'not found'}\nApply Custom Color Button: ${applyCustomColorButton ? 'found' : 'not found'}\nClear Custom Color Button: ${clearCustomColorButton ? 'found' : 'not found'}\nClose Custom Color Menu Button: ${closeCustomColorMenuButton ? 'found' : 'not found'}\nClose Help Menu Button: ${closeHelpMenuButton ? 'found' : 'not found'}\nClose History Menu Button: ${closeHistoryMenuButton ? 'found' : 'not found'}\nDesaturate Button: ${desaturateButton ? 'found' : 'not found'}\nGenerate Button: ${generateButton ? 'found' : 'not found'}\nHelp Menu Button: ${helpMenuButton ? 'found' : 'not found'}\nHistory Menu Button: ${historyMenuButton ? 'found' : 'not found'}\nSaturate Button: ${saturateButton ? 'found' : 'not found'}\nShow as CMYK Button: ${showAsCMYKButton ? 'found' : 'not found'}\nShow as Hex Button: ${showAsHexButton ? 'found' : 'not found'}\nShow as HSL Button: ${showAsHSLButton ? 'found' : 'not found'}\nShow as HSV Button: ${showAsHSVButton ? 'found' : 'not found'}\nShow as LAB Button: ${showAsLABButton ? 'found' : 'not found'}\nShow as RGB Button: ${showAsRGBButton ? 'found' : 'not found'}`
-	);
+	if (mode.debug) {
+		logger.debug.validateDOMElements();
+
+		if (mode.verbose) {
+			logger.verbose.validateDOMElements();
+		}
+	} else {
+		if (!mode.quiet) {
+			console.log('Skipping DOM element validation');
+		}
+	}
 
 	const selectedColor = selectedColorOption
 		? parseInt(selectedColorOption.value, 10)
 		: 0;
 
-	console.log(`Selected color: ${selectedColor}`);
+	if (!mode.quiet) console.log(`Selected color: ${selectedColor}`);
 
 	try {
-		addConversionButtonEventListeners();
+		dom.addConversionButtonEventListeners();
 
-		console.log('Conversion button event listeners attached');
+		if (!mode.quiet)
+			console.log('Conversion button event listeners attached');
 	} catch (error) {
-		console.error(
-			`Unable to attach conversion button event listeners: ${error}`
-		);
+		if (mode.logErrors)
+			console.error(
+				`Unable to attach conversion button event listeners: ${error}`
+			);
 	}
 
 	advancedMenuButton?.addEventListener('click', e => {
@@ -92,18 +96,18 @@ document.addEventListener('DOMContentLoaded', () => {
 			advancedMenuContent.style.display = isHidden ? 'flex' : 'none';
 		}
 
-		console.log('advancedMenuToggleButton clicked');
+		if (!mode.quiet) console.log('advancedMenuToggleButton clicked');
 	});
 
 	applyCustomColorButton?.addEventListener('click', async e => {
 		e.preventDefault();
 
-		const customHSLColor = applyCustomColor();
+		const customHSLColor = dom.applyCustomColor();
 		const customHSLColorClone: HSL = core.clone(customHSLColor);
 
 		await idb.saveData('customColor', 'appSettings', customHSLColorClone);
 
-		console.log('Custom color saved to IndexedDB');
+		if (!mode.quiet) console.log('Custom color saved to IndexedDB');
 	});
 
 	clearCustomColorButton?.addEventListener('click', async e => {
@@ -111,9 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		await idb.deleteTable('customColor');
 
-		console.log('Custom color cleared from IndexedDB');
+		if (!mode.quiet) console.log('Custom color cleared from IndexedDB');
 
-		showCustomColorPopupDiv();
+		dom.showCustomColorPopupDiv();
 	});
 
 	closeCustomColorMenuButton?.addEventListener('click', async e => {
@@ -125,27 +129,27 @@ document.addEventListener('DOMContentLoaded', () => {
 	closeHelpMenuButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		console.log('closeHelpMenuButton clicked');
+		if (!mode.quiet) console.log('closeHelpMenuButton clicked');
 	});
 
 	closeHistoryMenuButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		console.log('closeHistoryMenuButton clicked');
+		if (!mode.quiet) console.log('closeHistoryMenuButton clicked');
 	});
 
 	desaturateButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		console.log('desaturateButton clicked');
+		if (!mode.quiet) console.log('desaturateButton clicked');
 
-		desaturateColor(selectedColor);
+		dom.desaturateColor(selectedColor);
 	});
 
 	generateButton?.addEventListener('click', async e => {
 		e.preventDefault();
 
-		console.log('generateButton clicked');
+		if (!mode.quiet) console.log('generateButton clicked');
 
 		const {
 			paletteType,
@@ -154,12 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			limitDarkness,
 			limitGrayness,
 			limitLightness
-		} = pullParamsFromUI();
+		} = dom.pullParamsFromUI();
 
 		let customColor = (await idb.getCustomColor()) as HSL | null;
 
 		if (!customColor) {
-			console.info('No custom color found. Using a random color');
+			if (!mode.quiet)
+				console.info('No custom color found. Using a random color');
 
 			customColor = utils.random.hsl(true);
 		}
@@ -191,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			helpMenuContent.style.display = isHidden ? 'flex' : 'none';
 		}
 
-		console.log('helpMenuToggleButton clicked');
+		if (!mode.quiet) console.log('helpMenuToggleButton clicked');
 	});
 
 	historyMenuButton?.addEventListener('click', e => {
@@ -208,50 +213,50 @@ document.addEventListener('DOMContentLoaded', () => {
 			historyMenuContent.style.display = isHidden ? 'flex' : 'none';
 		}
 
-		console.log('historyMenuToggleButton clicked');
+		if (!mode.quiet) console.log('historyMenuToggleButton clicked');
 	});
 
 	saturateButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		console.log('saturateButton clicked');
+		if (!mode.quiet) console.log('saturateButton clicked');
 
-		saturateColor(selectedColor);
+		dom.saturateColor(selectedColor);
 	});
 
 	showAsCMYKButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		console.log('showAsCMYKButton clicked');
+		if (!mode.quiet) console.log('showAsCMYKButton clicked');
 	});
 
 	showAsHexButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		console.log('showAsHexButton clicked');
+		if (!mode.quiet) console.log('showAsHexButton clicked');
 	});
 
 	showAsHSLButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		console.log('showAsHSLButton clicked');
+		if (!mode.quiet) console.log('showAsHSLButton clicked');
 	});
 
 	showAsHSVButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		console.log('showAsHSVButton clicked');
+		if (!mode.quiet) console.log('showAsHSVButton clicked');
 	});
 
 	showAsLABButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		console.log('showAsLABButton clicked');
+		if (!mode.quiet) console.log('showAsLABButton clicked');
 	});
 
 	showAsRGBButton?.addEventListener('click', e => {
 		e.preventDefault();
 
-		console.log('showAsRGBButton clicked');
+		if (!mode.quiet) console.log('showAsRGBButton clicked');
 	});
 });

@@ -1,16 +1,19 @@
 // File: src/dom/buttons.ts
 
 import { PaletteOptions } from '../index';
-import { core, utils } from '../common';
+import { core, superUtils } from '../common';
 import { config } from '../config';
 import { start } from '../palette/start';
 
-export const handleGenButtonClick = core.debounce(() => {
+const buttonDebounce = config.consts.debounce.button || 300;
+
+export const handlePaletteGen = core.debounce(() => {
 	try {
-		const params = utils.dom.getGenButtonParams();
+		const params = superUtils.dom.getGenButtonParams();
 
 		if (!params) {
 			console.error('Failed to retrieve generateButton parameters');
+
 			return;
 		}
 
@@ -44,4 +47,8 @@ export const handleGenButtonClick = core.debounce(() => {
 	} catch (error) {
 		console.error(`Failed to handle generate button click: ${error}`);
 	}
-}, config.consts.debounce.button || 300);
+}, buttonDebounce);
+
+export const buttons = {
+	handlePaletteGen
+};

@@ -1,67 +1,33 @@
 // File: src/palette/main/types/hexadic.ts
 
 import { HSL, Palette } from '../../../index/index';
-import { idb } from '../../../idb';
+import { IndexedDB } from '../../../idb';
 import { config } from '../../../config';
-import { core, utils } from '../../../common';
-import { paletteUtils } from '../../utils';
+import { paletteSuperUtils } from '../../common';
+import { utils } from '../../../common';
 
-const conversion = utils.conversion;
-const create = paletteUtils.create;
-const defaults = config.defaults;
 const consts = config.consts;
+const create = paletteSuperUtils.create;
+const defaults = config.defaults;
+const genHues = paletteSuperUtils.genHues;
+const mode = config.mode;
 const paletteRanges = consts.palette.ranges;
 
-function genHues(color: HSL): number[] {
-	try {
-		const clonedColor = core.clone(color);
-
-		if (!core.validateColorValues(clonedColor)) {
-			console.error(`Invalid color value ${JSON.stringify(clonedColor)}`);
-
-			return [];
-		}
-
-		const clonedBaseHSL = conversion.genAllColorValues(clonedColor)
-			.hsl as HSL;
-
-		if (!clonedBaseHSL) {
-			throw new Error(
-				'Unable to generate hexadic hues - missing HSL values'
-			);
-		}
-
-		const hexadicHues: number[] = [];
-		const baseHue = clonedBaseHSL.value.hue;
-		const hue1 = baseHue;
-		const hue2 = (hue1 + 180) % 360;
-		const randomDistance = Math.floor(Math.random() * 61 + 30);
-		const hue3 = (hue1 + randomDistance) % 360;
-		const hue4 = (hue3 + 180) % 360;
-		const hue5 = (hue1 + 360 - randomDistance) % 360;
-		const hue6 = (hue5 + 180) % 360;
-
-		hexadicHues.push(hue1, hue2, hue3, hue4, hue5, hue6);
-
-		return hexadicHues;
-	} catch (error) {
-		console.error(`Error generating hexadic hues: ${error}`);
-		return [];
-	}
-}
+const idb = IndexedDB.getInstance();
 
 export async function hexadic(
 	numBoxes: number,
 	customColor: HSL | null,
 	enableAlpha: boolean,
-	limitBright: boolean,
 	limitDark: boolean,
-	limitGray: boolean
+	limitGray: boolean,
+	limitLight: boolean
 ): Promise<Palette> {
 	const currentHexadicPaletteID = await idb.getCurrentPaletteID();
 
 	if (numBoxes < 6) {
-		console.warn('Hexadic palette requires at least 6 swatches.');
+		if (mode.logWarnings)
+			console.warn('Hexadic palette requires at least 6 swatches.');
 
 		return utils.palette.createObject(
 			'hexadic',
@@ -70,14 +36,14 @@ export async function hexadic(
 			0,
 			currentHexadicPaletteID,
 			enableAlpha,
-			limitBright,
 			limitDark,
-			limitGray
+			limitGray,
+			limitLight
 		);
 	}
 
 	const baseColor = create.baseColor(customColor, enableAlpha);
-	const hues = genHues(baseColor);
+	const hues = genHues.hexadic(baseColor);
 	const paletteItems = hues.map((hue, _i) => {
 		const saturationShift =
 			Math.random() * paletteRanges.hexad.satShift -
@@ -110,8 +76,8 @@ export async function hexadic(
 		baseColor,
 		numBoxes,
 		enableAlpha,
-		limitBright,
 		limitDark,
-		limitGray
+		limitGray,
+		limitLight
 	);
 }

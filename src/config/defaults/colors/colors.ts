@@ -1,4 +1,4 @@
-// File: src/config/defaults/colors/main.ts
+// File: src/config/defaults/colors/colors.ts
 
 import { CMYK, Hex, HSL, HSV, LAB, RGB, SL, SV, XYZ } from '../../../index';
 
@@ -51,4 +51,4 @@ const xyz: XYZ = {
 	format: 'xyz'
 };
 
-export const colors = { cmyk, hex, hsl, hsv, lab, rgb, sl, sv, xyz };
+export const colors = { cmyk, hex, hsl, hsv, lab, rgb, sl, sv, xyz } as const;

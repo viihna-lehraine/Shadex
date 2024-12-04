@@ -1,13 +1,13 @@
 // File: src/palete/main/index.ts
-import { analogous } from './types/analogous.js';
-import { complementary } from './types/complementary.js';
-import { diadic } from './types/diadic.js';
-import { hexadic } from './types/hexadic.js';
-import { monochromatic } from './types/monochromatic.js';
-import { random } from './types/random.js';
-import { splitComplementary } from './types/splitComplementary.js';
-import { tetradic } from './types/tetradic.js';
-import { triadic } from './types/triadic.js';
+import { analogous } from './types/analogous';
+import { complementary } from './types/complementary';
+import { diadic } from './types/diadic';
+import { hexadic } from './types/hexadic';
+import { monochromatic } from './types/monochromatic';
+import { random } from './types/random';
+import { splitComplementary } from './types/splitComplementary';
+import { tetradic } from './types/tetradic';
+import { triadic } from './types/triadic';
 export const genPalette = {
     analogous,
     complementary,

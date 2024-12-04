@@ -1,5 +1,6 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import fixIndexJsImports from './plugins/fixIndexJsImports.js';
 
 export default {
 	input: 'public/js/app.js',
@@ -8,5 +9,11 @@ export default {
 		format: 'esm',
 		sourcemap: true
 	},
-	plugins: [resolve(), commonjs()]
+	plugins: [
+		resolve({
+			extensions: ['.js', '.ts']
+		}),
+		commonjs(),
+		fixIndexJsImports()
+	]
 };

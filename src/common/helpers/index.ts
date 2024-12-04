@@ -6,4 +6,4 @@ import { dom } from './dom';
 export const helpers = {
 	conversion,
 	dom
-};
+} as const;

@@ -1,8 +1,10 @@
 // File: src/common/helpers/conversion.ts
 
-import { HSL, HSLValue, RGB } from '../../index/index';
+import { HSL, HSLValue, RGB } from '../../index';
 import { config } from '../../config';
-import { core } from '../core';
+import { core } from '../index';
+
+const mode = config.mode;
 
 function applyGammaCorrection(value: number): number {
 	try {
@@ -10,7 +12,8 @@ function applyGammaCorrection(value: number): number {
 			? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
 			: 12.92 * value;
 	} catch (error) {
-		console.error(`Error applying gamma correction: ${error}`);
+		if (mode.logErrors)
+			console.error(`Error applying gamma correction: ${error}`);
 
 		return value;
 	}
@@ -18,7 +21,8 @@ function applyGammaCorrection(value: number): number {
 
 function clampRGB(rgb: RGB): RGB {
 	if (!core.validateColorValues(rgb)) {
-		console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+		if (mode.logErrors)
+			console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
 		return core.clone(config.defaults.colors.rgb);
 	}
@@ -40,7 +44,8 @@ function clampRGB(rgb: RGB): RGB {
 			format: 'rgb'
 		};
 	} catch (error) {
-		console.error(`Error clamping RGB values: ${error}`);
+		if (mode.logErrors)
+			console.error(`Error clamping RGB values: ${error}`);
 
 		return rgb;
 	}
@@ -62,7 +67,8 @@ function hueToRGB(p: number, q: number, t: number): number {
 
 		return clonedP;
 	} catch (error) {
-		console.error(`Error converting hue to RGB: ${error}`);
+		if (mode.logErrors)
+			console.error(`Error converting hue to RGB: ${error}`);
 
 		return 0;
 	}
@@ -71,14 +77,15 @@ function hueToRGB(p: number, q: number, t: number): number {
 function hslAddFormat(value: HSLValue): HSL {
 	try {
 		if (!core.validateColorValues({ value: value, format: 'hsl' })) {
-			console.error(`Invalid HSL value ${JSON.stringify(value)}`);
+			if (mode.logErrors)
+				console.error(`Invalid HSL value ${JSON.stringify(value)}`);
 
 			return core.clone(config.defaults.colors.hsl);
 		}
 
 		return { value: value, format: 'hsl' } as HSL;
 	} catch (error) {
-		console.error(`Error adding HSL format: ${error}`);
+		if (mode.logErrors) console.error(`Error adding HSL format: ${error}`);
 
 		return core.clone(config.defaults.colors.hsl);
 	}
@@ -89,4 +96,4 @@ export const conversion = {
 	clampRGB,
 	hueToRGB,
 	hslAddFormat
-};
+} as const;

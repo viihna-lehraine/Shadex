@@ -1,27 +1,31 @@
 // File: src/palette/main/types/complementary.ts
 
-import { HSL, Palette, PaletteItem } from '../../../index/index';
-import { idb } from '../../../idb';
+import { HSL, Palette, PaletteItem } from '../../../index';
+import { IndexedDB } from '../../../idb';
 import { config } from '../../../config';
+import { paletteSuperUtils } from '../../common';
 import { utils } from '../../../common';
-import { paletteUtils } from '../../utils';
 
-const create = paletteUtils.create;
+const create = paletteSuperUtils.create;
 const defaults = config.defaults;
+const mode = config.mode;
 const paletteRanges = config.consts.palette.ranges;
+
+const idb = IndexedDB.getInstance();
 
 export async function complementary(
 	numBoxes: number,
 	customColor: HSL | null,
 	enableAlpha: boolean,
-	limitBright: boolean,
 	limitDark: boolean,
-	limitGray: boolean
+	limitGray: boolean,
+	limitLight: boolean
 ): Promise<Palette> {
 	const currentComplementaryPaletteID = await idb.getCurrentPaletteID();
 
 	if (numBoxes < 2) {
-		console.warn('Complementary palette requires at least 2 swatches.');
+		if (mode.logWarnings)
+			console.warn('Complementary palette requires at least 2 swatches.');
 
 		return utils.palette.createObject(
 			'complementary',
@@ -30,9 +34,9 @@ export async function complementary(
 			0,
 			currentComplementaryPaletteID,
 			enableAlpha,
-			limitBright,
 			limitDark,
-			limitGray
+			limitGray,
+			limitLight
 		);
 	}
 
@@ -64,9 +68,7 @@ export async function complementary(
 		return create.paletteItem(newColor, enableAlpha);
 	});
 
-	paletteItems.unshift(
-		paletteUtils.create.paletteItem(baseColor, enableAlpha)
-	);
+	paletteItems.unshift(create.paletteItem(baseColor, enableAlpha));
 
 	return await idb.savePaletteToDB(
 		'complementary',
@@ -74,8 +76,8 @@ export async function complementary(
 		baseColor,
 		numBoxes,
 		enableAlpha,
-		limitBright,
 		limitDark,
-		limitGray
+		limitGray,
+		limitLight
 	);
 }

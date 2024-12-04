@@ -3,20 +3,21 @@
 import { HSL, Palette, PaletteOptions } from '../index';
 import { config } from '../config';
 import { genPalette } from './main';
-import { paletteUtils } from './utils';
+import { paletteHelpers } from './common';
 
 const defaultPalette = config.defaults.palette.data;
-const limits = paletteUtils.sub.limits;
+const limits = paletteHelpers.limits;
+const mode = config.mode;
 
-const isTooBright = limits.isTooBright;
 const isTooDark = limits.isTooDark;
 const isTooGray = limits.isTooGray;
+const isTooLight = limits.isTooLight;
 
 function limitedHSL(
 	baseHue: number,
 	limitDark: boolean,
-	limitLight: boolean,
 	limitGray: boolean,
+	limitLight: boolean,
 	alpha: number | null
 ): HSL {
 	let hsl: HSL;
@@ -34,7 +35,7 @@ function limitedHSL(
 	} while (
 		(limitGray && isTooGray(hsl)) ||
 		(limitDark && isTooDark(hsl)) ||
-		(limitLight && isTooBright(hsl))
+		(limitLight && isTooLight(hsl))
 	);
 
 	return hsl;
@@ -42,9 +43,7 @@ function limitedHSL(
 
 // async function generatePalette() {}
 
-async function generateSelectedPalette(
-	options: PaletteOptions
-): Promise<Palette> {
+async function selectedPalette(options: PaletteOptions): Promise<Palette> {
 	try {
 		const {
 			paletteType,
@@ -139,12 +138,12 @@ async function generateSelectedPalette(
 					limitLightness
 				);
 			default:
-				console.error('Invalid palette type.');
+				if (mode.logErrors) console.error('Invalid palette type.');
 
 				return Promise.resolve(defaultPalette);
 		}
 	} catch (error) {
-		console.error(`Error generating palette: ${error}`);
+		if (mode.logErrors) console.error(`Error generating palette: ${error}`);
 
 		return Promise.resolve(defaultPalette);
 	}
@@ -152,5 +151,5 @@ async function generateSelectedPalette(
 
 export const generate = {
 	limitedHSL,
-	selectedPalette: generateSelectedPalette
+	selectedPalette
 };

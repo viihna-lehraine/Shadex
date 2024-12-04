@@ -1,43 +1,47 @@
 // File: src/palette/main/types/monochromatic.ts
 
 import { HSL, Palette, PaletteItem } from '../../../index/index';
-import { idb } from '../../../idb';
 import { config } from '../../../config';
+import { IndexedDB } from '../../../idb';
+import { paletteSuperUtils } from '../../common';
 import { utils } from '../../../common';
-import { paletteUtils } from '../../utils';
 
-const create = paletteUtils.create;
-const defaults = config.defaults;
+const create = paletteSuperUtils.create;
+const defaultHSL = config.defaults.colors.hsl;
+const mode = config.mode;
+
+const idb = IndexedDB.getInstance();
 
 export async function monochromatic(
 	numBoxes: number,
 	customColor: HSL | null,
 	enableAlpha: boolean,
-	limitBright: boolean,
 	limitDark: boolean,
-	limitGray: boolean
+	limitGray: boolean,
+	limitLight: boolean
 ): Promise<Palette> {
 	const currentMonochromaticPaletteID = await idb.getCurrentPaletteID();
 
 	if (numBoxes < 2) {
-		console.warn('Monochromatic palette requires at least 2 swatches.');
+		if (mode.logWarnings)
+			console.warn('Monochromatic palette requires at least 2 swatches.');
 
 		return utils.palette.createObject(
 			'monochromatic',
 			[],
-			defaults.colors.hsl,
+			defaultHSL,
 			0,
 			currentMonochromaticPaletteID,
 			enableAlpha,
-			limitBright,
 			limitDark,
-			limitGray
+			limitGray,
+			limitLight
 		);
 	}
 
 	const baseColor = create.baseColor(customColor, enableAlpha);
 	const paletteItems: PaletteItem[] = [
-		paletteUtils.create.paletteItem(baseColor, enableAlpha)
+		create.paletteItem(baseColor, enableAlpha)
 	];
 
 	for (let i = 1; i < numBoxes; i++) {
@@ -69,8 +73,8 @@ export async function monochromatic(
 		baseColor,
 		numBoxes,
 		enableAlpha,
-		limitBright,
 		limitDark,
-		limitGray
+		limitGray,
+		limitLight
 	);
 }

@@ -1,3 +1,5 @@
 // File: src/common/core/index.ts
 
-export { core } from './main';
+import { main } from './main';
+
+export const core = { ...main } as const;

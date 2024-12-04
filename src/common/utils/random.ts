@@ -5,6 +5,7 @@ import { config } from '../../config';
 import { core } from '../core';
 
 const defaults = config.defaults;
+const mode = config.mode;
 
 function hsl(enableAlpha: boolean): HSL {
 	try {
@@ -24,18 +25,21 @@ function hsl(enableAlpha: boolean): HSL {
 		};
 
 		if (!core.validateColorValues(hsl)) {
-			console.error(
-				`Invalid random HSL color value ${JSON.stringify(hsl)}`
-			);
+			if (mode.logErrors)
+				console.error(
+					`Invalid random HSL color value ${JSON.stringify(hsl)}`
+				);
 
 			return core.clone(defaults.colors.hsl);
 		}
 
-		console.log(`Generated randomHSL: ${JSON.stringify(hsl)}`);
+		if (!mode.quiet)
+			console.log(`Generated randomHSL: ${JSON.stringify(hsl)}`);
 
 		return hsl;
 	} catch (error) {
-		console.error(`Error generating random HSL color: ${error}`);
+		if (mode.logErrors)
+			console.error(`Error generating random HSL color: ${error}`);
 
 		return core.clone(defaults.colors.hsl);
 	}
@@ -58,21 +62,24 @@ function sl(enableAlpha: boolean): SL {
 		};
 
 		if (!core.validateColorValues(sl as SL)) {
-			console.error(
-				`Invalid random SV color value ${JSON.stringify(sl)}`
-			);
+			if (mode.logErrors)
+				console.error(
+					`Invalid random SV color value ${JSON.stringify(sl)}`
+				);
 
 			return core.clone(defaults.colors.sl);
 		}
 
-		console.log(`Generated randomSL: ${JSON.stringify(sl)}`);
+		if (!mode.quiet)
+			console.log(`Generated randomSL: ${JSON.stringify(sl)}`);
 
 		return sl;
 	} catch (error) {
-		console.error(`Error generating random SL color: ${error}`);
+		if (mode.logErrors)
+			console.error(`Error generating random SL color: ${error}`);
 
 		return core.clone(defaults.colors.sl);
 	}
 }
 
-export const random = { hsl, sl };
+export const random = { hsl, sl } as const;

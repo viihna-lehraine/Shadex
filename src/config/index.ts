@@ -2,10 +2,12 @@
 
 import { consts } from './consts';
 import { defaults } from './defaults';
-import { flags } from './flags';
+import { idb } from './idb';
+import { mode } from './mode';
 
 export const config = {
 	consts,
 	defaults,
-	flags
-};
+	idb,
+	mode
+} as const;

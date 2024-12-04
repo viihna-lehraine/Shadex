@@ -16,4 +16,4 @@ const settings: Settings = {
 	lastTableID: 0
 };
 
-export const idb = { settings, mutation };
+export const idb = { settings, mutation } as const;

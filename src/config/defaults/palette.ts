@@ -7,9 +7,9 @@ const data: Palette = {
 	items: [],
 	flags: {
 		enableAlpha: false,
-		limitDark: false,
-		limitGray: false,
-		limitLight: false
+		limitDarkness: false,
+		limitGrayness: false,
+		limitLightness: false
 	},
 	metadata: {
 		numBoxes: 1,
@@ -32,7 +32,8 @@ const data: Palette = {
 				rgb: { red: 0, green: 0, blue: 0, alpha: 1 },
 				xyz: { x: 0, y: 0, z: 0, alpha: 1 }
 			}
-		}
+		},
+		timestamp: Date.now()
 	}
 };
 
@@ -86,4 +87,4 @@ const stored: StoredPalette = {
 	palette: data
 };
 
-export const palette = { data, item, stored };
+export const palette = { data, item, stored } as const;

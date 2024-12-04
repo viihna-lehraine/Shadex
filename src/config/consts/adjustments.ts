@@ -2,4 +2,4 @@
 
 export const adjustments = {
 	slaValue: 10
-};
+} as const;

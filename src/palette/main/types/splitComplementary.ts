@@ -1,30 +1,34 @@
 // File: src/palette/main/types/splitComplementary.ts
 
 import { HSL, Palette, PaletteItem } from '../../../index/index';
-import { idb } from '../../../idb';
 import { config } from '../../../config';
+import { IndexedDB } from '../../../idb';
+import { paletteSuperUtils } from '../../common';
 import { utils } from '../../../common';
-import { paletteUtils } from '../../utils';
 
-const create = paletteUtils.create;
+const create = paletteSuperUtils.create;
 const defaults = config.defaults;
-const genHues = paletteUtils.genHues;
+const genHues = paletteSuperUtils.genHues;
+const mode = config.mode;
 const paletteRanges = config.consts.palette.ranges;
+
+const idb = IndexedDB.getInstance();
 
 export async function splitComplementary(
 	numBoxes: number,
 	customColor: HSL | null,
 	enableAlpha: boolean,
-	limitBright: boolean,
 	limitDark: boolean,
-	limitGray: boolean
+	limitGray: boolean,
+	limitLight: boolean
 ): Promise<Palette> {
 	const currentSplitComplementaryPaletteID = await idb.getCurrentPaletteID();
 
 	if (numBoxes < 3) {
-		console.warn(
-			'Split complementary palette requires at least 3 swatches.'
-		);
+		if (mode.logWarnings)
+			console.warn(
+				'Split complementary palette requires at least 3 swatches.'
+			);
 
 		return utils.palette.createObject(
 			'splitComplementary',
@@ -33,16 +37,16 @@ export async function splitComplementary(
 			0,
 			currentSplitComplementaryPaletteID,
 			enableAlpha,
-			limitBright,
 			limitDark,
-			limitGray
+			limitGray,
+			limitLight
 		);
 	}
 
 	const baseColor = create.baseColor(customColor, enableAlpha);
-	const [hue1, hue2] = genHues.splitComp(baseColor.value.hue);
+	const [hue1, hue2] = genHues.splitComplementary(baseColor.value.hue);
 	const paletteItems: PaletteItem[] = [
-		paletteUtils.create.paletteItem(baseColor, enableAlpha),
+		create.paletteItem(baseColor, enableAlpha),
 		...[hue1, hue2].map((hue, index) => {
 			const adjustedHSL: HSL = {
 				value: {
@@ -75,7 +79,7 @@ export async function splitComplementary(
 				adjustedHSL
 			) as HSL;
 
-			return paletteUtils.create.paletteItem(adjustedColor, enableAlpha);
+			return create.paletteItem(adjustedColor, enableAlpha);
 		})
 	];
 
@@ -85,8 +89,8 @@ export async function splitComplementary(
 		baseColor,
 		numBoxes,
 		enableAlpha,
-		limitBright,
 		limitDark,
-		limitGray
+		limitGray,
+		limitLight
 	);
 }
