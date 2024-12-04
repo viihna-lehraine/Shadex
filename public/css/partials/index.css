@@ -38,7 +38,6 @@ section h2 {
 	margin-bottom: 5px;
 	font-size: 1.2em;
 	font-weight: bold;
-	color: var(--font-color-primary);
 	text-align: center;
 }
 
@@ -72,6 +71,20 @@ button:hover {
 	padding: 0;
 	overflow-x: hidden;
 	margin-top: 5px;
+}
+
+#color-limit-options .ui-sub-box .ui-sub-box-bottom {
+	display: flex;
+	justify-content: center;
+}
+
+.column-half {
+	height: 50%;
+	padding: 3px 0;
+}
+
+#swatch-selector: {
+	font-size: 0.95em;
 }
 
 #app {
@@ -111,10 +124,40 @@ button:hover {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
+	justify-content: center;
+	align-items: center;
 }
 
-.inside-left-column h2 {
-	text-align: center;
+#adjust-color-left-column label,
+#adjust-color-left-column select {
+	margin: auto;
+}
+
+.ui-sub-box-top h3 {
+	margin-top: 2px;
+	margin-bottom: 5px;
+	padding: 0;
+}
+
+#color-options-top-half {
+	padding-top: 5px;
+}
+
+#color-options-top-half h3 {
+	margin-bottom: 5px;
+	padding: 0;
+}
+
+#color-options-top-half.column-half {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	height: min-content;
+}
+
+#color-options-top-half h3 {
+	padding-top: 0;
+	margin-top: 0;
 }
 
 #palette-row {
@@ -157,7 +200,23 @@ button:hover {
 	text-align: center;
 }
 
-#palette-type-ui-div {
+#ui-sub-box {
+	display: flex;
+	flex-direction: column;
+}
+
+.ui-sub-box-top {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.ui-sub-box-top h2 {
+	margin: auto;
+	padding: 0 5px 8px 5px;
+}
+
+.palette-type-ui-div {
 	bottom: 1px solid var(--border-color-1);
 }
 
@@ -196,4 +255,8 @@ button:hover {
 
 .popup.active .popuptext {
 	display: block;
+}
+
+#palette-row {
+	display: flex;
 }

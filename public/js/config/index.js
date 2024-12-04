@@ -1,0 +1,10 @@
+// File: src/config/index.ts
+import { consts } from './consts.js';
+import { defaults } from './defaults.js';
+import { flags } from './flags.js';
+export const config = {
+    consts,
+    defaults,
+    flags
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvY29uZmlnL2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLDRCQUE0QjtBQUU1QixPQUFPLEVBQUUsTUFBTSxFQUFFLE1BQU0sVUFBVSxDQUFDO0FBQ2xDLE9BQU8sRUFBRSxRQUFRLEVBQUUsTUFBTSxZQUFZLENBQUM7QUFDdEMsT0FBTyxFQUFFLEtBQUssRUFBRSxNQUFNLFNBQVMsQ0FBQztBQUVoQyxNQUFNLENBQUMsTUFBTSxNQUFNLEdBQUc7SUFDckIsTUFBTTtJQUNOLFFBQVE7SUFDUixLQUFLO0NBQ0wsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEZpbGU6IHNyYy9jb25maWcvaW5kZXgudHNcblxuaW1wb3J0IHsgY29uc3RzIH0gZnJvbSAnLi9jb25zdHMnO1xuaW1wb3J0IHsgZGVmYXVsdHMgfSBmcm9tICcuL2RlZmF1bHRzJztcbmltcG9ydCB7IGZsYWdzIH0gZnJvbSAnLi9mbGFncyc7XG5cbmV4cG9ydCBjb25zdCBjb25maWcgPSB7XG5cdGNvbnN0cyxcblx0ZGVmYXVsdHMsXG5cdGZsYWdzXG59O1xuIl19

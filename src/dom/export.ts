@@ -1,11 +1,7 @@
-import * as colors from '../index/colors';
-import * as fnObjects from '../index/fn-objects';
-import * as palette from '../index/palette';
+import { ColorSpace } from '../index/colors';
+import { Palette } from '../index/palette';
 
-function asCSS(
-	palette: palette.Palette,
-	colorSpace: colors.ColorSpace = 'hsl'
-): void {
+export function asCSS(palette: Palette, colorSpace: ColorSpace = 'hsl'): void {
 	const css = palette.items
 		.map(item => {
 			const colorValue = (() => {
@@ -56,7 +52,7 @@ function asCSS(
 	URL.revokeObjectURL(url);
 }
 
-function asJSON(palette: palette.Palette): void {
+export function asJSON(palette: Palette): void {
 	const json = JSON.stringify(palette, null, 2);
 	const blob = new Blob([json], { type: 'application/json' });
 	const url = URL.createObjectURL(blob);
@@ -69,9 +65,9 @@ function asJSON(palette: palette.Palette): void {
 	URL.revokeObjectURL(url);
 }
 
-function asPNG(
-	palette: palette.Palette,
-	colorSpace: colors.ColorSpace = 'hsl',
+export function asPNG(
+	palette: Palette,
+	colorSpace: ColorSpace = 'hsl',
 	paletteName?: string
 ): void {
 	const canvas = document.createElement('canvas');
@@ -157,7 +153,7 @@ function asPNG(
 	}, 'image/png');
 }
 
-function asXML(palette: palette.Palette): void {
+export function asXML(palette: Palette): void {
 	const xmlItems = palette.items
 		.map(
 			item => `
@@ -205,10 +201,3 @@ function asXML(palette: palette.Palette): void {
 
 	URL.revokeObjectURL(url);
 }
-
-export const exportPalette: fnObjects.ExportPalette = {
-	asCSS,
-	asJSON,
-	asPNG,
-	asXML
-};

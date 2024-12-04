@@ -7,37 +7,47 @@
 
 // This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND.
 
-import { config } from './config/constants';
-import { domFn } from './dom/dom-main';
-import { database } from './database/database';
-import * as colors from './index/colors';
-import { generate } from './palette-gen/generate';
-import { randomHSL } from './utils/random-color-utils';
-import { core } from './utils/core-utils';
+import { HSL, PaletteOptions } from './index/colors';
+import { config } from './config';
+import { core } from './common/core';
+import { utils } from './common';
+import {
+	addConversionButtonEventListeners,
+	applyCustomColor,
+	defineUIElements,
+	pullParamsFromUI,
+	desaturateColor,
+	saturateColor,
+	showCustomColorPopupDiv
+} from './dom/main';
+import { idb } from './idb';
+import { start } from './palette/start';
+
+const consts = config.consts;
 
 document.addEventListener('DOMContentLoaded', () => {
 	console.log('DOM content loaded - Initializing application');
 
-	const buttons = domFn.defineUIElements();
+	const buttons = defineUIElements();
 
 	if (!buttons) {
 		console.error('Failed to initialize UI buttons');
 		return;
 	}
 
-	const selectedColorOptions = config.selectedColorOptions;
+	const selectedColorOption = consts.dom.selectedColorOption;
 
 	const {
-		advancedMenuToggleButton,
+		advancedMenuButton,
 		applyCustomColorButton,
 		clearCustomColorButton,
+		closeCustomColorMenuButton,
 		closeHelpMenuButton,
 		closeHistoryMenuButton,
-		customColorToggleButton,
 		desaturateButton,
 		generateButton,
-		helpMenuToggleButton,
-		historyMenuToggleButton,
+		helpMenuButton,
+		historyMenuButton,
 		saturateButton,
 		showAsCMYKButton,
 		showAsHexButton,
@@ -49,17 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// confirm that all elements are accessible
 	console.log(
-		`Advanced Menu Toggle Button${advancedMenuToggleButton ? 'found' : 'not found'}\nApply Custom Color Button: ${applyCustomColorButton ? 'found' : 'not found'}\nClear Custom Color Button: ${clearCustomColorButton ? 'found' : 'not found'}\nClose Help Menu Button: ${closeHelpMenuButton ? 'found' : 'not found'}\nClose History Menu Button: ${closeHistoryMenuButton ? 'found' : 'not found'}\nCustom Color Toggle Button: ${customColorToggleButton ? 'found' : 'not found'}\nDesaturate Button: ${desaturateButton ? 'found' : 'not found'}\nGenerate Button: ${generateButton ? 'found' : 'not found'}\nHistory Toggle Menu Button: ${historyMenuToggleButton ? 'found' : 'not found'}\nSaturate Button: ${saturateButton ? 'found' : 'not found'}\nShow as CMYK Button: ${showAsCMYKButton ? 'found' : 'not found'}\nShow as Hex Button: ${showAsHexButton ? 'found' : 'not found'}\nShow as HSL Button: ${showAsHSLButton ? 'found' : 'not found'}\nShow as HSV Button: ${showAsHSVButton ? 'found' : 'not found'}\nShow as LAB Button: ${showAsLABButton ? 'found' : 'not found'}\nShow as RGB Button: ${showAsRGBButton ? 'found' : 'not found'}`
+		`Advanced Menu Button: ${advancedMenuButton ? 'found' : 'not found'}\nApply Custom Color Button: ${applyCustomColorButton ? 'found' : 'not found'}\nClear Custom Color Button: ${clearCustomColorButton ? 'found' : 'not found'}\nClose Custom Color Menu Button: ${closeCustomColorMenuButton ? 'found' : 'not found'}\nClose Help Menu Button: ${closeHelpMenuButton ? 'found' : 'not found'}\nClose History Menu Button: ${closeHistoryMenuButton ? 'found' : 'not found'}\nDesaturate Button: ${desaturateButton ? 'found' : 'not found'}\nGenerate Button: ${generateButton ? 'found' : 'not found'}\nHelp Menu Button: ${helpMenuButton ? 'found' : 'not found'}\nHistory Menu Button: ${historyMenuButton ? 'found' : 'not found'}\nSaturate Button: ${saturateButton ? 'found' : 'not found'}\nShow as CMYK Button: ${showAsCMYKButton ? 'found' : 'not found'}\nShow as Hex Button: ${showAsHexButton ? 'found' : 'not found'}\nShow as HSL Button: ${showAsHSLButton ? 'found' : 'not found'}\nShow as HSV Button: ${showAsHSVButton ? 'found' : 'not found'}\nShow as LAB Button: ${showAsLABButton ? 'found' : 'not found'}\nShow as RGB Button: ${showAsRGBButton ? 'found' : 'not found'}`
 	);
 
-	const selectedColor = selectedColorOptions
-		? parseInt(selectedColorOptions.value, 10)
+	const selectedColor = selectedColorOption
+		? parseInt(selectedColorOption.value, 10)
 		: 0;
 
 	console.log(`Selected color: ${selectedColor}`);
 
 	try {
-		domFn.addConversionButtonEventListeners();
+		addConversionButtonEventListeners();
 
 		console.log('Conversion button event listeners attached');
 	} catch (error) {
@@ -68,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		);
 	}
 
-	advancedMenuToggleButton?.addEventListener('click', e => {
+	advancedMenuButton?.addEventListener('click', e => {
 		e.preventDefault();
 
 		const advancedMenuContent = document.querySelector(
@@ -88,14 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	applyCustomColorButton?.addEventListener('click', async e => {
 		e.preventDefault();
 
-		const customHSLColor = domFn.applyCustomColor();
-		const customHSLColorClone: colors.HSL = core.clone(customHSLColor);
+		const customHSLColor = applyCustomColor();
+		const customHSLColorClone: HSL = core.clone(customHSLColor);
 
-		await database.saveData(
-			'customColor',
-			'appSettings',
-			customHSLColorClone
-		);
+		await idb.saveData('customColor', 'appSettings', customHSLColorClone);
 
 		console.log('Custom color saved to IndexedDB');
 	});
@@ -103,11 +109,17 @@ document.addEventListener('DOMContentLoaded', () => {
 	clearCustomColorButton?.addEventListener('click', async e => {
 		e.preventDefault();
 
-		await database.deleteTable('customColor');
+		await idb.deleteTable('customColor');
 
 		console.log('Custom color cleared from IndexedDB');
 
-		domFn.showCustomColorPopupDiv();
+		showCustomColorPopupDiv();
+	});
+
+	closeCustomColorMenuButton?.addEventListener('click', async e => {
+		e.preventDefault();
+
+		console.log('closeCustomColorMenuButton clicked');
 	});
 
 	closeHelpMenuButton?.addEventListener('click', e => {
@@ -122,20 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		console.log('closeHistoryMenuButton clicked');
 	});
 
-	customColorToggleButton?.addEventListener('click', e => {
-		e.preventDefault();
-
-		console.log('customColorToggleButton clicked');
-
-		domFn.showCustomColorPopupDiv();
-	});
-
 	desaturateButton?.addEventListener('click', e => {
 		e.preventDefault();
 
 		console.log('desaturateButton clicked');
 
-		domFn.desaturateColor(selectedColor);
+		desaturateColor(selectedColor);
 	});
 
 	generateButton?.addEventListener('click', async e => {
@@ -147,34 +151,33 @@ document.addEventListener('DOMContentLoaded', () => {
 			paletteType,
 			numBoxes,
 			enableAlpha,
-			limitBright,
-			limitDark,
-			limitGray
-		} = domFn.pullParamsFromUI();
+			limitDarkness,
+			limitGrayness,
+			limitLightness
+		} = pullParamsFromUI();
 
-		let customColor =
-			(await database.getCustomColor()) as colors.HSL | null;
+		let customColor = (await idb.getCustomColor()) as HSL | null;
 
 		if (!customColor) {
 			console.info('No custom color found. Using a random color');
 
-			customColor = randomHSL(true);
+			customColor = utils.random.hsl(true);
 		}
 
-		const paletteOptions: colors.PaletteOptions = {
+		const paletteOptions: PaletteOptions = {
 			paletteType,
 			numBoxes,
 			customColor: core.clone(customColor),
 			enableAlpha,
-			limitBright,
-			limitDark,
-			limitGray
+			limitDarkness,
+			limitGrayness,
+			limitLightness
 		};
 
-		await generate.startPaletteGen(paletteOptions);
+		await start.paletteGen(paletteOptions);
 	});
 
-	helpMenuToggleButton?.addEventListener('click', e => {
+	helpMenuButton?.addEventListener('click', e => {
 		e.preventDefault();
 
 		const helpMenuContent = document.querySelector(
@@ -191,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		console.log('helpMenuToggleButton clicked');
 	});
 
-	historyMenuToggleButton?.addEventListener('click', e => {
+	historyMenuButton?.addEventListener('click', e => {
 		e.preventDefault();
 
 		const historyMenuContent = document.querySelector(
@@ -213,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		console.log('saturateButton clicked');
 
-		domFn.saturateColor(selectedColor);
+		saturateColor(selectedColor);
 	});
 
 	showAsCMYKButton?.addEventListener('click', e => {

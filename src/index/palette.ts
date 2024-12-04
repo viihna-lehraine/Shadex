@@ -1,4 +1,22 @@
-import * as colors from './colors';
+// File: src/index/colors.ts
+
+import {
+	CMYKValue,
+	CMYKValueString,
+	HexValue,
+	HexValueString,
+	HSL,
+	HSLValue,
+	HSLValueString,
+	HSVValue,
+	HSVValueString,
+	LABValue,
+	LABValueString,
+	RGBValue,
+	RGBValueString,
+	XYZValue,
+	XYZValueString
+} from './index';
 
 export interface Palette {
 	id: string;
@@ -11,7 +29,7 @@ export interface Palette {
 	};
 	metadata: {
 		customColor?: {
-			hslColor: colors.HSL;
+			hslColor: HSL;
 			convertedColors: PaletteItem['colors'];
 		};
 		numBoxes: number;
@@ -22,22 +40,22 @@ export interface Palette {
 export interface PaletteItem {
 	id: string;
 	colors: {
-		cmyk: colors.CMYKValue;
-		hex: colors.HexValue;
-		hsl: colors.HSLValue;
-		hsv: colors.HSVValue;
-		lab: colors.LABValue;
-		rgb: colors.RGBValue;
-		xyz: colors.XYZValue;
+		cmyk: CMYKValue;
+		hex: HexValue;
+		hsl: HSLValue;
+		hsv: HSVValue;
+		lab: LABValue;
+		rgb: RGBValue;
+		xyz: XYZValue;
 	};
 	colorStrings: {
-		cmykString: colors.CMYKValueString;
-		hexString: colors.HexValueString;
-		hslString: colors.HSLValueString;
-		hsvString: colors.HSVValueString;
-		labString: colors.LABValueString;
-		rgbString: colors.RGBValueString;
-		xyzString: colors.XYZValueString;
+		cmykString: CMYKValueString;
+		hexString: HexValueString;
+		hslString: HSLValueString;
+		hsvString: HSVValueString;
+		labString: LABValueString;
+		rgbString: RGBValueString;
+		xyzString: XYZValueString;
 	};
 	cssStrings: {
 		cmykCSSString: string;

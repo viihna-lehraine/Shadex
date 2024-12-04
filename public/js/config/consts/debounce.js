@@ -1,0 +1,6 @@
+// File: src/config/consts/debounce.ts
+export const debounce = {
+    button: 300,
+    input: 200
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGVib3VuY2UuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvY29uZmlnL2NvbnN0cy9kZWJvdW5jZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxzQ0FBc0M7QUFFdEMsTUFBTSxDQUFDLE1BQU0sUUFBUSxHQUFHO0lBQ3ZCLE1BQU0sRUFBRSxHQUFHO0lBQ1gsS0FBSyxFQUFFLEdBQUc7Q0FDVixDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLy8gRmlsZTogc3JjL2NvbmZpZy9jb25zdHMvZGVib3VuY2UudHNcblxuZXhwb3J0IGNvbnN0IGRlYm91bmNlID0ge1xuXHRidXR0b246IDMwMCxcblx0aW5wdXQ6IDIwMFxufTtcbiJdfQ==

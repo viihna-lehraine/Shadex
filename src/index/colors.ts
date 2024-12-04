@@ -1,3 +1,5 @@
+// File: src/index/colors.ts
+
 export type Color = CMYK | Hex | HSL | HSV | LAB | RGB | SL | SV | XYZ;
 
 export interface ColorData {
@@ -10,18 +12,6 @@ export interface ColorData {
 	xyz?: XYZ;
 }
 
-export interface ColorDataExtended {
-	cmyk?: CMYK;
-	hex?: Hex;
-	hsl?: HSL;
-	hsv?: HSV;
-	lab?: LAB;
-	rgb?: RGB;
-	sl?: SL;
-	sv?: SV;
-	xyz?: XYZ;
-}
-
 export interface ColorDataAssertion {
 	cmyk: CMYK;
 	hex: Hex;
@@ -30,6 +20,11 @@ export interface ColorDataAssertion {
 	lab: LAB;
 	rgb: RGB;
 	xyz: XYZ;
+}
+
+export interface ColorDataExtended extends ColorData {
+	sl?: SL;
+	sv?: SV;
 }
 
 export type ColorPartial = SL | SV;
@@ -58,9 +53,9 @@ export interface PaletteOptions {
 	customColor: HSL | null;
 	paletteType: number;
 	enableAlpha: boolean;
-	limitBright: boolean;
-	limitDark: boolean;
-	limitGray: boolean;
+	limitDarkness: boolean;
+	limitGrayness: boolean;
+	limitLightness: boolean;
 }
 
 // ***** Colors *****
@@ -167,7 +162,7 @@ export type CMYKValue = {
 export type HexValue = {
 	hex: string;
 	alpha: string;
-	numericAlpha: number;
+	numAlpha: number;
 };
 
 export type HSLValue = {

@@ -1,16 +1,15 @@
-import * as colors from '../index/colors';
-import * as fnObjects from '../index/fn-objects';
-import * as palette from '../index/palette';
+import { ColorSpace } from '../index/colors';
+import { Palette } from '../index/palette';
 
-let paletteHistory: palette.Palette[] = [];
+let paletteHistory: Palette[] = [];
 
-function addPaletteToHistory(palette: palette.Palette): void {
+export function addPaletteToHistory(palette: Palette): void {
 	paletteHistory.unshift(palette);
 
 	if (paletteHistory.length >= 50) paletteHistory.pop();
 }
 
-function renderPaletteHistory(displayFormat: colors.ColorSpace): void {
+export function renderPaletteHistory(displayFormat: ColorSpace): void {
 	paletteHistory.forEach(palette => {
 		console.log(`Palette ID: ${palette.id}`);
 
@@ -21,8 +20,3 @@ function renderPaletteHistory(displayFormat: colors.ColorSpace): void {
 		// });
 	});
 }
-
-export const history: fnObjects.History = {
-	addPaletteToHistory,
-	renderPaletteHistory
-};
