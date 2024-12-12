@@ -1,0 +1,11 @@
+// File: src/data/mode/base.ts
+export const base = {
+    debug: true,
+    errorLogs: true,
+    gracefulErrors: false,
+    infoLogs: true,
+    quiet: false,
+    verbose: true,
+    warnLogs: true
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYmFzZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL3NyYy9kYXRhL21vZGUvYmFzZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSw4QkFBOEI7QUFJOUIsTUFBTSxDQUFDLE1BQU0sSUFBSSxHQUFhO0lBQzdCLEtBQUssRUFBRSxJQUFJO0lBQ1gsU0FBUyxFQUFFLElBQUk7SUFDZixjQUFjLEVBQUUsS0FBSztJQUNyQixRQUFRLEVBQUUsSUFBSTtJQUNkLEtBQUssRUFBRSxLQUFLO0lBQ1osT0FBTyxFQUFFLElBQUk7SUFDYixRQUFRLEVBQUUsSUFBSTtDQUNMLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvLyBGaWxlOiBzcmMvZGF0YS9tb2RlL2Jhc2UudHNcblxuaW1wb3J0IHsgTW9kZURhdGEgfSBmcm9tICcuLi8uLi9pbmRleC9pbmRleC5qcyc7XG5cbmV4cG9ydCBjb25zdCBiYXNlOiBNb2RlRGF0YSA9IHtcblx0ZGVidWc6IHRydWUsXG5cdGVycm9yTG9nczogdHJ1ZSxcblx0Z3JhY2VmdWxFcnJvcnM6IGZhbHNlLFxuXHRpbmZvTG9nczogdHJ1ZSxcblx0cXVpZXQ6IGZhbHNlLFxuXHR2ZXJib3NlOiB0cnVlLFxuXHR3YXJuTG9nczogdHJ1ZVxufSBhcyBjb25zdDtcbiJdfQ==

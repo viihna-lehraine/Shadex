@@ -1,11 +1,12 @@
 // File: src/palette/index.ts
 
-import { generate } from './generate';
-import { start } from './start';
+import { PaletteFnMasterInterface } from '../index/index.js';
+import { generate } from './generate.js';
+import { start } from './start.js';
 
 export { generate, start };
 
-export const palette = {
+export const palette: PaletteFnMasterInterface = {
 	generate,
 	start
 } as const;

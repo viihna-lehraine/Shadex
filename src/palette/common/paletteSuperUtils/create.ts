@@ -11,35 +11,38 @@ import {
 	HSVString,
 	LAB,
 	LABString,
+	PaletteCommon_SuperUtils_Create,
 	PaletteItem,
 	RGB,
 	RGBString,
 	SL,
 	XYZ,
 	XYZString
-} from '../../../index';
-import { core, utils } from '../../../common';
-import { IndexedDB } from '../../../idb';
-import { paletteHelpers } from '../paletteHelpers';
-import { paletteUtils } from '../paletteUtils';
+} from '../../../index/index.js';
+import { core, utils } from '../../../common/index.js';
+import { IDBManager } from '../../../idb/index.js';
+import { paletteHelpers } from '../paletteHelpers/index.js';
+import { paletteUtils } from '../paletteUtils/index.js';
 
 const limits = paletteHelpers.limits;
 const update = paletteHelpers.update;
 
 const hslTo = paletteUtils.convert.hslTo;
 
-const idb = IndexedDB.getInstance();
+const idb = IDBManager.getInstance();
 
 function baseColor(customColor: HSL | null, enableAlpha: boolean): HSL {
-	const color = core.clone(customColor ?? utils.random.hsl(enableAlpha));
+	const color = core.base.clone(customColor ?? utils.random.hsl(enableAlpha));
 
 	return color as HSL;
 }
 
 function paletteItem(color: HSL, enableAlpha: boolean): PaletteItem {
-	const clonedColor = core.clone(color) as HSL;
+	const clonedColor = core.base.clone(color) as HSL;
 
-	clonedColor.value.alpha = enableAlpha ? Math.random() : 1;
+	clonedColor.value.alpha = enableAlpha
+		? core.brand.asAlphaRange(Math.random())
+		: core.brand.asAlphaRange(1);
 
 	return {
 		id: `${color.format}_${idb.getNextPaletteID()}`,
@@ -88,13 +91,25 @@ function paletteItem(color: HSL, enableAlpha: boolean): PaletteItem {
 			).value
 		},
 		cssStrings: {
-			cmykCSSString: core.getCSSColorString(hslTo(clonedColor, 'cmyk')),
-			hexCSSString: core.getCSSColorString(hslTo(clonedColor, 'hex')),
-			hslCSSString: core.getCSSColorString(clonedColor),
-			hsvCSSString: core.getCSSColorString(hslTo(clonedColor, 'hsv')),
-			labCSSString: core.getCSSColorString(hslTo(clonedColor, 'lab')),
-			rgbCSSString: core.getCSSColorString(hslTo(clonedColor, 'rgb')),
-			xyzCSSString: core.getCSSColorString(hslTo(clonedColor, 'xyz'))
+			cmykCSSString: core.convert.toCSSColorString(
+				hslTo(clonedColor, 'cmyk')
+			),
+			hexCSSString: core.convert.toCSSColorString(
+				hslTo(clonedColor, 'hex')
+			),
+			hslCSSString: core.convert.toCSSColorString(clonedColor),
+			hsvCSSString: core.convert.toCSSColorString(
+				hslTo(clonedColor, 'hsv')
+			),
+			labCSSString: core.convert.toCSSColorString(
+				hslTo(clonedColor, 'lab')
+			),
+			rgbCSSString: core.convert.toCSSColorString(
+				hslTo(clonedColor, 'rgb')
+			),
+			xyzCSSString: core.convert.toCSSColorString(
+				hslTo(clonedColor, 'xyz')
+			)
 		}
 	};
 }
@@ -115,7 +130,10 @@ function paletteItemArray(
 		do {
 			const sl = utils.random.sl(enableAlpha) as SL;
 			newColor = utils.conversion.genAllColorValues({
-				value: { hue, ...sl.value },
+				value: {
+					hue: core.brand.asRadial(hue),
+					...sl.value
+				},
 				format: 'hsl'
 			}).hsl as HSL;
 		} while (
@@ -135,7 +153,7 @@ function paletteItemArray(
 	return paletteItems;
 }
 
-export const create = {
+export const create: PaletteCommon_SuperUtils_Create = {
 	baseColor,
 	paletteItem,
 	paletteItemArray

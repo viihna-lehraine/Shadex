@@ -1,7 +1,11 @@
 // File: src/palette/common/paletteHelpers/update.ts
 
-import { Color, HSL } from '../../../index';
-import { core, utils } from '../../../common';
+import {
+	Color,
+	HSL,
+	PaletteCommon_Helpers_Update
+} from '../../../index/index.js';
+import { core, utils } from '../../../common/index.js';
 
 function colorBox(color: HSL, index: number): void {
 	const colorBox = document.getElementById(`color-box-${index + 1}`);
@@ -12,7 +16,7 @@ function colorBox(color: HSL, index: number): void {
 
 		if (selectedColor) {
 			const hslColor = colorValues.hsl as HSL;
-			const hslCSSString = core.getCSSColorString(hslColor);
+			const hslCSSString = core.convert.toCSSColorString(hslColor);
 
 			colorBox.style.backgroundColor = hslCSSString;
 
@@ -21,6 +25,6 @@ function colorBox(color: HSL, index: number): void {
 	}
 }
 
-export const update = {
+export const update: PaletteCommon_Helpers_Update = {
 	colorBox
 } as const;

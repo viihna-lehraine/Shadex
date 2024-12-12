@@ -1,3 +1,3 @@
 // File: src/idb/index.ts
 
-export { IndexedDB } from './IndexedDB';
+export { IDBManager } from './IDBManager.js';

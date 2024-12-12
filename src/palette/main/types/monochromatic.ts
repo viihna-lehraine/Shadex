@@ -1,80 +1,84 @@
 // File: src/palette/main/types/monochromatic.ts
 
-import { HSL, Palette, PaletteItem } from '../../../index/index';
-import { config } from '../../../config';
-import { IndexedDB } from '../../../idb';
-import { paletteSuperUtils } from '../../common';
-import { utils } from '../../../common';
+import { GenPaletteArgs, Palette, PaletteItem } from '../../../index/index.js';
+import { core, utils } from '../../../common/index.js';
+import { data } from '../../../data/index.js';
+import { IDBManager } from '../../../idb/index.js';
+import { paletteSuperUtils } from '../../common/index.js';
 
 const create = paletteSuperUtils.create;
-const defaultHSL = config.defaults.colors.hsl;
-const mode = config.mode;
+const mode = data.mode;
 
-const idb = IndexedDB.getInstance();
+const idb = IDBManager.getInstance();
 
-export async function monochromatic(
-	numBoxes: number,
-	customColor: HSL | null,
-	enableAlpha: boolean,
-	limitDark: boolean,
-	limitGray: boolean,
-	limitLight: boolean
-): Promise<Palette> {
+export async function monochromatic(args: GenPaletteArgs): Promise<Palette> {
 	const currentMonochromaticPaletteID = await idb.getCurrentPaletteID();
 
-	if (numBoxes < 2) {
-		if (mode.logWarnings)
+	if (args.numBoxes < 2) {
+		if (mode.warnLogs)
 			console.warn('Monochromatic palette requires at least 2 swatches.');
 
 		return utils.palette.createObject(
 			'monochromatic',
 			[],
-			defaultHSL,
+			core.brandColor.asHSL(data.defaults.colors.hsl),
 			0,
 			currentMonochromaticPaletteID,
-			enableAlpha,
-			limitDark,
-			limitGray,
-			limitLight
+			args.enableAlpha,
+			args.limitDark,
+			args.limitGray,
+			args.limitLight
 		);
 	}
 
-	const baseColor = create.baseColor(customColor, enableAlpha);
+	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const paletteItems: PaletteItem[] = [
-		create.paletteItem(baseColor, enableAlpha)
+		create.paletteItem(baseColor, args.enableAlpha)
 	];
 
-	for (let i = 1; i < numBoxes; i++) {
+	for (let i = 1; i < args.numBoxes; i++) {
 		const hueShift = Math.random() * 10 - 5;
 		const newColor = utils.conversion.genAllColorValues({
 			value: {
-				hue: (baseColor.value.hue + hueShift + 360) % 360,
-				saturation: Math.min(
-					100,
-					Math.max(0, baseColor.value.saturation - i * 5)
+				hue: core.brand.asRadial(
+					(baseColor.value.hue + hueShift + 360) % 360
 				),
-				lightness: Math.min(
-					100,
-					Math.max(0, baseColor.value.lightness + (i * 10 - 20))
+				saturation: core.brand.asPercentile(
+					Math.min(
+						100,
+						Math.max(0, baseColor.value.saturation - i * 5)
+					)
 				),
-				alpha: enableAlpha ? Math.random() : 1
+				lightness: core.brand.asPercentile(
+					Math.min(
+						100,
+						Math.max(0, baseColor.value.lightness + (i * 10 - 20))
+					)
+				),
+				alpha: args.enableAlpha
+					? core.brand.asAlphaRange(Math.random())
+					: core.brand.asAlphaRange(1)
 			},
 			format: 'hsl'
 		}).hsl;
 
 		if (newColor) {
-			paletteItems.push(create.paletteItem(newColor, enableAlpha));
+			paletteItems.push(create.paletteItem(newColor, args.enableAlpha));
 		}
 	}
 
-	return await idb.savePaletteToDB(
+	const monochromaticPalette = await idb.savePaletteToDB(
 		'monochromatic',
 		paletteItems,
 		baseColor,
-		numBoxes,
-		enableAlpha,
-		limitDark,
-		limitGray,
-		limitLight
+		args.numBoxes,
+		args.enableAlpha,
+		args.limitDark,
+		args.limitGray,
+		args.limitLight
 	);
+
+	if (!monochromaticPalette)
+		throw new Error('Monochromatic palette is either null or undefined.');
+	else return monochromaticPalette;
 }

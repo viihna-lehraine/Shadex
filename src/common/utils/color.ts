@@ -8,10 +8,11 @@ import {
 	ColorSpace,
 	ColorSpaceExtended,
 	ColorString,
+	CommonUtilsFnColor,
 	Format,
 	Hex,
+	HexString,
 	HexValue,
-	HexValueString,
 	HSL,
 	HSLString,
 	HSLValueString,
@@ -30,11 +31,11 @@ import {
 	SVString,
 	XYZ,
 	XYZValueString
-} from '../../index';
-import { config } from '../../config';
-import { core } from '../core';
+} from '../../index/index.js';
+import { core } from '../core/index.js';
+import { data } from '../../data/index.js';
 
-const mode = config.mode;
+const mode = data.mode;
 
 // ******** SECTION 1: Robust Type Guards ********
 
@@ -63,23 +64,20 @@ function isColorSpaceExtended(value: string): value is ColorSpaceExtended {
 	].includes(value);
 }
 
-export function isColorString(value: unknown): value is ColorString {
-	if (typeof value !== 'object' || value === null) return false;
+function isColorString(value: unknown): value is ColorString {
+	if (typeof value === 'object' && value !== null) {
+		const colorString = value as Exclude<ColorString, HexString>;
+		const validStringFormats: Exclude<ColorString, HexString>['format'][] =
+			['cmyk', 'hsl', 'hsv', 'lab', 'rgb', 'sl', 'sv', 'xyz'];
 
-	const colorString = value as ColorString;
-	const validStringFormats: ColorString['format'][] = [
-		'cmyk',
-		'hsl',
-		'hsv',
-		'sl',
-		'sv'
-	];
+		return (
+			'value' in colorString &&
+			'format' in colorString &&
+			validStringFormats.includes(colorString.format)
+		);
+	}
 
-	return (
-		'value' in colorString &&
-		'format' in colorString &&
-		validStringFormats.includes(colorString.format)
-	);
+	return typeof value === 'string' && /^#[0-9A-Fa-f]{6,8}$/.test(value);
 }
 
 function isFormat(format: unknown): format is Format {
@@ -91,7 +89,7 @@ function isFormat(format: unknown): format is Format {
 	);
 }
 
-// ******** SECTIOn 2: Narrower Type Guards ********
+// ******** SECTION 2: Narrow Type Guards ********
 
 function isCMYKColor(value: unknown): value is CMYK {
 	return (
@@ -174,7 +172,7 @@ function isHSLString(value: unknown): value is HSLString {
 
 function isHSVColor(value: unknown): value is HSV {
 	return (
-		core.isColor(value) &&
+		core.guards.isColor(value) &&
 		typeof value === 'object' &&
 		value !== null &&
 		'format' in value &&
@@ -206,7 +204,7 @@ function isHSVString(value: unknown): value is HSVString {
 
 function isLAB(value: unknown): value is LAB {
 	return (
-		core.isColor(value) &&
+		core.guards.isColor(value) &&
 		typeof value === 'object' &&
 		value !== null &&
 		'format' in value &&
@@ -224,7 +222,7 @@ function isLABFormat(color: Color): color is LAB {
 
 function isRGB(value: unknown): value is RGB {
 	return (
-		core.isColor(value) &&
+		core.guards.isColor(value) &&
 		typeof value === 'object' &&
 		value !== null &&
 		'format' in value &&
@@ -351,7 +349,7 @@ function isStoredPalette(obj: unknown): obj is StoredPalette {
 
 function narrowToColor(color: Color | ColorString): Color | null {
 	if (isColorString(color)) {
-		return core.colorStringToColor(color);
+		return core.convert.toColor(color);
 	}
 
 	switch (color.format as ColorSpaceExtended) {
@@ -378,28 +376,29 @@ function addHashToHex(hex: Hex): Hex {
 			? hex
 			: {
 					value: {
-						hex: `#${hex.value}}`,
-						alpha: hex.value.alpha,
-						numAlpha: hex.value.numAlpha
+						hex: core.brand.asHexSet(`#${hex.value}}`),
+						alpha: core.brand.asHexComponent(`#$hex.value.alpha`),
+						numAlpha: core.brand.asAlphaRange(hex.value.numAlpha)
 					},
 					format: 'hex' as 'hex'
 				};
 	} catch (error) {
-		if (mode.logErrors) console.error(`addHashToHex error: ${error}`);
+		if (mode.errorLogs) console.error(`addHashToHex error: ${error}`);
 
-		return config.defaults.colors.hex;
+		return core.brandColor.asHex(data.defaults.colors.hex);
 	}
 }
 
 function colorToColorString(color: Color): ColorString {
-	const clonedColor = core.clone(color) as Exclude<Color, Hex>;
+	const clonedColor = core.base.clone(color);
 
+	// Check if the color is already a string-based color
 	if (isColorString(clonedColor)) {
-		if (mode.logErrors)
+		if (mode.errorLogs) {
 			console.log(
 				`Already formatted as color string: ${JSON.stringify(color)}`
 			);
-
+		}
 		return clonedColor;
 	}
 
@@ -408,47 +407,57 @@ function colorToColorString(color: Color): ColorString {
 	if (isCMYKColor(clonedColor)) {
 		return {
 			format: 'cmyk',
-			value: newValue as unknown as CMYKValueString
+			value: newValue as CMYKValueString
 		};
 	} else if (isHex(clonedColor)) {
+		// Handle Hex colors properly
 		return {
 			format: 'hex',
-			value: newValue as unknown as HexValueString
+			value: {
+				hex: core.brand.asHexSet(newValue.hex as string), // Brand the hex value
+				alpha: core.brand.asHexComponent(newValue.alpha as string), // Brand the alpha component
+				numAlpha: String(
+					core.brand.asAlphaRange(newValue.numAlpha as number)
+				) // Convert branded value to string
+			}
 		};
 	} else if (isHSLColor(clonedColor)) {
 		return {
 			format: 'hsl',
-			value: newValue as unknown as HSLValueString
+			value: newValue as HSLValueString
 		};
 	} else if (isHSVColor(clonedColor)) {
 		return {
 			format: 'hsv',
-			value: newValue as unknown as HSVValueString
+			value: newValue as HSVValueString
 		};
 	} else if (isLAB(clonedColor)) {
 		return {
 			format: 'lab',
-			value: newValue as unknown as LABValueString
+			value: newValue as LABValueString
 		};
 	} else if (isRGB(clonedColor)) {
 		return {
 			format: 'rgb',
-			value: newValue as unknown as RGBValueString
+			value: newValue as RGBValueString
 		};
 	} else if (isXYZ(clonedColor)) {
 		return {
 			format: 'xyz',
-			value: newValue as unknown as XYZValueString
+			value: newValue as XYZValueString
 		};
 	} else {
-		if (!mode.gracefulErrors)
+		// Handle unsupported formats
+		if (!mode.gracefulErrors) {
 			throw new Error(`Unsupported format: ${clonedColor.format}`);
-		else if (mode.logErrors)
+		} else if (mode.errorLogs) {
 			console.error(`Unsupported format: ${clonedColor.format}`);
-		else if (!mode.quiet)
+		} else if (!mode.quiet) {
 			console.warn('Failed to convert to color string.');
+		}
 
-		return config.defaults.colors.strings.hsl;
+		// Return a default HSL color string in case of errors
+		return data.defaults.colorStrings.hsl;
 	}
 }
 
@@ -469,7 +478,7 @@ function formatColor(
 	asColorString: boolean = false,
 	asCSSString: boolean = false
 ): { baseColor: Color; formattedString?: ColorString | string } {
-	const baseColor = core.clone(color);
+	const baseColor = core.base.clone(color);
 
 	let formattedString: ColorString | string | undefined = undefined;
 
@@ -478,7 +487,7 @@ function formatColor(
 			color as Exclude<Color, Hex | LAB | RGB>
 		) as ColorString;
 	} else if (asCSSString) {
-		formattedString = core.getCSSColorString(color) as string;
+		formattedString = core.convert.toCSSColorString(color) as string;
 	}
 
 	return formattedString !== undefined
@@ -514,7 +523,7 @@ function getAlphaFromHex(hex: string): number {
 			throw new Error(
 				`Invalid hex color: ${hex}. Expected format #RRGGBBAA`
 			);
-		else if (mode.logErrors)
+		else if (mode.errorLogs)
 			console.error(
 				`Invalid hex color: ${hex}. Expected format #RRGGBBAA`
 			);
@@ -562,13 +571,13 @@ function getColorString(color: Color): string | null {
 			case 'xyz':
 				return formatters.xyz(color);
 			default:
-				if (!mode.logErrors)
+				if (!mode.errorLogs)
 					console.error(`Unsupported color format for ${color}`);
 
 				return null;
 		}
 	} catch (error) {
-		if (!mode.logErrors) console.error(`getColorString error: ${error}`);
+		if (!mode.errorLogs) console.error(`getColorString error: ${error}`);
 
 		return null;
 	}
@@ -585,7 +594,13 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 				const [c, m, y, k, a] = parseComponents(value, 5);
 
 				return {
-					value: { cyan: c, magenta: m, yellow: y, key: k, alpha: a },
+					value: {
+						cyan: core.brand.asPercentile(c),
+						magenta: core.brand.asPercentile(m),
+						yellow: core.brand.asPercentile(y),
+						key: core.brand.asPercentile(k),
+						alpha: core.brand.asAlphaRange(a)
+					},
 					format: 'cmyk'
 				};
 			}
@@ -596,9 +611,9 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 
 				return {
 					value: {
-						hex: hexValue,
-						alpha,
-						numAlpha
+						hex: core.brand.asHexSet(hexValue),
+						alpha: core.brand.asHexComponent(alpha),
+						numAlpha: core.brand.asAlphaRange(numAlpha)
 					},
 					format: 'hex'
 				};
@@ -606,7 +621,12 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 				const [h, s, l, a] = parseComponents(value, 4);
 
 				return {
-					value: { hue: h, saturation: s, lightness: l, alpha: a },
+					value: {
+						hue: core.brand.asRadial(h),
+						saturation: core.brand.asPercentile(s),
+						lightness: core.brand.asPercentile(l),
+						alpha: core.brand.asAlphaRange(a)
+					},
 					format: 'hsl'
 				};
 			}
@@ -614,34 +634,60 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 				const [h, s, v, a] = parseComponents(value, 4);
 
 				return {
-					value: { hue: h, saturation: s, value: v, alpha: a },
+					value: {
+						hue: core.brand.asRadial(h),
+						saturation: core.brand.asPercentile(s),
+						value: core.brand.asPercentile(v),
+						alpha: core.brand.asAlphaRange(a)
+					},
 					format: 'hsv'
 				};
 			}
 			case 'lab': {
 				const [l, a, b, alpha] = parseComponents(value, 4);
-				return { value: { l, a, b, alpha }, format: 'lab' };
+				return {
+					value: {
+						l: core.brand.asLAB_L(l),
+						a: core.brand.asLAB_A(a),
+						b: core.brand.asLAB_B(b),
+						alpha: core.brand.asAlphaRange(alpha)
+					},
+					format: 'lab'
+				};
 			}
 			case 'rgb': {
-				const [r, g, b, a] = value.split(',').map(Number);
+				const components = value.split(',').map(Number);
+
+				if (components.some(isNaN))
+					throw new Error('Invalid RGB format');
+
+				const [r, g, b, a] = components;
 
 				return {
-					value: { red: r, green: g, blue: b, alpha: a },
+					value: {
+						red: core.brand.asByteRange(r),
+						green: core.brand.asByteRange(g),
+						blue: core.brand.asByteRange(b),
+						alpha: core.brand.asAlphaRange(a)
+					},
 					format: 'rgb'
 				};
 			}
 			default:
-				if (!mode.gracefulErrors)
-					throw new Error(`Unsupported color format: ${colorSpace}`);
-				else if (mode.logErrors)
-					console.error(`Unsupported color format: ${colorSpace}`);
-				else if (!mode.quiet)
-					console.warn(`Failed to parse color: ${colorSpace}`);
+				const message = `Unsupported color format: ${colorSpace}`;
+
+				if (mode.gracefulErrors) {
+					if (mode.errorLogs) console.error(message);
+					else if (!mode.quiet)
+						console.warn(`Failed to parse color: ${message}`);
+				} else {
+					throw new Error(message);
+				}
 
 				return null;
 		}
 	} catch (error) {
-		if (mode.logErrors) console.error(`parseColor error: ${error}`);
+		if (mode.errorLogs) console.error(`parseColor error: ${error}`);
 
 		return null;
 	}
@@ -660,7 +706,7 @@ function parseComponents(value: string, count: number): number[] {
 		if (components.length !== count)
 			if (!mode.gracefulErrors)
 				throw new Error(`Expected ${count} components.`);
-			else if (mode.logErrors) {
+			else if (mode.errorLogs) {
 				if (!mode.quiet) console.warn(`Expected ${count} components.`);
 
 				console.error(`Expected ${count} components.`);
@@ -670,7 +716,7 @@ function parseComponents(value: string, count: number): number[] {
 
 		return components;
 	} catch (error) {
-		if (mode.logErrors) console.error(`Error parsing components: ${error}`);
+		if (mode.errorLogs) console.error(`Error parsing components: ${error}`);
 
 		return [];
 	}
@@ -681,7 +727,11 @@ function parseHexWithAlpha(hexValue: string): HexValue | null {
 	const alpha = hex.length === 9 ? hex.slice(-2) : 'FF';
 	const numAlpha = hexAlphaToNumericAlpha(alpha);
 
-	return { hex, alpha, numAlpha };
+	return {
+		hex: core.brand.asHexSet(hex),
+		alpha: core.brand.asHexComponent(alpha),
+		numAlpha: core.brand.asAlphaRange(numAlpha)
+	};
 }
 
 function stripHashFromHex(hex: Hex): Hex {
@@ -691,17 +741,23 @@ function stripHashFromHex(hex: Hex): Hex {
 		return hex.value.hex.startsWith('#')
 			? {
 					value: {
-						hex: hexString.slice(1),
-						alpha: hex.value.alpha,
-						numAlpha: hexAlphaToNumericAlpha(hex.value.alpha)
+						hex: core.brand.asHexSet(hexString.slice(1)),
+						alpha: core.brand.asHexComponent(
+							String(hex.value.alpha)
+						),
+						numAlpha: core.brand.asAlphaRange(
+							hexAlphaToNumericAlpha(String(hex.value.alpha))
+						)
 					},
 					format: 'hex' as 'hex'
 				}
 			: hex;
 	} catch (error) {
-		if (mode.logErrors) console.error(`stripHashFromHex error: ${error}`);
+		if (mode.errorLogs) console.error(`stripHashFromHex error: ${error}`);
 
-		return core.clone(config.defaults.colors.hex);
+		const unbrandedHex = core.base.clone(data.defaults.colors.hex);
+
+		return core.brandColor.asHex(unbrandedHex);
 	}
 }
 
@@ -736,7 +792,7 @@ function toHexWithAlpha(rgbValue: RGBValue): string {
 	return `${hex}${alphaHex}`;
 }
 
-export const color = {
+export const color: CommonUtilsFnColor = {
 	addHashToHex,
 	colorToColorString,
 	componentToHex,

@@ -1,11 +1,18 @@
 // File: src/common/utils/palette.ts
 
-import { Color, ColorString, HSL, Palette, PaletteItem } from '../../index';
-import { config } from '../../config';
+import {
+	Color,
+	ColorString,
+	CommonUtilsFnPalette,
+	HSL,
+	Palette,
+	PaletteItem
+} from '../../index';
 import { core } from '../core';
+import { data } from '../../data';
 import { helpers } from '../helpers';
 
-const mode = config.mode;
+const mode = data.mode;
 
 function createObject(
 	type: string,
@@ -44,12 +51,12 @@ export function populateOutputBox(
 	boxNumber: number
 ): void {
 	try {
-		const clonedColor: Color = core.isColor(color)
-			? core.clone(color)
-			: core.colorStringToColor(color);
+		const clonedColor: Color = core.guards.isColor(color)
+			? core.base.clone(color)
+			: core.convert.toColor(color);
 
-		if (!core.validateColorValues(clonedColor)) {
-			if (mode.logErrors) console.error('Invalid color values.');
+		if (!core.validate.colorValues(clonedColor)) {
+			if (mode.errorLogs) console.error('Invalid color values.');
 
 			helpers.dom.showToast('Invalid color.');
 
@@ -62,7 +69,7 @@ export function populateOutputBox(
 
 		if (!colorTextOutputBox) return;
 
-		const stringifiedColor = core.getCSSColorString(clonedColor);
+		const stringifiedColor = core.convert.toCSSColorString(clonedColor);
 
 		if (!mode.quiet)
 			console.log(
@@ -72,11 +79,14 @@ export function populateOutputBox(
 		colorTextOutputBox.value = stringifiedColor;
 		colorTextOutputBox.setAttribute('data-format', color.format);
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error('Failed to populate color text output box:', error);
 
 		return;
 	}
 }
 
-export const palette = { createObject, populateOutputBox } as const;
+export const palette: CommonUtilsFnPalette = {
+	createObject,
+	populateOutputBox
+} as const;

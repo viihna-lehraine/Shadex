@@ -4,6 +4,7 @@ import {
 	CMYK,
 	ColorDataAssertion,
 	ColorDataExtended,
+	CommonUtilsFnConversion,
 	Hex,
 	HSL,
 	HSV,
@@ -12,13 +13,13 @@ import {
 	SL,
 	SV,
 	XYZ
-} from '../../index';
-import { config } from '../../config';
-import { core } from '../core';
-import { paletteUtils } from '../../palette/common';
+} from '../../index/index.js';
+import { core } from '../core/index.js';
+import { data } from '../../data/index.js';
+import { paletteUtils } from '../../palette/common/index.js';
 
 const convert = paletteUtils.convert;
-const mode = config.mode;
+const mode = data.mode;
 
 function getConversionFn<
 	From extends keyof ColorDataAssertion,
@@ -40,7 +41,7 @@ function getConversionFn<
 		return (value: ColorDataAssertion[From]): ColorDataAssertion[To] =>
 			structuredClone(conversionFn(value));
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(`Error getting conversion function: ${error}`);
 
 		return undefined;
@@ -51,10 +52,10 @@ function genAllColorValues(color: HSL): Partial<ColorDataExtended> {
 	const result: Partial<ColorDataExtended> = {};
 
 	try {
-		const clonedColor = core.clone(color);
+		const clonedColor = core.base.clone(color);
 
-		if (!core.validateColorValues(clonedColor)) {
-			if (mode.logErrors)
+		if (!core.validate.colorValues(clonedColor)) {
+			if (mode.errorLogs)
 				console.error(`Invalid color: ${JSON.stringify(clonedColor)}`);
 
 			return {};
@@ -72,14 +73,14 @@ function genAllColorValues(color: HSL): Partial<ColorDataExtended> {
 
 		return result;
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(`Error generating all color values: ${error}`);
 
 		return {};
 	}
 }
 
-export const conversion = {
+export const conversion: CommonUtilsFnConversion = {
 	genAllColorValues,
 	getConversionFn
 } as const;

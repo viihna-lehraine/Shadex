@@ -9,8 +9,10 @@
 	"main": "./public/dist/bundle.js",
 	"scripts": {
 		"build": "npm run build:tsc && npm run build:rollup",
+		"build:full": "npm run clean && npm run build",
 		"build:rollup": "rollup -c",
-		"build:tsc": "rm -rf ./public/js && tsc && node scripts/add-js-extensions.js",
+		"build:tsc": "tsc",
+		"clean": "rm -rf ./public/dist && rm -rf ./public/js && mkdir ./public/dist && mkdir ./public/js",
 		"fix": "npm run format && npm run lint:fix",
 		"format": "npx prettier . --write",
 		"lint": "npx eslint",

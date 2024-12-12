@@ -1,0 +1,14 @@
+// File: src/data/index.ts
+import { consts } from './consts/index.js';
+import { defaults } from './defaults/index.js';
+import { idb } from './idb/index.js';
+import { mode } from './mode/index.js';
+import { sets } from './sets/index.js';
+export const data = {
+    consts,
+    defaults,
+    idb,
+    mode,
+    sets
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvZGF0YS9pbmRleC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSwwQkFBMEI7QUFHMUIsT0FBTyxFQUFFLE1BQU0sRUFBRSxNQUFNLG1CQUFtQixDQUFDO0FBQzNDLE9BQU8sRUFBRSxRQUFRLEVBQUUsTUFBTSxxQkFBcUIsQ0FBQztBQUMvQyxPQUFPLEVBQUUsR0FBRyxFQUFFLE1BQU0sZ0JBQWdCLENBQUM7QUFDckMsT0FBTyxFQUFFLElBQUksRUFBRSxNQUFNLGlCQUFpQixDQUFDO0FBQ3ZDLE9BQU8sRUFBRSxJQUFJLEVBQUUsTUFBTSxpQkFBaUIsQ0FBQztBQUV2QyxNQUFNLENBQUMsTUFBTSxJQUFJLEdBQWtCO0lBQ2xDLE1BQU07SUFDTixRQUFRO0lBQ1IsR0FBRztJQUNILElBQUk7SUFDSixJQUFJO0NBQ0ssQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEZpbGU6IHNyYy9kYXRhL2luZGV4LnRzXG5cbmltcG9ydCB7IERhdGFJbnRlcmZhY2UgfSBmcm9tICcuLi9pbmRleC9pbmRleC5qcyc7XG5pbXBvcnQgeyBjb25zdHMgfSBmcm9tICcuL2NvbnN0cy9pbmRleC5qcyc7XG5pbXBvcnQgeyBkZWZhdWx0cyB9IGZyb20gJy4vZGVmYXVsdHMvaW5kZXguanMnO1xuaW1wb3J0IHsgaWRiIH0gZnJvbSAnLi9pZGIvaW5kZXguanMnO1xuaW1wb3J0IHsgbW9kZSB9IGZyb20gJy4vbW9kZS9pbmRleC5qcyc7XG5pbXBvcnQgeyBzZXRzIH0gZnJvbSAnLi9zZXRzL2luZGV4LmpzJztcblxuZXhwb3J0IGNvbnN0IGRhdGE6IERhdGFJbnRlcmZhY2UgPSB7XG5cdGNvbnN0cyxcblx0ZGVmYXVsdHMsXG5cdGlkYixcblx0bW9kZSxcblx0c2V0c1xufSBhcyBjb25zdDtcbiJdfQ==

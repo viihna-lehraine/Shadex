@@ -1,7 +1,7 @@
 // File: src/index/idb.ts
 
 import { IDBPDatabase } from 'idb';
-import { ColorSpace, HSL, Palette } from '../index';
+import { ColorSpace, HSL, Palette, PaletteUnbranded } from './index.js';
 
 export interface MutationLog {
 	timestamp: string; // ISO timestamp of when the mutation occurred
@@ -41,4 +41,9 @@ export interface Settings {
 export interface StoredPalette {
 	tableID: number;
 	palette: Palette;
+}
+
+export interface StoredPaletteUnbranded {
+	tableID: number;
+	palette: PaletteUnbranded;
 }

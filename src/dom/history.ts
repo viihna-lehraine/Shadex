@@ -1,6 +1,6 @@
 // File: src/dom/history.ts
 
-import { ColorSpace, Palette } from '../index';
+import { ColorSpace, DOMHistoryFnInterface, Palette } from '../index/index.js';
 
 let paletteHistory: Palette[] = [];
 
@@ -23,7 +23,7 @@ function renderPalette(displayFormat: ColorSpace): void {
 	});
 }
 
-export const history = {
+export const history: DOMHistoryFnInterface = {
 	addPalette,
 	renderPalette
 };

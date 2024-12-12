@@ -4,13 +4,15 @@ import {
 	Color,
 	ColorInputElement,
 	ColorString,
+	CommonHelpersDOM,
+	CommonHelpersDOM_Handle,
 	MakePaletteBox
-} from '../../index';
-import { config } from '../../config';
-import { core } from '../index';
+} from '../../index/index.js';
+import { core } from '../core/index.js';
+import { data } from '../../data/index.js';
 
-const timeouts = config.consts.timeouts;
-const mode = config.mode;
+const timeouts = data.consts.timeouts;
+const mode = data.mode;
 
 let dragSrcEl: HTMLElement | null = null;
 
@@ -26,7 +28,7 @@ function attachDragAndDropListeners(element: HTMLElement | null): void {
 		if (!mode.quiet)
 			console.log('Drag and drop event listeners successfully attached');
 	} catch (error) {
-		if (!mode.logErrors)
+		if (!mode.errorLogs)
 			console.error(
 				`Failed to execute attachDragAndDropEventListeners: ${error}`
 			);
@@ -44,7 +46,7 @@ function dragStart(e: DragEvent): void {
 
 		if (!mode.quiet) console.log('handleDragStart complete');
 	} catch (error) {
-		if (!mode.logErrors)
+		if (!mode.errorLogs)
 			console.error(`Error in handleDragStart: ${error}`);
 	}
 }
@@ -61,7 +63,7 @@ function dragOver(e: DragEvent): boolean {
 
 		return false;
 	} catch (error) {
-		if (!mode.logErrors) console.error(`Error in handleDragOver: ${error}`);
+		if (!mode.errorLogs) console.error(`Error in handleDragOver: ${error}`);
 
 		return false;
 	}
@@ -79,7 +81,7 @@ function dragEnd(e: DragEvent): void {
 
 		if (!mode.quiet) console.log('handleDragEnd complete');
 	} catch (error) {
-		if (!mode.logErrors) console.error(`Error in handleDragEnd: ${error}`);
+		if (!mode.errorLogs) console.error(`Error in handleDragEnd: ${error}`);
 	}
 }
 
@@ -141,14 +143,14 @@ function drop(e: DragEvent): void {
 
 		if (!mode.quiet) console.log('handleDrop complete');
 	} catch (error) {
-		if (!mode.logErrors) console.error(`Error in handleDrop: ${error}`);
+		if (!mode.errorLogs) console.error(`Error in handleDrop: ${error}`);
 	}
 }
 
 function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 	try {
-		if (!core.validateColorValues(color)) {
-			if (!mode.logErrors)
+		if (!core.validate.colorValues(color)) {
+			if (!mode.errorLogs)
 				console.error(
 					`Invalid ${color.format} color value ${JSON.stringify(color)}`
 				);
@@ -159,7 +161,7 @@ function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 			};
 		}
 
-		const clonedColor = core.clone(color);
+		const clonedColor = core.base.clone(color);
 
 		const paletteBox = document.createElement('div');
 		paletteBox.className = 'palette-box';
@@ -177,7 +179,7 @@ function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 		colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
 		colorTextOutputBox.setAttribute('data-format', 'hex');
 
-		const colorString = core.getCSSColorString(clonedColor);
+		const colorString = core.convert.toCSSColorString(clonedColor);
 
 		colorTextOutputBox.value = colorString || '';
 		colorTextOutputBox.colorValues = clonedColor;
@@ -199,21 +201,21 @@ function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 
 				showTooltip(colorTextOutputBox);
 
-				clearTimeout(config.consts.timeouts.tooltip || 1000);
+				clearTimeout(data.consts.timeouts.tooltip || 1000);
 
 				copyButton.textContent = 'Copied!';
 				setTimeout(
 					() => (copyButton.textContent = 'Copy'),
-					config.consts.timeouts.copyButtonText || 1000
+					data.consts.timeouts.copyButtonText || 1000
 				);
 			} catch (error) {
-				if (!mode.logErrors) console.error(`Failed to copy: ${error}`);
+				if (!mode.errorLogs) console.error(`Failed to copy: ${error}`);
 			}
 		});
 
 		colorTextOutputBox.addEventListener(
 			'input',
-			core.debounce((e: Event) => {
+			core.base.debounce((e: Event) => {
 				const target = e.target as HTMLInputElement | null;
 				if (target) {
 					const cssColor = target.value.trim();
@@ -228,7 +230,7 @@ function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 					if (stripeElement)
 						stripeElement.style.backgroundColor = cssColor;
 				}
-			}, config.consts.debounce.input || 200)
+			}, data.consts.debounce.input || 200)
 		);
 
 		paletteBoxTopHalf.appendChild(colorTextOutputBox);
@@ -264,7 +266,7 @@ function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 			paletteBoxCount: paletteBoxCount + 1
 		};
 	} catch (error) {
-		if (!mode.logErrors)
+		if (!mode.errorLogs)
 			console.error(`Failed to execute makePaletteBox: ${error}`);
 
 		return {
@@ -305,7 +307,7 @@ function showTooltip(tooltipElement: HTMLElement): void {
 			setTimeout(() => {
 				tooltip.style.visibility = 'hidden';
 				tooltip.style.opacity = '0';
-			}, config.consts.timeouts.tooltip || 1000);
+			}, data.consts.timeouts.tooltip || 1000);
 		}
 
 		console.log('showTooltip executed');
@@ -319,12 +321,12 @@ function validateAndConvertColor(
 ): Color | null {
 	if (!color) return null;
 
-	const convertedColor = core.isColorString(color)
-		? core.colorStringToColor(color)
+	const convertedColor = core.guards.isColorString(color)
+		? core.convert.toColor(color)
 		: color;
 
-	if (!core.validateColorValues(convertedColor)) {
-		if (mode.logErrors)
+	if (!core.validate.colorValues(convertedColor)) {
+		if (mode.errorLogs)
 			console.error(`Invalid color: ${JSON.stringify(convertedColor)}`);
 
 		return null;
@@ -333,14 +335,14 @@ function validateAndConvertColor(
 	return convertedColor;
 }
 
-const handle = {
+const handle: CommonHelpersDOM_Handle = {
 	dragStart,
 	dragOver,
 	dragEnd,
 	drop
 };
 
-export const dom = {
+export const dom: CommonHelpersDOM = {
 	attachDragAndDropListeners,
 	handle,
 	makePaletteBox,

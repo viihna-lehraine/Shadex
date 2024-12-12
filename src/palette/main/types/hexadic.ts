@@ -1,48 +1,41 @@
 // File: src/palette/main/types/hexadic.ts
 
-import { HSL, Palette } from '../../../index/index';
-import { IndexedDB } from '../../../idb';
-import { config } from '../../../config';
-import { paletteSuperUtils } from '../../common';
-import { utils } from '../../../common';
+import { GenPaletteArgs, HSL, Palette } from '../../../index/index.js';
+import { core, utils } from '../../../common/index.js';
+import { data } from '../../../data/index.js';
+import { IDBManager } from '../../../idb/index.js';
+import { paletteSuperUtils } from '../../common/index.js';
 
-const consts = config.consts;
+const consts = data.consts;
 const create = paletteSuperUtils.create;
-const defaults = config.defaults;
+const defaults = data.defaults;
 const genHues = paletteSuperUtils.genHues;
-const mode = config.mode;
-const paletteRanges = consts.palette.ranges;
+const mode = data.mode;
+const paletteRanges = consts.paletteRanges;
 
-const idb = IndexedDB.getInstance();
+const idb = IDBManager.getInstance();
 
-export async function hexadic(
-	numBoxes: number,
-	customColor: HSL | null,
-	enableAlpha: boolean,
-	limitDark: boolean,
-	limitGray: boolean,
-	limitLight: boolean
-): Promise<Palette> {
+export async function hexadic(args: GenPaletteArgs): Promise<Palette> {
 	const currentHexadicPaletteID = await idb.getCurrentPaletteID();
 
-	if (numBoxes < 6) {
-		if (mode.logWarnings)
+	if (args.numBoxes < 6) {
+		if (mode.warnLogs)
 			console.warn('Hexadic palette requires at least 6 swatches.');
 
 		return utils.palette.createObject(
 			'hexadic',
 			[],
-			defaults.colors.hsl,
+			core.brandColor.asHSL(defaults.colors.hsl),
 			0,
 			currentHexadicPaletteID,
-			enableAlpha,
-			limitDark,
-			limitGray,
-			limitLight
+			args.enableAlpha,
+			args.limitDark,
+			args.limitGray,
+			args.limitLight
 		);
 	}
 
-	const baseColor = create.baseColor(customColor, enableAlpha);
+	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const hues = genHues.hexadic(baseColor);
 	const paletteItems = hues.map((hue, _i) => {
 		const saturationShift =
@@ -53,31 +46,44 @@ export async function hexadic(
 			paletteRanges.hexad.lightShift / 2;
 		const newColor: HSL = {
 			value: {
-				hue,
-				saturation: Math.min(
-					100,
-					Math.max(0, baseColor.value.saturation + saturationShift)
+				hue: core.brand.asRadial(hue),
+				saturation: core.brand.asPercentile(
+					Math.min(
+						100,
+						Math.max(
+							0,
+							baseColor.value.saturation + saturationShift
+						)
+					)
 				),
-				lightness: Math.min(
-					100,
-					Math.max(0, baseColor.value.lightness + lightnessShift)
+				lightness: core.brand.asPercentile(
+					Math.min(
+						100,
+						Math.max(0, baseColor.value.lightness + lightnessShift)
+					)
 				),
-				alpha: enableAlpha ? Math.random() : 1
+				alpha: args.enableAlpha
+					? core.brand.asAlphaRange(Math.random())
+					: core.brand.asAlphaRange(1)
 			},
 			format: 'hsl'
 		};
 
-		return create.paletteItem(newColor, enableAlpha);
+		return create.paletteItem(newColor, args.enableAlpha);
 	});
 
-	return await idb.savePaletteToDB(
+	const hexadicPalette = await idb.savePaletteToDB(
 		'hexadic',
 		paletteItems,
 		baseColor,
-		numBoxes,
-		enableAlpha,
-		limitDark,
-		limitGray,
-		limitLight
+		args.numBoxes,
+		args.enableAlpha,
+		args.limitDark,
+		args.limitGray,
+		args.limitLight
 	);
+
+	if (!hexadicPalette)
+		throw new Error('Hexadic palette is either null or undefined.');
+	else return hexadicPalette;
 }

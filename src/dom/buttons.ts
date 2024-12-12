@@ -1,15 +1,15 @@
 // File: src/dom/buttons.ts
 
-import { PaletteOptions } from '../index';
-import { core, superUtils } from '../common';
-import { config } from '../config';
-import { start } from '../palette/start';
+import { DOMButtonsFnInterface, PaletteOptions } from '../index/index.js';
+import { core, superUtils } from '../common/index.js';
+import { data } from '../data/index.js';
+import { start } from '../palette/index.js';
 
-const buttonDebounce = config.consts.debounce.button || 300;
+const buttonDebounce = data.consts.debounce.button || 300;
 
-export const handlePaletteGen = core.debounce(() => {
+const handlePaletteGen = core.base.debounce(() => {
 	try {
-		const params = superUtils.dom.getGenButtonParams();
+		const params = superUtils.dom.getGenButtonArgs();
 
 		if (!params) {
 			console.error('Failed to retrieve generateButton parameters');
@@ -49,6 +49,6 @@ export const handlePaletteGen = core.debounce(() => {
 	}
 }, buttonDebounce);
 
-export const buttons = {
+export const buttons: DOMButtonsFnInterface = {
 	handlePaletteGen
 };

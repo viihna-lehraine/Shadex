@@ -1,13 +1,12 @@
 // File: src/palette/common/paletteUtils/index.ts
 
-import { adjust } from './adjust';
-import { convert } from './convert';
-import { genHues } from '../paletteSuperUtils/genHues';
-import { probability } from './probability';
+import { PaletteCommon_Utils } from '../../../index/index.js';
+import { adjust } from './adjust.js';
+import { convert } from './convert.js';
+import { probability } from './probability.js';
 
-export const paletteUtils = {
+export const paletteUtils: PaletteCommon_Utils = {
 	adjust,
 	convert,
-	genHues,
 	probability
 } as const;

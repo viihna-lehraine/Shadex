@@ -1,5 +1,20 @@
 // File: src/index/colors.ts
 
+import type {
+	AlphaRange,
+	ByteRange,
+	HexComponent,
+	HexSet,
+	LAB_A,
+	LAB_B,
+	LAB_L,
+	Percentile,
+	Radial,
+	XYZ_X,
+	XYZ_Y,
+	XYZ_Z
+} from './index.js';
+
 export type Color = CMYK | Hex | HSL | HSV | LAB | RGB | SL | SV | XYZ;
 
 export interface ColorData {
@@ -35,7 +50,7 @@ export type ColorSpaceExtended = ColorSpace | 'sl' | 'sv';
 
 export type ColorString =
 	| CMYKString
-	| Hex
+	| HexString
 	| HSLString
 	| HSVString
 	| LABString
@@ -45,6 +60,17 @@ export type ColorString =
 	| XYZString;
 
 export type ColorStringExtended = ColorString | Hex | LAB | RGB | XYZ;
+
+export type ColorUnbranded =
+	| CMYKUnbranded
+	| HexUnbranded
+	| HSLUnbranded
+	| HSVUnbranded
+	| LABUnbranded
+	| RGBUnbranded
+	| SLUnbranded
+	| SVUnbranded
+	| XYZUnbranded;
 
 export type Format = keyof ColorSpace | 'sl' | 'sv';
 
@@ -112,7 +138,10 @@ export type CMYKString = {
 	format: 'cmyk';
 };
 
-export type HexString = Hex;
+export type HexString = {
+	value: HexValueString;
+	format: 'hex';
+};
 
 export type HSLString = {
 	value: HSLValueString;
@@ -149,67 +178,114 @@ export type XYZString = {
 	format: 'xyz';
 };
 
+// ***** Colors with Unbranded Values *****
+
+export type CMYKUnbranded = {
+	value: CMYKValueUnbranded;
+	format: 'cmyk';
+};
+
+export type HexUnbranded = {
+	value: HexValueUnbranded;
+	format: 'hex';
+};
+
+export type HSLUnbranded = {
+	value: HSLValueUnbranded;
+	format: 'hsl';
+};
+
+export type HSVUnbranded = {
+	value: HSVValueUnbranded;
+	format: 'hsv';
+};
+
+export type LABUnbranded = {
+	value: LABValueUnbranded;
+	format: 'lab';
+};
+
+export type RGBUnbranded = {
+	value: RGBValueUnbranded;
+	format: 'rgb';
+};
+
+export type SLUnbranded = {
+	value: SLValueUnbranded;
+	format: 'sl';
+};
+
+export type SVUnbranded = {
+	value: SVValueUnbranded;
+	format: 'sv';
+};
+
+export type XYZUnbranded = {
+	value: XYZValueUnbranded;
+	format: 'xyz';
+};
+
 // ***** Color Values *****
 
 export type CMYKValue = {
-	cyan: number;
-	magenta: number;
-	yellow: number;
-	key: number;
-	alpha: number;
+	cyan: Percentile;
+	magenta: Percentile;
+	yellow: Percentile;
+	key: Percentile;
+	alpha: AlphaRange;
 };
 
 export type HexValue = {
-	hex: string;
-	alpha: string;
-	numAlpha: number;
+	hex: HexSet;
+	alpha: HexComponent;
+	numAlpha: AlphaRange;
 };
 
 export type HSLValue = {
-	hue: number;
-	saturation: number;
-	lightness: number;
-	alpha: number;
+	hue: Radial;
+	saturation: Percentile;
+	lightness: Percentile;
+	alpha: AlphaRange;
 };
 
 export type HSVValue = {
-	hue: number;
-	saturation: number;
-	value: number;
-	alpha: number;
+	hue: Radial;
+	saturation: Percentile;
+	value: Percentile;
+	alpha: AlphaRange;
 };
 
 export type LABValue = {
-	l: number;
-	a: number;
-	b: number;
-	alpha: number;
+	l: LAB_L;
+	a: LAB_A;
+	b: LAB_B;
+	alpha: AlphaRange;
 };
 
 export type RGBValue = {
-	red: number;
-	green: number;
-	blue: number;
-	alpha: number;
+	red: ByteRange;
+	green: ByteRange;
+	blue: ByteRange;
+	alpha: AlphaRange;
 };
 
 export type SLValue = {
-	saturation: number;
-	lightness: number;
-	alpha: number;
+	saturation: Percentile;
+	lightness: Percentile;
+	alpha: AlphaRange;
 };
 
 export type SVValue = {
-	saturation: number;
-	value: number;
-	alpha: number;
+	saturation: Percentile;
+	value: Percentile;
+	alpha: AlphaRange;
 };
 
 export type XYZValue = {
-	x: number;
-	y: number;
-	z: number;
-	alpha: number;
+	x: XYZ_X;
+	y: XYZ_Y;
+	z: XYZ_Z;
+	alpha: AlphaRange;
 };
 
 // ***** Color Values (relevant props as strings, will have leading '%' character) *****
@@ -222,7 +298,11 @@ export type CMYKValueString = {
 	alpha: string;
 };
 
-export type HexValueString = HexValue;
+export type HexValueString = {
+	hex: string;
+	alpha: string;
+	numAlpha: string;
+};
 
 export type HSLValueString = {
 	hue: string;
@@ -269,4 +349,67 @@ export type XYZValueString = {
 	y: string;
 	z: string;
 	alpha: string;
+};
+
+// ***** Color Values (unbranded) *****
+
+export type CMYKValueUnbranded = {
+	cyan: number;
+	magenta: number;
+	yellow: number;
+	key: number;
+	alpha: number;
+};
+
+export type HexValueUnbranded = {
+	hex: string;
+	alpha: string;
+	numAlpha: number;
+};
+
+export type HSLValueUnbranded = {
+	hue: number;
+	saturation: number;
+	lightness: number;
+	alpha: number;
+};
+
+export type HSVValueUnbranded = {
+	hue: number;
+	saturation: number;
+	value: number;
+	alpha: number;
+};
+
+export type LABValueUnbranded = {
+	l: number;
+	a: number;
+	b: number;
+	alpha: number;
+};
+
+export type RGBValueUnbranded = {
+	red: number;
+	green: number;
+	blue: number;
+	alpha: number;
+};
+
+export type SLValueUnbranded = {
+	saturation: number;
+	lightness: number;
+	alpha: number;
+};
+
+export type SVValueUnbranded = {
+	saturation: number;
+	value: number;
+	alpha: number;
+};
+
+export type XYZValueUnbranded = {
+	x: number;
+	y: number;
+	z: number;
+	alpha: number;
 };

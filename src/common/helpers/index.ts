@@ -1,9 +1,10 @@
 // File: src/common/helpers/index.ts
 
-import { conversion } from './conversion';
-import { dom } from './dom';
+import { CommonHelpersFnMasterInterface } from '../../index/index.js';
+import { conversion } from './conversion.js';
+import { dom } from './dom.js';
 
-export const helpers = {
+export const helpers: CommonHelpersFnMasterInterface = {
 	conversion,
 	dom
 } as const;

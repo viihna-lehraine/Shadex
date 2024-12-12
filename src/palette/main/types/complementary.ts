@@ -1,49 +1,47 @@
 // File: src/palette/main/types/complementary.ts
 
-import { HSL, Palette, PaletteItem } from '../../../index';
-import { IndexedDB } from '../../../idb';
-import { config } from '../../../config';
-import { paletteSuperUtils } from '../../common';
-import { utils } from '../../../common';
+import {
+	GenPaletteArgs,
+	HSL,
+	Palette,
+	PaletteItem
+} from '../../../index/index.js';
+import { core, utils } from '../../../common/index.js';
+import { data } from '../../../data/index.js';
+import { IDBManager } from '../../../idb/index.js';
+import { paletteSuperUtils } from '../../common/index.js';
 
 const create = paletteSuperUtils.create;
-const defaults = config.defaults;
-const mode = config.mode;
-const paletteRanges = config.consts.palette.ranges;
+const defaults = data.defaults;
+const mode = data.mode;
+const paletteRanges = data.consts.paletteRanges;
 
-const idb = IndexedDB.getInstance();
+const idb = IDBManager.getInstance();
 
-export async function complementary(
-	numBoxes: number,
-	customColor: HSL | null,
-	enableAlpha: boolean,
-	limitDark: boolean,
-	limitGray: boolean,
-	limitLight: boolean
-): Promise<Palette> {
+export async function complementary(args: GenPaletteArgs): Promise<Palette> {
 	const currentComplementaryPaletteID = await idb.getCurrentPaletteID();
 
-	if (numBoxes < 2) {
-		if (mode.logWarnings)
+	if (args.numBoxes < 2) {
+		if (mode.warnLogs)
 			console.warn('Complementary palette requires at least 2 swatches.');
 
 		return utils.palette.createObject(
 			'complementary',
 			[],
-			defaults.colors.hsl,
+			core.brandColor.asHSL(defaults.colors.hsl),
 			0,
 			currentComplementaryPaletteID,
-			enableAlpha,
-			limitDark,
-			limitGray,
-			limitLight
+			args.enableAlpha,
+			args.limitDark,
+			args.limitGray,
+			args.limitLight
 		);
 	}
 
-	const baseColor = create.baseColor(customColor, enableAlpha);
+	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const complementaryHue = (baseColor.value.hue + 180) % 360;
 	const hues = Array.from(
-		{ length: numBoxes - 1 },
+		{ length: args.numBoxes - 1 },
 		(_, _i) =>
 			(complementaryHue +
 				(Math.random() * paletteRanges.comp.hueShift -
@@ -59,25 +57,34 @@ export async function complementary(
 			100,
 			Math.max(0, baseColor.value.lightness + (i % 2 === 0 ? -10 : 10))
 		);
-		const alpha = enableAlpha ? Math.random() : 1;
+		const alpha = args.enableAlpha ? Math.random() : 1;
 		const newColor: HSL = {
-			value: { hue, saturation, lightness, alpha },
+			value: {
+				hue: core.brand.asRadial(hue),
+				saturation: core.brand.asPercentile(saturation),
+				lightness: core.brand.asPercentile(lightness),
+				alpha: core.brand.asAlphaRange(alpha)
+			},
 			format: 'hsl'
 		};
 
-		return create.paletteItem(newColor, enableAlpha);
+		return create.paletteItem(newColor, args.enableAlpha);
 	});
 
-	paletteItems.unshift(create.paletteItem(baseColor, enableAlpha));
+	paletteItems.unshift(create.paletteItem(baseColor, args.enableAlpha));
 
-	return await idb.savePaletteToDB(
+	const complementaryPalette = await idb.savePaletteToDB(
 		'complementary',
 		paletteItems,
 		baseColor,
-		numBoxes,
-		enableAlpha,
-		limitDark,
-		limitGray,
-		limitLight
+		args.numBoxes,
+		args.enableAlpha,
+		args.limitDark,
+		args.limitGray,
+		args.limitLight
 	);
+
+	if (!complementaryPalette)
+		throw new Error('Complementary palette is null or undefined.');
+	else return complementaryPalette;
 }

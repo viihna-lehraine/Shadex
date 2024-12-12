@@ -1,81 +1,91 @@
 // File: src/palette/main/types/analogous.ts
 
-import { HSL, Palette, PaletteItem } from '../../../index';
-import { IndexedDB } from '../../../idb';
-import { config } from '../../../config';
-import { paletteUtils, paletteSuperUtils } from '../../common';
-import { utils } from '../../../common';
+import {
+	GenPaletteArgs,
+	HSL,
+	Palette,
+	PaletteItem
+} from '../../../index/index.js';
+import { core, utils } from '../../../common/index.js';
+import { data } from '../../../data/index.js';
+import { IDBManager } from '../../../idb/index.js';
+import { paletteSuperUtils } from '../../common/index.js';
 
 const create = paletteSuperUtils.create;
-const defaultHSL = config.defaults.colors.hsl;
-const genHues = paletteUtils.genHues;
-const mode = config.mode;
+const genHues = paletteSuperUtils.genHues;
+const mode = data.mode;
 
-const idb = IndexedDB.getInstance();
+const idb = IDBManager.getInstance();
 
-export async function analogous(
-	numBoxes: number,
-	customColor: HSL | null,
-	enableAlpha: boolean,
-	limitDark: boolean,
-	limitGray: boolean,
-	limitLight: boolean
-): Promise<Palette> {
+export async function analogous(args: GenPaletteArgs): Promise<Palette> {
 	const currentAnalogousPaletteID = await idb.getCurrentPaletteID();
 
-	if (numBoxes < 2) {
-		if (mode.logWarnings)
+	if (args.numBoxes < 2) {
+		if (mode.warnLogs) {
 			console.warn('Analogous palette requires at least 2 swatches.');
+			console.warn('Returning default palette.');
+		}
 
 		return utils.palette.createObject(
 			'analogous',
 			[],
-			defaultHSL,
+			core.brandColor.asHSL(data.defaults.colors.hsl),
 			0,
 			currentAnalogousPaletteID,
-			enableAlpha,
-			limitDark,
-			limitGray,
-			limitLight
+			args.enableAlpha,
+			args.limitDark,
+			args.limitGray,
+			args.limitLight
 		);
 	}
 
-	const baseColor = create.baseColor(customColor, enableAlpha);
-	const hues = genHues.analogous(baseColor, numBoxes);
+	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
+	const hues = genHues.analogous(baseColor, args.numBoxes);
 	const paletteItems: PaletteItem[] = hues.map((hue, i) => {
 		const newColor: HSL = {
 			value: {
-				hue,
-				saturation: Math.min(
-					100,
-					Math.max(
-						0,
-						baseColor.value.saturation + (Math.random() - 0.5) * 10
+				hue: core.brand.asRadial(hue),
+				saturation: core.brand.asPercentile(
+					Math.min(
+						100,
+						Math.max(
+							0,
+							baseColor.value.saturation +
+								(Math.random() - 0.5) * 10
+						)
 					)
 				),
-				lightness: Math.min(
-					100,
-					Math.max(
-						0,
-						baseColor.value.lightness + (i % 2 === 0 ? 5 : -5)
+				lightness: core.brand.asPercentile(
+					Math.min(
+						100,
+						Math.max(
+							0,
+							baseColor.value.lightness + (i % 2 === 0 ? 5 : -5)
+						)
 					)
 				),
-				alpha: enableAlpha ? Math.random() : 1
+				alpha: args.enableAlpha
+					? core.brand.asAlphaRange(Math.random())
+					: core.brand.asAlphaRange(1)
 			},
 			format: 'hsl'
 		};
 
-		return create.paletteItem(newColor, enableAlpha);
+		return create.paletteItem(newColor, args.enableAlpha);
 	});
 
-	return await idb.savePaletteToDB(
+	const analogousPalette = await idb.savePaletteToDB(
 		'analogous',
 		paletteItems,
 		baseColor,
-		numBoxes,
-		enableAlpha,
-		limitDark,
-		limitGray,
-		limitLight
+		args.numBoxes,
+		args.enableAlpha,
+		args.limitDark,
+		args.limitGray,
+		args.limitLight
 	);
+
+	if (!analogousPalette)
+		throw new Error('Analogous palette is null or undefined.');
+	else return analogousPalette;
 }

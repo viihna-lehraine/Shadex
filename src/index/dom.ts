@@ -1,12 +1,12 @@
 // File: src/index/colors.ts
 
-import { Color, HSL } from '../index';
+import { Color, HSL } from './index.js';
 
 export interface ColorInputElement extends HTMLInputElement {
 	colorValues?: Color;
 }
 
-export interface GenButtonParams {
+export interface GenButtonArgs {
 	numBoxes: number;
 	paletteType: number;
 	customColor: HSL | null;

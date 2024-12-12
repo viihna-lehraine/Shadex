@@ -1,36 +1,38 @@
 // File: src/common/utils/random.ts
 
-import { HSL, SL } from '../../index';
-import { config } from '../../config';
-import { core } from '../core';
+import { CommonUtilsFnRandom, HSL, SL } from '../../index/index.js';
+import { core } from '../core/index.js';
+import { data } from '../../data/index.js';
 
-const defaults = config.defaults;
-const mode = config.mode;
+const defaults = data.defaults;
+const mode = data.mode;
 
 function hsl(enableAlpha: boolean): HSL {
 	try {
 		const alpha = enableAlpha ? Math.random() : 1;
 		const hsl: HSL = {
 			value: {
-				hue: core.sanitizeRadial(Math.floor(Math.random() * 360)),
-				saturation: core.sanitizePercentage(
+				hue: core.sanitize.radial(Math.floor(Math.random() * 360)),
+				saturation: core.sanitize.percentile(
 					Math.floor(Math.random() * 101)
 				),
-				lightness: core.sanitizePercentage(
+				lightness: core.sanitize.percentile(
 					Math.floor(Math.random() * 101)
 				),
-				alpha
+				alpha: core.brand.asAlphaRange(alpha)
 			},
 			format: 'hsl'
 		};
 
-		if (!core.validateColorValues(hsl)) {
-			if (mode.logErrors)
+		if (!core.validate.colorValues(hsl)) {
+			if (mode.errorLogs)
 				console.error(
 					`Invalid random HSL color value ${JSON.stringify(hsl)}`
 				);
 
-			return core.clone(defaults.colors.hsl);
+			const unbrandedHSL = core.base.clone(defaults.colors.hsl);
+
+			return core.brandColor.asHSL(unbrandedHSL);
 		}
 
 		if (!mode.quiet)
@@ -38,10 +40,12 @@ function hsl(enableAlpha: boolean): HSL {
 
 		return hsl;
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(`Error generating random HSL color: ${error}`);
 
-		return core.clone(defaults.colors.hsl);
+		const unbrandedHSL = core.base.clone(defaults.colors.hsl);
+
+		return core.brandColor.asHSL(unbrandedHSL);
 	}
 }
 
@@ -50,24 +54,26 @@ function sl(enableAlpha: boolean): SL {
 		const alpha = enableAlpha ? Math.random() : 1;
 		const sl: SL = {
 			value: {
-				saturation: core.sanitizePercentage(
+				saturation: core.sanitize.percentile(
 					Math.max(0, Math.min(100, Math.random() * 100))
 				),
-				lightness: core.sanitizePercentage(
+				lightness: core.sanitize.percentile(
 					Math.max(0, Math.min(100, Math.random() * 100))
 				),
-				alpha
+				alpha: core.brand.asAlphaRange(alpha)
 			},
 			format: 'sl'
 		};
 
-		if (!core.validateColorValues(sl as SL)) {
-			if (mode.logErrors)
+		if (!core.validate.colorValues(sl as SL)) {
+			if (mode.errorLogs)
 				console.error(
 					`Invalid random SV color value ${JSON.stringify(sl)}`
 				);
 
-			return core.clone(defaults.colors.sl);
+			const unbrandedSL = core.base.clone(defaults.colors.sl);
+
+			return core.brandColor.asSL(unbrandedSL);
 		}
 
 		if (!mode.quiet)
@@ -75,11 +81,16 @@ function sl(enableAlpha: boolean): SL {
 
 		return sl;
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(`Error generating random SL color: ${error}`);
 
-		return core.clone(defaults.colors.sl);
+		const unbrandedSL = core.base.clone(defaults.colors.sl);
+
+		return core.brandColor.asSL(unbrandedSL);
 	}
 }
 
-export const random = { hsl, sl } as const;
+export const random: CommonUtilsFnRandom = {
+	hsl,
+	sl
+} as const;

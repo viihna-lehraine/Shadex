@@ -1,11 +1,12 @@
 // File src/common/utils/index.ts
 
-import { color } from './color';
-import { conversion } from './conversion';
-import { palette } from './palette';
-import { random } from './random';
+import { CommonUtilsFnMasterInterface } from '../../index/index.js';
+import { color } from './color.js';
+import { conversion } from './conversion.js';
+import { palette } from './palette.js';
+import { random } from './random.js';
 
-export const utils = {
+export const utils: CommonUtilsFnMasterInterface = {
 	color,
 	conversion,
 	palette,

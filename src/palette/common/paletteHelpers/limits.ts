@@ -1,14 +1,14 @@
 // File: src/palette/common/paletteHelpers/limits.ts
 
-import { HSL } from '../../../index';
-import { core } from '../../../common';
-import { config } from '../../../config';
+import { HSL, PaletteCommon_Helpers_Limits } from '../../../index/index.js';
+import { core } from '../../../common/index.js';
+import { data } from '../../../data/index.js';
 
-const mode = config.mode;
+const mode = data.mode;
 
 function isColorInBounds(hsl: HSL): boolean {
-	if (!core.validateColorValues(hsl)) {
-		if (mode.logErrors)
+	if (!core.validate.colorValues(hsl)) {
+		if (mode.errorLogs)
 			console.error(
 				`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`
 			);
@@ -20,8 +20,8 @@ function isColorInBounds(hsl: HSL): boolean {
 }
 
 function isTooDark(hsl: HSL): boolean {
-	if (!core.validateColorValues(hsl)) {
-		if (mode.logErrors)
+	if (!core.validate.colorValues(hsl)) {
+		if (mode.errorLogs)
 			console.error(
 				`isTooDark: Invalid HSL value ${JSON.stringify(hsl)}`
 			);
@@ -29,12 +29,12 @@ function isTooDark(hsl: HSL): boolean {
 		return false;
 	}
 
-	return core.clone(hsl).value.lightness < config.consts.thresholds.dark;
+	return core.base.clone(hsl).value.lightness < data.consts.thresholds.dark;
 }
 
 function isTooGray(hsl: HSL): boolean {
-	if (!core.validateColorValues(hsl)) {
-		if (mode.logErrors)
+	if (!core.validate.colorValues(hsl)) {
+		if (mode.errorLogs)
 			console.error(
 				`isTooGray: Invalid HSL value ${JSON.stringify(hsl)}`
 			);
@@ -42,12 +42,12 @@ function isTooGray(hsl: HSL): boolean {
 		return false;
 	}
 
-	return core.clone(hsl).value.saturation < config.consts.thresholds.gray;
+	return core.base.clone(hsl).value.saturation < data.consts.thresholds.gray;
 }
 
 function isTooLight(hsl: HSL): boolean {
-	if (!core.validateColorValues(hsl)) {
-		if (mode.logErrors)
+	if (!core.validate.colorValues(hsl)) {
+		if (mode.errorLogs)
 			console.error(
 				`isTooLight: Invalid HSL value ${JSON.stringify(hsl)}`
 			);
@@ -55,10 +55,10 @@ function isTooLight(hsl: HSL): boolean {
 		return false;
 	}
 
-	return core.clone(hsl).value.lightness > config.consts.thresholds.light;
+	return core.base.clone(hsl).value.lightness > data.consts.thresholds.light;
 }
 
-export const limits = {
+export const limits: PaletteCommon_Helpers_Limits = {
 	isColorInBounds,
 	isTooDark,
 	isTooGray,

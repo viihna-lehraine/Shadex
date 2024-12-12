@@ -3,18 +3,19 @@
 import {
 	Color,
 	ColorSpace,
+	DOMBaseFnInterface,
 	GetElementsForSelectedColor,
 	HSL,
 	PullParamsFromUI,
 	SL,
 	SV,
 	UIElements
-} from '../index';
-import { config } from '../config';
-import { core, helpers, utils, superUtils } from '../common';
-import { paletteUtils } from '../palette/common';
+} from '../index/index.js';
+import { core, helpers, utils, superUtils } from '../common/index.js';
+import { data } from '../data/index.js';
+import { paletteUtils } from '../palette/common/index.js';
 
-const mode = config.mode;
+const mode = data.mode;
 
 function addConversionButtonEventListeners(): void {
 	try {
@@ -28,7 +29,7 @@ function addConversionButtonEventListeners(): void {
 					superUtils.dom.switchColorSpace(colorSpace)
 				);
 			} else {
-				if (!mode.logWarnings)
+				if (!mode.warnLogs)
 					console.warn(`Element with id "${id}" not found.`);
 			}
 		};
@@ -40,7 +41,7 @@ function addConversionButtonEventListeners(): void {
 		addListener('show-as-lab-button', 'lab');
 		addListener('show-as-rgb-button', 'rgb');
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(
 				`Failed to add event listeners to conversion buttons: ${error}`
 			);
@@ -87,7 +88,7 @@ function applyCustomColor(): HSL {
 
 		return hslColor;
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(
 				`Failed to apply custom color: ${error}. Returning randomly generated hex color`
 			);
@@ -101,15 +102,15 @@ function applyFirstColorToUI(color: HSL): HSL {
 		const colorBox1 = document.getElementById('color-box-1');
 
 		if (!colorBox1) {
-			if (mode.logErrors) console.error('color-box-1 is null');
+			if (mode.errorLogs) console.error('color-box-1 is null');
 
 			return color;
 		}
 
-		const formatColorString = core.getCSSColorString(color);
+		const formatColorString = core.convert.toCSSColorString(color);
 
 		if (!formatColorString) {
-			if (mode.logErrors)
+			if (mode.errorLogs)
 				console.error('Unexpected or unsupported color format.');
 
 			return color;
@@ -121,7 +122,7 @@ function applyFirstColorToUI(color: HSL): HSL {
 
 		return color;
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(`Failed to apply first color to UI: ${error}`);
 
 		return utils.random.hsl(false) as HSL;
@@ -141,45 +142,45 @@ function copyToClipboard(text: string, tooltipElement: HTMLElement): void {
 
 				setTimeout(
 					() => tooltipElement.classList.remove('show'),
-					config.consts.timeouts.tooltip || 1000
+					data.consts.timeouts.tooltip || 1000
 				);
 			})
 			.catch(err => {
-				if (mode.logErrors)
+				if (mode.errorLogs)
 					console.error('Error copying to clipboard:', err);
 			});
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(`Failed to copy to clipboard: ${error}`);
 		else if (!mode.quiet) console.error('Failed to copy to clipboard');
 	}
 }
 
-export function defineUIElements(): UIElements {
+function defineUIElements(): UIElements {
 	try {
-		const advancedMenuButton = config.consts.dom.advancedMenuButton;
-		const applyCustomColorButton = config.consts.dom.applyCustomColorButton;
-		const clearCustomColorButton = config.consts.dom.clearCustomColorButton;
+		const advancedMenuButton = data.consts.dom.advancedMenuButton;
+		const applyCustomColorButton = data.consts.dom.applyCustomColorButton;
+		const clearCustomColorButton = data.consts.dom.clearCustomColorButton;
 		const closeCustomColorMenuButton =
-			config.consts.dom.closeCustomColorMenuButton;
-		const closeHelpMenuButton = config.consts.dom.closeHelpMenuButton;
-		const closeHistoryMenuButton = config.consts.dom.closeHistoryMenuButton;
-		const desaturateButton = config.consts.dom.desaturateButton;
-		const enableAlphaCheckbox = config.consts.dom.enableAlphaCheckbox;
-		const generateButton = config.consts.dom.generateButton;
-		const helpMenuButton = config.consts.dom.helpMenuButton;
-		const historyMenuButton = config.consts.dom.historyMenuButton;
-		const limitDarknessCheckbox = config.consts.dom.limitDarknessCheckbox;
-		const limitGraynessCheckbox = config.consts.dom.limitGraynessCheckbox;
-		const limitLightnessCheckbox = config.consts.dom.limitLightnessCheckbox;
-		const saturateButton = config.consts.dom.saturateButton;
-		const selectedColorOption = config.consts.dom.selectedColorOption;
-		const showAsCMYKButton = config.consts.dom.showAsCMYKButton;
-		const showAsHexButton = config.consts.dom.showAsHexButton;
-		const showAsHSLButton = config.consts.dom.showAsHSLButton;
-		const showAsHSVButton = config.consts.dom.showAsHSVButton;
-		const showAsLABButton = config.consts.dom.showAsLABButton;
-		const showAsRGBButton = config.consts.dom.showAsRGBButton;
+			data.consts.dom.closeCustomColorMenuButton;
+		const closeHelpMenuButton = data.consts.dom.closeHelpMenuButton;
+		const closeHistoryMenuButton = data.consts.dom.closeHistoryMenuButton;
+		const desaturateButton = data.consts.dom.desaturateButton;
+		const enableAlphaCheckbox = data.consts.dom.enableAlphaCheckbox;
+		const generateButton = data.consts.dom.generateButton;
+		const helpMenuButton = data.consts.dom.helpMenuButton;
+		const historyMenuButton = data.consts.dom.historyMenuButton;
+		const limitDarknessCheckbox = data.consts.dom.limitDarknessCheckbox;
+		const limitGraynessCheckbox = data.consts.dom.limitGraynessCheckbox;
+		const limitLightnessCheckbox = data.consts.dom.limitLightnessCheckbox;
+		const saturateButton = data.consts.dom.saturateButton;
+		const selectedColorOption = data.consts.dom.selectedColorOption;
+		const showAsCMYKButton = data.consts.dom.showAsCMYKButton;
+		const showAsHexButton = data.consts.dom.showAsHexButton;
+		const showAsHSLButton = data.consts.dom.showAsHSLButton;
+		const showAsHSVButton = data.consts.dom.showAsHSVButton;
+		const showAsLABButton = data.consts.dom.showAsLABButton;
+		const showAsRGBButton = data.consts.dom.showAsRGBButton;
 		const selectedColor = selectedColorOption
 			? parseInt(selectedColorOption.value, 10)
 			: 0;
@@ -209,7 +210,7 @@ export function defineUIElements(): UIElements {
 			showAsRGBButton
 		};
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(`Failed to define UI buttons: ${error}.`);
 		if (!mode.quiet) console.error('Failed to define UI buttons.');
 
@@ -244,7 +245,7 @@ function desaturateColor(selectedColor: number): void {
 	try {
 		getElementsForSelectedColor(selectedColor);
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(`Failed to desaturate color: ${error}`);
 	}
 }
@@ -257,7 +258,7 @@ function getElementsForSelectedColor(
 	);
 
 	if (!selectedColorBox) {
-		if (mode.logWarnings)
+		if (mode.warnLogs)
 			console.warn(`Element not found for color ${selectedColor}`);
 
 		helpers.dom.showToast('Please select a valid color.');
@@ -282,12 +283,12 @@ function getElementsForSelectedColor(
 
 function pullParamsFromUI(): PullParamsFromUI {
 	try {
-		const paletteTypeOptionsElement = config.consts.dom.paletteTypeOptions;
-		const numBoxesElement = config.consts.dom.paletteNumberOptions;
-		const enableAlphaCheckbox = config.consts.dom.enableAlphaCheckbox;
-		const limitDarknessCheckbox = config.consts.dom.limitDarknessCheckbox;
-		const limitGraynessCheckbox = config.consts.dom.limitGraynessCheckbox;
-		const limitLightnessCheckbox = config.consts.dom.limitLightnessCheckbox;
+		const paletteTypeOptionsElement = data.consts.dom.paletteTypeOptions;
+		const numBoxesElement = data.consts.dom.paletteNumberOptions;
+		const enableAlphaCheckbox = data.consts.dom.enableAlphaCheckbox;
+		const limitDarknessCheckbox = data.consts.dom.limitDarknessCheckbox;
+		const limitGraynessCheckbox = data.consts.dom.limitGraynessCheckbox;
+		const limitLightnessCheckbox = data.consts.dom.limitLightnessCheckbox;
 
 		return {
 			paletteType: paletteTypeOptionsElement
@@ -300,7 +301,7 @@ function pullParamsFromUI(): PullParamsFromUI {
 			limitLightness: limitLightnessCheckbox?.checked || false
 		};
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(`Failed to pull parameters from UI: ${error}`);
 
 		return {
@@ -318,7 +319,7 @@ function saturateColor(selectedColor: number): void {
 	try {
 		getElementsForSelectedColor(selectedColor);
 	} catch (error) {
-		if (mode.logErrors) console.error(`Failed to saturate color: ${error}`);
+		if (mode.errorLogs) console.error(`Failed to saturate color: ${error}`);
 	}
 }
 
@@ -329,7 +330,7 @@ function showCustomColorPopupDiv(): void {
 		if (popup) {
 			popup.classList.toggle('show');
 		} else {
-			if (mode.logErrors)
+			if (mode.errorLogs)
 				console.error(
 					"document.getElementById('popup-div') is undefined"
 				);
@@ -341,7 +342,7 @@ function showCustomColorPopupDiv(): void {
 	}
 }
 
-export const base = {
+export const base: DOMBaseFnInterface = {
 	addConversionButtonEventListeners,
 	applyCustomColor,
 	applyFirstColorToUI,

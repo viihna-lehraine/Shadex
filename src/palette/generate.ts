@@ -1,13 +1,20 @@
 // File: src/palette/generate.ts
 
-import { HSL, Palette, PaletteOptions } from '../index';
-import { config } from '../config';
-import { genPalette } from './main';
-import { paletteHelpers } from './common';
+import {
+	GenPaletteArgs,
+	HSL,
+	Palette,
+	PaletteGenerateFnInterface,
+	PaletteOptions
+} from '../index/index.js';
+import { core } from '../common/index.js';
+import { data } from '../data/index.js';
+import { genPalette } from './main/index.js';
+import { paletteHelpers } from './common/index.js';
 
-const defaultPalette = config.defaults.palette.data;
+const defaultPalette = data.defaults.palette.data;
 const limits = paletteHelpers.limits;
-const mode = config.mode;
+const mode = data.mode;
 
 const isTooDark = limits.isTooDark;
 const isTooGray = limits.isTooGray;
@@ -18,17 +25,19 @@ function limitedHSL(
 	limitDark: boolean,
 	limitGray: boolean,
 	limitLight: boolean,
-	alpha: number | null
+	alphaValue: number | null
 ): HSL {
 	let hsl: HSL;
 
 	do {
 		hsl = {
 			value: {
-				hue: baseHue,
-				saturation: Math.random() * 100,
-				lightness: Math.random() * 100,
-				alpha: alpha ?? 1
+				hue: core.brand.asRadial(baseHue),
+				saturation: core.brand.asPercentile(Math.random() * 100),
+				lightness: core.brand.asPercentile(Math.random() * 100),
+				alpha: alphaValue
+					? core.brand.asAlphaRange(alphaValue)
+					: core.brand.asAlphaRange(1)
 			},
 			format: 'hsl'
 		};
@@ -55,101 +64,47 @@ async function selectedPalette(options: PaletteOptions): Promise<Palette> {
 			limitLightness
 		} = options;
 
+		const args: GenPaletteArgs = {
+			numBoxes,
+			customColor,
+			enableAlpha,
+			limitDark: limitDarkness,
+			limitGray: limitGrayness,
+			limitLight: limitLightness
+		};
+
 		switch (paletteType) {
 			case 1:
-				return genPalette.random(
-					numBoxes,
-					customColor,
-					enableAlpha,
-					limitDarkness,
-					limitGrayness,
-					limitLightness
-				);
+				return genPalette.random(args);
 			case 2:
-				return genPalette.complementary(
-					numBoxes,
-					customColor,
-					enableAlpha,
-					limitDarkness,
-					limitGrayness,
-					limitLightness
-				);
+				return genPalette.complementary(args);
 			case 3:
-				return genPalette.triadic(
-					numBoxes,
-					customColor,
-					enableAlpha,
-					limitDarkness,
-					limitGrayness,
-					limitLightness
-				);
+				return genPalette.triadic(args);
 			case 4:
-				return genPalette.tetradic(
-					numBoxes,
-					customColor,
-					enableAlpha,
-					limitDarkness,
-					limitGrayness,
-					limitLightness
-				);
+				return genPalette.tetradic(args);
 			case 5:
-				return genPalette.splitComplementary(
-					numBoxes,
-					customColor,
-					enableAlpha,
-					limitDarkness,
-					limitGrayness,
-					limitLightness
-				);
+				return genPalette.splitComplementary(args);
 			case 6:
-				return genPalette.analogous(
-					numBoxes,
-					customColor,
-					enableAlpha,
-					limitDarkness,
-					limitGrayness,
-					limitLightness
-				);
+				return genPalette.analogous(args);
 			case 7:
-				return genPalette.hexadic(
-					numBoxes,
-					customColor,
-					enableAlpha,
-					limitDarkness,
-					limitGrayness,
-					limitLightness
-				);
+				return genPalette.hexadic(args);
 			case 8:
-				return genPalette.diadic(
-					numBoxes,
-					customColor,
-					enableAlpha,
-					limitDarkness,
-					limitGrayness,
-					limitLightness
-				);
+				return genPalette.diadic(args);
 			case 9:
-				return genPalette.monochromatic(
-					numBoxes,
-					customColor,
-					enableAlpha,
-					limitDarkness,
-					limitGrayness,
-					limitLightness
-				);
+				return genPalette.monochromatic(args);
 			default:
-				if (mode.logErrors) console.error('Invalid palette type.');
+				if (mode.errorLogs) console.error('Invalid palette type.');
 
 				return Promise.resolve(defaultPalette);
 		}
 	} catch (error) {
-		if (mode.logErrors) console.error(`Error generating palette: ${error}`);
+		if (mode.errorLogs) console.error(`Error generating palette: ${error}`);
 
 		return Promise.resolve(defaultPalette);
 	}
 }
 
-export const generate = {
+export const generate: PaletteGenerateFnInterface = {
 	limitedHSL,
 	selectedPalette
-};
+} as const;

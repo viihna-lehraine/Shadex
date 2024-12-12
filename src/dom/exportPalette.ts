@@ -1,6 +1,10 @@
 // File: src/dom/exportPalette.ts
 
-import { ColorSpace, Palette } from '../index/index';
+import {
+	ColorSpace,
+	DOMExportPaletteFnInterface,
+	Palette
+} from '../index/index.js';
 
 function asCSS(palette: Palette, colorSpace: ColorSpace = 'hsl'): void {
 	const css = palette.items
@@ -200,7 +204,7 @@ function asXML(palette: Palette): void {
 	URL.revokeObjectURL(url);
 }
 
-export const exportPalette = {
+export const exportPalette: DOMExportPaletteFnInterface = {
 	asCSS,
 	asJSON,
 	asPNG,

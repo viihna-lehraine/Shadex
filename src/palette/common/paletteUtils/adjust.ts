@@ -1,16 +1,16 @@
 // File: src/palette/common/paletteUtils/adjust.ts
 
-import { HSL } from '../../../index/index';
-import { core, helpers } from '../../../common';
-import { config } from '../../../config';
+import { HSL, PaletteCommon_Utils_Adjust } from '../../../index/index.js';
+import { core, helpers } from '../../../common/index.js';
+import { data } from '../../../data/index.js';
 
-const adjustments = config.consts.adjustments;
-const mode = config.mode;
+const adjustments = data.consts.adjustments;
+const mode = data.mode;
 
 function sl(color: HSL): HSL {
 	try {
-		if (!core.validateColorValues(color)) {
-			if (mode.logErrors)
+		if (!core.validate.colorValues(color)) {
+			if (mode.errorLogs)
 				console.error('Invalid color valus for adjustment.');
 
 			helpers.dom.showToast('Invalid color values');
@@ -27,18 +27,20 @@ function sl(color: HSL): HSL {
 		return {
 			value: {
 				hue: color.value.hue,
-				saturation: adjustedSaturation,
-				lightness: adjustedLightness,
+				saturation: core.brand.asPercentile(adjustedSaturation),
+				lightness: core.brand.asPercentile(adjustedLightness),
 				alpha: color.value.alpha
 			},
 			format: 'hsl'
 		};
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(`Error adjusting saturation and lightness: ${error}`);
 
 		return color;
 	}
 }
 
-export const adjust = { sl } as const;
+export const adjust: PaletteCommon_Utils_Adjust = {
+	sl
+} as const;

@@ -7,22 +7,22 @@
 
 // This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND.
 
-import { HSL, PaletteOptions } from './index';
-import { config } from './config';
-import { core } from './common';
-import { dom } from './dom';
-import { idb } from './idb';
-import { logger } from './logger';
-import { start } from './palette';
-import { utils } from './common';
+import { HSL, PaletteOptions } from './index/index.js';
+import { core, utils } from './common/index.js';
+import { data } from './data/index.js';
+import { dom } from './dom/index.js';
+import { IDBManager } from './idb/index.js';
+import { logger } from './logger/index.js';
+import { start } from './palette/index.js';
 
-const consts = config.consts;
-const mode = config.mode;
+const consts = data.consts;
+const mode = data.mode;
 
 document.addEventListener('DOMContentLoaded', () => {
 	console.log('DOM content loaded - Initializing application');
 
 	const buttons = dom.defineUIElements();
+	const idb = IDBManager.getInstance();
 
 	if (!buttons) {
 		console.error('Failed to initialize UI buttons');
@@ -51,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		showAsRGBButton
 	} = buttons;
 
-	// confirm that all elements are accessible
 	if (mode.debug) {
 		logger.debug.validateDOMElements();
 
@@ -76,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (!mode.quiet)
 			console.log('Conversion button event listeners attached');
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(
 				`Unable to attach conversion button event listeners: ${error}`
 			);
@@ -103,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		e.preventDefault();
 
 		const customHSLColor = dom.applyCustomColor();
-		const customHSLColorClone: HSL = core.clone(customHSLColor);
+		const customHSLColorClone = core.base.clone(customHSLColor);
 
 		await idb.saveData('customColor', 'appSettings', customHSLColorClone);
 
@@ -113,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	clearCustomColorButton?.addEventListener('click', async e => {
 		e.preventDefault();
 
-		await idb.deleteTable('customColor');
+		// *DEV-NOTE* add functionality
 
 		if (!mode.quiet) console.log('Custom color cleared from IndexedDB');
 
@@ -172,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		const paletteOptions: PaletteOptions = {
 			paletteType,
 			numBoxes,
-			customColor: core.clone(customColor),
+			customColor: core.base.clone(customColor),
 			enableAlpha,
 			limitDarkness,
 			limitGrayness,

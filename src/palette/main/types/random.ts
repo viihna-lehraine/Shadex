@@ -1,44 +1,41 @@
 // File: src/paletteGen/palettes/types/random.ts
 
-import { HSL, Palette, PaletteItem } from '../../../index/index';
-import { IndexedDB } from '../../../idb';
-import { paletteHelpers, paletteSuperUtils } from '../../common';
-import { utils } from '../../../common';
+import { GenPaletteArgs, Palette, PaletteItem } from '../../../index/index.js';
+import { IDBManager } from '../../../idb/index.js';
+import { paletteHelpers, paletteSuperUtils } from '../../common/index.js';
+import { utils } from '../../../common/index.js';
 
 const create = paletteSuperUtils.create;
 const update = paletteHelpers.update;
 
-const idb = IndexedDB.getInstance();
+const idb = IDBManager.getInstance();
 
-export async function random(
-	numBoxes: number,
-	customColor: HSL | null,
-	enableAlpha: boolean,
-	limitDark: boolean,
-	limitGray: boolean,
-	limitLight: boolean
-): Promise<Palette> {
-	const baseColor = create.baseColor(customColor, enableAlpha);
+export async function random(args: GenPaletteArgs): Promise<Palette> {
+	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const paletteItems: PaletteItem[] = [
-		create.paletteItem(baseColor, enableAlpha)
+		create.paletteItem(baseColor, args.enableAlpha)
 	];
 
-	for (let i = 1; i < numBoxes; i++) {
-		const randomColor = utils.random.hsl(enableAlpha);
+	for (let i = 1; i < args.numBoxes; i++) {
+		const randomColor = utils.random.hsl(args.enableAlpha);
 
-		paletteItems.push(create.paletteItem(randomColor, enableAlpha));
+		paletteItems.push(create.paletteItem(randomColor, args.enableAlpha));
 
 		update.colorBox(randomColor, i);
 	}
 
-	return await idb.savePaletteToDB(
+	const randomPalette = await idb.savePaletteToDB(
 		'random',
 		paletteItems,
 		baseColor,
-		numBoxes,
-		enableAlpha,
-		limitDark,
-		limitGray,
-		limitLight
+		args.numBoxes,
+		args.enableAlpha,
+		args.limitDark,
+		args.limitGray,
+		args.limitLight
 	);
+
+	if (!randomPalette)
+		throw new Error('Random palette is either null or undefined.');
+	else return randomPalette;
 }

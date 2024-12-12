@@ -1,11 +1,12 @@
 // File: src/dom/index.ts
 
-import { base } from './base';
-import { buttons } from './buttons';
-import { exportPalette } from './exportPalette';
-import { history } from './history';
+import { DOMFnMasterInterface } from '../index/index.js';
+import { base } from './base.js';
+import { buttons } from './buttons.js';
+import { exportPalette } from './exportPalette.js';
+import { history } from './history.js';
 
-export const dom = {
+export const dom: DOMFnMasterInterface = {
 	...base,
 	buttons,
 	exportPalette,

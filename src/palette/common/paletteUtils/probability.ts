@@ -1,9 +1,10 @@
 // File: src/paelette/common/paletteUtils/probability.ts
 
-import { config } from '../../../config';
+import { PaletteCommon_Utils_Probability } from '../../../index/index.js';
+import { data } from '../../../data/index.js';
 
-const mode = config.mode;
-const probabilities = config.consts.probabilities;
+const mode = data.mode;
+const probabilities = data.consts.probabilities;
 
 function getWeightedRandomInterval(): number {
 	try {
@@ -26,7 +27,7 @@ function getWeightedRandomInterval(): number {
 
 		return weights[weights.length - 1];
 	} catch (error) {
-		if (mode.logErrors)
+		if (mode.errorLogs)
 			console.error(
 				`Error generating weighted random interval: ${error}`
 			);
@@ -35,4 +36,6 @@ function getWeightedRandomInterval(): number {
 	}
 }
 
-export const probability = { getWeightedRandomInterval };
+export const probability: PaletteCommon_Utils_Probability = {
+	getWeightedRandomInterval
+} as const;

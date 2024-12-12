@@ -1,93 +1,101 @@
 // File: src/palette/main/types/triadic.ts
 
-import { HSL, Palette, PaletteItem } from '../../../index';
-import { config } from '../../../config';
-import { IndexedDB } from '../../../idb';
-import { paletteSuperUtils, paletteUtils } from '../../common';
-import { utils } from '../../../common';
+import {
+	GenPaletteArgs,
+	HSL,
+	Palette,
+	PaletteItem
+} from '../../../index/index.js';
+import { core, utils } from '../../../common/index.js';
+import { data } from '../../../data/index.js';
+import { IDBManager } from '../../../idb/index.js';
+import { paletteSuperUtils } from '../../common/index.js';
 
 const conversion = utils.conversion;
 const create = paletteSuperUtils.create;
-const defaults = config.defaults;
-const genHues = paletteUtils.genHues;
-const mode = config.mode;
-const paletteRanges = config.consts.palette.ranges;
+const defaults = data.defaults;
+const genHues = paletteSuperUtils.genHues;
+const mode = data.mode;
+const paletteRanges = data.consts.paletteRanges;
 
-const idb = IndexedDB.getInstance();
+const idb = IDBManager.getInstance();
 
-export async function triadic(
-	numBoxes: number,
-	customColor: HSL | null,
-	enableAlpha: boolean,
-	limitDark: boolean,
-	limitGray: boolean,
-	limitLight: boolean
-): Promise<Palette> {
+export async function triadic(args: GenPaletteArgs): Promise<Palette> {
 	const currentTriadicPaletteID = await idb.getCurrentPaletteID();
 
-	if (numBoxes < 3) {
-		if (mode.logWarnings)
+	if (args.numBoxes < 3) {
+		if (mode.warnLogs)
 			console.warn('Triadic palette requires at least 3 swatches.');
 
 		return utils.palette.createObject(
 			'triadic',
 			[],
-			defaults.colors.hsl,
+			core.brandColor.asHSL(defaults.colors.hsl),
 			0,
 			currentTriadicPaletteID,
-			enableAlpha,
-			limitDark,
-			limitGray,
-			limitLight
+			args.enableAlpha,
+			args.limitDark,
+			args.limitGray,
+			args.limitLight
 		);
 	}
 
-	const baseColor = create.baseColor(customColor, enableAlpha);
+	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const hues = genHues.triadic(baseColor.value.hue);
 	const paletteItems: PaletteItem[] = [
-		create.paletteItem(baseColor, enableAlpha),
+		create.paletteItem(baseColor, args.enableAlpha),
 		...hues.map((hue, index) => {
 			const adjustedHSL: HSL = {
 				value: {
-					hue,
-					saturation: Math.max(
-						0,
-						Math.min(
-							baseColor.value.saturation +
-								(index % 2 === 0
-									? -paletteRanges.triad.satShift
-									: paletteRanges.triad.satShift),
-							100
+					hue: core.brand.asRadial(hue),
+					saturation: core.brand.asPercentile(
+						Math.max(
+							0,
+							Math.min(
+								baseColor.value.saturation +
+									(index % 2 === 0
+										? -paletteRanges.triad.satShift
+										: paletteRanges.triad.satShift),
+								100
+							)
 						)
 					),
-					lightness: Math.max(
-						0,
-						Math.min(
-							baseColor.value.lightness +
-								(index % 2 === 0
-									? -paletteRanges.triad.lightShift
-									: paletteRanges.triad.lightShift),
-							100
+					lightness: core.brand.asPercentile(
+						Math.max(
+							0,
+							Math.min(
+								baseColor.value.lightness +
+									(index % 2 === 0
+										? -paletteRanges.triad.lightShift
+										: paletteRanges.triad.lightShift),
+								100
+							)
 						)
 					),
-					alpha: enableAlpha ? Math.random() : 1
+					alpha: args.enableAlpha
+						? core.brand.asAlphaRange(Math.random())
+						: core.brand.asAlphaRange(1)
 				},
 				format: 'hsl'
 			};
 			const adjustedColor = conversion.genAllColorValues(adjustedHSL);
 
-			return create.paletteItem(adjustedColor as HSL, enableAlpha);
+			return create.paletteItem(adjustedColor as HSL, args.enableAlpha);
 		})
 	];
 
-	return await idb.savePaletteToDB(
+	const triadicPalette = await idb.savePaletteToDB(
 		'triadic',
 		paletteItems,
 		baseColor,
-		numBoxes,
-		enableAlpha,
-		limitDark,
-		limitGray,
-		limitLight
+		args.numBoxes,
+		args.enableAlpha,
+		args.limitDark,
+		args.limitGray,
+		args.limitLight
 	);
+
+	if (!triadicPalette)
+		throw new Error('Triadic palette is either null or undefined.');
+	else return triadicPalette;
 }
