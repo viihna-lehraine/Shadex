@@ -1,4 +1,4 @@
-// File: src/palette/common/paletteHelpers/limits.ts
+// File: src/palette/common/paletteHelpers/limits.js
 
 import { HSL, PaletteCommon_Helpers_Limits } from '../../../index/index.js';
 import { core } from '../../../common/index.js';

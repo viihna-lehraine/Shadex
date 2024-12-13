@@ -1,4 +1,4 @@
-// File: src/dom/exportPalette.ts
+// File: src/dom/exportPalette.js
 
 import {
 	ColorSpace,

@@ -1,4 +1,4 @@
-// File: src/palete/main/index.ts
+// File: src/palete/main/index.js
 
 import { GenPaletteFnInterface } from '../../index/index.js';
 import { analogous } from './types/analogous.js';

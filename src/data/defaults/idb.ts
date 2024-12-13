@@ -1,4 +1,4 @@
-// File: src/data/defaults/idb.ts
+// File: src/data/defaults/idb.js
 
 import { IDBDefaultsData, MutationLog, Settings } from '../../index/index.js';
 

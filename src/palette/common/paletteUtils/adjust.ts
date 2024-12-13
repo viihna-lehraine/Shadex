@@ -1,4 +1,4 @@
-// File: src/palette/common/paletteUtils/adjust.ts
+// File: src/palette/common/paletteUtils/adjust.js
 
 import { HSL, PaletteCommon_Utils_Adjust } from '../../../index/index.js';
 import { core, helpers } from '../../../common/index.js';

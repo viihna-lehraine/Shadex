@@ -1,16 +1,6 @@
-// File: src/index/app/palette.ts
+// File: src/index/app/palette.js
 
-import {
-	Color,
-	ColorSpaceExtended,
-	Hex,
-	HSL,
-	Palette,
-	PaletteItem,
-	PaletteOptions,
-	SL,
-	SV
-} from '../index.js';
+import { HSL, Palette, PaletteItem, PaletteOptions } from '../index.js';
 
 // ******** COMMON UTILITIES ********
 
@@ -51,14 +41,6 @@ export interface PaletteCommon_Utils_Adjust {
 	sl(color: HSL): HSL;
 }
 
-export interface PaletteCommon_Utils_Convert {
-	hslTo(color: HSL, colorSpace: ColorSpaceExtended): Color;
-	toHSL(color: Exclude<Color, SL | SV>): HSL;
-	wrappers: {
-		hexToHSL(input: string | Hex): HSL;
-	};
-}
-
 export interface PaletteCommon_Utils_Probability {
 	getWeightedRandomInterval(): number;
 }
@@ -77,7 +59,6 @@ export interface PaletteCommon_SuperUtils {
 
 export interface PaletteCommon_Utils {
 	adjust: PaletteCommon_Utils_Adjust;
-	convert: PaletteCommon_Utils_Convert;
 	probability: PaletteCommon_Utils_Probability;
 }
 
@@ -124,7 +105,12 @@ export interface PaletteGenerateFnInterface {
 }
 
 export interface PaletteStartFnInterface {
-	paletteGen(options: PaletteOptions): Promise<void>;
+	genPalette(options: PaletteOptions): Promise<void>;
+	genPaletteDOMBox(
+		items: PaletteItem[],
+		numBoxes: number,
+		tableId: string
+	): Promise<void>;
 }
 
 // ******** TOP-LEVEL BUNDLE INTERFACE ********

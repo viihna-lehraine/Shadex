@@ -1,4 +1,4 @@
-// File: src/palette/common/paletteSuperUtils.ts
+// File: src/palette/common/paletteSuperUtils.js
 
 import { create } from './create.js';
 import { genHues } from './genHues.js';

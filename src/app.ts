@@ -7,6 +7,8 @@
 
 // This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND.
 
+// File: src/app.js
+
 import { HSL, PaletteOptions } from './index/index.js';
 import { core, utils } from './common/index.js';
 import { data } from './data/index.js';
@@ -15,41 +17,37 @@ import { IDBManager } from './idb/index.js';
 import { logger } from './logger/index.js';
 import { start } from './palette/index.js';
 
+const buttonIDs = data.consts.dom.ids;
 const consts = data.consts;
 const mode = data.mode;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 	console.log('DOM content loaded - Initializing application');
 
-	const buttons = dom.defineUIElements();
+	await dom.loadPartials();
+
+	if (!mode.quiet) console.log('HTML partials loaded. Initializing UI...');
+
+	const buttonElements = dom.defineUIElements();
+
+	if (!buttonElements) {
+		if (mode.errorLogs) console.error('Failed to initialize UI buttons');
+
+		return;
+	}
+
+	await dom.initializeUI();
+
+	if (!mode.quiet) console.log('UI successfully initialized');
+
 	const idb = IDBManager.getInstance();
 
-	if (!buttons) {
+	if (!buttonElements) {
 		console.error('Failed to initialize UI buttons');
 		return;
 	}
 
-	const selectedColorOption = consts.dom.selectedColorOption;
-
-	const {
-		advancedMenuButton,
-		applyCustomColorButton,
-		clearCustomColorButton,
-		closeCustomColorMenuButton,
-		closeHelpMenuButton,
-		closeHistoryMenuButton,
-		desaturateButton,
-		generateButton,
-		helpMenuButton,
-		historyMenuButton,
-		saturateButton,
-		showAsCMYKButton,
-		showAsHexButton,
-		showAsHSLButton,
-		showAsHSVButton,
-		showAsLABButton,
-		showAsRGBButton
-	} = buttons;
+	const selectedColorOption = consts.dom.elements.selectedColorOption;
 
 	if (mode.debug) {
 		logger.debug.validateDOMElements();
@@ -81,181 +79,251 @@ document.addEventListener('DOMContentLoaded', () => {
 			);
 	}
 
-	advancedMenuButton?.addEventListener('click', e => {
-		e.preventDefault();
+	dom.buttons.addEventListener(
+		buttonIDs.advancedMenuButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
 
-		const advancedMenuContent = document.querySelector(
-			'.advanced-menu-content'
-		) as HTMLElement | null;
+			const advancedMenuContent = document.querySelector(
+				'.advanced-menu-content'
+			) as HTMLElement | null;
 
-		if (advancedMenuContent) {
-			const isHidden =
-				getComputedStyle(advancedMenuContent).display === 'none';
+			if (advancedMenuContent) {
+				const isHidden =
+					getComputedStyle(advancedMenuContent).display === 'none';
 
-			advancedMenuContent.style.display = isHidden ? 'flex' : 'none';
+				advancedMenuContent.style.display = isHidden ? 'flex' : 'none';
+			}
+
+			if (!mode.quiet) console.log('advancedMenuButton clicked');
 		}
+	);
 
-		if (!mode.quiet) console.log('advancedMenuToggleButton clicked');
-	});
+	dom.buttons.addEventListener(
+		buttonIDs.applyCustomColorButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
 
-	applyCustomColorButton?.addEventListener('click', async e => {
-		e.preventDefault();
+			const customHSLColor = dom.applyCustomColor();
+			const customHSLColorClone = core.base.clone(customHSLColor);
 
-		const customHSLColor = dom.applyCustomColor();
-		const customHSLColorClone = core.base.clone(customHSLColor);
+			await idb.saveData(
+				'customColor',
+				'appSettings',
+				customHSLColorClone
+			);
 
-		await idb.saveData('customColor', 'appSettings', customHSLColorClone);
-
-		if (!mode.quiet) console.log('Custom color saved to IndexedDB');
-	});
-
-	clearCustomColorButton?.addEventListener('click', async e => {
-		e.preventDefault();
-
-		// *DEV-NOTE* add functionality
-
-		if (!mode.quiet) console.log('Custom color cleared from IndexedDB');
-
-		dom.showCustomColorPopupDiv();
-	});
-
-	closeCustomColorMenuButton?.addEventListener('click', async e => {
-		e.preventDefault();
-
-		console.log('closeCustomColorMenuButton clicked');
-	});
-
-	closeHelpMenuButton?.addEventListener('click', e => {
-		e.preventDefault();
-
-		if (!mode.quiet) console.log('closeHelpMenuButton clicked');
-	});
-
-	closeHistoryMenuButton?.addEventListener('click', e => {
-		e.preventDefault();
-
-		if (!mode.quiet) console.log('closeHistoryMenuButton clicked');
-	});
-
-	desaturateButton?.addEventListener('click', e => {
-		e.preventDefault();
-
-		if (!mode.quiet) console.log('desaturateButton clicked');
-
-		dom.desaturateColor(selectedColor);
-	});
-
-	generateButton?.addEventListener('click', async e => {
-		e.preventDefault();
-
-		if (!mode.quiet) console.log('generateButton clicked');
-
-		const {
-			paletteType,
-			numBoxes,
-			enableAlpha,
-			limitDarkness,
-			limitGrayness,
-			limitLightness
-		} = dom.pullParamsFromUI();
-
-		let customColor = (await idb.getCustomColor()) as HSL | null;
-
-		if (!customColor) {
-			if (!mode.quiet)
-				console.info('No custom color found. Using a random color');
-
-			customColor = utils.random.hsl(true);
+			if (!mode.quiet) console.log('Custom color saved to IndexedDB');
 		}
+	);
 
-		const paletteOptions: PaletteOptions = {
-			paletteType,
-			numBoxes,
-			customColor: core.base.clone(customColor),
-			enableAlpha,
-			limitDarkness,
-			limitGrayness,
-			limitLightness
-		};
+	dom.buttons.addEventListener(
+		buttonIDs.clearCustomColorButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
 
-		await start.paletteGen(paletteOptions);
-	});
+			if (!mode.quiet) console.log('Custom color cleared from IndexedDB');
 
-	helpMenuButton?.addEventListener('click', e => {
-		e.preventDefault();
-
-		const helpMenuContent = document.querySelector(
-			'.help-menu-content'
-		) as HTMLElement | null;
-
-		if (helpMenuContent) {
-			const isHidden =
-				getComputedStyle(helpMenuContent).display === 'none';
-
-			helpMenuContent.style.display = isHidden ? 'flex' : 'none';
+			dom.showCustomColorPopupDiv();
 		}
+	);
 
-		if (!mode.quiet) console.log('helpMenuToggleButton clicked');
-	});
+	dom.buttons.addEventListener(
+		buttonIDs.closeCustomColorMenuButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
 
-	historyMenuButton?.addEventListener('click', e => {
-		e.preventDefault();
-
-		const historyMenuContent = document.querySelector(
-			'history-menu-content'
-		) as HTMLElement | null;
-
-		if (historyMenuContent) {
-			const isHidden =
-				getComputedStyle(historyMenuContent).display === 'none';
-
-			historyMenuContent.style.display = isHidden ? 'flex' : 'none';
+			if (!mode.quiet) console.log('closeCustomColorMenuButton clicked');
 		}
+	);
 
-		if (!mode.quiet) console.log('historyMenuToggleButton clicked');
-	});
+	dom.buttons.addEventListener(
+		buttonIDs.closeHelpMenuButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
 
-	saturateButton?.addEventListener('click', e => {
-		e.preventDefault();
+			if (!mode.quiet) console.log('closeHelpMenuButton clicked');
+		}
+	);
 
-		if (!mode.quiet) console.log('saturateButton clicked');
+	dom.buttons.addEventListener(
+		buttonIDs.closeHistoryMenuButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
 
-		dom.saturateColor(selectedColor);
-	});
+			if (!mode.quiet) console.log('closeHistoryMenuButton clicked');
+		}
+	);
 
-	showAsCMYKButton?.addEventListener('click', e => {
-		e.preventDefault();
+	dom.buttons.addEventListener(
+		buttonIDs.desaturateButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
 
-		if (!mode.quiet) console.log('showAsCMYKButton clicked');
-	});
+			if (!mode.quiet) console.log('desaturateButton clicked');
 
-	showAsHexButton?.addEventListener('click', e => {
-		e.preventDefault();
+			dom.desaturateColor(selectedColor);
+		}
+	);
 
-		if (!mode.quiet) console.log('showAsHexButton clicked');
-	});
+	dom.buttons.addEventListener(
+		buttonIDs.generateButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
 
-	showAsHSLButton?.addEventListener('click', e => {
-		e.preventDefault();
+			if (!mode.quiet) console.log('generateButton clicked');
 
-		if (!mode.quiet) console.log('showAsHSLButton clicked');
-	});
+			const {
+				paletteType,
+				numBoxes,
+				enableAlpha,
+				limitDarkness,
+				limitGrayness,
+				limitLightness
+			} = dom.pullParamsFromUI();
 
-	showAsHSVButton?.addEventListener('click', e => {
-		e.preventDefault();
+			let customColor = (await idb.getCustomColor()) as HSL | null;
 
-		if (!mode.quiet) console.log('showAsHSVButton clicked');
-	});
+			if (!customColor) {
+				if (!mode.quiet)
+					console.info('No custom color found. Using a random color');
 
-	showAsLABButton?.addEventListener('click', e => {
-		e.preventDefault();
+				customColor = utils.random.hsl(true);
+			}
 
-		if (!mode.quiet) console.log('showAsLABButton clicked');
-	});
+			const paletteOptions: PaletteOptions = {
+				paletteType,
+				numBoxes,
+				customColor: core.base.clone(customColor),
+				enableAlpha,
+				limitDarkness,
+				limitGrayness,
+				limitLightness
+			};
 
-	showAsRGBButton?.addEventListener('click', e => {
-		e.preventDefault();
+			await start.genPalette(paletteOptions);
+		}
+	);
 
-		if (!mode.quiet) console.log('showAsRGBButton clicked');
-	});
+	dom.buttons.addEventListener(
+		buttonIDs.helpMenuButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			const helpMenuContent = document.querySelector(
+				'.help-menu-content'
+			) as HTMLElement | null;
+
+			if (helpMenuContent) {
+				const isHidden =
+					getComputedStyle(helpMenuContent).display === 'none';
+
+				helpMenuContent.style.display = isHidden ? 'flex' : 'none';
+
+				if (!mode.quiet) console.log('helpMenuButton clicked');
+			}
+		}
+	);
+
+	dom.buttons.addEventListener(
+		buttonIDs.historyMenuButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			const historyMenuContent = document.querySelector(
+				'.history-menu-content'
+			) as HTMLElement | null;
+
+			if (historyMenuContent) {
+				const isHidden =
+					getComputedStyle(historyMenuContent).display === 'none';
+
+				historyMenuContent.style.display = isHidden ? 'flex' : 'none';
+			}
+
+			if (!mode.quiet) console.log('historyMenuToggleButton clicked');
+		}
+	);
+
+	dom.buttons.addEventListener(
+		buttonIDs.saturateButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			if (!mode.quiet) console.log('saturateButton clicked');
+
+			dom.saturateColor(selectedColor);
+		}
+	);
+
+	dom.buttons.addEventListener(
+		buttonIDs.showAsCMYKButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			if (!mode.quiet) console.log('showAsCMYKButton clicked');
+		}
+	);
+
+	dom.buttons.addEventListener(
+		buttonIDs.showAsHexButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			if (!mode.quiet) console.log('showAsHexButton clicked');
+		}
+	);
+
+	dom.buttons.addEventListener(
+		buttonIDs.showAsHSLButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			if (!mode.quiet) console.log('showAsHSLButton clicked');
+		}
+	);
+
+	dom.buttons.addEventListener(
+		buttonIDs.showAsHSVButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			if (!mode.quiet) console.log('showAsHSVButton clicked');
+		}
+	);
+
+	dom.buttons.addEventListener(
+		buttonIDs.showAsLABButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			if (!mode.quiet) console.log('showAsLABButton clicked');
+		}
+	);
+
+	dom.buttons.addEventListener(
+		buttonIDs.showAsRGBButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			if (!mode.quiet) console.log('showAsRGBButton clicked');
+		}
+	);
 });

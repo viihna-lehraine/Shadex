@@ -1,4 +1,4 @@
-// File: src/common/helpers/conversion.ts
+// File: src/common/helpers/conversion.js
 
 import {
 	CommonHelpersConversion,
@@ -11,7 +11,7 @@ import { data } from '../../data/index.js';
 
 const mode = data.mode;
 
-function applyGammaCorrection(value: number): number {
+export function applyGammaCorrection(value: number): number {
 	try {
 		return value > 0.0031308
 			? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
@@ -24,7 +24,7 @@ function applyGammaCorrection(value: number): number {
 	}
 }
 
-function clampRGB(rgb: RGB): RGB {
+export function clampRGB(rgb: RGB): RGB {
 	const defaultRGBUnbranded = core.base.clone(data.defaults.colors.rgb);
 	const defaultRGBBranded = core.brandColor.asRGB(defaultRGBUnbranded);
 
@@ -63,7 +63,7 @@ function clampRGB(rgb: RGB): RGB {
 	}
 }
 
-function hueToRGB(p: number, q: number, t: number): number {
+export function hueToRGB(p: number, q: number, t: number): number {
 	try {
 		const clonedP = core.base.clone(p);
 		const clonedQ = core.base.clone(q);
@@ -86,7 +86,7 @@ function hueToRGB(p: number, q: number, t: number): number {
 	}
 }
 
-function hslAddFormat(value: HSLValue): HSL {
+export function hslAddFormat(value: HSLValue): HSL {
 	const defaultHSLUnbranded = core.base.clone(data.defaults.colors.hsl);
 	const defaultHSLBranded = core.brandColor.asHSL(defaultHSLUnbranded);
 
@@ -109,6 +109,6 @@ function hslAddFormat(value: HSLValue): HSL {
 export const conversion: CommonHelpersConversion = {
 	applyGammaCorrection,
 	clampRGB,
-	hueToRGB,
-	hslAddFormat
+	hslAddFormat,
+	hueToRGB
 } as const;

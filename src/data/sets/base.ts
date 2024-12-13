@@ -1,4 +1,4 @@
-// File: src/data/base.ts
+// File: src/data/base.js
 
 export const base = {
 	AlphaRange: [0, 1] as const,

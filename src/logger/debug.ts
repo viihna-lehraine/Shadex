@@ -1,4 +1,4 @@
-// File: src/logger/debug.ts
+// File: src/logger/debug.js
 
 import { LoggerFnDebugInterface } from '../index/index.js';
 import { data } from '../data/index.js';
@@ -28,7 +28,7 @@ type DOMElements = {
 };
 
 function validateDOMElements(): void {
-	const elements: DOMElements = data.consts.dom;
+	const elements: DOMElements = data.consts.dom.elements;
 	const notFoundElements: string[] = [];
 
 	Object.entries(elementsToCheck).forEach(([key, name]) => {
@@ -45,7 +45,7 @@ function validateDOMElements(): void {
 			`Some DOM elements are missing: ${notFoundElements.length} not found.`
 		);
 		console.log('Missing elements:');
-		console.log(notFoundElements.join('\n'));
+		notFoundElements.forEach(element => console.log(`- ${element}`));
 	}
 }
 

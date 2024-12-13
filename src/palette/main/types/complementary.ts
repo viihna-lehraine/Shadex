@@ -1,4 +1,4 @@
-// File: src/palette/main/types/complementary.ts
+// File: src/palette/main/types/complementary.js
 
 import {
 	GenPaletteArgs,
@@ -6,9 +6,9 @@ import {
 	Palette,
 	PaletteItem
 } from '../../../index/index.js';
+import { IDBManager } from '../../../idb/index.js';
 import { core, utils } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
-import { IDBManager } from '../../../idb/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
 
 const create = paletteSuperUtils.create;

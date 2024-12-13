@@ -1,4 +1,4 @@
-// File: src/index/app/dom.ts
+// File: src/index/app/dom.js
 
 import {
 	ColorSpace,
@@ -19,12 +19,19 @@ export interface DOMBaseFnInterface {
 	getElementsForSelectedColor(
 		selectedColor: number
 	): GetElementsForSelectedColor;
+	initializeUI: () => Promise<void>;
+	loadPartials: () => Promise<void>;
 	pullParamsFromUI(): PullParamsFromUI;
 	saturateColor(selectedColor: number): void;
 	showCustomColorPopupDiv(): void;
 }
 
 export interface DOMButtonsFnInterface {
+	addEventListener<K extends keyof HTMLElementEventMap>(
+		id: string,
+		eventType: K,
+		callback: (ev: HTMLElementEventMap[K]) => void
+	): void;
 	handlePaletteGen: () => void;
 }
 
@@ -50,6 +57,8 @@ export interface DOMFnMasterInterface {
 	getElementsForSelectedColor(
 		selectedColor: number
 	): GetElementsForSelectedColor;
+	initializeUI: () => Promise<void>;
+	loadPartials: () => Promise<void>;
 	pullParamsFromUI(): PullParamsFromUI;
 	saturateColor(selectedColor: number): void;
 	showCustomColorPopupDiv(): void;

@@ -1,4 +1,4 @@
-// File: src/common/core/index.ts
+// File: src/common/core/index.js
 
 import { CommonCoreFnMasterInterface } from '../../index/index.js';
 import {

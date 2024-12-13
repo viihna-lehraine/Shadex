@@ -1,4 +1,4 @@
-// File: src/logger/index.ts
+// File: src/logger/index.js
 
 import { LoggerFnMasterInterface } from '../index/index.js';
 import { debug } from './debug.js';

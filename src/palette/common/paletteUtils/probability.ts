@@ -1,4 +1,4 @@
-// File: src/paelette/common/paletteUtils/probability.ts
+// File: src/paelette/common/paletteUtils/probability.js
 
 import { PaletteCommon_Utils_Probability } from '../../../index/index.js';
 import { data } from '../../../data/index.js';

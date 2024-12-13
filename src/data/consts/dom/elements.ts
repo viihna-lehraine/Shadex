@@ -1,7 +1,7 @@
-// File: src/data/consts/dom.ts
+// File: src/data/consts/dom/elements.js
 
-import { DOMData } from '../../index/index.js';
-import { domUtils } from '../../common/dom/index.js';
+import { DOMElementData } from '../../../index/index.js';
+import { domUtils } from '../../../common/dom/index.js';
 
 const getElement = domUtils.getElement;
 
@@ -63,7 +63,7 @@ const showAsHSVButton = getElement<HTMLButtonElement>('show-as-hsv-button');
 const showAsLABButton = getElement<HTMLButtonElement>('show-as-lab-button');
 const showAsRGBButton = getElement<HTMLButtonElement>('show-as-rgb-button');
 
-export const dom: DOMData = {
+export const domElements: DOMElementData = {
 	advancedMenuButton,
 	applyCustomColorButton,
 	clearCustomColorButton,

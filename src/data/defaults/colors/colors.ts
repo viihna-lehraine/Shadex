@@ -1,4 +1,4 @@
-// File: src/data/defaults/colors/colors.ts
+// File: src/data/defaults/colors/colors.js
 
 import {
 	CMYKUnbranded,

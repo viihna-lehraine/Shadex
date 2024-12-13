@@ -1,4 +1,4 @@
-// File: src/dom/index.ts
+// File: src/dom/index.js
 
 import { DOMFnMasterInterface } from '../index/index.js';
 import { base } from './base.js';

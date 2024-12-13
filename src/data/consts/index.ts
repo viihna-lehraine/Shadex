@@ -1,4 +1,4 @@
-// File: src/data/consts/index.ts
+// File: src/data/consts/index.js
 
 import { ConstsData } from '../../index/index.js';
 import {
@@ -10,7 +10,7 @@ import {
 	thresholds,
 	timeouts
 } from './base.js';
-import { dom } from './dom.js';
+import { dom } from './dom/index.js';
 
 export const consts: ConstsData = {
 	adjustments,

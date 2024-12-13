@@ -1,4 +1,4 @@
-// File: src/index/classes.ts
+// File: src/index/classes.js
 
 import { IDBPObjectStore } from 'idb';
 import {

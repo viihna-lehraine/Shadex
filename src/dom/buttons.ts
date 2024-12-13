@@ -1,11 +1,27 @@
-// File: src/dom/buttons.ts
+// File: src/dom/buttons.js
 
 import { DOMButtonsFnInterface, PaletteOptions } from '../index/index.js';
 import { core, superUtils } from '../common/index.js';
 import { data } from '../data/index.js';
+import { mode } from '../data/mode/index.js';
 import { start } from '../palette/index.js';
 
 const buttonDebounce = data.consts.debounce.button || 300;
+
+function addEventListener<K extends keyof HTMLElementEventMap>(
+	id: string,
+	eventType: K,
+	callback: (ev: HTMLElementEventMap[K]) => void
+): void {
+	const button = document.getElementById(id);
+
+	if (button) {
+		button.addEventListener(eventType, callback);
+	} else if (mode.warnLogs) {
+		if ((mode.debug || mode.verbose) && mode.warnLogs)
+			console.warn(`Button with id "${id}" not found.`);
+	}
+}
 
 const handlePaletteGen = core.base.debounce(() => {
 	try {
@@ -43,12 +59,13 @@ const handlePaletteGen = core.base.debounce(() => {
 			limitLightness
 		};
 
-		start.paletteGen(options);
+		start.genPalette(options);
 	} catch (error) {
 		console.error(`Failed to handle generate button click: ${error}`);
 	}
 }, buttonDebounce);
 
 export const buttons: DOMButtonsFnInterface = {
+	addEventListener,
 	handlePaletteGen
 };

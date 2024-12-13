@@ -1,4 +1,4 @@
-// File: src/palette/common/paletteSuperUtils/genHues.ts
+// File: src/palette/common/paletteSuperUtils/genHues.js
 
 import { HSL, PaletteCommon_SuperUtils_GenHues } from '../../../index/index.js';
 import { core, utils } from '../../../common/index.js';

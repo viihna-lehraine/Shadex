@@ -1,4 +1,4 @@
-// File: src/index/data.ts
+// File: src/index/data.js
 
 import {
 	CMYKUnbranded,
@@ -57,7 +57,7 @@ export interface DefaultColorStringsData {
 	xyz: XYZString;
 }
 
-export interface DOMData {
+export interface DOMElementData {
 	advancedMenuButton: HTMLButtonElement | null;
 	applyCustomColorButton: HTMLButtonElement | null;
 	clearCustomColorButton: HTMLButtonElement | null;
@@ -85,6 +85,43 @@ export interface DOMData {
 	showAsHSVButton: HTMLButtonElement | null;
 	showAsLABButton: HTMLButtonElement | null;
 	showAsRGBButton: HTMLButtonElement | null;
+}
+
+export type DOMFilesData = readonly [
+	'./html/advanced-menu.html',
+	'./html/custom-color-menu.html',
+	'./html/help-menu.html',
+	'./html/history-menu.html'
+];
+
+export interface DOM_ID_Data {
+	advancedMenuButton: string;
+	applyCustomColorButton: string;
+	clearCustomColorButton: string;
+	closeAdvancedMenuButton: string;
+	closeCustomColorMenuButton: string;
+	closeHelpMenuButton: string;
+	closeHistoryMenuButton: string;
+	customColorElement: string;
+	customColorMenuButton: string;
+	desaturateButton: string;
+	enableAlphaCheckbox: string;
+	generateButton: string;
+	helpMenuButton: string;
+	historyMenuButton: string;
+	limitDarknessCheckbox: string;
+	limitGraynessCheckbox: string;
+	limitLightnessCheckbox: string;
+	paletteNumberOptions: string;
+	paletteTypeOptions: string;
+	saturateButton: string;
+	selectedColorOption: string;
+	showAsCMYKButton: string;
+	showAsHexButton: string;
+	showAsHSLButton: string;
+	showAsHSVButton: string;
+	showAsLABButton: string;
+	showAsRGBButton: string;
 }
 
 export interface IDB_DEFAULT_KEYS_Data {
@@ -193,6 +230,14 @@ export interface TimeoutsData {
 	copyButtonText: number;
 	toast: number;
 	tooltip: number;
+}
+
+// ******** INNER BUNDLE INTERFACES ********
+
+export interface DOMData {
+	elements: DOMElementData;
+	ids: DOM_ID_Data;
+	files: DOMFilesData;
 }
 
 // ******** BUNDLE INTERFACES ********

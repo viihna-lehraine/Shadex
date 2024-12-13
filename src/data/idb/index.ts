@@ -1,4 +1,4 @@
-// File: src/data/idb/index.ts
+// File: src/data/idb/index.js
 
 import { IDBData } from '../../index/index.js';
 import { base } from './base.js';

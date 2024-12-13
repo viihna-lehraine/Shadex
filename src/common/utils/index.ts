@@ -1,4 +1,4 @@
-// File src/common/utils/index.ts
+// File src/common/utils/index.js
 
 import { CommonUtilsFnMasterInterface } from '../../index/index.js';
 import { color } from './color.js';

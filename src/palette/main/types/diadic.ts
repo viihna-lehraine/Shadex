@@ -1,9 +1,9 @@
-// File: src/palette/main/types/diadic.ts
+// File: src/palette/main/types/diadic.js
 
 import { GenPaletteArgs, HSL, Palette } from '../../../index/index.js';
+import { IDBManager } from '../../../idb/index.js';
 import { core, utils } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
-import { IDBManager } from '../../../idb/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
 
 const consts = data.consts;

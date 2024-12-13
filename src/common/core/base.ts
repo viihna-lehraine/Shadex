@@ -1,4 +1,4 @@
-// File: src/common/core/base.ts
+// File: src/common/core/base.js
 
 import {
 	AlphaRange,
@@ -153,10 +153,13 @@ function asHexComponent(value: string): HexComponent {
 }
 
 function asHexSet(value: string): HexSet {
+	if (/^#[0-9a-fA-F]{8}$/.test(value)) {
+		value = value.slice(0, 7);
+	}
 	if (!validate.hexSet(value)) {
 		throw new Error(`Invalid HexSet value: ${value}`);
 	}
-	return value as unknown as HexSet;
+	return value as HexSet;
 }
 
 function asLAB_L(value: number): LAB_L {
@@ -761,11 +764,11 @@ function hex(value: string, pattern: RegExp): boolean {
 }
 
 function hexComponent(value: string): boolean {
-	return hex(value, /^#[A-Fa-f0-9]{2}$/);
+	return hex(value, /^[A-Fa-f0-9]{2}$/);
 }
 
 function hexSet(value: string): boolean {
-	return hex(value, /^#[A-Fa-f0-9]{7}$/);
+	return /^#[0-9a-fA-F]{6}$/.test(value);
 }
 
 function range<T extends keyof typeof _sets>(
@@ -792,3 +795,5 @@ export const validate: CommonCoreFnValidate = {
 	hexSet,
 	range
 };
+
+export { clone };

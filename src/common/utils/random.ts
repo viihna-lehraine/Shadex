@@ -1,4 +1,4 @@
-// File: src/common/utils/random.ts
+// File: src/common/utils/random.js
 
 import { CommonUtilsFnRandom, HSL, SL } from '../../index/index.js';
 import { core } from '../core/index.js';

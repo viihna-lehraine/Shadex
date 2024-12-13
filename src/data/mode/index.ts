@@ -1,4 +1,4 @@
-// File: src/data/mode/index.ts
+// File: src/data/mode/index.js
 
 import { ModeData } from '../../index/index.js';
 import { base } from './base.js';

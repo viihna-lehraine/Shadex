@@ -1,4 +1,4 @@
-// File: src/data/index.ts
+// File: src/data/index.js
 
 import { DataInterface } from '../index/index.js';
 import { consts } from './consts/index.js';

@@ -1,8 +1,7 @@
-// File: src/palette/index.ts
+// File: src/palette/index.js
 
 import { PaletteFnMasterInterface } from '../index/index.js';
-import { generate } from './generate.js';
-import { start } from './start.js';
+import { generate, start } from './main.js';
 
 export { generate, start };
 

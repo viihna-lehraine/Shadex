@@ -1,4 +1,4 @@
-// File: src/index/colors.ts
+// File: src/index/colors.js
 
 import {
 	CMYKValueUnbranded,
@@ -126,4 +126,14 @@ export interface PaletteItemUnbranded {
 		rgbCSSString: string;
 		xyzCSSString: string;
 	};
+}
+
+export interface PaletteOptions {
+	numBoxes: number;
+	customColor: HSL | null;
+	paletteType: number;
+	enableAlpha: boolean;
+	limitDarkness: boolean;
+	limitGrayness: boolean;
+	limitLightness: boolean;
 }

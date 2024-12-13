@@ -1,4 +1,4 @@
-// File: src/paletteGen/palettes/types/random.ts
+// File: src/paletteGen/palettes/types/random.js
 
 import { GenPaletteArgs, Palette, PaletteItem } from '../../../index/index.js';
 import { IDBManager } from '../../../idb/index.js';

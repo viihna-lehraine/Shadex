@@ -1,4 +1,4 @@
-// File: src/palette/main/types/analogous.ts
+// File: src/palette/main/types/analogous.js
 
 import {
 	GenPaletteArgs,

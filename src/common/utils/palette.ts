@@ -1,4 +1,4 @@
-// File: src/common/utils/palette.ts
+// File: src/common/utils/palette.js
 
 import {
 	Color,

@@ -1,4 +1,4 @@
-// File: src/common/superUtils/index.ts
+// File: src/common/superUtils/index.js
 
 import { CommonSuperUtilsFnMasterInterface } from '../../index/index.js';
 import { dom } from './dom.js';

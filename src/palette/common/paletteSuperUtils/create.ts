@@ -1,4 +1,4 @@
-// File: src/palette/common/paletteSuperUtils/create.ts
+// File: src/palette/common/paletteSuperUtils/create.js
 
 import {
 	CMYK,
@@ -19,15 +19,14 @@ import {
 	XYZ,
 	XYZString
 } from '../../../index/index.js';
-import { core, utils } from '../../../common/index.js';
+import { convert, core, utils } from '../../../common/index.js';
 import { IDBManager } from '../../../idb/index.js';
 import { paletteHelpers } from '../paletteHelpers/index.js';
-import { paletteUtils } from '../paletteUtils/index.js';
 
 const limits = paletteHelpers.limits;
 const update = paletteHelpers.update;
 
-const hslTo = paletteUtils.convert.hslTo;
+const hslTo = convert.hslTo;
 
 const idb = IDBManager.getInstance();
 

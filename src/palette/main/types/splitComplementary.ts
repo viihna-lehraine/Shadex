@@ -1,4 +1,4 @@
-// File: src/palette/main/types/splitComplementary.ts
+// File: src/palette/main/types/splitComplementary.js
 
 import {
 	GenPaletteArgs,

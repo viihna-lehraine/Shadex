@@ -1,15 +1,15 @@
-// File: src/index/idb.ts
+// File: src/index/idb.js
 
 import { IDBPDatabase } from 'idb';
 import { ColorSpace, HSL, Palette, PaletteUnbranded } from './index.js';
 
 export interface MutationLog {
-	timestamp: string; // ISO timestamp of when the mutation occurred
-	key: string; // ID or ke of mutated item
-	action: 'add' | 'delete' | 'update'; // what occurred
-	newValue: unknown; // new value of mutated item
-	oldValue: unknown; // previous value of mutated item
-	origin: string; // source of the mutation
+	timestamp: string;
+	key: string;
+	action: 'add' | 'delete' | 'update';
+	newValue: unknown;
+	oldValue: unknown;
+	origin: string;
 }
 
 export type PaletteDB = IDBPDatabase<PaletteSchema>;

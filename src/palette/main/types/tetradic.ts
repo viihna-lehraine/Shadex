@@ -1,4 +1,4 @@
-// File: src/palette/main/types/tetradic.ts
+// File: src/palette/main/types/tetradic.js
 
 import {
 	GenPaletteArgs,

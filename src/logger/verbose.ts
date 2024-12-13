@@ -1,9 +1,9 @@
-// File: src/logger/verbose.ts
+// File: src/logger/verbose.js
 
 import { LoggerFnVerboseInterface } from '../index/index.js';
 import { data } from '../data/index.js';
 
-const elements = data.consts.dom;
+const elements = data.consts.dom.elements;
 
 function validateDOMElements(): void {
 	const elementsToCheck = {

@@ -1,4 +1,4 @@
-// File: src/palette/main/types/triadic.ts
+// File: src/palette/main/types/triadic.js
 
 import {
 	GenPaletteArgs,

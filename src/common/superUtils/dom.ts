@@ -1,69 +1,34 @@
-// File: src/common/superUtils/dom.ts
+// File: src/common/superUtils/dom.js
 
 import {
 	ColorInputElement,
 	ColorSpace,
 	CommonSuperUtilsDOM,
 	GenButtonArgs,
-	HSL,
-	PaletteItem
+	HSL
 } from '../../index/index.js';
-import { IDBManager } from '../../idb/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
 import { helpers } from '../helpers/index.js';
 import { utils } from '../utils/index.js';
 
 const mode = data.mode;
-const idb = IDBManager.getInstance();
-
-async function genPaletteBox(
-	items: PaletteItem[],
-	numBoxes: number,
-	tableId: string
-): Promise<void> {
-	try {
-		const paletteRow = document.getElementById('palette-row');
-
-		if (!paletteRow) {
-			if (mode.errorLogs) console.error('paletteRow is undefined.');
-
-			return;
-		}
-
-		paletteRow.innerHTML = '';
-
-		const fragment = document.createDocumentFragment();
-
-		items.slice(0, numBoxes).forEach((item, i) => {
-			const color: HSL = { value: item.colors.hsl, format: 'hsl' };
-			const { colorStripe } = helpers.dom.makePaletteBox(color, i + 1);
-
-			fragment.appendChild(colorStripe);
-
-			utils.palette.populateOutputBox(color, i + 1);
-		});
-
-		paletteRow.appendChild(fragment);
-
-		if (!mode.quiet) console.log('Palette boxes generated and rendered.');
-
-		await idb.saveData('tables', tableId, { palette: items });
-	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error generating palette box: ${error}`);
-	}
-}
 
 function getGenButtonArgs(): GenButtonArgs | null {
 	try {
-		const paletteNumberOptions = data.consts.dom.paletteNumberOptions;
-		const paletteTypeOptions = data.consts.dom.paletteTypeOptions;
-		const customColorRaw = data.consts.dom.customColorElement?.value;
-		const enableAlphaCheckbox = data.consts.dom.enableAlphaCheckbox;
-		const limitDarknessCheckbox = data.consts.dom.limitDarknessCheckbox;
-		const limitGraynessCheckbox = data.consts.dom.limitGraynessCheckbox;
-		const limitLightnessCheckbox = data.consts.dom.limitLightnessCheckbox;
+		const paletteNumberOptions =
+			data.consts.dom.elements.paletteNumberOptions;
+		const paletteTypeOptions = data.consts.dom.elements.paletteTypeOptions;
+		const customColorRaw =
+			data.consts.dom.elements.customColorElement?.value;
+		const enableAlphaCheckbox =
+			data.consts.dom.elements.enableAlphaCheckbox;
+		const limitDarknessCheckbox =
+			data.consts.dom.elements.limitDarknessCheckbox;
+		const limitGraynessCheckbox =
+			data.consts.dom.elements.limitGraynessCheckbox;
+		const limitLightnessCheckbox =
+			data.consts.dom.elements.limitLightnessCheckbox;
 
 		if (
 			paletteNumberOptions === null ||
@@ -216,7 +181,6 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 }
 
 export const dom: CommonSuperUtilsDOM = {
-	genPaletteBox,
 	getGenButtonArgs,
 	switchColorSpace
 } as const;

@@ -1,4 +1,4 @@
-// File: src/data/idb/base.ts
+// File: src/data/idb/base.js
 
 import {
 	IDBData,

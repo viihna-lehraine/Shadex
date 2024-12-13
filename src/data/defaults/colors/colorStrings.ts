@@ -1,4 +1,4 @@
-// File: src/data/defaults/colors/colorStrings.ts
+// File: src/data/defaults/colors/colorStrings.js
 
 import {
 	CMYKString,

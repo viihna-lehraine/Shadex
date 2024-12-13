@@ -1,4 +1,4 @@
-// File: src/data/defaults/colors/index.ts
+// File: src/data/defaults/colors/index.js
 
 import { DefaultColorsData } from '../../../index/index.js';
 import { colors as base } from './colors.js';

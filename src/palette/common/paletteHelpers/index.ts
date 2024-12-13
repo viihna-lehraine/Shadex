@@ -1,4 +1,4 @@
-// File: src/palette/common/paletteHelpers/index.ts
+// File: src/palette/common/paletteHelpers/index.js
 
 import { PaletteCommon_Helpers } from '../../../index/index.js';
 import { limits } from './limits.js';

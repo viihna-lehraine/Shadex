@@ -1,4 +1,4 @@
-// File: src/index/app/logger.ts
+// File: src/index/app/logger.js
 
 export interface LoggerFnDebugInterface {
 	validateDOMElements: () => void;

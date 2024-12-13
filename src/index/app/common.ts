@@ -1,4 +1,4 @@
-// File: src/index/app/common.ts
+// File: src/index/app/common.js
 
 import {
 	AlphaRange,
@@ -165,8 +165,8 @@ export interface CommonDOMFnMasterInterface extends CommonDOMBase {}
 export interface CommonHelpersConversion {
 	applyGammaCorrection(value: number): number;
 	clampRGB(rgb: RGB): RGB;
-	hueToRGB(p: number, q: number, t: number): number;
 	hslAddFormat(value: HSLValue): HSL;
+	hueToRGB(p: number, q: number, t: number): number;
 }
 
 export interface CommonHelpersDOM_Handle {
@@ -193,11 +193,6 @@ export interface CommonHelpersFnMasterInterface {
 // ******** SuperUtils ********
 
 export interface CommonSuperUtilsDOM {
-	genPaletteBox(
-		items: PaletteItem[],
-		numBoxes: number,
-		tableId: string
-	): Promise<void>;
 	getGenButtonArgs(): GenButtonArgs | null;
 	switchColorSpace(targetFormat: ColorSpace): void;
 }
@@ -206,9 +201,32 @@ export interface CommonSuperUtilsFnMasterInterface {
 	dom: CommonSuperUtilsDOM;
 }
 
-// ******** UTILS ********
+// ******** Transform ********
+
+export interface CommonTransformFnBase {
+	addHashToHex(hex: Hex): Hex;
+	componentToHex(component: number): string;
+	brandPalette(data: PaletteUnbranded): Palette;
+	defaultColorValue(color: ColorUnbranded): Color;
+}
+
+export interface CommonTransformFnMasterInterface
+	extends CommonTransformFnBase {}
+
+// ******** Convert ********
+
+export interface CommonConvertFnBase {
+	hslTo(color: HSL, colorSpace: ColorSpaceExtended): Color;
+	toHSL(color: Exclude<Color, SL | SV>): HSL;
+	wrappers: {
+		hexToHSL(input: string | Hex): HSL;
+	};
+}
+
+// ******** Utils ********
 
 export interface CommonUtilsFnColor {
+	colorToColorString(color: Color): ColorString;
 	isColorFormat<T extends Color>(
 		color: Color,
 		format: T['format']
@@ -247,14 +265,6 @@ export interface CommonUtilsFnColor {
 	isInputElement(element: HTMLElement | null): element is HTMLElement;
 	isStoredPalette(obj: unknown): obj is StoredPalette;
 	narrowToColor(color: Color | ColorString): Color | null;
-	addHashToHex(hex: Hex): Hex;
-	colorToColorString(color: Color): ColorString;
-	componentToHex(component: number): string;
-	formatColor(
-		color: Color,
-		asColorString: boolean,
-		asCSSString: boolean
-	): { baseColor: Color; formattedString?: ColorString | string };
 	formatPercentageValues<T extends Record<string, unknown>>(value: T): T;
 	getAlphaFromHex(hex: string): number;
 	getColorString(color: Color): string | null;
@@ -308,16 +318,6 @@ export interface CommonUtilsFnMasterInterface {
 	palette: CommonUtilsFnPalette;
 	random: CommonUtilsFnRandom;
 }
-
-// ******** Transform ********
-
-export interface CommonTransformFnBase {
-	brandPalette(data: PaletteUnbranded): Palette;
-	defaultColorValue(color: ColorUnbranded): Color;
-}
-
-export interface CommonTransformFnMasterInterface
-	extends CommonTransformFnBase {}
 
 // ******** Final Bundle ********
 

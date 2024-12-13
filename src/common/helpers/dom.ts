@@ -1,4 +1,4 @@
-// File: src/common/helpers/dom.ts
+// File: src/common/helpers/dom.js
 
 import {
 	Color,

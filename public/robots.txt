@@ -1,3 +1,5 @@
+# File: public/robots.txt
+
 # Block all bots from accessing site during development
 User-agent: *
 Disallow: /
@@ -6,6 +8,6 @@ Disallow: /
 User-agent: *
 Disallow: /public/assets/
 
-# Explicitly allow all bots to access these directories 
+# Explicitly allow all bots to access these directories
 # User-agent: *
 # Allow: /[???]

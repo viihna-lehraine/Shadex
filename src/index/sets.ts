@@ -1,4 +1,4 @@
-// File: src/index/sets.ts
+// File: src/index/sets.js
 
 import { data } from '../data/index.js';
 

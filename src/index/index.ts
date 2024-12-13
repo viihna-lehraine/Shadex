@@ -1,7 +1,8 @@
-// File: src/index/index.ts
+// File: src/index/index.js
 
 export type {
 	AdjustmentsData,
+	CommonConvertFnBase,
 	CommonCoreFnBase,
 	CommonCoreFnBrand,
 	CommonCoreFnBrandColor,
@@ -31,13 +32,16 @@ export type {
 	DefaultBaseColorsData,
 	DefaultColorsData,
 	DefaultColorStringsData,
+	Defaults,
 	DOMBaseFnInterface,
 	DOMButtonsFnInterface,
 	DOMExportPaletteFnInterface,
 	DOMFnMasterInterface,
 	DOMHistoryFnInterface,
-	Defaults,
 	DOMData,
+	DOMElementData,
+	DOMFilesData,
+	DOM_ID_Data,
 	GenPaletteArgs,
 	GenPaletteFnInterface,
 	IDBData,
@@ -58,7 +62,6 @@ export type {
 	PaletteCommon_SuperUtils,
 	PaletteCommon_Utils,
 	PaletteCommon_Utils_Adjust,
-	PaletteCommon_Utils_Convert,
 	PaletteCommon_Utils_Probability,
 	PaletteDefaultsData,
 	PaletteFnMasterInterface,
@@ -113,7 +116,6 @@ export type {
 	LABValue,
 	LABValueUnbranded,
 	LABValueString,
-	PaletteOptions,
 	RGB,
 	RGBUnbranded,
 	RGBString,
@@ -138,7 +140,7 @@ export type {
 	XYZValue,
 	XYZValueUnbranded,
 	XYZValueString
-} from './colors.js';
+} from './colors/index.js';
 export type {
 	ColorInputElement,
 	GenButtonArgs,
@@ -176,5 +178,6 @@ export type {
 	Palette,
 	PaletteItem,
 	PaletteItemUnbranded,
+	PaletteOptions,
 	PaletteUnbranded
 } from './palette.js';

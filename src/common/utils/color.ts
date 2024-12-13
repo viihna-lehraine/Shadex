@@ -1,8 +1,9 @@
-// File: src/common/utils/color.ts
+// File: src/common/utils/color.js
 
 import {
 	CMYK,
 	CMYKString,
+	CMYKValue,
 	CMYKValueString,
 	Color,
 	ColorSpace,
@@ -13,13 +14,17 @@ import {
 	Hex,
 	HexString,
 	HexValue,
+	HexValueString,
 	HSL,
 	HSLString,
+	HSLValue,
 	HSLValueString,
 	HSV,
 	HSVString,
+	HSVValue,
 	HSVValueString,
 	LAB,
+	LABValue,
 	LABValueString,
 	RGB,
 	RGBValue,
@@ -30,6 +35,7 @@ import {
 	SV,
 	SVString,
 	XYZ,
+	XYZValue,
 	XYZValueString
 } from '../../index/index.js';
 import { core } from '../core/index.js';
@@ -370,29 +376,9 @@ function narrowToColor(color: Color | ColorString): Color | null {
 
 // ******** SECTION 4: TRANSFORM UTILS ********
 
-function addHashToHex(hex: Hex): Hex {
-	try {
-		return hex.value.hex.startsWith('#')
-			? hex
-			: {
-					value: {
-						hex: core.brand.asHexSet(`#${hex.value}}`),
-						alpha: core.brand.asHexComponent(`#$hex.value.alpha`),
-						numAlpha: core.brand.asAlphaRange(hex.value.numAlpha)
-					},
-					format: 'hex' as 'hex'
-				};
-	} catch (error) {
-		if (mode.errorLogs) console.error(`addHashToHex error: ${error}`);
-
-		return core.brandColor.asHex(data.defaults.colors.hex);
-	}
-}
-
 function colorToColorString(color: Color): ColorString {
 	const clonedColor = core.base.clone(color);
 
-	// Check if the color is already a string-based color
 	if (isColorString(clonedColor)) {
 		if (mode.errorLogs) {
 			console.log(
@@ -402,52 +388,91 @@ function colorToColorString(color: Color): ColorString {
 		return clonedColor;
 	}
 
-	const newValue = formatPercentageValues(clonedColor.value);
-
 	if (isCMYKColor(clonedColor)) {
+		const newValue = formatPercentageValues(clonedColor.value) as CMYKValue;
+
 		return {
 			format: 'cmyk',
-			value: newValue as CMYKValueString
+			value: {
+				cyan: `${newValue.cyan}%`,
+				magenta: `${newValue.magenta}%`,
+				yellow: `${newValue.yellow}%`,
+				key: `${newValue.key}%`,
+				alpha: `${newValue.alpha}`
+			} as CMYKValueString
 		};
 	} else if (isHex(clonedColor)) {
-		// Handle Hex colors properly
+		const newValue = formatPercentageValues(clonedColor.value) as HexValue;
+
 		return {
 			format: 'hex',
 			value: {
-				hex: core.brand.asHexSet(newValue.hex as string), // Brand the hex value
-				alpha: core.brand.asHexComponent(newValue.alpha as string), // Brand the alpha component
-				numAlpha: String(
-					core.brand.asAlphaRange(newValue.numAlpha as number)
-				) // Convert branded value to string
-			}
+				hex: `${newValue.hex}`,
+				alpha: `${newValue.alpha}`,
+				numAlpha: `${newValue.numAlpha}`
+			} as HexValueString
 		};
 	} else if (isHSLColor(clonedColor)) {
+		const newValue = formatPercentageValues(clonedColor.value) as HSLValue;
+
 		return {
 			format: 'hsl',
-			value: newValue as HSLValueString
+			value: {
+				hue: `${newValue.hue}`,
+				saturation: `${newValue.saturation}%`,
+				lightness: `${newValue.lightness}%`,
+				alpha: `${newValue.alpha}`
+			} as HSLValueString
 		};
 	} else if (isHSVColor(clonedColor)) {
+		const newValue = formatPercentageValues(clonedColor.value) as HSVValue;
+
 		return {
 			format: 'hsv',
-			value: newValue as HSVValueString
+			value: {
+				hue: `${newValue.hue}`,
+				saturation: `${newValue.saturation}%`,
+				value: `${newValue.value}%`,
+				alpha: `${newValue.alpha}`
+			} as HSVValueString
 		};
 	} else if (isLAB(clonedColor)) {
+		const newValue = formatPercentageValues(clonedColor.value) as LABValue;
+
 		return {
 			format: 'lab',
-			value: newValue as LABValueString
+			value: {
+				l: `${newValue.l}`,
+				a: `${newValue.a}`,
+				b: `${newValue.b}`,
+				alpha: `${newValue.alpha}`
+			} as LABValueString
 		};
 	} else if (isRGB(clonedColor)) {
+		const newValue = formatPercentageValues(clonedColor.value) as RGBValue;
+
 		return {
 			format: 'rgb',
-			value: newValue as RGBValueString
+			value: {
+				red: `${newValue.red}`,
+				green: `${newValue.green}`,
+				blue: `${newValue.blue}`,
+				alpha: `${newValue.alpha}`
+			} as RGBValueString
 		};
 	} else if (isXYZ(clonedColor)) {
+		const newValue = formatPercentageValues(clonedColor.value) as XYZValue;
+
 		return {
 			format: 'xyz',
-			value: newValue as XYZValueString
+			value: {
+				x: `${newValue.x}`,
+				y: `${newValue.y}`,
+				z: `${newValue.z}`,
+				alpha: `${newValue.alpha}`
+			} as XYZValueString
 		};
 	} else {
-		// Handle unsupported formats
 		if (!mode.gracefulErrors) {
 			throw new Error(`Unsupported format: ${clonedColor.format}`);
 		} else if (mode.errorLogs) {
@@ -456,43 +481,8 @@ function colorToColorString(color: Color): ColorString {
 			console.warn('Failed to convert to color string.');
 		}
 
-		// Return a default HSL color string in case of errors
 		return data.defaults.colorStrings.hsl;
 	}
-}
-
-function componentToHex(component: number): string {
-	try {
-		const hex = Math.max(0, Math.min(255, component)).toString(16);
-
-		return hex.length === 1 ? '0' + hex : hex;
-	} catch (error) {
-		if (!mode.quiet) console.error(`componentToHex error: ${error}`);
-
-		return '00';
-	}
-}
-
-function formatColor(
-	color: Color,
-	asColorString: boolean = false,
-	asCSSString: boolean = false
-): { baseColor: Color; formattedString?: ColorString | string } {
-	const baseColor = core.base.clone(color);
-
-	let formattedString: ColorString | string | undefined = undefined;
-
-	if (asColorString) {
-		formattedString = colorToColorString(
-			color as Exclude<Color, Hex | LAB | RGB>
-		) as ColorString;
-	} else if (asCSSString) {
-		formattedString = core.convert.toCSSColorString(color) as string;
-	}
-
-	return formattedString !== undefined
-		? { baseColor, formattedString }
-		: { baseColor };
 }
 
 function formatPercentageValues<T extends Record<string, unknown>>(
@@ -793,11 +783,8 @@ function toHexWithAlpha(rgbValue: RGBValue): string {
 }
 
 export const color: CommonUtilsFnColor = {
-	addHashToHex,
 	colorToColorString,
-	componentToHex,
 	ensureHash,
-	formatColor,
 	formatPercentageValues,
 	getAlphaFromHex,
 	getColorString,
@@ -841,3 +828,5 @@ export const color: CommonUtilsFnColor = {
 	stripPercentFromValues,
 	toHexWithAlpha
 } as const;
+
+export { hexAlphaToNumericAlpha, stripHashFromHex };

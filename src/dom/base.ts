@@ -1,4 +1,4 @@
-// File: src/dom/base.ts
+// File: src/dom/base.js
 
 import {
 	Color,
@@ -11,9 +11,9 @@ import {
 	SV,
 	UIElements
 } from '../index/index.js';
+import { convert } from '../common/convert/index.js';
 import { core, helpers, utils, superUtils } from '../common/index.js';
 import { data } from '../data/index.js';
-import { paletteUtils } from '../palette/common/index.js';
 
 const mode = data.mode;
 
@@ -84,7 +84,7 @@ function applyCustomColor(): HSL {
 
 		const hslColor = utils.color.isHSLColor(parsedColor)
 			? parsedColor
-			: paletteUtils.convert.toHSL(parsedColor);
+			: convert.toHSL(parsedColor);
 
 		return hslColor;
 	} catch (error) {
@@ -158,29 +158,39 @@ function copyToClipboard(text: string, tooltipElement: HTMLElement): void {
 
 function defineUIElements(): UIElements {
 	try {
-		const advancedMenuButton = data.consts.dom.advancedMenuButton;
-		const applyCustomColorButton = data.consts.dom.applyCustomColorButton;
-		const clearCustomColorButton = data.consts.dom.clearCustomColorButton;
+		const advancedMenuButton = data.consts.dom.elements.advancedMenuButton;
+		const applyCustomColorButton =
+			data.consts.dom.elements.applyCustomColorButton;
+		const clearCustomColorButton =
+			data.consts.dom.elements.clearCustomColorButton;
 		const closeCustomColorMenuButton =
-			data.consts.dom.closeCustomColorMenuButton;
-		const closeHelpMenuButton = data.consts.dom.closeHelpMenuButton;
-		const closeHistoryMenuButton = data.consts.dom.closeHistoryMenuButton;
-		const desaturateButton = data.consts.dom.desaturateButton;
-		const enableAlphaCheckbox = data.consts.dom.enableAlphaCheckbox;
-		const generateButton = data.consts.dom.generateButton;
-		const helpMenuButton = data.consts.dom.helpMenuButton;
-		const historyMenuButton = data.consts.dom.historyMenuButton;
-		const limitDarknessCheckbox = data.consts.dom.limitDarknessCheckbox;
-		const limitGraynessCheckbox = data.consts.dom.limitGraynessCheckbox;
-		const limitLightnessCheckbox = data.consts.dom.limitLightnessCheckbox;
-		const saturateButton = data.consts.dom.saturateButton;
-		const selectedColorOption = data.consts.dom.selectedColorOption;
-		const showAsCMYKButton = data.consts.dom.showAsCMYKButton;
-		const showAsHexButton = data.consts.dom.showAsHexButton;
-		const showAsHSLButton = data.consts.dom.showAsHSLButton;
-		const showAsHSVButton = data.consts.dom.showAsHSVButton;
-		const showAsLABButton = data.consts.dom.showAsLABButton;
-		const showAsRGBButton = data.consts.dom.showAsRGBButton;
+			data.consts.dom.elements.closeCustomColorMenuButton;
+		const closeHelpMenuButton =
+			data.consts.dom.elements.closeHelpMenuButton;
+		const closeHistoryMenuButton =
+			data.consts.dom.elements.closeHistoryMenuButton;
+		const desaturateButton = data.consts.dom.elements.desaturateButton;
+		const enableAlphaCheckbox =
+			data.consts.dom.elements.enableAlphaCheckbox;
+		const generateButton = data.consts.dom.elements.generateButton;
+		const helpMenuButton = data.consts.dom.elements.helpMenuButton;
+		const historyMenuButton = data.consts.dom.elements.historyMenuButton;
+		const limitDarknessCheckbox =
+			data.consts.dom.elements.limitDarknessCheckbox;
+		const limitGraynessCheckbox =
+			data.consts.dom.elements.limitGraynessCheckbox;
+		const limitLightnessCheckbox =
+			data.consts.dom.elements.limitLightnessCheckbox;
+		const saturateButton = data.consts.dom.elements.saturateButton;
+		const selectedColorOption =
+			data.consts.dom.elements.selectedColorOption;
+		const showAsCMYKButton = data.consts.dom.elements.showAsCMYKButton;
+		const showAsHexButton = data.consts.dom.elements.showAsHexButton;
+		const showAsHSLButton = data.consts.dom.elements.showAsHSLButton;
+		const showAsHSVButton = data.consts.dom.elements.showAsHSVButton;
+		const showAsLABButton = data.consts.dom.elements.showAsLABButton;
+		const showAsRGBButton = data.consts.dom.elements.showAsRGBButton;
+
 		const selectedColor = selectedColorOption
 			? parseInt(selectedColorOption.value, 10)
 			: 0;
@@ -281,14 +291,66 @@ function getElementsForSelectedColor(
 	};
 }
 
+async function initializeUI(): Promise<void> {
+	console.log('Initializing UI with dynamically loaded elements');
+	const buttons = defineUIElements();
+
+	if (!buttons) {
+		console.error('Failed to initialize UI buttons');
+		return;
+	}
+
+	buttons.applyCustomColorButton?.addEventListener('click', async e => {
+		e.preventDefault();
+		console.log('applyCustomColorButton clicked');
+		// *DEV-NOTE* add logic here...
+	});
+}
+
+const loadPartials = async (): Promise<void> => {
+	const files = [
+		'./html/advanced-menu.html',
+		'./html/custom-color-menu.html',
+		'./html/help-menu.html',
+		'./html/history-menu.html'
+	];
+
+	try {
+		await Promise.all(
+			files.map(file =>
+				fetch(file)
+					.then(response => {
+						if (!response.ok) {
+							throw new Error(
+								`Failed to load ${file}: ${response.statusText}`
+							);
+						}
+						return response.text();
+					})
+					.then(html => {
+						document.body.insertAdjacentHTML('beforeend', html);
+					})
+			)
+		);
+		if (!mode.quiet) console.log('HTML partials successfully loaded.');
+	} catch (error) {
+		console.error(`Error loading partials: ${error}`);
+	}
+};
+
 function pullParamsFromUI(): PullParamsFromUI {
 	try {
-		const paletteTypeOptionsElement = data.consts.dom.paletteTypeOptions;
-		const numBoxesElement = data.consts.dom.paletteNumberOptions;
-		const enableAlphaCheckbox = data.consts.dom.enableAlphaCheckbox;
-		const limitDarknessCheckbox = data.consts.dom.limitDarknessCheckbox;
-		const limitGraynessCheckbox = data.consts.dom.limitGraynessCheckbox;
-		const limitLightnessCheckbox = data.consts.dom.limitLightnessCheckbox;
+		const paletteTypeOptionsElement =
+			data.consts.dom.elements.paletteTypeOptions;
+		const numBoxesElement = data.consts.dom.elements.paletteNumberOptions;
+		const enableAlphaCheckbox =
+			data.consts.dom.elements.enableAlphaCheckbox;
+		const limitDarknessCheckbox =
+			data.consts.dom.elements.limitDarknessCheckbox;
+		const limitGraynessCheckbox =
+			data.consts.dom.elements.limitGraynessCheckbox;
+		const limitLightnessCheckbox =
+			data.consts.dom.elements.limitLightnessCheckbox;
 
 		return {
 			paletteType: paletteTypeOptionsElement
@@ -350,6 +412,8 @@ export const base: DOMBaseFnInterface = {
 	defineUIElements,
 	desaturateColor,
 	getElementsForSelectedColor,
+	initializeUI,
+	loadPartials,
 	pullParamsFromUI,
 	saturateColor,
 	showCustomColorPopupDiv

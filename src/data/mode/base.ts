@@ -1,4 +1,4 @@
-// File: src/data/mode/base.ts
+// File: src/data/mode/base.js
 
 import { ModeData } from '../../index/index.js';
 
@@ -8,6 +8,6 @@ export const base: ModeData = {
 	gracefulErrors: false,
 	infoLogs: true,
 	quiet: false,
-	verbose: true,
+	verbose: false,
 	warnLogs: true
 } as const;

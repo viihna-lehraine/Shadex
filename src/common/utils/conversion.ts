@@ -1,4 +1,4 @@
-// File: src/common/utils/conversion.ts
+// File: src/common/utils/conversion.js
 
 import {
 	CMYK,
@@ -14,11 +14,10 @@ import {
 	SV,
 	XYZ
 } from '../../index/index.js';
+import { convert } from '../convert/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
-import { paletteUtils } from '../../palette/common/index.js';
 
-const convert = paletteUtils.convert;
 const mode = data.mode;
 
 function getConversionFn<

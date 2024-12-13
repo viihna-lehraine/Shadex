@@ -1,13 +1,32 @@
-// File: src/common/transform/base.ts
+// File: src/common/transform/base.js
 
 import {
 	Color,
 	ColorUnbranded,
 	CommonTransformFnBase,
+	Hex,
 	Palette,
 	PaletteUnbranded
 } from '../../index/index.js';
 import { brand } from '../core/base.js';
+import { mode } from '../../data/mode/index.js';
+
+function addHashToHex(hex: Hex): Hex {
+	try {
+		return hex.value.hex.startsWith('#')
+			? hex
+			: {
+					value: {
+						hex: brand.asHexSet(`#${hex.value}}`),
+						alpha: brand.asHexComponent(`#$hex.value.alpha`),
+						numAlpha: brand.asAlphaRange(hex.value.numAlpha)
+					},
+					format: 'hex' as 'hex'
+				};
+	} catch (error) {
+		throw new Error(`addHashToHex error: ${error}`);
+	}
+}
 
 function brandPalette(data: PaletteUnbranded): Palette {
 	return {
@@ -176,6 +195,18 @@ function brandPalette(data: PaletteUnbranded): Palette {
 	};
 }
 
+function componentToHex(component: number): string {
+	try {
+		const hex = Math.max(0, Math.min(255, component)).toString(16);
+
+		return hex.length === 1 ? '0' + hex : hex;
+	} catch (error) {
+		if (!mode.quiet) console.error(`componentToHex error: ${error}`);
+
+		return '00';
+	}
+}
+
 function defaultColorValue(color: ColorUnbranded): Color {
 	switch (color.format) {
 		case 'cmyk':
@@ -273,6 +304,10 @@ function defaultColorValue(color: ColorUnbranded): Color {
 }
 
 export const base: CommonTransformFnBase = {
+	addHashToHex,
+	componentToHex,
 	brandPalette,
 	defaultColorValue
 };
+
+export { componentToHex };

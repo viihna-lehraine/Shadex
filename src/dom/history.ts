@@ -1,4 +1,4 @@
-// File: src/dom/history.ts
+// File: src/dom/history.js
 
 import { ColorSpace, DOMHistoryFnInterface, Palette } from '../index/index.js';
 

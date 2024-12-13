@@ -1,4 +1,4 @@
-// File: src/idb/IDBManager.ts
+// File: src/idb/IDBManager.js
 
 import { IDBPDatabase, IDBPObjectStore, openDB } from 'idb';
 import {

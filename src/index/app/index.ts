@@ -1,6 +1,7 @@
-// File: src/index/app/index.ts
+// File: src/index/app/index.js
 
 export type {
+	CommonConvertFnBase,
 	CommonCoreFnBase,
 	CommonCoreFnBrand,
 	CommonCoreFnBrandColor,
@@ -35,6 +36,9 @@ export type {
 	Defaults,
 	ConstsData,
 	DOMData,
+	DOMElementData,
+	DOMFilesData,
+	DOM_ID_Data,
 	IDBData,
 	IDB_DEFAULT_KEYS_Data,
 	IDBDefaultsData,
@@ -72,7 +76,6 @@ export type {
 	PaletteCommon_SuperUtils_GenHues,
 	PaletteCommon_Utils,
 	PaletteCommon_Utils_Adjust,
-	PaletteCommon_Utils_Convert,
 	PaletteCommon_Utils_Probability,
 	PaletteFnMasterInterface,
 	PaletteGenerateFnInterface,

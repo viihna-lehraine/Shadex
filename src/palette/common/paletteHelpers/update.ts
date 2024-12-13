@@ -1,4 +1,4 @@
-// File: src/palette/common/paletteHelpers/update.ts
+// File: src/palette/common/paletteHelpers/update.js
 
 import {
 	Color,

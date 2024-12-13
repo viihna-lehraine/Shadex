@@ -1,4 +1,4 @@
-// File: src/common/dom/index.ts
+// File: src/common/dom/index.js
 
 import { CommonDOMFnMasterInterface } from '../../index/index.js';
 import { base } from './base.js';

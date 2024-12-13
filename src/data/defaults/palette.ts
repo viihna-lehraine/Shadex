@@ -1,4 +1,4 @@
-// File: src/data/defaults/palette.ts
+// File: src/data/defaults/palette.js
 
 import {
 	PaletteDefaultsData,

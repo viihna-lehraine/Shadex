@@ -1,4 +1,4 @@
-// File: src/data/defaults/index.ts
+// File: src/data/defaults/index.js
 
 import {
 	DefaultBaseColorsData,

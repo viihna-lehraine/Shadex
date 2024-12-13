@@ -1,4 +1,4 @@
-// File: src/data/consts/base.ts
+// File: src/data/consts/base.js
 
 import {
 	AdjustmentsData,

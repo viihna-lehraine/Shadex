@@ -1,4 +1,4 @@
-// File: src/index/colors.ts
+// File: src/index/colors.js
 
 import { Color, HSL } from './index.js';
 

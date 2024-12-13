@@ -1,16 +1,18 @@
-// File: src/palette/common/index.ts
+// File: src/palette/common/index.js
 
 import { PaletteCommon } from '../../index/index.js';
 import { paletteHelpers } from './paletteHelpers/index.js';
 import { paletteSuperUtils } from './paletteSuperUtils/index.js';
 import { paletteUtils } from './paletteUtils/index.js';
 
-export { paletteHelpers };
-export { paletteSuperUtils };
-export { paletteUtils };
+export { paletteHelpers, paletteSuperUtils, paletteUtils };
+
+const helpers = paletteHelpers;
+const superUtils = paletteSuperUtils;
+const utils = paletteUtils;
 
 export const paletteCommon: PaletteCommon = {
-	helpers: paletteHelpers,
-	superUtils: paletteSuperUtils,
-	utils: paletteUtils
+	helpers,
+	superUtils,
+	utils
 } as const;
