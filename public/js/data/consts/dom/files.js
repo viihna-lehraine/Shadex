@@ -1,8 +1,0 @@
-// File: src/data/consts/dom/partialFiles.ts
-export const files = [
-    './html/advanced-menu.html',
-    './html/custom-color-menu.html',
-    './html/help-menu.html',
-    './html/history-menu.html'
-];
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmlsZXMuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi9zcmMvZGF0YS9jb25zdHMvZG9tL2ZpbGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLDRDQUE0QztBQUk1QyxNQUFNLENBQUMsTUFBTSxLQUFLLEdBQWlCO0lBQ2xDLDJCQUEyQjtJQUMzQiwrQkFBK0I7SUFDL0IsdUJBQXVCO0lBQ3ZCLDBCQUEwQjtDQUNqQixDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLy8gRmlsZTogc3JjL2RhdGEvY29uc3RzL2RvbS9wYXJ0aWFsRmlsZXMudHNcblxuaW1wb3J0IHsgRE9NRmlsZXNEYXRhIH0gZnJvbSAnLi4vLi4vLi4vaW5kZXgnO1xuXG5leHBvcnQgY29uc3QgZmlsZXM6IERPTUZpbGVzRGF0YSA9IFtcblx0Jy4vaHRtbC9hZHZhbmNlZC1tZW51Lmh0bWwnLFxuXHQnLi9odG1sL2N1c3RvbS1jb2xvci1tZW51Lmh0bWwnLFxuXHQnLi9odG1sL2hlbHAtbWVudS5odG1sJyxcblx0Jy4vaHRtbC9oaXN0b3J5LW1lbnUuaHRtbCdcbl0gYXMgY29uc3Q7XG4iXX0=

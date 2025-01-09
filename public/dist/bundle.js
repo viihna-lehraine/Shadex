@@ -142,7 +142,7 @@ const showAsHSLButton$1 = getElement('show-as-hsl-button');
 const showAsHSVButton$1 = getElement('show-as-hsv-button');
 const showAsLABButton$1 = getElement('show-as-lab-button');
 const showAsRGBButton$1 = getElement('show-as-rgb-button');
-const domElements = {
+const domElements$1 = {
     advancedMenu,
     advancedMenuButton: advancedMenuButton$1,
     applyCustomColorButton: applyCustomColorButton$1,
@@ -178,14 +178,6 @@ const domElements = {
     showAsRGBButton: showAsRGBButton$1
 };
 
-// File: src/data/consts/dom/partialFiles.ts
-const files$1 = [
-    './html/advanced-menu.html',
-    './html/custom-color-menu.html',
-    './html/help-menu.html',
-    './html/history-menu.html'
-];
-
 // File: src/data/consts/dom/IDs.js
 const advancedMenuButton = 'advanced-menu-button';
 const applyCustomColorButton = 'apply-custom-color-button';
@@ -214,7 +206,7 @@ const showAsHSLButton = 'show-as-hsl-button';
 const showAsHSVButton = 'show-as-hsv-button';
 const showAsLABButton = 'show-as-lab-button';
 const showAsRGBButton = 'show-as-rgb-button';
-const domIDs = {
+const domIDs$1 = {
     advancedMenuButton,
     applyCustomColorButton,
     clearCustomColorButton,
@@ -246,9 +238,8 @@ const domIDs = {
 
 // File: src/data/consts/dom/IDs.js
 const dom$3 = {
-    elements: domElements,
-    files: files$1,
-    ids: domIDs
+    elements: domElements$1,
+    ids: domIDs$1
 };
 
 // File: src/data/consts/index.js
@@ -418,7 +409,7 @@ const settings = {
     colorSpace: 'hsl',
     lastTableID: 0
 };
-const idb$c = {
+const idb$d = {
     settings,
     mutation
 };
@@ -506,7 +497,7 @@ const colorStrings = colors$1.strings;
 const defaults$7 = {
     colors,
     colorStrings,
-    idb: idb$c,
+    idb: idb$d,
     palette: palette$1
 };
 
@@ -528,7 +519,7 @@ const base$4 = {
 };
 
 // File: src/data/idb/index.js
-const idb$b = {
+const idb$c = {
     ...base$4
 };
 
@@ -557,7 +548,7 @@ const sets = {
 const data = {
     consts: consts$3,
     defaults: defaults$7,
-    idb: idb$b,
+    idb: idb$c,
     mode: mode$n,
     sets
 };
@@ -949,6 +940,19 @@ function isColor(value) {
         'format' in color &&
         validFormats.includes(color.format));
 }
+function isColorSpace$1(value) {
+    const validColorSpaces = [
+        'cmyk',
+        'hex',
+        'hsl',
+        'hsv',
+        'lab',
+        'rgb',
+        'xyz'
+    ];
+    return (typeof value === 'string' &&
+        validColorSpaces.includes(value));
+}
 function isColorString$1(value) {
     if (typeof value !== 'object' || value === null)
         return false;
@@ -979,6 +983,7 @@ function isInRange(value, rangeKey) {
 }
 const guards = {
     isColor,
+    isColorSpace: isColorSpace$1,
     isColorString: isColorString$1,
     isInRange
 };
@@ -3468,33 +3473,7 @@ const transform = {
 };
 
 // File: src/dom/base.js
-const files = data.consts.dom.files;
 const mode$e = data.mode;
-function addConversionButtonEventListeners() {
-    try {
-        const addListener = (id, colorSpace) => {
-            const button = document.getElementById(id);
-            if (button) {
-                button.addEventListener('click', () => superUtils.dom.switchColorSpace(colorSpace));
-            }
-            else {
-                if (!mode$e.warnLogs)
-                    console.warn(`Element with id "${id}" not found.`);
-            }
-        };
-        addListener('show-as-cmyk-button', 'cmyk');
-        addListener('show-as-hex-button', 'hex');
-        addListener('show-as-hsl-button', 'hsl');
-        addListener('show-as-hsv-button', 'hsv');
-        addListener('show-as-lab-button', 'lab');
-        addListener('show-as-rgb-button', 'rgb');
-    }
-    catch (error) {
-        if (mode$e.errorLogs)
-            console.error(`Failed to add event listeners to conversion buttons: ${error}`);
-        return;
-    }
-}
 function applyCustomColor() {
     try {
         const colorPicker = document.getElementById('custom-color-picker');
@@ -3693,25 +3672,6 @@ async function initializeUI() {
         // *DEV-NOTE* add logic here...
     });
 }
-const loadPartials = async () => {
-    try {
-        await Promise.all(files.map(file => fetch(file)
-            .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to load ${file}: ${response.statusText}`);
-            }
-            return response.text();
-        })
-            .then(html => {
-            document.body.insertAdjacentHTML('beforeend', html);
-        })));
-        if (!mode$e.quiet)
-            console.log('HTML partials successfully loaded.');
-    }
-    catch (error) {
-        console.error(`Error loading partials: ${error}`);
-    }
-};
 function pullParamsFromUI() {
     try {
         const paletteTypeOptionsElement = data.consts.dom.elements.paletteTypeOptions;
@@ -3754,7 +3714,6 @@ function saturateColor(selectedColor) {
     }
 }
 const base = {
-    addConversionButtonEventListeners,
     applyCustomColor,
     applyFirstColorToUI,
     copyToClipboard,
@@ -3762,7 +3721,6 @@ const base = {
     desaturateColor,
     getElementsForSelectedColor,
     initializeUI,
-    loadPartials,
     pullParamsFromUI,
     saturateColor
 };
@@ -4477,7 +4435,7 @@ const paletteHelpers = {
 const limits$1 = paletteHelpers.limits;
 const update$1 = paletteHelpers.update;
 const hslTo = convert.hslTo;
-const idb$a = IDBManager.getInstance();
+const idb$b = IDBManager.getInstance();
 function baseColor(customColor, enableAlpha) {
     const color = core.base.clone(customColor ?? utils.random.hsl(enableAlpha));
     return color;
@@ -4488,7 +4446,7 @@ function paletteItem(color, enableAlpha) {
         ? core.brand.asAlphaRange(Math.random())
         : core.brand.asAlphaRange(1);
     return {
-        id: `${color.format}_${idb$a.getNextPaletteID()}`,
+        id: `${color.format}_${idb$b.getNextPaletteID()}`,
         colors: {
             cmyk: hslTo(clonedColor, 'cmyk').value,
             hex: hslTo(clonedColor, 'hex').value,
@@ -4761,9 +4719,9 @@ const paletteSuperUtils = {
 const create$8 = paletteSuperUtils.create;
 const genHues$5 = paletteSuperUtils.genHues;
 const mode$9 = data.mode;
-const idb$9 = IDBManager.getInstance();
+const idb$a = IDBManager.getInstance();
 async function analogous(args) {
-    const currentAnalogousPaletteID = await idb$9.getCurrentPaletteID();
+    const currentAnalogousPaletteID = await idb$a.getCurrentPaletteID();
     if (args.numBoxes < 2) {
         if (mode$9.warnLogs) {
             console.warn('Analogous palette requires at least 2 swatches.');
@@ -4788,7 +4746,7 @@ async function analogous(args) {
         };
         return create$8.paletteItem(newColor, args.enableAlpha);
     });
-    const analogousPalette = await idb$9.savePaletteToDB('analogous', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
+    const analogousPalette = await idb$a.savePaletteToDB('analogous', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
     if (!analogousPalette)
         throw new Error('Analogous palette is null or undefined.');
     else
@@ -4800,9 +4758,9 @@ const create$7 = paletteSuperUtils.create;
 const defaults$5 = data.defaults;
 const mode$8 = data.mode;
 const paletteRanges$5 = data.consts.paletteRanges;
-const idb$8 = IDBManager.getInstance();
+const idb$9 = IDBManager.getInstance();
 async function complementary(args) {
-    const currentComplementaryPaletteID = await idb$8.getCurrentPaletteID();
+    const currentComplementaryPaletteID = await idb$9.getCurrentPaletteID();
     if (args.numBoxes < 2) {
         if (mode$8.warnLogs)
             console.warn('Complementary palette requires at least 2 swatches.');
@@ -4830,7 +4788,7 @@ async function complementary(args) {
         return create$7.paletteItem(newColor, args.enableAlpha);
     });
     paletteItems.unshift(create$7.paletteItem(baseColor, args.enableAlpha));
-    const complementaryPalette = await idb$8.savePaletteToDB('complementary', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
+    const complementaryPalette = await idb$9.savePaletteToDB('complementary', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
     if (!complementaryPalette)
         throw new Error('Complementary palette is null or undefined.');
     else
@@ -4844,9 +4802,9 @@ const defaults$4 = data.defaults;
 const genHues$4 = paletteSuperUtils.genHues;
 const mode$7 = data.mode;
 const paletteRanges$4 = consts$2.paletteRanges;
-const idb$7 = IDBManager.getInstance();
+const idb$8 = IDBManager.getInstance();
 async function diadic(args) {
-    const currentDiadicPaletteID = await idb$7.getCurrentPaletteID();
+    const currentDiadicPaletteID = await idb$8.getCurrentPaletteID();
     if (args.numBoxes < 2) {
         if (mode$7.warnLogs)
             console.warn('Diadic palette requires at least 2 swatches.');
@@ -4872,7 +4830,7 @@ async function diadic(args) {
         };
         return create$6.paletteItem(newColor, args.enableAlpha);
     });
-    const diadicPalette = await idb$7.savePaletteToDB('diadic', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
+    const diadicPalette = await idb$8.savePaletteToDB('diadic', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
     if (!diadicPalette)
         throw new Error(`Diadic palette is either null or undefined.`);
     else
@@ -4886,9 +4844,9 @@ const defaults$3 = data.defaults;
 const genHues$3 = paletteSuperUtils.genHues;
 const mode$6 = data.mode;
 const paletteRanges$3 = consts$1.paletteRanges;
-const idb$6 = IDBManager.getInstance();
+const idb$7 = IDBManager.getInstance();
 async function hexadic(args) {
-    const currentHexadicPaletteID = await idb$6.getCurrentPaletteID();
+    const currentHexadicPaletteID = await idb$7.getCurrentPaletteID();
     if (args.numBoxes < 6) {
         if (mode$6.warnLogs)
             console.warn('Hexadic palette requires at least 6 swatches.');
@@ -4914,7 +4872,7 @@ async function hexadic(args) {
         };
         return create$5.paletteItem(newColor, args.enableAlpha);
     });
-    const hexadicPalette = await idb$6.savePaletteToDB('hexadic', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
+    const hexadicPalette = await idb$7.savePaletteToDB('hexadic', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
     if (!hexadicPalette)
         throw new Error('Hexadic palette is either null or undefined.');
     else
@@ -4924,9 +4882,9 @@ async function hexadic(args) {
 // File: src/palette/main/types/monochromatic.js
 const create$4 = paletteSuperUtils.create;
 const mode$5 = data.mode;
-const idb$5 = IDBManager.getInstance();
+const idb$6 = IDBManager.getInstance();
 async function monochromatic(args) {
-    const currentMonochromaticPaletteID = await idb$5.getCurrentPaletteID();
+    const currentMonochromaticPaletteID = await idb$6.getCurrentPaletteID();
     if (args.numBoxes < 2) {
         if (mode$5.warnLogs)
             console.warn('Monochromatic palette requires at least 2 swatches.');
@@ -4953,7 +4911,7 @@ async function monochromatic(args) {
             paletteItems.push(create$4.paletteItem(newColor, args.enableAlpha));
         }
     }
-    const monochromaticPalette = await idb$5.savePaletteToDB('monochromatic', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
+    const monochromaticPalette = await idb$6.savePaletteToDB('monochromatic', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
     if (!monochromaticPalette)
         throw new Error('Monochromatic palette is either null or undefined.');
     else
@@ -4963,7 +4921,7 @@ async function monochromatic(args) {
 // File: src/paletteGen/palettes/types/random.js
 const create$3 = paletteSuperUtils.create;
 const update = paletteHelpers.update;
-const idb$4 = IDBManager.getInstance();
+const idb$5 = IDBManager.getInstance();
 async function random(args) {
     const baseColor = create$3.baseColor(args.customColor, args.enableAlpha);
     const paletteItems = [
@@ -4974,7 +4932,7 @@ async function random(args) {
         paletteItems.push(create$3.paletteItem(randomColor, args.enableAlpha));
         update.colorBox(randomColor, i);
     }
-    const randomPalette = await idb$4.savePaletteToDB('random', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
+    const randomPalette = await idb$5.savePaletteToDB('random', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
     if (!randomPalette)
         throw new Error('Random palette is either null or undefined.');
     else
@@ -4987,9 +4945,9 @@ const defaults$2 = data.defaults;
 const genHues$2 = paletteSuperUtils.genHues;
 const mode$4 = data.mode;
 const paletteRanges$2 = data.consts.paletteRanges;
-const idb$3 = IDBManager.getInstance();
+const idb$4 = IDBManager.getInstance();
 async function splitComplementary(args) {
-    const currentSplitComplementaryPaletteID = await idb$3.getCurrentPaletteID();
+    const currentSplitComplementaryPaletteID = await idb$4.getCurrentPaletteID();
     if (args.numBoxes < 3) {
         if (mode$4.warnLogs)
             console.warn('Split complementary palette requires at least 3 swatches.');
@@ -5021,7 +4979,7 @@ async function splitComplementary(args) {
             return create$2.paletteItem(adjustedColor, args.enableAlpha);
         })
     ];
-    const splitComplementaryPalette = await idb$3.savePaletteToDB('splitComplementary', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
+    const splitComplementaryPalette = await idb$4.savePaletteToDB('splitComplementary', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
     if (!splitComplementaryPalette)
         throw new Error('Split complementary palette is either null or undefined.');
     else
@@ -5034,9 +4992,9 @@ const defaults$1 = data.defaults;
 const genHues$1 = paletteSuperUtils.genHues;
 const mode$3 = data.mode;
 const paletteRanges$1 = data.consts.paletteRanges;
-const idb$2 = IDBManager.getInstance();
+const idb$3 = IDBManager.getInstance();
 async function tetradic(args) {
-    const currentTetradicPaletteID = await idb$2.getCurrentPaletteID();
+    const currentTetradicPaletteID = await idb$3.getCurrentPaletteID();
     if (args.numBoxes < 4) {
         if (mode$3.warnLogs)
             console.warn('Tetradic palette requires at least 4 swatches.');
@@ -5068,7 +5026,7 @@ async function tetradic(args) {
             return create$1.paletteItem(adjustedColor.hsl, args.enableAlpha);
         })
     ];
-    const tetradicPalette = await idb$2.savePaletteToDB('tetradic', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
+    const tetradicPalette = await idb$3.savePaletteToDB('tetradic', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
     if (!tetradicPalette)
         throw new Error('Tetradic palette is either null or undefined.');
     else
@@ -5082,9 +5040,9 @@ const defaults = data.defaults;
 const genHues = paletteSuperUtils.genHues;
 const mode$2 = data.mode;
 const paletteRanges = data.consts.paletteRanges;
-const idb$1 = IDBManager.getInstance();
+const idb$2 = IDBManager.getInstance();
 async function triadic(args) {
-    const currentTriadicPaletteID = await idb$1.getCurrentPaletteID();
+    const currentTriadicPaletteID = await idb$2.getCurrentPaletteID();
     if (args.numBoxes < 3) {
         if (mode$2.warnLogs)
             console.warn('Triadic palette requires at least 3 swatches.');
@@ -5116,7 +5074,7 @@ async function triadic(args) {
             return create.paletteItem(adjustedColor, args.enableAlpha);
         })
     ];
-    const triadicPalette = await idb$1.savePaletteToDB('triadic', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
+    const triadicPalette = await idb$2.savePaletteToDB('triadic', paletteItems, baseColor, args.numBoxes, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
     if (!triadicPalette)
         throw new Error('Triadic palette is either null or undefined.');
     else
@@ -5141,7 +5099,7 @@ const defaultPalette = data.defaults.palette.unbrandedData;
 const defaultBrandedPalete = transform.brandPalette(defaultPalette);
 const limits = paletteHelpers.limits;
 const mode$1 = data.mode;
-const idb = IDBManager.getInstance();
+const idb$1 = IDBManager.getInstance();
 const isTooDark = limits.isTooDark;
 const isTooGray = limits.isTooGray;
 const isTooLight = limits.isTooLight;
@@ -5194,7 +5152,7 @@ async function genPaletteDOMBox(items, numBoxes, tableId) {
         paletteRow.appendChild(fragment);
         if (!mode$1.quiet)
             console.log('Palette boxes generated and rendered.');
-        await idb.saveData('tables', tableId, { palette: items });
+        await idb$1.saveData('tables', tableId, { palette: items });
     }
     catch (error) {
         if (mode$1.errorLogs)
@@ -5272,16 +5230,19 @@ const generate = {
     selectedPalette
 };
 
-// File: src/dom/buttons.js
+// File: src/dom/elements.js
 const buttonDebounce = data.consts.debounce.button;
+const domElements = data.consts.dom.elements;
+const domIDs = data.consts.dom.ids;
+const idb = IDBManager.getInstance();
 function addEventListener(id, eventType, callback) {
-    const button = document.getElementById(id);
-    if (button) {
-        button.addEventListener(eventType, callback);
+    const element = document.getElementById(id);
+    if (element) {
+        element.addEventListener(eventType, callback);
     }
     else if (mode$n.warnLogs) {
         if ((mode$n.debug || mode$n.verbose) && mode$n.warnLogs)
-            console.warn(`Button with id "${id}" not found.`);
+            console.warn(`Element with id "${id}" not found.`);
     }
 }
 const handlePaletteGen = core.base.debounce(() => {
@@ -5311,9 +5272,153 @@ const handlePaletteGen = core.base.debounce(() => {
         console.error(`Failed to handle generate button click: ${error}`);
     }
 }, buttonDebounce);
-const buttons = {
+function initializeEventListeners() {
+    const addConversionListener = (id, colorSpace) => {
+        const button = document.getElementById(id);
+        if (button) {
+            if (core.guards.isColorSpace(colorSpace)) {
+                button.addEventListener('click', () => superUtils.dom.switchColorSpace(colorSpace));
+            }
+        }
+        else {
+            if (mode$n.warnLogs)
+                console.warn(`Element with id "${id}" not found.`);
+        }
+    };
+    addConversionListener('show-as-cmyk-button', 'cmyk');
+    addConversionListener('show-as-hex-button', 'hex');
+    addConversionListener('show-as-hsl-button', 'hsl');
+    addConversionListener('show-as-hsv-button', 'hsv');
+    addConversionListener('show-as-lab-button', 'lab');
+    addConversionListener('show-as-rgb-button', 'rgb');
+    addEventListener(domIDs.advancedMenuButton, 'click', async (e) => {
+        e.preventDefault();
+        const advancedMenuContent = document.querySelector('.advanced-menu-content');
+        if (advancedMenuContent) {
+            const isHidden = getComputedStyle(advancedMenuContent).display === 'none';
+            advancedMenuContent.style.display = isHidden ? 'flex' : 'none';
+        }
+        if (!mode$n.quiet)
+            console.log('advancedMenuButton clicked');
+    });
+    addEventListener(domIDs.applyCustomColorButton, 'click', async (e) => {
+        e.preventDefault();
+        const customHSLColor = dom.applyCustomColor();
+        const customHSLColorClone = core.base.clone(customHSLColor);
+        await idb.saveData('customColor', 'appSettings', customHSLColorClone);
+        if (!mode$n.quiet)
+            console.log('Custom color saved to IndexedDB');
+        // *DEV-NOTE* unfinished
+    });
+    addEventListener(domIDs.clearCustomColorButton, 'click', async (e) => {
+        e.preventDefault();
+        domElements.customColorInput.value = '#ff0000';
+        if (!mode$n.quiet)
+            console.log('Custom color cleared');
+    });
+    addEventListener(domIDs.closeCustomColorMenuButton, 'click', async (e) => {
+        e.preventDefault();
+        if (!mode$n.quiet)
+            console.log('closeCustomColorMenuButton clicked');
+        domElements.customColorMenu?.classList.add('hidden');
+    });
+    addEventListener(domIDs.closeHelpMenuButton, 'click', async (e) => {
+        e.preventDefault();
+        if (!mode$n.quiet)
+            console.log('closeHelpMenuButton clicked');
+        domElements.advancedMenu?.classList.add('hidden');
+    });
+    addEventListener(domIDs.closeHistoryMenuButton, 'click', async (e) => {
+        e.preventDefault();
+        if (!mode$n.quiet)
+            console.log('closeHistoryMenuButton clicked');
+        domElements.historyMenu?.classList.add('hidden');
+    });
+    addEventListener(domIDs.customColorMenuButton, 'click', async (e) => {
+        e.preventDefault();
+        if (!mode$n.quiet)
+            console.log('customColorMenuButton clicked');
+        domElements.customColorMenu?.classList.remove('hidden');
+    });
+    if (!domElements.customColorInput)
+        throw new Error('Custom color input element not found');
+    domElements.customColorInput.addEventListener('input', () => {
+        if (!domElements.customColorDisplay)
+            throw new Error('Custom color display element not found');
+        domElements.customColorDisplay.textContent =
+            domElements.customColorInput.value;
+    });
+    addEventListener(domIDs.desaturateButton, 'click', async (e) => {
+        e.preventDefault();
+        const selectedColor = domElements.selectedColorOption
+            ? parseInt(domElements.selectedColorOption.value, 10)
+            : 0;
+        if (!mode$n.quiet)
+            console.log('desaturateButton clicked');
+        dom.desaturateColor(selectedColor); // *DEV-NOTE* possible circular dependency
+    });
+    // MAIN - generate palette
+    dom.elements.addEventListener(domIDs.generateButton, 'click', async (e) => {
+        e.preventDefault();
+        if (!mode$n.quiet)
+            console.log('generateButton clicked');
+        const { paletteType, numBoxes, enableAlpha, limitDarkness, limitGrayness, limitLightness } = dom.pullParamsFromUI();
+        let customColor = (await idb.getCustomColor());
+        if (!customColor) {
+            if (!mode$n.quiet)
+                console.info('No custom color found. Using a random color');
+            customColor = utils.random.hsl(true);
+        }
+        const paletteOptions = {
+            paletteType,
+            numBoxes,
+            customColor: core.base.clone(customColor),
+            enableAlpha,
+            limitDarkness,
+            limitGrayness,
+            limitLightness
+        };
+        await start.genPalette(paletteOptions);
+    });
+    dom.elements.addEventListener(domIDs.helpMenuButton, 'click', async (e) => {
+        e.preventDefault();
+        const helpMenuContent = document.querySelector('.help-menu-content');
+        if (helpMenuContent) {
+            const isHidden = getComputedStyle(helpMenuContent).display === 'none';
+            helpMenuContent.style.display = isHidden ? 'flex' : 'none';
+            if (!mode$n.quiet)
+                console.log('helpMenuButton clicked');
+        }
+    });
+    addEventListener(domIDs.historyMenuButton, 'click', async (e) => {
+        e.preventDefault();
+        const historyMenuContent = document.querySelector('.history-menu-content');
+        if (historyMenuContent) {
+            const isHidden = getComputedStyle(historyMenuContent).display === 'none';
+            historyMenuContent.style.display = isHidden ? 'flex' : 'none';
+        }
+        if (!mode$n.quiet)
+            console.log('historyMenuToggleButton clicked');
+    });
+    addEventListener(domIDs.saturateButton, 'click', async (e) => {
+        e.preventDefault();
+        if (!mode$n.quiet)
+            console.log('saturateButton clicked');
+        const selectedColor = domElements.selectedColorOption
+            ? parseInt(domElements.selectedColorOption.value, 10)
+            : 0;
+        dom.saturateColor(selectedColor);
+    });
+    window.addEventListener('click', async (e) => {
+        if (domElements.customColorMenu)
+            if (e.target === domElements.customColorMenu)
+                domElements.customColorMenu.classList.add('hidden');
+    });
+}
+const elements$1 = {
     addEventListener,
-    handlePaletteGen
+    handlePaletteGen,
+    initializeEventListeners
 };
 
 // File: src/dom/exportPalette.js
@@ -5509,7 +5614,7 @@ const history = {
 // File: src/dom/index.js
 const dom = {
     ...base,
-    buttons,
+    elements: elements$1,
     exportPalette,
     history
 };
@@ -5593,26 +5698,28 @@ const logger = {
 };
 
 // ColorGen - version 0.6.0-dev
-const buttonIDs = data.consts.dom.ids;
+// Author: Viihna Leraine (viihna@ViihnaTech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
+// Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
+// You may use this code for any purpose EXCEPT for the creation of proprietary derivatives. I encourage you to improve on my code or to include it in other projects if you find it helpful. Please credit me as the original author.
+// This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND.
+// File: src/app.js
 const consts = data.consts;
 const mode = data.mode;
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM content loaded - Initializing application');
-    await dom.loadPartials();
     if (!mode.quiet)
         console.log('HTML partials loaded. Initializing UI...');
-    const buttonElements = dom.defineUIElements();
-    if (!buttonElements) {
+    const domElements = dom.defineUIElements();
+    if (!domElements) {
         if (mode.errorLogs)
-            console.error('Failed to initialize UI buttons');
+            console.error('Failed to initialize DOM elements: Some elements could not be found.');
         return;
     }
     await dom.initializeUI();
     if (!mode.quiet)
         console.log('UI successfully initialized');
-    const idb = IDBManager.getInstance();
-    if (!buttonElements) {
-        console.error('Failed to initialize UI buttons');
+    if (!domElements) {
+        console.error('Failed to initialize DOM elements');
         return;
     }
     const selectedColorOption = consts.dom.elements.selectedColorOption;
@@ -5633,177 +5740,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!mode.quiet)
         console.log(`Selected color: ${selectedColor}`);
     try {
-        dom.addConversionButtonEventListeners();
+        dom.elements.initializeEventListeners();
         if (!mode.quiet)
-            console.log('Conversion button event listeners attached');
+            console.log('Event listeners have been successfully initialized');
     }
-    catch (error) {
+    catch {
         if (mode.errorLogs)
-            console.error(`Unable to attach conversion button event listeners: ${error}`);
+            console.error('Failed to initialize event listeners');
     }
-    // show advanced menu
-    dom.buttons.addEventListener(buttonIDs.advancedMenuButton, 'click', async (e) => {
-        e.preventDefault();
-        const advancedMenuContent = document.querySelector('.advanced-menu-content');
-        if (advancedMenuContent) {
-            const isHidden = getComputedStyle(advancedMenuContent).display === 'none';
-            advancedMenuContent.style.display = isHidden ? 'flex' : 'none';
-        }
-        if (!mode.quiet)
-            console.log('advancedMenuButton clicked');
-    });
-    // apply custom color
-    dom.buttons.addEventListener(buttonIDs.applyCustomColorButton, 'click', async (e) => {
-        e.preventDefault();
-        const customHSLColor = dom.applyCustomColor();
-        const customHSLColorClone = core.base.clone(customHSLColor);
-        await idb.saveData('customColor', 'appSettings', customHSLColorClone);
-        if (!mode.quiet)
-            console.log('Custom color saved to IndexedDB');
-        // *DEV-NOTE* unfinished
-    });
-    // clear custom color
-    dom.buttons.addEventListener(buttonIDs.clearCustomColorButton, 'click', async (e) => {
-        e.preventDefault();
-        consts.dom.elements.customColorInput.value = '#ff0000';
-        if (!mode.quiet)
-            console.log('Custom color cleared');
-    });
-    // close custom color menu
-    dom.buttons.addEventListener(buttonIDs.closeCustomColorMenuButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('closeCustomColorMenuButton clicked');
-        consts.dom.elements.customColorMenu?.classList.add('hidden');
-    });
-    // close help menu
-    dom.buttons.addEventListener(buttonIDs.closeHelpMenuButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('closeHelpMenuButton clicked');
-        consts.dom.elements.advancedMenu?.classList.add('hidden');
-    });
-    // close history menu
-    dom.buttons.addEventListener(buttonIDs.closeHistoryMenuButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('closeHistoryMenuButton clicked');
-        consts.dom.elements.historyMenu?.classList.add('hidden');
-    });
-    if (!consts.dom.elements.customColorInput)
-        throw new Error('Custom color input element not found');
-    consts.dom.elements.customColorInput.addEventListener('input', () => {
-        if (!consts.dom.elements.customColorDisplay)
-            throw new Error('Custom color display element not found');
-        consts.dom.elements.customColorDisplay.textContent =
-            consts.dom.elements.customColorInput.value;
-    });
-    // display custom color menu
-    dom.buttons.addEventListener(buttonIDs.customColorMenuButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('customColorMenuButton clicked');
-        consts.dom.elements.customColorMenu?.classList.remove('hidden');
-    });
-    // desaturate Button
-    dom.buttons.addEventListener(buttonIDs.desaturateButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('desaturateButton clicked');
-        dom.desaturateColor(selectedColor);
-    });
-    // MAIN - generate palette
-    dom.buttons.addEventListener(buttonIDs.generateButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('generateButton clicked');
-        const { paletteType, numBoxes, enableAlpha, limitDarkness, limitGrayness, limitLightness } = dom.pullParamsFromUI();
-        let customColor = (await idb.getCustomColor());
-        if (!customColor) {
-            if (!mode.quiet)
-                console.info('No custom color found. Using a random color');
-            customColor = utils.random.hsl(true);
-        }
-        const paletteOptions = {
-            paletteType,
-            numBoxes,
-            customColor: core.base.clone(customColor),
-            enableAlpha,
-            limitDarkness,
-            limitGrayness,
-            limitLightness
-        };
-        await start.genPalette(paletteOptions);
-    });
-    // open Help Menu
-    dom.buttons.addEventListener(buttonIDs.helpMenuButton, 'click', async (e) => {
-        e.preventDefault();
-        const helpMenuContent = document.querySelector('.help-menu-content');
-        if (helpMenuContent) {
-            const isHidden = getComputedStyle(helpMenuContent).display === 'none';
-            helpMenuContent.style.display = isHidden ? 'flex' : 'none';
-            if (!mode.quiet)
-                console.log('helpMenuButton clicked');
-        }
-    });
-    // open History Menu
-    dom.buttons.addEventListener(buttonIDs.historyMenuButton, 'click', async (e) => {
-        e.preventDefault();
-        const historyMenuContent = document.querySelector('.history-menu-content');
-        if (historyMenuContent) {
-            const isHidden = getComputedStyle(historyMenuContent).display === 'none';
-            historyMenuContent.style.display = isHidden ? 'flex' : 'none';
-        }
-        if (!mode.quiet)
-            console.log('historyMenuToggleButton clicked');
-    });
-    // saturate selected color
-    dom.buttons.addEventListener(buttonIDs.saturateButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('saturateButton clicked');
-        dom.saturateColor(selectedColor);
-    });
-    dom.buttons.addEventListener(buttonIDs.showAsCMYKButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('showAsCMYKButton clicked');
-        // *DEV-NOTE* unfinished
-    });
-    dom.buttons.addEventListener(buttonIDs.showAsHexButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('showAsHexButton clicked');
-        // *DEV-NOTE* unfinished
-    });
-    dom.buttons.addEventListener(buttonIDs.showAsHSLButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('showAsHSLButton clicked');
-        // *DEV-NOTE* unfinished
-    });
-    dom.buttons.addEventListener(buttonIDs.showAsHSVButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('showAsHSVButton clicked');
-        // *DEV-NOTE* unfinished
-    });
-    dom.buttons.addEventListener(buttonIDs.showAsLABButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('showAsLABButton clicked');
-        // *DEV-NOTE* unfinished
-    });
-    dom.buttons.addEventListener(buttonIDs.showAsRGBButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode.quiet)
-            console.log('showAsRGBButton clicked');
-        // *DEV-NOTE* unfinished
-    });
-    // close Custom Color Menu when clicking outside the content
-    window.addEventListener('click', async (e) => {
-        if (consts.dom.elements.customColorMenu)
-            if (e.target === consts.dom.elements.customColorMenu)
-                consts.dom.elements.customColorMenu.classList.add('hidden');
-    });
+    if (!mode.quiet)
+        console.log('Application successfully initialized. Awaiting user input');
 });
