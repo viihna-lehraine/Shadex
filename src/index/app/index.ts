@@ -54,7 +54,7 @@ export type {
 } from './data.js';
 export type {
 	DOMBaseFnInterface,
-	DOMButtonsFnInterface,
+	DOMElementsInterface,
 	DOMExportPaletteFnInterface,
 	DOMFnMasterInterface,
 	DOMHistoryFnInterface

@@ -8,7 +8,7 @@ export default {
 	output: {
 		file: 'public/dist/bundle.js',
 		format: 'esm',
-		sourcemap: true
+		sourcemap: false
 	},
 	plugins: [
 		resolve({

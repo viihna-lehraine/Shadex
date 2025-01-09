@@ -7,6 +7,7 @@ import {
 	CMYKUnbranded,
 	CMYKValue,
 	Color,
+	ColorSpace,
 	ColorString,
 	CommonCoreFnBase,
 	CommonCoreFnBrand,
@@ -543,6 +544,23 @@ function isColor(value: unknown): value is Color {
 	);
 }
 
+function isColorSpace(value: unknown): value is ColorSpace {
+	const validColorSpaces: ColorSpace[] = [
+		'cmyk',
+		'hex',
+		'hsl',
+		'hsv',
+		'lab',
+		'rgb',
+		'xyz'
+	];
+
+	return (
+		typeof value === 'string' &&
+		validColorSpaces.includes(value as ColorSpace)
+	);
+}
+
 function isColorString(value: unknown): value is ColorString {
 	if (typeof value !== 'object' || value === null) return false;
 
@@ -585,6 +603,7 @@ function isInRange<T extends keyof typeof _sets>(
 
 export const guards: CommonCoreFnGuards = {
 	isColor,
+	isColorSpace,
 	isColorString,
 	isInRange
 };

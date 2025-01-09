@@ -117,6 +117,7 @@ export interface CommonCoreFnConvert {
 
 export interface CommonCoreFnGuards {
 	isColor(value: unknown): value is Color;
+	isColorSpace(value: unknown): value is ColorSpace;
 	isColorString(value: unknown): value is ColorString;
 	isInRange<T extends keyof typeof _sets>(
 		value: number | string,

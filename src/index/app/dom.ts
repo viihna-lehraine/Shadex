@@ -10,7 +10,6 @@ import {
 } from '../index.js';
 
 export interface DOMBaseFnInterface {
-	addConversionButtonEventListeners: () => void;
 	applyCustomColor: () => void;
 	applyFirstColorToUI(color: HSL): HSL;
 	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
@@ -20,19 +19,18 @@ export interface DOMBaseFnInterface {
 		selectedColor: number
 	): GetElementsForSelectedColor;
 	initializeUI: () => Promise<void>;
-	loadPartials: () => Promise<void>;
 	pullParamsFromUI(): PullParamsFromUI;
 	saturateColor(selectedColor: number): void;
-	showCustomColorPopupDiv(): void;
 }
 
-export interface DOMButtonsFnInterface {
+export interface DOMElementsInterface {
 	addEventListener<K extends keyof HTMLElementEventMap>(
 		id: string,
 		eventType: K,
 		callback: (ev: HTMLElementEventMap[K]) => void
 	): void;
 	handlePaletteGen: () => void;
+	initializeEventListeners(): void;
 }
 
 export interface DOMExportPaletteFnInterface {
@@ -48,7 +46,6 @@ export interface DOMHistoryFnInterface {
 }
 
 export interface DOMFnMasterInterface {
-	addConversionButtonEventListeners: () => void;
 	applyCustomColor: () => void;
 	applyFirstColorToUI(color: HSL): HSL;
 	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
@@ -58,11 +55,9 @@ export interface DOMFnMasterInterface {
 		selectedColor: number
 	): GetElementsForSelectedColor;
 	initializeUI: () => Promise<void>;
-	loadPartials: () => Promise<void>;
 	pullParamsFromUI(): PullParamsFromUI;
 	saturateColor(selectedColor: number): void;
-	showCustomColorPopupDiv(): void;
-	buttons: DOMButtonsFnInterface;
+	elements: DOMElementsInterface;
 	exportPalette: DOMExportPaletteFnInterface;
 	history: DOMHistoryFnInterface;
 }

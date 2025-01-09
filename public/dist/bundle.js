@@ -109,6 +109,7 @@ const domUtils = {
 
 // File: src/data/consts/dom/elements.js
 const getElement = domUtils.getElement;
+const advancedMenu = getElement('advanced-menu');
 const advancedMenuButton$1 = getElement('advanced-menu-button');
 const applyCustomColorButton$1 = getElement('apply-custom-color-button');
 const clearCustomColorButton$1 = getElement('clear-custom-color-button');
@@ -116,11 +117,16 @@ const closeCustomColorMenuButton$1 = getElement('close-custom-color-menu-button'
 const closeAdvancedMenuButton$1 = getElement('close-advanced-menu-button');
 const closeHelpMenuButton$1 = getElement('close-help-menu-button');
 const closeHistoryMenuButton$1 = getElement('close-history-menu-button');
+const customColorDisplay = getElement('custom-color-display');
 const customColorElement$1 = getElement('custom-color');
+const customColorInput = getElement('custom-color-input');
+const customColorMenu = getElement('custom-color-menu');
 const customColorMenuButton$1 = getElement('custom-color-menu-button');
 const desaturateButton$1 = getElement('desaturate-button');
 const enableAlphaCheckbox$1 = getElement('enable-alpha-checkbox');
 const generateButton$1 = getElement('generate-button');
+const helpMenu = getElement('help-menu');
+const historyMenu = getElement('history-menu');
 const helpMenuButton$1 = getElement('help-menu-button');
 const historyMenuButton$1 = getElement('history-menu-button');
 const limitDarknessCheckbox$1 = getElement('limit-darkness-checkbox');
@@ -137,6 +143,7 @@ const showAsHSVButton$1 = getElement('show-as-hsv-button');
 const showAsLABButton$1 = getElement('show-as-lab-button');
 const showAsRGBButton$1 = getElement('show-as-rgb-button');
 const domElements = {
+    advancedMenu,
     advancedMenuButton: advancedMenuButton$1,
     applyCustomColorButton: applyCustomColorButton$1,
     clearCustomColorButton: clearCustomColorButton$1,
@@ -144,12 +151,17 @@ const domElements = {
     closeCustomColorMenuButton: closeCustomColorMenuButton$1,
     closeHelpMenuButton: closeHelpMenuButton$1,
     closeHistoryMenuButton: closeHistoryMenuButton$1,
+    customColorDisplay,
     customColorElement: customColorElement$1,
+    customColorInput,
+    customColorMenu,
     customColorMenuButton: customColorMenuButton$1,
     desaturateButton: desaturateButton$1,
     enableAlphaCheckbox: enableAlphaCheckbox$1,
     generateButton: generateButton$1,
     helpMenuButton: helpMenuButton$1,
+    helpMenu,
+    historyMenu,
     historyMenuButton: historyMenuButton$1,
     limitDarknessCheckbox: limitDarknessCheckbox$1,
     limitGraynessCheckbox: limitGraynessCheckbox$1,
@@ -165,6 +177,14 @@ const domElements = {
     showAsLABButton: showAsLABButton$1,
     showAsRGBButton: showAsRGBButton$1
 };
+
+// File: src/data/consts/dom/partialFiles.ts
+const files$1 = [
+    './html/advanced-menu.html',
+    './html/custom-color-menu.html',
+    './html/help-menu.html',
+    './html/history-menu.html'
+];
 
 // File: src/data/consts/dom/IDs.js
 const advancedMenuButton = 'advanced-menu-button';
@@ -224,19 +244,11 @@ const domIDs = {
     showAsRGBButton
 };
 
-// File: src/data/consts/dom/partialFiles.ts
-const files = [
-    './html/advanced-menu.html',
-    './html/custom-color-menu.html',
-    './html/help-menu.html',
-    './html/history-menu.html'
-];
-
 // File: src/data/consts/dom/IDs.js
 const dom$3 = {
     elements: domElements,
-    ids: domIDs,
-    files
+    files: files$1,
+    ids: domIDs
 };
 
 // File: src/data/consts/index.js
@@ -3456,6 +3468,7 @@ const transform = {
 };
 
 // File: src/dom/base.js
+const files = data.consts.dom.files;
 const mode$e = data.mode;
 function addConversionButtonEventListeners() {
     try {
@@ -3681,12 +3694,6 @@ async function initializeUI() {
     });
 }
 const loadPartials = async () => {
-    const files = [
-        './html/advanced-menu.html',
-        './html/custom-color-menu.html',
-        './html/help-menu.html',
-        './html/history-menu.html'
-    ];
     try {
         await Promise.all(files.map(file => fetch(file)
             .then(response => {
@@ -3746,22 +3753,6 @@ function saturateColor(selectedColor) {
             console.error(`Failed to saturate color: ${error}`);
     }
 }
-function showCustomColorPopupDiv() {
-    try {
-        const popup = document.getElementById('popup-div');
-        if (popup) {
-            popup.classList.toggle('show');
-        }
-        else {
-            if (mode$e.errorLogs)
-                console.error("document.getElementById('popup-div') is undefined");
-            return;
-        }
-    }
-    catch (error) {
-        console.error(`Failed to show custom color popup div: ${error}`);
-    }
-}
 const base = {
     addConversionButtonEventListeners,
     applyCustomColor,
@@ -3773,8 +3764,7 @@ const base = {
     initializeUI,
     loadPartials,
     pullParamsFromUI,
-    saturateColor,
-    showCustomColorPopupDiv
+    saturateColor
 };
 
 const instanceOfAny = (object, constructors) => constructors.some((c) => object instanceof c);
@@ -5015,11 +5005,11 @@ async function splitComplementary(args) {
                     hue: core.brand.asRadial(hue),
                     saturation: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
                         (index === 0
-                            ? -paletteRanges$2.splitComp.satShift
+                            ? -30
                             : paletteRanges$2.splitComp.satShift), 100))),
                     lightness: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
                         (index === 0
-                            ? -paletteRanges$2.splitComp.lightShift
+                            ? -30
                             : paletteRanges$2.splitComp.lightShift), 100))),
                     alpha: args.enableAlpha
                         ? core.brand.asAlphaRange(Math.random())
@@ -5062,11 +5052,11 @@ async function tetradic(args) {
                     hue: core.brand.asRadial(hue),
                     saturation: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
                         (index % 2 === 0
-                            ? -paletteRanges$1.tetra.satShift
+                            ? -30
                             : paletteRanges$1.tetra.satShift), 100))),
                     lightness: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
                         (index % 2 === 0
-                            ? -paletteRanges$1.tetra.lightShift
+                            ? -30
                             : paletteRanges$1.tetra.lightShift), 100))),
                     alpha: args.enableAlpha
                         ? core.brand.asAlphaRange(Math.random())
@@ -5110,11 +5100,11 @@ async function triadic(args) {
                     hue: core.brand.asRadial(hue),
                     saturation: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
                         (index % 2 === 0
-                            ? -paletteRanges.triad.satShift
+                            ? -30
                             : paletteRanges.triad.satShift), 100))),
                     lightness: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
                         (index % 2 === 0
-                            ? -paletteRanges.triad.lightShift
+                            ? -30
                             : paletteRanges.triad.lightShift), 100))),
                     alpha: args.enableAlpha
                         ? core.brand.asAlphaRange(Math.random())
@@ -5651,6 +5641,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (mode.errorLogs)
             console.error(`Unable to attach conversion button event listeners: ${error}`);
     }
+    // show advanced menu
     dom.buttons.addEventListener(buttonIDs.advancedMenuButton, 'click', async (e) => {
         e.preventDefault();
         const advancedMenuContent = document.querySelector('.advanced-menu-content');
@@ -5661,6 +5652,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!mode.quiet)
             console.log('advancedMenuButton clicked');
     });
+    // apply custom color
     dom.buttons.addEventListener(buttonIDs.applyCustomColorButton, 'click', async (e) => {
         e.preventDefault();
         const customHSLColor = dom.applyCustomColor();
@@ -5668,34 +5660,59 @@ document.addEventListener('DOMContentLoaded', async () => {
         await idb.saveData('customColor', 'appSettings', customHSLColorClone);
         if (!mode.quiet)
             console.log('Custom color saved to IndexedDB');
+        // *DEV-NOTE* unfinished
     });
+    // clear custom color
     dom.buttons.addEventListener(buttonIDs.clearCustomColorButton, 'click', async (e) => {
         e.preventDefault();
+        consts.dom.elements.customColorInput.value = '#ff0000';
         if (!mode.quiet)
-            console.log('Custom color cleared from IndexedDB');
-        dom.showCustomColorPopupDiv();
+            console.log('Custom color cleared');
     });
+    // close custom color menu
     dom.buttons.addEventListener(buttonIDs.closeCustomColorMenuButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode.quiet)
             console.log('closeCustomColorMenuButton clicked');
+        consts.dom.elements.customColorMenu?.classList.add('hidden');
     });
+    // close help menu
     dom.buttons.addEventListener(buttonIDs.closeHelpMenuButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode.quiet)
             console.log('closeHelpMenuButton clicked');
+        consts.dom.elements.advancedMenu?.classList.add('hidden');
     });
+    // close history menu
     dom.buttons.addEventListener(buttonIDs.closeHistoryMenuButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode.quiet)
             console.log('closeHistoryMenuButton clicked');
+        consts.dom.elements.historyMenu?.classList.add('hidden');
     });
+    if (!consts.dom.elements.customColorInput)
+        throw new Error('Custom color input element not found');
+    consts.dom.elements.customColorInput.addEventListener('input', () => {
+        if (!consts.dom.elements.customColorDisplay)
+            throw new Error('Custom color display element not found');
+        consts.dom.elements.customColorDisplay.textContent =
+            consts.dom.elements.customColorInput.value;
+    });
+    // display custom color menu
+    dom.buttons.addEventListener(buttonIDs.customColorMenuButton, 'click', async (e) => {
+        e.preventDefault();
+        if (!mode.quiet)
+            console.log('customColorMenuButton clicked');
+        consts.dom.elements.customColorMenu?.classList.remove('hidden');
+    });
+    // desaturate Button
     dom.buttons.addEventListener(buttonIDs.desaturateButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode.quiet)
             console.log('desaturateButton clicked');
         dom.desaturateColor(selectedColor);
     });
+    // MAIN - generate palette
     dom.buttons.addEventListener(buttonIDs.generateButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode.quiet)
@@ -5718,6 +5735,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         await start.genPalette(paletteOptions);
     });
+    // open Help Menu
     dom.buttons.addEventListener(buttonIDs.helpMenuButton, 'click', async (e) => {
         e.preventDefault();
         const helpMenuContent = document.querySelector('.help-menu-content');
@@ -5728,6 +5746,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.log('helpMenuButton clicked');
         }
     });
+    // open History Menu
     dom.buttons.addEventListener(buttonIDs.historyMenuButton, 'click', async (e) => {
         e.preventDefault();
         const historyMenuContent = document.querySelector('.history-menu-content');
@@ -5738,6 +5757,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!mode.quiet)
             console.log('historyMenuToggleButton clicked');
     });
+    // saturate selected color
     dom.buttons.addEventListener(buttonIDs.saturateButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode.quiet)
@@ -5748,31 +5768,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         if (!mode.quiet)
             console.log('showAsCMYKButton clicked');
+        // *DEV-NOTE* unfinished
     });
     dom.buttons.addEventListener(buttonIDs.showAsHexButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode.quiet)
             console.log('showAsHexButton clicked');
+        // *DEV-NOTE* unfinished
     });
     dom.buttons.addEventListener(buttonIDs.showAsHSLButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode.quiet)
             console.log('showAsHSLButton clicked');
+        // *DEV-NOTE* unfinished
     });
     dom.buttons.addEventListener(buttonIDs.showAsHSVButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode.quiet)
             console.log('showAsHSVButton clicked');
+        // *DEV-NOTE* unfinished
     });
     dom.buttons.addEventListener(buttonIDs.showAsLABButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode.quiet)
             console.log('showAsLABButton clicked');
+        // *DEV-NOTE* unfinished
     });
     dom.buttons.addEventListener(buttonIDs.showAsRGBButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode.quiet)
             console.log('showAsRGBButton clicked');
+        // *DEV-NOTE* unfinished
+    });
+    // close Custom Color Menu when clicking outside the content
+    window.addEventListener('click', async (e) => {
+        if (consts.dom.elements.customColorMenu)
+            if (e.target === consts.dom.elements.customColorMenu)
+                consts.dom.elements.customColorMenu.classList.add('hidden');
     });
 });
-//# sourceMappingURL=bundle.js.map

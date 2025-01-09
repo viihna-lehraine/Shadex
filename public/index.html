@@ -64,6 +64,8 @@
 											<input id="limit-lightness-checkbox" type="checkbox"/>
 											<label for="limit-saturation-checkbox" class="checkbox-label">Saturation</label>
 											<input id="limit-saturation-checkbox" type="checkbox"/>
+											<label for="limit-grayness-checkbox" class="checkbox-label">Grayness</label>
+											<input id="limit-grayness-checkbox" type="checkbox"/>
 										</div>
 									</div>
 								</div>
@@ -112,12 +114,12 @@
 							</section>
 						</div>
 					</div>
-					<section id="modals">
+					<section id="modals-section">
 						<h2>Menus</h2>
 						<div id="menu-buttons">
 							<button id="advanced-menu-button" class="modal-button" type="button">Advanced</button>
 							<button id="custom-color-menu-button" class="modal-button" type="button">Custom Color</button>
-							<button id="palette-history-button" class="modal-button" type="button">History</button>
+							<button id="history-menu-button" class="modal-button" type="button">History</button>
 							<button id="help-menu-button" class="modal-button" type="button">Help</button>
 						</div>
 					</section>
@@ -127,7 +129,61 @@
 				<h3>Generated Palette</h3>
 				<div id="palette-output"></div>
 			</section>
+
+			<!-- ADVANCED MENU -->
+			<div id="advanced-menu" class="help-menu modal hidden">
+				<div class="advanced-menu-content">
+					<button type="button" id="close-advanced-menu-button">X</button>
+					<input type="checkbox" id="enable-alpha-checkbox"/>
+					<h2>Help & Instructions</h2>
+					<p>Here’s how to use the ColorGen application:</p>
+					<ul>
+						<li>Explanation of each option and feature...</li>
+						<li>Details on exporting palettes...</li>
+						<li>Any other necessary instructions...</li>
+					</ul>
+				</div>
+			</div>
+
+			<!-- CUSTOM COLOR MENU -->
+			<div id="custom-color-menu" class="modal hidden">
+				<button type="button" id="close-custom-color-menu-button">X</button>
+				<section>
+					<h2>Custom Color Menu</h2>
+					<div class="custom-color-menu-content">
+						<label for="custom-color-input">Pick a Color</label>
+						<input type="color" id="custom-color-input" value="#ff0000" />
+						<p>Selected Color: <span id="custom-color-display">#ff0000</span> </p>
+						<button type="button" id="apply-custom-color-button">Apply</button>
+						<button type="button" id="clear-custom-color-button">Clear</button>
+					</div>
+				</section>
+			</div>
+
+			<!-- HELP MENU -->
+			<div id="help-menu" class="modal hidden">
+				<div class="help-menu-content">
+					<button type="button" id="close-help-menu-button">X</button>
+					<h2>Help & Instructions</h2>
+					<p>Here’s how to use the ColorGen application:</p>
+					<ul>
+						<li>Explanation of each option and feature...</li>
+						<li>Details on exporting palettes...</li>
+						<li>Any other necessary instructions...</li>
+					</ul>
+				</div>
+			</div>
+
+			<!-- HISTORY MENU -->
+			<div id="history-menu" class="modal hidden">
+				<button type="button" id="close-history-menu-button" class="close-button">X</button>
+				<div class="history-menu-content">
+					<h2>Palette History</h2>
+					<div id="palette-list" class="palette-list hidden"></div>
+					<div id="modal-footer"></div>
+				</div>
+			</div>
 		</div>
-		<script src="./dist/bundle.js"></script>
+		<script src="./dist/bundle.js" type="module"></script>
 	</body>
 </html>

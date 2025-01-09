@@ -5,6 +5,7 @@ import { domUtils } from '../../../common/dom/index.js';
 
 const getElement = domUtils.getElement;
 
+const advancedMenu = getElement<HTMLDivElement>('advanced-menu');
 const advancedMenuButton = getElement<HTMLButtonElement>(
 	'advanced-menu-button'
 );
@@ -26,7 +27,10 @@ const closeHelpMenuButton = getElement<HTMLButtonElement>(
 const closeHistoryMenuButton = getElement<HTMLButtonElement>(
 	'close-history-menu-button'
 );
+const customColorDisplay = getElement<HTMLSpanElement>('custom-color-display');
 const customColorElement = getElement<HTMLInputElement>('custom-color');
+const customColorInput = getElement<HTMLInputElement>('custom-color-input');
+const customColorMenu = getElement<HTMLDivElement>('custom-color-menu');
 const customColorMenuButton = getElement<HTMLButtonElement>(
 	'custom-color-menu-button'
 );
@@ -35,6 +39,8 @@ const enableAlphaCheckbox = getElement<HTMLInputElement>(
 	'enable-alpha-checkbox'
 );
 const generateButton = getElement<HTMLButtonElement>('generate-button');
+const helpMenu = getElement<HTMLDivElement>('help-menu');
+const historyMenu = getElement<HTMLDivElement>('history-menu');
 const helpMenuButton = getElement<HTMLButtonElement>('help-menu-button');
 const historyMenuButton = getElement<HTMLButtonElement>('history-menu-button');
 const limitDarknessCheckbox = getElement<HTMLInputElement>(
@@ -64,6 +70,7 @@ const showAsLABButton = getElement<HTMLButtonElement>('show-as-lab-button');
 const showAsRGBButton = getElement<HTMLButtonElement>('show-as-rgb-button');
 
 export const domElements: DOMElementData = {
+	advancedMenu,
 	advancedMenuButton,
 	applyCustomColorButton,
 	clearCustomColorButton,
@@ -71,12 +78,17 @@ export const domElements: DOMElementData = {
 	closeCustomColorMenuButton,
 	closeHelpMenuButton,
 	closeHistoryMenuButton,
+	customColorDisplay,
 	customColorElement,
+	customColorInput,
+	customColorMenu,
 	customColorMenuButton,
 	desaturateButton,
 	enableAlphaCheckbox,
 	generateButton,
 	helpMenuButton,
+	helpMenu,
+	historyMenu,
 	historyMenuButton,
 	limitDarknessCheckbox,
 	limitGraynessCheckbox,

@@ -58,6 +58,7 @@ export interface DefaultColorStringsData {
 }
 
 export interface DOMElementData {
+	advancedMenu: HTMLDivElement | null;
 	advancedMenuButton: HTMLButtonElement | null;
 	applyCustomColorButton: HTMLButtonElement | null;
 	clearCustomColorButton: HTMLButtonElement | null;
@@ -65,12 +66,17 @@ export interface DOMElementData {
 	closeCustomColorMenuButton: HTMLButtonElement | null;
 	closeHelpMenuButton: HTMLButtonElement | null;
 	closeHistoryMenuButton: HTMLButtonElement | null;
+	customColorDisplay: HTMLSpanElement | null;
 	customColorElement: HTMLInputElement | null;
+	customColorInput: HTMLInputElement | null;
+	customColorMenu: HTMLDivElement | null;
 	customColorMenuButton: HTMLButtonElement | null;
 	desaturateButton: HTMLButtonElement | null;
 	enableAlphaCheckbox: HTMLInputElement | null;
 	generateButton: HTMLButtonElement | null;
+	helpMenu: HTMLDivElement | null;
 	helpMenuButton: HTMLButtonElement | null;
+	historyMenu: HTMLDivElement | null;
 	historyMenuButton: HTMLButtonElement | null;
 	limitDarknessCheckbox: HTMLInputElement | null;
 	limitGraynessCheckbox: HTMLInputElement | null;
@@ -237,7 +243,6 @@ export interface TimeoutsData {
 export interface DOMData {
 	elements: DOMElementData;
 	ids: DOM_ID_Data;
-	files: DOMFilesData;
 }
 
 // ******** BUNDLE INTERFACES ********

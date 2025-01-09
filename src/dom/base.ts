@@ -12,43 +12,10 @@ import {
 	UIElements
 } from '../index/index.js';
 import { convert } from '../common/convert/index.js';
-import { core, helpers, utils, superUtils } from '../common/index.js';
+import { core, helpers, utils } from '../common/index.js';
 import { data } from '../data/index.js';
 
 const mode = data.mode;
-
-function addConversionButtonEventListeners(): void {
-	try {
-		const addListener = (id: string, colorSpace: ColorSpace) => {
-			const button = document.getElementById(
-				id
-			) as HTMLButtonElement | null;
-
-			if (button) {
-				button.addEventListener('click', () =>
-					superUtils.dom.switchColorSpace(colorSpace)
-				);
-			} else {
-				if (!mode.warnLogs)
-					console.warn(`Element with id "${id}" not found.`);
-			}
-		};
-
-		addListener('show-as-cmyk-button', 'cmyk');
-		addListener('show-as-hex-button', 'hex');
-		addListener('show-as-hsl-button', 'hsl');
-		addListener('show-as-hsv-button', 'hsv');
-		addListener('show-as-lab-button', 'lab');
-		addListener('show-as-rgb-button', 'rgb');
-	} catch (error) {
-		if (mode.errorLogs)
-			console.error(
-				`Failed to add event listeners to conversion buttons: ${error}`
-			);
-
-		return;
-	}
-}
 
 function applyCustomColor(): HSL {
 	try {
@@ -307,37 +274,6 @@ async function initializeUI(): Promise<void> {
 	});
 }
 
-const loadPartials = async (): Promise<void> => {
-	const files = [
-		'./html/advanced-menu.html',
-		'./html/custom-color-menu.html',
-		'./html/help-menu.html',
-		'./html/history-menu.html'
-	];
-
-	try {
-		await Promise.all(
-			files.map(file =>
-				fetch(file)
-					.then(response => {
-						if (!response.ok) {
-							throw new Error(
-								`Failed to load ${file}: ${response.statusText}`
-							);
-						}
-						return response.text();
-					})
-					.then(html => {
-						document.body.insertAdjacentHTML('beforeend', html);
-					})
-			)
-		);
-		if (!mode.quiet) console.log('HTML partials successfully loaded.');
-	} catch (error) {
-		console.error(`Error loading partials: ${error}`);
-	}
-};
-
 function pullParamsFromUI(): PullParamsFromUI {
 	try {
 		const paletteTypeOptionsElement =
@@ -385,27 +321,7 @@ function saturateColor(selectedColor: number): void {
 	}
 }
 
-function showCustomColorPopupDiv(): void {
-	try {
-		const popup = document.getElementById('popup-div');
-
-		if (popup) {
-			popup.classList.toggle('show');
-		} else {
-			if (mode.errorLogs)
-				console.error(
-					"document.getElementById('popup-div') is undefined"
-				);
-
-			return;
-		}
-	} catch (error) {
-		console.error(`Failed to show custom color popup div: ${error}`);
-	}
-}
-
 export const base: DOMBaseFnInterface = {
-	addConversionButtonEventListeners,
 	applyCustomColor,
 	applyFirstColorToUI,
 	copyToClipboard,
@@ -413,8 +329,6 @@ export const base: DOMBaseFnInterface = {
 	desaturateColor,
 	getElementsForSelectedColor,
 	initializeUI,
-	loadPartials,
 	pullParamsFromUI,
-	saturateColor,
-	showCustomColorPopupDiv
+	saturateColor
 } as const;

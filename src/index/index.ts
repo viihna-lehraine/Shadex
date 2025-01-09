@@ -34,7 +34,7 @@ export type {
 	DefaultColorStringsData,
 	Defaults,
 	DOMBaseFnInterface,
-	DOMButtonsFnInterface,
+	DOMElementsInterface,
 	DOMExportPaletteFnInterface,
 	DOMFnMasterInterface,
 	DOMHistoryFnInterface,
