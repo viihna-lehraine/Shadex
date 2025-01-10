@@ -9,7 +9,7 @@ const mode = data.mode;
 
 function hsl(enableAlpha: boolean): HSL {
 	try {
-		const alpha = enableAlpha ? Math.random() : 1;
+		const alpha = enableAlpha ? Math.round(Math.random() * 100) / 100 : 1;
 		const hsl: HSL = {
 			value: {
 				hue: core.sanitize.radial(Math.floor(Math.random() * 360)),
@@ -51,7 +51,7 @@ function hsl(enableAlpha: boolean): HSL {
 
 function sl(enableAlpha: boolean): SL {
 	try {
-		const alpha = enableAlpha ? Math.random() : 1;
+		const alpha = enableAlpha ? Math.round(Math.random() * 100) / 100 : 1;
 		const sl: SL = {
 			value: {
 				saturation: core.sanitize.percentile(

@@ -223,7 +223,6 @@ function initializeEventListeners(): void {
 		}
 	);
 
-	// MAIN - generate palette
 	dom.elements.addEventListener(
 		domIDs.generateButton,
 		'click',

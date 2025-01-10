@@ -1,18 +1,57 @@
-10/31/24
+1. make sure app returns integer values for all color property values (or maybe 1 decimal place)
 
-- retain these conversion methods
-	* hslToCMYK
-	* hslToHex
-	* hslToHSV
-	* hslToLAB
-	* hslToRGB
-	* hslToSL
-	* hslToSV
-	* hslToXYZ
-	* hsvToSV
-	* labToXYZ
-	* rgbToCMYK
-	* rgbToHex
-	* rgbToHSV
-	* rgbToXYZ
-	* xyzToLAB
+2. button showToast functions don't work
+
+3. create basic Help Menu
+
+4. create About page
+
+5. create Advanced Menu
+
+6. create History Menu
+
+7. finish export functionality
+
+8. finish import functionality
+
+9. CONSOLE: id: "hsl_[object Promise]" issue
+
+10. remove duplicated RGB => CMYK conversions
+
+11. console log - "No custom color found. Using a random color"
+	- only print this if trying to use a custom color and it could not be found/used
+
+12. observation - app performs multiple color format conversions for each color
+	improvement - consolidate the logic into a single method to avoid duplication and centralize updates
+
+13. improve mutation logging
+		observation - mutation logs are overly verbose and difficult to read
+		improvement - format logs to focus on key information (i.e. palette ID, timestamp)
+
+14. improve CSS string outputs
+		observation - CSS strings like "cmyk(0,0,0,11)" include values that could be more human-readable
+		improvement - ensure CSS strings are rounded and formatted consistently
+			for example...
+				const cssString = `cmyk(${Math.round(cyan)}%, ${Math.round(magenta)}%, ${Math.round(yellow)}%, ${Math.round(key)}%)`;
+
+15. test edge cases
+		for example...
+			* colors with extreme values (full black, full white)
+			* empty or malformed input (e.g., undefined or invalid values)
+			* browser compatibility for rendering CSS strings
+
+16. for palette generation...
+		force...
+			diadic palettes to EXACTLY 2 colors
+			triadic palettes to EXACTLY 3 colors
+			tetradic palettes to EXACTLY 4 colors
+			hexadic palettes to EXACTLY 6 colors
+
+17. check palette generation logic. I am no longer confident in their correctness
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+IDEAS
+
+1. possibly add pentadic palette generation

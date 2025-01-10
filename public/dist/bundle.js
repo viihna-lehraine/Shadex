@@ -3283,7 +3283,7 @@ const defaults$6 = data.defaults;
 const mode$g = data.mode;
 function hsl(enableAlpha) {
     try {
-        const alpha = enableAlpha ? Math.random() : 1;
+        const alpha = enableAlpha ? Math.round(Math.random() * 100) / 100 : 1;
         const hsl = {
             value: {
                 hue: core.sanitize.radial(Math.floor(Math.random() * 360)),
@@ -3312,7 +3312,7 @@ function hsl(enableAlpha) {
 }
 function sl$1(enableAlpha) {
     try {
-        const alpha = enableAlpha ? Math.random() : 1;
+        const alpha = enableAlpha ? Math.round(Math.random() * 100) / 100 : 1;
         const sl = {
             value: {
                 saturation: core.sanitize.percentile(Math.max(0, Math.min(100, Math.random() * 100))),
@@ -5357,7 +5357,6 @@ function initializeEventListeners() {
             console.log('desaturateButton clicked');
         dom.desaturateColor(selectedColor); // *DEV-NOTE* possible circular dependency
     });
-    // MAIN - generate palette
     dom.elements.addEventListener(domIDs.generateButton, 'click', async (e) => {
         e.preventDefault();
         if (!mode$n.quiet)

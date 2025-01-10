@@ -1,0 +1,4 @@
+PALETTE GENERATION
+
+1. app.js: initializeEventListeners
+2.
