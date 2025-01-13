@@ -15,11 +15,14 @@ const applyCustomColorButton = getElement<HTMLButtonElement>(
 const clearCustomColorButton = getElement<HTMLButtonElement>(
 	'clear-custom-color-button'
 );
+const closeAdvancedMenuButton = getElement<HTMLButtonElement>(
+	'close-advanced-menu-button'
+);
 const closeCustomColorMenuButton = getElement<HTMLButtonElement>(
 	'close-custom-color-menu-button'
 );
-const closeAdvancedMenuButton = getElement<HTMLButtonElement>(
-	'close-advanced-menu-button'
+const closeDeveloperMenuButton = getElement<HTMLButtonElement>(
+	'close-developer-menu-button'
 );
 const closeHelpMenuButton = getElement<HTMLButtonElement>(
 	'close-help-menu-button'
@@ -28,20 +31,23 @@ const closeHistoryMenuButton = getElement<HTMLButtonElement>(
 	'close-history-menu-button'
 );
 const customColorDisplay = getElement<HTMLSpanElement>('custom-color-display');
-const customColorElement = getElement<HTMLInputElement>('custom-color');
 const customColorInput = getElement<HTMLInputElement>('custom-color-input');
 const customColorMenu = getElement<HTMLDivElement>('custom-color-menu');
 const customColorMenuButton = getElement<HTMLButtonElement>(
 	'custom-color-menu-button'
 );
 const desaturateButton = getElement<HTMLButtonElement>('desaturate-button');
+const developerMenu = getElement<HTMLDivElement>('developer-menu');
+const developerMenuButton = getElement<HTMLButtonElement>(
+	'developer-menu-button'
+);
 const enableAlphaCheckbox = getElement<HTMLInputElement>(
 	'enable-alpha-checkbox'
 );
 const generateButton = getElement<HTMLButtonElement>('generate-button');
 const helpMenu = getElement<HTMLDivElement>('help-menu');
-const historyMenu = getElement<HTMLDivElement>('history-menu');
 const helpMenuButton = getElement<HTMLButtonElement>('help-menu-button');
+const historyMenu = getElement<HTMLDivElement>('history-menu');
 const historyMenuButton = getElement<HTMLButtonElement>('history-menu-button');
 const limitDarknessCheckbox = getElement<HTMLInputElement>(
 	'limit-darkness-checkbox'
@@ -58,6 +64,7 @@ const paletteNumberOptions = getElement<HTMLInputElement>(
 const paletteTypeOptions = getElement<HTMLSelectElement>(
 	'palette-type-options'
 );
+const resetButton = getElement<HTMLButtonElement>('reset-button');
 const saturateButton = getElement<HTMLButtonElement>('saturate-button');
 const selectedColorOption = getElement<HTMLSelectElement>(
 	'selected-color-option'
@@ -76,14 +83,16 @@ export const domElements: DOMElementData = {
 	clearCustomColorButton,
 	closeAdvancedMenuButton,
 	closeCustomColorMenuButton,
+	closeDeveloperMenuButton,
 	closeHelpMenuButton,
 	closeHistoryMenuButton,
 	customColorDisplay,
-	customColorElement,
 	customColorInput,
 	customColorMenu,
 	customColorMenuButton,
 	desaturateButton,
+	developerMenu,
+	developerMenuButton,
 	enableAlphaCheckbox,
 	generateButton,
 	helpMenuButton,
@@ -95,6 +104,7 @@ export const domElements: DOMElementData = {
 	limitLightnessCheckbox,
 	paletteNumberOptions,
 	paletteTypeOptions,
+	resetButton,
 	saturateButton,
 	selectedColorOption,
 	showAsCMYKButton,

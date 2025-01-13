@@ -45,6 +45,9 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 			(helpers.dom.validateAndConvertColor(customColor) as HSL) ??
 			utils.random.hsl(options.enableAlpha);
 
+		if (mode.debug)
+			console.log(`Custom color: ${JSON.stringify(customColor)}`);
+
 		options.customColor = validatedCustomColor;
 
 		const palette = await generate.selectedPalette(options);

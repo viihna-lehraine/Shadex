@@ -1,0 +1,153 @@
+// File: src/index/config.ts
+
+interface EnvDataApp {
+	app: 'dev' | 'prod';
+	debug: boolean;
+	errorLogs: boolean;
+	gracefulErrors: boolean;
+	infoLogs: boolean;
+	quiet: boolean;
+	stackTrace: boolean;
+	verbose: boolean;
+	warnLogs: boolean;
+}
+
+interface EnvDataColors {
+	slaValueAdjustment: number;
+	xyzMaxX: number;
+	xyzMaxY: number;
+	xyzMaxZ: number;
+	xyzMinX: number;
+	xyzMinY: number;
+	xyzMinZ: number;
+	darkThreshold: number;
+	grayThreshold: number;
+	lightThreshold: number;
+	compPaletteHueShiftRange: number | null;
+	compPaletteLightShiftRange: number | null;
+	compPaletteSatShiftRange: number | null;
+	diadicPaletteHueShiftRange: number | null;
+	diadicPaletteLightShiftRange: number | null;
+	diadicPaletteSatShiftRange: number | null;
+	hexadPaletteHueShiftRange: number | null;
+	hexadPaletteLightShiftRange: number | null;
+	hexadPaletteSatShiftRange: number | null;
+	randomPaletteHueShiftRange: number | null;
+	randomPaletteLightShiftRange: number | null;
+	randomPaletteSatShiftRange: number | null;
+	splitCompPaletteHueShiftRange: number | null;
+	splitCompPaletteLightShiftRange: number | null;
+	splitCompPaletteSatShiftRange: number | null;
+	tetraPaletteHueShiftRange: number | null;
+	tetraPaletteLightShiftRange: number | null;
+	tetraPaletteSatShiftRange: number | null;
+	triadPaletteHueShiftRange: number | null;
+	triadPaletteLightShiftRange: number | null;
+	triadPaletteSatShiftRange: number | null;
+}
+
+interface EnvDataDOMSettings {
+	buttonDebounce: number;
+	inputDebounce: number;
+	copyButtonTextTimeout: number;
+	toastTimeout: number;
+	tooltipTimeout: number;
+}
+
+interface EnvDataDOMElements {
+	dom_AdvancedMenu: string;
+	dom_AdvancedMenuButton: string;
+	dom_ApplyCustomColorButton: string;
+	dom_ClearCustomColorButton: string;
+	dom_CloseAdvancedMenuButton: string;
+	dom_CloseCustomColorMenuButton: string;
+	dom_CloseDeveloperMenuButton: string;
+	dom_CloseHelpMenuButton: string;
+	dom_CloseHistoryMenuButton: string;
+	dom_CustomColorDisplay: string;
+	dom_CustomColorInput: string;
+	dom_CustomColorMenu: string;
+	dom_CustomColorMenuButton: string;
+	dom_DesaturateButton: string;
+	dom_DeveloperMenu: string;
+	dom_EnableAlphaCheckbox: string;
+	dom_GenerateButton: string;
+	dom_HelpMenu: string;
+	dom_HelpMenuButton: string;
+	dom_HistoryMenu: string;
+	dom_HistoryMenuButton: string;
+	dom_LimitDarknessCheckbox: string;
+	dom_LimitGraynessCheckbox: string;
+	dom_LimitLightnessCheckbox: string;
+	dom_PaletteNumberOptions: string;
+	dom_PaletteTypeOptions: string;
+	dom_ResetButton: string;
+	dom_SaturateButton: string;
+	dom_SelectedColorOption: string;
+	dom_ShowAsCMYKButton: string;
+	dom_ShowAsHexButton: string;
+	dom_ShowAsHSLButton: string;
+	dom_ShowAsHSVButton: string;
+	dom_ShowAsLABButton: string;
+	dom_ShowAsRGBButton: string;
+}
+
+interface EnvDataIDBDefaults {
+	idbDefaults_ColorSpace: string;
+	idbDefaults_LastTableID: number;
+	idbDefaults_KeysAPP_SETTINGS: string;
+	idbDefaults_KeysCUSTOM_COLOR: string;
+	idbDefaults_StoreNamesCUSTOM_COLOR: string;
+	idbDefaults_StoreNamesMUTATIONS: string;
+	idbDefaults_StoreNamesPALETTES: string;
+	idbDefaults_StoreNamesSETTINGS: string;
+	idbDefaults_StoreNamesTABLES: string;
+}
+
+interface EnvDataProbabilities {
+	probabilities_Value_1: number;
+	probabilities_Value_2: number;
+	probabilities_Value_3: number;
+	probabilities_Value_4: number;
+	probabilities_Value_5: number;
+	probabilities_Value_6: number;
+	probabilities_Value_7: number;
+	probabilities_Weight_1: number;
+	probabilities_Weight_2: number;
+	probabilities_Weight_3: number;
+	probabilities_Weight_4: number;
+	probabilities_Weight_5: number;
+	probabilities_Weight_6: number;
+	probabilities_Weight_7: number;
+}
+
+export interface EnvData
+	extends EnvDataApp,
+		EnvDataColors,
+		EnvDataDOMSettings,
+		EnvDataDOMElements,
+		EnvDataIDBDefaults,
+		EnvDataProbabilities {}
+
+export interface EnvFnInterface {
+	load(...filePaths: string[]): void;
+	parse<T extends EnvSchema>(schema: T): ParsedEnv<T> & EnvData;
+	print(keys: string[]): void;
+}
+
+type EnvType = 'string' | 'number' | 'boolean' | 'array' | 'null';
+
+export interface EnvSchema {
+	[key: string]: {
+		type: EnvType;
+		default?: string | number | boolean | string[] | number[] | null;
+		allowedValues?: string[];
+		nullable?: boolean;
+	};
+}
+
+export type ParsedEnv<T extends EnvSchema> = {
+	[K in keyof T]: T[K]['nullable'] extends true
+		? T[K]['default'] | null
+		: T[K]['default'];
+};

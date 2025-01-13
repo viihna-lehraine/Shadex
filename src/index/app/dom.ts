@@ -1,26 +1,12 @@
 // File: src/index/app/dom.js
 
-import {
-	ColorSpace,
-	GetElementsForSelectedColor,
-	HSL,
-	Palette,
-	PullParamsFromUI,
-	UIElements
-} from '../index.js';
+import { ColorSpace, HSL, Palette, UIElements } from '../index.js';
 
 export interface DOMBaseFnInterface {
-	applyCustomColor: () => void;
 	applyFirstColorToUI(color: HSL): HSL;
 	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
 	defineUIElements(): UIElements;
-	desaturateColor(selectedColor: number): void;
-	getElementsForSelectedColor(
-		selectedColor: number
-	): GetElementsForSelectedColor;
 	initializeUI: () => Promise<void>;
-	pullParamsFromUI(): PullParamsFromUI;
-	saturateColor(selectedColor: number): void;
 }
 
 export interface DOMElementsInterface {
@@ -46,17 +32,10 @@ export interface DOMHistoryFnInterface {
 }
 
 export interface DOMFnMasterInterface {
-	applyCustomColor: () => void;
 	applyFirstColorToUI(color: HSL): HSL;
 	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
 	defineUIElements(): UIElements;
-	desaturateColor(selectedColor: number): void;
-	getElementsForSelectedColor(
-		selectedColor: number
-	): GetElementsForSelectedColor;
 	initializeUI: () => Promise<void>;
-	pullParamsFromUI(): PullParamsFromUI;
-	saturateColor(selectedColor: number): void;
 	elements: DOMElementsInterface;
 	exportPalette: DOMExportPaletteFnInterface;
 	history: DOMHistoryFnInterface;

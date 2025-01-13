@@ -29,6 +29,8 @@ export interface AdjustmentsData {
 	slaValue: number;
 }
 
+export type AppModeData = 'dev' | 'prod';
+
 export interface DebounceData {
 	button: number;
 	input: number;
@@ -64,14 +66,16 @@ export interface DOMElementData {
 	clearCustomColorButton: HTMLButtonElement | null;
 	closeAdvancedMenuButton: HTMLButtonElement | null;
 	closeCustomColorMenuButton: HTMLButtonElement | null;
+	closeDeveloperMenuButton: HTMLButtonElement | null;
 	closeHelpMenuButton: HTMLButtonElement | null;
 	closeHistoryMenuButton: HTMLButtonElement | null;
 	customColorDisplay: HTMLSpanElement | null;
-	customColorElement: HTMLInputElement | null;
 	customColorInput: HTMLInputElement | null;
 	customColorMenu: HTMLDivElement | null;
 	customColorMenuButton: HTMLButtonElement | null;
 	desaturateButton: HTMLButtonElement | null;
+	developerMenu: HTMLDivElement | null;
+	developerMenuButton: HTMLButtonElement | null;
 	enableAlphaCheckbox: HTMLInputElement | null;
 	generateButton: HTMLButtonElement | null;
 	helpMenu: HTMLDivElement | null;
@@ -83,6 +87,7 @@ export interface DOMElementData {
 	limitLightnessCheckbox: HTMLInputElement | null;
 	paletteNumberOptions: HTMLInputElement | null;
 	paletteTypeOptions: HTMLSelectElement | null;
+	resetButton: HTMLButtonElement | null;
 	saturateButton: HTMLButtonElement | null;
 	selectedColorOption: HTMLSelectElement | null;
 	showAsCMYKButton: HTMLButtonElement | null;
@@ -106,11 +111,13 @@ export interface DOM_ID_Data {
 	clearCustomColorButton: string;
 	closeAdvancedMenuButton: string;
 	closeCustomColorMenuButton: string;
+	closeDeveloperMenuButton: string;
 	closeHelpMenuButton: string;
 	closeHistoryMenuButton: string;
 	customColorElement: string;
 	customColorMenuButton: string;
 	desaturateButton: string;
+	developerMenuButton: string;
 	enableAlphaCheckbox: string;
 	generateButton: string;
 	helpMenuButton: string;
@@ -120,6 +127,7 @@ export interface DOM_ID_Data {
 	limitLightnessCheckbox: string;
 	paletteNumberOptions: string;
 	paletteTypeOptions: string;
+	resetButton: string;
 	saturateButton: string;
 	selectedColorOption: string;
 	showAsCMYKButton: string;
@@ -159,11 +167,13 @@ export interface LimitsData {
 }
 
 export interface ModeData {
+	app: 'dev' | 'prod';
 	debug: boolean;
 	errorLogs: boolean;
 	gracefulErrors: boolean;
 	infoLogs: boolean;
 	quiet: boolean;
+	stackTrace: boolean;
 	verbose: boolean;
 	warnLogs: boolean;
 }

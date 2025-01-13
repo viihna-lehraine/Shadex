@@ -19,8 +19,7 @@ function getGenButtonArgs(): GenButtonArgs | null {
 		const paletteNumberOptions =
 			data.consts.dom.elements.paletteNumberOptions;
 		const paletteTypeOptions = data.consts.dom.elements.paletteTypeOptions;
-		const customColorRaw =
-			data.consts.dom.elements.customColorElement?.value;
+		const customColorRaw = data.consts.dom.elements.customColorInput?.value;
 		const enableAlphaCheckbox =
 			data.consts.dom.elements.enableAlphaCheckbox;
 		const limitDarknessCheckbox =

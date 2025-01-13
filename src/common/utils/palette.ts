@@ -8,9 +8,9 @@ import {
 	Palette,
 	PaletteItem
 } from '../../index';
-import { core } from '../core';
-import { data } from '../../data';
-import { helpers } from '../helpers';
+import { core } from '../core/index.js';
+import { data } from '../../data/index.js';
+import { helpers } from '../helpers/index.js';
 
 const mode = data.mode;
 

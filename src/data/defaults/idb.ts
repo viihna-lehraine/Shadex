@@ -4,11 +4,11 @@ import { IDBDefaultsData, MutationLog, Settings } from '../../index/index.js';
 
 const mutation: MutationLog = {
 	timestamp: new Date().toISOString(),
-	key: 'test_key',
+	key: 'default_key',
 	action: 'update' as 'update',
 	newValue: { value: 'new_value' },
 	oldValue: { value: 'old_value' },
-	origin: 'test'
+	origin: 'DEFAULT'
 };
 
 const settings: Settings = {

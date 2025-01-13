@@ -20,6 +20,7 @@
 
 11. console log - "No custom color found. Using a random color"
 	- only print this if trying to use a custom color and it could not be found/used
+		- elements.js - initialzeEventListeners()
 
 12. observation - app performs multiple color format conversions for each color
 	improvement - consolidate the logic into a single method to avoid duplication and centralize updates
@@ -48,6 +49,8 @@
 			hexadic palettes to EXACTLY 6 colors
 
 17. check palette generation logic. I am no longer confident in their correctness
+
+18. switch from using hard-coded Mode data within the JS itself to using .env files
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

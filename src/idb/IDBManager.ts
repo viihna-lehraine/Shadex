@@ -158,8 +158,11 @@ export class IDBManager implements IDBManagerInterface {
 				this.getDefaultKey('APP_SETTINGS')
 			);
 
+			if (this.mode.debug)
+				console.log(`Fetched settings from IndexedDB\n${settings}`);
+
 			return settings?.lastPaletteID ?? 0;
-		}, 'Error fetching current palette ID');
+		}, 'IDBManager: getCurrentPaletteID(): Error fetching current palette ID');
 	}
 
 	public async getCachedSettings(): Promise<Settings> {
@@ -205,7 +208,7 @@ export class IDBManager implements IDBManagerInterface {
 
 			this.cache.customColor = entry.color;
 			return this.createMutationLogger(entry.color, storeName);
-		}, 'Error fetching custom color');
+		}, 'IDBManager.getCustomColor(): Error fetching custom color');
 	}
 
 	public getLoggedObject<T extends object>(
@@ -222,7 +225,8 @@ export class IDBManager implements IDBManagerInterface {
 	public async getNextTableID(): Promise<string | null> {
 		return this.handleAsync(async () => {
 			const settings = await this.getSettings();
-			const nextID = settings.lastTableID + 1;
+			const lastTableID = settings.lastTableID ?? 0;
+			const nextID = lastTableID + 1;
 
 			await this.saveData('settings', 'appSettings', {
 				...settings,
@@ -230,7 +234,7 @@ export class IDBManager implements IDBManagerInterface {
 			});
 
 			return `palette_${nextID}`;
-		}, 'Error fetching next table ID');
+		}, 'IDBManager.getNextTableID(): Error fetching next table ID');
 	}
 
 	public async getNextPaletteID(): Promise<number | null> {
@@ -238,10 +242,15 @@ export class IDBManager implements IDBManagerInterface {
 			const currentID = await this.getCurrentPaletteID();
 			const newID = currentID + 1;
 
+			if (this.mode.stackTrace)
+				console.trace(
+					`IDBManager method getNextPalleteID was called\n.Palette ID before save: ${currentID}`
+				);
+
 			await this.updateCurrentPaletteID(newID);
 
 			return newID;
-		}, 'Error fetching next palette ID');
+		}, 'IDBManager.getNextPaletteID(): Error fetching next palette ID');
 	}
 
 	public async getSettings(): Promise<Settings> {
@@ -253,7 +262,7 @@ export class IDBManager implements IDBManagerInterface {
 			);
 
 			return settings ?? this.defaultSettings;
-		}, 'Error fetching settings');
+		}, 'IDBManager.getSettings(): Error fetching settings');
 	}
 
 	// **DEV-NOTE** FIGURE OUT HOW TO IMPLEMENT handleAsync HERE
@@ -282,6 +291,23 @@ export class IDBManager implements IDBManagerInterface {
 
 	private async initializeDB(): Promise<void> {
 		await this.dbPromise;
+
+		const db = await this.getDB();
+		const settings = await db.get(
+			this.getStoreName('SETTINGS'),
+			this.getDefaultKey('APP_SETTINGS')
+		);
+
+		if (!settings) {
+			if (!this.mode.quiet) {
+				console.log(`Initializing default settings...`);
+			}
+
+			await db.get(
+				this.getStoreName('SETTINGS'),
+				this.getDefaultKey('APP_SETTINGS')
+			);
+		}
 	}
 
 	public async renderPalette(tableId: string): Promise<void | null> {
@@ -299,7 +325,44 @@ export class IDBManager implements IDBManagerInterface {
 			paletteRow.appendChild(tableElement);
 
 			if (!this.mode.quiet) console.log(`Rendered palette ${tableId}.`);
-		}, 'Error rendering palette');
+		}, 'IDBManager.renderPalette(): Error rendering palette');
+	}
+
+	public async resetDatabase(): Promise<void | null> {
+		return this.handleAsync(async () => {
+			const db = await this.getDB();
+
+			// Delete all data from each object store
+			const storeNames = Object.values(this.STORE_NAMES);
+
+			for (const storeName of storeNames) {
+				const tx = db.transaction(storeName, 'readwrite');
+				const store = tx.objectStore(storeName);
+
+				await store.clear();
+				await tx.done;
+			}
+
+			if (this.mode.debug) console.log('All object stores cleared.');
+
+			// Re-initialize default settings
+			const tx = db.transaction(
+				this.getStoreName('SETTINGS'),
+				'readwrite'
+			);
+			const store = tx.objectStore(this.getStoreName('SETTINGS'));
+
+			await store.put(
+				this.defaultSettings,
+				this.getDefaultKey('APP_SETTINGS')
+			);
+			await tx.done;
+
+			if (!this.mode.quiet)
+				console.log('Default IDB settings re-initialized.');
+
+			return;
+		}, 'Error resetting database');
 	}
 
 	public async saveData<T>(
@@ -320,7 +383,7 @@ export class IDBManager implements IDBManagerInterface {
 					origin: 'saveData'
 				});
 			});
-		}, 'Error saving data');
+		}, 'IDBManager.saveData(): Error saving data');
 	}
 
 	public async savePalette(
@@ -337,7 +400,7 @@ export class IDBManager implements IDBManagerInterface {
 			await store.put({ key: id, ...paletteToSave });
 
 			if (!this.mode.quiet) this.log(`Palette ${id} saved successfully.`);
-		}, 'Error saving palette');
+		}, 'IDBManager.savePalette(): Error saving palette');
 	}
 
 	public async savePaletteToDB(
@@ -362,13 +425,18 @@ export class IDBManager implements IDBManagerInterface {
 				limitLight
 			);
 
+			const idParts = newPalette.id.split('_');
+			if (idParts.length !== 2 || isNaN(Number(idParts[1]))) {
+				throw new Error(`Invalid palette ID format: ${newPalette.id}`);
+			}
+
 			await this.savePalette(newPalette.id, {
-				tableID: parseInt(newPalette.id.split('_')[1]),
+				tableID: parseInt(idParts[1], 10),
 				palette: newPalette
 			});
 
 			return newPalette;
-		}, 'Error saving palette to DB');
+		}, 'IDBManager.savePaletteToDB(): Error saving palette to DB');
 	}
 
 	public async saveSettings(newSettings: Settings): Promise<void | null> {
@@ -376,7 +444,7 @@ export class IDBManager implements IDBManagerInterface {
 			await this.saveData('settings', 'appSettings', newSettings);
 
 			if (!this.mode.quiet) console.log('Settings updated');
-		}, 'Error saving settings');
+		}, 'IDBManager.saveSettings(): Error saving settings');
 	}
 
 	public async updateEntryInPalette(
@@ -421,7 +489,7 @@ export class IDBManager implements IDBManagerInterface {
 
 			if (!this.mode.quiet)
 				this.log(`Entry ${entryIndex} in palette ${tableID} updated.`);
-		}, 'Error updating entry in palette');
+		}, 'IDBManager.updateEntryInPalette(): Error updating entry in palette');
 	}
 
 	//
@@ -467,7 +535,7 @@ export class IDBManager implements IDBManagerInterface {
 					this.log(`Table with ID ${id} not found.`, 'warn');
 			}
 			return result;
-		}, 'Error fetching table');
+		}, 'IDBManager.getTable(): Error fetching table');
 	}
 
 	private async handleAsync<T>(
@@ -486,7 +554,7 @@ export class IDBManager implements IDBManagerInterface {
 				);
 			}
 
-			return null;
+			throw error;
 		}
 	}
 
@@ -512,7 +580,7 @@ export class IDBManager implements IDBManagerInterface {
 
 			if (!this.mode.quiet)
 				this.log(`Logged mutation: ${JSON.stringify(log)}`);
-		}, 'Error logging mutation');
+		}, 'IDBManager.logMutation(): Error logging mutation');
 	}
 
 	private resolveKey<K extends keyof typeof this.DEFAULT_KEYS>(
@@ -533,12 +601,15 @@ export class IDBManager implements IDBManagerInterface {
 			const tx = db.transaction('settings', 'readwrite');
 			const store = tx.objectStore('settings');
 
+			if (this.mode.debug)
+				console.log(`Updating curent palette ID to ${newID}`);
+
 			await store.put({ key: 'appSettings', lastPaletteID: newID });
 			await tx.done;
 
 			if (!this.mode.quiet)
 				this.log(`Current palette ID updated to ${newID}`);
-		}, 'Error updating current palette ID');
+		}, 'IDBManager.updateCurrentPaletteID(): Error updating current palette ID');
 	}
 
 	private async withStore<

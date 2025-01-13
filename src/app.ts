@@ -19,27 +19,27 @@ const mode = data.mode;
 document.addEventListener('DOMContentLoaded', async () => {
 	console.log('DOM content loaded - Initializing application');
 
-	if (!mode.quiet) console.log('HTML partials loaded. Initializing UI...');
+	if (!mode.quiet) console.log('Initializing UI...');
 
 	const domElements = dom.defineUIElements();
 
 	if (!domElements) {
 		if (mode.errorLogs)
 			console.error(
-				'Failed to initialize DOM elements: Some elements could not be found.'
+				'Failed to properly initialize the UI. Some DOM elements could not be found.'
 			);
 
-		return;
+		process.exit(201);
 	}
 
-	await dom.initializeUI();
+	try {
+		await dom.initializeUI();
 
-	if (!mode.quiet) console.log('UI successfully initialized');
+		if (!mode.quiet) console.log('UI successfully initialized');
+	} catch (error) {
+		if (mode.errorLogs) console.error(`Failed to initialize UI\n${error}`);
 
-	if (!domElements) {
-		console.error('Failed to initialize DOM elements');
-
-		return;
+		process.exit(202);
 	}
 
 	const selectedColorOption = consts.dom.elements.selectedColorOption;
@@ -67,13 +67,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 		if (!mode.quiet)
 			console.log('Event listeners have been successfully initialized');
-	} catch {
+	} catch (error) {
 		if (mode.errorLogs)
-			console.error('Failed to initialize event listeners');
+			console.error(`Failed to initialize event listeners.\n${error}`);
+
+		process.exit(203);
 	}
 
 	if (!mode.quiet)
 		console.log(
-			'Application successfully initialized. Awaiting user input'
+			'Application successfully initialized. Awaiting user input.'
 		);
 });

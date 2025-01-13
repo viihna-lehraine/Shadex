@@ -31,6 +31,7 @@ export interface IDBManagerInterface {
 		IDBPObjectStore<PaletteSchema, [StoreName], StoreName, 'readwrite'>
 	>;
 	renderPalette(tableId: string): Promise<void | null>;
+	resetDatabase(): Promise<void | null>;
 	updateEntryInPalette(
 		tableID: string,
 		entryIndex: number,

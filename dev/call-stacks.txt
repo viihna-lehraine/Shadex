@@ -1,4 +1,5 @@
 PALETTE GENERATION
 
-1. app.js: initializeEventListeners
-2.
+1. click event
+2. initializeEventListeners()		* src/dom/elements.js
+3. genPalette()						* src/palette/main.js

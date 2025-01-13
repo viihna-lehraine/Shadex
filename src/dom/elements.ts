@@ -3,7 +3,7 @@
 import { DOMElementsInterface, HSL, PaletteOptions } from '../index/index.js';
 import { core, superUtils, utils } from '../common/index.js';
 import { data } from '../data/index.js';
-import { dom } from '../dom/index.js'; // *DEV-NOTE* this might cause a circular dependency
+import { domUtils } from '../dom/utils/index.js';
 import { IDBManager } from '../idb/index.js';
 import { mode } from '../data/mode/index.js';
 import { start } from '../palette/index.js';
@@ -121,7 +121,7 @@ function initializeEventListeners(): void {
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
-			const customHSLColor = dom.applyCustomColor();
+			const customHSLColor = domUtils.applyCustomColor();
 			const customHSLColorClone = core.base.clone(customHSLColor);
 
 			await idb.saveData(
@@ -157,6 +157,18 @@ function initializeEventListeners(): void {
 			if (!mode.quiet) console.log('closeCustomColorMenuButton clicked');
 
 			domElements.customColorMenu?.classList.add('hidden');
+		}
+	);
+
+	addEventListener(
+		domIDs.closeDeveloperMenuButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			if (!mode.quiet) console.log('closeDeveloperMenuButton clicked');
+
+			domElements.developerMenu?.classList.add('hidden');
 		}
 	);
 
@@ -219,70 +231,83 @@ function initializeEventListeners(): void {
 
 			if (!mode.quiet) console.log('desaturateButton clicked');
 
-			dom.desaturateColor(selectedColor); // *DEV-NOTE* possible circular dependency
+			domUtils.desaturateColor(selectedColor);
 		}
 	);
 
-	dom.elements.addEventListener(
-		domIDs.generateButton,
+	addEventListener(
+		domIDs.developerMenuButton,
 		'click',
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
-			if (!mode.quiet) console.log('generateButton clicked');
-
-			const {
-				paletteType,
-				numBoxes,
-				enableAlpha,
-				limitDarkness,
-				limitGrayness,
-				limitLightness
-			} = dom.pullParamsFromUI();
-
-			let customColor = (await idb.getCustomColor()) as HSL | null;
-
-			if (!customColor) {
+			if (mode.app !== 'dev') {
 				if (!mode.quiet)
-					console.info('No custom color found. Using a random color');
+					console.error(
+						'Cannot access developer menu in production mode.'
+					);
+
+				return;
+			}
+
+			if (!mode.quiet) console.log('developerMenuButton clicked');
+
+			domElements.developerMenu?.classList.remove('hidden');
+		}
+	);
+
+	addEventListener(domIDs.generateButton, 'click', async (e: MouseEvent) => {
+		e.preventDefault();
+
+		if (!mode.quiet) console.log('generateButton clicked');
+
+		const {
+			paletteType,
+			numBoxes,
+			enableAlpha,
+			limitDarkness,
+			limitGrayness,
+			limitLightness
+		} = domUtils.pullParamsFromUI();
+
+		let customColor = (await idb.getCustomColor()) as HSL | null;
+
+		if (!customColor) {
+			if (!mode.quiet)
+				// console.info('No custom color found. Using a random color'); *DEV-NOTE* see notes.txt for more info about what to do with this
 
 				customColor = utils.random.hsl(true);
-			}
-
-			const paletteOptions: PaletteOptions = {
-				paletteType,
-				numBoxes,
-				customColor: core.base.clone(customColor),
-				enableAlpha,
-				limitDarkness,
-				limitGrayness,
-				limitLightness
-			};
-
-			await start.genPalette(paletteOptions);
 		}
-	);
 
-	dom.elements.addEventListener(
-		domIDs.helpMenuButton,
-		'click',
-		async (e: MouseEvent) => {
-			e.preventDefault();
+		const paletteOptions: PaletteOptions = {
+			paletteType,
+			numBoxes,
+			customColor: core.base.clone(customColor),
+			enableAlpha,
+			limitDarkness,
+			limitGrayness,
+			limitLightness
+		};
 
-			const helpMenuContent = document.querySelector(
-				'.help-menu-content'
-			) as HTMLElement | null;
+		await start.genPalette(paletteOptions);
+	});
 
-			if (helpMenuContent) {
-				const isHidden =
-					getComputedStyle(helpMenuContent).display === 'none';
+	addEventListener(domIDs.helpMenuButton, 'click', async (e: MouseEvent) => {
+		e.preventDefault();
 
-				helpMenuContent.style.display = isHidden ? 'flex' : 'none';
+		const helpMenuContent = document.querySelector(
+			'.help-menu-content'
+		) as HTMLElement | null;
 
-				if (!mode.quiet) console.log('helpMenuButton clicked');
-			}
+		if (helpMenuContent) {
+			const isHidden =
+				getComputedStyle(helpMenuContent).display === 'none';
+
+			helpMenuContent.style.display = isHidden ? 'flex' : 'none';
+
+			if (!mode.quiet) console.log('helpMenuButton clicked');
 		}
-	);
+	});
 
 	addEventListener(
 		domIDs.historyMenuButton,
@@ -305,6 +330,32 @@ function initializeEventListeners(): void {
 		}
 	);
 
+	addEventListener(domIDs.resetButton, 'click', async (e: MouseEvent) => {
+		e.preventDefault();
+
+		if (!mode.quiet) console.log('resetButton clicked');
+
+		const confirmReset = confirm(
+			'Are you sure you want to reset the cache?'
+		);
+
+		if (!confirmReset) return;
+
+		try {
+			IDBManager.getInstance().resetDatabase();
+
+			if (!mode.quiet)
+				console.log('IndexedDB Data has been successfully reset.');
+
+			alert('Cached IDB data reset successfully!');
+		} catch (error) {
+			if (mode.errorLogs)
+				console.error(`Failed to reset IndexedDB: ${error}`);
+
+			alert('Failed to reset IndexedDB data.');
+		}
+	});
+
 	addEventListener(domIDs.saturateButton, 'click', async (e: MouseEvent) => {
 		e.preventDefault();
 
@@ -314,7 +365,7 @@ function initializeEventListeners(): void {
 			? parseInt(domElements.selectedColorOption.value, 10)
 			: 0;
 
-		dom.saturateColor(selectedColor);
+		domUtils.saturateColor(selectedColor);
 	});
 
 	window.addEventListener('click', async (e: MouseEvent) => {

@@ -8,8 +8,10 @@
 	"description": "*** Web-based color palette generator. Produces 8 varieties of color scheme and can convert between 6 colorspaces.",
 	"main": "./public/dist/bundle.js",
 	"scripts": {
-		"build": "npm run clean && tsc && rollup -c",
-		"clean": "rm -rf ./public/dist && rm -rf ./public/js && mkdir ./public/dist && mkdir ./public/js",
+		"build:dist": "npm run clean:all && tsc && rollup -c",
+		"build:js": "npm run clean:all && tsc",
+		"clean:all": "rm -rf ./public/dist && rm -rf ./public/js && mkdir ./public/dist && mkdir ./public/js",
+		"clean:js": "rm -rf ./public/js && mkdir ./public/js",
 		"fix": "npm run format && npm run lint:fix",
 		"format": "npx prettier . --write",
 		"lint": "npx eslint",
