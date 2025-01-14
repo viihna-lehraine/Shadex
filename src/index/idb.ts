@@ -20,6 +20,7 @@ export interface PaletteSchema {
 		value: { color: HSL };
 	};
 	mutations: {
+		key: string;
 		timestamp: string;
 		value: MutationLog;
 	};

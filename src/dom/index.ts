@@ -2,13 +2,15 @@
 
 import { DOMFnMasterInterface } from '../index/index.js';
 import { base } from './base.js';
-import { elements } from './elements.js';
+import { events } from './events/index.js';
 import { exportPalette } from './exportPalette.js';
 import { history } from './history.js';
+import { validate } from './validate.js';
 
 export const dom: DOMFnMasterInterface = {
 	...base,
-	elements,
+	events,
 	exportPalette,
-	history
+	history,
+	validate
 };

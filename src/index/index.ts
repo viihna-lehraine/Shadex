@@ -34,20 +34,18 @@ export type {
 	DefaultColorStringsData,
 	Defaults,
 	DOMBaseFnInterface,
-	DOMElementsInterface,
+	DOMEventsInterface,
 	DOMExportPaletteFnInterface,
+	DOMFnEventsInterface,
 	DOMFnMasterInterface,
 	DOMHistoryFnInterface,
 	DOMData,
 	DOMElementData,
-	DOMFilesData,
+	DOMValidateFnInterface,
 	DOM_ID_Data,
 	GenPaletteArgs,
 	GenPaletteFnInterface,
-	IDBData,
-	IDB_DEFAULT_KEYS_Data,
 	IDBDefaultsData,
-	IDB_STORE_NAMES_Data,
 	LimitsData,
 	LoggerFnDebugInterface,
 	LoggerFnMasterInterface,
@@ -71,7 +69,9 @@ export type {
 	ProbabilitiesData,
 	SetsData,
 	ThresholdsData,
-	TimeoutsData
+	TimeoutsData,
+	UIFnBaseInterface,
+	UIFnMasterInterface
 } from './app/index.js';
 export type { IDBManagerInterface } from './classes.js';
 export type {
@@ -158,6 +158,13 @@ export type {
 	StoredPaletteUnbranded
 } from './idb.js';
 export type {
+	Palette,
+	PaletteItem,
+	PaletteItemUnbranded,
+	PaletteOptions,
+	PaletteUnbranded
+} from './palette.js';
+export type {
 	AlphaRange,
 	ByteRange,
 	ColorValueRange,
@@ -174,10 +181,3 @@ export type {
 	XYZ_Y,
 	XYZ_Z
 } from './sets.js';
-export type {
-	Palette,
-	PaletteItem,
-	PaletteItemUnbranded,
-	PaletteOptions,
-	PaletteUnbranded
-} from './palette.js';

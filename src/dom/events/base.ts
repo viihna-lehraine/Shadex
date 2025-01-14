@@ -1,16 +1,16 @@
-// File: src/dom/elements.js
+// File: src/dom/events/base.js
 
-import { DOMElementsInterface, HSL, PaletteOptions } from '../index/index.js';
-import { core, superUtils, utils } from '../common/index.js';
-import { data } from '../data/index.js';
-import { domUtils } from '../dom/utils/index.js';
-import { IDBManager } from '../idb/index.js';
-import { mode } from '../data/mode/index.js';
-import { start } from '../palette/index.js';
+import { DOMEventsInterface, HSL, PaletteOptions } from '../../index/index.js';
+import { core, superUtils, utils } from '../../common/index.js';
+import { data } from '../../data/index.js';
+import { domUtils } from '../utils/index.js';
+import { IDBManager } from '../../idb/index.js';
+import { mode } from '../../data/mode/index.js';
+import { start } from '../../palette/index.js';
 
 const buttonDebounce = data.consts.debounce.button || 300;
-const domElements = data.consts.dom.elements;
 const domIDs = data.consts.dom.ids;
+const uiElements = data.consts.dom.elements;
 
 const idb = IDBManager.getInstance();
 
@@ -132,7 +132,7 @@ function initializeEventListeners(): void {
 
 			if (!mode.quiet) console.log('Custom color saved to IndexedDB');
 
-			// *DEV-NOTE* unfinished
+			// *DEV-NOTE* unfinished, I think? Double-check this
 		}
 	);
 
@@ -142,7 +142,7 @@ function initializeEventListeners(): void {
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
-			domElements.customColorInput!.value = '#ff0000';
+			uiElements.customColorInput!.value = '#ff0000';
 
 			if (!mode.quiet) console.log('Custom color cleared');
 		}
@@ -156,7 +156,7 @@ function initializeEventListeners(): void {
 
 			if (!mode.quiet) console.log('closeCustomColorMenuButton clicked');
 
-			domElements.customColorMenu?.classList.add('hidden');
+			uiElements.customColorMenu?.classList.add('hidden');
 		}
 	);
 
@@ -168,7 +168,7 @@ function initializeEventListeners(): void {
 
 			if (!mode.quiet) console.log('closeDeveloperMenuButton clicked');
 
-			domElements.developerMenu?.classList.add('hidden');
+			uiElements.developerMenu?.classList.add('hidden');
 		}
 	);
 
@@ -180,7 +180,7 @@ function initializeEventListeners(): void {
 
 			if (!mode.quiet) console.log('closeHelpMenuButton clicked');
 
-			domElements.advancedMenu?.classList.add('hidden');
+			uiElements.advancedMenu?.classList.add('hidden');
 		}
 	);
 
@@ -192,7 +192,7 @@ function initializeEventListeners(): void {
 
 			if (!mode.quiet) console.log('closeHistoryMenuButton clicked');
 
-			domElements.historyMenu?.classList.add('hidden');
+			uiElements.historyMenu?.classList.add('hidden');
 		}
 	);
 
@@ -204,20 +204,52 @@ function initializeEventListeners(): void {
 
 			if (!mode.quiet) console.log('customColorMenuButton clicked');
 
-			domElements.customColorMenu?.classList.remove('hidden');
+			uiElements.customColorMenu?.classList.remove('hidden');
 		}
 	);
 
-	if (!domElements.customColorInput)
+	if (!uiElements.customColorInput)
 		throw new Error('Custom color input element not found');
 
-	domElements.customColorInput.addEventListener('input', () => {
-		if (!domElements.customColorDisplay)
+	uiElements.customColorInput.addEventListener('input', () => {
+		if (!uiElements.customColorDisplay)
 			throw new Error('Custom color display element not found');
 
-		domElements.customColorDisplay.textContent =
-			domElements.customColorInput!.value;
+		uiElements.customColorDisplay.textContent =
+			uiElements.customColorInput!.value;
 	});
+
+	addEventListener(
+		domIDs.deleteDatabaseButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			// Only allow if application is in development mode
+			if (mode.app !== 'dev') {
+				if (mode.infoLogs) {
+					console.info('Cannot delete database in production mode.');
+				}
+
+				return;
+			}
+
+			const confirmDelete = confirm(
+				'Are you sure you want to delete the entire database? This action cannot be undone.'
+			);
+
+			if (!confirmDelete) return;
+
+			try {
+				await IDBManager.getInstance().deleteDatabase();
+				alert('Database deleted successfully!');
+			} catch (error) {
+				if (mode.errorLogs)
+					console.error(`Failed to delete database: ${error}`);
+				alert('Failed to delete database.');
+			}
+		}
+	);
 
 	addEventListener(
 		domIDs.desaturateButton,
@@ -225,8 +257,8 @@ function initializeEventListeners(): void {
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
-			const selectedColor = domElements.selectedColorOption
-				? parseInt(domElements.selectedColorOption.value, 10)
+			const selectedColor = uiElements.selectedColorOption
+				? parseInt(uiElements.selectedColorOption.value, 10)
 				: 0;
 
 			if (!mode.quiet) console.log('desaturateButton clicked');
@@ -252,7 +284,7 @@ function initializeEventListeners(): void {
 
 			if (!mode.quiet) console.log('developerMenuButton clicked');
 
-			domElements.developerMenu?.classList.remove('hidden');
+			uiElements.developerMenu?.classList.remove('hidden');
 		}
 	);
 
@@ -261,6 +293,12 @@ function initializeEventListeners(): void {
 
 		if (!mode.quiet) console.log('generateButton clicked');
 
+		if (mode.verbose)
+			console.log(
+				`Generate Button click event: Capturing parameters from UI`
+			);
+
+		// Captures data from UI at the time the Generate Button is clicked
 		const {
 			paletteType,
 			numBoxes,
@@ -270,13 +308,25 @@ function initializeEventListeners(): void {
 			limitLightness
 		} = domUtils.pullParamsFromUI();
 
+		if (mode.verbose)
+			console.log(
+				'Generate Button click event: Retrieved parameters from UI.'
+			);
+
 		let customColor = (await idb.getCustomColor()) as HSL | null;
 
 		if (!customColor) {
-			if (!mode.quiet)
+			if (mode.debug)
 				// console.info('No custom color found. Using a random color'); *DEV-NOTE* see notes.txt for more info about what to do with this
 
 				customColor = utils.random.hsl(true);
+		} else {
+			if (mode.debug)
+				console.log(
+					`User-generated Custom Color found in IndexedDB: ${JSON.stringify(
+						customColor
+					)}`
+				);
 		}
 
 		const paletteOptions: PaletteOptions = {
@@ -288,6 +338,24 @@ function initializeEventListeners(): void {
 			limitGrayness,
 			limitLightness
 		};
+
+		if (mode.debug) {
+			console.log(`paletteOptions object data:`);
+			console.log(`paletteType: ${paletteOptions.paletteType}`);
+			console.log(`numBoxes: ${paletteOptions.numBoxes}`);
+			console.log(
+				`customColor: ${JSON.stringify(paletteOptions.customColor)}`
+			);
+			console.log(`enableAlpha: ${paletteOptions.enableAlpha}`);
+			console.log(`limitDarkness: ${paletteOptions.limitDarkness}`);
+			console.log(`limitGrayness: ${paletteOptions.limitGrayness}`);
+			console.log(`limitLightness: ${paletteOptions.limitLightness}`);
+		}
+
+		if (mode.verbose)
+			console.log(
+				'Generate Button click event: Calling start.genPalette()'
+			);
 
 		await start.genPalette(paletteOptions);
 	});
@@ -356,26 +424,56 @@ function initializeEventListeners(): void {
 		}
 	});
 
+	addEventListener(
+		domIDs.resetPaletteIDButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			if (!mode.quiet) console.log('resetPaletteIDButton clicked');
+
+			const confirmReset = confirm(
+				'Are you sure you want to reset the palette ID?'
+			);
+
+			if (!confirmReset) return;
+
+			try {
+				await idb.resetPaletteID();
+
+				if (!mode.quiet)
+					console.log('Palette ID has been successfully reset.');
+
+				alert('Palette ID reset successfully!');
+			} catch (error) {
+				if (mode.errorLogs)
+					console.error(`Failed to reset palette ID: ${error}`);
+
+				alert('Failed to reset palette ID.');
+			}
+		}
+	);
+
 	addEventListener(domIDs.saturateButton, 'click', async (e: MouseEvent) => {
 		e.preventDefault();
 
 		if (!mode.quiet) console.log('saturateButton clicked');
 
-		const selectedColor = domElements.selectedColorOption
-			? parseInt(domElements.selectedColorOption.value, 10)
+		const selectedColor = uiElements.selectedColorOption
+			? parseInt(uiElements.selectedColorOption.value, 10)
 			: 0;
 
 		domUtils.saturateColor(selectedColor);
 	});
 
 	window.addEventListener('click', async (e: MouseEvent) => {
-		if (domElements.customColorMenu)
-			if (e.target === domElements.customColorMenu)
-				domElements.customColorMenu.classList.add('hidden');
+		if (uiElements.customColorMenu)
+			if (e.target === uiElements.customColorMenu)
+				uiElements.customColorMenu.classList.add('hidden');
 	});
 }
 
-export const elements: DOMElementsInterface = {
+export const base: DOMEventsInterface = {
 	addEventListener,
 	handlePaletteGen,
 	initializeEventListeners

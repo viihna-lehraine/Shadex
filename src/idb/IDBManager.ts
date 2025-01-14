@@ -18,75 +18,57 @@ import { utils } from '../common/index.js';
 
 export class IDBManager implements IDBManagerInterface {
 	private static instance: IDBManager | null = null;
-
 	private cache: Partial<{
 		settings: Settings;
 		customColor: HSL;
 	}> = {};
-
 	private dbPromise: Promise<IDBPDatabase<PaletteSchema>>;
+	private defaultKeys;
 	private defaultSettings: Settings;
 	private mode: ModeData;
-
-	private DEFAULT_KEYS: {
-		APP_SETTINGS: string;
-		CUSTOM_COLOR: string;
-	};
-	private STORE_NAMES: {
-		CUSTOM_COLOR: string;
-		MUTATIONS: string;
-		SETTINGS: string;
-		TABLES: string;
-	};
+	private storeNames;
 
 	private constructor() {
-		this.defaultSettings = data.defaults.idb.settings;
-		this.mode = data.mode;
-		this.DEFAULT_KEYS = data.idb.DEFAULT_KEYS;
-		this.STORE_NAMES = data.idb.STORE_NAMES;
-
 		this.dbPromise = openDB<PaletteSchema>('paletteDB', 1, {
-			upgrade(db) {
-				const stores = [
-					'customColor',
-					'mutations',
-					'settings',
-					'tables'
-				];
+			upgrade: db => {
+				const storeNames = Object.values(this.storeNames);
 
-				stores.forEach(store => {
-					if (!db.objectStoreNames.contains(store)) {
-						db.createObjectStore(store, {
-							keyPath: store === 'mutations' ? 'timestamp' : 'key'
-						});
+				for (const storeName of storeNames) {
+					if (!db.objectStoreNames.contains(storeName)) {
+						db.createObjectStore(storeName, { keyPath: 'key' });
 					}
-				});
+				}
 			}
 		});
+		this.defaultSettings = data.defaults.idb.settings;
+		this.mode = data.mode;
+		this.defaultKeys = data.idb.DEFAULT_KEYS;
+		this.storeNames = data.idb.STORE_NAMES;
 	}
 
 	//
 	///
 	//// * * * * * * * * * * * * * * * * * * * * * *
-	///// * * * * * * INSTANCE METHODS * * * * * * *
+	///// * * * * * * STATIC METHODS * * * * * * *
 	//// * * * * * * * * * * * * * * * * * * * * * *
 	///
 	//
 
 	public static async createInstance(): Promise<IDBManager> {
 		if (!this.instance) {
-			const manager = new IDBManager();
-			await manager.initializeDB();
-			this.instance = manager;
+			this.instance = new IDBManager();
+			await this.instance.initializeDB();
 		}
+
 		return this.instance;
 	}
 
-	public static getInstance(): IDBManager {
+	static getInstance(): IDBManager {
 		if (!this.instance) {
-			this.instance = new IDBManager();
+			throw new Error(
+				'IDBManager instance has not been initialized. Call createInstance first.'
+			);
 		}
-
 		return this.instance;
 	}
 
@@ -150,29 +132,6 @@ export class IDBManager implements IDBManagerInterface {
 		return fragment as unknown as HTMLElement;
 	}
 
-	public async getCurrentPaletteID(): Promise<number> {
-		return this.handleAsync(async () => {
-			const db = await this.getDB();
-			const settings = await db.get(
-				this.getStoreName('SETTINGS'),
-				this.getDefaultKey('APP_SETTINGS')
-			);
-
-			if (this.mode.debug)
-				console.log(`Fetched settings from IndexedDB\n${settings}`);
-
-			return settings?.lastPaletteID ?? 0;
-		}, 'IDBManager: getCurrentPaletteID(): Error fetching current palette ID');
-	}
-
-	public async getCachedSettings(): Promise<Settings> {
-		if (this.cache.settings) return this.cache.settings;
-
-		const settings = await this.getSettings();
-		if (settings) this.cache.settings = settings;
-		return settings;
-	}
-
 	private createPaletteObject(
 		type: string,
 		items: PaletteItem[],
@@ -194,6 +153,88 @@ export class IDBManager implements IDBManagerInterface {
 			limitGray,
 			limitLight
 		);
+	}
+
+	// *DEV-NOTE* add this method to docs
+	public async deleteEntry(
+		storeName: keyof PaletteSchema,
+		key: string
+	): Promise<void | null> {
+		return this.handleAsync(async () => {
+			const db = await this.getDB();
+			const store = db
+				.transaction(storeName, 'readwrite')
+				.objectStore(storeName);
+
+			// ensure entry exists before attempting to delete
+			const entryExists = await store.get(key);
+
+			if (!entryExists) {
+				if (this.mode.warnLogs)
+					this.log(`Entry with key ${key} not found.`, 'warn');
+
+				return;
+			}
+
+			await store.delete(key);
+
+			if (!this.mode.quiet)
+				this.log(`Entry with key ${key} deleted successfully.`);
+		}, 'IDBManager.deleteData(): Error deleting data');
+	}
+
+	public async deleteEntries(
+		storeName: keyof PaletteSchema,
+		keys: string[]
+	): Promise<void | null> {
+		return this.handleAsync(async () => {
+			const keyList = [];
+			const db = await this.getDB();
+			const store = db
+				.transaction(storeName, 'readwrite')
+				.objectStore(storeName);
+
+			// ensure entries exists before attempting to delete
+			for (const key of keys) {
+				const entryExists = await store.get(key);
+
+				if (!entryExists) {
+					if (this.mode.warnLogs)
+						this.log(`Entry with key ${key} not found.`, 'warn');
+
+					return;
+				} else {
+					keyList.push(key);
+					await store.delete(key);
+				}
+			}
+
+			if (!this.mode.quiet)
+				this.log(`Entries deleted successfully. Keys: ${keyList}`);
+		}, 'IDBManager.deleteData(): Error deleting data');
+	}
+
+	public async getCurrentPaletteID(): Promise<number> {
+		return this.handleAsync(async () => {
+			const db = await this.getDB();
+			const settings = await db.get(
+				this.getStoreName('SETTINGS'),
+				this.getDefaultKey('APP_SETTINGS')
+			);
+
+			if (this.mode.debug)
+				console.log(`Fetched settings from IndexedDB\n${settings}`);
+
+			return settings?.lastPaletteID ?? 0;
+		}, 'IDBManager: getCurrentPaletteID(): Error fetching current palette ID');
+	}
+
+	public async getCachedSettings(): Promise<Settings> {
+		if (this.cache.settings) return this.cache.settings;
+
+		const settings = await this.getSettings();
+		if (settings) this.cache.settings = settings;
+		return settings;
 	}
 
 	public async getCustomColor(): Promise<HSL | null> {
@@ -289,27 +330,6 @@ export class IDBManager implements IDBManagerInterface {
 		return db.transaction(storeName, mode).objectStore(storeName);
 	}
 
-	private async initializeDB(): Promise<void> {
-		await this.dbPromise;
-
-		const db = await this.getDB();
-		const settings = await db.get(
-			this.getStoreName('SETTINGS'),
-			this.getDefaultKey('APP_SETTINGS')
-		);
-
-		if (!settings) {
-			if (!this.mode.quiet) {
-				console.log(`Initializing default settings...`);
-			}
-
-			await db.get(
-				this.getStoreName('SETTINGS'),
-				this.getDefaultKey('APP_SETTINGS')
-			);
-		}
-	}
-
 	public async renderPalette(tableId: string): Promise<void | null> {
 		return this.handleAsync(async () => {
 			const storedPalette = await this.getTable(tableId);
@@ -331,38 +351,118 @@ export class IDBManager implements IDBManagerInterface {
 	public async resetDatabase(): Promise<void | null> {
 		return this.handleAsync(async () => {
 			const db = await this.getDB();
+			const availableStores = Array.from(db.objectStoreNames);
+			const expectedStores = Object.values(this.storeNames);
 
-			// Delete all data from each object store
-			const storeNames = Object.values(this.STORE_NAMES);
+			for (const storeName of expectedStores) {
+				if (!availableStores.includes(storeName)) {
+					console.warn(
+						`Object store "${storeName}" not found in IndexedDB.`
+					);
+					continue;
+				}
 
-			for (const storeName of storeNames) {
 				const tx = db.transaction(storeName, 'readwrite');
 				const store = tx.objectStore(storeName);
 
 				await store.clear();
 				await tx.done;
+
+				const settingsStore = db
+					.transaction(this.getStoreName('SETTINGS'), 'readwrite')
+					.objectStore(this.getStoreName('SETTINGS'));
+				await settingsStore.put(
+					this.defaultSettings,
+					this.getDefaultKey('APP_SETTINGS')
+				);
+
+				if (!this.mode.quiet)
+					console.log(`IndexedDB has been reset to default settins.`);
+			}
+		}, 'IDBManager.resetDatabase(): Error resetting database');
+	}
+
+	public async deleteDatabase(): Promise<void> {
+		await this.handleAsync(async () => {
+			const dbName = 'paletteDB';
+			const dbExists = await new Promise<boolean>(resolve => {
+				const request = indexedDB.open(dbName);
+
+				request.onsuccess = () => {
+					request.result.close();
+					resolve(true);
+				};
+				request.onerror = () => resolve(false);
+			});
+
+			if (dbExists) {
+				const deleteRequest = indexedDB.deleteDatabase(dbName);
+
+				deleteRequest.onsuccess = () => {
+					if (!this.mode.quiet)
+						console.log(
+							`Database "${dbName}" deleted successfully.`
+						);
+				};
+				deleteRequest.onerror = event => {
+					console.error(
+						`Error deleting database "${dbName}":`,
+						event
+					);
+				};
+				deleteRequest.onblocked = () => {
+					if (this.mode.warnLogs)
+						console.warn(
+							`Delete operation blocked. Ensure no open connections to "${dbName}".`
+						);
+
+					if (this.mode.showAlerts)
+						alert(
+							`Unable to delete database "${dbName}" because it is in use. Please close all other tabs or windows accessing this database and try again.`
+						);
+
+					if (this.mode.stackTrace)
+						console.trace(`Blocked call stack:`);
+				};
+			} else {
+				if (!this.mode.quiet)
+					console.log(`Database "${dbName}" does not exist.`);
+			}
+		}, 'IDBManager.deleteDatabase(): Error deleting database');
+	}
+
+	// *DEV-NOTE* add this method to docs
+	public async resetPaletteID(): Promise<void | null> {
+		return this.handleAsync(async () => {
+			const currentPaletteID = await this.getCurrentPaletteID();
+
+			if (!this.mode.quiet) {
+				console.log(
+					`Resetting palette ID. Current palette ID: ${currentPaletteID}`
+				);
 			}
 
-			if (this.mode.debug) console.log('All object stores cleared.');
+			const db = await this.getDB();
+			const storeName = this.getStoreName('SETTINGS');
+			const key = this.getDefaultKey('APP_SETTINGS');
+			const settings = await db.get(storeName, key);
 
-			// Re-initialize default settings
-			const tx = db.transaction(
-				this.getStoreName('SETTINGS'),
-				'readwrite'
-			);
-			const store = tx.objectStore(this.getStoreName('SETTINGS'));
+			if (!settings) {
+				throw new Error('Settings not found. Cannot reset palette ID.');
+			}
 
-			await store.put(
-				this.defaultSettings,
-				this.getDefaultKey('APP_SETTINGS')
-			);
-			await tx.done;
+			settings.lastPaletteID = 0;
 
-			if (!this.mode.quiet)
-				console.log('Default IDB settings re-initialized.');
+			await db.put(storeName, { key, ...this.defaultSettings });
 
-			return;
-		}, 'Error resetting database');
+			if (!this.mode.quiet) {
+				const newPaletteID = await this.getCurrentPaletteID();
+
+				console.log(
+					`Palette ID has successfully been reset. New palette ID: ${newPaletteID}`
+				);
+			}
+		}, 'IDBManager.resetPaletteID(): Error resetting palette ID');
 	}
 
 	public async saveData<T>(
@@ -426,6 +526,7 @@ export class IDBManager implements IDBManagerInterface {
 			);
 
 			const idParts = newPalette.id.split('_');
+
 			if (idParts.length !== 2 || isNaN(Number(idParts[1]))) {
 				throw new Error(`Invalid palette ID format: ${newPalette.id}`);
 			}
@@ -500,6 +601,39 @@ export class IDBManager implements IDBManagerInterface {
 	///
 	//
 
+	private async initializeDB(): Promise<void> {
+		await this.dbPromise;
+
+		const db = await this.getDB();
+		const storeName = this.getStoreName('SETTINGS');
+		const key = this.getDefaultKey('APP_SETTINGS');
+
+		console.log(
+			`Initializing DB with Store Name: ${storeName}, Key: ${key}`
+		);
+
+		if (!storeName || !key) throw new Error('Invalid store name or key.');
+
+		const settings = await db.get(storeName, key);
+
+		if (!settings) {
+			if (!this.mode.quiet) {
+				console.log(`Initializing default settings...`);
+
+				if (this.mode.debug)
+					console.log(
+						'Data to insert into database initialization:',
+						{
+							key,
+							...this.defaultSettings
+						}
+					);
+			}
+
+			await db.put(storeName, { key, ...this.defaultSettings });
+		}
+	}
+
 	private debugError(context: string, error: unknown): void {
 		if (this.mode.errorLogs) {
 			const errorMsg =
@@ -517,18 +651,30 @@ export class IDBManager implements IDBManagerInterface {
 		return this.dbPromise;
 	}
 
-	private getDefaultKey(key: keyof typeof this.DEFAULT_KEYS): string {
-		return this.DEFAULT_KEYS[key];
+	private getDefaultKey(key: keyof typeof this.storeNames): string {
+		const defaultKey = this.defaultKeys[key];
+
+		if (!defaultKey) {
+			throw new Error(`[getDefaultKey()]: Invalid default key: ${key}`);
+		}
+
+		return defaultKey;
 	}
 
-	private getStoreName(storeKey: keyof typeof this.STORE_NAMES): string {
-		return this.STORE_NAMES[storeKey];
+	private getStoreName(storeKey: keyof typeof this.storeNames): string {
+		const storeName = this.storeNames[storeKey];
+
+		if (!storeName) {
+			throw new Error(`[getStoreName()]: Invalid store key: ${storeKey}`);
+		}
+
+		return storeName;
 	}
 
 	private async getTable(id: string): Promise<StoredPalette | null> {
 		return this.handleAsync(async () => {
 			const db = await this.getDB();
-			const result = await db.get(this.STORE_NAMES.TABLES, id);
+			const result = await db.get(this.storeNames.TABLES, id);
 
 			if (!result) {
 				if (this.mode.warnLogs)
@@ -558,6 +704,7 @@ export class IDBManager implements IDBManagerInterface {
 		}
 	}
 
+	// *DEV-NOTE* refactor to use this method instead of generic console logging throughout the class
 	private log(
 		message: string,
 		level: 'info' | 'warn' | 'error' = 'info'
@@ -583,16 +730,16 @@ export class IDBManager implements IDBManagerInterface {
 		}, 'IDBManager.logMutation(): Error logging mutation');
 	}
 
-	private resolveKey<K extends keyof typeof this.DEFAULT_KEYS>(
+	private resolveKey<K extends keyof typeof this.defaultKeys>(
 		key: K
 	): string {
-		return this.DEFAULT_KEYS[key];
+		return this.defaultKeys[key];
 	}
 
-	private resolveStoreName<S extends keyof typeof this.STORE_NAMES>(
+	private resolveStoreName<S extends keyof typeof this.storeNames>(
 		store: S
 	): string {
-		return this.STORE_NAMES[store];
+		return this.storeNames[store];
 	}
 
 	private async updateCurrentPaletteID(newID: number): Promise<void | null> {

@@ -1,43 +1,36 @@
 // File: src/palette/main/types/diadic.js
 
-import { GenPaletteArgs, HSL, Palette } from '../../../index/index.js';
+import {
+	GenPaletteArgs,
+	HSL,
+	Palette,
+	PaletteItem
+} from '../../../index/index.js';
 import { IDBManager } from '../../../idb/index.js';
-import { core, utils } from '../../../common/index.js';
+import { core } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
+import { ui } from '../../../ui/index.js';
 
 const consts = data.consts;
 const create = paletteSuperUtils.create;
-const defaults = data.defaults;
 const genHues = paletteSuperUtils.genHues;
-const mode = data.mode;
 const paletteRanges = consts.paletteRanges;
 
 const idb = IDBManager.getInstance();
 
+// *DEV-NOTE* update to reflect the fact this will always return 2 color swatches
 export async function diadic(args: GenPaletteArgs): Promise<Palette> {
-	const currentDiadicPaletteID = await idb.getCurrentPaletteID();
-
-	if (args.numBoxes < 2) {
-		if (mode.warnLogs)
-			console.warn('Diadic palette requires at least 2 swatches.');
-
-		return utils.palette.createObject(
-			'diadic',
-			[],
-			core.brandColor.asHSL(defaults.colors.hsl),
-			0,
-			currentDiadicPaletteID,
-			args.enableAlpha,
-			args.limitDark,
-			args.limitGray,
-			args.limitLight
-		);
+	// ensure exactly 2 color swatches
+	if (args.numBoxes !== 2) {
+		ui.enforceSwatchRules(2, 2);
 	}
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const hues = genHues.diadic(baseColor.value.hue);
-	const paletteItems = Array.from({ length: args.numBoxes }, (_, i) => {
+	const paletteItems: PaletteItem[] = [];
+
+	for (let i = 0; i < args.numBoxes; i++) {
 		const saturationShift =
 			Math.random() * paletteRanges.diadic.satShift -
 			paletteRanges.diadic.satShift / 2;
@@ -69,8 +62,12 @@ export async function diadic(args: GenPaletteArgs): Promise<Palette> {
 			format: 'hsl'
 		};
 
-		return create.paletteItem(newColor, args.enableAlpha);
-	});
+		const paletteItem = await create.paletteItem(
+			newColor,
+			args.enableAlpha
+		);
+		paletteItems.push(paletteItem);
+	}
 
 	const diadicPalette = await idb.savePaletteToDB(
 		'diadic',

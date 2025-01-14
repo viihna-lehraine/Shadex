@@ -12,6 +12,15 @@ import {
 
 export interface IDBManagerInterface {
 	createMutationLogger<T extends object>(obj: T, key: string): T;
+	deleteEntry(
+		storeName: keyof PaletteSchema,
+		key: string
+	): Promise<void | null>;
+	deleteEntries(
+		storeName: keyof PaletteSchema,
+		keys: string[]
+	): Promise<void | null>;
+	deleteDatabase(): Promise<void>;
 	getCustomColor(): Promise<HSL | null>;
 	getCurrentPaletteID(): Promise<number>;
 	getLoggedObject<T extends object>(obj: T | null, key: string): T | null;
@@ -32,6 +41,7 @@ export interface IDBManagerInterface {
 	>;
 	renderPalette(tableId: string): Promise<void | null>;
 	resetDatabase(): Promise<void | null>;
+	resetPaletteID(): Promise<void | null>;
 	updateEntryInPalette(
 		tableID: string,
 		entryIndex: number,

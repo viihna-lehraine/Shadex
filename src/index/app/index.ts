@@ -37,12 +37,8 @@ export type {
 	ConstsData,
 	DOMData,
 	DOMElementData,
-	DOMFilesData,
 	DOM_ID_Data,
-	IDBData,
-	IDB_DEFAULT_KEYS_Data,
 	IDBDefaultsData,
-	IDB_STORE_NAMES_Data,
 	LimitsData,
 	ModeData,
 	PaletteDefaultsData,
@@ -54,10 +50,12 @@ export type {
 } from './data.js';
 export type {
 	DOMBaseFnInterface,
-	DOMElementsInterface,
+	DOMEventsInterface,
 	DOMExportPaletteFnInterface,
+	DOMFnEventsInterface,
 	DOMFnMasterInterface,
-	DOMHistoryFnInterface
+	DOMHistoryFnInterface,
+	DOMValidateFnInterface
 } from './dom.js';
 export type {
 	LoggerFnDebugInterface,
@@ -81,3 +79,4 @@ export type {
 	PaletteGenerateFnInterface,
 	PaletteStartFnInterface
 } from './palette.js';
+export type { UIFnBaseInterface, UIFnMasterInterface } from './ui.js';

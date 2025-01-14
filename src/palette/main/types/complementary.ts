@@ -7,35 +7,20 @@ import {
 	PaletteItem
 } from '../../../index/index.js';
 import { IDBManager } from '../../../idb/index.js';
-import { core, utils } from '../../../common/index.js';
+import { core } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
+import { ui } from '../../../ui/index.js';
 
 const create = paletteSuperUtils.create;
-const defaults = data.defaults;
-const mode = data.mode;
 const paletteRanges = data.consts.paletteRanges;
 
 const idb = IDBManager.getInstance();
 
 export async function complementary(args: GenPaletteArgs): Promise<Palette> {
-	const currentComplementaryPaletteID = await idb.getCurrentPaletteID();
-
+	// ensure at least 2 color swatches
 	if (args.numBoxes < 2) {
-		if (mode.warnLogs)
-			console.warn('Complementary palette requires at least 2 swatches.');
-
-		return utils.palette.createObject(
-			'complementary',
-			[],
-			core.brandColor.asHSL(defaults.colors.hsl),
-			0,
-			currentComplementaryPaletteID,
-			args.enableAlpha,
-			args.limitDark,
-			args.limitGray,
-			args.limitLight
-		);
+		ui.enforceSwatchRules(2);
 	}
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
@@ -48,7 +33,10 @@ export async function complementary(args: GenPaletteArgs): Promise<Palette> {
 					paletteRanges.comp.hueShift / 2)) %
 			360
 	);
-	const paletteItems: PaletteItem[] = hues.map((hue, i) => {
+	const paletteItems: PaletteItem[] = [];
+
+	for (let i = 0; i < hues.length; i++) {
+		const hue = hues[i];
 		const saturation = Math.min(
 			100,
 			Math.max(0, baseColor.value.saturation + (Math.random() - 0.5) * 15)
@@ -67,11 +55,19 @@ export async function complementary(args: GenPaletteArgs): Promise<Palette> {
 			},
 			format: 'hsl'
 		};
+		const paletteItem = await create.paletteItem(
+			newColor,
+			args.enableAlpha
+		);
+		paletteItems.push(paletteItem);
+	}
 
-		return create.paletteItem(newColor, args.enableAlpha);
-	});
+	const baseColorPaletteItem = await create.paletteItem(
+		baseColor,
+		args.enableAlpha
+	);
 
-	paletteItems.unshift(create.paletteItem(baseColor, args.enableAlpha));
+	paletteItems.unshift(baseColorPaletteItem);
 
 	const complementaryPalette = await idb.savePaletteToDB(
 		'complementary',

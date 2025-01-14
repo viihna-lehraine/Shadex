@@ -13,13 +13,17 @@ const idb = IDBManager.getInstance();
 export async function random(args: GenPaletteArgs): Promise<Palette> {
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const paletteItems: PaletteItem[] = [
-		create.paletteItem(baseColor, args.enableAlpha)
+		await create.paletteItem(baseColor, args.enableAlpha)
 	];
 
 	for (let i = 1; i < args.numBoxes; i++) {
 		const randomColor = utils.random.hsl(args.enableAlpha);
+		const nextPaletteItem = await create.paletteItem(
+			randomColor,
+			args.enableAlpha
+		);
 
-		paletteItems.push(create.paletteItem(randomColor, args.enableAlpha));
+		paletteItems.push(nextPaletteItem);
 
 		update.colorBox(randomColor, i);
 	}

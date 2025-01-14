@@ -73,6 +73,7 @@ export interface DOMElementData {
 	customColorInput: HTMLInputElement | null;
 	customColorMenu: HTMLDivElement | null;
 	customColorMenuButton: HTMLButtonElement | null;
+	deleteDatabaseButton: HTMLButtonElement | null;
 	desaturateButton: HTMLButtonElement | null;
 	developerMenu: HTMLDivElement | null;
 	developerMenuButton: HTMLButtonElement | null;
@@ -88,6 +89,7 @@ export interface DOMElementData {
 	paletteNumberOptions: HTMLInputElement | null;
 	paletteTypeOptions: HTMLSelectElement | null;
 	resetButton: HTMLButtonElement | null;
+	resetPaletteIDButton: HTMLButtonElement | null;
 	saturateButton: HTMLButtonElement | null;
 	selectedColorOption: HTMLSelectElement | null;
 	showAsCMYKButton: HTMLButtonElement | null;
@@ -98,14 +100,8 @@ export interface DOMElementData {
 	showAsRGBButton: HTMLButtonElement | null;
 }
 
-export type DOMFilesData = readonly [
-	'./html/advanced-menu.html',
-	'./html/custom-color-menu.html',
-	'./html/help-menu.html',
-	'./html/history-menu.html'
-];
-
 export interface DOM_ID_Data {
+	advancedMenu: string;
 	advancedMenuButton: string;
 	applyCustomColorButton: string;
 	clearCustomColorButton: string;
@@ -114,13 +110,19 @@ export interface DOM_ID_Data {
 	closeDeveloperMenuButton: string;
 	closeHelpMenuButton: string;
 	closeHistoryMenuButton: string;
-	customColorElement: string;
+	customColorDisplay: string;
+	customColorInput: string;
+	customColorMenu: string;
 	customColorMenuButton: string;
+	deleteDatabaseButton: string;
 	desaturateButton: string;
+	developerMenu: string;
 	developerMenuButton: string;
 	enableAlphaCheckbox: string;
 	generateButton: string;
+	helpMenu: string;
 	helpMenuButton: string;
+	historyMenu: string;
 	historyMenuButton: string;
 	limitDarknessCheckbox: string;
 	limitGraynessCheckbox: string;
@@ -128,6 +130,7 @@ export interface DOM_ID_Data {
 	paletteNumberOptions: string;
 	paletteTypeOptions: string;
 	resetButton: string;
+	resetPaletteIDButton: string;
 	saturateButton: string;
 	selectedColorOption: string;
 	showAsCMYKButton: string;
@@ -136,19 +139,6 @@ export interface DOM_ID_Data {
 	showAsHSVButton: string;
 	showAsLABButton: string;
 	showAsRGBButton: string;
-}
-
-export interface IDB_DEFAULT_KEYS_Data {
-	APP_SETTINGS: string;
-	CUSTOM_COLOR: string;
-}
-
-export interface IDB_STORE_NAMES_Data {
-	CUSTOM_COLOR: string;
-	MUTATIONS: string;
-	PALLETES: string;
-	SETTINGS: string;
-	TABLES: string;
 }
 
 export interface LimitsData {
@@ -169,10 +159,13 @@ export interface LimitsData {
 export interface ModeData {
 	app: 'dev' | 'prod';
 	debug: boolean;
+	exposeIDB: boolean;
 	errorLogs: boolean;
 	gracefulErrors: boolean;
 	infoLogs: boolean;
+	logClicks: boolean;
 	quiet: boolean;
+	showAlerts: boolean;
 	stackTrace: boolean;
 	verbose: boolean;
 	warnLogs: boolean;
@@ -288,11 +281,6 @@ export interface Defaults {
 	palette: PaletteDefaultsData;
 }
 
-export interface IDBData {
-	DEFAULT_KEYS: IDB_DEFAULT_KEYS_Data;
-	STORE_NAMES: IDB_STORE_NAMES_Data;
-}
-
 export interface IDBDefaultsData {
 	settings: Settings;
 	mutation: MutationLog;
@@ -309,7 +297,10 @@ export interface PaletteDefaultsData {
 export interface DataInterface {
 	consts: ConstsData;
 	defaults: Defaults;
-	idb: IDBData;
+	idb: Readonly<{
+		DEFAULT_KEYS: Readonly<Record<string, string>>;
+		STORE_NAMES: Readonly<Record<string, string>>;
+	}>;
 	mode: ModeData;
 	sets: SetsData;
 }

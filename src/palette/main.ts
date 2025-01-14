@@ -32,6 +32,9 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 	try {
 		let { numBoxes, customColor } = options;
 
+		if (mode.verbose)
+			console.log('Retrieving existing IDBManager instance.');
+
 		const idb = IDBManager.getInstance();
 
 		if (customColor === null || customColor === undefined) {

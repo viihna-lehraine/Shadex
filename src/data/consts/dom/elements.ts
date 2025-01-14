@@ -36,6 +36,9 @@ const customColorMenu = getElement<HTMLDivElement>('custom-color-menu');
 const customColorMenuButton = getElement<HTMLButtonElement>(
 	'custom-color-menu-button'
 );
+const deleteDatabaseButton = getElement<HTMLButtonElement>(
+	'delete-database-button'
+);
 const desaturateButton = getElement<HTMLButtonElement>('desaturate-button');
 const developerMenu = getElement<HTMLDivElement>('developer-menu');
 const developerMenuButton = getElement<HTMLButtonElement>(
@@ -65,6 +68,9 @@ const paletteTypeOptions = getElement<HTMLSelectElement>(
 	'palette-type-options'
 );
 const resetButton = getElement<HTMLButtonElement>('reset-button');
+const resetPaletteIDButton = getElement<HTMLButtonElement>(
+	'reset-palette-id-button'
+);
 const saturateButton = getElement<HTMLButtonElement>('saturate-button');
 const selectedColorOption = getElement<HTMLSelectElement>(
 	'selected-color-option'
@@ -90,6 +96,7 @@ export const domElements: DOMElementData = {
 	customColorInput,
 	customColorMenu,
 	customColorMenuButton,
+	deleteDatabaseButton,
 	desaturateButton,
 	developerMenu,
 	developerMenuButton,
@@ -105,6 +112,7 @@ export const domElements: DOMElementData = {
 	paletteNumberOptions,
 	paletteTypeOptions,
 	resetButton,
+	resetPaletteIDButton,
 	saturateButton,
 	selectedColorOption,
 	showAsCMYKButton,

@@ -488,19 +488,19 @@ function toCSSColorString(color: Color): string {
 	try {
 		switch (color.format) {
 			case 'cmyk':
-				return `cmyk(${color.value.cyan},${color.value.magenta},${color.value.yellow},${color.value.key}${color.value.alpha})`;
+				return `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key}, ${color.value.alpha})`;
 			case 'hex':
 				return String(color.value.hex);
 			case 'hsl':
-				return `hsl(${color.value.hue},${color.value.saturation}%,${color.value.lightness}%,${color.value.alpha})`;
+				return `hsl(${color.value.hue}, ${color.value.saturation}%, ${color.value.lightness}%, ${color.value.alpha})`;
 			case 'hsv':
-				return `hsv(${color.value.hue},${color.value.saturation}%,${color.value.value}%,${color.value.alpha})`;
+				return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%, ${color.value.alpha})`;
 			case 'lab':
-				return `lab(${color.value.l},${color.value.a},${color.value.b},${color.value.alpha})`;
+				return `lab(${color.value.l}, ${color.value.a}, ${color.value.b}, ${color.value.alpha})`;
 			case 'rgb':
-				return `rgb(${color.value.red},${color.value.green},${color.value.blue},${color.value.alpha})`;
+				return `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue}, ${color.value.alpha})`;
 			case 'xyz':
-				return `xyz(${color.value.x},${color.value.y},${color.value.z},${color.value.alpha})`;
+				return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z}, ${color.value.alpha})`;
 			default:
 				if (mode.errorLogs)
 					console.error(`Unexpected color format: ${color.format}`);

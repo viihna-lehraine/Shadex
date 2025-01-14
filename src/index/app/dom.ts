@@ -9,7 +9,7 @@ export interface DOMBaseFnInterface {
 	initializeUI: () => Promise<void>;
 }
 
-export interface DOMElementsInterface {
+export interface DOMEventsInterface {
 	addEventListener<K extends keyof HTMLElementEventMap>(
 		id: string,
 		eventType: K,
@@ -31,12 +31,27 @@ export interface DOMHistoryFnInterface {
 	renderPalette(displayFormat: ColorSpace): void;
 }
 
+export interface DOMValidateFnInterface {
+	elements(ids: Record<string, string>): void;
+}
+
+export interface DOMFnEventsInterface {
+	addEventListener<K extends keyof HTMLElementEventMap>(
+		id: string,
+		eventType: K,
+		callback: (ev: HTMLElementEventMap[K]) => void
+	): void;
+	handlePaletteGen: () => void;
+	initializeEventListeners(): void;
+}
+
 export interface DOMFnMasterInterface {
 	applyFirstColorToUI(color: HSL): HSL;
 	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
 	defineUIElements(): UIElements;
 	initializeUI: () => Promise<void>;
-	elements: DOMElementsInterface;
+	events: DOMFnEventsInterface;
 	exportPalette: DOMExportPaletteFnInterface;
 	history: DOMHistoryFnInterface;
+	validate: DOMValidateFnInterface;
 }

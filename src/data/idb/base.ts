@@ -1,17 +1,11 @@
 // File: src/data/idb/base.js
 
-import {
-	IDBData,
-	IDB_DEFAULT_KEYS_Data,
-	IDB_STORE_NAMES_Data
-} from '../../index/index.js';
-
-const DEFAULT_KEYS: IDB_DEFAULT_KEYS_Data = {
+const DEFAULT_KEYS: Record<string, string> = {
 	APP_SETTINGS: 'appSettings',
 	CUSTOM_COLOR: 'customColor'
 } as const;
 
-const STORE_NAMES: IDB_STORE_NAMES_Data = {
+const STORE_NAMES: Record<string, string> = {
 	CUSTOM_COLOR: 'customColor',
 	MUTATIONS: 'mutations',
 	PALLETES: 'palettes',
@@ -19,7 +13,10 @@ const STORE_NAMES: IDB_STORE_NAMES_Data = {
 	TABLES: 'tables'
 } as const;
 
-export const base: IDBData = {
+export const base: Readonly<{
+	DEFAULT_KEYS: Readonly<Record<string, string>>;
+	STORE_NAMES: Readonly<Record<string, string>>;
+}> = {
 	DEFAULT_KEYS,
 	STORE_NAMES
 } as const;

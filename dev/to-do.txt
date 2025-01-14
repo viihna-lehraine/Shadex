@@ -58,3 +58,9 @@
 IDEAS
 
 1. possibly add pentadic palette generation
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+PRE-LAUNCH CHECKLIST
+
+1. remove HTML import map script

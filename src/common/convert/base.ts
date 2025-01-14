@@ -97,9 +97,9 @@ function cmykToRGB(cmyk: CMYK): RGB {
 		const alpha = cmyk.value.alpha;
 		const rgb: RGB = {
 			value: {
-				red: brand.asByteRange(r),
-				green: brand.asByteRange(g),
-				blue: brand.asByteRange(b),
+				red: brand.asByteRange(Math.round(r)),
+				green: brand.asByteRange(Math.round(g)),
+				blue: brand.asByteRange(Math.round(b)),
 				alpha: brand.asAlphaRange(alpha)
 			},
 			format: 'rgb'
@@ -183,9 +183,9 @@ function hexToRGB(hex: Hex): RGB {
 
 		return {
 			value: {
-				red: brand.asByteRange((bigint >> 16) & 255),
-				green: brand.asByteRange((bigint >> 8) & 255),
-				blue: brand.asByteRange(bigint & 255),
+				red: brand.asByteRange(Math.round((bigint >> 16) & 255)),
+				green: brand.asByteRange(Math.round((bigint >> 8) & 255)),
+				blue: brand.asByteRange(Math.round(bigint & 255)),
 				alpha: hex.value.numAlpha
 			},
 			format: 'rgb'
@@ -505,22 +505,28 @@ function labToXYZ(lab: LAB): XYZ {
 		return {
 			value: {
 				x: brand.asXYZ_X(
-					refX *
-						(pow(x, 3) > 0.008856
-							? pow(x, 3)
-							: (x - 16 / 116) / 7.787)
+					Math.round(
+						refX *
+							(pow(x, 3) > 0.008856
+								? pow(x, 3)
+								: (x - 16 / 116) / 7.787)
+					)
 				),
 				y: brand.asXYZ_Y(
-					refY *
-						(pow(y, 3) > 0.008856
-							? pow(y, 3)
-							: (y - 16 / 116) / 7.787)
+					Math.round(
+						refY *
+							(pow(y, 3) > 0.008856
+								? pow(y, 3)
+								: (y - 16 / 116) / 7.787)
+					)
 				),
 				z: brand.asXYZ_Z(
-					refZ *
-						(pow(z, 3) > 0.008856
-							? pow(z, 3)
-							: (z - 16 / 116) / 7.787)
+					Math.round(
+						refZ *
+							(pow(z, 3) > 0.008856
+								? pow(z, 3)
+								: (z - 16 / 116) / 7.787)
+					)
 				),
 				alpha: brand.asAlphaRange(lab.value.alpha)
 			},
@@ -549,14 +555,16 @@ function rgbToCMYK(rgb: RGB): CMYK {
 		const bluePrime = clonedRGB.value.blue / 255;
 
 		const key = sanitize.percentile(
-			1 - Math.max(redPrime, greenPrime, bluePrime)
+			Math.round(1 - Math.max(redPrime, greenPrime, bluePrime))
 		);
-		const cyan = sanitize.percentile((1 - redPrime - key) / (1 - key) || 0);
+		const cyan = sanitize.percentile(
+			Math.round((1 - redPrime - key) / (1 - key) || 0)
+		);
 		const magenta = sanitize.percentile(
-			(1 - greenPrime - key) / (1 - key) || 0
+			Math.round((1 - greenPrime - key) / (1 - key) || 0)
 		);
 		const yellow = sanitize.percentile(
-			(1 - bluePrime - key) / (1 - key) || 0
+			Math.round((1 - bluePrime - key) / (1 - key) || 0)
 		);
 		const alpha = brand.asAlphaRange(rgb.value.alpha);
 		const format: 'cmyk' = 'cmyk';
@@ -598,7 +606,7 @@ function rgbToHex(rgb: RGB): Hex {
 		) {
 			if (mode.warnLogs)
 				console.warn(
-					`Invalid RGB values: \nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}\nA=${JSON.stringify(clonedRGB.value.alpha)}`
+					`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}\nA=${JSON.stringify(clonedRGB.value.alpha)}`
 				);
 
 			return {
@@ -777,19 +785,25 @@ function rgbToXYZ(rgb: RGB): XYZ {
 		return {
 			value: {
 				x: brand.asXYZ_X(
-					scaledRed * 0.4124 +
-						scaledGreen * 0.3576 +
-						scaledBlue * 0.1805
+					Math.round(
+						scaledRed * 0.4124 +
+							scaledGreen * 0.3576 +
+							scaledBlue * 0.1805
+					)
 				),
 				y: brand.asXYZ_Y(
-					scaledRed * 0.2126 +
-						scaledGreen * 0.7152 +
-						scaledBlue * 0.0722
+					Math.round(
+						scaledRed * 0.2126 +
+							scaledGreen * 0.7152 +
+							scaledBlue * 0.0722
+					)
 				),
 				z: brand.asXYZ_Z(
-					scaledRed * 0.0193 +
-						scaledGreen * 0.1192 +
-						scaledBlue * 0.9505
+					Math.round(
+						scaledRed * 0.0193 +
+							scaledGreen * 0.1192 +
+							scaledBlue * 0.9505
+					)
 				),
 				alpha: brand.asAlphaRange(rgb.value.alpha)
 			},
@@ -869,9 +883,9 @@ function xyzToLAB(xyz: XYZ): LAB {
 
 		const lab: LAB = {
 			value: {
-				l: brand.asLAB_L(l),
-				a: brand.asLAB_A(a),
-				b: brand.asLAB_B(b),
+				l: brand.asLAB_L(Math.round(l)),
+				a: brand.asLAB_A(Math.round(a)),
+				b: brand.asLAB_B(Math.round(b)),
 				alpha: xyz.value.alpha
 			},
 			format: 'lab'
@@ -915,9 +929,9 @@ function xyzToRGB(xyz: XYZ): RGB {
 
 		const rgb: RGB = clampRGB({
 			value: {
-				red: brand.asByteRange(red),
-				green: brand.asByteRange(green),
-				blue: brand.asByteRange(blue),
+				red: brand.asByteRange(Math.round(red)),
+				green: brand.asByteRange(Math.round(green)),
+				blue: brand.asByteRange(Math.round(blue)),
 				alpha: xyz.value.alpha
 			},
 			format: 'rgb'

@@ -1,43 +1,36 @@
 // File: src/palette/main/types/hexadic.js
 
-import { GenPaletteArgs, HSL, Palette } from '../../../index/index.js';
+import {
+	GenPaletteArgs,
+	HSL,
+	Palette,
+	PaletteItem
+} from '../../../index/index.js';
 import { IDBManager } from '../../../idb/index.js';
-import { core, utils } from '../../../common/index.js';
+import { core } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
+import { ui } from '../../../ui/index.js';
 
 const consts = data.consts;
 const create = paletteSuperUtils.create;
-const defaults = data.defaults;
 const genHues = paletteSuperUtils.genHues;
-const mode = data.mode;
 const paletteRanges = consts.paletteRanges;
 
 const idb = IDBManager.getInstance();
 
+// *DEV-NOTE* update to reflect the fact this will always return 6 color swatches
 export async function hexadic(args: GenPaletteArgs): Promise<Palette> {
-	const currentHexadicPaletteID = await idb.getCurrentPaletteID();
-
-	if (args.numBoxes < 6) {
-		if (mode.warnLogs)
-			console.warn('Hexadic palette requires at least 6 swatches.');
-
-		return utils.palette.createObject(
-			'hexadic',
-			[],
-			core.brandColor.asHSL(defaults.colors.hsl),
-			0,
-			currentHexadicPaletteID,
-			args.enableAlpha,
-			args.limitDark,
-			args.limitGray,
-			args.limitLight
-		);
+	// ensure exactly 6 color swatches
+	if (args.numBoxes !== 6) {
+		ui.enforceSwatchRules(6, 6);
 	}
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const hues = genHues.hexadic(baseColor);
-	const paletteItems = hues.map((hue, _i) => {
+
+	const paletteItems: PaletteItem[] = [];
+	for (const hue of hues) {
 		const saturationShift =
 			Math.random() * paletteRanges.hexad.satShift -
 			paletteRanges.hexad.satShift / 2;
@@ -69,8 +62,13 @@ export async function hexadic(args: GenPaletteArgs): Promise<Palette> {
 			format: 'hsl'
 		};
 
-		return create.paletteItem(newColor, args.enableAlpha);
-	});
+		const paletteItem = await create.paletteItem(
+			newColor,
+			args.enableAlpha
+		);
+
+		paletteItems.push(paletteItem);
+	}
 
 	const hexadicPalette = await idb.savePaletteToDB(
 		'hexadic',
@@ -83,7 +81,9 @@ export async function hexadic(args: GenPaletteArgs): Promise<Palette> {
 		args.limitLight
 	);
 
-	if (!hexadicPalette)
+	if (!hexadicPalette) {
 		throw new Error('Hexadic palette is either null or undefined.');
-	else return hexadicPalette;
+	} else {
+		return hexadicPalette;
+	}
 }

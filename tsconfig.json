@@ -25,6 +25,6 @@
         "useDefineForClassFields": true,
         "useUnknownInCatchVariables": true
     },
-    "include": ["src/**/*.ts", "src/index/dom.ts", "src/schemas/defaults/colors", "dev/old-files/new/env-variable-handling/config.ts"],
+    "include": ["src/**/*.ts", "types/**/*.d.ts"],
     "exclude": ["node_modules", "public/js"]
 }

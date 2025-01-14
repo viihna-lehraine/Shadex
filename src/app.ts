@@ -11,13 +11,73 @@
 
 import { data } from './data/index.js';
 import { dom } from './dom/index.js';
+import { IDBManager } from './idb/index.js';
 import { logger } from './logger/index.js';
 
 const consts = data.consts;
 const mode = data.mode;
 
-document.addEventListener('DOMContentLoaded', async () => {
+if (mode.debug) console.log('Executing main application script');
+
+if (document.readyState === 'loading') {
+	if (mode.debug)
+		console.log(
+			'DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...'
+		);
+
+	document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+	if (mode.debug)
+		console.log(
+			'DOM content already loaded. Initializing application immediately.'
+		);
+	initializeApp();
+}
+
+async function initializeApp(): Promise<void> {
 	console.log('DOM content loaded - Initializing application');
+
+	try {
+		if (mode.verbose)
+			console.log(
+				'Creating new IDBManager instance. Initializing database and its dependencies.'
+			);
+
+		if (mode.exposeIDB) {
+			if (mode.debug)
+				console.log('Exposing IDBManager instance to window.');
+
+			try {
+				(async () => {
+					const idbManagerInstance =
+						await IDBManager.createInstance();
+
+					// binds the IDBManager instance to the window object
+					window.idbManager = idbManagerInstance;
+
+					console.log(
+						'IDBManager instance successfully exposed to window.'
+					);
+				})();
+			} catch (error) {
+				if (mode.errorLogs)
+					console.error(
+						`Failed to expose IDBManager instance to window. Error: ${error}`
+					);
+
+				if (mode.showAlerts)
+					alert('An error occurred. Check console for details.');
+			}
+		}
+	} catch (error) {
+		if (mode.errorLogs)
+			console.error(
+				`Failed to create initial IDBManager instance. Error: ${error}`
+			);
+
+		if (mode.showAlerts)
+			alert('An error occurred. Check console for details.');
+	}
 
 	if (!mode.quiet) console.log('Initializing UI...');
 
@@ -29,7 +89,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 				'Failed to properly initialize the UI. Some DOM elements could not be found.'
 			);
 
-		process.exit(201);
+		if (mode.showAlerts)
+			alert('An error occurred. Check console for details.');
 	}
 
 	try {
@@ -39,7 +100,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 	} catch (error) {
 		if (mode.errorLogs) console.error(`Failed to initialize UI\n${error}`);
 
-		process.exit(202);
+		if (mode.showAlerts)
+			alert('An error occurred. Check console for details.');
 	}
 
 	const selectedColorOption = consts.dom.elements.selectedColorOption;
@@ -63,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	if (!mode.quiet) console.log(`Selected color: ${selectedColor}`);
 
 	try {
-		dom.elements.initializeEventListeners();
+		dom.events.initializeEventListeners();
 
 		if (!mode.quiet)
 			console.log('Event listeners have been successfully initialized');
@@ -71,11 +133,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 		if (mode.errorLogs)
 			console.error(`Failed to initialize event listeners.\n${error}`);
 
-		process.exit(203);
+		if (mode.showAlerts)
+			alert('An error occurred. Check console for details.');
 	}
 
 	if (!mode.quiet)
 		console.log(
 			'Application successfully initialized. Awaiting user input.'
 		);
-});
+}

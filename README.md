@@ -1,11 +1,13 @@
 # ColorGen
-## version 0.6.01 (pre-alpha)
 
 ***
+
+**_unfinished build_**
+
 ColorGen is a web-based color palette generator. It produces 8 varieties of color scheme and can convert between 6 color formats.
 
 ### NOTE
-This is a development version. Please visit [my website](sharkswithswords.com/project-files/colorgen/colorgen.html) to access the most recent stable release! *updated July 27, 2024*
+This is a development version. Please visit **[my website](sharkswithswords.com/project-files/colorgen/colorgen.html)** to access the most recent stable release! *updated July 27, 2024*
 
 ***
 

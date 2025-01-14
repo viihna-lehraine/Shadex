@@ -3,38 +3,27 @@
 import { GenPaletteArgs, Palette, PaletteItem } from '../../../index/index.js';
 import { IDBManager } from '../../../idb/index.js';
 import { core, utils } from '../../../common/index.js';
-import { data } from '../../../data/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
+import { ui } from '../../../ui/index.js';
 
 const create = paletteSuperUtils.create;
-const mode = data.mode;
 
 const idb = IDBManager.getInstance();
 
 export async function monochromatic(args: GenPaletteArgs): Promise<Palette> {
-	const currentMonochromaticPaletteID = await idb.getCurrentPaletteID();
-
+	// ensure at least 2 color swatches
 	if (args.numBoxes < 2) {
-		if (mode.warnLogs)
-			console.warn('Monochromatic palette requires at least 2 swatches.');
-
-		return utils.palette.createObject(
-			'monochromatic',
-			[],
-			core.brandColor.asHSL(data.defaults.colors.hsl),
-			0,
-			currentMonochromaticPaletteID,
-			args.enableAlpha,
-			args.limitDark,
-			args.limitGray,
-			args.limitLight
-		);
+		ui.enforceSwatchRules(2);
 	}
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
-	const paletteItems: PaletteItem[] = [
-		create.paletteItem(baseColor, args.enableAlpha)
-	];
+	const paletteItems: PaletteItem[] = [];
+	const basePaletteItem = await create.paletteItem(
+		baseColor,
+		args.enableAlpha
+	);
+
+	paletteItems.push(basePaletteItem);
 
 	for (let i = 1; i < args.numBoxes; i++) {
 		const hueShift = Math.random() * 10 - 5;
@@ -63,7 +52,12 @@ export async function monochromatic(args: GenPaletteArgs): Promise<Palette> {
 		}).hsl;
 
 		if (newColor) {
-			paletteItems.push(create.paletteItem(newColor, args.enableAlpha));
+			const paletteItem = await create.paletteItem(
+				newColor,
+				args.enableAlpha
+			);
+
+			paletteItems.push(paletteItem);
 		}
 	}
 
@@ -78,7 +72,9 @@ export async function monochromatic(args: GenPaletteArgs): Promise<Palette> {
 		args.limitLight
 	);
 
-	if (!monochromaticPalette)
+	if (!monochromaticPalette) {
 		throw new Error('Monochromatic palette is either null or undefined.');
-	else return monochromaticPalette;
+	} else {
+		return monochromaticPalette;
+	}
 }

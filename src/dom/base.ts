@@ -171,6 +171,7 @@ async function initializeUI(): Promise<void> {
 
 	buttons.applyCustomColorButton?.addEventListener('click', async e => {
 		e.preventDefault();
+
 		console.log('applyCustomColorButton clicked');
 		// *DEV-NOTE* add logic here...
 	});

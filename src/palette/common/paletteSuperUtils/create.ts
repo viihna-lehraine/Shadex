@@ -20,7 +20,7 @@ import {
 	XYZString
 } from '../../../index/index.js';
 import { convert, core, utils } from '../../../common/index.js';
-import { IDBManager } from '../../../idb/index.js';
+import { idbInstance } from '../../../idb/index.js';
 import { paletteHelpers } from '../paletteHelpers/index.js';
 
 const limits = paletteHelpers.limits;
@@ -28,23 +28,25 @@ const update = paletteHelpers.update;
 
 const hslTo = convert.hslTo;
 
-const idb = IDBManager.getInstance();
-
 function baseColor(customColor: HSL | null, enableAlpha: boolean): HSL {
 	const color = core.base.clone(customColor ?? utils.random.hsl(enableAlpha));
 
 	return color as HSL;
 }
 
-function paletteItem(color: HSL, enableAlpha: boolean): PaletteItem {
+async function paletteItem(
+	color: HSL,
+	enableAlpha: boolean
+): Promise<PaletteItem> {
 	const clonedColor = core.base.clone(color) as HSL;
+	const nextPaletteID = await idbInstance.getNextPaletteID();
 
 	clonedColor.value.alpha = enableAlpha
 		? core.brand.asAlphaRange(Math.random())
 		: core.brand.asAlphaRange(1);
 
 	return {
-		id: `${color.format}_${idb.getNextPaletteID()}`,
+		id: `${color.format}_${nextPaletteID}`,
 		colors: {
 			cmyk: (hslTo(clonedColor, 'cmyk') as CMYK).value,
 			hex: (hslTo(clonedColor, 'hex') as Hex).value,
@@ -113,21 +115,24 @@ function paletteItem(color: HSL, enableAlpha: boolean): PaletteItem {
 	};
 }
 
-function paletteItemArray(
+async function paletteItemArray(
 	baseColor: HSL,
 	hues: number[],
 	enableAlpha: boolean,
 	limitDark: boolean,
 	limitGray: boolean,
 	limitLight: boolean
-): PaletteItem[] {
-	const paletteItems: PaletteItem[] = [paletteItem(baseColor, enableAlpha)];
+): Promise<PaletteItem[]> {
+	const paletteItems: PaletteItem[] = [
+		await paletteItem(baseColor, enableAlpha)
+	];
 
-	hues.forEach((hue, i) => {
+	for (const [i, hue] of hues.entries()) {
 		let newColor: HSL | null = null;
 
 		do {
 			const sl = utils.random.sl(enableAlpha) as SL;
+
 			newColor = utils.conversion.genAllColorValues({
 				value: {
 					hue: core.brand.asRadial(hue),
@@ -143,11 +148,13 @@ function paletteItemArray(
 		);
 
 		if (newColor) {
-			paletteItems.push(paletteItem(newColor, enableAlpha));
+			const newPaletteItem = await paletteItem(newColor, enableAlpha);
+
+			paletteItems.push(newPaletteItem);
 
 			update.colorBox(newColor, i + 1);
 		}
-	});
+	}
 
 	return paletteItems;
 }

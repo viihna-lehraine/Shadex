@@ -6,42 +6,27 @@ import {
 	Palette,
 	PaletteItem
 } from '../../../index/index.js';
-import { core, utils } from '../../../common/index.js';
-import { data } from '../../../data/index.js';
+import { core } from '../../../common/index.js';
 import { IDBManager } from '../../../idb/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
+import { ui } from '../../../ui/index.js';
 
 const create = paletteSuperUtils.create;
 const genHues = paletteSuperUtils.genHues;
-const mode = data.mode;
 
 const idb = IDBManager.getInstance();
 
 export async function analogous(args: GenPaletteArgs): Promise<Palette> {
-	const currentAnalogousPaletteID = await idb.getCurrentPaletteID();
-
+	// ensure at least 2 color swatches
 	if (args.numBoxes < 2) {
-		if (mode.warnLogs) {
-			console.warn('Analogous palette requires at least 2 swatches.');
-			console.warn('Returning default palette.');
-		}
-
-		return utils.palette.createObject(
-			'analogous',
-			[],
-			core.brandColor.asHSL(data.defaults.colors.hsl),
-			0,
-			currentAnalogousPaletteID,
-			args.enableAlpha,
-			args.limitDark,
-			args.limitGray,
-			args.limitLight
-		);
+		ui.enforceSwatchRules(2);
 	}
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const hues = genHues.analogous(baseColor, args.numBoxes);
-	const paletteItems: PaletteItem[] = hues.map((hue, i) => {
+	const paletteItems: PaletteItem[] = [];
+
+	for (const [i, hue] of hues.entries()) {
 		const newColor: HSL = {
 			value: {
 				hue: core.brand.asRadial(hue),
@@ -71,8 +56,13 @@ export async function analogous(args: GenPaletteArgs): Promise<Palette> {
 			format: 'hsl'
 		};
 
-		return create.paletteItem(newColor, args.enableAlpha);
-	});
+		const paletteItem = await create.paletteItem(
+			newColor,
+			args.enableAlpha
+		);
+
+		paletteItems.push(paletteItem);
+	}
 
 	const analogousPalette = await idb.savePaletteToDB(
 		'analogous',

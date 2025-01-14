@@ -1,5 +1,7 @@
 // File: src/dom/validate.ts
 
+import { DOMValidateFnInterface } from '../index/index.js';
+
 function validateElements(ids: Record<string, string>): void {
 	const missingElements: string[] = [];
 
@@ -22,31 +24,6 @@ function validateElements(ids: Record<string, string>): void {
 	}
 }
 
-function validateFiles(files: readonly string[]): void {
-	const missingFiles: string[] = [];
-
-	files.forEach(file => {
-		fetch(file, { method: 'HEAD' })
-			.then(response => {
-				if (!response.ok) {
-					console.error(`File "${file}" is missing or inaccessible`);
-					missingFiles.push(file);
-				}
-			})
-			.catch(() => {
-				console.error(`Failed to check file: ${file}`);
-				missingFiles.push(file);
-			});
-	});
-
-	if (missingFiles.length) {
-		console.warn(
-			`Some required HTML partial files are missing (${missingFiles.length}):`,
-			missingFiles
-		);
-	} else {
-		console.log('All required HTML partial files are accessible.');
-	}
-}
-
-export { validateElements, validateFiles };
+export const validate: DOMValidateFnInterface = {
+	elements: validateElements
+};

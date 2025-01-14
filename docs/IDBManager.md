@@ -2,37 +2,208 @@
 
 ***
 
-## Preamble
+## Table of Contents
 
-This document provides an overview of the 'IDBManager' class.
+- **[Overview](#overview)**
+- **[Methods](#Methods)**
+	- **[Static Methods](#1-static-methods)**
+		- **[createInstance()](#1a-createinstance)**
+		- **[getInstance()](#1b-getinstance)**
+		- **[resetInstance()](#1c-resetinstance)**
+	- **[Public Methods](#2-public-methods)**
+		- **[createMutationLogger](#2a-createmutationloggertobj-t-key-string-t)**
+		- **[createPaletteTable](#2b-createpalettetablepalette-storedpalette-htmlelement)**
+		- **[getCurrentPaletteId](#2c-getcurrentpaletteid-promisenumber)**
+		- **[getCustomColor](#2d-getcustomcolor-promisehsl--null)**
+		- **[getLoggedObject](#2e-getloggedobjectobj-t--null-key-string-t--null)**
+		- **[getNextTableId](#2f-getnexttableid-promisestring--null)**
+		- **[getNextPaletteId](#2g-getnextpaletteid-promisenumber--null)**
+		- **[getSettings](#2h-getsettings-promisesettings)**
+		- **[getStore](#2i-getstorestorename-extends-keyof-paletteschemastorename-storename-mode-readonly--readwrite)**
+		- **[initializeDB](#2j-initializedb-promisevoid)**
+		- **[renderPalette](#2k-renderpalettetableid-string-promisevoid--null)**
+		- **[resetDatabase](#2l-resetdatabase-promisevoid--null)**
+		- **[saveData](#2m-savedatatstorename-keyof-paletteschema-key-string-data-t-oldvalue-t-promisevoid--null)**
+		- **[savePaletteId](#2n-savepaletteid-string-newpalette-storedpalette-promisevoid--null)**
+		- **[savePaletteToDB](#2o-savepalettetodbtype-string-items-paletteitem-basecolor-hsl-numboxes-number-enablealpha-boolean-limitdark-boolean-limitgray-boolean-limitlight-boolean-promisepalette--null)**
+		- **[saveSettings](#2p-savesettingsnewsettings-settings-promisevoid--null)**
+		- **[updateEntryInPalette](#2q-updateentryinpalettetableid-string-entryindex-number-newentry-paletteitem-promisevoid--null)**
+		- **[deleteDatabase](#2r-deletedatabase-promisevoid)**
+	- **[Private Methods](#3-private-methods)**
+		- **[debugError](#3a-debugerrorcontext-string-error-unknown-void)**
+		- **[formatLogMessage](#3b-formatlogmessageaction-string-details-recordstring-unknown-string)**
+		- **[getDB](#3c-getdb-promisepalettedb)**
+		- **[getDefa8ltKey](#3d-getdefaultkeykey-keyof-typeof-thisdefault_keys-string)**
+		- **[getStoreNames](#3e-getstorenamestorekey-keyof-typeof-thisstore_names-string)**
+		- **[getTableId](#3f-gettableid-string-promisestoredpalette--null)**
+		- **[handleAsync](#3g-handleasynctaction---promiset-errormessage-string-context-recordstring-unknown-promiset--null)**
+		- **[logMessage](#3h-logmessage-string-level-info--warn--error--info-void)**
+		- **[logMutation](#3i-logmutationlog-mutationlog-promisevoid--null)**
+		- **[resolveKey](#3j-resolvekeyk-extends-keyof-typeof-thisdefault_keyskey-k-string)**
+		- **[resolveStoreNames](#3k-resolvestorenames-extends-keyof-typeof-thisstore_namesstore-s-string)**
+		- **[updateCurrentPaletteId](#3l-updatecurrentpaletteidnewid-number-promisevoid--null)**
 
-- **[Overview](Overview)**
-- **[Methods](Methods)**
-- **[Usage](Usage)**
+<br>
+
+***
 
 ## Overview
 
-This application manages persistent data storage using IndexedDB. The data is managed via the 'IDBManager class' as defined in **[IDBManager.ts](../src/idb/IDBManager.ts)**.
+### **A. Class Description**<br>
+IDBManager is a singleton class that manages the IndexedDB database for the application. It provides methods to interact with the database, such as creating, updating, deleting, and retrieving data. This class also handles the initialization and management of database object stores.
 
-- Describe the class in general. Constructor?
+#### **Implements**<br>
+* IDBManagerInterface
 
+### **B. Class Properties**<br>
+
+- **B1. Static Properties**<br>
+	* **_instance: IDBManager | null_**
+		- **Description**: Stores the singleton instance of the IDBManager class.
+		- **Access**: Private.
+- **B2. Instance Properties**<br>
+	* **_adapter_**
+		- **Description**: Acts as a bridge between the environment and IndexedDB so that it may be more easily abstracted.
+		- **Access:** Private.
+	* **_cache: Partial<{ settings: Settings; customColor: HSL }>_**
+		- **Description**: A cache for frequently accessed settings and custom color data.
+		- **Access**: Private.
+	* **_dbPromise: Promise\<IDBPDatabase\<PaletteSchema\>\>_**
+		- **Description:** A promise that resolves to the IDBPDatabase instance, representing the IndexedDB database.
+		- **Access**: Private.
+	* **_defaultSettings: Settings_**
+		- **Description:** The default application settings for the database.
+		- **Access:** Private.
+	* **__mode: ModeData_**
+		- **Description:** Configuration object for controlling logging, debugging, and other runtime behaviors.
+		- **Access:** Private
+	* **_DEFAULT_KEYS: { APP_SETTINGS: string; CUSTOM_COLOR: string }_**
+    	- **Description:** Key constants for identifying specific entries in object stores.
+    	- **Access:** Private.
+	* **_STORE_NAMES: { CUSTOM_COLOR: string; MUTATIONS: string; SETTINGS: string; TABLES: string }_**
+    	- **Description:** Store name constants for the IndexedDB object stores.
+    	- **Access:** Private.
+
+### **Constructor**
+
+#### constructor()<br>
+- **Access:** Private.<br>
+- **Description:** Initializes the IDBManager instance by setting default settings, mode configurations, and store constants. It also initializes the IndexedDB instance with the appropriate object stores.<br>
+
+#### Behavior<br>
+1. Sets default values for defaultSettings, mode, DEFAULT_KEYS, and STORE_NAMES using predefined constants from the data module.
+Opens the paletteDB IndexedDB database:
+2. If the database does not exist, it creates the following object stores:
+	* customColor
+	* mutations
+	* palettes
+	* settings
+	* tables
+3. Sets the keyPath to timestamp for the mutations store and key for other stores.
+
+#### **Example Usage**<br>
+This constructor is private and cannot be called directly. Use the static createInstance() or getInstance() methods to obtain an instance of IDBManager.
+
+### Notes
+* The singleton pattern ensures only one instance of IDBManager is created throughout the application's lifecycle.
+* Object stores and their key paths are configured during database initialization in the upgrade callback of openDB.
+
+***
+***
+***
 
 ## Methods
 
-### 1. Instance Methods
+### 1. Static Methods
 
 ***
 ***
 
 #### **1a. createInstance()**<br>
-Asynchronously creates a singleton instance of IDBManager. Ensures any asynchronous setup (such as database initialization) is completed before returning the instance, so the database will be confirmed as ready for use.
+
+**Description**<br>
+Asynchronously creates a singleton instance of the IDBManager class and initializes the database if it has not already been instantiated. This method ensures that only one instance of the manager exists. Note that when the app is loaded, this is the method which must be called, otherwise the database will not be properly initialized.
+
+**Signature**<br>
+```
+public static async createInstance\(\): Promise\<IDBManager\>
+```
+
+**Returns**<br>
+* Promise\<IDBManager\>
+	* Resolves with the singleton IDBManager instance.
+
+**Behavior**<br>
+1. Checks if an instance of IDBManager already exists:
+    * If not, it creates a new instance of IDBManager and initializes the database using initializeDB().
+2. Returns the singleton instance.
+
+**Example Usage**<br>
+```
+const idbManager = await IDBManager.createInstance();
+
+console.log('IDBManager instance created and initialized:', idbManager);
+
+```
+
+***
+***
 
 #### **1b. getInstance()**<br>
-Synchronously retrieves a singleton instance of IDBManager. If the instance does not yet exist, it is created using the class constructor.
+
+**Description**<br>
+Synchronously retrieves the singleton instance of the IDBManager class. If no instance exists, it creates one without initializing the database.
+
+**Signature**<br>
+```
+public static getInstance(): IDBManager
+```
+
+**Returns***<br>
+* IDBManager
+	* the singleton IDBManager instance.
+
+**Behavior**<br>
+1. Checks if an instance of IDBManager already exists:
+    * If not, it creates a new instance without calling initializeDB().
+2. Returns the singleton instance.
+
+**Example Usage**<br>
+```
+const idbManager = IDBManager.getInstance();
+
+console.log('IDBManager instance retrieved:', idbManager);
+
+```
+
+***
+***
 
 #### **1c. resetInstance()**<br>
-Resets the class instance by setting its value to null.
 
+**Description**<br>
+Resets the singleton instance of the IDBManager class to null. This allows a new instance to be created the next time createInstance() is called.
+
+**Returns**<br>
+* void
+
+**Behavior**<br>
+1. Sets the internal instance variable to null.
+2. This effectively removes the current IDBManager instance.
+
+**Example Usage**<br>
+```
+IDBManager.resetInstance();
+
+console.log('IDBManager instance has been reset.');
+```
+
+**Notes**<br>
+* Use createInstance when you need to ensure the database is initialized before using the IDBManager.
+* Use getInstance when you only need access to the singleton instance without re-initializing it.
+* Use resetInstance during testing, debugging, or when the current instance needs to be discarded.
+
+***
 ***
 ***
 
@@ -70,9 +241,11 @@ const susObject = { name: 'Amogus', age: 69 };
 const manager = IDBManager.getInstance();
 const proxiedObject = manager.createMutationLogger( 'susObject');
 
-proxiedObject.name = 'Jeff';   // logs the mutation: name changed from 'Amog' to 'Jeff'
+proxiedObject.name = 'Jeff';   // logs the mutation: name changed from 'Amogus' to 'Jeff'
 proxiedObject.age = 420;   // logs the mutation: age changed from 69 to 420
 ```
+
+**Sample Log Entry**<br>
 
 ***
 ***
@@ -598,6 +771,49 @@ await idbManager.updateEntryInPalette('palette_2', 3, {
 
 ***
 ***
+
+#### **2r. deleteDatabase\(\): Promise\<void\>**
+
+**Description**<br>
+Deletes the IndexedDB database used by the application. This is useful for clearing all stored data, typically for debugging, resetting the application state, or handling corrupted data. If the database does not exist, the method logs a message and exits gracefully.
+
+**Returns**<br>
+a Promise resolving to void.
+
+**How It Works**<br>
+1. Checks if the database exists:
+	 * Opens the database and resolves a boolean indicating its existence.
+2. If the database exists:
+    * Attempts to delete it using indexedDB.deleteDatabase(dbName).
+    * Handles success, error, and blocked events:
+        * Logs success if the deletion completes.
+        * Logs an error if the deletion fails.
+        * Logs a warning if the deletion is blocked due to open connections.
+3. If the database does not exist:
+    * Logs a message indicating that the database was not found.
+
+**Error Handling**<br>
+* Errors are handled via the handleAsync utility.
+* Any exceptions or issues during the deletion process are logged and re-thrown.
+
+**Usage Example**<br>
+```
+const idbManager = await IDBManager.createInstance();
+
+try {
+    await idbManager.deleteDatabase();
+    console.log('Database successfully deleted.');
+} catch (error) {
+    console.error('Failed to delete the database:', error);
+}
+
+```
+
+**Related Methods**<br>
+* resetDatabase(): Resets the database by clearing all object stores and reinitializing default settings.
+
+***
+***
 ***
 
 ### 3. Private Methods
@@ -825,5 +1041,10 @@ a Promise that resolves to void if the operation is successful, or null if an er
 await updateCurrentPaletteID(42); // updates the palette ID to 42
 
 ```
+
+***
+***
+
+### **[Return to Top](#table-of-contents)**
 
 ***

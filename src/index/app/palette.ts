@@ -17,7 +17,7 @@ export interface PaletteCommon_Helpers_Update {
 
 export interface PaletteCommon_SuperUtils_Create {
 	baseColor(customColor: HSL | null, enableAlpha: boolean): HSL;
-	paletteItem(color: HSL, enableAlpha: boolean): PaletteItem;
+	paletteItem(color: HSL, enableAlpha: boolean): Promise<PaletteItem>;
 	paletteItemArray(
 		baseColor: HSL,
 		hues: number[],
@@ -25,7 +25,7 @@ export interface PaletteCommon_SuperUtils_Create {
 		limitDark: boolean,
 		limitGray: boolean,
 		limitLight: boolean
-	): PaletteItem[];
+	): Promise<PaletteItem[]>;
 }
 
 export interface PaletteCommon_SuperUtils_GenHues {
