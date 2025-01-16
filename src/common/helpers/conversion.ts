@@ -8,8 +8,9 @@ import {
 } from '../../index/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
+import { log } from '../../classes/logger/index.js';
 
-const mode = data.mode;
+const logMode = data.mode.logging;
 
 export function applyGammaCorrection(value: number): number {
 	try {
@@ -17,8 +18,8 @@ export function applyGammaCorrection(value: number): number {
 			? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
 			: 12.92 * value;
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error applying gamma correction: ${error}`);
+		if (logMode.errors)
+			log.error(`Error applying gamma correction: ${error}`);
 
 		return value;
 	}
@@ -29,8 +30,8 @@ export function clampRGB(rgb: RGB): RGB {
 	const defaultRGBBranded = core.brandColor.asRGB(defaultRGBUnbranded);
 
 	if (!core.validate.colorValues(rgb)) {
-		if (mode.errorLogs)
-			console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+		if (logMode.errors)
+			log.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
 		return defaultRGBBranded;
 	}
@@ -56,8 +57,7 @@ export function clampRGB(rgb: RGB): RGB {
 			format: 'rgb'
 		};
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error clamping RGB values: ${error}`);
+		if (logMode.errors) log.error(`Error clamping RGB values: ${error}`);
 
 		return rgb;
 	}
@@ -79,8 +79,7 @@ export function hueToRGB(p: number, q: number, t: number): number {
 
 		return clonedP;
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error converting hue to RGB: ${error}`);
+		if (logMode.errors) log.error(`Error converting hue to RGB: ${error}`);
 
 		return 0;
 	}
@@ -92,15 +91,15 @@ export function hslAddFormat(value: HSLValue): HSL {
 
 	try {
 		if (!core.validate.colorValues({ value: value, format: 'hsl' })) {
-			if (mode.errorLogs)
-				console.error(`Invalid HSL value ${JSON.stringify(value)}`);
+			if (logMode.errors)
+				log.error(`Invalid HSL value ${JSON.stringify(value)}`);
 
 			return defaultHSLBranded;
 		}
 
 		return { value: value, format: 'hsl' } as HSL;
 	} catch (error) {
-		if (mode.errorLogs) console.error(`Error adding HSL format: ${error}`);
+		if (logMode.errors) log.error(`Error adding HSL format: ${error}`);
 
 		return defaultHSLBranded;
 	}

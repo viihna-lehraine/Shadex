@@ -10,9 +10,11 @@ import {
 } from '../../index/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
+import { log } from '../../classes/logger/index.js';
 
-const timeouts = data.consts.timeouts;
+const logMode = data.mode.logging;
 const mode = data.mode;
+const timeouts = data.consts.timeouts;
 
 let dragSrcEl: HTMLElement | null = null;
 
@@ -26,10 +28,10 @@ function attachDragAndDropListeners(element: HTMLElement | null): void {
 		}
 
 		if (!mode.quiet)
-			console.log('Drag and drop event listeners successfully attached');
+			log.info('Drag and drop event listeners successfully attached');
 	} catch (error) {
-		if (!mode.errorLogs)
-			console.error(
+		if (!logMode.errors)
+			log.error(
 				`Failed to execute attachDragAndDropEventListeners: ${error}`
 			);
 	}
@@ -44,10 +46,10 @@ function dragStart(e: DragEvent): void {
 			e.dataTransfer.setData('text/html', dragSrcEl.outerHTML);
 		}
 
-		if (!mode.quiet) console.log('handleDragStart complete');
+		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
+			log.info('handleDragStart complete');
 	} catch (error) {
-		if (!mode.errorLogs)
-			console.error(`Error in handleDragStart: ${error}`);
+		if (logMode.errors) log.error(`Error in handleDragStart: ${error}`);
 	}
 }
 
@@ -59,11 +61,12 @@ function dragOver(e: DragEvent): boolean {
 			e.dataTransfer.dropEffect = 'move';
 		}
 
-		if (!mode.quiet) console.log('handleDragOver complete');
+		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
+			log.info('handleDragOver complete');
 
 		return false;
 	} catch (error) {
-		if (!mode.errorLogs) console.error(`Error in handleDragOver: ${error}`);
+		if (logMode.errors) log.error(`Error in handleDragOver: ${error}`);
 
 		return false;
 	}
@@ -79,9 +82,10 @@ function dragEnd(e: DragEvent): void {
 			el.classList.remove('dragging');
 		});
 
-		if (!mode.quiet) console.log('handleDragEnd complete');
+		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
+			log.info('handleDragEnd complete');
 	} catch (error) {
-		if (!mode.errorLogs) console.error(`Error in handleDragEnd: ${error}`);
+		if (logMode.errors) console.error(`Error in handleDragEnd: ${error}`);
 	}
 }
 
@@ -131,8 +135,8 @@ function drop(e: DragEvent): void {
 				) as HTMLInputElement
 			).value = dragSrcText;
 
-			if (!mode.quiet)
-				console.log(
+			if (!mode.quiet && mode.debug && logMode.verbosity > 3)
+				log.info(
 					'calling attachDragAndDropEventListeners for new elements'
 				);
 
@@ -141,16 +145,17 @@ function drop(e: DragEvent): void {
 			attachDragAndDropListeners(newDropTargetEl);
 		}
 
-		if (!mode.quiet) console.log('handleDrop complete');
+		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
+			log.info('handleDrop complete');
 	} catch (error) {
-		if (!mode.errorLogs) console.error(`Error in handleDrop: ${error}`);
+		if (!logMode.errors) log.error(`Error in handleDrop: ${error}`);
 	}
 }
 
 function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 	try {
 		if (!core.validate.colorValues(color)) {
-			if (!mode.errorLogs)
+			if (!logMode.errors)
 				console.error(
 					`Invalid ${color.format} color value ${JSON.stringify(color)}`
 				);
@@ -209,7 +214,7 @@ function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 					data.consts.timeouts.copyButtonText || 1000
 				);
 			} catch (error) {
-				if (!mode.errorLogs) console.error(`Failed to copy: ${error}`);
+				if (!logMode.errors) log.error(`Failed to copy: ${error}`);
 			}
 		});
 
@@ -266,8 +271,8 @@ function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 			paletteBoxCount: paletteBoxCount + 1
 		};
 	} catch (error) {
-		if (!mode.errorLogs)
-			console.error(`Failed to execute makePaletteBox: ${error}`);
+		if (!logMode.errors)
+			log.error(`Failed to execute makePaletteBox: ${error}`);
 
 		return {
 			colorStripe: document.createElement('div'),
@@ -285,12 +290,13 @@ function showToast(message: string): void {
 
 	document.body.appendChild(toast);
 
-	if (!mode.quiet) console.log('Toast message added');
+	if (!mode.quiet && logMode.verbosity > 3) log.info('Toast message added');
 
 	setTimeout(() => {
 		toast.classList.add('fade-out');
 
-		if (!mode.quiet) console.log('Toast message faded out');
+		if (!mode.quiet && logMode.verbosity > 3)
+			log.info('Toast message faded out');
 
 		toast.addEventListener('transitioned', () => toast.remove());
 	}, timeouts.toast || 3000);
@@ -310,9 +316,11 @@ function showTooltip(tooltipElement: HTMLElement): void {
 			}, data.consts.timeouts.tooltip || 1000);
 		}
 
-		console.log('showTooltip executed');
+		if (!mode.quiet && logMode.verbosity > 3)
+			log.info('showTooltip executed');
 	} catch (error) {
-		console.error(`Failed to execute showTooltip: ${error}`);
+		if (logMode.errors)
+			log.error(`Failed to execute showTooltip: ${error}`);
 	}
 }
 
@@ -326,8 +334,8 @@ function validateAndConvertColor(
 		: color;
 
 	if (!core.validate.colorValues(convertedColor)) {
-		if (mode.errorLogs)
-			console.error(`Invalid color: ${JSON.stringify(convertedColor)}`);
+		if (logMode.errors)
+			log.error(`Invalid color: ${JSON.stringify(convertedColor)}`);
 
 		return null;
 	}

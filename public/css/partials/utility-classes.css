@@ -1,0 +1,184 @@
+/* File: public/css/partials/utility-classes.css */
+
+/* * * * * * * */
+/* Background Colors */
+
+.bg-color-1 {
+	background-color: var(--background-color-1);
+}
+
+.bg-color-2 {
+	background-color: var(--background-color-2);
+}
+
+.bg-color-3 {
+	background-color: var(--background-color-3);
+}
+
+.bg-color-4 {
+	background-color: var(--background-color-4);
+}
+
+.bg-color-5 {
+	background-color: var(--background-color-5);
+}
+
+.bg-color-6 {
+	background-color: var(--background-color-6);
+}
+
+.bg-color-7 {
+	background-color: var(--background-color-7);
+}
+
+.bg-color-8 {
+	background-color: var(--background-color-8);
+}
+
+.bg-color-9 {
+	background-color: var(--background-color-9);
+}
+
+.bg-color-10 {
+	background-color: var(--background-color-10);
+}
+
+.bg-color-11 {
+	background-color: var(--background-color-11);
+}
+
+/* * * * * * * */
+/* Border Colors */
+
+.border-color-1 {
+	border-color: var(--border-color-1);
+}
+
+.border-color-2 {
+	border-color: var(--border-color-2);
+}
+
+.border-color-3 {
+	border-color: var(--border-color-3);
+}
+
+.border-color-4 {
+	border-color: var(--border-color-4);
+}
+
+.border-color-5 {
+	border-color: var(--border-color-5);
+}
+
+/* * * * * * * * * * */
+/* Box Shadow Colors */
+
+.box-shadow-color-1 {
+	box-shadow: 0 4px 8px var(--box-shadow-color-1);
+}
+
+/* * * * * * * */
+/* Font Colors */
+
+.font-color-primary {
+	color: var(--font-color-primary);
+}
+
+.font-color-labels {
+	color: var(--font-color-labels);
+}
+
+.font-color-3 {
+	color: var(--font-color-3);
+}
+
+.font-color-4 {
+	color: var(--font-color-4);
+}
+
+/* * * * * * * */
+/* Gap Sizes */
+
+.gap-xs {
+	gap: var(--gap-xs);
+}
+
+.gap-sm {
+	gap: var(--gap-sm);
+}
+
+.gap-md {
+	gap: var(--gap-md);
+}
+
+.gap-lg {
+	gap: var(--gap-lg);
+}
+
+.gap-xl {
+	gap: var(--gap-xl);
+}
+
+.gap-xxl {
+	gap: var(--gap-xxl);
+}
+
+/* * * * * * * * */
+/* Margin Sizes */
+
+.margin-xs {
+	margin: var(--margin-xs);
+}
+
+.margin-sm {
+	margin: var(--margin-sm);
+}
+
+.margin-md {
+	margin: var(--margin-md);
+}
+
+.margin-lg {
+	margin: var(--margin-lg);
+}
+
+.margin-xl {
+	margin: var(--margin-xl);
+}
+
+.margin-xxl {
+	margin: var(--margin-xxl);
+}
+
+/* * * * * * * * */
+/* Padding Sizes */
+
+.padding-xs {
+	padding: var(--padding-xs);
+}
+
+.padding-sm {
+	padding: var(--padding-sm);
+}
+
+.padding-ms {
+	padding: var(--padding-ms);
+}
+
+.padding-md {
+	padding: var(--padding-md);
+}
+
+.padding-lg {
+	padding: var(--padding-lg);
+}
+
+.padding-xl {
+	padding: var(--padding-xl);
+}
+
+/* Other Utility Classes */
+
+.border-none {
+	border: none;
+}

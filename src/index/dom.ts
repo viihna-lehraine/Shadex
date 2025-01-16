@@ -37,22 +37,36 @@ export interface PullParamsFromUI {
 }
 
 export interface UIElements {
+	advancedMenu: HTMLDivElement | null;
 	advancedMenuButton: HTMLButtonElement | null;
+	advancedMenuContent: HTMLDivElement | null;
 	applyCustomColorButton: HTMLButtonElement | null;
 	clearCustomColorButton: HTMLButtonElement | null;
-	closeCustomColorMenuButton: HTMLButtonElement | null;
-	closeHelpMenuButton: HTMLButtonElement | null;
-	closeHistoryMenuButton: HTMLButtonElement | null;
+	customColorDisplay: HTMLSpanElement | null;
+	customColorInput: HTMLInputElement | null;
+	customColorMenu: HTMLDivElement | null;
+	customColorMenuButton: HTMLButtonElement | null;
+	deleteDatabaseButton: HTMLButtonElement | null;
 	desaturateButton: HTMLButtonElement | null;
+	developerMenuButton: HTMLButtonElement | null;
 	enableAlphaCheckbox: HTMLInputElement | null;
 	generateButton: HTMLButtonElement | null;
+	helpMenu: HTMLDivElement | null;
 	helpMenuButton: HTMLButtonElement | null;
+	helpMenuContent: HTMLDivElement | null;
+	historyMenu: HTMLDivElement | null;
 	historyMenuButton: HTMLButtonElement | null;
+	historyMenuContent: HTMLDivElement | null;
 	limitDarknessCheckbox: HTMLInputElement | null;
 	limitGraynessCheckbox: HTMLInputElement | null;
 	limitLightnessCheckbox: HTMLInputElement | null;
+	paletteNumberOptions: HTMLInputElement | null;
+	paletteTypeOptions: HTMLSelectElement | null;
+	resetDatabaseButton: HTMLButtonElement | null;
+	resetPaletteIDButton: HTMLButtonElement | null;
 	saturateButton: HTMLButtonElement | null;
 	selectedColor: number;
+	selectedColorOption: HTMLSelectElement | null;
 	showAsCMYKButton: HTMLButtonElement | null;
 	showAsHexButton: HTMLButtonElement | null;
 	showAsHSLButton: HTMLButtonElement | null;

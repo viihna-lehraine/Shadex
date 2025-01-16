@@ -9,26 +9,12 @@ const advancedMenu = getElement<HTMLDivElement>('advanced-menu');
 const advancedMenuButton = getElement<HTMLButtonElement>(
 	'advanced-menu-button'
 );
+const advancedMenuContent = getElement<HTMLDivElement>('advanced-menu-content');
 const applyCustomColorButton = getElement<HTMLButtonElement>(
 	'apply-custom-color-button'
 );
 const clearCustomColorButton = getElement<HTMLButtonElement>(
 	'clear-custom-color-button'
-);
-const closeAdvancedMenuButton = getElement<HTMLButtonElement>(
-	'close-advanced-menu-button'
-);
-const closeCustomColorMenuButton = getElement<HTMLButtonElement>(
-	'close-custom-color-menu-button'
-);
-const closeDeveloperMenuButton = getElement<HTMLButtonElement>(
-	'close-developer-menu-button'
-);
-const closeHelpMenuButton = getElement<HTMLButtonElement>(
-	'close-help-menu-button'
-);
-const closeHistoryMenuButton = getElement<HTMLButtonElement>(
-	'close-history-menu-button'
 );
 const customColorDisplay = getElement<HTMLSpanElement>('custom-color-display');
 const customColorInput = getElement<HTMLInputElement>('custom-color-input');
@@ -50,8 +36,10 @@ const enableAlphaCheckbox = getElement<HTMLInputElement>(
 const generateButton = getElement<HTMLButtonElement>('generate-button');
 const helpMenu = getElement<HTMLDivElement>('help-menu');
 const helpMenuButton = getElement<HTMLButtonElement>('help-menu-button');
+const helpMenuContent = getElement<HTMLDivElement>('help-menu-content');
 const historyMenu = getElement<HTMLDivElement>('history-menu');
 const historyMenuButton = getElement<HTMLButtonElement>('history-menu-button');
+const historyMenuContent = getElement<HTMLDivElement>('history-menu-content');
 const limitDarknessCheckbox = getElement<HTMLInputElement>(
 	'limit-darkness-checkbox'
 );
@@ -67,7 +55,9 @@ const paletteNumberOptions = getElement<HTMLInputElement>(
 const paletteTypeOptions = getElement<HTMLSelectElement>(
 	'palette-type-options'
 );
-const resetButton = getElement<HTMLButtonElement>('reset-button');
+const resetDatabaseButton = getElement<HTMLButtonElement>(
+	'reset-database-button'
+);
 const resetPaletteIDButton = getElement<HTMLButtonElement>(
 	'reset-palette-id-button'
 );
@@ -85,13 +75,9 @@ const showAsRGBButton = getElement<HTMLButtonElement>('show-as-rgb-button');
 export const domElements: DOMElementData = {
 	advancedMenu,
 	advancedMenuButton,
+	advancedMenuContent,
 	applyCustomColorButton,
 	clearCustomColorButton,
-	closeAdvancedMenuButton,
-	closeCustomColorMenuButton,
-	closeDeveloperMenuButton,
-	closeHelpMenuButton,
-	closeHistoryMenuButton,
 	customColorDisplay,
 	customColorInput,
 	customColorMenu,
@@ -102,16 +88,18 @@ export const domElements: DOMElementData = {
 	developerMenuButton,
 	enableAlphaCheckbox,
 	generateButton,
-	helpMenuButton,
 	helpMenu,
+	helpMenuButton,
+	helpMenuContent,
 	historyMenu,
 	historyMenuButton,
+	historyMenuContent,
 	limitDarknessCheckbox,
 	limitGraynessCheckbox,
 	limitLightnessCheckbox,
 	paletteNumberOptions,
 	paletteTypeOptions,
-	resetButton,
+	resetDatabaseButton,
 	resetPaletteIDButton,
 	saturateButton,
 	selectedColorOption,

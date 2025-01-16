@@ -1,7 +1,7 @@
 // File: src/palette/main/types/monochromatic.js
 
 import { GenPaletteArgs, Palette, PaletteItem } from '../../../index/index.js';
-import { IDBManager } from '../../../idb/index.js';
+import { IDBManager } from '../../../classes/idb/index.js';
 import { core, utils } from '../../../common/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
 import { ui } from '../../../ui/index.js';

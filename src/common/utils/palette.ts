@@ -11,8 +11,10 @@ import {
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
 import { helpers } from '../helpers/index.js';
+import { log } from '../../classes/logger/index.js';
 
 const mode = data.mode;
+const logMode = mode.logging;
 
 function createObject(
 	type: string,
@@ -56,7 +58,7 @@ export function populateOutputBox(
 			: core.convert.toColor(color);
 
 		if (!core.validate.colorValues(clonedColor)) {
-			if (mode.errorLogs) console.error('Invalid color values.');
+			if (logMode.errors) log.error('Invalid color values.');
 
 			helpers.dom.showToast('Invalid color.');
 
@@ -71,16 +73,14 @@ export function populateOutputBox(
 
 		const stringifiedColor = core.convert.toCSSColorString(clonedColor);
 
-		if (!mode.quiet)
-			console.log(
-				`Adding CSS-formatted color to DOM ${stringifiedColor}`
-			);
+		if (!mode.quiet && logMode.info && logMode.verbosity > 0)
+			log.info(`Adding CSS-formatted color to DOM ${stringifiedColor}`);
 
 		colorTextOutputBox.value = stringifiedColor;
 		colorTextOutputBox.setAttribute('data-format', color.format);
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error('Failed to populate color text output box:', error);
+		if (logMode.errors)
+			log.error(`Failed to populate color text output box: ${error}`);
 
 		return;
 	}

@@ -3,15 +3,16 @@
 import { HSL, PaletteCommon_Utils_Adjust } from '../../../index/index.js';
 import { core, helpers } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
+import { log } from '../../../classes/logger/index.js';
 
 const adjustments = data.consts.adjustments;
-const mode = data.mode;
+const logMode = data.mode.logging;
 
 function sl(color: HSL): HSL {
 	try {
 		if (!core.validate.colorValues(color)) {
-			if (mode.errorLogs)
-				console.error('Invalid color valus for adjustment.');
+			if (logMode.errors)
+				log.error('Invalid color valus for adjustment.');
 
 			helpers.dom.showToast('Invalid color values');
 
@@ -34,8 +35,8 @@ function sl(color: HSL): HSL {
 			format: 'hsl'
 		};
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error adjusting saturation and lightness: ${error}`);
+		if (logMode.errors)
+			log.error(`Error adjusting saturation and lightness: ${error}`);
 
 		return color;
 	}

@@ -49,7 +49,9 @@ import {
 	XYZ_Z
 } from '../../index/index.js';
 import { data } from '../../data/index.js';
+import { log } from '../../classes/logger/index.js';
 
+const logMode = data.mode.logging;
 const defaultColors = data.defaults.colors;
 const mode = data.mode;
 const _sets = data.sets;
@@ -82,7 +84,7 @@ function debounce<T extends (...args: Parameters<T>) => void>(
 function parseCustomColor(rawValue: string): HSL | null {
 	try {
 		if (!mode.quiet)
-			console.log(`Parsing custom color: ${JSON.stringify(rawValue)}`);
+			log.info(`Parsing custom color: ${JSON.stringify(rawValue)}`);
 
 		const match = rawValue.match(
 			/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?,\s*(\d*\.?\d+)\)/
@@ -101,15 +103,15 @@ function parseCustomColor(rawValue: string): HSL | null {
 				format: 'hsl'
 			};
 		} else {
-			if (mode.errorLogs)
-				console.error(
+			if (logMode.errors)
+				log.error(
 					'Invalid HSL custom color. Expected format: hsl(H, S%, L%, A)'
 				);
 
 			return null;
 		}
 	} catch (error) {
-		if (mode.errorLogs) console.error(`parseCustomColor error: ${error}`);
+		if (logMode.errors) log.error(`parseCustomColor error: ${error}`);
 
 		return null;
 	}
@@ -436,8 +438,8 @@ function toColor(colorString: ColorString): Color {
 		case 'sv':
 			return { format: 'sv', value: newValue as SVValue };
 		default:
-			if (mode.errorLogs)
-				console.error('Unsupported format for colorStringToColor');
+			if (logMode.errors)
+				log.error('Unsupported format for colorStringToColor');
 
 			const unbrandedHSL = defaultColors.hsl;
 
@@ -502,8 +504,8 @@ function toCSSColorString(color: Color): string {
 			case 'xyz':
 				return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z}, ${color.value.alpha})`;
 			default:
-				if (mode.errorLogs)
-					console.error(`Unexpected color format: ${color.format}`);
+				if (logMode.errors)
+					log.error(`Unexpected color format: ${color.format}`);
 
 				return '#FFFFFFFF';
 		}
@@ -771,8 +773,8 @@ function colorValues(color: Color | SL | SV): boolean {
 				clonedColor.value.z <= 108.883
 			);
 		default:
-			if (mode.errorLogs)
-				console.error(`Unsupported color format: ${color.format}`);
+			if (logMode.errors)
+				log.error(`Unsupported color format: ${color.format}`);
 
 			return false;
 	}

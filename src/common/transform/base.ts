@@ -9,6 +9,7 @@ import {
 	PaletteUnbranded
 } from '../../index/index.js';
 import { brand } from '../core/base.js';
+import { log } from '../../classes/logger/index.js';
 import { mode } from '../../data/mode/index.js';
 
 function addHashToHex(hex: Hex): Hex {
@@ -201,7 +202,8 @@ function componentToHex(component: number): string {
 
 		return hex.length === 1 ? '0' + hex : hex;
 	} catch (error) {
-		if (!mode.quiet) console.error(`componentToHex error: ${error}`);
+		if (!mode.quiet && mode.logging.errors)
+			log.error(`componentToHex error: ${error}`);
 
 		return '00';
 	}

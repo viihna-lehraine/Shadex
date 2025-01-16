@@ -10,9 +10,11 @@ import {
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
 import { helpers } from '../helpers/index.js';
+import { log } from '../../classes/logger/index.js';
 import { utils } from '../utils/index.js';
 
 const mode = data.mode;
+const logMode = data.mode.logging;
 
 function getGenButtonArgs(): GenButtonArgs | null {
 	try {
@@ -37,13 +39,13 @@ function getGenButtonArgs(): GenButtonArgs | null {
 			limitGraynessCheckbox === null ||
 			limitLightnessCheckbox === null
 		) {
-			if (mode.errorLogs) console.error('One or more elements are null');
+			if (logMode.errors) log.error('One or more elements are null');
 
 			return null;
 		}
 
-		if (!mode.quiet)
-			console.log(
+		if (!mode.quiet && logMode.info && logMode.verbosity >= 2)
+			log.info(
 				`numBoxes: ${parseInt(paletteNumberOptions.value, 10)}\npaletteType: ${parseInt(paletteTypeOptions.value, 10)}`
 			);
 
@@ -59,10 +61,8 @@ function getGenButtonArgs(): GenButtonArgs | null {
 			limitLightness: limitLightnessCheckbox.checked
 		};
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(
-				`Failed to retrieve generateButton parameters: ${error}`
-			);
+		if (logMode.errors)
+			log.error(`Failed to retrieve generateButton parameters: ${error}`);
 
 		return null;
 	}
@@ -80,10 +80,8 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 			const colorValues = inputBox.colorValues;
 
 			if (!colorValues || !core.validate.colorValues(colorValues)) {
-				if (mode.errorLogs)
-					console.error(
-						'Invalid color values. Cannot display toast.'
-					);
+				if (logMode.errors)
+					log.error('Invalid color values. Cannot display toast.');
 
 				helpers.dom.showToast('Invalid color.');
 
@@ -94,10 +92,8 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 				'data-format'
 			) as ColorSpace;
 
-			if (!mode.quiet)
-				console.log(
-					`Converting from ${currentFormat} to ${targetFormat}`
-				);
+			if (!mode.quiet && logMode.info && logMode.verbosity >= 2)
+				log.info(`Converting from ${currentFormat} to ${targetFormat}`);
 
 			const convertFn = utils.conversion.getConversionFn(
 				currentFormat,
@@ -105,8 +101,8 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 			);
 
 			if (!convertFn) {
-				if (mode.errorLogs)
-					console.error(
+				if (logMode.errors)
+					log.error(
 						`Conversion from ${currentFormat} to ${targetFormat} is not supported.`
 					);
 
@@ -116,8 +112,8 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 			}
 
 			if (colorValues.format === 'xyz') {
-				if (mode.errorLogs)
-					console.error(
+				if (logMode.errors)
+					log.error(
 						'Cannot convert from XYZ to another color space.'
 					);
 
@@ -134,8 +130,8 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 				utils.color.isSVColor(clonedColor) ||
 				utils.color.isXYZ(clonedColor)
 			) {
-				if (mode.errorLogs)
-					console.error(
+				if (logMode.verbosity >= 3 && logMode.errors)
+					log.error(
 						'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.'
 					);
 
@@ -145,8 +141,8 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 			}
 
 			if (!clonedColor) {
-				if (mode.errorLogs)
-					console.error(`Conversion to ${targetFormat} failed.`);
+				if (logMode.errors)
+					log.error(`Conversion to ${targetFormat} failed.`);
 
 				helpers.dom.showToast('Conversion failed.');
 
@@ -156,8 +152,8 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 			const newColor = core.base.clone(convertFn(clonedColor));
 
 			if (!newColor) {
-				if (mode.errorLogs)
-					console.error(`Conversion to ${targetFormat} failed.`);
+				if (logMode.errors)
+					log.error(`Conversion to ${targetFormat} failed.`);
 
 				helpers.dom.showToast('Conversion failed.');
 
@@ -171,11 +167,12 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 	} catch (error) {
 		helpers.dom.showToast('Failed to convert colors.');
 
-		if (!mode.quiet) console.log('Failed to convert colors.');
+		if (!mode.quiet && logMode.warnings)
+			log.warn('Failed to convert colors.');
 		else if (!mode.gracefulErrors)
 			throw new Error(`Failed to convert colors: ${error as Error}`);
-		else if (mode.errorLogs)
-			console.error(`Failed to convert colors: ${error as Error}`);
+		else if (logMode.errors)
+			log.error(`Failed to convert colors: ${error as Error}`);
 	}
 }
 

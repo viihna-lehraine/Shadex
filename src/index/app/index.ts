@@ -38,8 +38,10 @@ export type {
 	DOMData,
 	DOMElementData,
 	DOM_ID_Data,
+	EnvironmentData,
 	IDBDefaultsData,
 	LimitsData,
+	LoggingData,
 	ModeData,
 	PaletteDefaultsData,
 	PaletteRangesData,
@@ -57,11 +59,6 @@ export type {
 	DOMHistoryFnInterface,
 	DOMValidateFnInterface
 } from './dom.js';
-export type {
-	LoggerFnDebugInterface,
-	LoggerFnMasterInterface,
-	LoggerFnVerboseInterface
-} from './logger.js';
 export type {
 	GenPaletteArgs,
 	GenPaletteFnInterface,

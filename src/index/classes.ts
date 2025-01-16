@@ -3,12 +3,30 @@
 import { IDBPObjectStore } from 'idb';
 import {
 	HSL,
+	MutationLog,
 	Palette,
 	PaletteItem,
 	PaletteSchema,
 	Settings,
 	StoredPalette
 } from './index.js';
+
+export interface AppLoggerInterface {
+	log(
+		message: string,
+		level: 'debug' | 'info' | 'warn' | 'error',
+		debugLevel: 0 | 1
+	): void;
+	logAsync(
+		message: string,
+		level: 'debug' | 'info' | 'warn' | 'error',
+		debugLevel: 0 | 1
+	): Promise<void>;
+	logMutation(
+		data: MutationLog,
+		logCallback: (data: MutationLog) => void
+	): void;
+}
 
 export interface IDBManagerInterface {
 	createMutationLogger<T extends object>(obj: T, key: string): T;
@@ -65,4 +83,8 @@ export interface IDBManagerInterface {
 		limitLight: boolean
 	): Promise<Palette | null>;
 	saveSettings(newSettings: Settings): Promise<void | null>;
+}
+
+export interface MutationTrackerInterface {
+	persistMutation(data: MutationLog): Promise<void>;
 }

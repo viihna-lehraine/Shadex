@@ -4,12 +4,14 @@ import { DOMEventsInterface, HSL, PaletteOptions } from '../../index/index.js';
 import { core, superUtils, utils } from '../../common/index.js';
 import { data } from '../../data/index.js';
 import { domUtils } from '../utils/index.js';
-import { IDBManager } from '../../idb/index.js';
+import { IDBManager } from '../../classes/idb/index.js';
+import { log } from '../../classes/logger/index.js';
 import { mode } from '../../data/mode/index.js';
 import { start } from '../../palette/index.js';
 
 const buttonDebounce = data.consts.debounce.button || 300;
 const domIDs = data.consts.dom.ids;
+const logMode = mode.logging;
 const uiElements = data.consts.dom.elements;
 
 const idb = IDBManager.getInstance();
@@ -23,9 +25,9 @@ function addEventListener<K extends keyof HTMLElementEventMap>(
 
 	if (element) {
 		element.addEventListener(eventType, callback);
-	} else if (mode.warnLogs) {
-		if ((mode.debug || mode.verbose) && mode.warnLogs)
-			console.warn(`Element with id "${id}" not found.`);
+	} else if (logMode.warnings) {
+		if (mode.debug && logMode.warnings && logMode.verbosity > 2)
+			log.warn(`Element with id "${id}" not found.`);
 	}
 }
 
@@ -34,7 +36,9 @@ const handlePaletteGen = core.base.debounce(() => {
 		const params = superUtils.dom.getGenButtonArgs();
 
 		if (!params) {
-			console.error('Failed to retrieve generateButton parameters');
+			if (logMode.errors) {
+				log.error('Failed to retrieve generateButton parameters');
+			}
 
 			return;
 		}
@@ -50,7 +54,9 @@ const handlePaletteGen = core.base.debounce(() => {
 		} = params;
 
 		if (!paletteType || !numBoxes) {
-			console.error('paletteType and/or numBoxes are undefined');
+			if (logMode.errors) {
+				log.error('paletteType and/or numBoxes are undefined');
+			}
 
 			return;
 		}
@@ -67,7 +73,8 @@ const handlePaletteGen = core.base.debounce(() => {
 
 		start.genPalette(options);
 	} catch (error) {
-		console.error(`Failed to handle generate button click: ${error}`);
+		if (logMode.errors)
+			log.error(`Failed to handle generate button click: ${error}`);
 	}
 }, buttonDebounce);
 
@@ -82,8 +89,8 @@ function initializeEventListeners(): void {
 				);
 			}
 		} else {
-			if (mode.warnLogs)
-				console.warn(`Element with id "${id}" not found.`);
+			if (logMode.warnings)
+				log.warn(`Element with id "${id}" not found.`);
 		}
 	};
 
@@ -100,18 +107,8 @@ function initializeEventListeners(): void {
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
-			const advancedMenuContent = document.querySelector(
-				'.advanced-menu-content'
-			) as HTMLElement | null;
-
-			if (advancedMenuContent) {
-				const isHidden =
-					getComputedStyle(advancedMenuContent).display === 'none';
-
-				advancedMenuContent.style.display = isHidden ? 'flex' : 'none';
-			}
-
-			if (!mode.quiet) console.log('advancedMenuButton clicked');
+			uiElements.advancedMenu?.classList.remove('hidden');
+			uiElements.advancedMenu?.setAttribute('aria-hidden', 'false');
 		}
 	);
 
@@ -130,7 +127,8 @@ function initializeEventListeners(): void {
 				customHSLColorClone
 			);
 
-			if (!mode.quiet) console.log('Custom color saved to IndexedDB');
+			if (!mode.quiet && logMode.info)
+				log.info('Custom color saved to IndexedDB');
 
 			// *DEV-NOTE* unfinished, I think? Double-check this
 		}
@@ -144,55 +142,7 @@ function initializeEventListeners(): void {
 
 			uiElements.customColorInput!.value = '#ff0000';
 
-			if (!mode.quiet) console.log('Custom color cleared');
-		}
-	);
-
-	addEventListener(
-		domIDs.closeCustomColorMenuButton,
-		'click',
-		async (e: MouseEvent) => {
-			e.preventDefault();
-
-			if (!mode.quiet) console.log('closeCustomColorMenuButton clicked');
-
-			uiElements.customColorMenu?.classList.add('hidden');
-		}
-	);
-
-	addEventListener(
-		domIDs.closeDeveloperMenuButton,
-		'click',
-		async (e: MouseEvent) => {
-			e.preventDefault();
-
-			if (!mode.quiet) console.log('closeDeveloperMenuButton clicked');
-
-			uiElements.developerMenu?.classList.add('hidden');
-		}
-	);
-
-	addEventListener(
-		domIDs.closeHelpMenuButton,
-		'click',
-		async (e: MouseEvent) => {
-			e.preventDefault();
-
-			if (!mode.quiet) console.log('closeHelpMenuButton clicked');
-
-			uiElements.advancedMenu?.classList.add('hidden');
-		}
-	);
-
-	addEventListener(
-		domIDs.closeHistoryMenuButton,
-		'click',
-		async (e: MouseEvent) => {
-			e.preventDefault();
-
-			if (!mode.quiet) console.log('closeHistoryMenuButton clicked');
-
-			uiElements.historyMenu?.classList.add('hidden');
+			if (!mode.quiet && logMode.info) log.info('Custom color cleared');
 		}
 	);
 
@@ -202,9 +152,8 @@ function initializeEventListeners(): void {
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
-			if (!mode.quiet) console.log('customColorMenuButton clicked');
-
-			uiElements.customColorMenu?.classList.remove('hidden');
+			uiElements.customColorMenu?.classList.add('hidden');
+			uiElements.customColorMenu?.setAttribute('aria-hidden', 'true');
 		}
 	);
 
@@ -225,10 +174,10 @@ function initializeEventListeners(): void {
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
-			// Only allow if application is in development mode
-			if (mode.app !== 'dev') {
-				if (mode.infoLogs) {
-					console.info('Cannot delete database in production mode.');
+			// only allow if application is in development mode
+			if (mode.environment === 'prod') {
+				if (logMode.warnings) {
+					log.warn('Cannot delete database in production mode.');
 				}
 
 				return;
@@ -242,10 +191,12 @@ function initializeEventListeners(): void {
 
 			try {
 				await IDBManager.getInstance().deleteDatabase();
+
 				alert('Database deleted successfully!');
 			} catch (error) {
-				if (mode.errorLogs)
-					console.error(`Failed to delete database: ${error}`);
+				if (logMode.errors)
+					log.error(`Failed to delete database: ${error}`);
+
 				alert('Failed to delete database.');
 			}
 		}
@@ -261,7 +212,8 @@ function initializeEventListeners(): void {
 				? parseInt(uiElements.selectedColorOption.value, 10)
 				: 0;
 
-			if (!mode.quiet) console.log('desaturateButton clicked');
+			if (!mode.quiet && logMode.clicks)
+				log.info('desaturateButton clicked');
 
 			domUtils.desaturateColor(selectedColor);
 		}
@@ -273,32 +225,24 @@ function initializeEventListeners(): void {
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
-			if (mode.app !== 'dev') {
-				if (!mode.quiet)
-					console.error(
+			if (mode.environment === 'prod') {
+				if (!mode.quiet && logMode.errors)
+					log.error(
 						'Cannot access developer menu in production mode.'
 					);
 
 				return;
 			}
 
-			if (!mode.quiet) console.log('developerMenuButton clicked');
-
 			uiElements.developerMenu?.classList.remove('hidden');
+			uiElements.developerMenu?.setAttribute('aria-hidden', 'false');
 		}
 	);
 
 	addEventListener(domIDs.generateButton, 'click', async (e: MouseEvent) => {
 		e.preventDefault();
 
-		if (!mode.quiet) console.log('generateButton clicked');
-
-		if (mode.verbose)
-			console.log(
-				`Generate Button click event: Capturing parameters from UI`
-			);
-
-		// Captures data from UI at the time the Generate Button is clicked
+		// captures data from UI at the time the Generate Button is clicked
 		const {
 			paletteType,
 			numBoxes,
@@ -308,21 +252,18 @@ function initializeEventListeners(): void {
 			limitLightness
 		} = domUtils.pullParamsFromUI();
 
-		if (mode.verbose)
-			console.log(
+		if (logMode.info && logMode.verbosity > 1)
+			log.info(
 				'Generate Button click event: Retrieved parameters from UI.'
 			);
 
 		let customColor = (await idb.getCustomColor()) as HSL | null;
 
 		if (!customColor) {
-			if (mode.debug)
-				// console.info('No custom color found. Using a random color'); *DEV-NOTE* see notes.txt for more info about what to do with this
-
-				customColor = utils.random.hsl(true);
+			customColor = utils.random.hsl(true);
 		} else {
-			if (mode.debug)
-				console.log(
+			if (mode.debug && logMode.info)
+				log.info(
 					`User-generated Custom Color found in IndexedDB: ${JSON.stringify(
 						customColor
 					)}`
@@ -339,23 +280,18 @@ function initializeEventListeners(): void {
 			limitLightness
 		};
 
-		if (mode.debug) {
-			console.log(`paletteOptions object data:`);
-			console.log(`paletteType: ${paletteOptions.paletteType}`);
-			console.log(`numBoxes: ${paletteOptions.numBoxes}`);
-			console.log(
+		if (mode.debug && logMode.info) {
+			log.info(`paletteOptions object data:`);
+			log.info(`paletteType: ${paletteOptions.paletteType}`);
+			log.info(`numBoxes: ${paletteOptions.numBoxes}`);
+			log.info(
 				`customColor: ${JSON.stringify(paletteOptions.customColor)}`
 			);
-			console.log(`enableAlpha: ${paletteOptions.enableAlpha}`);
-			console.log(`limitDarkness: ${paletteOptions.limitDarkness}`);
-			console.log(`limitGrayness: ${paletteOptions.limitGrayness}`);
-			console.log(`limitLightness: ${paletteOptions.limitLightness}`);
+			log.info(`enableAlpha: ${paletteOptions.enableAlpha}`);
+			log.info(`limitDarkness: ${paletteOptions.limitDarkness}`);
+			log.info(`limitGrayness: ${paletteOptions.limitGrayness}`);
+			log.info(`limitLightness: ${paletteOptions.limitLightness}`);
 		}
-
-		if (mode.verbose)
-			console.log(
-				'Generate Button click event: Calling start.genPalette()'
-			);
 
 		await start.genPalette(paletteOptions);
 	});
@@ -363,18 +299,8 @@ function initializeEventListeners(): void {
 	addEventListener(domIDs.helpMenuButton, 'click', async (e: MouseEvent) => {
 		e.preventDefault();
 
-		const helpMenuContent = document.querySelector(
-			'.help-menu-content'
-		) as HTMLElement | null;
-
-		if (helpMenuContent) {
-			const isHidden =
-				getComputedStyle(helpMenuContent).display === 'none';
-
-			helpMenuContent.style.display = isHidden ? 'flex' : 'none';
-
-			if (!mode.quiet) console.log('helpMenuButton clicked');
-		}
+		uiElements.helpMenu?.classList.remove('hidden');
+		uiElements.helpMenu?.setAttribute('aria-hidden', 'false');
 	});
 
 	addEventListener(
@@ -383,46 +309,45 @@ function initializeEventListeners(): void {
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
-			const historyMenuContent = document.querySelector(
-				'.history-menu-content'
-			) as HTMLElement | null;
-
-			if (historyMenuContent) {
-				const isHidden =
-					getComputedStyle(historyMenuContent).display === 'none';
-
-				historyMenuContent.style.display = isHidden ? 'flex' : 'none';
-			}
-
-			if (!mode.quiet) console.log('historyMenuToggleButton clicked');
+			uiElements.historyMenu?.classList.remove('hidden');
+			uiElements.historyMenu?.setAttribute('aria-hidden', 'false');
 		}
 	);
 
-	addEventListener(domIDs.resetButton, 'click', async (e: MouseEvent) => {
-		e.preventDefault();
+	addEventListener(
+		domIDs.resetDatabaseButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
 
-		if (!mode.quiet) console.log('resetButton clicked');
+			if (mode.environment === 'prod') {
+				if (!mode.quiet && logMode.errors)
+					log.error('Cannot reset database in production mode.');
 
-		const confirmReset = confirm(
-			'Are you sure you want to reset the cache?'
-		);
+				return;
+			}
 
-		if (!confirmReset) return;
+			const confirmReset = confirm(
+				'Are you sure you want to reset the database?'
+			);
 
-		try {
-			IDBManager.getInstance().resetDatabase();
+			if (!confirmReset) return;
 
-			if (!mode.quiet)
-				console.log('IndexedDB Data has been successfully reset.');
+			try {
+				IDBManager.getInstance().resetDatabase();
 
-			alert('Cached IDB data reset successfully!');
-		} catch (error) {
-			if (mode.errorLogs)
-				console.error(`Failed to reset IndexedDB: ${error}`);
+				if (!mode.quiet && logMode.info)
+					log.info('Database has been successfully reset.');
 
-			alert('Failed to reset IndexedDB data.');
+				alert('IndexedDB successfully reset!');
+			} catch (error) {
+				if (logMode.errors)
+					log.error(`Failed to reset database: ${error}`);
+
+				if (mode.showAlerts) alert('Failed to reset database.');
+			}
 		}
-	});
+	);
 
 	addEventListener(
 		domIDs.resetPaletteIDButton,
@@ -430,7 +355,12 @@ function initializeEventListeners(): void {
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
-			if (!mode.quiet) console.log('resetPaletteIDButton clicked');
+			if (mode.environment === 'prod') {
+				if (!mode.quiet && logMode.errors)
+					log.error('Cannot reset palette ID in production mode.');
+
+				return;
+			}
 
 			const confirmReset = confirm(
 				'Are you sure you want to reset the palette ID?'
@@ -441,23 +371,21 @@ function initializeEventListeners(): void {
 			try {
 				await idb.resetPaletteID();
 
-				if (!mode.quiet)
-					console.log('Palette ID has been successfully reset.');
+				if (!mode.quiet && logMode.info)
+					log.info('Palette ID has been successfully reset.');
 
-				alert('Palette ID reset successfully!');
+				if (mode.showAlerts) alert('Palette ID reset successfully!');
 			} catch (error) {
-				if (mode.errorLogs)
-					console.error(`Failed to reset palette ID: ${error}`);
+				if (logMode.errors)
+					log.error(`Failed to reset palette ID: ${error}`);
 
-				alert('Failed to reset palette ID.');
+				if (mode.showAlerts) alert('Failed to reset palette ID.');
 			}
 		}
 	);
 
 	addEventListener(domIDs.saturateButton, 'click', async (e: MouseEvent) => {
 		e.preventDefault();
-
-		if (!mode.quiet) console.log('saturateButton clicked');
 
 		const selectedColor = uiElements.selectedColorOption
 			? parseInt(uiElements.selectedColorOption.value, 10)
@@ -467,9 +395,43 @@ function initializeEventListeners(): void {
 	});
 
 	window.addEventListener('click', async (e: MouseEvent) => {
+		if (uiElements.advancedMenu)
+			if (e.target === uiElements.advancedMenu) {
+				uiElements.advancedMenu.classList.add('hidden');
+				uiElements.advancedMenu.setAttribute('aria-hidden', 'true');
+			}
+	});
+
+	window.addEventListener('click', async (e: MouseEvent) => {
 		if (uiElements.customColorMenu)
-			if (e.target === uiElements.customColorMenu)
+			if (e.target === uiElements.customColorMenu) {
 				uiElements.customColorMenu.classList.add('hidden');
+				uiElements.customColorMenu.setAttribute('aria-hidden', 'true');
+			}
+	});
+
+	window.addEventListener('click', async (e: MouseEvent) => {
+		if (uiElements.developerMenu)
+			if (e.target === uiElements.developerMenu) {
+				uiElements.developerMenu.classList.add('hidden');
+				uiElements.developerMenu.setAttribute('aria-hidden', 'true');
+			}
+	});
+
+	window.addEventListener('click', async (e: MouseEvent) => {
+		if (uiElements.helpMenu)
+			if (e.target === uiElements.helpMenu) {
+				uiElements.helpMenu.classList.add('hidden');
+				uiElements.helpMenu.setAttribute('aria-hidden', 'true');
+			}
+	});
+
+	window.addEventListener('click', async (e: MouseEvent) => {
+		if (uiElements.historyMenu)
+			if (e.target === uiElements.historyMenu) {
+				uiElements.historyMenu.classList.add('hidden');
+				uiElements.historyMenu.setAttribute('aria-hidden', 'true');
+			}
 	});
 }
 

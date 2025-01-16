@@ -2,8 +2,10 @@
 
 import { UIFnBaseInterface } from '../index/index.js';
 import { data } from '../data/index.js';
+import { log } from '../classes/logger/index.js';
 
 const domIDs = data.consts.dom.ids;
+const logMode = data.mode.logging;
 const mode = data.mode;
 
 function enforceSwatchRules(
@@ -15,10 +17,10 @@ function enforceSwatchRules(
 	) as HTMLSelectElement;
 
 	if (!paletteDropdown) {
-		if (mode.errorLogs) {
-			console.error('paletteDropdown not found');
+		if (logMode.errors) {
+			log.error('paletteDropdown not found');
 		}
-		if (mode.stackTrace) {
+		if (mode.stackTrace && logMode.verbosity > 3) {
 			console.trace('enforceMinimumSwatches stack trace');
 		}
 
@@ -48,8 +50,8 @@ function enforceSwatchRules(
 		try {
 			paletteDropdown.dispatchEvent(event);
 		} catch (error) {
-			if (mode.errorLogs) {
-				console.error(
+			if (logMode.errors) {
+				log.error(
 					`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`
 				);
 			}

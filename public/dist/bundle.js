@@ -76,6 +76,8 @@ const timeouts$1 = {
 const mode$j = {
     app: 'dev',
     debug: true,
+    debugLevel: 1,
+    debugLogs: true,
     exposeIDB: true,
     errorLogs: true,
     gracefulErrors: false,
@@ -117,13 +119,9 @@ const domUtils$1 = {
 const getElement = domUtils$1.getElement;
 const advancedMenu$1 = getElement('advanced-menu');
 const advancedMenuButton$1 = getElement('advanced-menu-button');
+const advancedMenuContent$1 = getElement('advanced-menu-content');
 const applyCustomColorButton$1 = getElement('apply-custom-color-button');
 const clearCustomColorButton$1 = getElement('clear-custom-color-button');
-const closeAdvancedMenuButton$1 = getElement('close-advanced-menu-button');
-const closeCustomColorMenuButton$1 = getElement('close-custom-color-menu-button');
-const closeDeveloperMenuButton$1 = getElement('close-developer-menu-button');
-const closeHelpMenuButton$1 = getElement('close-help-menu-button');
-const closeHistoryMenuButton$1 = getElement('close-history-menu-button');
 const customColorDisplay$1 = getElement('custom-color-display');
 const customColorInput$1 = getElement('custom-color-input');
 const customColorMenu$1 = getElement('custom-color-menu');
@@ -136,14 +134,16 @@ const enableAlphaCheckbox$1 = getElement('enable-alpha-checkbox');
 const generateButton$1 = getElement('generate-button');
 const helpMenu$1 = getElement('help-menu');
 const helpMenuButton$1 = getElement('help-menu-button');
+const helpMenuContent$1 = getElement('help-menu-content');
 const historyMenu$1 = getElement('history-menu');
 const historyMenuButton$1 = getElement('history-menu-button');
+const historyMenuContent$1 = getElement('history-menu-content');
 const limitDarknessCheckbox$1 = getElement('limit-darkness-checkbox');
 const limitGraynessCheckbox$1 = getElement('limit-grayness-checkbox');
 const limitLightnessCheckbox$1 = getElement('limit-lightness-checkbox');
 const paletteNumberOptions$1 = getElement('palette-number-options');
 const paletteTypeOptions$1 = getElement('palette-type-options');
-const resetButton$1 = getElement('reset-button');
+const resetDatabaseButton$1 = getElement('reset-database-button');
 const resetPaletteIDButton$1 = getElement('reset-palette-id-button');
 const saturateButton$1 = getElement('saturate-button');
 const selectedColorOption$1 = getElement('selected-color-option');
@@ -156,13 +156,9 @@ const showAsRGBButton$1 = getElement('show-as-rgb-button');
 const domElements = {
     advancedMenu: advancedMenu$1,
     advancedMenuButton: advancedMenuButton$1,
+    advancedMenuContent: advancedMenuContent$1,
     applyCustomColorButton: applyCustomColorButton$1,
     clearCustomColorButton: clearCustomColorButton$1,
-    closeAdvancedMenuButton: closeAdvancedMenuButton$1,
-    closeCustomColorMenuButton: closeCustomColorMenuButton$1,
-    closeDeveloperMenuButton: closeDeveloperMenuButton$1,
-    closeHelpMenuButton: closeHelpMenuButton$1,
-    closeHistoryMenuButton: closeHistoryMenuButton$1,
     customColorDisplay: customColorDisplay$1,
     customColorInput: customColorInput$1,
     customColorMenu: customColorMenu$1,
@@ -173,16 +169,18 @@ const domElements = {
     developerMenuButton: developerMenuButton$1,
     enableAlphaCheckbox: enableAlphaCheckbox$1,
     generateButton: generateButton$1,
-    helpMenuButton: helpMenuButton$1,
     helpMenu: helpMenu$1,
+    helpMenuButton: helpMenuButton$1,
+    helpMenuContent: helpMenuContent$1,
     historyMenu: historyMenu$1,
     historyMenuButton: historyMenuButton$1,
+    historyMenuContent: historyMenuContent$1,
     limitDarknessCheckbox: limitDarknessCheckbox$1,
     limitGraynessCheckbox: limitGraynessCheckbox$1,
     limitLightnessCheckbox: limitLightnessCheckbox$1,
     paletteNumberOptions: paletteNumberOptions$1,
     paletteTypeOptions: paletteTypeOptions$1,
-    resetButton: resetButton$1,
+    resetDatabaseButton: resetDatabaseButton$1,
     resetPaletteIDButton: resetPaletteIDButton$1,
     saturateButton: saturateButton$1,
     selectedColorOption: selectedColorOption$1,
@@ -197,13 +195,9 @@ const domElements = {
 // File: src/data/consts/dom/IDs.js
 const advancedMenu = 'advanced-menu';
 const advancedMenuButton = 'advanced-menu-button';
+const advancedMenuContent = 'advanced-menu-content';
 const applyCustomColorButton = 'apply-custom-color-button';
 const clearCustomColorButton = 'clear-custom-color-button';
-const closeAdvancedMenuButton = 'close-advanced-menu-button';
-const closeCustomColorMenuButton = 'close-custom-color-menu-button';
-const closeDeveloperMenuButton = 'close-developer-menu-button';
-const closeHelpMenuButton = 'close-help-menu-button';
-const closeHistoryMenuButton = 'close-history-menu-button';
 const customColorDisplay = 'custom-color-display';
 const customColorInput = 'custom-color-input';
 const customColorMenu = 'custom-color-menu';
@@ -216,14 +210,16 @@ const enableAlphaCheckbox = 'enable-alpha-checkbox';
 const generateButton = 'generate-button';
 const helpMenu = 'help-menu';
 const helpMenuButton = 'help-menu-button';
+const helpMenuContent = 'help-menu-content';
 const historyMenu = 'history-menu';
 const historyMenuButton = 'history-menu-button';
+const historyMenuContent = 'history-menu-content';
 const limitDarknessCheckbox = 'limit-darkness-checkbox';
 const limitGraynessCheckbox = 'limit-grayness-checkbox';
 const limitLightnessCheckbox = 'limit-lightness-checkbox';
 const paletteNumberOptions = 'palette-number-options';
 const paletteTypeOptions = 'palette-type-options';
-const resetButton = 'reset-button';
+const resetDatabaseButton = 'reset-database-button';
 const resetPaletteIDButton = 'reset-palette-id-button';
 const saturateButton = 'saturate-button';
 const selectedColorOption = 'selected-color-option';
@@ -236,13 +232,9 @@ const showAsRGBButton = 'show-as-rgb-button';
 const domIDs$2 = {
     advancedMenu,
     advancedMenuButton,
+    advancedMenuContent,
     applyCustomColorButton,
     clearCustomColorButton,
-    closeAdvancedMenuButton,
-    closeCustomColorMenuButton,
-    closeDeveloperMenuButton,
-    closeHelpMenuButton,
-    closeHistoryMenuButton,
     customColorDisplay,
     customColorInput,
     customColorMenu,
@@ -255,14 +247,16 @@ const domIDs$2 = {
     generateButton,
     helpMenu,
     helpMenuButton,
+    helpMenuContent,
     historyMenu,
     historyMenuButton,
+    historyMenuContent,
     limitDarknessCheckbox,
     limitGraynessCheckbox,
     limitLightnessCheckbox,
     paletteNumberOptions,
     paletteTypeOptions,
-    resetButton,
+    resetDatabaseButton,
     resetPaletteIDButton,
     saturateButton,
     selectedColorOption,
@@ -532,7 +526,7 @@ const palette$1 = {
 // File: src/data/defaults/index.js
 const colors = { ...colors$1 };
 const colorStrings = colors$1.strings;
-const defaults$2 = {
+const defaults$1 = {
     colors,
     colorStrings,
     idb: idb$c,
@@ -585,7 +579,7 @@ const sets = {
 // File: src/data/index.js
 const data = {
     consts: consts$3,
-    defaults: defaults$2,
+    defaults: defaults$1,
     idb: idb$b,
     mode: mode$i,
     sets
@@ -2166,15 +2160,15 @@ const color = {
 };
 
 // File: src/common/convert/base.js
-const defaultCMYKUnbranded = base$5.clone(defaults$2.colors.cmyk);
-const defaultHexUnbranded = base$5.clone(defaults$2.colors.hex);
-const defaultHSLUnbranded = base$5.clone(defaults$2.colors.hsl);
-const defaultHSVUnbranded = base$5.clone(defaults$2.colors.hsv);
-const defaultLABUnbranded = base$5.clone(defaults$2.colors.lab);
-const defaultRGBUnbranded = base$5.clone(defaults$2.colors.rgb);
-const defaultSLUnbranded = base$5.clone(defaults$2.colors.sl);
-const defaultSVUnbranded = base$5.clone(defaults$2.colors.sv);
-const defaultXYZUnbranded = base$5.clone(defaults$2.colors.xyz);
+const defaultCMYKUnbranded = base$5.clone(defaults$1.colors.cmyk);
+const defaultHexUnbranded = base$5.clone(defaults$1.colors.hex);
+const defaultHSLUnbranded = base$5.clone(defaults$1.colors.hsl);
+const defaultHSVUnbranded = base$5.clone(defaults$1.colors.hsv);
+const defaultLABUnbranded = base$5.clone(defaults$1.colors.lab);
+const defaultRGBUnbranded = base$5.clone(defaults$1.colors.rgb);
+const defaultSLUnbranded = base$5.clone(defaults$1.colors.sl);
+const defaultSVUnbranded = base$5.clone(defaults$1.colors.sv);
+const defaultXYZUnbranded = base$5.clone(defaults$1.colors.xyz);
 const defaultCMYKBranded = brandColor.asCMYK(defaultCMYKUnbranded);
 const defaultHexBranded = brandColor.asHex(defaultHexUnbranded);
 const defaultHSLBranded = brandColor.asHSL(defaultHSLUnbranded);
@@ -3317,7 +3311,7 @@ const palette = {
 };
 
 // File: src/common/utils/random.js
-const defaults$1 = data.defaults;
+const defaults = data.defaults;
 const mode$b = data.mode;
 function hsl(enableAlpha) {
     try {
@@ -3334,7 +3328,7 @@ function hsl(enableAlpha) {
         if (!core.validate.colorValues(hsl)) {
             if (mode$b.errorLogs)
                 console.error(`Invalid random HSL color value ${JSON.stringify(hsl)}`);
-            const unbrandedHSL = core.base.clone(defaults$1.colors.hsl);
+            const unbrandedHSL = core.base.clone(defaults.colors.hsl);
             return core.brandColor.asHSL(unbrandedHSL);
         }
         if (!mode$b.quiet)
@@ -3344,7 +3338,7 @@ function hsl(enableAlpha) {
     catch (error) {
         if (mode$b.errorLogs)
             console.error(`Error generating random HSL color: ${error}`);
-        const unbrandedHSL = core.base.clone(defaults$1.colors.hsl);
+        const unbrandedHSL = core.base.clone(defaults.colors.hsl);
         return core.brandColor.asHSL(unbrandedHSL);
     }
 }
@@ -3362,7 +3356,7 @@ function sl$1(enableAlpha) {
         if (!core.validate.colorValues(sl)) {
             if (mode$b.errorLogs)
                 console.error(`Invalid random SV color value ${JSON.stringify(sl)}`);
-            const unbrandedSL = core.base.clone(defaults$1.colors.sl);
+            const unbrandedSL = core.base.clone(defaults.colors.sl);
             return core.brandColor.asSL(unbrandedSL);
         }
         if (!mode$b.quiet)
@@ -3372,7 +3366,7 @@ function sl$1(enableAlpha) {
     catch (error) {
         if (mode$b.errorLogs)
             console.error(`Error generating random SL color: ${error}`);
-        const unbrandedSL = core.base.clone(defaults$1.colors.sl);
+        const unbrandedSL = core.base.clone(defaults.colors.sl);
         return core.brandColor.asSL(unbrandedSL);
     }
 }
@@ -3560,87 +3554,48 @@ function copyToClipboard(text, tooltipElement) {
     }
 }
 function defineUIElements() {
-    try {
-        const advancedMenuButton = data.consts.dom.elements.advancedMenuButton;
-        const applyCustomColorButton = data.consts.dom.elements.applyCustomColorButton;
-        const clearCustomColorButton = data.consts.dom.elements.clearCustomColorButton;
-        const closeCustomColorMenuButton = data.consts.dom.elements.closeCustomColorMenuButton;
-        const closeHelpMenuButton = data.consts.dom.elements.closeHelpMenuButton;
-        const closeHistoryMenuButton = data.consts.dom.elements.closeHistoryMenuButton;
-        const desaturateButton = data.consts.dom.elements.desaturateButton;
-        const enableAlphaCheckbox = data.consts.dom.elements.enableAlphaCheckbox;
-        const generateButton = data.consts.dom.elements.generateButton;
-        const helpMenuButton = data.consts.dom.elements.helpMenuButton;
-        const historyMenuButton = data.consts.dom.elements.historyMenuButton;
-        const limitDarknessCheckbox = data.consts.dom.elements.limitDarknessCheckbox;
-        const limitGraynessCheckbox = data.consts.dom.elements.limitGraynessCheckbox;
-        const limitLightnessCheckbox = data.consts.dom.elements.limitLightnessCheckbox;
-        const saturateButton = data.consts.dom.elements.saturateButton;
-        const selectedColorOption = data.consts.dom.elements.selectedColorOption;
-        const showAsCMYKButton = data.consts.dom.elements.showAsCMYKButton;
-        const showAsHexButton = data.consts.dom.elements.showAsHexButton;
-        const showAsHSLButton = data.consts.dom.elements.showAsHSLButton;
-        const showAsHSVButton = data.consts.dom.elements.showAsHSVButton;
-        const showAsLABButton = data.consts.dom.elements.showAsLABButton;
-        const showAsRGBButton = data.consts.dom.elements.showAsRGBButton;
-        const selectedColor = selectedColorOption
-            ? parseInt(selectedColorOption.value, 10)
-            : 0;
-        return {
-            advancedMenuButton,
-            applyCustomColorButton,
-            clearCustomColorButton,
-            closeCustomColorMenuButton,
-            closeHelpMenuButton,
-            closeHistoryMenuButton,
-            desaturateButton,
-            enableAlphaCheckbox,
-            generateButton,
-            helpMenuButton,
-            historyMenuButton,
-            limitDarknessCheckbox,
-            limitGraynessCheckbox,
-            limitLightnessCheckbox,
-            saturateButton,
-            selectedColor,
-            showAsCMYKButton,
-            showAsHexButton,
-            showAsHSLButton,
-            showAsHSVButton,
-            showAsLABButton,
-            showAsRGBButton
-        };
-    }
-    catch (error) {
-        if (mode$9.errorLogs)
-            console.error(`Failed to define UI buttons: ${error}.`);
-        if (!mode$9.quiet)
-            console.error('Failed to define UI buttons.');
-        return {
-            advancedMenuButton: null,
-            applyCustomColorButton: null,
-            clearCustomColorButton: null,
-            closeCustomColorMenuButton: null,
-            closeHelpMenuButton: null,
-            closeHistoryMenuButton: null,
-            desaturateButton: null,
-            enableAlphaCheckbox: null,
-            generateButton: null,
-            helpMenuButton: null,
-            historyMenuButton: null,
-            limitDarknessCheckbox: null,
-            limitLightnessCheckbox: null,
-            limitGraynessCheckbox: null,
-            saturateButton: null,
-            selectedColor: 0,
-            showAsCMYKButton: null,
-            showAsHexButton: null,
-            showAsHSLButton: null,
-            showAsHSVButton: null,
-            showAsLABButton: null,
-            showAsRGBButton: null
-        };
-    }
+    const elements = data.consts.dom.elements;
+    const selectedColor = elements.selectedColorOption
+        ? parseInt(elements.selectedColorOption.value, 10)
+        : 0;
+    return {
+        advancedMenu: elements.advancedMenu,
+        advancedMenuButton: elements.advancedMenuButton,
+        advancedMenuContent: elements.advancedMenuContent,
+        applyCustomColorButton: elements.applyCustomColorButton,
+        clearCustomColorButton: elements.clearCustomColorButton,
+        customColorDisplay: elements.customColorDisplay,
+        customColorInput: elements.customColorInput,
+        customColorMenu: elements.customColorMenu,
+        customColorMenuButton: elements.customColorMenuButton,
+        deleteDatabaseButton: elements.deleteDatabaseButton,
+        desaturateButton: elements.desaturateButton,
+        developerMenuButton: elements.developerMenuButton,
+        enableAlphaCheckbox: elements.enableAlphaCheckbox,
+        generateButton: elements.generateButton,
+        helpMenu: elements.helpMenu,
+        helpMenuButton: elements.helpMenuButton,
+        helpMenuContent: elements.helpMenuContent,
+        historyMenu: elements.historyMenu,
+        historyMenuButton: elements.historyMenuButton,
+        historyMenuContent: elements.historyMenuContent,
+        limitDarknessCheckbox: elements.limitDarknessCheckbox,
+        limitGraynessCheckbox: elements.limitGraynessCheckbox,
+        limitLightnessCheckbox: elements.limitLightnessCheckbox,
+        paletteNumberOptions: elements.paletteNumberOptions,
+        paletteTypeOptions: elements.paletteTypeOptions,
+        resetDatabaseButton: elements.resetDatabaseButton,
+        resetPaletteIDButton: elements.resetPaletteIDButton,
+        saturateButton: elements.saturateButton,
+        selectedColor,
+        selectedColorOption: elements.selectedColorOption,
+        showAsCMYKButton: elements.showAsCMYKButton,
+        showAsHexButton: elements.showAsHexButton,
+        showAsHSLButton: elements.showAsHSLButton,
+        showAsHSVButton: elements.showAsHSVButton,
+        showAsLABButton: elements.showAsLABButton,
+        showAsRGBButton: elements.showAsRGBButton
+    };
 }
 async function initializeUI() {
     console.log('Initializing UI with dynamically loaded elements');
@@ -4064,6 +4019,72 @@ replaceTraps((oldTraps) => ({
     },
 }));
 
+// File: src/logger/Logger.ts
+const mode$7 = data.mode;
+class AppLogger {
+    static instance = null;
+    mode;
+    constructor() {
+        this.mode = mode$7;
+    }
+    static getInstance() {
+        if (!AppLogger.instance) {
+            AppLogger.instance = new AppLogger();
+        }
+        return AppLogger.instance;
+    }
+    async log(message, level = 'info', debugLevel = 0) {
+        if ((level === 'info' && this.mode.quiet) || !this.mode[`${level}Logs`])
+            return;
+        const formattedMessage = this.formatLogMessage(level.toUpperCase(), {
+            message
+        });
+        try {
+            console[level](formattedMessage);
+        }
+        catch (error) {
+            console.error(`AppLogger encountered an unexpected error:, ${error}`);
+            if (debugLevel === 1)
+                console.trace('Trace:');
+        }
+        if (debugLevel === 1)
+            console.trace('Trace:');
+    }
+    formatLogMessage(action, details) {
+        return JSON.stringify({
+            timestamp: new Date().toISOString(),
+            action,
+            details
+        });
+    }
+}
+
+// File: src/logger/factory.ts
+const debugLevel = data.mode.debugLevel;
+const appLogger = AppLogger.getInstance();
+function logDebug(message) {
+    appLogger.log(message, 'debug', debugLevel);
+}
+function logInfo(message) {
+    appLogger.log(message, 'info', debugLevel);
+}
+function logWarning(message) {
+    appLogger.log(message, 'warn', debugLevel);
+}
+function logError(message) {
+    appLogger.log(message, 'error', debugLevel);
+}
+function logCritical(message) {
+    appLogger.log(message, 'error', debugLevel);
+}
+const log = {
+    debug: logDebug,
+    info: logInfo,
+    warn: logWarning,
+    error: logError,
+    critical: logCritical
+};
+
 // File: src/idb/IDBManager.js
 class IDBManager {
     static instance = null;
@@ -4163,52 +4184,43 @@ class IDBManager {
     // *DEV-NOTE* add this method to docs
     async deleteEntry(storeName, key) {
         return this.handleAsync(async () => {
+            if (!(await this.ensureEntryExists(storeName, key))) {
+                if (this.mode.warnLogs) {
+                    log.warn(`Entry with key ${key} not found.`);
+                }
+                return;
+            }
             const db = await this.getDB();
             const store = db
                 .transaction(storeName, 'readwrite')
                 .objectStore(storeName);
-            // ensure entry exists before attempting to delete
-            const entryExists = await store.get(key);
-            if (!entryExists) {
-                if (this.mode.warnLogs)
-                    this.log(`Entry with key ${key} not found.`, 'warn');
-                return;
-            }
             await store.delete(key);
-            if (!this.mode.quiet)
-                this.log(`Entry with key ${key} deleted successfully.`);
-        }, 'IDBManager.deleteData(): Error deleting data');
+            if (!this.mode.quiet) {
+                log.info(`Entry with key ${key} deleted successfully.`);
+            }
+        }, 'IDBManager.deleteData(): Error deleting entry');
     }
     async deleteEntries(storeName, keys) {
         return this.handleAsync(async () => {
-            const keyList = [];
             const db = await this.getDB();
             const store = db
                 .transaction(storeName, 'readwrite')
                 .objectStore(storeName);
-            // ensure entries exists before attempting to delete
-            for (const key of keys) {
-                const entryExists = await store.get(key);
-                if (!entryExists) {
-                    if (this.mode.warnLogs)
-                        this.log(`Entry with key ${key} not found.`, 'warn');
-                    return;
-                }
-                else {
-                    keyList.push(key);
-                    await store.delete(key);
-                }
+            const validKeys = (await Promise.all(keys.map(async (key) => (await this.ensureEntryExists(storeName, key))
+                ? key
+                : null))).filter((key) => key !== null);
+            await Promise.all(validKeys.map(key => store.delete(key)));
+            if (!this.mode.quiet) {
+                log.info(`Entries deleted successfully. Keys: ${validKeys}`);
             }
-            if (!this.mode.quiet)
-                this.log(`Entries deleted successfully. Keys: ${keyList}`);
-        }, 'IDBManager.deleteData(): Error deleting data');
+        }, 'IDBManager.deleteEntries(): Error deleting entries');
     }
     async getCurrentPaletteID() {
         return this.handleAsync(async () => {
             const db = await this.getDB();
             const settings = await db.get(this.getStoreName('SETTINGS'), this.getDefaultKey('APP_SETTINGS'));
             if (this.mode.debug)
-                console.log(`Fetched settings from IndexedDB\n${settings}`);
+                log.info(`Fetched settings from IndexedDB: ${settings}`);
             return settings?.lastPaletteID ?? 0;
         }, 'IDBManager: getCurrentPaletteID(): Error fetching current palette ID');
     }
@@ -4254,8 +4266,6 @@ class IDBManager {
         return this.handleAsync(async () => {
             const currentID = await this.getCurrentPaletteID();
             const newID = currentID + 1;
-            if (this.mode.stackTrace)
-                console.trace(`IDBManager method getNextPalleteID was called\n.Palette ID before save: ${currentID}`);
             await this.updateCurrentPaletteID(newID);
             return newID;
         }, 'IDBManager.getNextPaletteID(): Error fetching next palette ID');
@@ -4283,7 +4293,7 @@ class IDBManager {
             const tableElement = this.createPaletteTable(storedPalette);
             paletteRow.appendChild(tableElement);
             if (!this.mode.quiet)
-                console.log(`Rendered palette ${tableId}.`);
+                log.info(`Rendered palette ${tableId}.`);
         }, 'IDBManager.renderPalette(): Error rendering palette');
     }
     async resetDatabase() {
@@ -4293,7 +4303,7 @@ class IDBManager {
             const expectedStores = Object.values(this.storeNames);
             for (const storeName of expectedStores) {
                 if (!availableStores.includes(storeName)) {
-                    console.warn(`Object store "${storeName}" not found in IndexedDB.`);
+                    log.warn(`Object store "${storeName}" not found in IndexedDB.`);
                     continue;
                 }
                 const tx = db.transaction(storeName, 'readwrite');
@@ -4305,7 +4315,7 @@ class IDBManager {
                     .objectStore(this.getStoreName('SETTINGS'));
                 await settingsStore.put(this.defaultSettings, this.getDefaultKey('APP_SETTINGS'));
                 if (!this.mode.quiet)
-                    console.log(`IndexedDB has been reset to default settins.`);
+                    log.info(`IndexedDB has been reset to default settins.`);
             }
         }, 'IDBManager.resetDatabase(): Error resetting database');
     }
@@ -4324,14 +4334,14 @@ class IDBManager {
                 const deleteRequest = indexedDB.deleteDatabase(dbName);
                 deleteRequest.onsuccess = () => {
                     if (!this.mode.quiet)
-                        console.log(`Database "${dbName}" deleted successfully.`);
+                        log.info(`Database "${dbName}" deleted successfully.`);
                 };
                 deleteRequest.onerror = event => {
                     console.error(`Error deleting database "${dbName}":`, event);
                 };
                 deleteRequest.onblocked = () => {
                     if (this.mode.warnLogs)
-                        console.warn(`Delete operation blocked. Ensure no open connections to "${dbName}".`);
+                        log.warn(`Delete operation blocked. Ensure no open connections to "${dbName}".`);
                     if (this.mode.showAlerts)
                         alert(`Unable to delete database "${dbName}" because it is in use. Please close all other tabs or windows accessing this database and try again.`);
                     if (this.mode.stackTrace)
@@ -4340,30 +4350,23 @@ class IDBManager {
             }
             else {
                 if (!this.mode.quiet)
-                    console.log(`Database "${dbName}" does not exist.`);
+                    log.warn(`Database "${dbName}" does not exist.`);
             }
         }, 'IDBManager.deleteDatabase(): Error deleting database');
     }
     // *DEV-NOTE* add this method to docs
     async resetPaletteID() {
         return this.handleAsync(async () => {
-            const currentPaletteID = await this.getCurrentPaletteID();
-            if (!this.mode.quiet) {
-                console.log(`Resetting palette ID. Current palette ID: ${currentPaletteID}`);
-            }
             const db = await this.getDB();
             const storeName = this.getStoreName('SETTINGS');
             const key = this.getDefaultKey('APP_SETTINGS');
             const settings = await db.get(storeName, key);
-            if (!settings) {
+            if (!settings)
                 throw new Error('Settings not found. Cannot reset palette ID.');
-            }
             settings.lastPaletteID = 0;
             await db.put(storeName, { key, ...this.defaultSettings });
-            if (!this.mode.quiet) {
-                const newPaletteID = await this.getCurrentPaletteID();
-                console.log(`Palette ID has successfully been reset. New palette ID: ${newPaletteID}`);
-            }
+            if (!this.mode.quiet)
+                log.info(`Palette ID has successfully been reset to 0`);
         }, 'IDBManager.resetPaletteID(): Error resetting palette ID');
     }
     async saveData(storeName, key, data, oldValue) {
@@ -4390,7 +4393,7 @@ class IDBManager {
             };
             await store.put({ key: id, ...paletteToSave });
             if (!this.mode.quiet)
-                this.log(`Palette ${id} saved successfully.`);
+                log.info(`Palette ${id} saved successfully.`);
         }, 'IDBManager.savePalette(): Error saving palette');
     }
     async savePaletteToDB(type, items, baseColor, numBoxes, enableAlpha, limitDark, limitGray, limitLight) {
@@ -4411,11 +4414,14 @@ class IDBManager {
         return this.handleAsync(async () => {
             await this.saveData('settings', 'appSettings', newSettings);
             if (!this.mode.quiet)
-                console.log('Settings updated');
+                log.info('Settings updated');
         }, 'IDBManager.saveSettings(): Error saving settings');
     }
     async updateEntryInPalette(tableID, entryIndex, newEntry) {
         return this.handleAsync(async () => {
+            if (!(await this.ensureEntryExists('tables', tableID))) {
+                throw new Error(`Palette ${tableID} not found.`);
+            }
             const storedPalette = await this.getTable(tableID);
             if (!storedPalette)
                 throw new Error(`Palette ${tableID} not found.`);
@@ -4424,9 +4430,9 @@ class IDBManager {
                 if (!this.mode.gracefulErrors)
                     throw new Error(`Entry ${entryIndex} not found in palette ${tableID}.`);
                 if (this.mode.errorLogs)
-                    this.log(`Entry ${entryIndex} not found in palette ${tableID}.`, 'error');
+                    log.error(`Entry ${entryIndex} not found in palette ${tableID}.`);
                 if (!this.mode.quiet)
-                    this.log('updateEntryInPalette: Entry not found.');
+                    log.warn('updateEntryInPalette: Entry not found.');
             }
             const oldEntry = items[entryIndex];
             items[entryIndex] = newEntry;
@@ -4440,7 +4446,7 @@ class IDBManager {
                 origin: 'updateEntryInPalette'
             });
             if (!this.mode.quiet)
-                this.log(`Entry ${entryIndex} in palette ${tableID} updated.`);
+                log.info(`Entry ${entryIndex} in palette ${tableID} updated.`);
         }, 'IDBManager.updateEntryInPalette(): Error updating entry in palette');
     }
     //
@@ -4455,18 +4461,13 @@ class IDBManager {
         const db = await this.getDB();
         const storeName = this.getStoreName('SETTINGS');
         const key = this.getDefaultKey('APP_SETTINGS');
-        console.log(`Initializing DB with Store Name: ${storeName}, Key: ${key}`);
+        log.info(`Initializing DB with Store Name: ${storeName}, Key: ${key}`);
         if (!storeName || !key)
             throw new Error('Invalid store name or key.');
         const settings = await db.get(storeName, key);
         if (!settings) {
             if (!this.mode.quiet) {
-                console.log(`Initializing default settings...`);
-                if (this.mode.debug)
-                    console.log('Data to insert into database initialization:', {
-                        key,
-                        ...this.defaultSettings
-                    });
+                log.info(`Initializing default settings...`);
             }
             await db.put(storeName, { key, ...this.defaultSettings });
         }
@@ -4474,11 +4475,15 @@ class IDBManager {
     debugError(context, error) {
         if (this.mode.errorLogs) {
             const errorMsg = error instanceof Error ? error.message : String(error);
-            this.log(`Error in ${context}: ${errorMsg}`, 'error');
+            log.error(`Error in ${context}: ${errorMsg}`);
         }
     }
-    formatLogMessage(action, details) {
-        return `[${new Date().toISOString()}] Action: ${action}, Details: ${JSON.stringify(details)}`;
+    async ensureEntryExists(storeName, key) {
+        const db = await this.getDB();
+        const store = db
+            .transaction(storeName, 'readonly')
+            .objectStore(storeName);
+        return (await store.get(key)) !== undefined;
     }
     async getDB() {
         return this.dbPromise;
@@ -4503,7 +4508,7 @@ class IDBManager {
             const result = await db.get(this.storeNames.TABLES, id);
             if (!result) {
                 if (this.mode.warnLogs)
-                    this.log(`Table with ID ${id} not found.`, 'warn');
+                    log.warn(`Table with ID ${id} not found.`);
             }
             return result;
         }, 'IDBManager.getTable(): Error fetching table');
@@ -4520,21 +4525,12 @@ class IDBManager {
             throw error;
         }
     }
-    // *DEV-NOTE* refactor to use this method instead of generic console logging throughout the class
-    log(message, level = 'info') {
-        if ((level === 'info' && this.mode.quiet) || !this.mode[`${level}Logs`])
-            return;
-        const formattedMessage = this.formatLogMessage(level.toUpperCase(), {
-            message
-        });
-        console[level](formattedMessage);
-    }
-    async logMutation(log) {
+    async logMutation(data) {
         return this.handleAsync(async () => {
             const db = await this.getDB();
             await db.put('mutations', log);
             if (!this.mode.quiet)
-                this.log(`Logged mutation: ${JSON.stringify(log)}`);
+                log.info(`Logged mutation: ${JSON.stringify(data)}`);
         }, 'IDBManager.logMutation(): Error logging mutation');
     }
     resolveKey(key) {
@@ -4549,11 +4545,11 @@ class IDBManager {
             const tx = db.transaction('settings', 'readwrite');
             const store = tx.objectStore('settings');
             if (this.mode.debug)
-                console.log(`Updating curent palette ID to ${newID}`);
+                log.info(`Updating curent palette ID to ${newID}`);
             await store.put({ key: 'appSettings', lastPaletteID: newID });
             await tx.done;
             if (!this.mode.quiet)
-                this.log(`Current palette ID updated to ${newID}`);
+                log.info(`Current palette ID updated to ${newID}`);
         }, 'IDBManager.updateCurrentPaletteID(): Error updating current palette ID');
     }
     async withStore(storeName, mode, callback) {
@@ -4572,10 +4568,10 @@ class IDBManager {
 const idbInstance = await IDBManager.createInstance();
 
 // File: src/palette/common/paletteHelpers/limits.js
-const mode$7 = data.mode;
+const mode$6 = data.mode;
 function isColorInBounds(hsl) {
     if (!core.validate.colorValues(hsl)) {
-        if (mode$7.errorLogs)
+        if (mode$6.errorLogs)
             console.error(`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`);
         return false;
     }
@@ -4583,7 +4579,7 @@ function isColorInBounds(hsl) {
 }
 function isTooDark$1(hsl) {
     if (!core.validate.colorValues(hsl)) {
-        if (mode$7.errorLogs)
+        if (mode$6.errorLogs)
             console.error(`isTooDark: Invalid HSL value ${JSON.stringify(hsl)}`);
         return false;
     }
@@ -4591,7 +4587,7 @@ function isTooDark$1(hsl) {
 }
 function isTooGray$1(hsl) {
     if (!core.validate.colorValues(hsl)) {
-        if (mode$7.errorLogs)
+        if (mode$6.errorLogs)
             console.error(`isTooGray: Invalid HSL value ${JSON.stringify(hsl)}`);
         return false;
     }
@@ -4599,7 +4595,7 @@ function isTooGray$1(hsl) {
 }
 function isTooLight$1(hsl) {
     if (!core.validate.colorValues(hsl)) {
-        if (mode$7.errorLogs)
+        if (mode$6.errorLogs)
             console.error(`isTooLight: Invalid HSL value ${JSON.stringify(hsl)}`);
         return false;
     }
@@ -4716,11 +4712,11 @@ const create$9 = {
 
 // File: src/palette/common/paletteUtils/adjust.js
 const adjustments = data.consts.adjustments;
-const mode$6 = data.mode;
+const mode$5 = data.mode;
 function sl(color) {
     try {
         if (!core.validate.colorValues(color)) {
-            if (mode$6.errorLogs)
+            if (mode$5.errorLogs)
                 console.error('Invalid color valus for adjustment.');
             helpers.dom.showToast('Invalid color values');
             return color;
@@ -4738,7 +4734,7 @@ function sl(color) {
         };
     }
     catch (error) {
-        if (mode$6.errorLogs)
+        if (mode$5.errorLogs)
             console.error(`Error adjusting saturation and lightness: ${error}`);
         return color;
     }
@@ -4748,7 +4744,7 @@ const adjust = {
 };
 
 // File: src/paelette/common/paletteUtils/probability.js
-const mode$5 = data.mode;
+const mode$4 = data.mode;
 const probabilities = data.consts.probabilities;
 function getWeightedRandomInterval$1() {
     try {
@@ -4767,7 +4763,7 @@ function getWeightedRandomInterval$1() {
         return weights[weights.length - 1];
     }
     catch (error) {
-        if (mode$5.errorLogs)
+        if (mode$4.errorLogs)
             console.error(`Error generating weighted random interval: ${error}`);
         return 50;
     }
@@ -4783,14 +4779,14 @@ const paletteUtils = {
 };
 
 // File: src/palette/common/paletteSuperUtils/genHues.js
-const mode$4 = data.mode;
+const mode$3 = data.mode;
 const genAllColorValues = utils.conversion.genAllColorValues;
 const getWeightedRandomInterval = paletteUtils.probability.getWeightedRandomInterval;
 const validateColorValues = core.validate.colorValues;
 function analogous$1(color, numBoxes) {
     try {
         if (!validateColorValues(color)) {
-            if (mode$4.errorLogs)
+            if (mode$3.errorLogs)
                 console.error(`Invalid color value ${JSON.stringify(color)}`);
             return [];
         }
@@ -4807,7 +4803,7 @@ function analogous$1(color, numBoxes) {
         return analogousHues;
     }
     catch (error) {
-        if (mode$4.errorLogs)
+        if (mode$3.errorLogs)
             console.error(`Error generating analogous hues: ${error}`);
         return [];
     }
@@ -4823,7 +4819,7 @@ function diadic$1(baseHue) {
         return diadicHues;
     }
     catch (error) {
-        if (mode$4.errorLogs)
+        if (mode$3.errorLogs)
             console.error(`Error generating diadic hues: ${error}`);
         return [];
     }
@@ -4832,17 +4828,17 @@ function hexadic$1(color) {
     try {
         const clonedColor = core.base.clone(color);
         if (!validateColorValues(clonedColor)) {
-            if (mode$4.errorLogs)
+            if (mode$3.errorLogs)
                 console.error(`Invalid color value ${JSON.stringify(clonedColor)}`);
             return [];
         }
         const clonedBaseHSL = genAllColorValues(clonedColor).hsl;
         if (!clonedBaseHSL) {
-            if (!mode$4.gracefulErrors)
+            if (!mode$3.gracefulErrors)
                 throw new Error('Unable to generate hexadic hues - missing HSL values');
-            else if (mode$4.errorLogs)
+            else if (mode$3.errorLogs)
                 console.error('Unable to generate hexadic hues - missing HSL values');
-            else if (!mode$4.quiet)
+            else if (!mode$3.quiet)
                 console.error('Error generating hexadic hues');
             return [];
         }
@@ -4859,7 +4855,7 @@ function hexadic$1(color) {
         return hexadicHues;
     }
     catch (error) {
-        if (mode$4.errorLogs)
+        if (mode$3.errorLogs)
             console.error(`Error generating hexadic hues: ${error}`);
         return [];
     }
@@ -4874,7 +4870,7 @@ function splitComplementary$1(baseHue) {
         ];
     }
     catch (error) {
-        if (mode$4.errorLogs)
+        if (mode$3.errorLogs)
             console.error(`Error generating split complementary hues: ${error}`);
         return [];
     }
@@ -4892,7 +4888,7 @@ function tetradic$1(baseHue) {
         ];
     }
     catch (error) {
-        if (mode$4.errorLogs)
+        if (mode$3.errorLogs)
             console.error(`Error generating tetradic hues: ${error}`);
         return [];
     }
@@ -4903,7 +4899,7 @@ function triadic$1(baseHue) {
         return [120, 240].map(increment => (clonedBaseHue + increment) % 360);
     }
     catch (error) {
-        if (mode$4.errorLogs)
+        if (mode$3.errorLogs)
             console.error(`Error generating triadic hues: ${error}`);
         return [];
     }
@@ -4925,14 +4921,14 @@ const paletteSuperUtils = {
 
 // File: src/dom/events/palette.js
 const domIDs$1 = data.consts.dom.ids;
-const mode$3 = data.mode;
+const mode$2 = data.mode;
 function enforceSwatchRules(minimumSwatches, maximumSwatches) {
     const paletteDropdown = document.getElementById(domIDs$1.paletteNumberOptions);
     if (!paletteDropdown) {
-        if (mode$3.errorLogs) {
+        if (mode$2.errorLogs) {
             console.error('paletteDropdown not found');
         }
-        if (mode$3.stackTrace) {
+        if (mode$2.stackTrace) {
             console.trace('enforceMinimumSwatches stack trace');
         }
         return;
@@ -4956,7 +4952,7 @@ function enforceSwatchRules(minimumSwatches, maximumSwatches) {
             paletteDropdown.dispatchEvent(event);
         }
         catch (error) {
-            if (mode$3.errorLogs) {
+            if (mode$2.errorLogs) {
                 console.error(`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`);
             }
             throw new Error(`Failed to dispatch change event: ${error}`);
@@ -5247,9 +5243,7 @@ async function splitComplementary(args) {
 
 // File: src/palette/main/types/tetradic.js
 const create$1 = paletteSuperUtils.create;
-const defaults = data.defaults;
 const genHues$1 = paletteSuperUtils.genHues;
-const mode$2 = data.mode;
 const paletteRanges$1 = data.consts.paletteRanges;
 const idb$3 = IDBManager.getInstance();
 // *DEV-NOTE* update to reflect the fact this will always return 4 color swatches
@@ -5257,14 +5251,6 @@ async function tetradic(args) {
     // ensure exactly 4 swatches
     if (args.numBoxes !== 4) {
         ui.enforceSwatchRules(4, 4);
-    }
-    const currentTetradicPaletteID = await idb$3.getCurrentPaletteID();
-    // ensure a minimum of 4 swatches
-    if (args.numBoxes < 4) {
-        if (mode$2.warnLogs) {
-            console.warn('Tetradic palette requires at least 4 swatches.');
-        }
-        return utils.palette.createObject('tetradic', [], core.brandColor.asHSL(defaults.colors.hsl), 0, currentTetradicPaletteID, args.enableAlpha, args.limitDark, args.limitGray, args.limitLight);
     }
     // base color setup
     const baseColor = create$1.baseColor(args.customColor, args.enableAlpha);
@@ -5581,13 +5567,8 @@ function initializeEventListeners() {
     addConversionListener('show-as-rgb-button', 'rgb');
     addEventListener(domIDs.advancedMenuButton, 'click', async (e) => {
         e.preventDefault();
-        const advancedMenuContent = document.querySelector('.advanced-menu-content');
-        if (advancedMenuContent) {
-            const isHidden = getComputedStyle(advancedMenuContent).display === 'none';
-            advancedMenuContent.style.display = isHidden ? 'flex' : 'none';
-        }
-        if (!mode$i.quiet)
-            console.log('advancedMenuButton clicked');
+        uiElements.advancedMenu?.classList.remove('hidden');
+        uiElements.advancedMenu?.setAttribute('aria-hidden', 'false');
     });
     addEventListener(domIDs.applyCustomColorButton, 'click', async (e) => {
         e.preventDefault();
@@ -5604,35 +5585,10 @@ function initializeEventListeners() {
         if (!mode$i.quiet)
             console.log('Custom color cleared');
     });
-    addEventListener(domIDs.closeCustomColorMenuButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode$i.quiet)
-            console.log('closeCustomColorMenuButton clicked');
-        uiElements.customColorMenu?.classList.add('hidden');
-    });
-    addEventListener(domIDs.closeDeveloperMenuButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode$i.quiet)
-            console.log('closeDeveloperMenuButton clicked');
-        uiElements.developerMenu?.classList.add('hidden');
-    });
-    addEventListener(domIDs.closeHelpMenuButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode$i.quiet)
-            console.log('closeHelpMenuButton clicked');
-        uiElements.advancedMenu?.classList.add('hidden');
-    });
-    addEventListener(domIDs.closeHistoryMenuButton, 'click', async (e) => {
-        e.preventDefault();
-        if (!mode$i.quiet)
-            console.log('closeHistoryMenuButton clicked');
-        uiElements.historyMenu?.classList.add('hidden');
-    });
     addEventListener(domIDs.customColorMenuButton, 'click', async (e) => {
         e.preventDefault();
-        if (!mode$i.quiet)
-            console.log('customColorMenuButton clicked');
-        uiElements.customColorMenu?.classList.remove('hidden');
+        uiElements.customColorMenu?.classList.add('hidden');
+        uiElements.customColorMenu?.setAttribute('aria-hidden', 'true');
     });
     if (!uiElements.customColorInput)
         throw new Error('Custom color input element not found');
@@ -5644,7 +5600,7 @@ function initializeEventListeners() {
     });
     addEventListener(domIDs.deleteDatabaseButton, 'click', async (e) => {
         e.preventDefault();
-        // Only allow if application is in development mode
+        // only allow if application is in development mode
         if (mode$i.app !== 'dev') {
             if (mode$i.infoLogs) {
                 console.info('Cannot delete database in production mode.');
@@ -5680,25 +5636,18 @@ function initializeEventListeners() {
                 console.error('Cannot access developer menu in production mode.');
             return;
         }
-        if (!mode$i.quiet)
-            console.log('developerMenuButton clicked');
         uiElements.developerMenu?.classList.remove('hidden');
+        uiElements.developerMenu?.setAttribute('aria-hidden', 'false');
     });
     addEventListener(domIDs.generateButton, 'click', async (e) => {
         e.preventDefault();
-        if (!mode$i.quiet)
-            console.log('generateButton clicked');
-        if (mode$i.verbose)
-            console.log(`Generate Button click event: Capturing parameters from UI`);
-        // Captures data from UI at the time the Generate Button is clicked
+        // captures data from UI at the time the Generate Button is clicked
         const { paletteType, numBoxes, enableAlpha, limitDarkness, limitGrayness, limitLightness } = domUtils.pullParamsFromUI();
         if (mode$i.verbose)
             console.log('Generate Button click event: Retrieved parameters from UI.');
         let customColor = (await idb.getCustomColor());
         if (!customColor) {
-            if (mode$i.debug)
-                // console.info('No custom color found. Using a random color'); *DEV-NOTE* see notes.txt for more info about what to do with this
-                customColor = utils.random.hsl(true);
+            customColor = utils.random.hsl(true);
         }
         else {
             if (mode$i.debug)
@@ -5723,53 +5672,42 @@ function initializeEventListeners() {
             console.log(`limitGrayness: ${paletteOptions.limitGrayness}`);
             console.log(`limitLightness: ${paletteOptions.limitLightness}`);
         }
-        if (mode$i.verbose)
-            console.log('Generate Button click event: Calling start.genPalette()');
         await start.genPalette(paletteOptions);
     });
     addEventListener(domIDs.helpMenuButton, 'click', async (e) => {
         e.preventDefault();
-        const helpMenuContent = document.querySelector('.help-menu-content');
-        if (helpMenuContent) {
-            const isHidden = getComputedStyle(helpMenuContent).display === 'none';
-            helpMenuContent.style.display = isHidden ? 'flex' : 'none';
-            if (!mode$i.quiet)
-                console.log('helpMenuButton clicked');
-        }
+        uiElements.helpMenu?.classList.remove('hidden');
+        uiElements.helpMenu?.setAttribute('aria-hidden', 'false');
     });
     addEventListener(domIDs.historyMenuButton, 'click', async (e) => {
         e.preventDefault();
-        const historyMenuContent = document.querySelector('.history-menu-content');
-        if (historyMenuContent) {
-            const isHidden = getComputedStyle(historyMenuContent).display === 'none';
-            historyMenuContent.style.display = isHidden ? 'flex' : 'none';
-        }
-        if (!mode$i.quiet)
-            console.log('historyMenuToggleButton clicked');
+        uiElements.historyMenu?.classList.remove('hidden');
+        uiElements.historyMenu?.setAttribute('aria-hidden', 'false');
     });
-    addEventListener(domIDs.resetButton, 'click', async (e) => {
+    addEventListener(domIDs.resetDatabaseButton, 'click', async (e) => {
         e.preventDefault();
-        if (!mode$i.quiet)
-            console.log('resetButton clicked');
-        const confirmReset = confirm('Are you sure you want to reset the cache?');
+        const confirmReset = confirm('Are you sure you want to reset the database?');
         if (!confirmReset)
             return;
         try {
             IDBManager.getInstance().resetDatabase();
             if (!mode$i.quiet)
-                console.log('IndexedDB Data has been successfully reset.');
-            alert('Cached IDB data reset successfully!');
+                console.log('Database has been successfully reset.');
+            alert('IndexedDB successfully reset!');
         }
         catch (error) {
             if (mode$i.errorLogs)
-                console.error(`Failed to reset IndexedDB: ${error}`);
-            alert('Failed to reset IndexedDB data.');
+                console.error(`Failed to reset database: ${error}`);
+            alert('Failed to reset database.');
         }
     });
     addEventListener(domIDs.resetPaletteIDButton, 'click', async (e) => {
         e.preventDefault();
-        if (!mode$i.quiet)
-            console.log('resetPaletteIDButton clicked');
+        if (mode$i.app !== 'dev') {
+            if (!mode$i.quiet)
+                console.error('Cannot reset palette ID in production mode.');
+            return;
+        }
         const confirmReset = confirm('Are you sure you want to reset the palette ID?');
         if (!confirmReset)
             return;
@@ -5787,17 +5725,45 @@ function initializeEventListeners() {
     });
     addEventListener(domIDs.saturateButton, 'click', async (e) => {
         e.preventDefault();
-        if (!mode$i.quiet)
-            console.log('saturateButton clicked');
         const selectedColor = uiElements.selectedColorOption
             ? parseInt(uiElements.selectedColorOption.value, 10)
             : 0;
         domUtils.saturateColor(selectedColor);
     });
     window.addEventListener('click', async (e) => {
+        if (uiElements.advancedMenu)
+            if (e.target === uiElements.advancedMenu) {
+                uiElements.advancedMenu.classList.add('hidden');
+                uiElements.advancedMenu.setAttribute('aria-hidden', 'true');
+            }
+    });
+    window.addEventListener('click', async (e) => {
         if (uiElements.customColorMenu)
-            if (e.target === uiElements.customColorMenu)
+            if (e.target === uiElements.customColorMenu) {
                 uiElements.customColorMenu.classList.add('hidden');
+                uiElements.customColorMenu.setAttribute('aria-hidden', 'true');
+            }
+    });
+    window.addEventListener('click', async (e) => {
+        if (uiElements.developerMenu)
+            if (e.target === uiElements.developerMenu) {
+                uiElements.developerMenu.classList.add('hidden');
+                uiElements.developerMenu.setAttribute('aria-hidden', 'true');
+            }
+    });
+    window.addEventListener('click', async (e) => {
+        if (uiElements.helpMenu)
+            if (e.target === uiElements.helpMenu) {
+                uiElements.helpMenu.classList.add('hidden');
+                uiElements.helpMenu.setAttribute('aria-hidden', 'true');
+            }
+    });
+    window.addEventListener('click', async (e) => {
+        if (uiElements.historyMenu)
+            if (e.target === uiElements.historyMenu) {
+                uiElements.historyMenu.classList.add('hidden');
+                uiElements.historyMenu.setAttribute('aria-hidden', 'true');
+            }
     });
 }
 const base = {
@@ -6002,7 +5968,8 @@ const history = {
 };
 
 // File: src/dom/validate.ts
-function validateElements(ids) {
+function validateElements() {
+    const ids = data.consts.dom.ids;
     const missingElements = [];
     Object.values(ids).forEach(id => {
         const element = document.getElementById(id);
@@ -6031,84 +5998,6 @@ const dom = {
     validate
 };
 
-// File: src/logger/debug.js
-const elementsToCheck = {
-    advancedMenuButton: 'Advanced Menu Button',
-    applyCustomColorButton: 'Apply Custom Color Button',
-    clearCustomColorButton: 'Clear Custom Color Button',
-    closeCustomColorMenuButton: 'Close Custom Color Menu Button',
-    closeHelpMenuButton: 'Close Help Menu Button',
-    closeHistoryMenuButton: 'Close History Menu Button',
-    desaturateButton: 'Desaturate Button',
-    generateButton: 'Generate Button',
-    helpMenuButton: 'Help Menu Button',
-    historyMenuButton: 'History Menu Button',
-    saturateButton: 'Saturate Button',
-    showAsCMYKButton: 'Show as CMYK Button',
-    showAsHexButton: 'Show as Hex Button',
-    showAsHSLButton: 'Show as HSL Button',
-    showAsHSVButton: 'Show as HSV Button',
-    showAsLABButton: 'Show as LAB Button',
-    showAsRGBButton: 'Show as RGB Button'
-};
-function validateDOMElements$1() {
-    const elements = data.consts.dom.elements;
-    const notFoundElements = [];
-    Object.entries(elementsToCheck).forEach(([key, name]) => {
-        if (!elements[key]) {
-            notFoundElements.push(name);
-        }
-    });
-    const allFound = notFoundElements.length === 0;
-    if (allFound)
-        console.log('All elements found.');
-    else {
-        console.log(`Some DOM elements are missing: ${notFoundElements.length} not found.`);
-        console.log('Missing elements:');
-        notFoundElements.forEach(element => console.log(`- ${element}`));
-    }
-}
-const debug = {
-    validateDOMElements: validateDOMElements$1
-};
-
-// File: src/logger/verbose.js
-const elements = data.consts.dom.elements;
-function validateDOMElements() {
-    const elementsToCheck = {
-        advancedMenuButton: 'Advanced Menu Button',
-        applyCustomColorButton: 'Apply Custom Color Button',
-        clearCustomColorButton: 'Clear Custom Color Button',
-        closeCustomColorMenuButton: 'Close Custom Color Menu Button',
-        closeHelpMenuButton: 'Close Help Menu Button',
-        closeHistoryMenuButton: 'Close History Menu Button',
-        desaturateButton: 'Desaturate Button',
-        generateButton: 'Generate Button',
-        helpMenuButton: 'Help Menu Button',
-        historyMenuButton: 'History Menu Button',
-        saturateButton: 'Saturate Button',
-        showAsCMYKButton: 'Show as CMYK Button',
-        showAsHexButton: 'Show as Hex Button',
-        showAsHSLButton: 'Show as HSL Button',
-        showAsHSVButton: 'Show as HSV Button',
-        showAsLABButton: 'Show as LAB Button',
-        showAsRGBButton: 'Show as RGB Button'
-    };
-    const results = Object.entries(elementsToCheck)
-        .map(([key, label]) => `${label}: ${elements[key] ? 'found' : 'not found'}`)
-        .join('\n');
-    console.log(results);
-}
-const verbose = {
-    validateDOMElements
-};
-
-// File: src/logger/index.js
-const logger = {
-    debug,
-    verbose
-};
-
 // ColorGen - version 0.6.0-dev
 // Author: Viihna Leraine (viihna@ViihnaTech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
 // Licensed under GNU GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
@@ -6118,36 +6007,36 @@ const logger = {
 const consts = data.consts;
 const mode = data.mode;
 if (mode.debug)
-    console.log('Executing main application script');
+    log.info('Executing main application script');
 if (document.readyState === 'loading') {
     if (mode.debug)
-        console.log('DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...');
+        log.info('DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...');
     document.addEventListener('DOMContentLoaded', initializeApp);
 }
 else {
     if (mode.debug)
-        console.log('DOM content already loaded. Initializing application immediately.');
+        log.info('DOM content already loaded. Initializing application immediately.');
     initializeApp();
 }
 async function initializeApp() {
     console.log('DOM content loaded - Initializing application');
     try {
         if (mode.verbose)
-            console.log('Creating new IDBManager instance. Initializing database and its dependencies.');
+            log.info('Creating new IDBManager instance. Initializing database and its dependencies.');
         if (mode.exposeIDB) {
             if (mode.debug)
-                console.log('Exposing IDBManager instance to window.');
+                log.info('Exposing IDBManager instance to window.');
             try {
                 (async () => {
                     const idbManagerInstance = await IDBManager.createInstance();
                     // binds the IDBManager instance to the window object
                     window.idbManager = idbManagerInstance;
-                    console.log('IDBManager instance successfully exposed to window.');
+                    log.info('IDBManager instance successfully exposed to window.');
                 })();
             }
             catch (error) {
                 if (mode.errorLogs)
-                    console.error(`Failed to expose IDBManager instance to window. Error: ${error}`);
+                    log.error(`Failed to expose IDBManager instance to window. Error: ${error}`);
                 if (mode.showAlerts)
                     alert('An error occurred. Check console for details.');
             }
@@ -6155,7 +6044,7 @@ async function initializeApp() {
     }
     catch (error) {
         if (mode.errorLogs)
-            console.error(`Failed to create initial IDBManager instance. Error: ${error}`);
+            log.error(`Failed to create initial IDBManager instance. Error: ${error}`);
         if (mode.showAlerts)
             alert('An error occurred. Check console for details.');
     }
@@ -6164,49 +6053,46 @@ async function initializeApp() {
     const domElements = dom.defineUIElements();
     if (!domElements) {
         if (mode.errorLogs)
-            console.error('Failed to properly initialize the UI. Some DOM elements could not be found.');
+            log.error('Failed to properly initialize the UI. Some DOM elements could not be found.');
         if (mode.showAlerts)
             alert('An error occurred. Check console for details.');
     }
     try {
         await dom.initializeUI();
         if (!mode.quiet)
-            console.log('UI successfully initialized');
+            log.info('UI successfully initialized');
     }
     catch (error) {
         if (mode.errorLogs)
-            console.error(`Failed to initialize UI\n${error}`);
+            log.error(`Failed to initialize UI\n${error}`);
         if (mode.showAlerts)
             alert('An error occurred. Check console for details.');
     }
     const selectedColorOption = consts.dom.elements.selectedColorOption;
     if (mode.debug) {
-        logger.debug.validateDOMElements();
-        if (mode.verbose) {
-            logger.verbose.validateDOMElements();
-        }
+        dom.validate.elements();
     }
     else {
         if (!mode.quiet) {
-            console.log('Skipping DOM element validation');
+            log.info('Skipping DOM element validation');
         }
     }
     const selectedColor = selectedColorOption
         ? parseInt(selectedColorOption.value, 10)
         : 0;
     if (!mode.quiet)
-        console.log(`Selected color: ${selectedColor}`);
+        log.info(`Selected color: ${selectedColor}`);
     try {
         dom.events.initializeEventListeners();
         if (!mode.quiet)
-            console.log('Event listeners have been successfully initialized');
+            log.info('Event listeners have been successfully initialized');
     }
     catch (error) {
         if (mode.errorLogs)
-            console.error(`Failed to initialize event listeners.\n${error}`);
+            log.error(`Failed to initialize event listeners.\n${error}`);
         if (mode.showAlerts)
             alert('An error occurred. Check console for details.');
     }
     if (!mode.quiet)
-        console.log('Application successfully initialized. Awaiting user input.');
+        log.info('Application successfully initialized. Awaiting user input.');
 }

@@ -47,9 +47,6 @@ export type {
 	GenPaletteFnInterface,
 	IDBDefaultsData,
 	LimitsData,
-	LoggerFnDebugInterface,
-	LoggerFnMasterInterface,
-	LoggerFnVerboseInterface,
 	ModeData,
 	PaletteCommon,
 	PaletteCommon_Helpers,
@@ -73,7 +70,11 @@ export type {
 	UIFnBaseInterface,
 	UIFnMasterInterface
 } from './app/index.js';
-export type { IDBManagerInterface } from './classes.js';
+export type {
+	AppLoggerInterface,
+	IDBManagerInterface,
+	MutationTrackerInterface
+} from './classes.js';
 export type {
 	CMYK,
 	CMYKUnbranded,

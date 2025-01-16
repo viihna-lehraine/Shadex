@@ -2,4 +2,6 @@
 
 @import url('./partials/keyframes.css');
 @import url('./partials/variables.css');
+@import url('./partials/media-queries.css');
 @import url('./partials/index.css');
+@import url('./partials/utility-classes.css');

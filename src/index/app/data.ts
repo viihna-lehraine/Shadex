@@ -62,13 +62,9 @@ export interface DefaultColorStringsData {
 export interface DOMElementData {
 	advancedMenu: HTMLDivElement | null;
 	advancedMenuButton: HTMLButtonElement | null;
+	advancedMenuContent: HTMLDivElement | null;
 	applyCustomColorButton: HTMLButtonElement | null;
 	clearCustomColorButton: HTMLButtonElement | null;
-	closeAdvancedMenuButton: HTMLButtonElement | null;
-	closeCustomColorMenuButton: HTMLButtonElement | null;
-	closeDeveloperMenuButton: HTMLButtonElement | null;
-	closeHelpMenuButton: HTMLButtonElement | null;
-	closeHistoryMenuButton: HTMLButtonElement | null;
 	customColorDisplay: HTMLSpanElement | null;
 	customColorInput: HTMLInputElement | null;
 	customColorMenu: HTMLDivElement | null;
@@ -81,14 +77,16 @@ export interface DOMElementData {
 	generateButton: HTMLButtonElement | null;
 	helpMenu: HTMLDivElement | null;
 	helpMenuButton: HTMLButtonElement | null;
+	helpMenuContent: HTMLDivElement | null;
 	historyMenu: HTMLDivElement | null;
 	historyMenuButton: HTMLButtonElement | null;
+	historyMenuContent: HTMLDivElement | null;
 	limitDarknessCheckbox: HTMLInputElement | null;
 	limitGraynessCheckbox: HTMLInputElement | null;
 	limitLightnessCheckbox: HTMLInputElement | null;
 	paletteNumberOptions: HTMLInputElement | null;
 	paletteTypeOptions: HTMLSelectElement | null;
-	resetButton: HTMLButtonElement | null;
+	resetDatabaseButton: HTMLButtonElement | null;
 	resetPaletteIDButton: HTMLButtonElement | null;
 	saturateButton: HTMLButtonElement | null;
 	selectedColorOption: HTMLSelectElement | null;
@@ -103,13 +101,9 @@ export interface DOMElementData {
 export interface DOM_ID_Data {
 	advancedMenu: string;
 	advancedMenuButton: string;
+	advancedMenuContent: string;
 	applyCustomColorButton: string;
 	clearCustomColorButton: string;
-	closeAdvancedMenuButton: string;
-	closeCustomColorMenuButton: string;
-	closeDeveloperMenuButton: string;
-	closeHelpMenuButton: string;
-	closeHistoryMenuButton: string;
 	customColorDisplay: string;
 	customColorInput: string;
 	customColorMenu: string;
@@ -122,14 +116,16 @@ export interface DOM_ID_Data {
 	generateButton: string;
 	helpMenu: string;
 	helpMenuButton: string;
+	helpMenuContent: string;
 	historyMenu: string;
 	historyMenuButton: string;
+	historyMenuContent: string;
 	limitDarknessCheckbox: string;
 	limitGraynessCheckbox: string;
 	limitLightnessCheckbox: string;
 	paletteNumberOptions: string;
 	paletteTypeOptions: string;
-	resetButton: string;
+	resetDatabaseButton: string;
 	resetPaletteIDButton: string;
 	saturateButton: string;
 	selectedColorOption: string;
@@ -157,18 +153,25 @@ export interface LimitsData {
 }
 
 export interface ModeData {
-	app: 'dev' | 'prod';
 	debug: boolean;
-	exposeIDB: boolean;
-	errorLogs: boolean;
+	debugLevel: 0 | 1 | 2 | 3 | 4 | 5;
+	environment: 'dev' | 'prod' | 'test';
+	expose: {
+		idbManager: boolean;
+		appLogger: boolean;
+	};
 	gracefulErrors: boolean;
-	infoLogs: boolean;
-	logClicks: boolean;
+	logging: {
+		clicks: boolean;
+		debug: boolean;
+		errors: boolean;
+		info: boolean;
+		verbosity: 0 | 1 | 2 | 3 | 4 | 5;
+		warnings: boolean;
+	};
 	quiet: boolean;
 	showAlerts: boolean;
 	stackTrace: boolean;
-	verbose: boolean;
-	warnLogs: boolean;
 }
 
 export interface PaletteRangesData {

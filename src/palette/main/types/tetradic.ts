@@ -8,14 +8,12 @@ import {
 } from '../../../index/index.js';
 import { core, utils } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
-import { IDBManager } from '../../../idb/index.js';
+import { IDBManager } from '../../../classes/idb/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
 import { ui } from '../../../ui/index.js';
 
 const create = paletteSuperUtils.create;
-const defaults = data.defaults;
 const genHues = paletteSuperUtils.genHues;
-const mode = data.mode;
 const paletteRanges = data.consts.paletteRanges;
 
 const idb = IDBManager.getInstance();
@@ -25,27 +23,6 @@ export async function tetradic(args: GenPaletteArgs): Promise<Palette> {
 	// ensure exactly 4 swatches
 	if (args.numBoxes !== 4) {
 		ui.enforceSwatchRules(4, 4);
-	}
-
-	const currentTetradicPaletteID = await idb.getCurrentPaletteID();
-
-	// ensure a minimum of 4 swatches
-	if (args.numBoxes < 4) {
-		if (mode.warnLogs) {
-			console.warn('Tetradic palette requires at least 4 swatches.');
-		}
-
-		return utils.palette.createObject(
-			'tetradic',
-			[],
-			core.brandColor.asHSL(defaults.colors.hsl),
-			0,
-			currentTetradicPaletteID,
-			args.enableAlpha,
-			args.limitDark,
-			args.limitGray,
-			args.limitLight
-		);
 	}
 
 	// base color setup

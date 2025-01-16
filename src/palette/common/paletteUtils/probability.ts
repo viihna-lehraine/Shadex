@@ -2,8 +2,9 @@
 
 import { PaletteCommon_Utils_Probability } from '../../../index/index.js';
 import { data } from '../../../data/index.js';
+import { log } from '../../../classes/logger/index.js';
 
-const mode = data.mode;
+const logMode = data.mode.logging;
 const probabilities = data.consts.probabilities;
 
 function getWeightedRandomInterval(): number {
@@ -27,10 +28,8 @@ function getWeightedRandomInterval(): number {
 
 		return weights[weights.length - 1];
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(
-				`Error generating weighted random interval: ${error}`
-			);
+		if (logMode.errors)
+			log.error(`Error generating weighted random interval: ${error}`);
 
 		return 50;
 	}

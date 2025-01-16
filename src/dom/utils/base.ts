@@ -12,6 +12,7 @@ import {
 import { convert } from '../../common/convert/index.js';
 import { data } from '../../data/index.js';
 import { helpers, utils } from '../../common/index.js';
+import { log } from '../../classes/logger/index.js';
 
 export interface DOMSharedUtilsBase {
 	applyCustomColor: () => HSL;
@@ -24,6 +25,7 @@ export interface DOMSharedUtilsBase {
 }
 
 const mode = data.mode;
+const logMode = mode.logging;
 
 function applyCustomColor(): HSL {
 	try {
@@ -36,6 +38,8 @@ function applyCustomColor(): HSL {
 		}
 
 		const rawValue = colorPicker.value.trim();
+
+		// *DEV-NOTE* Add this to the Data object
 		const selectedFormat = (
 			document.getElementById(
 				'custom-color-format'
@@ -63,8 +67,8 @@ function applyCustomColor(): HSL {
 
 		return hslColor;
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(
+		if (logMode.errors)
+			log.error(
 				`Failed to apply custom color: ${error}. Returning randomly generated hex color`
 			);
 
@@ -76,8 +80,7 @@ function desaturateColor(selectedColor: number): void {
 	try {
 		getElementsForSelectedColor(selectedColor);
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Failed to desaturate color: ${error}`);
+		if (logMode.errors) log.error(`Failed to desaturate color: ${error}`);
 	}
 }
 
@@ -89,8 +92,8 @@ function getElementsForSelectedColor(
 	);
 
 	if (!selectedColorBox) {
-		if (mode.warnLogs)
-			console.warn(`Element not found for color ${selectedColor}`);
+		if (logMode.warnings)
+			log.warn(`Element not found for color ${selectedColor}`);
 
 		helpers.dom.showToast('Please select a valid color.');
 
@@ -137,8 +140,8 @@ function pullParamsFromUI(): PullParamsFromUI {
 			limitLightness: limitLightnessCheckbox?.checked || false
 		};
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Failed to pull parameters from UI: ${error}`);
+		if (logMode.errors)
+			log.error(`Failed to pull parameters from UI: ${error}`);
 
 		return {
 			paletteType: 0,
@@ -156,7 +159,7 @@ function saturateColor(selectedColor: number): void {
 		getElementsForSelectedColor(selectedColor);
 		// *DEV-NOTE* unfinished function
 	} catch (error) {
-		if (mode.errorLogs) console.error(`Failed to saturate color: ${error}`);
+		if (logMode.errors) log.error(`Failed to saturate color: ${error}`);
 	}
 }
 

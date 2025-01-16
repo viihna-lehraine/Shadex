@@ -3,16 +3,23 @@
 import { ModeData } from '../../index/index.js';
 
 export const mode: ModeData = {
-	app: 'dev',
+	environment: 'dev',
 	debug: true,
-	exposeIDB: true,
-	errorLogs: true,
+	debugLevel: 1,
+	expose: {
+		idbManager: true,
+		appLogger: true
+	},
 	gracefulErrors: false,
-	infoLogs: true,
-	logClicks: false,
+	logging: {
+		clicks: false,
+		debug: true,
+		errors: true,
+		info: true,
+		verbosity: 3,
+		warnings: true
+	},
 	quiet: false,
 	showAlerts: true,
-	stackTrace: true,
-	verbose: false,
-	warnLogs: true
+	stackTrace: true
 } as const;

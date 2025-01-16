@@ -10,45 +10,32 @@ body {
 	font-family: Arial, sans-serif;
 }
 
-main {
-	width: 100%;
-	background: #f9f9f9;
-	padding: 10px;
-	border-radius: 8px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	border: 1px solid var(--border-color-1);
+fieldset {
+	border: none;
 }
 
 section {
 	width: 100%;
 	background: var(--background-color-3);
-	padding: 10px;
-	margin-bottom: 10px;
+	padding: var(--padding-sm);
+	margin-bottom: var(--margin-md);
 	border-radius: 8px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	border: 1px solid var(--border-color-1);
-	margin: 0;
-}
-
-header h1 {
-	font-size: 2rem;
-	margin: 0;
-	text-align: center;
-}
-
-section h2 {
-	margin-bottom: 5px;
-	font-size: 1.2em;
-	font-weight: bold;
-	text-align: center;
+	margin: var(--margin-xs);
 }
 
 h1 {
-	font-size: 2em;
+	margin: 0;
+	text-align: center;
+}
+
+h2 {
+	font-size: 1.2rem;
 }
 
 button {
-	padding: 10px 15px;
+	padding: var(--padding-md) var(--padding-lg);
 	border: 1px solid var(--border-color-1);
 	border-radius: 4px;
 	background-color: var(--background-color-4);
@@ -56,7 +43,12 @@ button {
 	cursor: pointer;
 	transition:
 		background-color 0.3s ease,
-		transform 0.2s ease;
+		transform 0.15s ease;
+}
+
+button:active {
+	transform: scale(0.95);
+	background-color: var(--background-color-4);
 }
 
 button:hover {
@@ -72,7 +64,7 @@ button:hover {
 	min-width: 100vw;
 	padding: 0;
 	overflow-x: hidden;
-	margin-top: 5px;
+	margin-top: var(--margin-sm);
 }
 
 #color-limit-options .ui-sub-box .ui-sub-box-bottom {
@@ -82,7 +74,7 @@ button:hover {
 
 .column-half {
 	height: 50%;
-	padding: 3px 0;
+	padding: var(--padding-xs) 0;
 }
 
 #selected-color-option {
@@ -94,23 +86,23 @@ button:hover {
 	flex-direction: column;
 	width: 90vw;
 	max-width: 1200px;
-	padding: 5px;
+	padding: var(--padding-sm);
 	background: var(--background-color-3);
 	border: 1px solid var(--border-color-1);
 	border-radius: 8px;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-	gap: 15px;
+	gap: var(--gap-lg);
 }
 
 #app > header {
 	margin: 0;
-	padding: 10px 0;
+	padding: var(--padding-md) 0;
 }
 
 #main-ui {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 15px;
+	gap: var(--gap-lg);
 	width: 100%;
 }
 
@@ -118,14 +110,14 @@ button:hover {
 #right-column {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: var(--gap-md);
 }
 
 .inside-left-column,
 .inside-right-column {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: var(--gap-md);
 	justify-content: center;
 	align-items: center;
 }
@@ -135,18 +127,26 @@ button:hover {
 	margin: auto;
 }
 
+select:hover,
+select:focus,
+input[type='checkbox']:hover,
+input[type='checkbox']:focus {
+	border: 2px solid var(--highlight-color);
+	box-shadow: 0 0 5px var(--highlight-color);
+}
+
 .ui-sub-box-top h3 {
-	margin-top: 2px;
-	margin-bottom: 5px;
+	margin-top: var(--margin-xs);
+	margin-bottom: var(--margin-sm);
 	padding: 0;
 }
 
-#color-options-top-half {
-	padding-top: 5px;
+#main-options-top-half {
+	padding-top: var(--padding-sm);
 }
 
-#color-options-top-half h3 {
-	margin-bottom: 5px;
+#main-options-top-half h3 {
+	margin-bottom: var(--margin-sm);
 	padding: 0;
 }
 
@@ -163,8 +163,8 @@ button:hover {
 }
 
 #palette-row {
-	margin-top: 10px;
-	padding: 10px;
+	margin-top: var(--margin-md);
+	padding: var(--padding-md);
 	width: 90vw;
 	max-width: 1200px;
 	background: var(--background-color-3);
@@ -176,29 +176,36 @@ button:hover {
 #palette-output {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 10px;
+	gap: var(--gap-md);
 	justify-content: center;
 }
 
-#controls {
+#main-options-section {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-	gap: 15px;
+	gap: var(--gap-lg);
+}
+
+.modal-content {
+	width: 100%;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	border: 1px solid var(--border-color-1);
 }
 
 #color-limit-options {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: var(--gap-md);
 }
 
-#actions {
+#actions-section {
 	display: flex;
 	justify-content: center;
-	gap: 15px;
+	gap: var(--gap-lg);
 }
 
-#convert {
+#conversion-buttons-section {
 	text-align: center;
 }
 
@@ -215,7 +222,7 @@ button:hover {
 
 .ui-sub-box-top h2 {
 	margin: auto;
-	padding: 0 5px 8px 5px;
+	padding: 0 var(--padding-sm) var(--padding-ms) var(--padding-sm);
 }
 
 .palette-type-ui-div {
@@ -225,7 +232,7 @@ button:hover {
 #button-row {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 10px;
+	gap: var(--gap-md);
 	justify-content: center;
 }
 
@@ -246,9 +253,9 @@ button:hover {
 	display: none;
 }
 
-.modal .custom-color-menu-content {
+.modal .modal-menu-content {
 	background: var(--background-color-3);
-	padding: 20px;
+	padding: var(--padding-xl);
 	border-radius: 8px;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 	max-width: 400px;
@@ -257,18 +264,28 @@ button:hover {
 }
 
 .modal button {
-	margin-top: 10px;
+	margin-top: var(--gap-md);
 }
 
-#modals-section {
+#menu-buttons-section {
+	margin-top: 0;
 	text-align: center;
-	margin-top: 10px;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: var(--gap-lg);
 }
 
 #menu-buttons {
+	margin-top: var(--gap-sm);
 	display: flex;
 	justify-content: center;
-	gap: 15px;
+	gap: var(--gap-lg);
+}
+
+.modal-button {
+	flex: 1;
+	max-width: 200px;
 }
 
 .modal-button:hover {
@@ -278,4 +295,9 @@ button:hover {
 
 #palette-row {
 	display: flex;
+}
+
+.sub-menu-title {
+	font-size: 1.1em;
+	font-weight: bold;
 }

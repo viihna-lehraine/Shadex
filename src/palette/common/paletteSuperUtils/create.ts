@@ -20,7 +20,7 @@ import {
 	XYZString
 } from '../../../index/index.js';
 import { convert, core, utils } from '../../../common/index.js';
-import { idbInstance } from '../../../idb/index.js';
+import { idbInstance } from '../../../classes/idb/index.js';
 import { paletteHelpers } from '../paletteHelpers/index.js';
 
 const limits = paletteHelpers.limits;

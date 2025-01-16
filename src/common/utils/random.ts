@@ -3,8 +3,10 @@
 import { CommonUtilsFnRandom, HSL, SL } from '../../index/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
+import { log } from '../../classes/logger/index.js';
 
 const defaults = data.defaults;
+const logMode = data.mode.logging;
 const mode = data.mode;
 
 function hsl(enableAlpha: boolean): HSL {
@@ -25,8 +27,8 @@ function hsl(enableAlpha: boolean): HSL {
 		};
 
 		if (!core.validate.colorValues(hsl)) {
-			if (mode.errorLogs)
-				console.error(
+			if (logMode.errors)
+				log.error(
 					`Invalid random HSL color value ${JSON.stringify(hsl)}`
 				);
 
@@ -35,13 +37,13 @@ function hsl(enableAlpha: boolean): HSL {
 			return core.brandColor.asHSL(unbrandedHSL);
 		}
 
-		if (!mode.quiet)
-			console.log(`Generated randomHSL: ${JSON.stringify(hsl)}`);
+		if (!mode.quiet && !logMode.info)
+			log.info(`Generated randomHSL: ${JSON.stringify(hsl)}`);
 
 		return hsl;
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error generating random HSL color: ${error}`);
+		if (logMode.errors)
+			log.error(`Error generating random HSL color: ${error}`);
 
 		const unbrandedHSL = core.base.clone(defaults.colors.hsl);
 
@@ -66,8 +68,8 @@ function sl(enableAlpha: boolean): SL {
 		};
 
 		if (!core.validate.colorValues(sl as SL)) {
-			if (mode.errorLogs)
-				console.error(
+			if (logMode.errors)
+				log.error(
 					`Invalid random SV color value ${JSON.stringify(sl)}`
 				);
 
@@ -76,13 +78,13 @@ function sl(enableAlpha: boolean): SL {
 			return core.brandColor.asSL(unbrandedSL);
 		}
 
-		if (!mode.quiet)
-			console.log(`Generated randomSL: ${JSON.stringify(sl)}`);
+		if (!mode.quiet && logMode.info)
+			log.info(`Generated randomSL: ${JSON.stringify(sl)}`);
 
 		return sl;
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error generating random SL color: ${error}`);
+		if (logMode.errors)
+			log.error(`Error generating random SL color: ${error}`);
 
 		const unbrandedSL = core.base.clone(defaults.colors.sl);
 

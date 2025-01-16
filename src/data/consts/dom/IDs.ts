@@ -4,13 +4,9 @@ import { DOM_ID_Data } from '../../../index/index.js';
 
 const advancedMenu = 'advanced-menu';
 const advancedMenuButton = 'advanced-menu-button';
+const advancedMenuContent = 'advanced-menu-content';
 const applyCustomColorButton = 'apply-custom-color-button';
 const clearCustomColorButton = 'clear-custom-color-button';
-const closeAdvancedMenuButton = 'close-advanced-menu-button';
-const closeCustomColorMenuButton = 'close-custom-color-menu-button';
-const closeDeveloperMenuButton = 'close-developer-menu-button';
-const closeHelpMenuButton = 'close-help-menu-button';
-const closeHistoryMenuButton = 'close-history-menu-button';
 const customColorDisplay = 'custom-color-display';
 const customColorInput = 'custom-color-input';
 const customColorMenu = 'custom-color-menu';
@@ -23,14 +19,16 @@ const enableAlphaCheckbox = 'enable-alpha-checkbox';
 const generateButton = 'generate-button';
 const helpMenu = 'help-menu';
 const helpMenuButton = 'help-menu-button';
+const helpMenuContent = 'help-menu-content';
 const historyMenu = 'history-menu';
 const historyMenuButton = 'history-menu-button';
+const historyMenuContent = 'history-menu-content';
 const limitDarknessCheckbox = 'limit-darkness-checkbox';
 const limitGraynessCheckbox = 'limit-grayness-checkbox';
 const limitLightnessCheckbox = 'limit-lightness-checkbox';
 const paletteNumberOptions = 'palette-number-options';
 const paletteTypeOptions = 'palette-type-options';
-const resetButton = 'reset-button';
+const resetDatabaseButton = 'reset-database-button';
 const resetPaletteIDButton = 'reset-palette-id-button';
 const saturateButton = 'saturate-button';
 const selectedColorOption = 'selected-color-option';
@@ -44,13 +42,9 @@ const showAsRGBButton = 'show-as-rgb-button';
 export const domIDs: DOM_ID_Data = {
 	advancedMenu,
 	advancedMenuButton,
+	advancedMenuContent,
 	applyCustomColorButton,
 	clearCustomColorButton,
-	closeAdvancedMenuButton,
-	closeCustomColorMenuButton,
-	closeDeveloperMenuButton,
-	closeHelpMenuButton,
-	closeHistoryMenuButton,
 	customColorDisplay,
 	customColorInput,
 	customColorMenu,
@@ -63,14 +57,16 @@ export const domIDs: DOM_ID_Data = {
 	generateButton,
 	helpMenu,
 	helpMenuButton,
+	helpMenuContent,
 	historyMenu,
 	historyMenuButton,
+	historyMenuContent,
 	limitDarknessCheckbox,
 	limitGraynessCheckbox,
 	limitLightnessCheckbox,
 	paletteNumberOptions,
 	paletteTypeOptions,
-	resetButton,
+	resetDatabaseButton,
 	resetPaletteIDButton,
 	saturateButton,
 	selectedColorOption,

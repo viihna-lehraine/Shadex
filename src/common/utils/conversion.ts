@@ -17,8 +17,10 @@ import {
 import { convert } from '../convert/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
+import { log } from '../../classes/logger/index.js';
 
 const mode = data.mode;
+const logMode = mode.logging;
 
 function getConversionFn<
 	From extends keyof ColorDataAssertion,
@@ -40,8 +42,8 @@ function getConversionFn<
 		return (value: ColorDataAssertion[From]): ColorDataAssertion[To] =>
 			structuredClone(conversionFn(value));
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error getting conversion function: ${error}`);
+		if (logMode.errors)
+			log.error(`Error getting conversion function: ${error}`);
 
 		return undefined;
 	}
@@ -54,8 +56,8 @@ function genAllColorValues(color: HSL): Partial<ColorDataExtended> {
 		const clonedColor = core.base.clone(color);
 
 		if (!core.validate.colorValues(clonedColor)) {
-			if (mode.errorLogs)
-				console.error(`Invalid color: ${JSON.stringify(clonedColor)}`);
+			if (logMode.errors)
+				log.error(`Invalid color: ${JSON.stringify(clonedColor)}`);
 
 			return {};
 		}
@@ -72,8 +74,8 @@ function genAllColorValues(color: HSL): Partial<ColorDataExtended> {
 
 		return result;
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error generating all color values: ${error}`);
+		if (logMode.errors)
+			log.error(`Error generating all color values: ${error}`);
 
 		return {};
 	}

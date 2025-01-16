@@ -11,57 +11,58 @@
 
 import { data } from './data/index.js';
 import { dom } from './dom/index.js';
-import { IDBManager } from './idb/index.js';
-import { logger } from './logger/index.js';
+import { log } from './classes/logger/index.js';
+import { IDBManager } from './classes/idb/index.js';
 
 const consts = data.consts;
 const mode = data.mode;
+const loggingMode = mode.logging;
 
-if (mode.debug) console.log('Executing main application script');
+if (mode.debug) log.info('Executing main application script');
 
 if (document.readyState === 'loading') {
 	if (mode.debug)
-		console.log(
+		log.info(
 			'DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...'
 		);
 
 	document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
 	if (mode.debug)
-		console.log(
+		log.info(
 			'DOM content already loaded. Initializing application immediately.'
 		);
+
 	initializeApp();
 }
 
 async function initializeApp(): Promise<void> {
-	console.log('DOM content loaded - Initializing application');
+	log.info('DOM content loaded - Initializing application');
 
 	try {
-		if (mode.verbose)
-			console.log(
+		if (mode.logging.verbosity > 1)
+			log.info(
 				'Creating new IDBManager instance. Initializing database and its dependencies.'
 			);
 
-		if (mode.exposeIDB) {
-			if (mode.debug)
-				console.log('Exposing IDBManager instance to window.');
+		if (mode.expose.idbManager) {
+			if (mode.debug) log.info('Exposing IDBManager instance to window.');
 
 			try {
 				(async () => {
 					const idbManagerInstance =
-						await IDBManager.createInstance();
+						await IDBManager.createInstance(data);
 
 					// binds the IDBManager instance to the window object
 					window.idbManager = idbManagerInstance;
 
-					console.log(
+					log.info(
 						'IDBManager instance successfully exposed to window.'
 					);
 				})();
 			} catch (error) {
-				if (mode.errorLogs)
-					console.error(
+				if (loggingMode.errors)
+					log.error(
 						`Failed to expose IDBManager instance to window. Error: ${error}`
 					);
 
@@ -70,8 +71,8 @@ async function initializeApp(): Promise<void> {
 			}
 		}
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(
+		if (loggingMode.errors)
+			log.error(
 				`Failed to create initial IDBManager instance. Error: ${error}`
 			);
 
@@ -79,13 +80,13 @@ async function initializeApp(): Promise<void> {
 			alert('An error occurred. Check console for details.');
 	}
 
-	if (!mode.quiet) console.log('Initializing UI...');
+	if (!mode.quiet) log.info('Initializing UI...');
 
 	const domElements = dom.defineUIElements();
 
 	if (!domElements) {
-		if (mode.errorLogs)
-			console.error(
+		if (loggingMode.errors)
+			log.error(
 				'Failed to properly initialize the UI. Some DOM elements could not be found.'
 			);
 
@@ -96,9 +97,9 @@ async function initializeApp(): Promise<void> {
 	try {
 		await dom.initializeUI();
 
-		if (!mode.quiet) console.log('UI successfully initialized');
+		if (!mode.quiet) log.info('UI successfully initialized');
 	} catch (error) {
-		if (mode.errorLogs) console.error(`Failed to initialize UI\n${error}`);
+		if (loggingMode.errors) log.error(`Failed to initialize UI\n${error}`);
 
 		if (mode.showAlerts)
 			alert('An error occurred. Check console for details.');
@@ -107,14 +108,10 @@ async function initializeApp(): Promise<void> {
 	const selectedColorOption = consts.dom.elements.selectedColorOption;
 
 	if (mode.debug) {
-		logger.debug.validateDOMElements();
-
-		if (mode.verbose) {
-			logger.verbose.validateDOMElements();
-		}
+		dom.validate.elements();
 	} else {
 		if (!mode.quiet) {
-			console.log('Skipping DOM element validation');
+			log.info('Skipping DOM element validation');
 		}
 	}
 
@@ -122,23 +119,21 @@ async function initializeApp(): Promise<void> {
 		? parseInt(selectedColorOption.value, 10)
 		: 0;
 
-	if (!mode.quiet) console.log(`Selected color: ${selectedColor}`);
+	if (!mode.quiet) log.info(`Selected color: ${selectedColor}`);
 
 	try {
 		dom.events.initializeEventListeners();
 
 		if (!mode.quiet)
-			console.log('Event listeners have been successfully initialized');
+			log.info('Event listeners have been successfully initialized');
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Failed to initialize event listeners.\n${error}`);
+		if (loggingMode.errors)
+			log.error(`Failed to initialize event listeners.\n${error}`);
 
 		if (mode.showAlerts)
 			alert('An error occurred. Check console for details.');
 	}
 
 	if (!mode.quiet)
-		console.log(
-			'Application successfully initialized. Awaiting user input.'
-		);
+		log.info('Application successfully initialized. Awaiting user input.');
 }

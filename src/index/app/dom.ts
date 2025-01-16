@@ -32,7 +32,7 @@ export interface DOMHistoryFnInterface {
 }
 
 export interface DOMValidateFnInterface {
-	elements(ids: Record<string, string>): void;
+	elements(): void;
 }
 
 export interface DOMFnEventsInterface {

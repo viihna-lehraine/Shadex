@@ -31,9 +31,13 @@ import {
 	validate
 } from '../core/base.js';
 import { componentToHex } from '../transform/base.js';
+import { data } from '../../data/index.js';
 import { defaults } from '../../data/defaults/index.js';
 import { hexAlphaToNumericAlpha, stripHashFromHex } from '../utils/color.js';
-import { mode } from '../../data/mode/index.js';
+import { log } from '../../classes/logger/index.js';
+
+const logMode = data.mode.logging;
+const mode = data.mode;
 
 const defaultCMYKUnbranded = base.clone(defaults.colors.cmyk);
 const defaultHexUnbranded = base.clone(defaults.colors.hex);
@@ -58,15 +62,15 @@ const defaultXYZBranded = brandColor.asXYZ(defaultXYZUnbranded);
 function cmykToHSL(cmyk: CMYK): HSL {
 	try {
 		if (!validate.colorValues(cmyk)) {
-			if (mode.errorLogs)
-				console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
+			if (logMode.errors)
+				log.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
 
 			return defaultHSLBranded;
 		}
 
 		return rgbToHSL(cmykToRGB(base.clone(cmyk)));
 	} catch (error) {
-		if (mode.errorLogs) console.error(`cmykToHSL() error: ${error}`);
+		if (logMode.errors) log.error(`cmykToHSL() error: ${error}`);
 
 		return defaultHSLBranded;
 	}
@@ -75,8 +79,8 @@ function cmykToHSL(cmyk: CMYK): HSL {
 function cmykToRGB(cmyk: CMYK): RGB {
 	try {
 		if (!validate.colorValues(cmyk)) {
-			if (mode.errorLogs)
-				console.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
+			if (logMode.errors)
+				log.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`);
 
 			return defaultRGBBranded;
 		}
@@ -107,7 +111,7 @@ function cmykToRGB(cmyk: CMYK): RGB {
 
 		return clampRGB(rgb);
 	} catch (error) {
-		if (mode.errorLogs) console.error(`cmykToRGB error: ${error}`);
+		if (logMode.errors) log.error(`cmykToRGB error: ${error}`);
 
 		return defaultRGBBranded;
 	}
@@ -116,15 +120,15 @@ function cmykToRGB(cmyk: CMYK): RGB {
 function hexToHSL(hex: Hex): HSL {
 	try {
 		if (!validate.colorValues(hex)) {
-			if (mode.errorLogs)
-				console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
+			if (logMode.errors)
+				log.error(`Invalid Hex value ${JSON.stringify(hex)}`);
 
 			return defaultHSLBranded;
 		}
 
 		return rgbToHSL(hexToRGB(base.clone(hex)));
 	} catch (error) {
-		if (mode.errorLogs) console.error(`hexToHSL() error: ${error}`);
+		if (logMode.errors) log.error(`hexToHSL() error: ${error}`);
 
 		return defaultHSLBranded;
 	}
@@ -160,8 +164,8 @@ function hexToHSLWrapper(input: string | Hex): HSL {
 
 		return hexToHSL(hex);
 	} catch (error) {
-		if (mode.errorLogs) {
-			console.error(`Error converting hex to HSL: ${error}`);
+		if (logMode.errors) {
+			log.error(`Error converting hex to HSL: ${error}`);
 		}
 
 		return defaultHSLBranded;
@@ -171,8 +175,8 @@ function hexToHSLWrapper(input: string | Hex): HSL {
 function hexToRGB(hex: Hex): RGB {
 	try {
 		if (!validate.colorValues(hex)) {
-			if (mode.errorLogs)
-				console.error(`Invalid Hex value ${JSON.stringify(hex)}`);
+			if (logMode.errors)
+				log.error(`Invalid Hex value ${JSON.stringify(hex)}`);
 
 			return defaultRGBBranded;
 		}
@@ -191,7 +195,7 @@ function hexToRGB(hex: Hex): RGB {
 			format: 'rgb'
 		};
 	} catch (error) {
-		if (mode.errorLogs) console.error(`hexToRGB error: ${error}`);
+		if (logMode.errors) log.error(`hexToRGB error: ${error}`);
 
 		return defaultRGBBranded;
 	}
@@ -200,16 +204,16 @@ function hexToRGB(hex: Hex): RGB {
 function hslToCMYK(hsl: HSL): CMYK {
 	try {
 		if (!validate.colorValues(hsl)) {
-			if (mode.errorLogs)
-				console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+			if (logMode.errors)
+				log.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 			return defaultCMYKBranded;
 		}
 
 		return rgbToCMYK(hslToRGB(clone(hsl)));
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(
+		if (logMode.errors)
+			log.error(
 				`Error converting HSL ${JSON.stringify(hsl)} to CMYK: ${error}`
 			);
 
@@ -220,15 +224,15 @@ function hslToCMYK(hsl: HSL): CMYK {
 function hslToHex(hsl: HSL): Hex {
 	try {
 		if (!validate.colorValues(hsl)) {
-			if (mode.errorLogs)
-				console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+			if (logMode.errors)
+				log.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 			return defaultHexBranded;
 		}
 
 		return rgbToHex(hslToRGB(clone(hsl)));
 	} catch (error) {
-		if (mode.errorLogs) console.error(`hslToHex error: ${error}`);
+		if (logMode.errors) log.error(`hslToHex error: ${error}`);
 
 		return defaultHexBranded;
 	}
@@ -237,8 +241,8 @@ function hslToHex(hsl: HSL): Hex {
 function hslToHSV(hsl: HSL): HSV {
 	try {
 		if (!validate.colorValues(hsl)) {
-			if (mode.errorLogs)
-				console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+			if (logMode.errors)
+				log.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 			return defaultHSVBranded;
 		}
@@ -259,7 +263,7 @@ function hslToHSV(hsl: HSL): HSV {
 			format: 'hsv'
 		};
 	} catch (error) {
-		if (mode.errorLogs) console.error(`hslToHSV() error: ${error}`);
+		if (logMode.errors) log.error(`hslToHSV() error: ${error}`);
 
 		return defaultHSVBranded;
 	}
@@ -268,15 +272,15 @@ function hslToHSV(hsl: HSL): HSV {
 function hslToLAB(hsl: HSL): LAB {
 	try {
 		if (!validate.colorValues(hsl)) {
-			if (mode.errorLogs)
-				console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+			if (logMode.errors)
+				log.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 			return defaultLABBranded;
 		}
 
 		return xyzToLAB(rgbToXYZ(hslToRGB(clone(hsl))));
 	} catch (error) {
-		if (mode.errorLogs) console.error(`hslToLab() error: ${error}`);
+		if (logMode.errors) log.error(`hslToLab() error: ${error}`);
 
 		return defaultLABBranded;
 	}
@@ -285,8 +289,8 @@ function hslToLAB(hsl: HSL): LAB {
 function hslToRGB(hsl: HSL): RGB {
 	try {
 		if (!validate.colorValues(hsl)) {
-			if (mode.errorLogs)
-				console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+			if (logMode.errors)
+				log.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 			return defaultRGBBranded;
 		}
@@ -317,7 +321,7 @@ function hslToRGB(hsl: HSL): RGB {
 			format: 'rgb'
 		};
 	} catch (error) {
-		if (mode.errorLogs) console.error(`hslToRGB error: ${error}`);
+		if (logMode.errors) log.error(`hslToRGB error: ${error}`);
 
 		return defaultRGBBranded;
 	}
@@ -326,8 +330,8 @@ function hslToRGB(hsl: HSL): RGB {
 function hslToSL(hsl: HSL): SL {
 	try {
 		if (!validate.colorValues(hsl)) {
-			if (mode.errorLogs)
-				console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+			if (logMode.errors)
+				log.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 			return defaultSLBranded;
 		}
@@ -341,8 +345,7 @@ function hslToSL(hsl: HSL): SL {
 			format: 'sl' as 'sl'
 		};
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error converting HSL to SL: ${error}`);
+		if (logMode.errors) log.error(`Error converting HSL to SL: ${error}`);
 
 		return defaultSLBranded;
 	}
@@ -351,16 +354,15 @@ function hslToSL(hsl: HSL): SL {
 function hslToSV(hsl: HSL): SV {
 	try {
 		if (!validate.colorValues(hsl)) {
-			if (mode.errorLogs)
-				console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+			if (logMode.errors)
+				log.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 			return defaultSVBranded;
 		}
 
 		return hsvToSV(rgbToHSV(hslToRGB(clone(hsl))));
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error converting HSL to SV: ${error}`);
+		if (logMode.errors) log.error(`Error converting HSL to SV: ${error}`);
 
 		return defaultSVBranded;
 	}
@@ -369,15 +371,15 @@ function hslToSV(hsl: HSL): SV {
 function hslToXYZ(hsl: HSL): XYZ {
 	try {
 		if (!validate.colorValues(hsl)) {
-			if (mode.errorLogs)
-				console.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
+			if (logMode.errors)
+				log.error(`Invalid HSL value ${JSON.stringify(hsl)}`);
 
 			return defaultXYZBranded;
 		}
 
 		return labToXYZ(hslToLAB(clone(hsl)));
 	} catch (error) {
-		if (mode.errorLogs) console.error(`hslToXYZ error: ${error}`);
+		if (logMode.errors) log.error(`hslToXYZ error: ${error}`);
 
 		return defaultXYZBranded;
 	}
@@ -386,8 +388,8 @@ function hslToXYZ(hsl: HSL): XYZ {
 function hsvToHSL(hsv: HSV): HSL {
 	try {
 		if (!validate.colorValues(hsv)) {
-			if (mode.errorLogs)
-				console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
+			if (logMode.errors)
+				log.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
 
 			return defaultHSLBranded;
 		}
@@ -417,7 +419,7 @@ function hsvToHSL(hsv: HSV): HSL {
 			format: 'hsl'
 		};
 	} catch (error) {
-		if (mode.errorLogs) console.error(`hsvToHSL() error: ${error}`);
+		if (logMode.errors) log.error(`hsvToHSL() error: ${error}`);
 
 		return defaultHSLBranded;
 	}
@@ -426,8 +428,8 @@ function hsvToHSL(hsv: HSV): HSL {
 function hsvToSV(hsv: HSV): SV {
 	try {
 		if (!validate.colorValues(hsv)) {
-			if (mode.errorLogs)
-				console.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
+			if (logMode.errors)
+				log.error(`Invalid HSV value ${JSON.stringify(hsv)}`);
 
 			return defaultSVBranded;
 		}
@@ -441,8 +443,7 @@ function hsvToSV(hsv: HSV): SV {
 			format: 'sv' as 'sv'
 		};
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error converting HSV to SV: ${error}`);
+		if (logMode.errors) log.error(`Error converting HSV to SV: ${error}`);
 
 		return defaultSVBranded;
 	}
@@ -451,15 +452,15 @@ function hsvToSV(hsv: HSV): SV {
 function labToHSL(lab: LAB): HSL {
 	try {
 		if (!validate.colorValues(lab)) {
-			if (mode.errorLogs)
-				console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
+			if (logMode.errors)
+				log.error(`Invalid LAB value ${JSON.stringify(lab)}`);
 
 			return defaultHSLBranded;
 		}
 
 		return rgbToHSL(labToRGB(clone(lab)));
 	} catch (error) {
-		if (mode.errorLogs) console.error(`labToHSL() error: ${error}`);
+		if (logMode.errors) log.error(`labToHSL() error: ${error}`);
 
 		return defaultHSLBranded;
 	}
@@ -468,15 +469,15 @@ function labToHSL(lab: LAB): HSL {
 function labToRGB(lab: LAB): RGB {
 	try {
 		if (!validate.colorValues(lab)) {
-			if (mode.errorLogs)
-				console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
+			if (logMode.errors)
+				log.error(`Invalid LAB value ${JSON.stringify(lab)}`);
 
 			return defaultRGBBranded;
 		}
 
 		return xyzToRGB(labToXYZ(clone(lab)));
 	} catch (error) {
-		if (mode.errorLogs) console.error(`labToRGB error: ${error}`);
+		if (logMode.errors) log.error(`labToRGB error: ${error}`);
 
 		return defaultRGBBranded;
 	}
@@ -485,8 +486,8 @@ function labToRGB(lab: LAB): RGB {
 function labToXYZ(lab: LAB): XYZ {
 	try {
 		if (!validate.colorValues(lab)) {
-			if (mode.errorLogs)
-				console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
+			if (logMode.errors)
+				log.error(`Invalid LAB value ${JSON.stringify(lab)}`);
 
 			return defaultXYZBranded;
 		}
@@ -533,7 +534,7 @@ function labToXYZ(lab: LAB): XYZ {
 			format: 'xyz'
 		};
 	} catch (error) {
-		if (mode.errorLogs) console.error(`labToXYZ error: ${error}`);
+		if (logMode.errors) log.error(`labToXYZ error: ${error}`);
 
 		return defaultXYZBranded;
 	}
@@ -542,8 +543,8 @@ function labToXYZ(lab: LAB): XYZ {
 function rgbToCMYK(rgb: RGB): CMYK {
 	try {
 		if (!validate.colorValues(rgb)) {
-			if (mode.errorLogs)
-				console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+			if (logMode.errors)
+				log.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
 			return defaultCMYKBranded;
 		}
@@ -572,14 +573,13 @@ function rgbToCMYK(rgb: RGB): CMYK {
 		const cmyk = { value: { cyan, magenta, yellow, key, alpha }, format };
 
 		if (!mode.quiet)
-			console.log(
+			log.info(
 				`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(clone(cmyk))}`
 			);
 
 		return cmyk;
 	} catch (error) {
-		if (mode.errorLogs)
-			console.error(`Error converting RGB to CMYK: ${error}`);
+		if (logMode.errors) log.error(`Error converting RGB to CMYK: ${error}`);
 
 		return defaultCMYKBranded;
 	}
@@ -588,8 +588,8 @@ function rgbToCMYK(rgb: RGB): CMYK {
 function rgbToHex(rgb: RGB): Hex {
 	try {
 		if (!validate.colorValues(rgb)) {
-			if (mode.errorLogs)
-				console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+			if (logMode.errors)
+				log.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
 			return defaultHexBranded;
 		}
@@ -604,8 +604,8 @@ function rgbToHex(rgb: RGB): Hex {
 			].some(v => isNaN(v) || v < 0 || v > 255) ||
 			[clonedRGB.value.alpha].some(v => isNaN(v) || v < 0 || v > 1)
 		) {
-			if (mode.warnLogs)
-				console.warn(
+			if (logMode.warnings)
+				log.warn(
 					`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}\nA=${JSON.stringify(clonedRGB.value.alpha)}`
 				);
 
@@ -632,7 +632,7 @@ function rgbToHex(rgb: RGB): Hex {
 			format: 'hex' as 'hex'
 		};
 	} catch (error) {
-		if (mode.errorLogs) console.warn(`rgbToHex error: ${error}`);
+		if (logMode.errors) log.warn(`rgbToHex error: ${error}`);
 
 		return defaultHexBranded;
 	}
@@ -641,8 +641,8 @@ function rgbToHex(rgb: RGB): Hex {
 function rgbToHSL(rgb: RGB): HSL {
 	try {
 		if (!validate.colorValues(rgb)) {
-			if (mode.errorLogs) {
-				console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+			if (logMode.errors) {
+				log.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 			}
 			return defaultHSLBranded;
 		}
@@ -690,8 +690,8 @@ function rgbToHSL(rgb: RGB): HSL {
 			format: 'hsl'
 		};
 	} catch (error) {
-		if (mode.errorLogs) {
-			console.error(`rgbToHSL() error: ${error}`);
+		if (logMode.errors) {
+			log.error(`rgbToHSL() error: ${error}`);
 		}
 
 		return defaultHSLBranded;
@@ -701,8 +701,8 @@ function rgbToHSL(rgb: RGB): HSL {
 function rgbToHSV(rgb: RGB): HSV {
 	try {
 		if (!validate.colorValues(rgb)) {
-			if (mode.errorLogs) {
-				console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+			if (logMode.errors) {
+				log.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 			}
 			return defaultHSVBranded;
 		}
@@ -746,8 +746,8 @@ function rgbToHSV(rgb: RGB): HSV {
 			format: 'hsv'
 		};
 	} catch (error) {
-		if (mode.errorLogs) {
-			console.error(`rgbToHSV() error: ${error}`);
+		if (logMode.errors) {
+			log.error(`rgbToHSV() error: ${error}`);
 		}
 
 		return defaultHSVBranded;
@@ -757,8 +757,8 @@ function rgbToHSV(rgb: RGB): HSV {
 function rgbToXYZ(rgb: RGB): XYZ {
 	try {
 		if (!validate.colorValues(rgb)) {
-			if (mode.errorLogs) {
-				console.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+			if (logMode.errors) {
+				log.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 			}
 			return defaultXYZBranded;
 		}
@@ -810,8 +810,8 @@ function rgbToXYZ(rgb: RGB): XYZ {
 			format: 'xyz'
 		};
 	} catch (error) {
-		if (mode.errorLogs) {
-			console.error(`rgbToXYZ error: ${error}`);
+		if (logMode.errors) {
+			log.error(`rgbToXYZ error: ${error}`);
 		}
 		return defaultXYZBranded;
 	}
@@ -820,15 +820,15 @@ function rgbToXYZ(rgb: RGB): XYZ {
 function xyzToHSL(xyz: XYZ): HSL {
 	try {
 		if (!validate.colorValues(xyz)) {
-			if (mode.errorLogs)
-				console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
+			if (logMode.errors)
+				log.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
 
 			return defaultHSLBranded;
 		}
 
 		return rgbToHSL(xyzToRGB(clone(xyz)));
 	} catch (error) {
-		if (mode.errorLogs) console.error(`xyzToHSL() error: ${error}`);
+		if (logMode.errors) log.error(`xyzToHSL() error: ${error}`);
 
 		return defaultHSLBranded;
 	}
@@ -837,8 +837,8 @@ function xyzToHSL(xyz: XYZ): HSL {
 function xyzToLAB(xyz: XYZ): LAB {
 	try {
 		if (!validate.colorValues(xyz)) {
-			if (mode.errorLogs)
-				console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
+			if (logMode.errors)
+				log.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
 
 			return defaultLABBranded;
 		}
@@ -892,15 +892,15 @@ function xyzToLAB(xyz: XYZ): LAB {
 		};
 
 		if (!validate.colorValues(lab)) {
-			if (mode.errorLogs)
-				console.error(`Invalid LAB value ${JSON.stringify(lab)}`);
+			if (logMode.errors)
+				log.error(`Invalid LAB value ${JSON.stringify(lab)}`);
 
 			return defaultLABBranded;
 		}
 
 		return lab;
 	} catch (error) {
-		if (mode.errorLogs) console.error(`xyzToLab() error: ${error}`);
+		if (logMode.errors) log.error(`xyzToLab() error: ${error}`);
 
 		return defaultLABBranded;
 	}
@@ -909,8 +909,8 @@ function xyzToLAB(xyz: XYZ): LAB {
 function xyzToRGB(xyz: XYZ): RGB {
 	try {
 		if (!validate.colorValues(xyz)) {
-			if (mode.errorLogs) {
-				console.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
+			if (logMode.errors) {
+				log.error(`Invalid XYZ value ${JSON.stringify(xyz)}`);
 			}
 			return defaultRGBBranded;
 		}
@@ -939,8 +939,8 @@ function xyzToRGB(xyz: XYZ): RGB {
 
 		return rgb;
 	} catch (error) {
-		if (mode.errorLogs) {
-			console.error(`xyzToRGB error: ${error}`);
+		if (logMode.errors) {
+			log.error(`xyzToRGB error: ${error}`);
 		}
 		return defaultRGBBranded;
 	}
@@ -951,7 +951,7 @@ function xyzToRGB(xyz: XYZ): RGB {
 function hslTo(color: HSL, colorSpace: ColorSpaceExtended): Color {
 	try {
 		if (!validate.colorValues(color)) {
-			console.error(`Invalid color value ${JSON.stringify(color)}`);
+			log.error(`Invalid color value ${JSON.stringify(color)}`);
 
 			return defaultRGBBranded;
 		}
@@ -988,7 +988,7 @@ function hslTo(color: HSL, colorSpace: ColorSpaceExtended): Color {
 function toHSL(color: Exclude<Color, SL | SV>): HSL {
 	try {
 		if (!validate.colorValues(color)) {
-			console.error(`Invalid color value ${JSON.stringify(color)}`);
+			log.error(`Invalid color value ${JSON.stringify(color)}`);
 
 			return defaultHSLBranded;
 		}
