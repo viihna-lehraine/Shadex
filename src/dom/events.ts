@@ -1,13 +1,13 @@
 // File: src/dom/events/base.js
 
-import { DOMEventsInterface, HSL, PaletteOptions } from '../../index/index.js';
-import { core, superUtils, utils } from '../../common/index.js';
-import { data } from '../../data/index.js';
-import { domUtils } from '../utils/index.js';
-import { IDBManager } from '../../classes/idb/index.js';
-import { log } from '../../classes/logger/index.js';
-import { mode } from '../../data/mode/index.js';
-import { start } from '../../palette/index.js';
+import { DOMEventsInterface, HSL, PaletteOptions } from '../index/index.js';
+import { core, superUtils, utils } from '../common/index.js';
+import { data } from '../data/index.js';
+import { IDBManager } from '../classes/idb/index.js';
+import { log } from '../classes/logger/index.js';
+import { mode } from '../data/mode/index.js';
+import { start } from '../palette/index.js';
+import { UIManager } from '../classes/ui/index.js';
 
 const buttonDebounce = data.consts.debounce.button || 300;
 const domIDs = data.consts.dom.ids;
@@ -15,6 +15,7 @@ const logMode = mode.logging;
 const uiElements = data.consts.dom.elements;
 
 const idb = IDBManager.getInstance();
+const uiManager = new UIManager(uiElements);
 
 function addEventListener<K extends keyof HTMLElementEventMap>(
 	id: string,
@@ -118,7 +119,7 @@ function initializeEventListeners(): void {
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
-			const customHSLColor = domUtils.applyCustomColor();
+			const customHSLColor = uiManager.applyCustomColor();
 			const customHSLColorClone = core.base.clone(customHSLColor);
 
 			await idb.saveData(

@@ -293,6 +293,14 @@ export interface CommonUtilsFnConversion {
 	genAllColorValues(color: HSL): Partial<ColorDataExtended>;
 }
 
+export interface CommonUtilsFnErrors {
+	handleAsync<T>(
+		action: () => Promise<T>,
+		errorMessage: string,
+		context?: Record<string, unknown>
+	): Promise<T | null>;
+}
+
 export interface CommonUtilsFnPalette {
 	createObject(
 		type: string,
@@ -316,6 +324,7 @@ export interface CommonUtilsFnRandom {
 export interface CommonUtilsFnMasterInterface {
 	color: CommonUtilsFnColor;
 	conversion: CommonUtilsFnConversion;
+	errors: CommonUtilsFnErrors;
 	palette: CommonUtilsFnPalette;
 	random: CommonUtilsFnRandom;
 }

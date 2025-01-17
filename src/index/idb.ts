@@ -37,6 +37,8 @@ export interface PaletteSchema {
 export interface Settings {
 	colorSpace: ColorSpace;
 	lastTableID: number;
+	theme: 'light' | 'dark';
+	loggingEnabled: boolean;
 }
 
 export interface StoredPalette {

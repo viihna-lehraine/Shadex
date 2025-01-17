@@ -16,7 +16,7 @@ import { IDBManager } from './classes/idb/index.js';
 
 const consts = data.consts;
 const mode = data.mode;
-const loggingMode = mode.logging;
+const logMode = mode.logging;
 
 if (mode.debug) log.info('Executing main application script');
 
@@ -61,7 +61,7 @@ async function initializeApp(): Promise<void> {
 					);
 				})();
 			} catch (error) {
-				if (loggingMode.errors)
+				if (logMode.errors)
 					log.error(
 						`Failed to expose IDBManager instance to window. Error: ${error}`
 					);
@@ -71,7 +71,7 @@ async function initializeApp(): Promise<void> {
 			}
 		}
 	} catch (error) {
-		if (loggingMode.errors)
+		if (logMode.errors)
 			log.error(
 				`Failed to create initial IDBManager instance. Error: ${error}`
 			);
@@ -80,34 +80,14 @@ async function initializeApp(): Promise<void> {
 			alert('An error occurred. Check console for details.');
 	}
 
-	if (!mode.quiet) log.info('Initializing UI...');
-
-	const domElements = dom.defineUIElements();
-
-	if (!domElements) {
-		if (loggingMode.errors)
-			log.error(
-				'Failed to properly initialize the UI. Some DOM elements could not be found.'
-			);
-
-		if (mode.showAlerts)
-			alert('An error occurred. Check console for details.');
-	}
-
-	try {
-		await dom.initializeUI();
-
-		if (!mode.quiet) log.info('UI successfully initialized');
-	} catch (error) {
-		if (loggingMode.errors) log.error(`Failed to initialize UI\n${error}`);
-
-		if (mode.showAlerts)
-			alert('An error occurred. Check console for details.');
-	}
-
 	const selectedColorOption = consts.dom.elements.selectedColorOption;
 
 	if (mode.debug) {
+		if (logMode.debug)
+			if (!mode.quiet && logMode.verbosity > 1) {
+				log.debug('Validating DOM elements');
+			}
+
 		dom.validate.elements();
 	} else {
 		if (!mode.quiet) {
@@ -119,7 +99,8 @@ async function initializeApp(): Promise<void> {
 		? parseInt(selectedColorOption.value, 10)
 		: 0;
 
-	if (!mode.quiet) log.info(`Selected color: ${selectedColor}`);
+	if (!mode.quiet && mode.debug)
+		log.debug(`Selected color: ${selectedColor}`);
 
 	try {
 		dom.events.initializeEventListeners();
@@ -127,13 +108,13 @@ async function initializeApp(): Promise<void> {
 		if (!mode.quiet)
 			log.info('Event listeners have been successfully initialized');
 	} catch (error) {
-		if (loggingMode.errors)
+		if (logMode.errors)
 			log.error(`Failed to initialize event listeners.\n${error}`);
 
 		if (mode.showAlerts)
 			alert('An error occurred. Check console for details.');
 	}
 
-	if (!mode.quiet)
+	if (!mode.quiet && logMode.info)
 		log.info('Application successfully initialized. Awaiting user input.');
 }

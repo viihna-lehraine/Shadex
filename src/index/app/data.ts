@@ -13,7 +13,6 @@ import {
 	MutationLog,
 	PaletteItemUnbranded,
 	PaletteUnbranded,
-	Settings,
 	SLString,
 	SLUnbranded,
 	SVString,
@@ -65,6 +64,7 @@ export interface DOMElementData {
 	advancedMenuContent: HTMLDivElement | null;
 	applyCustomColorButton: HTMLButtonElement | null;
 	clearCustomColorButton: HTMLButtonElement | null;
+	colorBox1: HTMLDivElement | null;
 	customColorDisplay: HTMLSpanElement | null;
 	customColorInput: HTMLInputElement | null;
 	customColorMenu: HTMLDivElement | null;
@@ -104,6 +104,7 @@ export interface DOM_ID_Data {
 	advancedMenuContent: string;
 	applyCustomColorButton: string;
 	clearCustomColorButton: string;
+	colorBox1: string;
 	customColorDisplay: string;
 	customColorInput: string;
 	customColorMenu: string;
@@ -285,7 +286,6 @@ export interface Defaults {
 }
 
 export interface IDBDefaultsData {
-	settings: Settings;
 	mutation: MutationLog;
 }
 

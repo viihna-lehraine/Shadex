@@ -6,6 +6,7 @@ const advancedMenu = 'advanced-menu';
 const advancedMenuButton = 'advanced-menu-button';
 const advancedMenuContent = 'advanced-menu-content';
 const applyCustomColorButton = 'apply-custom-color-button';
+const colorBox1 = 'color-box-1';
 const clearCustomColorButton = 'clear-custom-color-button';
 const customColorDisplay = 'custom-color-display';
 const customColorInput = 'custom-color-input';
@@ -45,6 +46,7 @@ export const domIDs: DOM_ID_Data = {
 	advancedMenuContent,
 	applyCustomColorButton,
 	clearCustomColorButton,
+	colorBox1,
 	customColorDisplay,
 	customColorInput,
 	customColorMenu,

@@ -23,6 +23,7 @@ export type {
 	CommonTransformFnMasterInterface,
 	CommonUtilsFnColor,
 	CommonUtilsFnConversion,
+	CommonUtilsFnErrors,
 	CommonUtilsFnMasterInterface,
 	CommonUtilsFnPalette,
 	CommonUtilsFnRandom,
@@ -33,7 +34,6 @@ export type {
 	DefaultColorsData,
 	DefaultColorStringsData,
 	Defaults,
-	DOMBaseFnInterface,
 	DOMEventsInterface,
 	DOMExportPaletteFnInterface,
 	DOMFnEventsInterface,
@@ -72,8 +72,10 @@ export type {
 } from './app/index.js';
 export type {
 	AppLoggerInterface,
+	CacheManagerInterface,
 	IDBManagerInterface,
-	MutationTrackerInterface
+	MutationTrackerInterface,
+	UIManagerInterface
 } from './classes.js';
 export type {
 	CMYK,
@@ -143,12 +145,17 @@ export type {
 	XYZValueString
 } from './colors/index.js';
 export type {
+	ConfigInterface,
+	ConfigDBInterface,
+	DefaultKeysInterface,
+	DefaultSettingsInterface,
+	StoreNamesInterface
+} from './config.js';
+export type { DBMasterFnInterface, StoreUtilsFnInterface } from './db.js';
+export type {
 	ColorInputElement,
 	GenButtonArgs,
-	GetElementsForSelectedColor,
-	MakePaletteBox,
-	PullParamsFromUI,
-	UIElements
+	MakePaletteBox
 } from './dom.js';
 export type {
 	MutationLog,

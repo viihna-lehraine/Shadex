@@ -1,8 +1,11 @@
 // File: src/classes/idb/IDBManager.js
 
-import { IDBPDatabase, IDBPObjectStore, openDB } from 'idb';
+import { IDBPDatabase, IDBPObjectStore } from 'idb';
 import {
+	CommonUtilsFnErrors,
 	DataInterface,
+	DefaultKeysInterface,
+	DBMasterFnInterface,
 	HSL,
 	IDBManagerInterface,
 	ModeData,
@@ -12,46 +15,56 @@ import {
 	PaletteItem,
 	PaletteSchema,
 	Settings,
-	StoredPalette
+	StoreNamesInterface,
+	StoredPalette,
+	DefaultSettingsInterface
 } from '../../index/index.js';
+import { config } from '../../config/index.js';
+import { dbFn } from '../../db/index.js';
 import { log } from '../logger/index.js';
 import { MutationTracker } from '../mutations/index.js';
 import { utils } from '../../common/index.js';
 
 export class IDBManager implements IDBManagerInterface {
 	private static instance: IDBManager | null = null;
+
+	private dbFn: DBMasterFnInterface = dbFn;
+
+	private dbPromise: Promise<IDBPDatabase<PaletteSchema>>;
+
+	private data: DataInterface;
+	private mode: ModeData;
+	private logMode: ModeData['logging'];
+
 	private cache: Partial<{
 		settings: Settings;
 		customColor: HSL;
 	}> = {};
-	private data: DataInterface;
-	private dbPromise: Promise<IDBPDatabase<PaletteSchema>>;
-	private defaultKeys;
-	private defaultSettings: Settings;
-	private loggingMode: ModeData['logging'];
-	private mode: ModeData;
+
+	private defaultKeys: DefaultKeysInterface;
+	private defaultSettings: DefaultSettingsInterface;
+	private storeNames: StoreNamesInterface;
+
+	private storeUtils: DBMasterFnInterface['storeUtils'];
+	private errorUtils: CommonUtilsFnErrors;
+
 	private mutationTracker: MutationTracker;
-	private storeNames;
 
 	private constructor(data: DataInterface) {
-		this.dbPromise = openDB<PaletteSchema>('paletteDB', 1, {
-			upgrade: db => {
-				const storeNames = Object.values(this.storeNames);
+		this.dbPromise = this.dbFn.initializeDB();
 
-				for (const storeName of storeNames) {
-					if (!db.objectStoreNames.contains(storeName)) {
-						db.createObjectStore(storeName, { keyPath: 'key' });
-					}
-				}
-			}
-		});
 		this.data = data;
-		this.defaultSettings = this.data.defaults.idb.settings;
-		this.loggingMode = this.data.mode.logging;
 		this.mode = this.data.mode;
+		this.logMode = this.data.mode.logging;
+
+		this.defaultKeys = config.db.DEFAULT_KEYS;
+		this.defaultSettings = config.db.DEFAULT_SETTINGS;
+		this.storeNames = config.db.STORE_NAMES;
+
+		this.storeUtils = this.dbFn.storeUtils;
+		this.errorUtils = utils.errors;
+
 		this.mutationTracker = MutationTracker.getInstance(data);
-		this.defaultKeys = this.data.idb.DEFAULT_KEYS;
-		this.storeNames = this.data.idb.STORE_NAMES;
 	}
 
 	//
@@ -112,7 +125,7 @@ export class IDBManager implements IDBManagerInterface {
 						origin: 'Proxy'
 					};
 
-					if (self.loggingMode.info)
+					if (self.logMode.info)
 						log.info(
 							`Mutation detected: ${JSON.stringify(mutationLog)}`
 						);
@@ -120,7 +133,7 @@ export class IDBManager implements IDBManagerInterface {
 					self.mutationTracker
 						.persistMutation(mutationLog)
 						.catch(err => {
-							if (self.loggingMode.errors)
+							if (self.logMode.errors)
 								log.error(
 									`Failed to persist mutation: ${err.message}`
 								);
@@ -130,30 +143,6 @@ export class IDBManager implements IDBManagerInterface {
 				return success;
 			}
 		});
-	}
-
-	private createPaletteTable(palette: StoredPalette): HTMLElement {
-		const fragment = document.createDocumentFragment();
-		const table = document.createElement('table');
-		table.classList.add('palette-table');
-
-		palette.palette.items.forEach((item, index) => {
-			const row = document.createElement('tr');
-			const cell = document.createElement('td');
-			const colorBox = document.createElement('div');
-
-			cell.textContent = `Color ${index + 1}`;
-			colorBox.classList.add('color-box');
-			colorBox.style.backgroundColor = item.cssStrings.hexCSSString;
-
-			row.appendChild(colorBox);
-			row.appendChild(cell);
-			table.appendChild(row);
-		});
-
-		fragment.appendChild(table);
-
-		return fragment as unknown as HTMLElement;
 	}
 
 	private createPaletteObject(
@@ -184,9 +173,9 @@ export class IDBManager implements IDBManagerInterface {
 		storeName: keyof PaletteSchema,
 		key: string
 	): Promise<void | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			if (!(await this.ensureEntryExists(storeName, key))) {
-				if (this.loggingMode.warnings) {
+				if (this.logMode.warnings) {
 					log.warn(`Entry with key ${key} not found.`);
 				}
 
@@ -210,7 +199,7 @@ export class IDBManager implements IDBManagerInterface {
 		storeName: keyof PaletteSchema,
 		keys: string[]
 	): Promise<void | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const db = await this.getDB();
 			const store = db
 				.transaction(storeName, 'readwrite')
@@ -234,10 +223,21 @@ export class IDBManager implements IDBManagerInterface {
 	}
 
 	public async getCurrentPaletteID(): Promise<number> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const db = await this.getDB();
 			const settings = await db.get(
-				this.getStoreName('SETTINGS'),
+				/*
+				private getStoreName(storeKey: keyof typeof this.storeNames): string {
+					const storeName = this.storeNames[storeKey];
+
+					if (!storeName) {
+						throw new Error(`[getStoreName()]: Invalid store key: ${storeKey}`);
+					}
+
+					return storeName;
+				}
+				*/
+				this.storeNames['SETTINGS'],
 				this.getDefaultKey('APP_SETTINGS')
 			);
 
@@ -252,23 +252,30 @@ export class IDBManager implements IDBManagerInterface {
 		if (this.cache.settings) return this.cache.settings;
 
 		const settings = await this.getSettings();
+
 		if (settings) this.cache.settings = settings;
+
 		return settings;
 	}
 
 	public async getCustomColor(): Promise<HSL | null> {
-		const key = this.resolveKey('CUSTOM_COLOR');
-		const storeName = this.resolveStoreName('CUSTOM_COLOR');
+		const key = this.defaultKeys['CUSTOM_COLOR'];
+		const storeName = this.storeNames['CUSTOM_COLOR'];
 
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const db = await this.getDB();
 			const entry = await db.get(storeName, key);
 
 			if (!entry?.color) return null;
 
 			this.cache.customColor = entry.color;
+
 			return this.createMutationLogger(entry.color, storeName);
 		}, 'IDBManager.getCustomColor(): Error fetching custom color');
+	}
+
+	public async getDB(): Promise<PaletteDB> {
+		return this.dbPromise;
 	}
 
 	public getLoggedObject<T extends object>(
@@ -283,7 +290,7 @@ export class IDBManager implements IDBManagerInterface {
 	}
 
 	public async getNextTableID(): Promise<string | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const settings = await this.getSettings();
 			const lastTableID = settings.lastTableID ?? 0;
 			const nextID = lastTableID + 1;
@@ -298,7 +305,7 @@ export class IDBManager implements IDBManagerInterface {
 	}
 
 	public async getNextPaletteID(): Promise<number | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const currentID = await this.getCurrentPaletteID();
 			const newID = currentID + 1;
 
@@ -309,10 +316,10 @@ export class IDBManager implements IDBManagerInterface {
 	}
 
 	public async getSettings(): Promise<Settings> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const db = await this.getDB();
 			const settings = await db.get(
-				this.getStoreName('SETTINGS'),
+				this.storeNames['SETTINGS'],
 				this.getDefaultKey('APP_SETTINGS')
 			);
 
@@ -344,27 +351,8 @@ export class IDBManager implements IDBManagerInterface {
 		return db.transaction(storeName, mode).objectStore(storeName);
 	}
 
-	public async renderPalette(tableId: string): Promise<void | null> {
-		return this.handleAsync(async () => {
-			const storedPalette = await this.getTable(tableId);
-			const paletteRow = document.getElementById('palette-row');
-
-			if (!storedPalette)
-				throw new Error(`Palette ${tableId} not found.`);
-			if (!paletteRow) throw new Error('Palette row element not found.');
-
-			paletteRow.innerHTML = '';
-
-			const tableElement = this.createPaletteTable(storedPalette);
-
-			paletteRow.appendChild(tableElement);
-
-			if (!this.mode.quiet) log.info(`Rendered palette ${tableId}.`);
-		}, 'IDBManager.renderPalette(): Error rendering palette');
-	}
-
 	public async resetDatabase(): Promise<void | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const db = await this.getDB();
 			const availableStores = Array.from(db.objectStoreNames);
 			const expectedStores = Object.values(this.storeNames);
@@ -384,8 +372,8 @@ export class IDBManager implements IDBManagerInterface {
 				await tx.done;
 
 				const settingsStore = db
-					.transaction(this.getStoreName('SETTINGS'), 'readwrite')
-					.objectStore(this.getStoreName('SETTINGS'));
+					.transaction(this.storeNames['SETTINGS'], 'readwrite')
+					.objectStore(this.storeNames['SETTINGS']);
 				await settingsStore.put(
 					this.defaultSettings,
 					this.getDefaultKey('APP_SETTINGS')
@@ -398,7 +386,7 @@ export class IDBManager implements IDBManagerInterface {
 	}
 
 	public async deleteDatabase(): Promise<void> {
-		await this.handleAsync(async () => {
+		await this.errorUtils.handleAsync(async () => {
 			const dbName = 'paletteDB';
 			const dbExists = await new Promise<boolean>(resolve => {
 				const request = indexedDB.open(dbName);
@@ -424,7 +412,7 @@ export class IDBManager implements IDBManagerInterface {
 					);
 				};
 				deleteRequest.onblocked = () => {
-					if (this.loggingMode.warnings)
+					if (this.logMode.warnings)
 						log.warn(
 							`Delete operation blocked. Ensure no open connections to "${dbName}".`
 						);
@@ -446,9 +434,9 @@ export class IDBManager implements IDBManagerInterface {
 
 	// *DEV-NOTE* add this method to docs
 	public async resetPaletteID(): Promise<void | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const db = await this.getDB();
-			const storeName = this.getStoreName('SETTINGS');
+			const storeName = this.storeNames['SETTINGS'];
 			const key = this.getDefaultKey('APP_SETTINGS');
 			const settings = await db.get(storeName, key);
 
@@ -470,19 +458,26 @@ export class IDBManager implements IDBManagerInterface {
 		data: T,
 		oldValue?: T
 	): Promise<void | null> {
-		return this.handleAsync(async () => {
-			await this.withStore(storeName, 'readwrite', async store => {
-				await store.put({ key, ...data });
+		return this.errorUtils.handleAsync(async () => {
+			const db = await this.getDB();
 
-				log.mutation({
-					timestamp: new Date().toISOString(),
-					key,
-					action: 'update',
-					newValue: data,
-					oldValue: oldValue || null,
-					origin: 'saveData'
-				});
-			});
+			await this.storeUtils.withStore(
+				db,
+				storeName,
+				'readwrite',
+				async store => {
+					await store.put({ key, ...data });
+
+					log.mutation({
+						timestamp: new Date().toISOString(),
+						key,
+						action: 'update',
+						newValue: data,
+						oldValue: oldValue || null,
+						origin: 'saveData'
+					});
+				}
+			);
 		}, 'IDBManager.saveData(): Error saving data');
 	}
 
@@ -490,7 +485,7 @@ export class IDBManager implements IDBManagerInterface {
 		id: string,
 		newPalette: StoredPalette
 	): Promise<void | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const store = await this.getStore('tables', 'readwrite');
 			const paletteToSave: StoredPalette = {
 				tableID: newPalette.tableID,
@@ -513,7 +508,7 @@ export class IDBManager implements IDBManagerInterface {
 		limitGray: boolean,
 		limitLight: boolean
 	): Promise<Palette | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const newPalette = this.createPaletteObject(
 				type,
 				items,
@@ -541,10 +536,10 @@ export class IDBManager implements IDBManagerInterface {
 	}
 
 	public async saveSettings(newSettings: Settings): Promise<void | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			await this.saveData('settings', 'appSettings', newSettings);
 
-			if (!this.mode.quiet && this.loggingMode.info)
+			if (!this.mode.quiet && this.logMode.info)
 				log.info('Settings updated');
 		}, 'IDBManager.saveSettings(): Error saving settings');
 	}
@@ -554,7 +549,7 @@ export class IDBManager implements IDBManagerInterface {
 		entryIndex: number,
 		newEntry: PaletteItem
 	): Promise<void | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			if (!(await this.ensureEntryExists('tables', tableID))) {
 				throw new Error(`Palette ${tableID} not found.`);
 			}
@@ -571,11 +566,11 @@ export class IDBManager implements IDBManagerInterface {
 					throw new Error(
 						`Entry ${entryIndex} not found in palette ${tableID}.`
 					);
-				if (this.loggingMode.errors)
+				if (this.logMode.errors)
 					log.error(
 						`Entry ${entryIndex} not found in palette ${tableID}.`
 					);
-				if (!this.mode.quiet && this.loggingMode.info)
+				if (!this.mode.quiet && this.logMode.info)
 					log.warn('updateEntryInPalette: Entry not found.');
 			}
 
@@ -584,6 +579,7 @@ export class IDBManager implements IDBManagerInterface {
 			items[entryIndex] = newEntry;
 
 			await this.saveData('tables', tableID, storedPalette);
+
 			log.mutation({
 				timestamp: new Date().toISOString(),
 				key: `${tableID}-${entryIndex}]`,
@@ -593,7 +589,7 @@ export class IDBManager implements IDBManagerInterface {
 				origin: 'updateEntryInPalette'
 			});
 
-			if (!this.mode.quiet && this.loggingMode.info)
+			if (!this.mode.quiet && this.logMode.info)
 				log.info(`Entry ${entryIndex} in palette ${tableID} updated.`);
 		}, 'IDBManager.updateEntryInPalette(): Error updating entry in palette');
 	}
@@ -610,7 +606,7 @@ export class IDBManager implements IDBManagerInterface {
 		await this.dbPromise;
 
 		const db = await this.getDB();
-		const storeName = this.getStoreName('SETTINGS');
+		const storeName = this.storeNames['SETTINGS'];
 		const key = this.getDefaultKey('APP_SETTINGS');
 
 		log.info(`Initializing DB with Store Name: ${storeName}, Key: ${key}`);
@@ -640,12 +636,8 @@ export class IDBManager implements IDBManagerInterface {
 		return (await store.get(key)) !== undefined;
 	}
 
-	private async getDB(): Promise<PaletteDB> {
-		return this.dbPromise;
-	}
-
-	private getDefaultKey(key: keyof typeof this.storeNames): string {
-		const defaultKey = this.defaultKeys[key];
+	private getDefaultKey(key: keyof StoreNamesInterface): string {
+		const defaultKey = this.defaultKeys[key as keyof DefaultKeysInterface];
 
 		if (!defaultKey) {
 			throw new Error(`[getDefaultKey()]: Invalid default key: ${key}`);
@@ -654,63 +646,21 @@ export class IDBManager implements IDBManagerInterface {
 		return defaultKey;
 	}
 
-	private getStoreName(storeKey: keyof typeof this.storeNames): string {
-		const storeName = this.storeNames[storeKey];
-
-		if (!storeName) {
-			throw new Error(`[getStoreName()]: Invalid store key: ${storeKey}`);
-		}
-
-		return storeName;
-	}
-
 	private async getTable(id: string): Promise<StoredPalette | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const db = await this.getDB();
 			const result = await db.get(this.storeNames.TABLES, id);
 
 			if (!result) {
-				if (this.loggingMode.warnings)
+				if (this.logMode.warnings)
 					log.warn(`Table with ID ${id} not found.`);
 			}
 			return result;
 		}, 'IDBManager.getTable(): Error fetching table');
 	}
 
-	private async handleAsync<T>(
-		action: () => Promise<T>,
-		errorMessage: string,
-		context?: Record<string, unknown>
-	): Promise<T | null> {
-		try {
-			return await action();
-		} catch (error) {
-			if (this.loggingMode.errors) {
-				const details = context ? JSON.stringify(context) : '';
-
-				log.debug(
-					`Error: ${errorMessage}\nDetails: ${details}\n${error}`
-				);
-			}
-
-			throw error;
-		}
-	}
-
-	private resolveKey<K extends keyof typeof this.defaultKeys>(
-		key: K
-	): string {
-		return this.defaultKeys[key];
-	}
-
-	private resolveStoreName<S extends keyof typeof this.storeNames>(
-		store: S
-	): string {
-		return this.storeNames[store];
-	}
-
 	private async updateCurrentPaletteID(newID: number): Promise<void | null> {
-		return this.handleAsync(async () => {
+		return this.errorUtils.handleAsync(async () => {
 			const db = await this.getDB();
 			const tx = db.transaction('settings', 'readwrite');
 			const store = tx.objectStore('settings');
@@ -724,27 +674,5 @@ export class IDBManager implements IDBManagerInterface {
 			if (!this.mode.quiet)
 				log.info(`Current palette ID updated to ${newID}`);
 		}, 'IDBManager.updateCurrentPaletteID(): Error updating current palette ID');
-	}
-
-	private async withStore<
-		StoreName extends keyof PaletteSchema,
-		Mode extends 'readonly' | 'readwrite'
-	>(
-		storeName: StoreName,
-		mode: Mode,
-		callback: (
-			store: IDBPObjectStore<PaletteSchema, [StoreName], StoreName, Mode>
-		) => Promise<void>
-	): Promise<void> {
-		const db = await this.getDB();
-		const tx = db.transaction(storeName, mode);
-		const store = tx.objectStore(storeName);
-
-		if (!store) {
-			throw new Error(`Store "${storeName}" not found`);
-		}
-
-		await callback(store);
-		await tx.done;
 	}
 }

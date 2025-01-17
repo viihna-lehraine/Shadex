@@ -5,6 +5,7 @@ import {
 	HSL,
 	MutationLog,
 	Palette,
+	PaletteDB,
 	PaletteItem,
 	PaletteSchema,
 	Settings,
@@ -28,6 +29,12 @@ export interface AppLoggerInterface {
 	): void;
 }
 
+export interface CacheManagerInterface<T> {
+	get(key: string): T | undefined;
+	set(key: string, value: T): void;
+	clear(): void;
+}
+
 export interface IDBManagerInterface {
 	createMutationLogger<T extends object>(obj: T, key: string): T;
 	deleteEntry(
@@ -41,6 +48,7 @@ export interface IDBManagerInterface {
 	deleteDatabase(): Promise<void>;
 	getCustomColor(): Promise<HSL | null>;
 	getCurrentPaletteID(): Promise<number>;
+	getDB(): Promise<PaletteDB>;
 	getLoggedObject<T extends object>(obj: T | null, key: string): T | null;
 	getNextTableID(): Promise<string | null>;
 	getNextPaletteID(): Promise<number | null>;
@@ -57,7 +65,6 @@ export interface IDBManagerInterface {
 	): Promise<
 		IDBPObjectStore<PaletteSchema, [StoreName], StoreName, 'readwrite'>
 	>;
-	renderPalette(tableId: string): Promise<void | null>;
 	resetDatabase(): Promise<void | null>;
 	resetPaletteID(): Promise<void | null>;
 	updateEntryInPalette(
@@ -87,4 +94,14 @@ export interface IDBManagerInterface {
 
 export interface MutationTrackerInterface {
 	persistMutation(data: MutationLog): Promise<void>;
+}
+
+export interface UIManagerInterface {
+	addPaletteToHistory(palette: Palette): void;
+	applyCustomColor(): HSL;
+	applyFirstColorToUI(color: HSL): HSL;
+	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
+	createPaletteTable(palette: StoredPalette): HTMLElement;
+	getID(): number;
+	renderPalette(tableId: string): Promise<void | null>;
 }

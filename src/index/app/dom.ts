@@ -1,13 +1,6 @@
 // File: src/index/app/dom.js
 
-import { ColorSpace, HSL, Palette, UIElements } from '../index.js';
-
-export interface DOMBaseFnInterface {
-	applyFirstColorToUI(color: HSL): HSL;
-	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
-	defineUIElements(): UIElements;
-	initializeUI: () => Promise<void>;
-}
+import { ColorSpace, Palette } from '../index.js';
 
 export interface DOMEventsInterface {
 	addEventListener<K extends keyof HTMLElementEventMap>(
@@ -26,11 +19,6 @@ export interface DOMExportPaletteFnInterface {
 	asXML(palette: Palette): void;
 }
 
-export interface DOMHistoryFnInterface {
-	addPalette(palette: Palette): void;
-	renderPalette(displayFormat: ColorSpace): void;
-}
-
 export interface DOMValidateFnInterface {
 	elements(): void;
 }
@@ -46,12 +34,7 @@ export interface DOMFnEventsInterface {
 }
 
 export interface DOMFnMasterInterface {
-	applyFirstColorToUI(color: HSL): HSL;
-	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
-	defineUIElements(): UIElements;
-	initializeUI: () => Promise<void>;
 	events: DOMFnEventsInterface;
 	exportPalette: DOMExportPaletteFnInterface;
-	history: DOMHistoryFnInterface;
 	validate: DOMValidateFnInterface;
 }

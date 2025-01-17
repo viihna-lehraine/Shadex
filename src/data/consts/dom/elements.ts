@@ -16,6 +16,7 @@ const applyCustomColorButton = getElement<HTMLButtonElement>(
 const clearCustomColorButton = getElement<HTMLButtonElement>(
 	'clear-custom-color-button'
 );
+const colorBox1 = getElement<HTMLDivElement>('color-box-1');
 const customColorDisplay = getElement<HTMLSpanElement>('custom-color-display');
 const customColorInput = getElement<HTMLInputElement>('custom-color-input');
 const customColorMenu = getElement<HTMLDivElement>('custom-color-menu');
@@ -78,6 +79,7 @@ export const domElements: DOMElementData = {
 	advancedMenuContent,
 	applyCustomColorButton,
 	clearCustomColorButton,
+	colorBox1,
 	customColorDisplay,
 	customColorInput,
 	customColorMenu,

@@ -22,6 +22,7 @@ export type {
 	CommonTransformFnMasterInterface,
 	CommonUtilsFnColor,
 	CommonUtilsFnConversion,
+	CommonUtilsFnErrors,
 	CommonUtilsFnMasterInterface,
 	CommonUtilsFnPalette,
 	CommonUtilsFnRandom
@@ -38,10 +39,8 @@ export type {
 	DOMData,
 	DOMElementData,
 	DOM_ID_Data,
-	EnvironmentData,
 	IDBDefaultsData,
 	LimitsData,
-	LoggingData,
 	ModeData,
 	PaletteDefaultsData,
 	PaletteRangesData,
