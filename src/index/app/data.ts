@@ -74,6 +74,9 @@ export interface DOMElementData {
 	developerMenu: HTMLDivElement | null;
 	developerMenuButton: HTMLButtonElement | null;
 	enableAlphaCheckbox: HTMLInputElement | null;
+	exportPaletteFormatOptions: HTMLSelectElement | null;
+	exportPaletteButton: HTMLButtonElement | null;
+	exportPaletteInput: HTMLInputElement | null;
 	generateButton: HTMLButtonElement | null;
 	helpMenu: HTMLDivElement | null;
 	helpMenuButton: HTMLButtonElement | null;
@@ -81,6 +84,9 @@ export interface DOMElementData {
 	historyMenu: HTMLDivElement | null;
 	historyMenuButton: HTMLButtonElement | null;
 	historyMenuContent: HTMLDivElement | null;
+	importExportMenu: HTMLDivElement | null;
+	importExportMenuButton: HTMLButtonElement | null;
+	importPaletteInput: HTMLInputElement | null;
 	limitDarknessCheckbox: HTMLInputElement | null;
 	limitGraynessCheckbox: HTMLInputElement | null;
 	limitLightnessCheckbox: HTMLInputElement | null;
@@ -114,6 +120,9 @@ export interface DOM_ID_Data {
 	developerMenu: string;
 	developerMenuButton: string;
 	enableAlphaCheckbox: string;
+	exportPaletteButton: string;
+	exportPaletteFormatOptions: string;
+	exportPaletteInput: string;
 	generateButton: string;
 	helpMenu: string;
 	helpMenuButton: string;
@@ -121,6 +130,9 @@ export interface DOM_ID_Data {
 	historyMenu: string;
 	historyMenuButton: string;
 	historyMenuContent: string;
+	importExportMenu: string;
+	importExportMenuButton: string;
+	importPaletteInput: string;
 	limitDarknessCheckbox: string;
 	limitGraynessCheckbox: string;
 	limitLightnessCheckbox: string;

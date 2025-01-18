@@ -34,6 +34,13 @@ const developerMenuButton = getElement<HTMLButtonElement>(
 const enableAlphaCheckbox = getElement<HTMLInputElement>(
 	'enable-alpha-checkbox'
 );
+const exportPaletteButton = getElement<HTMLButtonElement>(
+	'export-palette-button'
+);
+const exportPaletteFormatOptions = getElement<HTMLSelectElement>(
+	'export-palette-format-options'
+);
+const exportPaletteInput = getElement<HTMLInputElement>('export-palette-input');
 const generateButton = getElement<HTMLButtonElement>('generate-button');
 const helpMenu = getElement<HTMLDivElement>('help-menu');
 const helpMenuButton = getElement<HTMLButtonElement>('help-menu-button');
@@ -41,6 +48,11 @@ const helpMenuContent = getElement<HTMLDivElement>('help-menu-content');
 const historyMenu = getElement<HTMLDivElement>('history-menu');
 const historyMenuButton = getElement<HTMLButtonElement>('history-menu-button');
 const historyMenuContent = getElement<HTMLDivElement>('history-menu-content');
+const importExportMenu = getElement<HTMLDivElement>('import-export-menu');
+const importExportMenuButton = getElement<HTMLButtonElement>(
+	'import-export-menu-button'
+);
+const importPaletteInput = getElement<HTMLInputElement>('import-palette-input');
 const limitDarknessCheckbox = getElement<HTMLInputElement>(
 	'limit-darkness-checkbox'
 );
@@ -89,6 +101,9 @@ export const domElements: DOMElementData = {
 	developerMenu,
 	developerMenuButton,
 	enableAlphaCheckbox,
+	exportPaletteButton,
+	exportPaletteFormatOptions,
+	exportPaletteInput,
 	generateButton,
 	helpMenu,
 	helpMenuButton,
@@ -96,6 +111,9 @@ export const domElements: DOMElementData = {
 	historyMenu,
 	historyMenuButton,
 	historyMenuContent,
+	importExportMenu,
+	importExportMenuButton,
+	importPaletteInput,
 	limitDarknessCheckbox,
 	limitGraynessCheckbox,
 	limitLightnessCheckbox,

@@ -176,7 +176,7 @@ export class IDBManager implements IDBManagerInterface {
 		return this.errorUtils.handleAsync(async () => {
 			if (!(await this.ensureEntryExists(storeName, key))) {
 				if (this.logMode.warnings) {
-					log.warn(`Entry with key ${key} not found.`);
+					log.warning(`Entry with key ${key} not found.`);
 				}
 
 				return;
@@ -226,17 +226,6 @@ export class IDBManager implements IDBManagerInterface {
 		return this.errorUtils.handleAsync(async () => {
 			const db = await this.getDB();
 			const settings = await db.get(
-				/*
-				private getStoreName(storeKey: keyof typeof this.storeNames): string {
-					const storeName = this.storeNames[storeKey];
-
-					if (!storeName) {
-						throw new Error(`[getStoreName()]: Invalid store key: ${storeKey}`);
-					}
-
-					return storeName;
-				}
-				*/
 				this.storeNames['SETTINGS'],
 				this.getDefaultKey('APP_SETTINGS')
 			);
@@ -359,7 +348,7 @@ export class IDBManager implements IDBManagerInterface {
 
 			for (const storeName of expectedStores) {
 				if (!availableStores.includes(storeName)) {
-					log.warn(
+					log.warning(
 						`Object store "${storeName}" not found in IndexedDB.`
 					);
 					continue;
@@ -413,7 +402,7 @@ export class IDBManager implements IDBManagerInterface {
 				};
 				deleteRequest.onblocked = () => {
 					if (this.logMode.warnings)
-						log.warn(
+						log.warning(
 							`Delete operation blocked. Ensure no open connections to "${dbName}".`
 						);
 
@@ -427,7 +416,7 @@ export class IDBManager implements IDBManagerInterface {
 				};
 			} else {
 				if (!this.mode.quiet)
-					log.warn(`Database "${dbName}" does not exist.`);
+					log.warning(`Database "${dbName}" does not exist.`);
 			}
 		}, 'IDBManager.deleteDatabase(): Error deleting database');
 	}
@@ -468,14 +457,23 @@ export class IDBManager implements IDBManagerInterface {
 				async store => {
 					await store.put({ key, ...data });
 
-					log.mutation({
-						timestamp: new Date().toISOString(),
-						key,
-						action: 'update',
-						newValue: data,
-						oldValue: oldValue || null,
-						origin: 'saveData'
-					});
+					log.mutation(
+						{
+							timestamp: new Date().toISOString(),
+							key,
+							action: 'update',
+							newValue: data,
+							oldValue: oldValue || null,
+							origin: 'saveData'
+						},
+						mutationLog => {
+							console.log(
+								'Mutation log triggered for saveData:',
+								mutationLog,
+								'IDBManager.saveData()'
+							);
+						}
+					);
 				}
 			);
 		}, 'IDBManager.saveData(): Error saving data');
@@ -571,7 +569,7 @@ export class IDBManager implements IDBManagerInterface {
 						`Entry ${entryIndex} not found in palette ${tableID}.`
 					);
 				if (!this.mode.quiet && this.logMode.info)
-					log.warn('updateEntryInPalette: Entry not found.');
+					log.warning('updateEntryInPalette: Entry not found.');
 			}
 
 			const oldEntry = items[entryIndex];
@@ -580,14 +578,21 @@ export class IDBManager implements IDBManagerInterface {
 
 			await this.saveData('tables', tableID, storedPalette);
 
-			log.mutation({
-				timestamp: new Date().toISOString(),
-				key: `${tableID}-${entryIndex}]`,
-				action: 'update',
-				newValue: newEntry,
-				oldValue: oldEntry,
-				origin: 'updateEntryInPalette'
-			});
+			log.mutation(
+				{
+					timestamp: new Date().toISOString(),
+					key: `${tableID}-${entryIndex}]`,
+					action: 'update',
+					newValue: newEntry,
+					oldValue: oldEntry,
+					origin: 'updateEntryInPalette'
+				},
+				mutationLog =>
+					console.log(
+						`Mutation log trigger for updateEntryInPalette:`,
+						mutationLog
+					)
+			);
 
 			if (!this.mode.quiet && this.logMode.info)
 				log.info(`Entry ${entryIndex} in palette ${tableID} updated.`);
@@ -653,7 +658,7 @@ export class IDBManager implements IDBManagerInterface {
 
 			if (!result) {
 				if (this.logMode.warnings)
-					log.warn(`Table with ID ${id} not found.`);
+					log.warning(`Table with ID ${id} not found.`);
 			}
 			return result;
 		}, 'IDBManager.getTable(): Error fetching table');

@@ -481,7 +481,7 @@ function colorToColorString(color: Color): ColorString {
 		} else if (logMode.errors) {
 			log.error(`Unsupported format: ${clonedColor.format}`);
 		} else if (!mode.quiet && logMode.warnings) {
-			log.warn('Failed to convert to color string.');
+			log.warning('Failed to convert to color string.');
 		}
 
 		return data.defaults.colorStrings.hsl;
@@ -519,7 +519,7 @@ function getAlphaFromHex(hex: string): number {
 		else if (logMode.errors)
 			log.error(`Invalid hex color: ${hex}. Expected format #RRGGBBAA`);
 		else if (!mode.quiet && logMode.warnings)
-			log.warn('Failed to parse alpha from hex color.');
+			log.warning('Failed to parse alpha from hex color.');
 	}
 
 	const alphaHex = hex.slice(-2);
@@ -670,7 +670,7 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 				if (mode.gracefulErrors) {
 					if (logMode.errors) log.error(message);
 					else if (!mode.quiet && logMode.warnings)
-						log.warn(`Failed to parse color: ${message}`);
+						log.warning(`Failed to parse color: ${message}`);
 				} else {
 					throw new Error(message);
 				}
@@ -699,7 +699,7 @@ function parseComponents(value: string, count: number): number[] {
 				throw new Error(`Expected ${count} components.`);
 			else if (logMode.errors) {
 				if (!mode.quiet && logMode.warnings)
-					log.warn(`Expected ${count} components.`);
+					log.warning(`Expected ${count} components.`);
 
 				return [];
 			}

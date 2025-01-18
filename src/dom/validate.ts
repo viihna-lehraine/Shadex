@@ -22,7 +22,7 @@ function validateElements(): void {
 
 	if (missingElements.length) {
 		if (logMode.warnings)
-			log.warn(
+			log.warning(
 				`Some DOM elements are missing (${missingElements.length}): ${missingElements.join(
 					', '
 				)}`

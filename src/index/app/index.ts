@@ -50,12 +50,11 @@ export type {
 	TimeoutsData
 } from './data.js';
 export type {
-	DOMBaseFnInterface,
 	DOMEventsInterface,
-	DOMExportPaletteFnInterface,
+	DOMFileUtilsFnInterface,
 	DOMFnEventsInterface,
 	DOMFnMasterInterface,
-	DOMHistoryFnInterface,
+	DOMParseFnInterface,
 	DOMValidateFnInterface
 } from './dom.js';
 export type {
@@ -71,8 +70,15 @@ export type {
 	PaletteCommon_Utils,
 	PaletteCommon_Utils_Adjust,
 	PaletteCommon_Utils_Probability,
+	PaletteDeserializeFnInterface,
 	PaletteFnMasterInterface,
 	PaletteGenerateFnInterface,
+	PaletteFnIOInterface,
+	PaletteSerializeFnInterface,
 	PaletteStartFnInterface
 } from './palette.js';
-export type { UIFnBaseInterface, UIFnMasterInterface } from './ui.js';
+export type {
+	UIFnBaseInterface,
+	UIFnMasterInterface,
+	UIFnIOInterface
+} from './ui.js';

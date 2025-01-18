@@ -1,7 +1,5 @@
 // File: src/index/app/dom.js
 
-import { ColorSpace, Palette } from '../index.js';
-
 export interface DOMEventsInterface {
 	addEventListener<K extends keyof HTMLElementEventMap>(
 		id: string,
@@ -12,11 +10,14 @@ export interface DOMEventsInterface {
 	initializeEventListeners(): void;
 }
 
-export interface DOMExportPaletteFnInterface {
-	asCSS(palette: Palette, colorSpace: ColorSpace): void;
-	asJSON(palette: Palette): void;
-	asPNG(palette: Palette, colorSpace: ColorSpace, paletteName?: string): void;
-	asXML(palette: Palette): void;
+export interface DOMFileUtilsFnInterface {
+	download(data: string, filename: string, type: string): void;
+	readFile(file: File): Promise<string>;
+}
+
+export interface DOMParseFnInterface {
+	checkbox(id: string): boolean | void;
+	paletteExportFormat(): string | void;
 }
 
 export interface DOMValidateFnInterface {
@@ -35,6 +36,7 @@ export interface DOMFnEventsInterface {
 
 export interface DOMFnMasterInterface {
 	events: DOMFnEventsInterface;
-	exportPalette: DOMExportPaletteFnInterface;
+	fileUtils: DOMFileUtilsFnInterface;
+	parse: DOMParseFnInterface;
 	validate: DOMValidateFnInterface;
 }

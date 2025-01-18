@@ -1,8 +1,14 @@
 // File: src/dom/events/base.js
 
-import { DOMEventsInterface, HSL, PaletteOptions } from '../index/index.js';
+import {
+	DOMEventsInterface,
+	HSL,
+	IOFormat,
+	PaletteOptions
+} from '../index/index.js';
 import { core, superUtils, utils } from '../common/index.js';
 import { data } from '../data/index.js';
+import { parse } from './parse.js';
 import { IDBManager } from '../classes/idb/index.js';
 import { log } from '../classes/logger/index.js';
 import { mode } from '../data/mode/index.js';
@@ -28,7 +34,7 @@ function addEventListener<K extends keyof HTMLElementEventMap>(
 		element.addEventListener(eventType, callback);
 	} else if (logMode.warnings) {
 		if (mode.debug && logMode.warnings && logMode.verbosity > 2)
-			log.warn(`Element with id "${id}" not found.`);
+			log.warning(`Element with id "${id}" not found.`);
 	}
 }
 
@@ -91,7 +97,7 @@ function initializeEventListeners(): void {
 			}
 		} else {
 			if (logMode.warnings)
-				log.warn(`Element with id "${id}" not found.`);
+				log.warning(`Element with id "${id}" not found.`);
 		}
 	};
 
@@ -178,7 +184,7 @@ function initializeEventListeners(): void {
 			// only allow if application is in development mode
 			if (mode.environment === 'prod') {
 				if (logMode.warnings) {
-					log.warn('Cannot delete database in production mode.');
+					log.warning('Cannot delete database in production mode.');
 				}
 
 				return;
@@ -216,7 +222,7 @@ function initializeEventListeners(): void {
 			if (!mode.quiet && logMode.clicks)
 				log.info('desaturateButton clicked');
 
-			domUtils.desaturateColor(selectedColor);
+			uiManager.desaturateColor(selectedColor);
 		}
 	);
 
@@ -240,6 +246,23 @@ function initializeEventListeners(): void {
 		}
 	);
 
+	addEventListener(
+		domIDs.exportPaletteButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			const format = parse.paletteExportFormat() as IOFormat;
+
+			if (mode.debug && logMode.info && logMode.verbosity > 1)
+				log.info(
+					`Export Palette Button click event: Export format selected: ${format}`
+				);
+
+			uiManager.handleExport(format);
+		}
+	);
+
 	addEventListener(domIDs.generateButton, 'click', async (e: MouseEvent) => {
 		e.preventDefault();
 
@@ -251,7 +274,7 @@ function initializeEventListeners(): void {
 			limitDarkness,
 			limitGrayness,
 			limitLightness
-		} = domUtils.pullParamsFromUI();
+		} = uiManager.pullParamsFromUI();
 
 		if (logMode.info && logMode.verbosity > 1)
 			log.info(
@@ -314,6 +337,30 @@ function initializeEventListeners(): void {
 			uiElements.historyMenu?.setAttribute('aria-hidden', 'false');
 		}
 	);
+
+	addEventListener(
+		domIDs.importExportMenuButton,
+		'click',
+		async (e: MouseEvent) => {
+			e.preventDefault();
+
+			uiElements.importExportMenu?.classList.remove('hidden');
+			uiElements.importExportMenu?.setAttribute('aria-hidden', 'false');
+		}
+	);
+
+	addEventListener(domIDs.importPaletteInput, 'change', async (e: Event) => {
+		const input = e.target as HTMLInputElement;
+
+		if (input.files && input.files.length > 0) {
+			const file = input.files[0];
+
+			// *DEV-NOTE* implement a way to determine whether file describes CSS, JSON, or XML import
+			const format = 'JSON';
+
+			await uiManager.handleImport(file, format);
+		}
+	});
 
 	addEventListener(
 		domIDs.resetDatabaseButton,
@@ -392,7 +439,7 @@ function initializeEventListeners(): void {
 			? parseInt(uiElements.selectedColorOption.value, 10)
 			: 0;
 
-		domUtils.saturateColor(selectedColor);
+		uiManager.saturateColor(selectedColor);
 	});
 
 	window.addEventListener('click', async (e: MouseEvent) => {
@@ -432,6 +479,14 @@ function initializeEventListeners(): void {
 			if (e.target === uiElements.historyMenu) {
 				uiElements.historyMenu.classList.add('hidden');
 				uiElements.historyMenu.setAttribute('aria-hidden', 'true');
+			}
+	});
+
+	window.addEventListener('click', async (e: MouseEvent) => {
+		if (uiElements.importExportMenu)
+			if (e.target === uiElements.importExportMenu) {
+				uiElements.importExportMenu.classList.add('hidden');
+				uiElements.importExportMenu.setAttribute('aria-hidden', 'true');
 			}
 	});
 }

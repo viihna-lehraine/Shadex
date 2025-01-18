@@ -17,6 +17,9 @@ const desaturateButton = 'desaturate-button';
 const developerMenu = 'developer-menu';
 const developerMenuButton = 'developer-menu-button';
 const enableAlphaCheckbox = 'enable-alpha-checkbox';
+const exportPaletteButton = 'export-palette-button';
+const exportPaletteFormatOptions = 'export-palette-format-options';
+const exportPaletteInput = 'export-palette-input';
 const generateButton = 'generate-button';
 const helpMenu = 'help-menu';
 const helpMenuButton = 'help-menu-button';
@@ -24,6 +27,9 @@ const helpMenuContent = 'help-menu-content';
 const historyMenu = 'history-menu';
 const historyMenuButton = 'history-menu-button';
 const historyMenuContent = 'history-menu-content';
+const importExportMenu = 'import-export-menu';
+const importExportMenuButton = 'import-export-menu-button';
+const importPaletteInput = 'import-palette-input';
 const limitDarknessCheckbox = 'limit-darkness-checkbox';
 const limitGraynessCheckbox = 'limit-grayness-checkbox';
 const limitLightnessCheckbox = 'limit-lightness-checkbox';
@@ -56,6 +62,9 @@ export const domIDs: DOM_ID_Data = {
 	developerMenu,
 	developerMenuButton,
 	enableAlphaCheckbox,
+	exportPaletteButton,
+	exportPaletteFormatOptions,
+	exportPaletteInput,
 	generateButton,
 	helpMenu,
 	helpMenuButton,
@@ -63,6 +72,9 @@ export const domIDs: DOM_ID_Data = {
 	historyMenu,
 	historyMenuButton,
 	historyMenuContent,
+	importExportMenu,
+	importExportMenuButton,
+	importPaletteInput,
 	limitDarknessCheckbox,
 	limitGraynessCheckbox,
 	limitLightnessCheckbox,

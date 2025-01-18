@@ -35,12 +35,12 @@ export type {
 	DefaultColorStringsData,
 	Defaults,
 	DOMEventsInterface,
-	DOMExportPaletteFnInterface,
+	DOMFileUtilsFnInterface,
 	DOMFnEventsInterface,
 	DOMFnMasterInterface,
-	DOMHistoryFnInterface,
 	DOMData,
 	DOMElementData,
+	DOMParseFnInterface,
 	DOMValidateFnInterface,
 	DOM_ID_Data,
 	GenPaletteArgs,
@@ -59,15 +59,19 @@ export type {
 	PaletteCommon_Utils_Adjust,
 	PaletteCommon_Utils_Probability,
 	PaletteDefaultsData,
+	PaletteDeserializeFnInterface,
+	PaletteFnIOInterface,
 	PaletteFnMasterInterface,
 	PaletteGenerateFnInterface,
 	PaletteRangesData,
+	PaletteSerializeFnInterface,
 	PaletteStartFnInterface,
 	ProbabilitiesData,
 	SetsData,
 	ThresholdsData,
 	TimeoutsData,
 	UIFnBaseInterface,
+	UIFnIOInterface,
 	UIFnMasterInterface
 } from './app/index.js';
 export type {
@@ -155,8 +159,10 @@ export type { DBMasterFnInterface, StoreUtilsFnInterface } from './db.js';
 export type {
 	ColorInputElement,
 	GenButtonArgs,
+	IOFormat,
 	MakePaletteBox
 } from './dom.js';
+export type { AsyncLoggerFactory, SyncLoggerFactory } from './factories.js';
 export type {
 	MutationLog,
 	PaletteDB,
@@ -170,6 +176,7 @@ export type {
 	PaletteItem,
 	PaletteItemUnbranded,
 	PaletteOptions,
+	PaletteType,
 	PaletteUnbranded
 } from './palette.js';
 export type {

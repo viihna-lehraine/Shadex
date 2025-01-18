@@ -137,3 +137,14 @@ export interface PaletteOptions {
 	limitGrayness: boolean;
 	limitLightness: boolean;
 }
+
+export type PaletteType =
+	| 'analogous'
+	| 'complementary'
+	| 'diadic'
+	| 'hexadic'
+	| 'monochromatic'
+	| 'random'
+	| 'split-complementary'
+	| 'triadic'
+	| 'tetradic';

@@ -202,6 +202,9 @@
 										<button id="custom-color-menu-button" class="modal-button" type="button" aria-label="Open Custom Color Menu">
 											Use Custom Color
 										</button>
+										<button id="import-export-menu-button" class="modal-button" type="button" aria-label="Open Import/Export Menu">
+											Import/Export
+										</button>
 										<button id="history-menu-button" class="modal-button" type="button" aria-label="Open Palette History Menu">
 											History
 										</button>
@@ -300,6 +303,47 @@
 								Palette History
 							</legend>
 							<div id="palette-history-list" class="palette-list hidden" aria-hidden="true">
+							</div>
+						</fieldset>
+					</section>
+				</div>
+			</div>
+
+			<!-- IMPORT/EXPORT MENU -->
+			<div id="import-export-menu" class="modal hidden padding-md" aria-hidden="true">
+				<div id="import-export-menu-content" class="modal-menu-content">
+					<section id="import-export-menu-section" class="bg-color-3 border-none">
+						<fieldset aria-labelledby="import-export-legend">
+							<legend id="import-export-legend" class="sub-menu-title">
+								Import/Export
+							</legend>
+							<div id="import-export-content">
+								<div>
+									<legend for="import-palette-sub-menu" class="sub-menu-title">
+										Import Palette
+									</legend>
+									<div id="import-palette-sub-menu" aria-labelledby="import-palette-sub-menu">
+										<input type="file" id="import-palette-input" accept=".json"/>
+									</div>
+								</div>
+								<div>
+									<legend for="export-palette-sub-menu">
+										Export Palette
+									</legend>
+									<div id="export-palette-sub-menu" aria-labelledby="export-palette-sub-menu">
+										<label for="export-palette-format-options">
+											Format
+										</label>
+										<select id="export-palette-format-options" aria-label="Select Export Format">
+											<option value="1">JSON</option>
+											<option value="2">CSS</option>
+											<option value="3">XML</option>
+										</select>
+										<button id="export-palette-button" type="button">
+											Export
+										</button>
+									</div>
+								</div>
 							</div>
 						</fieldset>
 					</section>

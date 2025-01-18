@@ -332,6 +332,7 @@ export interface CommonUtilsFnMasterInterface {
 // ******** Final Bundle ********
 
 export interface CommonFnMasterInterface {
+	convert: CommonConvertFnBase;
 	core: CommonCoreFnMasterInterface;
 	helpers: CommonHelpersFnMasterInterface;
 	superUtils: CommonSuperUtilsFnMasterInterface;

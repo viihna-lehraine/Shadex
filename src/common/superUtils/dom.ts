@@ -168,7 +168,7 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 		helpers.dom.showToast('Failed to convert colors.');
 
 		if (!mode.quiet && logMode.warnings)
-			log.warn('Failed to convert colors.');
+			log.warning('Failed to convert colors.');
 		else if (!mode.gracefulErrors)
 			throw new Error(`Failed to convert colors: ${error as Error}`);
 		else if (logMode.errors)

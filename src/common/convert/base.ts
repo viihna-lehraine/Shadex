@@ -605,7 +605,7 @@ function rgbToHex(rgb: RGB): Hex {
 			[clonedRGB.value.alpha].some(v => isNaN(v) || v < 0 || v > 1)
 		) {
 			if (logMode.warnings)
-				log.warn(
+				log.warning(
 					`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}\nA=${JSON.stringify(clonedRGB.value.alpha)}`
 				);
 
@@ -632,7 +632,7 @@ function rgbToHex(rgb: RGB): Hex {
 			format: 'hex' as 'hex'
 		};
 	} catch (error) {
-		if (logMode.errors) log.warn(`rgbToHex error: ${error}`);
+		if (logMode.errors) log.warning(`rgbToHex error: ${error}`);
 
 		return defaultHexBranded;
 	}

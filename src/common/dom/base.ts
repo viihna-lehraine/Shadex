@@ -13,7 +13,7 @@ function getElement<T extends HTMLElement>(id: string): T | null {
 
 	if (!element) {
 		if (logMode.warnings) {
-			log.warn(`Element with ID ${id} not found`);
+			log.warning(`Element with ID ${id} not found`);
 		}
 	}
 

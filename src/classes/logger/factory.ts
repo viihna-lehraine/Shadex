@@ -1,6 +1,10 @@
 // File: src/classes/logger/factory.ts
 
-import { MutationLog } from '../../index/index.js';
+import {
+	AsyncLoggerFactory,
+	MutationLog,
+	SyncLoggerFactory
+} from '../../index/index.js';
 import { AppLogger } from './AppLogger.js';
 import { data } from '../../data/index.js';
 
@@ -51,17 +55,25 @@ async function logAsyncError(message: string): Promise<void> {
 	appLogger.logAsync(message, 'error', debugLevel);
 }
 
-export const log = {
+async function logAsyncMutation(
+	data: MutationLog,
+	logCallback: (data: MutationLog) => void = () => {}
+): Promise<void> {
+	appLogger.logMutation(data, logCallback);
+}
+
+export const log: SyncLoggerFactory = {
 	debug: logDebug,
 	info: logInfo,
-	warn: logWarning,
+	warning: logWarning,
 	error: logError,
 	mutation: logMutation
 };
 
-export const logAsync = {
+export const logAsync: AsyncLoggerFactory = {
 	debug: logAsyncDebug,
 	info: logAsyncInfo,
-	warn: logAsyncWarning,
-	error: logAsyncError
+	warning: logAsyncWarning,
+	error: logAsyncError,
+	mutation: logAsyncMutation
 };

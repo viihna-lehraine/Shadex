@@ -11,6 +11,7 @@ import { utils } from './utils/index.js';
 export { convert, core, helpers, superUtils, transform, utils };
 
 export const common: CommonFnMasterInterface = {
+	convert,
 	core,
 	helpers,
 	superUtils,
