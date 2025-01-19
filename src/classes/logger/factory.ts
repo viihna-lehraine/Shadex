@@ -70,6 +70,8 @@ export const log: SyncLoggerFactory = {
 	mutation: logMutation
 };
 
+export const logger = log;
+
 export const logAsync: AsyncLoggerFactory = {
 	debug: logAsyncDebug,
 	info: logAsyncInfo,
@@ -77,3 +79,5 @@ export const logAsync: AsyncLoggerFactory = {
 	error: logAsyncError,
 	mutation: logAsyncMutation
 };
+
+export const asyncLogger = logAsync;

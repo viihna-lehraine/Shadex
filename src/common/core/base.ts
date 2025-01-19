@@ -6,6 +6,7 @@ import {
 	CMYK,
 	CMYKUnbranded,
 	CMYKValue,
+	CMYKValueString,
 	Color,
 	ColorSpace,
 	ColorString,
@@ -19,14 +20,20 @@ import {
 	HexComponent,
 	HexSet,
 	HexUnbranded,
+	HexValue,
+	HexValueString,
 	HSL,
 	HSLUnbranded,
 	HSLValue,
+	HSLValueString,
 	HSV,
 	HSVUnbranded,
 	HSVValue,
+	HSVValueString,
 	LAB,
 	LABUnbranded,
+	LABValue,
+	LABValueString,
 	LAB_L,
 	LAB_A,
 	LAB_B,
@@ -36,6 +43,8 @@ import {
 	RangeKeyMap,
 	RGB,
 	RGBUnbranded,
+	RGBValue,
+	RGBValueString,
 	SL,
 	SLUnbranded,
 	SLValue,
@@ -44,6 +53,8 @@ import {
 	SVValue,
 	XYZ,
 	XYZUnbranded,
+	XYZValue,
+	XYZValueString,
 	XYZ_X,
 	XYZ_Y,
 	XYZ_Z
@@ -404,8 +415,116 @@ export const brandColor: CommonCoreFnBrandColor = {
 
 // ******** SECTION 3 - Convert ********
 
+function cmykStringToValue(cmyk: CMYKValueString): CMYKValue {
+	return {
+		cyan: brand.asPercentile(parseFloat(cmyk.cyan) / 100),
+		magenta: brand.asPercentile(parseFloat(cmyk.magenta) / 100),
+		yellow: brand.asPercentile(parseFloat(cmyk.yellow) / 100),
+		key: brand.asPercentile(parseFloat(cmyk.key) / 100),
+		alpha: brand.asAlphaRange(parseFloat(cmyk.alpha))
+	};
+}
+
+function cmykValueToString(cmyk: CMYKValue): CMYKValueString {
+	return {
+		cyan: `${cmyk.cyan * 100}%`,
+		magenta: `${cmyk.magenta * 100}%`,
+		yellow: `${cmyk.yellow * 100}%`,
+		key: `${cmyk.key * 100}%`,
+		alpha: `${cmyk.alpha}`
+	};
+}
+
 function hexAlphaToNumericAlpha(hexAlpha: string): number {
 	return parseInt(hexAlpha, 16) / 255;
+}
+
+function hexStringToValue(hex: HexValueString): HexValue {
+	return {
+		hex: brand.asHexSet(hex.hex),
+		alpha: brand.asHexComponent(hex.alpha),
+		numAlpha: brand.asAlphaRange(parseFloat(hex.numAlpha))
+	};
+}
+
+function hexValueToString(hex: HexValue): HexValueString {
+	return {
+		hex: hex.hex,
+		alpha: `${hex.alpha}`,
+		numAlpha: `${hex.numAlpha}`
+	};
+}
+
+function hslStringToValue(hsl: HSLValueString): HSLValue {
+	return {
+		hue: brand.asRadial(parseFloat(hsl.hue)),
+		saturation: brand.asPercentile(parseFloat(hsl.saturation) / 100),
+		lightness: brand.asPercentile(parseFloat(hsl.lightness) / 100),
+		alpha: brand.asAlphaRange(parseFloat(hsl.alpha))
+	};
+}
+
+function hslValueToString(hsl: HSLValue): HSLValueString {
+	return {
+		hue: `${hsl.hue}°`,
+		saturation: `${hsl.saturation * 100}%`,
+		lightness: `${hsl.lightness * 100}%`,
+		alpha: `${hsl.alpha}`
+	};
+}
+
+function hsvStringToValue(hsv: HSVValueString): HSVValue {
+	return {
+		hue: brand.asRadial(parseFloat(hsv.hue)),
+		saturation: brand.asPercentile(parseFloat(hsv.saturation) / 100),
+		value: brand.asPercentile(parseFloat(hsv.value) / 100),
+		alpha: brand.asAlphaRange(parseFloat(hsv.alpha))
+	};
+}
+
+function hsvValueToString(hsv: HSVValue): HSVValueString {
+	return {
+		hue: `${hsv.hue}°`,
+		saturation: `${hsv.saturation * 100}%`,
+		value: `${hsv.value * 100}%`,
+		alpha: `${hsv.alpha}`
+	};
+}
+
+function labValueToString(lab: LABValue): LABValueString {
+	return {
+		l: `${lab.l}`,
+		a: `${lab.a}`,
+		b: `${lab.b}`,
+		alpha: `${lab.alpha}`
+	};
+}
+
+function labStringToValue(lab: LABValueString): LABValue {
+	return {
+		l: brand.asLAB_L(parseFloat(lab.l)),
+		a: brand.asLAB_A(parseFloat(lab.a)),
+		b: brand.asLAB_B(parseFloat(lab.b)),
+		alpha: brand.asAlphaRange(parseFloat(lab.alpha))
+	};
+}
+
+function rgbValueToString(rgb: RGBValue): RGBValueString {
+	return {
+		red: `${rgb.red}`,
+		green: `${rgb.green}`,
+		blue: `${rgb.blue}`,
+		alpha: `${rgb.alpha}`
+	};
+}
+
+function rgbStringToValue(rgb: RGBValueString): RGBValue {
+	return {
+		red: brand.asByteRange(parseFloat(rgb.red)),
+		green: brand.asByteRange(parseFloat(rgb.green)),
+		blue: brand.asByteRange(parseFloat(rgb.blue)),
+		alpha: brand.asAlphaRange(parseFloat(rgb.alpha))
+	};
 }
 
 function toColor(colorString: ColorString): Color {
@@ -514,11 +633,51 @@ function toCSSColorString(color: Color): string {
 	}
 }
 
+function xyzValueToString(xyz: XYZValue): XYZValueString {
+	return {
+		x: `${xyz.x}`,
+		y: `${xyz.y}`,
+		z: `${xyz.z}`,
+		alpha: `${xyz.alpha}`
+	};
+}
+
+function xyzStringToValue(xyz: XYZValueString): XYZValue {
+	return {
+		x: brand.asXYZ_X(parseFloat(xyz.x)),
+		y: brand.asXYZ_Y(parseFloat(xyz.y)),
+		z: brand.asXYZ_Z(parseFloat(xyz.z)),
+		alpha: brand.asAlphaRange(parseFloat(xyz.alpha))
+	};
+}
+
+const stringToValue = {
+	cmyk: cmykStringToValue,
+	hex: hexStringToValue,
+	hsl: hslStringToValue,
+	hsv: hsvStringToValue,
+	lab: labStringToValue,
+	rgb: rgbStringToValue,
+	xyz: xyzStringToValue
+};
+
+const valueToString = {
+	cmyk: cmykValueToString,
+	hex: hexValueToString,
+	hsl: hslValueToString,
+	hsv: hsvValueToString,
+	lab: labValueToString,
+	rgb: rgbValueToString,
+	xyz: xyzValueToString
+};
+
 export const convert: CommonCoreFnConvert = {
 	hexAlphaToNumericAlpha,
+	stringToValue,
 	toColor,
 	toColorValueRange,
-	toCSSColorString
+	toCSSColorString,
+	valueToString
 };
 
 // ******** SECTION 4 - Guards ********

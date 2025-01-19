@@ -8,20 +8,17 @@ import {
 	DOMFnMasterInterface,
 	HSL,
 	Palette,
-	PaletteFnIOInterface,
 	SL,
 	StoredPalette,
 	SV,
 	SyncLoggerFactory,
-	UIFnMasterInterface,
 	UIManagerInterface
 } from '../../index/index.js';
 import { common, core, helpers, utils } from '../../common/index.js';
 import { data } from '../../data/index.js';
 import { dom } from '../../dom/index.js';
-import { io as paletteIO } from '../../palette/io/index.js';
+import { io } from '../../io/index.js';
 import { log } from '../logger/index.js';
-import { ui } from '../../ui/index.js';
 
 export class UIManager implements UIManagerInterface {
 	private static instanceCounter = 0; // static instance ID counter
@@ -34,8 +31,7 @@ export class UIManager implements UIManagerInterface {
 	private errorUtils: CommonFnMasterInterface['utils']['errors'];
 	private conversionUtils: CommonFnMasterInterface['convert'];
 	private dom: DOMFnMasterInterface;
-	private paletteIO: PaletteFnIOInterface;
-	private ui: UIFnMasterInterface;
+	private io = io;
 
 	private elements: DataInterface['consts']['dom']['elements'];
 
@@ -54,8 +50,7 @@ export class UIManager implements UIManagerInterface {
 		this.conversionUtils = common.convert;
 		this.elements = elements;
 		this.dom = dom;
-		this.paletteIO = paletteIO;
-		this.ui = ui;
+		this.io = io;
 	}
 
 	/* PUBLIC METHODS */
@@ -280,10 +275,7 @@ export class UIManager implements UIManagerInterface {
 		UIManager.instances.delete(id);
 	}
 
-	public async handleExport(
-		format: 'CSS' | 'JSON' | 'XML',
-		colorSpace: ColorSpace = 'hsl'
-	): Promise<void> {
+	public async handleExport(format: 'css' | 'json' | 'xml'): Promise<void> {
 		try {
 			const palette = await this.getCurrentPalette();
 
@@ -294,14 +286,14 @@ export class UIManager implements UIManagerInterface {
 			}
 
 			switch (format) {
-				case 'CSS':
-					this.ui.io.exportPalette.asCSS(palette, colorSpace);
+				case 'css':
+					this.io.exportPalette(palette, format);
 					break;
-				case 'JSON':
-					this.ui.io.exportPalette.asJSON(palette);
+				case 'json':
+					this.io.exportPalette(palette, format);
 					break;
-				case 'XML':
-					this.ui.io.exportPalette.asXML(palette);
+				case 'xml':
+					this.io.exportPalette(palette, format);
 					break;
 				default:
 					throw new Error(`Unsupported export format: ${format}`);
@@ -319,28 +311,44 @@ export class UIManager implements UIManagerInterface {
 		try {
 			const data = await this.dom.fileUtils.readFile(file);
 
-			let palette: Palette;
+			let palette: Palette | null = null;
 
 			switch (format) {
 				case 'JSON':
-					palette = this.paletteIO.deserialize.fromJSON(data);
+					palette = await this.io.deserialize.fromJSON(data);
+					if (!palette) {
+						if (this.logMode.errors && this.logMode.verbosity > 1) {
+							this.logger.error(
+								'Failed to deserialize JSON data'
+							);
+						}
+						return;
+					}
 					break;
 				case 'XML':
-					palette = this.paletteIO.deserialize.fromXML(data);
+					palette = (await this.io.deserialize.fromXML(data)) || null;
 					break;
 				case 'CSS':
-					palette = this.paletteIO.deserialize.fromCSS(data);
+					palette = (await this.io.deserialize.fromCSS(data)) || null;
 					break;
 				default:
 					throw new Error(`Unsupported format: ${format}`);
 			}
 
+			if (!palette) {
+				if (this.logMode.errors && this.logMode.verbosity > 1) {
+					this.logger.error(`Failed to deserialize ${format} data`);
+				}
+				return;
+			}
+
 			this.addPaletteToHistory(palette);
 
-			if (this.logMode.info && this.logMode.verbosity > 1)
+			if (this.logMode.info && this.logMode.verbosity > 1) {
 				this.logger.info(
 					`Successfully imported palette in ${format} format.`
 				);
+			}
 		} catch (error) {
 			this.logger.error(`Failed to import file: ${error}`);
 		}

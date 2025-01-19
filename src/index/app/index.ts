@@ -32,8 +32,10 @@ export type {
 	DataInterface,
 	DebounceData,
 	DefaultBaseColorsData,
+	DefaultBaseColorsDataBranded,
 	DefaultColorsData,
 	DefaultColorStringsData,
+	DefaultCSSColorStringsData,
 	Defaults,
 	ConstsData,
 	DOMData,
@@ -70,15 +72,18 @@ export type {
 	PaletteCommon_Utils,
 	PaletteCommon_Utils_Adjust,
 	PaletteCommon_Utils_Probability,
-	PaletteDeserializeFnInterface,
 	PaletteFnMasterInterface,
 	PaletteGenerateFnInterface,
-	PaletteFnIOInterface,
-	PaletteSerializeFnInterface,
 	PaletteStartFnInterface
 } from './palette.js';
 export type {
-	UIFnBaseInterface,
-	UIFnMasterInterface,
-	UIFnIOInterface
-} from './ui.js';
+	ColorParser,
+	IO_Fn_DeserializeInterface,
+	IO_Fn_MasterInterface,
+	IO_Fn_ParseCSSInterface,
+	IO_Fn_ParseDataInterface,
+	IO_Fn_ParseJSONInterface,
+	IO_Fn_ParseXMLInterface,
+	IO_Fn_SerializeInterface
+} from './io.js';
+export type { UIFnBaseInterface, UIFnMasterInterface } from './ui.js';

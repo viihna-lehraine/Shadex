@@ -6,7 +6,7 @@ export interface ColorInputElement extends HTMLInputElement {
 	colorValues?: Color;
 }
 
-export type IOFormat = 'CSS' | 'JSON' | 'XML';
+export type IOFormat = 'css' | 'json' | 'xml';
 
 export interface GenButtonArgs {
 	numBoxes: number;

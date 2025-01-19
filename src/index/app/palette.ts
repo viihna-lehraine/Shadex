@@ -1,31 +1,6 @@
 // File: src/index/app/palette.js
 
-import {
-	ColorSpace,
-	HSL,
-	Palette,
-	PaletteItem,
-	PaletteOptions
-} from '../index.js';
-
-// ******** SORT ME ********
-
-export interface PaletteDeserializeFnInterface {
-	fromCSS(data: string): Palette | void;
-	fromJSON(data: string): Palette | void;
-	fromXML(data: string): Palette | void;
-}
-
-export interface PaletteSerializeFnInterface {
-	toCSS(palette: Palette, colorSpace: ColorSpace): string;
-	toJSON(palette: Palette): string;
-	toXML(palette: Palette): string;
-}
-
-export interface PaletteFnIOInterface {
-	deserialize: PaletteDeserializeFnInterface;
-	serialize: PaletteSerializeFnInterface;
-}
+import { HSL, Palette, PaletteItem, PaletteOptions } from '../index.js';
 
 // ******** COMMON UTILITIES ********
 
@@ -142,6 +117,5 @@ export interface PaletteStartFnInterface {
 
 export interface PaletteFnMasterInterface {
 	generate: PaletteGenerateFnInterface;
-	serialize: PaletteSerializeFnInterface;
 	start: PaletteStartFnInterface;
 }

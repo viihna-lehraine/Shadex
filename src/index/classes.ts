@@ -2,7 +2,6 @@
 
 import { IDBPObjectStore } from 'idb';
 import {
-	ColorSpace,
 	HSL,
 	MutationLog,
 	Palette,
@@ -105,10 +104,6 @@ export interface UIManagerInterface {
 	createPaletteTable(palette: StoredPalette): HTMLElement;
 	getCurrentPalette(): Promise<Palette | null>;
 	getID(): number;
-	handleExport(
-		format: 'CSS' | 'JSON' | 'XML',
-		colorSpace: ColorSpace
-	): Promise<void>;
-	handleImport(file: File, format: 'JSON' | 'XML' | 'CSS'): Promise<void>;
+	handleExport(format: 'css' | 'json' | 'xml'): Promise<void>;
 	renderPalette(tableId: string): Promise<void | null>;
 }

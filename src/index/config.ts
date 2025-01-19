@@ -2,6 +2,33 @@
 
 import { ColorSpace } from '../index/index.js';
 
+export interface ConfigRegexInterface {
+	colors: {
+		cmyk: RegExp;
+		hex: RegExp;
+		hsl: RegExp;
+		hsv: RegExp;
+		lab: RegExp;
+		rgb: RegExp;
+		xyz: RegExp;
+	};
+	file: {
+		palette: {
+			css: {
+				header: RegExp;
+				class: RegExp;
+				colorProperty: RegExp;
+				settings: {
+					enableAlpha: RegExp;
+					limitDarkness: RegExp;
+					limitGrayness: RegExp;
+					limitLightness: RegExp;
+				};
+			};
+		};
+	};
+}
+
 export interface DefaultKeysInterface {
 	APP_SETTINGS: string;
 	CUSTOM_COLOR: string;
@@ -31,4 +58,5 @@ export interface ConfigDBInterface {
 
 export interface ConfigInterface {
 	db: ConfigDBInterface;
+	regex: ConfigRegexInterface;
 }

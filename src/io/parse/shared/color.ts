@@ -1,9 +1,10 @@
-// File: src/palette/colorParser.ts
+// File: src/palette/io/parse/color.ts
 
 import {
 	CMYK,
 	CMYKValue,
 	Color,
+	ColorParser,
 	Hex,
 	HSL,
 	HSLValue,
@@ -15,22 +16,18 @@ import {
 	RGBValue,
 	XYZ,
 	XYZValue
-} from '../index/index.js';
-import { common } from '../common/index.js';
+} from '../../../index/index.js';
+import { common } from '../../../common/index.js';
+import { config } from '../../../config/index.js';
 
 const brand = common.core.brand;
-
-interface ColorParser {
-	parse(input: string): Color;
-}
+const regex = config.regex;
 
 const colorParsers: Record<string, ColorParser> = {};
 
 const cmykParser: ColorParser = {
 	parse(input: string): CMYK {
-		const regex =
-			/cmyk\((\d+)%?,\s*(\d+)%?,\s*(\d+)%?,\s*(\d+)%?(?:,\s*([\d.]+))?\)/i;
-		const match = input.match(regex);
+		const match = input.match(regex.colors.cmyk);
 
 		if (!match) {
 			throw new Error(`Invalid CMYK string format: ${input}`);
@@ -52,8 +49,7 @@ const cmykParser: ColorParser = {
 
 const hexParser: ColorParser = {
 	parse(input: string): Hex {
-		const regex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
-		const match = input.match(regex);
+		const match = input.match(regex.colors.hex);
 
 		if (!match) {
 			throw new Error(`Invalid Hex string format: ${input}`);
@@ -78,9 +74,7 @@ const hexParser: ColorParser = {
 
 const hslParser: ColorParser = {
 	parse(input: string): HSL {
-		const regex =
-			/hsl\(([\d.]+),\s*([\d.]+)%?,\s*([\d.]+)%?(?:,\s*([\d.]+))?\)/i;
-		const match = input.match(regex);
+		const match = input.match(regex.colors.hsl);
 
 		if (!match) {
 			throw new Error(`Invalid HSL string format: ${input}`);
@@ -101,9 +95,7 @@ const hslParser: ColorParser = {
 
 const hsvParser: ColorParser = {
 	parse(input: string): HSV {
-		const regex =
-			/hsv\(([\d.]+),\s*([\d.]+)%?,\s*([\d.]+)%?(?:,\s*([\d.]+))?\)/i;
-		const match = input.match(regex);
+		const match = input.match(regex.colors.hsv);
 
 		if (!match) {
 			throw new Error(`Invalid HSV string format: ${input}`);
@@ -124,9 +116,7 @@ const hsvParser: ColorParser = {
 
 const labParser: ColorParser = {
 	parse(input: string): LAB {
-		const regex =
-			/lab\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i;
-		const match = input.match(regex);
+		const match = input.match(regex.colors.lab);
 
 		if (!match) {
 			throw new Error(`Invalid LAB string format: ${input}`);
@@ -147,9 +137,7 @@ const labParser: ColorParser = {
 
 const rgbParser: ColorParser = {
 	parse(input: string): RGB {
-		const regex =
-			/rgb\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i;
-		const match = input.match(regex);
+		const match = input.match(regex.colors.rgb);
 
 		if (!match) {
 			throw new Error(`Invalid RGB string format: ${input}`);
@@ -170,9 +158,7 @@ const rgbParser: ColorParser = {
 
 const xyzParser: ColorParser = {
 	parse(input: string): XYZ {
-		const regex =
-			/xyz\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i;
-		const match = input.match(regex);
+		const match = input.match(regex.colors.xyz);
 
 		if (!match) {
 			throw new Error(`Invalid XYZ string format: ${input}`);
@@ -207,4 +193,55 @@ export function parseColorString(format: string, input: string): Color {
 	}
 
 	return parser.parse(input);
+}
+
+// ******** CSS COLOR STRINGS ********
+
+export function parseCSSColorString(format: string, input: string): string {
+	const color = parseColorString(format, input);
+
+	switch (color.format) {
+		case 'cmyk':
+			const cmyk = color.value as CMYK['value'];
+			return `cmyk(${cmyk.cyan * 100}%, ${cmyk.magenta * 100}%, ${cmyk.yellow * 100}%, ${cmyk.key * 100}${
+				cmyk.alpha !== 1 ? `, ${cmyk.alpha}` : ''
+			})`;
+
+		case 'hex':
+			const hex = color.value as Hex['value'];
+			return `#${hex.hex}${String(hex.alpha) !== 'FF' ? hex.alpha : ''}`;
+
+		case 'hsl':
+			const hsl = color.value as HSL['value'];
+			return `hsl(${hsl.hue}, ${hsl.saturation * 100}%, ${hsl.lightness * 100}%${
+				hsl.alpha !== 1 ? `, ${hsl.alpha}` : ''
+			})`;
+
+		case 'hsv':
+			const hsv = color.value as HSV['value'];
+			return `hsv(${hsv.hue}, ${hsv.saturation * 100}%, ${hsv.value * 100}%${
+				hsv.alpha !== 1 ? `, ${hsv.alpha}` : ''
+			})`;
+
+		case 'lab':
+			const lab = color.value as LAB['value'];
+			return `lab(${lab.l}, ${lab.a}, ${lab.b}${
+				lab.alpha !== 1 ? `, ${lab.alpha}` : ''
+			})`;
+
+		case 'rgb':
+			const rgb = color.value as RGB['value'];
+			return `rgb(${rgb.red}, ${rgb.green}, ${rgb.blue}${
+				rgb.alpha !== 1 ? `, ${rgb.alpha}` : ''
+			})`;
+
+		case 'xyz':
+			const xyz = color.value as XYZ['value'];
+			return `xyz(${xyz.x}, ${xyz.y}, ${xyz.z}${
+				xyz.alpha !== 1 ? `, ${xyz.alpha}` : ''
+			})`;
+
+		default:
+			throw new Error(`Unsupported color format: ${color.format}`);
+	}
 }

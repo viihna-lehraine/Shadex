@@ -1,0 +1,12 @@
+// File: src/io/parse/index.ts
+import { css } from './css.js';
+import { data } from './shared/index.js';
+import { json } from './json.js';
+import { xml } from './xml.js';
+export const parse = {
+    css,
+    json,
+    xml,
+    data
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvaW8vcGFyc2UvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsOEJBQThCO0FBRTlCLE9BQU8sRUFBRSxHQUFHLEVBQUUsTUFBTSxVQUFVLENBQUM7QUFDL0IsT0FBTyxFQUFFLElBQUksRUFBRSxNQUFNLG1CQUFtQixDQUFDO0FBQ3pDLE9BQU8sRUFBRSxJQUFJLEVBQUUsTUFBTSxXQUFXLENBQUM7QUFDakMsT0FBTyxFQUFFLEdBQUcsRUFBRSxNQUFNLFVBQVUsQ0FBQztBQUUvQixNQUFNLENBQUMsTUFBTSxLQUFLLEdBQUc7SUFDcEIsR0FBRztJQUNILElBQUk7SUFDSixHQUFHO0lBQ0gsSUFBSTtDQUNKLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvLyBGaWxlOiBzcmMvaW8vcGFyc2UvaW5kZXgudHNcblxuaW1wb3J0IHsgY3NzIH0gZnJvbSAnLi9jc3MuanMnO1xuaW1wb3J0IHsgZGF0YSB9IGZyb20gJy4vc2hhcmVkL2luZGV4LmpzJztcbmltcG9ydCB7IGpzb24gfSBmcm9tICcuL2pzb24uanMnO1xuaW1wb3J0IHsgeG1sIH0gZnJvbSAnLi94bWwuanMnO1xuXG5leHBvcnQgY29uc3QgcGFyc2UgPSB7XG5cdGNzcyxcblx0anNvbixcblx0eG1sLFxuXHRkYXRhXG59O1xuIl19

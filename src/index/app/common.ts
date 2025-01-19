@@ -6,6 +6,8 @@ import {
 	CMYK,
 	CMYKString,
 	CMYKUnbranded,
+	CMYKValue,
+	CMYKValueString,
 	Color,
 	ColorDataExtended,
 	ColorDataAssertion,
@@ -20,18 +22,24 @@ import {
 	HexSet,
 	HexUnbranded,
 	HexValue,
+	HexValueString,
 	HSL,
 	HSLString,
 	HSLUnbranded,
 	HSLValue,
+	HSLValueString,
 	HSV,
 	HSVUnbranded,
 	HSVString,
+	HSVValue,
+	HSVValueString,
 	LAB,
+	LABUnbranded,
+	LABValue,
+	LABValueString,
 	LAB_L,
 	LAB_A,
 	LAB_B,
-	LABUnbranded,
 	MakePaletteBox,
 	NumericRangeKey,
 	Palette,
@@ -43,6 +51,7 @@ import {
 	RGB,
 	RGBUnbranded,
 	RGBValue,
+	RGBValueString,
 	SL,
 	SLString,
 	SLUnbranded,
@@ -52,6 +61,8 @@ import {
 	SVUnbranded,
 	XYZ,
 	XYZUnbranded,
+	XYZValue,
+	XYZValueString,
 	XYZ_X,
 	XYZ_Y,
 	XYZ_Z
@@ -107,12 +118,30 @@ export interface CommonCoreFnBrandColor {
 
 export interface CommonCoreFnConvert {
 	hexAlphaToNumericAlpha(hexAlpha: string): number;
+	stringToValue: {
+		cmyk(cmyk: CMYKValueString): CMYKValue;
+		hex(hex: HexValueString): HexValue;
+		hsl(hsl: HSLValueString): HSLValue;
+		hsv(hsv: HSVValueString): HSVValue;
+		lab(lab: LABValueString): LABValue;
+		rgb(rgb: RGBValueString): RGBValue;
+		xyz(xyz: XYZValueString): XYZValue;
+	};
 	toColor(colorString: ColorString): Color;
 	toColorValueRange<T extends keyof RangeKeyMap>(
 		value: string | number,
 		rangeKey: T
 	): RangeKeyMap[T];
 	toCSSColorString(color: Color): string;
+	valueToString: {
+		cmyk(cmyk: CMYKValue): CMYKValueString;
+		hex(hex: HexValue): HexValueString;
+		hsl(hsl: HSLValue): HSLValueString;
+		hsv(hsv: HSVValue): HSVValueString;
+		lab(lab: LABValue): LABValueString;
+		rgb(rgb: RGBValue): RGBValueString;
+		xyz(xyz: XYZValue): XYZValueString;
+	};
 }
 
 export interface CommonCoreFnGuards {

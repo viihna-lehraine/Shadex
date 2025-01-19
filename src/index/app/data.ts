@@ -1,25 +1,35 @@
 // File: src/index/data.js
 
 import {
+	CMYK,
 	CMYKUnbranded,
 	CMYKString,
+	Hex,
+	HexString,
 	HexUnbranded,
+	HSL,
 	HSLString,
 	HSLUnbranded,
+	HSV,
 	HSVUnbranded,
 	HSVString,
+	LAB,
 	LABString,
 	LABUnbranded,
 	MutationLog,
 	PaletteItemUnbranded,
 	PaletteUnbranded,
+	SL,
 	SLString,
 	SLUnbranded,
+	SV,
 	SVString,
 	SVUnbranded,
+	RGB,
 	RGBString,
 	RGBUnbranded,
 	StoredPaletteUnbranded,
+	XYZ,
 	XYZString,
 	XYZUnbranded
 } from '../index.js';
@@ -35,6 +45,18 @@ export interface DebounceData {
 	input: number;
 }
 
+export interface DefaultBaseColorsDataBranded {
+	cmyk: CMYK;
+	hex: Hex;
+	hsl: HSL;
+	hsv: HSV;
+	lab: LAB;
+	rgb: RGB;
+	sl: SL;
+	sv: SV;
+	xyz: XYZ;
+}
+
 export interface DefaultBaseColorsData {
 	cmyk: CMYKUnbranded;
 	hex: HexUnbranded;
@@ -47,8 +69,34 @@ export interface DefaultBaseColorsData {
 	xyz: XYZUnbranded;
 }
 
+export interface DefaultCSSColorStringsData {
+	noAlpha: {
+		cmyk: string;
+		hex: string;
+		hsl: string;
+		hsv: string;
+		lab: string;
+		rgb: string;
+		sl: string;
+		sv: string;
+		xyz: string;
+	};
+	withAlpha: {
+		cmyk: string;
+		hex: string;
+		hsl: string;
+		hsv: string;
+		lab: string;
+		rgb: string;
+		sl: string;
+		sv: string;
+		xyz: string;
+	};
+}
+
 export interface DefaultColorStringsData {
 	cmyk: CMYKString;
+	hex: HexString;
 	hsl: HSLString;
 	hsv: HSVString;
 	lab: LABString;
@@ -287,12 +335,15 @@ export interface DefaultColorsData {
 	sl: SLUnbranded;
 	sv: SVUnbranded;
 	xyz: XYZUnbranded;
+	cssColorStrings: DefaultCSSColorStringsData;
 	strings: DefaultColorStringsData;
 }
 
 export interface Defaults {
+	brandedColors: DefaultBaseColorsDataBranded;
 	colors: DefaultBaseColorsData;
 	colorStrings: DefaultColorStringsData;
+	cssColorStrings: DefaultCSSColorStringsData;
 	idb: IDBDefaultsData;
 	palette: PaletteDefaultsData;
 }

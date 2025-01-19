@@ -2,6 +2,7 @@
 
 export type {
 	AdjustmentsData,
+	ColorParser,
 	CommonConvertFnBase,
 	CommonCoreFnBase,
 	CommonCoreFnBrand,
@@ -31,8 +32,10 @@ export type {
 	DataInterface,
 	DebounceData,
 	DefaultBaseColorsData,
+	DefaultBaseColorsDataBranded,
 	DefaultColorsData,
 	DefaultColorStringsData,
+	DefaultCSSColorStringsData,
 	Defaults,
 	DOMEventsInterface,
 	DOMFileUtilsFnInterface,
@@ -46,6 +49,13 @@ export type {
 	GenPaletteArgs,
 	GenPaletteFnInterface,
 	IDBDefaultsData,
+	IO_Fn_DeserializeInterface,
+	IO_Fn_MasterInterface,
+	IO_Fn_ParseCSSInterface,
+	IO_Fn_ParseDataInterface,
+	IO_Fn_ParseJSONInterface,
+	IO_Fn_ParseXMLInterface,
+	IO_Fn_SerializeInterface,
 	LimitsData,
 	ModeData,
 	PaletteCommon,
@@ -59,19 +69,15 @@ export type {
 	PaletteCommon_Utils_Adjust,
 	PaletteCommon_Utils_Probability,
 	PaletteDefaultsData,
-	PaletteDeserializeFnInterface,
-	PaletteFnIOInterface,
 	PaletteFnMasterInterface,
 	PaletteGenerateFnInterface,
 	PaletteRangesData,
-	PaletteSerializeFnInterface,
 	PaletteStartFnInterface,
 	ProbabilitiesData,
 	SetsData,
 	ThresholdsData,
 	TimeoutsData,
 	UIFnBaseInterface,
-	UIFnIOInterface,
 	UIFnMasterInterface
 } from './app/index.js';
 export type {
@@ -151,6 +157,7 @@ export type {
 export type {
 	ConfigInterface,
 	ConfigDBInterface,
+	ConfigRegexInterface,
 	DefaultKeysInterface,
 	DefaultSettingsInterface,
 	StoreNamesInterface

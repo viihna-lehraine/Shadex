@@ -3,6 +3,7 @@
 import {
 	CMYKString,
 	DefaultColorStringsData,
+	HexString,
 	HSLString,
 	HSVString,
 	LABString,
@@ -15,6 +16,11 @@ import {
 const cmyk: CMYKString = {
 	value: { cyan: '0%', magenta: '0%', yellow: '0%', key: '0%', alpha: '1' },
 	format: 'cmyk'
+};
+
+const hex: HexString = {
+	value: { hex: '000000', alpha: 'FF', numAlpha: '1' },
+	format: 'hex'
 };
 
 const hsl: HSLString = {
@@ -54,6 +60,7 @@ const xyz: XYZString = {
 
 export const colorStrings: DefaultColorStringsData = {
 	cmyk,
+	hex,
 	hsl,
 	hsv,
 	lab,
