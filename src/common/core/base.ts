@@ -10,12 +10,7 @@ import {
 	Color,
 	ColorSpace,
 	ColorString,
-	CommonCoreFnBase,
-	CommonCoreFnBrand,
-	CommonCoreFnBrandColor,
-	CommonCoreFnConvert,
-	CommonCoreFnGuards,
-	CommonCoreFnValidate,
+	CommonFunctionsMasterInterface,
 	Hex,
 	HexComponent,
 	HexSet,
@@ -58,12 +53,12 @@ import {
 	XYZ_X,
 	XYZ_Y,
 	XYZ_Z
-} from '../../index/index.js';
+} from '../../types/index.js';
 import { data } from '../../data/index.js';
-import { log } from '../../classes/logger/index.js';
+import { logger } from '../../logger/index.js';
 
 const logMode = data.mode.logging;
-const defaultColors = data.defaults.colors;
+const defaultColors = data.defaults.colors.base.branded;
 const mode = data.mode;
 const _sets = data.sets;
 
@@ -95,7 +90,7 @@ function debounce<T extends (...args: Parameters<T>) => void>(
 function parseCustomColor(rawValue: string): HSL | null {
 	try {
 		if (!mode.quiet)
-			log.info(`Parsing custom color: ${JSON.stringify(rawValue)}`);
+			logger.info(`Parsing custom color: ${JSON.stringify(rawValue)}`);
 
 		const match = rawValue.match(
 			/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?,\s*(\d*\.?\d+)\)/
@@ -115,20 +110,20 @@ function parseCustomColor(rawValue: string): HSL | null {
 			};
 		} else {
 			if (logMode.errors)
-				log.error(
+				logger.error(
 					'Invalid HSL custom color. Expected format: hsl(H, S%, L%, A)'
 				);
 
 			return null;
 		}
 	} catch (error) {
-		if (logMode.errors) log.error(`parseCustomColor error: ${error}`);
+		if (logMode.errors) logger.error(`parseCustomColor error: ${error}`);
 
 		return null;
 	}
 }
 
-export const base: CommonCoreFnBase = {
+export const base: CommonFunctionsMasterInterface['core']['base'] = {
 	clampToRange,
 	clone,
 	debounce,
@@ -224,7 +219,7 @@ function asXYZ_Z(value: number): XYZ_Z {
 	return value as XYZ_Z;
 }
 
-export const brand: CommonCoreFnBrand = {
+export const brand: CommonFunctionsMasterInterface['core']['brand'] = {
 	asAlphaRange,
 	asBranded,
 	asByteRange,
@@ -401,17 +396,18 @@ function asXYZ(color: XYZUnbranded): XYZ {
 	};
 }
 
-export const brandColor: CommonCoreFnBrandColor = {
-	asCMYK,
-	asHex,
-	asHSL,
-	asHSV,
-	asLAB,
-	asRGB,
-	asSL,
-	asSV,
-	asXYZ
-};
+export const brandColor: CommonFunctionsMasterInterface['core']['brandColor'] =
+	{
+		asCMYK,
+		asHex,
+		asHSL,
+		asHSV,
+		asLAB,
+		asRGB,
+		asSL,
+		asSV,
+		asXYZ
+	};
 
 // ******** SECTION 3 - Convert ********
 
@@ -433,6 +429,90 @@ function cmykValueToString(cmyk: CMYKValue): CMYKValueString {
 		key: `${cmyk.key * 100}%`,
 		alpha: `${cmyk.alpha}`
 	};
+}
+
+function colorStringToColor(colorString: ColorString): Color {
+	const clonedColor = clone(colorString);
+
+	const parseValue = (value: string | number): number =>
+		typeof value === 'string' && value.endsWith('%')
+			? parseFloat(value.slice(0, -1))
+			: Number(value);
+
+	const newValue = Object.entries(clonedColor.value).reduce(
+		(acc, [key, val]) => {
+			acc[key as keyof (typeof clonedColor)['value']] = parseValue(
+				val
+			) as never;
+			return acc;
+		},
+		{} as Record<keyof (typeof clonedColor)['value'], number>
+	);
+
+	switch (clonedColor.format) {
+		case 'cmyk':
+			return { format: 'cmyk', value: newValue as CMYKValue };
+		case 'hsl':
+			return { format: 'hsl', value: newValue as HSLValue };
+		case 'hsv':
+			return { format: 'hsv', value: newValue as HSVValue };
+		case 'sl':
+			return { format: 'sl', value: newValue as SLValue };
+		case 'sv':
+			return { format: 'sv', value: newValue as SVValue };
+		default:
+			if (logMode.errors)
+				logger.error('Unsupported format for colorStringToColor');
+
+			const unbrandedHSL = defaultColors.hsl;
+
+			const brandedHue = brand.asRadial(unbrandedHSL.value.hue);
+			const brandedSaturation = brand.asPercentile(
+				unbrandedHSL.value.saturation
+			);
+			const brandedLightness = brand.asPercentile(
+				unbrandedHSL.value.lightness
+			);
+			const brandedAlpha = brand.asAlphaRange(unbrandedHSL.value.alpha);
+
+			return {
+				value: {
+					hue: brandedHue,
+					saturation: brandedSaturation,
+					lightness: brandedLightness,
+					alpha: brandedAlpha
+				},
+				format: 'hsl'
+			};
+	}
+}
+
+function colorToCSSColorString(color: Color): string {
+	try {
+		switch (color.format) {
+			case 'cmyk':
+				return `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key}, ${color.value.alpha})`;
+			case 'hex':
+				return String(color.value.hex);
+			case 'hsl':
+				return `hsl(${color.value.hue}, ${color.value.saturation}%, ${color.value.lightness}%, ${color.value.alpha})`;
+			case 'hsv':
+				return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%, ${color.value.alpha})`;
+			case 'lab':
+				return `lab(${color.value.l}, ${color.value.a}, ${color.value.b}, ${color.value.alpha})`;
+			case 'rgb':
+				return `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue}, ${color.value.alpha})`;
+			case 'xyz':
+				return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z}, ${color.value.alpha})`;
+			default:
+				if (logMode.errors)
+					logger.error(`Unexpected color format: ${color.format}`);
+
+				return '#FFFFFFFF';
+		}
+	} catch (error) {
+		throw new Error(`getCSSColorString error: ${error}`);
+	}
 }
 
 function hexAlphaToNumericAlpha(hexAlpha: string): number {
@@ -527,62 +607,6 @@ function rgbStringToValue(rgb: RGBValueString): RGBValue {
 	};
 }
 
-function toColor(colorString: ColorString): Color {
-	const clonedColor = clone(colorString);
-
-	const parseValue = (value: string | number): number =>
-		typeof value === 'string' && value.endsWith('%')
-			? parseFloat(value.slice(0, -1))
-			: Number(value);
-
-	const newValue = Object.entries(clonedColor.value).reduce(
-		(acc, [key, val]) => {
-			acc[key as keyof (typeof clonedColor)['value']] = parseValue(
-				val
-			) as never;
-			return acc;
-		},
-		{} as Record<keyof (typeof clonedColor)['value'], number>
-	);
-
-	switch (clonedColor.format) {
-		case 'cmyk':
-			return { format: 'cmyk', value: newValue as CMYKValue };
-		case 'hsl':
-			return { format: 'hsl', value: newValue as HSLValue };
-		case 'hsv':
-			return { format: 'hsv', value: newValue as HSVValue };
-		case 'sl':
-			return { format: 'sl', value: newValue as SLValue };
-		case 'sv':
-			return { format: 'sv', value: newValue as SVValue };
-		default:
-			if (logMode.errors)
-				log.error('Unsupported format for colorStringToColor');
-
-			const unbrandedHSL = defaultColors.hsl;
-
-			const brandedHue = brand.asRadial(unbrandedHSL.value.hue);
-			const brandedSaturation = brand.asPercentile(
-				unbrandedHSL.value.saturation
-			);
-			const brandedLightness = brand.asPercentile(
-				unbrandedHSL.value.lightness
-			);
-			const brandedAlpha = brand.asAlphaRange(unbrandedHSL.value.alpha);
-
-			return {
-				value: {
-					hue: brandedHue,
-					saturation: brandedSaturation,
-					lightness: brandedLightness,
-					alpha: brandedAlpha
-				},
-				format: 'hsl'
-			};
-	}
-}
-
 function toColorValueRange<T extends keyof RangeKeyMap>(
 	value: string | number,
 	rangeKey: T
@@ -603,34 +627,6 @@ function toColorValueRange<T extends keyof RangeKeyMap>(
 		value as number,
 		rangeKey
 	) as unknown as RangeKeyMap[T];
-}
-
-function toCSSColorString(color: Color): string {
-	try {
-		switch (color.format) {
-			case 'cmyk':
-				return `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key}, ${color.value.alpha})`;
-			case 'hex':
-				return String(color.value.hex);
-			case 'hsl':
-				return `hsl(${color.value.hue}, ${color.value.saturation}%, ${color.value.lightness}%, ${color.value.alpha})`;
-			case 'hsv':
-				return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%, ${color.value.alpha})`;
-			case 'lab':
-				return `lab(${color.value.l}, ${color.value.a}, ${color.value.b}, ${color.value.alpha})`;
-			case 'rgb':
-				return `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue}, ${color.value.alpha})`;
-			case 'xyz':
-				return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z}, ${color.value.alpha})`;
-			default:
-				if (logMode.errors)
-					log.error(`Unexpected color format: ${color.format}`);
-
-				return '#FFFFFFFF';
-		}
-	} catch (error) {
-		throw new Error(`getCSSColorString error: ${error}`);
-	}
 }
 
 function xyzValueToString(xyz: XYZValue): XYZValueString {
@@ -671,12 +667,12 @@ const valueToString = {
 	xyz: xyzValueToString
 };
 
-export const convert: CommonCoreFnConvert = {
+export const convert: CommonFunctionsMasterInterface['core']['convert'] = {
+	colorStringToColor,
 	hexAlphaToNumericAlpha,
 	stringToValue,
-	toColor,
 	toColorValueRange,
-	toCSSColorString,
+	colorToCSSColorString,
 	valueToString
 };
 
@@ -762,7 +758,7 @@ function isInRange<T extends keyof typeof _sets>(
 	throw new Error(`Invalid range or value for ${rangeKey}`);
 }
 
-export const guards: CommonCoreFnGuards = {
+export const guards: CommonFunctionsMasterInterface['core']['guards'] = {
 	isColor,
 	isColorSpace,
 	isColorString,
@@ -933,7 +929,7 @@ function colorValues(color: Color | SL | SV): boolean {
 			);
 		default:
 			if (logMode.errors)
-				log.error(`Unsupported color format: ${color.format}`);
+				logger.error(`Unsupported color format: ${color.format}`);
 
 			return false;
 	}
@@ -968,12 +964,28 @@ function range<T extends keyof typeof _sets>(
 	}
 }
 
-export const validate: CommonCoreFnValidate = {
+export const validate: CommonFunctionsMasterInterface['core']['validate'] = {
 	colorValues,
 	hex,
 	hexComponent,
 	hexSet,
 	range
 };
+
+// ******** SECTION 6 - Other ********
+
+function getFormattedTimestamp(): string {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, '0');
+	const day = String(now.getDate()).padStart(2, '0');
+	const hours = String(now.getHours()).padStart(2, '0');
+	const minutes = String(now.getMinutes()).padStart(2, '0');
+	const seconds = String(now.getSeconds()).padStart(2, '0');
+
+	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+export const other = { getFormattedTimestamp };
 
 export { clone };

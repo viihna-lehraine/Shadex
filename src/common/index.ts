@@ -1,6 +1,6 @@
 // File: src/common/index.js
 
-import { CommonFnMasterInterface } from '../index/index.js';
+import { CommonFnMasterInterface } from '../types/index.js';
 import { convert } from './convert/index.js';
 import { core } from './core/index.js';
 import { helpers } from './helpers/index.js';

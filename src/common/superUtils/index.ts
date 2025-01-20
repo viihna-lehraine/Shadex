@@ -1,8 +1,8 @@
 // File: src/common/superUtils/index.js
 
-import { CommonSuperUtilsFnMasterInterface } from '../../index/index.js';
+import { CommonFunctionsMasterInterface } from '../../types/index.js';
 import { dom } from './dom.js';
 
-export const superUtils: CommonSuperUtilsFnMasterInterface = {
+export const superUtils: CommonFunctionsMasterInterface['superUtils'] = {
 	dom
 } as const;

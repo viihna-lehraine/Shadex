@@ -5,8 +5,8 @@ import {
 	HSL,
 	Palette,
 	PaletteItem
-} from '../../../index/index.js';
-import { IDBManager } from '../../../classes/idb/index.js';
+} from '../../../types/index.js';
+import { IDBManager } from '../../../db/index.js';
 import { core } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
@@ -19,7 +19,6 @@ const paletteRanges = consts.paletteRanges;
 
 const idb = IDBManager.getInstance();
 
-// *DEV-NOTE* update to reflect the fact this will always return 6 color swatches
 export async function hexadic(args: GenPaletteArgs): Promise<Palette> {
 	// ensure exactly 6 color swatches
 	if (args.numBoxes !== 6) {

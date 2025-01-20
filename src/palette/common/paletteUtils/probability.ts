@@ -1,8 +1,8 @@
 // File: src/paelette/common/paletteUtils/probability.js
 
-import { PaletteCommon_Utils_Probability } from '../../../index/index.js';
+import { PaletteCommon_Utils_Probability } from '../../../types/index.js';
 import { data } from '../../../data/index.js';
-import { log } from '../../../classes/logger/index.js';
+import { logger } from '../../../logger/index.js';
 
 const logMode = data.mode.logging;
 const probabilities = data.consts.probabilities;
@@ -29,7 +29,7 @@ function getWeightedRandomInterval(): number {
 		return weights[weights.length - 1];
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error generating weighted random interval: ${error}`);
+			logger.error(`Error generating weighted random interval: ${error}`);
 
 		return 50;
 	}

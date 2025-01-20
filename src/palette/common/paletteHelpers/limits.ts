@@ -1,16 +1,16 @@
 // File: src/palette/common/paletteHelpers/limits.js
 
-import { HSL, PaletteCommon_Helpers_Limits } from '../../../index/index.js';
+import { HSL, PaletteCommon_Helpers_Limits } from '../../../types/index.js';
 import { core } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
-import { log } from '../../../classes/logger/index.js';
+import { logger } from '../../../logger/index.js';
 
 const logMode = data.mode.logging;
 
 function isColorInBounds(hsl: HSL): boolean {
 	if (!core.validate.colorValues(hsl)) {
 		if (logMode.errors)
-			log.error(
+			logger.error(
 				`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`
 			);
 
@@ -23,7 +23,7 @@ function isColorInBounds(hsl: HSL): boolean {
 function isTooDark(hsl: HSL): boolean {
 	if (!core.validate.colorValues(hsl)) {
 		if (logMode.errors)
-			log.error(`isTooDark: Invalid HSL value ${JSON.stringify(hsl)}`);
+			logger.error(`isTooDark: Invalid HSL value ${JSON.stringify(hsl)}`);
 
 		return false;
 	}
@@ -34,7 +34,7 @@ function isTooDark(hsl: HSL): boolean {
 function isTooGray(hsl: HSL): boolean {
 	if (!core.validate.colorValues(hsl)) {
 		if (logMode.errors)
-			log.error(`isTooGray: Invalid HSL value ${JSON.stringify(hsl)}`);
+			logger.error(`isTooGray: Invalid HSL value ${JSON.stringify(hsl)}`);
 
 		return false;
 	}
@@ -45,7 +45,9 @@ function isTooGray(hsl: HSL): boolean {
 function isTooLight(hsl: HSL): boolean {
 	if (!core.validate.colorValues(hsl)) {
 		if (logMode.errors)
-			log.error(`isTooLight: Invalid HSL value ${JSON.stringify(hsl)}`);
+			logger.error(
+				`isTooLight: Invalid HSL value ${JSON.stringify(hsl)}`
+			);
 
 		return false;
 	}

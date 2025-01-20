@@ -1,8 +1,8 @@
 // File: src/common/utils/errors.ts
 
-import { CommonUtilsFnErrors } from '../../index/index.js';
+import { CommonUtilsFnErrors } from '../../types/index.js';
 import { data } from '../../data/index.js';
-import { log } from '../../classes/logger/index.js';
+import { logger } from '../../logger/index.js';
 
 const logMode = data.mode.logging;
 
@@ -16,11 +16,11 @@ async function handleAsync<T>(
 	} catch (error) {
 		if (logMode.errors)
 			if (error instanceof Error) {
-				log.error(
+				logger.error(
 					`${errorMessage}: ${error.message}. Context: ${context}`
 				);
 			} else {
-				log.error(`${errorMessage}: ${error}. Context: ${context}`);
+				logger.error(`${errorMessage}: ${error}. Context: ${context}`);
 			}
 
 		return null;

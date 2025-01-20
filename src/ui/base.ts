@@ -1,8 +1,8 @@
 // File: src/dom/events/palette.js
 
-import { UIFnBaseInterface } from '../index/index.js';
+import { UIFnBaseInterface } from '../types/index.js';
 import { data } from '../data/index.js';
-import { log } from '../classes/logger/index.js';
+import { logger } from '../logger/index.js';
 
 const domIDs = data.consts.dom.ids;
 const logMode = data.mode.logging;
@@ -18,7 +18,7 @@ function enforceSwatchRules(
 
 	if (!paletteDropdown) {
 		if (logMode.errors) {
-			log.error('paletteDropdown not found');
+			logger.error('paletteDropdown not found');
 		}
 		if (mode.stackTrace && logMode.verbosity > 3) {
 			console.trace('enforceMinimumSwatches stack trace');
@@ -51,7 +51,7 @@ function enforceSwatchRules(
 			paletteDropdown.dispatchEvent(event);
 		} catch (error) {
 			if (logMode.errors) {
-				log.error(
+				logger.error(
 					`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`
 				);
 			}

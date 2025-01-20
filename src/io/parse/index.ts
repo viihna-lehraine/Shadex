@@ -1,13 +1,15 @@
 // File: src/io/parse/index.ts
 
-import { css } from './css.js';
-import { data } from './shared/index.js';
+import { IO_Interface } from '../../types/index.js';
+import { asColorValue } from './colorValue.js';
+import { asColorString, asCSSColorString } from './color.js';
+import { color } from './base.js';
 import { json } from './json.js';
-import { xml } from './xml.js';
 
-export const parse = {
-	css,
-	json,
-	xml,
-	data
+export const parse: IO_Interface['parse'] = {
+	asColorValue,
+	asColorString,
+	asCSSColorString,
+	color,
+	json
 };

@@ -8,12 +8,12 @@ import {
 	PaletteItem,
 	PaletteOptions,
 	PaletteStartFnInterface
-} from '../index/index.js';
-import { IDBManager } from '../classes/idb/index.js';
+} from '../types/index.js';
+import { IDBManager } from '../db/index.js';
 import { core, helpers, utils } from '../common/index.js';
 import { data } from '../data/index.js';
 import { genPalette as genPaletteType } from './main/index.js';
-import { log } from '../classes/logger/index.js';
+import { logger } from '../logger/index.js';
 import { paletteHelpers } from './common/index.js';
 import { transform } from '../common/transform/index.js';
 
@@ -35,12 +35,13 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 		let { numBoxes, customColor } = options;
 
 		if (logMode.info && logMode.verbosity > 2)
-			log.info('Retrieving existing IDBManager instance.');
+			logger.info('Retrieving existing IDBManager instance.');
 
 		const idb = IDBManager.getInstance();
 
 		if (customColor === null || customColor === undefined) {
-			if (logMode.errors) log.error('Custom color is null or undefined.');
+			if (logMode.errors)
+				logger.error('Custom color is null or undefined.');
 
 			return;
 		}
@@ -50,20 +51,21 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 			utils.random.hsl(options.enableAlpha);
 
 		if (mode.debug && logMode.info && logMode.verbosity > 2)
-			log.info(`Custom color: ${JSON.stringify(customColor)}`);
+			logger.info(`Custom color: ${JSON.stringify(customColor)}`);
 
 		options.customColor = validatedCustomColor;
 
 		const palette = await generate.selectedPalette(options);
 
 		if (palette.items.length === 0) {
-			if (logMode.errors) log.error('Colors array is empty or invalid.');
+			if (logMode.errors)
+				logger.error('Colors array is empty or invalid.');
 
 			return;
 		}
 
 		if (!mode.quiet && logMode.info && logMode.verbosity > 0)
-			log.info(
+			logger.info(
 				`Colors array generated: ${JSON.stringify(palette.items)}`
 			);
 
@@ -74,7 +76,7 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 		await genPaletteDOMBox(palette.items, numBoxes, tableId);
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error starting palette generation: ${error}`);
+			logger.error(`Error starting palette generation: ${error}`);
 	}
 }
 
@@ -87,7 +89,7 @@ async function genPaletteDOMBox(
 		const paletteRow = document.getElementById('palette-row');
 
 		if (!paletteRow) {
-			if (logMode.errors) log.error('paletteRow is undefined.');
+			if (logMode.errors) logger.error('paletteRow is undefined.');
 
 			return;
 		}
@@ -108,11 +110,12 @@ async function genPaletteDOMBox(
 		paletteRow.appendChild(fragment);
 
 		if (!mode.quiet && logMode.info && logMode.verbosity > 1)
-			log.info('Palette boxes generated and rendered.');
+			logger.info('Palette boxes generated and rendered.');
 
 		await idb.saveData('tables', tableId, { palette: items });
 	} catch (error) {
-		if (logMode.errors) log.error(`Error generating palette box: ${error}`);
+		if (logMode.errors)
+			logger.error(`Error generating palette box: ${error}`);
 	}
 }
 
@@ -194,7 +197,7 @@ async function selectedPalette(options: PaletteOptions): Promise<Palette> {
 			case 9:
 				return genPaletteType.monochromatic(args);
 			default:
-				if (logMode.errors) log.error('Invalid palette type.');
+				if (logMode.errors) logger.error('Invalid palette type.');
 
 				return Promise.resolve(defaultBrandedPalete);
 		}

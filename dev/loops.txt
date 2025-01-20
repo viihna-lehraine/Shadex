@@ -1,0 +1,36 @@
+1.
+public/js/data/index.js ->
+public/js/data/consts/index.js ->
+public/js/data/consts/dom/index.js ->
+public/js/data/consts/dom/elements.js ->
+public/js/common/dom/index.js ->
+public/js/common/dom/base.js ->
+public/js/classes/logger/index.js ->
+public/js/classes/logger/factory.js ->
+public/js/data/index.js
+
+
+2.
+public/js/data/index.js ->
+public/js/data/defaults/index.js ->
+public/js/data/defaults/colors/index.js ->
+public/js/data/defaults/colors/colors.js ->
+public/js/common/core/base.js ->
+public/js/data/index.js
+
+
+3.
+public/js/dom/index.js ->
+public/js/dom/events.js ->
+public/js/classes/ui/index.js ->
+public/js/classes/ui/UIManager.js ->
+public/js/dom/index.js
+
+4.
+public/js/dom/index.js ->
+public/js/dom/events.js ->
+public/js/classes/ui/index.js ->
+public/js/classes/ui/UIManager.js ->
+public/js/io/index.js ->
+public/js/io/base.js ->
+public/js/dom/index.js

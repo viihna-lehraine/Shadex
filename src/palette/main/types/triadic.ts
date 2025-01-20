@@ -5,10 +5,10 @@ import {
 	HSL,
 	Palette,
 	PaletteItem
-} from '../../../index/index.js';
+} from '../../../types/index.js';
 import { core, utils } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
-import { IDBManager } from '../../../classes/idb/index.js';
+import { IDBManager } from '../../../db/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
 import { ui } from '../../../ui/index.js';
 

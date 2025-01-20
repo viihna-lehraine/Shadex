@@ -1,9 +1,9 @@
 // File: src/common/utils/random.js
 
-import { CommonUtilsFnRandom, HSL, SL } from '../../index/index.js';
+import { CommonUtilsFnRandom, HSL, SL } from '../../types/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
-import { log } from '../../classes/logger/index.js';
+import { logger } from '../../logger/index.js';
 
 const defaults = data.defaults;
 const logMode = data.mode.logging;
@@ -28,24 +28,28 @@ function hsl(enableAlpha: boolean): HSL {
 
 		if (!core.validate.colorValues(hsl)) {
 			if (logMode.errors)
-				log.error(
+				logger.error(
 					`Invalid random HSL color value ${JSON.stringify(hsl)}`
 				);
 
-			const unbrandedHSL = core.base.clone(defaults.colors.hsl);
+			const unbrandedHSL = core.base.clone(
+				defaults.colors.base.unbranded.hsl
+			);
 
 			return core.brandColor.asHSL(unbrandedHSL);
 		}
 
 		if (!mode.quiet && !logMode.info)
-			log.info(`Generated randomHSL: ${JSON.stringify(hsl)}`);
+			logger.info(`Generated randomHSL: ${JSON.stringify(hsl)}`);
 
 		return hsl;
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error generating random HSL color: ${error}`);
+			logger.error(`Error generating random HSL color: ${error}`);
 
-		const unbrandedHSL = core.base.clone(defaults.colors.hsl);
+		const unbrandedHSL = core.base.clone(
+			defaults.colors.base.unbranded.hsl
+		);
 
 		return core.brandColor.asHSL(unbrandedHSL);
 	}
@@ -69,24 +73,26 @@ function sl(enableAlpha: boolean): SL {
 
 		if (!core.validate.colorValues(sl as SL)) {
 			if (logMode.errors)
-				log.error(
+				logger.error(
 					`Invalid random SV color value ${JSON.stringify(sl)}`
 				);
 
-			const unbrandedSL = core.base.clone(defaults.colors.sl);
+			const unbrandedSL = core.base.clone(
+				defaults.colors.base.unbranded.sl
+			);
 
 			return core.brandColor.asSL(unbrandedSL);
 		}
 
 		if (!mode.quiet && logMode.info)
-			log.info(`Generated randomSL: ${JSON.stringify(sl)}`);
+			logger.info(`Generated randomSL: ${JSON.stringify(sl)}`);
 
 		return sl;
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error generating random SL color: ${error}`);
+			logger.error(`Error generating random SL color: ${error}`);
 
-		const unbrandedSL = core.base.clone(defaults.colors.sl);
+		const unbrandedSL = core.base.clone(defaults.colors.base.unbranded.sl);
 
 		return core.brandColor.asSL(unbrandedSL);
 	}

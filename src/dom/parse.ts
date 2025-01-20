@@ -1,8 +1,8 @@
 // File: src/dom/parse.ts
 
-import { DOMParseFnInterface } from '../index/index.js';
+import { DOMParseFnInterface } from '../types/index.js';
 import { data } from '../data/index.js';
-import { log as logger } from '../classes/logger/index.js';
+import { logger } from '../logger/index.js';
 
 const domIDs = data.consts.dom.ids;
 const logMode = data.mode.logging;

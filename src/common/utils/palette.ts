@@ -7,11 +7,11 @@ import {
 	HSL,
 	Palette,
 	PaletteItem
-} from '../../index';
+} from '../../types/index';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
 import { helpers } from '../helpers/index.js';
-import { log } from '../../classes/logger/index.js';
+import { logger } from '../../logger/index.js';
 
 const mode = data.mode;
 const logMode = mode.logging;
@@ -30,20 +30,21 @@ function createObject(
 	return {
 		id: `${type}_${paletteID}`,
 		items,
-		flags: {
-			enableAlpha: enableAlpha,
-			limitDarkness: limitDark,
-			limitGrayness: limitGray,
-			limitLightness: limitLight
-		},
 		metadata: {
-			numBoxes,
-			paletteType: type,
+			name: '',
+			timestamp: core.getFormattedTimestamp(),
+			swatches: numBoxes,
+			type,
+			flags: {
+				enableAlpha: enableAlpha,
+				limitDarkness: limitDark,
+				limitGrayness: limitGray,
+				limitLightness: limitLight
+			},
 			customColor: {
 				hslColor: baseColor,
 				convertedColors: items[0]?.colors || {}
-			},
-			timestamp: Date.now()
+			}
 		}
 	};
 }
@@ -55,10 +56,10 @@ export function populateOutputBox(
 	try {
 		const clonedColor: Color = core.guards.isColor(color)
 			? core.base.clone(color)
-			: core.convert.toColor(color);
+			: core.convert.colorStringToColor(color);
 
 		if (!core.validate.colorValues(clonedColor)) {
-			if (logMode.errors) log.error('Invalid color values.');
+			if (logMode.errors) logger.error('Invalid color values.');
 
 			helpers.dom.showToast('Invalid color.');
 
@@ -71,16 +72,19 @@ export function populateOutputBox(
 
 		if (!colorTextOutputBox) return;
 
-		const stringifiedColor = core.convert.toCSSColorString(clonedColor);
+		const stringifiedColor =
+			core.convert.colorToCSSColorString(clonedColor);
 
 		if (!mode.quiet && logMode.info && logMode.verbosity > 0)
-			log.info(`Adding CSS-formatted color to DOM ${stringifiedColor}`);
+			logger.info(
+				`Adding CSS-formatted color to DOM ${stringifiedColor}`
+			);
 
 		colorTextOutputBox.value = stringifiedColor;
 		colorTextOutputBox.setAttribute('data-format', color.format);
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Failed to populate color text output box: ${error}`);
+			logger.error(`Failed to populate color text output box: ${error}`);
 
 		return;
 	}

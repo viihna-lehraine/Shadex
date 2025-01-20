@@ -1,8 +1,8 @@
 // File: src/io/parse/json.ts
 
-import { Palette } from '../../index/index.js';
+import { Palette } from '../../types/index.js';
 import { data } from '../../data/index.js';
-import { log as logger } from '../../classes/logger/factory.js';
+import { logger } from '../../logger/factory.js';
 
 const logMode = data.mode.logging;
 const mode = data.mode;

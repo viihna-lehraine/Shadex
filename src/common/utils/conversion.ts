@@ -13,11 +13,11 @@ import {
 	SL,
 	SV,
 	XYZ
-} from '../../index/index.js';
+} from '../../types/index.js';
 import { convert } from '../convert/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
-import { log } from '../../classes/logger/index.js';
+import { logger } from '../../logger/index.js';
 
 const mode = data.mode;
 const logMode = mode.logging;
@@ -43,7 +43,7 @@ function getConversionFn<
 			structuredClone(conversionFn(value));
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error getting conversion function: ${error}`);
+			logger.error(`Error getting conversion function: ${error}`);
 
 		return undefined;
 	}
@@ -57,7 +57,7 @@ function genAllColorValues(color: HSL): Partial<ColorDataExtended> {
 
 		if (!core.validate.colorValues(clonedColor)) {
 			if (logMode.errors)
-				log.error(`Invalid color: ${JSON.stringify(clonedColor)}`);
+				logger.error(`Invalid color: ${JSON.stringify(clonedColor)}`);
 
 			return {};
 		}
@@ -75,7 +75,7 @@ function genAllColorValues(color: HSL): Partial<ColorDataExtended> {
 		return result;
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error generating all color values: ${error}`);
+			logger.error(`Error generating all color values: ${error}`);
 
 		return {};
 	}

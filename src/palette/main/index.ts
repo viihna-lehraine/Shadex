@@ -1,6 +1,6 @@
 // File: src/palete/main/index.js
 
-import { GenPaletteFnInterface } from '../../index/index.js';
+import { GenPaletteFnInterface } from '../../types/index.js';
 import { analogous } from './types/analogous.js';
 import { complementary } from './types/complementary.js';
 import { diadic } from './types/diadic.js';

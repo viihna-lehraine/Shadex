@@ -18,9 +18,9 @@ import {
 	SL,
 	XYZ,
 	XYZString
-} from '../../../index/index.js';
+} from '../../../types/index.js';
 import { convert, core, utils } from '../../../common/index.js';
-import { idbInstance } from '../../../classes/idb/index.js';
+import { idbInstance } from '../../../db/instance.js';
 import { paletteHelpers } from '../paletteHelpers/index.js';
 
 const limits = paletteHelpers.limits;
@@ -46,7 +46,7 @@ async function paletteItem(
 		: core.brand.asAlphaRange(1);
 
 	return {
-		id: `${color.format}_${nextPaletteID}`,
+		id: nextPaletteID ?? 0, // *DEV-NOTE* re-write to auto-increment items in same palette
 		colors: {
 			cmyk: (hslTo(clonedColor, 'cmyk') as CMYK).value,
 			hex: (hslTo(clonedColor, 'hex') as Hex).value,
@@ -92,23 +92,23 @@ async function paletteItem(
 			).value
 		},
 		cssStrings: {
-			cmykCSSString: core.convert.toCSSColorString(
+			cmykCSSString: core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'cmyk')
 			),
-			hexCSSString: core.convert.toCSSColorString(
+			hexCSSString: core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'hex')
 			),
-			hslCSSString: core.convert.toCSSColorString(clonedColor),
-			hsvCSSString: core.convert.toCSSColorString(
+			hslCSSString: core.convert.colorToCSSColorString(clonedColor),
+			hsvCSSString: core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'hsv')
 			),
-			labCSSString: core.convert.toCSSColorString(
+			labCSSString: core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'lab')
 			),
-			rgbCSSString: core.convert.toCSSColorString(
+			rgbCSSString: core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'rgb')
 			),
-			xyzCSSString: core.convert.toCSSColorString(
+			xyzCSSString: core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'xyz')
 			)
 		}

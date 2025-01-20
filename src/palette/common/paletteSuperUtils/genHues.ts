@@ -1,9 +1,9 @@
 // File: src/palette/common/paletteSuperUtils/genHues.js
 
-import { HSL, PaletteCommon_SuperUtils_GenHues } from '../../../index/index.js';
+import { HSL, PaletteCommon_SuperUtils_GenHues } from '../../../types/index.js';
 import { core, utils } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
-import { log } from '../../../classes/logger/index.js';
+import { logger } from '../../../logger/index.js';
 import { paletteUtils } from '../paletteUtils/index.js';
 
 const logMode = data.mode.logging;
@@ -18,7 +18,7 @@ function analogous(color: HSL, numBoxes: number): number[] {
 	try {
 		if (!validateColorValues(color)) {
 			if (logMode.errors)
-				log.error(`Invalid color value ${JSON.stringify(color)}`);
+				logger.error(`Invalid color value ${JSON.stringify(color)}`);
 
 			return [];
 		}
@@ -42,7 +42,7 @@ function analogous(color: HSL, numBoxes: number): number[] {
 		return analogousHues;
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error generating analogous hues: ${error}`);
+			logger.error(`Error generating analogous hues: ${error}`);
 
 		return [];
 	}
@@ -60,7 +60,8 @@ function diadic(baseHue: number): number[] {
 
 		return diadicHues;
 	} catch (error) {
-		if (logMode.errors) log.error(`Error generating diadic hues: ${error}`);
+		if (logMode.errors)
+			logger.error(`Error generating diadic hues: ${error}`);
 
 		return [];
 	}
@@ -72,7 +73,9 @@ function hexadic(color: HSL): number[] {
 
 		if (!validateColorValues(clonedColor)) {
 			if (logMode.errors)
-				log.error(`Invalid color value ${JSON.stringify(clonedColor)}`);
+				logger.error(
+					`Invalid color value ${JSON.stringify(clonedColor)}`
+				);
 
 			return [];
 		}
@@ -85,11 +88,11 @@ function hexadic(color: HSL): number[] {
 					'Unable to generate hexadic hues - missing HSL values'
 				);
 			else if (logMode.errors)
-				log.error(
+				logger.error(
 					'Unable to generate hexadic hues - missing HSL values'
 				);
 			else if (!mode.quiet && logMode.verbosity > 0)
-				log.error('Error generating hexadic hues');
+				logger.error('Error generating hexadic hues');
 
 			return [];
 		}
@@ -109,7 +112,7 @@ function hexadic(color: HSL): number[] {
 		return hexadicHues;
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error generating hexadic hues: ${error}`);
+			logger.error(`Error generating hexadic hues: ${error}`);
 
 		return [];
 	}
@@ -126,7 +129,7 @@ function splitComplementary(baseHue: number): number[] {
 		];
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error generating split complementary hues: ${error}`);
+			logger.error(`Error generating split complementary hues: ${error}`);
 
 		return [];
 	}
@@ -147,7 +150,7 @@ function tetradic(baseHue: number): number[] {
 		];
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error generating tetradic hues: ${error}`);
+			logger.error(`Error generating tetradic hues: ${error}`);
 
 		return [];
 	}
@@ -160,7 +163,7 @@ function triadic(baseHue: number): number[] {
 		return [120, 240].map(increment => (clonedBaseHue + increment) % 360);
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error generating triadic hues: ${error}`);
+			logger.error(`Error generating triadic hues: ${error}`);
 
 		return [];
 	}

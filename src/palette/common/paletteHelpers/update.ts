@@ -4,7 +4,7 @@ import {
 	Color,
 	HSL,
 	PaletteCommon_Helpers_Update
-} from '../../../index/index.js';
+} from '../../../types/index.js';
 import { core, utils } from '../../../common/index.js';
 
 function colorBox(color: HSL, index: number): void {
@@ -16,7 +16,7 @@ function colorBox(color: HSL, index: number): void {
 
 		if (selectedColor) {
 			const hslColor = colorValues.hsl as HSL;
-			const hslCSSString = core.convert.toCSSColorString(hslColor);
+			const hslCSSString = core.convert.colorToCSSColorString(hslColor);
 
 			colorBox.style.backgroundColor = hslCSSString;
 

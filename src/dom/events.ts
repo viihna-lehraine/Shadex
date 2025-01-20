@@ -5,15 +5,15 @@ import {
 	HSL,
 	IOFormat,
 	PaletteOptions
-} from '../index/index.js';
+} from '../types/index.js';
 import { core, superUtils, utils } from '../common/index.js';
 import { data } from '../data/index.js';
 import { parse } from './parse.js';
-import { IDBManager } from '../classes/idb/index.js';
-import { log } from '../classes/logger/index.js';
+import { IDBManager } from '../db/index.js';
+import { logger } from '../logger/index.js';
 import { mode } from '../data/mode/index.js';
 import { start } from '../palette/index.js';
-import { UIManager } from '../classes/ui/index.js';
+import { UIManager } from '../ui/index.js';
 
 const buttonDebounce = data.consts.debounce.button || 300;
 const domIDs = data.consts.dom.ids;
@@ -34,7 +34,7 @@ function addEventListener<K extends keyof HTMLElementEventMap>(
 		element.addEventListener(eventType, callback);
 	} else if (logMode.warnings) {
 		if (mode.debug && logMode.warnings && logMode.verbosity > 2)
-			log.warning(`Element with id "${id}" not found.`);
+			logger.warning(`Element with id "${id}" not found.`);
 	}
 }
 
@@ -44,7 +44,7 @@ const handlePaletteGen = core.base.debounce(() => {
 
 		if (!params) {
 			if (logMode.errors) {
-				log.error('Failed to retrieve generateButton parameters');
+				logger.error('Failed to retrieve generateButton parameters');
 			}
 
 			return;
@@ -62,7 +62,7 @@ const handlePaletteGen = core.base.debounce(() => {
 
 		if (!paletteType || !numBoxes) {
 			if (logMode.errors) {
-				log.error('paletteType and/or numBoxes are undefined');
+				logger.error('paletteType and/or numBoxes are undefined');
 			}
 
 			return;
@@ -81,7 +81,7 @@ const handlePaletteGen = core.base.debounce(() => {
 		start.genPalette(options);
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Failed to handle generate button click: ${error}`);
+			logger.error(`Failed to handle generate button click: ${error}`);
 	}
 }, buttonDebounce);
 
@@ -97,7 +97,7 @@ function initializeEventListeners(): void {
 			}
 		} else {
 			if (logMode.warnings)
-				log.warning(`Element with id "${id}" not found.`);
+				logger.warning(`Element with id "${id}" not found.`);
 		}
 	};
 
@@ -135,7 +135,7 @@ function initializeEventListeners(): void {
 			);
 
 			if (!mode.quiet && logMode.info)
-				log.info('Custom color saved to IndexedDB');
+				logger.info('Custom color saved to IndexedDB');
 
 			// *DEV-NOTE* unfinished, I think? Double-check this
 		}
@@ -149,7 +149,8 @@ function initializeEventListeners(): void {
 
 			uiElements.customColorInput!.value = '#ff0000';
 
-			if (!mode.quiet && logMode.info) log.info('Custom color cleared');
+			if (!mode.quiet && logMode.info)
+				logger.info('Custom color cleared');
 		}
 	);
 
@@ -184,7 +185,9 @@ function initializeEventListeners(): void {
 			// only allow if application is in development mode
 			if (mode.environment === 'prod') {
 				if (logMode.warnings) {
-					log.warning('Cannot delete database in production mode.');
+					logger.warning(
+						'Cannot delete database in production mode.'
+					);
 				}
 
 				return;
@@ -202,7 +205,7 @@ function initializeEventListeners(): void {
 				alert('Database deleted successfully!');
 			} catch (error) {
 				if (logMode.errors)
-					log.error(`Failed to delete database: ${error}`);
+					logger.error(`Failed to delete database: ${error}`);
 
 				alert('Failed to delete database.');
 			}
@@ -220,7 +223,7 @@ function initializeEventListeners(): void {
 				: 0;
 
 			if (!mode.quiet && logMode.clicks)
-				log.info('desaturateButton clicked');
+				logger.info('desaturateButton clicked');
 
 			uiManager.desaturateColor(selectedColor);
 		}
@@ -234,7 +237,7 @@ function initializeEventListeners(): void {
 
 			if (mode.environment === 'prod') {
 				if (!mode.quiet && logMode.errors)
-					log.error(
+					logger.error(
 						'Cannot access developer menu in production mode.'
 					);
 
@@ -255,7 +258,7 @@ function initializeEventListeners(): void {
 			const format = parse.paletteExportFormat() as IOFormat;
 
 			if (mode.debug && logMode.info && logMode.verbosity > 1)
-				log.info(
+				logger.info(
 					`Export Palette Button click event: Export format selected: ${format}`
 				);
 
@@ -277,7 +280,7 @@ function initializeEventListeners(): void {
 		} = uiManager.pullParamsFromUI();
 
 		if (logMode.info && logMode.verbosity > 1)
-			log.info(
+			logger.info(
 				'Generate Button click event: Retrieved parameters from UI.'
 			);
 
@@ -287,7 +290,7 @@ function initializeEventListeners(): void {
 			customColor = utils.random.hsl(true);
 		} else {
 			if (mode.debug && logMode.info)
-				log.info(
+				logger.info(
 					`User-generated Custom Color found in IndexedDB: ${JSON.stringify(
 						customColor
 					)}`
@@ -305,16 +308,16 @@ function initializeEventListeners(): void {
 		};
 
 		if (mode.debug && logMode.info) {
-			log.info(`paletteOptions object data:`);
-			log.info(`paletteType: ${paletteOptions.paletteType}`);
-			log.info(`numBoxes: ${paletteOptions.numBoxes}`);
-			log.info(
+			logger.info(`paletteOptions object data:`);
+			logger.info(`paletteType: ${paletteOptions.paletteType}`);
+			logger.info(`numBoxes: ${paletteOptions.numBoxes}`);
+			logger.info(
 				`customColor: ${JSON.stringify(paletteOptions.customColor)}`
 			);
-			log.info(`enableAlpha: ${paletteOptions.enableAlpha}`);
-			log.info(`limitDarkness: ${paletteOptions.limitDarkness}`);
-			log.info(`limitGrayness: ${paletteOptions.limitGrayness}`);
-			log.info(`limitLightness: ${paletteOptions.limitLightness}`);
+			logger.info(`enableAlpha: ${paletteOptions.enableAlpha}`);
+			logger.info(`limitDarkness: ${paletteOptions.limitDarkness}`);
+			logger.info(`limitGrayness: ${paletteOptions.limitGrayness}`);
+			logger.info(`limitLightness: ${paletteOptions.limitLightness}`);
 		}
 
 		await start.genPalette(paletteOptions);
@@ -370,7 +373,7 @@ function initializeEventListeners(): void {
 
 			if (mode.environment === 'prod') {
 				if (!mode.quiet && logMode.errors)
-					log.error('Cannot reset database in production mode.');
+					logger.error('Cannot reset database in production mode.');
 
 				return;
 			}
@@ -385,12 +388,12 @@ function initializeEventListeners(): void {
 				IDBManager.getInstance().resetDatabase();
 
 				if (!mode.quiet && logMode.info)
-					log.info('Database has been successfully reset.');
+					logger.info('Database has been successfully reset.');
 
 				alert('IndexedDB successfully reset!');
 			} catch (error) {
 				if (logMode.errors)
-					log.error(`Failed to reset database: ${error}`);
+					logger.error(`Failed to reset database: ${error}`);
 
 				if (mode.showAlerts) alert('Failed to reset database.');
 			}
@@ -405,7 +408,7 @@ function initializeEventListeners(): void {
 
 			if (mode.environment === 'prod') {
 				if (!mode.quiet && logMode.errors)
-					log.error('Cannot reset palette ID in production mode.');
+					logger.error('Cannot reset palette ID in production mode.');
 
 				return;
 			}
@@ -420,12 +423,12 @@ function initializeEventListeners(): void {
 				await idb.resetPaletteID();
 
 				if (!mode.quiet && logMode.info)
-					log.info('Palette ID has been successfully reset.');
+					logger.info('Palette ID has been successfully reset.');
 
 				if (mode.showAlerts) alert('Palette ID reset successfully!');
 			} catch (error) {
 				if (logMode.errors)
-					log.error(`Failed to reset palette ID: ${error}`);
+					logger.error(`Failed to reset palette ID: ${error}`);
 
 				if (mode.showAlerts) alert('Failed to reset palette ID.');
 			}

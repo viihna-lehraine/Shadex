@@ -1,6 +1,6 @@
 // File: src/dom/fileUtils.ts
 
-import { DOMFileUtilsFnInterface } from '../index/index.js';
+import { DOMFileUtilsFnInterface } from '../types/index.js';
 
 function download(data: string, filename: string, type: string): void {
 	const blob = new Blob([data], { type });

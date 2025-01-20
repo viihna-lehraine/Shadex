@@ -8,7 +8,7 @@ import {
 	ProbabilitiesData,
 	ThresholdsData,
 	TimeoutsData
-} from '../../index/index.js';
+} from '../../types/index.js';
 
 export const adjustments: AdjustmentsData = {
 	slaValue: 10

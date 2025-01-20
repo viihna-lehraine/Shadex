@@ -4,13 +4,12 @@ import {
 	Color,
 	ColorInputElement,
 	ColorString,
-	CommonHelpersDOM,
-	CommonHelpersDOM_Handle,
+	CommonFunctionsMasterInterface,
 	MakePaletteBox
-} from '../../index/index.js';
+} from '../../types/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
-import { log } from '../../classes/logger/index.js';
+import { logger } from '../../logger/index.js';
 
 const logMode = data.mode.logging;
 const mode = data.mode;
@@ -28,10 +27,10 @@ function attachDragAndDropListeners(element: HTMLElement | null): void {
 		}
 
 		if (!mode.quiet)
-			log.info('Drag and drop event listeners successfully attached');
+			logger.info('Drag and drop event listeners successfully attached');
 	} catch (error) {
 		if (!logMode.errors)
-			log.error(
+			logger.error(
 				`Failed to execute attachDragAndDropEventListeners: ${error}`
 			);
 	}
@@ -47,9 +46,9 @@ function dragStart(e: DragEvent): void {
 		}
 
 		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
-			log.info('handleDragStart complete');
+			logger.info('handleDragStart complete');
 	} catch (error) {
-		if (logMode.errors) log.error(`Error in handleDragStart: ${error}`);
+		if (logMode.errors) logger.error(`Error in handleDragStart: ${error}`);
 	}
 }
 
@@ -62,11 +61,11 @@ function dragOver(e: DragEvent): boolean {
 		}
 
 		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
-			log.info('handleDragOver complete');
+			logger.info('handleDragOver complete');
 
 		return false;
 	} catch (error) {
-		if (logMode.errors) log.error(`Error in handleDragOver: ${error}`);
+		if (logMode.errors) logger.error(`Error in handleDragOver: ${error}`);
 
 		return false;
 	}
@@ -83,7 +82,7 @@ function dragEnd(e: DragEvent): void {
 		});
 
 		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
-			log.info('handleDragEnd complete');
+			logger.info('handleDragEnd complete');
 	} catch (error) {
 		if (logMode.errors) console.error(`Error in handleDragEnd: ${error}`);
 	}
@@ -136,7 +135,7 @@ function drop(e: DragEvent): void {
 			).value = dragSrcText;
 
 			if (!mode.quiet && mode.debug && logMode.verbosity > 3)
-				log.info(
+				logger.info(
 					'calling attachDragAndDropEventListeners for new elements'
 				);
 
@@ -146,9 +145,9 @@ function drop(e: DragEvent): void {
 		}
 
 		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
-			log.info('handleDrop complete');
+			logger.info('handleDrop complete');
 	} catch (error) {
-		if (!logMode.errors) log.error(`Error in handleDrop: ${error}`);
+		if (!logMode.errors) logger.error(`Error in handleDrop: ${error}`);
 	}
 }
 
@@ -184,7 +183,7 @@ function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 		colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
 		colorTextOutputBox.setAttribute('data-format', 'hex');
 
-		const colorString = core.convert.toCSSColorString(clonedColor);
+		const colorString = core.convert.colorToCSSColorString(clonedColor);
 
 		colorTextOutputBox.value = colorString || '';
 		colorTextOutputBox.colorValues = clonedColor;
@@ -214,7 +213,7 @@ function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 					data.consts.timeouts.copyButtonText || 1000
 				);
 			} catch (error) {
-				if (!logMode.errors) log.error(`Failed to copy: ${error}`);
+				if (!logMode.errors) logger.error(`Failed to copy: ${error}`);
 			}
 		});
 
@@ -272,7 +271,7 @@ function makePaletteBox(color: Color, paletteBoxCount: number): MakePaletteBox {
 		};
 	} catch (error) {
 		if (!logMode.errors)
-			log.error(`Failed to execute makePaletteBox: ${error}`);
+			logger.error(`Failed to execute makePaletteBox: ${error}`);
 
 		return {
 			colorStripe: document.createElement('div'),
@@ -290,13 +289,14 @@ function showToast(message: string): void {
 
 	document.body.appendChild(toast);
 
-	if (!mode.quiet && logMode.verbosity > 3) log.info('Toast message added');
+	if (!mode.quiet && logMode.verbosity > 3)
+		logger.info('Toast message added');
 
 	setTimeout(() => {
 		toast.classList.add('fade-out');
 
 		if (!mode.quiet && logMode.verbosity > 3)
-			log.info('Toast message faded out');
+			logger.info('Toast message faded out');
 
 		toast.addEventListener('transitioned', () => toast.remove());
 	}, timeouts.toast || 3000);
@@ -317,10 +317,10 @@ function showTooltip(tooltipElement: HTMLElement): void {
 		}
 
 		if (!mode.quiet && logMode.verbosity > 3)
-			log.info('showTooltip executed');
+			logger.info('showTooltip executed');
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Failed to execute showTooltip: ${error}`);
+			logger.error(`Failed to execute showTooltip: ${error}`);
 	}
 }
 
@@ -330,12 +330,12 @@ function validateAndConvertColor(
 	if (!color) return null;
 
 	const convertedColor = core.guards.isColorString(color)
-		? core.convert.toColor(color)
+		? core.convert.colorStringToColor(color)
 		: color;
 
 	if (!core.validate.colorValues(convertedColor)) {
 		if (logMode.errors)
-			log.error(`Invalid color: ${JSON.stringify(convertedColor)}`);
+			logger.error(`Invalid color: ${JSON.stringify(convertedColor)}`);
 
 		return null;
 	}
@@ -343,16 +343,14 @@ function validateAndConvertColor(
 	return convertedColor;
 }
 
-const handle: CommonHelpersDOM_Handle = {
-	dragStart,
-	dragOver,
-	dragEnd,
-	drop
-};
-
-export const dom: CommonHelpersDOM = {
+export const dom: CommonFunctionsMasterInterface['helpers']['dom'] = {
 	attachDragAndDropListeners,
-	handle,
+	handle: {
+		dragStart,
+		dragOver,
+		dragEnd,
+		drop
+	},
 	makePaletteBox,
 	showToast,
 	showTooltip,

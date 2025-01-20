@@ -1,6 +1,6 @@
 // File: src/data/consts/index.js
 
-import { ConstsData } from '../../index/index.js';
+import { ConstsData } from '../../types/index.js';
 import {
 	adjustments,
 	debounce,

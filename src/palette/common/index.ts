@@ -1,6 +1,6 @@
 // File: src/palette/common/index.js
 
-import { PaletteCommon } from '../../index/index.js';
+import { PaletteCommon } from '../../types/index.js';
 import { paletteHelpers } from './paletteHelpers/index.js';
 import { paletteSuperUtils } from './paletteSuperUtils/index.js';
 import { paletteUtils } from './paletteUtils/index.js';

@@ -1,6 +1,6 @@
 // File: src/data/defaults/idb.js
 
-import { IDBDefaultsData, MutationLog } from '../../index/index.js';
+import { DefaultIDBData, MutationLog } from '../../types/index.js';
 
 const mutation: MutationLog = {
 	timestamp: new Date().toISOString(),
@@ -11,6 +11,6 @@ const mutation: MutationLog = {
 	origin: 'DEFAULT'
 };
 
-export const idb: IDBDefaultsData = {
+export const idb: DefaultIDBData = {
 	mutation
 } as const;

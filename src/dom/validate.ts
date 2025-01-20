@@ -1,8 +1,8 @@
 // File: src/dom/validate.ts
 
-import { DOMValidateFnInterface } from '../index/index.js';
+import { DOMValidateFnInterface } from '../types/index.js';
 import { data } from '../data/index.js';
-import { log } from '../classes/logger/index.js';
+import { logger } from '../logger/index.js';
 
 const logMode = data.mode.logging;
 const mode = data.mode;
@@ -15,21 +15,22 @@ function validateElements(): void {
 		const element = document.getElementById(id);
 
 		if (!element) {
-			if (logMode.errors) log.error(`Element with ID "${id}" not found`);
+			if (logMode.errors)
+				logger.error(`Element with ID "${id}" not found`);
 			missingElements.push(id);
 		}
 	});
 
 	if (missingElements.length) {
 		if (logMode.warnings)
-			log.warning(
+			logger.warning(
 				`Some DOM elements are missing (${missingElements.length}): ${missingElements.join(
 					', '
 				)}`
 			);
 	} else {
 		if (logMode.info && mode.debug && logMode.verbosity > 1)
-			log.info('All required DOM elements are present.');
+			logger.info('All required DOM elements are present.');
 	}
 }
 

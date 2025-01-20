@@ -5,10 +5,10 @@ import {
 	HSL,
 	Palette,
 	PaletteItem
-} from '../../../index/index.js';
+} from '../../../types/index.js';
 import { core, utils } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
-import { IDBManager } from '../../../classes/idb/index.js';
+import { IDBManager } from '../../../db/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
 import { ui } from '../../../ui/index.js';
 
@@ -18,7 +18,6 @@ const paletteRanges = data.consts.paletteRanges;
 
 const idb = IDBManager.getInstance();
 
-// *DEV-NOTE* update to reflect the fact this will always return 4 color swatches
 export async function tetradic(args: GenPaletteArgs): Promise<Palette> {
 	// ensure exactly 4 swatches
 	if (args.numBoxes !== 4) {
@@ -39,6 +38,7 @@ export async function tetradic(args: GenPaletteArgs): Promise<Palette> {
 		baseColor,
 		args.enableAlpha
 	);
+
 	paletteItems.push(basePaletteItem);
 
 	// add the tetradic colors sequentially

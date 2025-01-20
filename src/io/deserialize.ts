@@ -1,87 +1,278 @@
 // File: src/io/deserialize.ts
 
 import {
-	CMYK,
-	CMYKValue,
 	CMYKValueString,
-	Hex,
-	HexValue,
 	HexValueString,
 	HSL,
-	HSLValue,
 	HSLValueString,
-	HSV,
-	HSVValue,
 	HSVValueString,
-	IO_Fn_DeserializeInterface,
-	LAB,
-	LABValue,
+	IO_Interface,
 	LABValueString,
 	Palette,
 	PaletteItem,
-	PaletteType,
-	RGB,
-	RGBValue,
 	RGBValueString,
-	XYZ,
-	XYZValue,
 	XYZValueString
-} from '../index/index.js';
+} from '../types/index.js';
 import { common } from '../common/index.js';
 import { data } from '../data/index.js';
-import { log as logger } from '../classes/logger/factory.js';
+import { logger } from '../logger/factory.js';
 import { parse } from './parse/index.js';
 
+const config = data.config;
+const defaultColors = {
+	cmyk: data.defaults.colors.base.branded.cmyk,
+	hex: data.defaults.colors.base.branded.hex,
+	hsl: data.defaults.colors.base.branded.hsl,
+	hsv: data.defaults.colors.base.branded.hsv,
+	lab: data.defaults.colors.base.branded.lab,
+	rgb: data.defaults.colors.base.branded.rgb,
+	xyz: data.defaults.colors.base.branded.xyz
+};
+const mode = data.mode;
 const logMode = data.mode.logging;
+const regex = config.regex;
 
-const parseColorString = parse.data.asColorString;
-
+const brand = common.core.brand;
+const getFormattedTimestamp = common.core.getFormattedTimestamp;
 const convertToColorString = common.utils.color.colorToColorString;
-const convertToCSSColorString = common.core.convert.toCSSColorString;
+const convertToCSSColorString = common.core.convert.colorToCSSColorString;
 
 async function fromCSS(data: string): Promise<Palette> {
 	try {
-		// 1: asynchronously extract Palette ID from the CSS file header
-		const id =
-			(await parse.css.header(data)) ?? ('ERROR_(PALETTE_ID)' as string);
+		// 1. parse metadata
+		const metadataMatch = data.match(regex.file.palette.css.metadata);
+		const metadataRaw = metadataMatch ? metadataMatch[1] : '{}';
+		const metadataJSON = JSON.parse(metadataRaw);
 
-		// 2: parse palette items asynchronously from the CSS file
-		const items = await parse.css.paletteItems(data);
+		// 2. extract individual metadata properties
+		const id = metadataJSON.id || 'ERROR_(PALETTE_ID)';
+		const name = metadataJSON.name || undefined;
+		const swatches = metadataJSON.swatches || 1;
+		const type = metadataJSON.type || '???';
+		const timestamp = metadataJSON.timestamp || getFormattedTimestamp();
 
-		// 3: parse settings asynchronously from the CSS file
-		const settings = (await parse.css.settings(data)) ?? {
-			enableAlpha: false,
-			limitDarkness: false,
-			limitGrayness: false,
-			limitLightness: false
+		// 3. parse flags
+		const flags = {
+			enableAlpha: metadataJSON.flags?.enableAlpha || false,
+			limitDarkness: metadataJSON.flags?.limitDarkness || false,
+			limitGrayness: metadataJSON.flags?.limitGrayness || false,
+			limitLightness: metadataJSON.flags?.limitLightness || false
 		};
 
-		// 4: return the deserialized palette object
+		// 4. parse custom color if provided
+		const { customColor: rawCustomColor } = metadataJSON;
+		const customColor =
+			rawCustomColor && rawCustomColor.hslColor
+				? {
+						hslColor: {
+							value: {
+								hue: brand.asRadial(
+									rawCustomColor.hslColor.value?.hue ?? 0
+								),
+								saturation: brand.asPercentile(
+									rawCustomColor.hslColor.value?.saturation ??
+										0
+								),
+								lightness: brand.asPercentile(
+									rawCustomColor.hslColor.value?.lightness ??
+										0
+								)
+							},
+							format: 'hsl'
+						} as HSL,
+						convertedColors: {
+							cmyk:
+								rawCustomColor.convertedColors?.cmyk ??
+								defaultColors.cmyk.value,
+							hex:
+								rawCustomColor.convertedColors?.hex ??
+								defaultColors.hex.value,
+							hsl:
+								rawCustomColor.convertedColors?.hsl ??
+								defaultColors.hsl.value,
+							hsv:
+								rawCustomColor.convertedColors?.hsv ??
+								defaultColors.hsv.value,
+							lab:
+								rawCustomColor.convertedColors?.lab ??
+								defaultColors.lab.value,
+							rgb:
+								rawCustomColor.convertedColors?.rgb ??
+								defaultColors.rgb.value,
+							xyz:
+								rawCustomColor.convertedColors?.xyz ??
+								defaultColors.xyz.value
+						}
+					}
+				: false;
+		if (!customColor) {
+			if (!mode.quiet && logMode.info && logMode.verbosity > 1) {
+				logger.info(
+					`No custom color data found in CSS file. Assigning boolean value 'false' for Palette property Palette['metadata']['customColor'].`
+				);
+			}
+		}
+
+		// 5. parse palette items
+		const items: PaletteItem[] = [];
+		const itemBlocks = Array.from(
+			data.matchAll(regex.file.palette.css.color)
+		);
+
+		for (const match of itemBlocks) {
+			const itemID = match[1];
+			const properties = match[2].split(';').reduce(
+				(acc, line) => {
+					const [key, value] = line.split(':').map(s => s.trim());
+
+					if (key && value) {
+						acc[key.replace('--', '')] = value.replace(/[";]/g, '');
+					}
+
+					return acc;
+				},
+				{} as Record<string, string>
+			);
+
+			// 2.1. create each PaletteItem with required properties
+			items.push({
+				id: parseFloat(itemID) ?? 0,
+				colors: {
+					cmyk:
+						parse.asColorValue.cmyk(properties.cmyk) ??
+						defaultColors.cmyk.value,
+					hex:
+						parse.asColorValue.hex(properties.hex) ??
+						defaultColors.hex.value,
+					hsl:
+						parse.asColorValue.hsl(properties.hsl) ??
+						defaultColors.hsl.value,
+					hsv:
+						parse.asColorValue.hsv(properties.hsv) ??
+						defaultColors.hsv.value,
+					lab:
+						parse.asColorValue.lab(properties.lab) ??
+						defaultColors.lab.value,
+					rgb:
+						parse.asColorValue.rgb(properties.rgb) ??
+						defaultColors.rgb.value,
+					xyz:
+						parse.asColorValue.xyz(properties.xyz) ??
+						defaultColors.xyz.value
+				},
+				colorStrings: {
+					cmykString: convertToColorString({
+						value:
+							parse.asColorValue.cmyk(properties.cmyk) ??
+							defaultColors.cmyk,
+						format: 'cmyk'
+					}).value as CMYKValueString,
+					hexString: convertToColorString({
+						value:
+							parse.asColorValue.hex(properties.hex) ??
+							defaultColors.hex,
+						format: 'hex'
+					}).value as HexValueString,
+					hslString: convertToColorString({
+						value:
+							parse.asColorValue.hsl(properties.hsl) ??
+							defaultColors.hsl,
+						format: 'hsl'
+					}).value as HSLValueString,
+					hsvString: convertToColorString({
+						value:
+							parse.asColorValue.hsv(properties.hsv) ??
+							defaultColors.hsv,
+						format: 'hsv'
+					}).value as HSVValueString,
+					labString: convertToColorString({
+						value:
+							parse.asColorValue.lab(properties.lab) ??
+							defaultColors.lab,
+						format: 'lab'
+					}).value as LABValueString,
+					rgbString: convertToColorString({
+						value:
+							parse.asColorValue.rgb(properties.rgb) ??
+							defaultColors.rgb,
+						format: 'rgb'
+					}).value as RGBValueString,
+					xyzString: convertToColorString({
+						value:
+							parse.asColorValue.xyz(properties.xyz) ??
+							defaultColors.xyz,
+						format: 'xyz'
+					}).value as XYZValueString
+				},
+				cssStrings: {
+					cmykCSSString: convertToCSSColorString({
+						value:
+							parse.asColorValue.cmyk(properties.cmyk) ??
+							defaultColors.cmyk,
+						format: 'cmyk'
+					}),
+					hexCSSString: convertToCSSColorString({
+						value:
+							parse.asColorValue.hex(properties.hex) ??
+							defaultColors.hex,
+						format: 'hex'
+					}),
+					hslCSSString: convertToCSSColorString({
+						value:
+							parse.asColorValue.hsl(properties.hsl) ??
+							defaultColors.hsl,
+						format: 'hsl'
+					}),
+					hsvCSSString: convertToCSSColorString({
+						value:
+							parse.asColorValue.hsv(properties.hsv) ??
+							defaultColors.hsv,
+						format: 'hsv'
+					}),
+					labCSSString: convertToCSSColorString({
+						value:
+							parse.asColorValue.lab(properties.lab) ??
+							defaultColors.lab,
+						format: 'lab'
+					}),
+					rgbCSSString: convertToCSSColorString({
+						value:
+							parse.asColorValue.rgb(properties.rgb) ??
+							defaultColors.rgb,
+						format: 'rgb'
+					}),
+					xyzCSSString: convertToCSSColorString({
+						value:
+							parse.asColorValue.xyz(properties.xyz) ??
+							defaultColors.xyz,
+						format: 'xyz'
+					})
+				}
+			});
+		}
+
+		// 4. construct and return the palette object
 		return {
 			id,
 			items,
-			flags: {
-				enableAlpha: settings.enableAlpha,
-				limitDarkness: settings.limitDarkness,
-				limitGrayness: settings.limitGrayness,
-				limitLightness: settings.limitLightness
-			},
 			metadata: {
-				numBoxes: items.length, // Total number of parsed PaletteItems
-				paletteType: 'random', // *DEV-NOTE* write a way to parse from file
-				timestamp: Date.now() // *DEV-NOTE* write a way to parse from file
+				customColor,
+				flags,
+				name,
+				swatches,
+				type,
+				timestamp
 			}
 		};
 	} catch (error) {
-		// handle parsing errors or unexpected failures
-		console.error('Error in fromCSS:', error);
+		if (logMode.errors && logMode.verbosity > 1)
+			logger.error(`Error occurred during CSS deserialization: ${error}`);
 
 		throw new Error('Failed to deserialize CSS Palette.');
 	}
 }
 
 async function fromJSON(data: string): Promise<Palette> {
-	// *DEV-NOTE* revisit THE FUCK out of this
 	try {
 		const parsed = JSON.parse(data);
 
@@ -122,148 +313,177 @@ async function fromXML(data: string): Promise<Palette> {
 		throw new Error('Missing <Palette> root element.');
 	}
 
-	const rawID = paletteElement.getAttribute('id') || 'ERROR_(PALETTE_ID)';
-	const enableAlpha =
-		paletteElement.querySelector('EnableAlpha')?.textContent === 'true';
-	const limitDarkness =
-		paletteElement.querySelector('LimitDarkness')?.textContent === 'true';
-	const limitGrayness =
-		paletteElement.querySelector('LimitGrayness')?.textContent === 'true';
-	const limitLightness =
-		paletteElement.querySelector('LimitLightness')?.textContent === 'true';
-	const numBoxes = parseInt(
-		paletteElement.querySelector('NumBoxes')?.textContent || '0',
-		10
-	);
-	const paletteType =
-		(paletteElement.querySelector('PaletteType')
-			?.textContent as PaletteType) || 'ERROR';
-	const rawHSLColor = paletteElement.querySelector('HSLColor')?.textContent;
-	const hslColor: HSL | null = rawHSLColor
-		? (parseColorString('hsl', rawHSLColor) as HSL)
-		: null;
-	const rawConvertedColors =
-		paletteElement.querySelector('ConvertedColors')?.textContent;
-	const convertedColors =
-		rawConvertedColors && rawConvertedColors.trim()
-			? (JSON.parse(rawConvertedColors) as {
-					cmyk: CMYKValue;
-					hex: HexValue;
-					hsl: HSLValue;
-					hsv: HSVValue;
-					lab: LABValue;
-					rgb: RGBValue;
-					xyz: XYZValue;
-				})
-			: null;
-	const customColor = {
-		hslColor,
-		convertedColors
-	};
-	const timestamp = parseInt(
-		paletteElement.querySelector('Timestamp')?.textContent ||
-			`${Date.now()}`
-	);
-	const rawColors = {
-		cmyk: paletteElement.querySelector('CMYK')?.textContent,
-		hex: paletteElement.querySelector('Hex')?.textContent,
-		hsl: paletteElement.querySelector('HSL')?.textContent,
-		hsv: paletteElement.querySelector('HSV')?.textContent,
-		lab: paletteElement.querySelector('LAB')?.textContent,
-		rgb: paletteElement.querySelector('RGB')?.textContent,
-		xyz: paletteElement.querySelector('XYZ')?.textContent
-	};
+	// 1. parse metadata
+	const id = paletteElement.getAttribute('id') || 'ERROR_(PALETTE_ID)';
+	const metadataElement = paletteElement.querySelector('Metadata');
 
-	if (
-		rawColors.cmyk !== '' ||
-		rawColors.hex !== '' ||
-		rawColors.hsl !== '' ||
-		rawColors.hsv !== '' ||
-		rawColors.lab !== '' ||
-		rawColors.rgb !== '' ||
-		rawColors.xyz !== ''
-	) {
-		if (logMode.errors) {
-			logger.error(
-				'Palette deserialization error: Found unexpected color values.'
-			);
-		}
-
-		throw new Error('Unexpected color values found in Palette.');
+	if (!metadataElement) {
+		throw new Error('Missing <Metadata> element in XML.');
 	}
 
-	const cmyk = parseColorString('cmyk', rawColors.cmyk) as CMYK;
-	const cmykColorString = convertToColorString(cmyk);
-	const cmykCSSString = convertToCSSColorString(cmyk);
+	const name =
+		metadataElement.querySelector('Name')?.textContent || 'Unnamed Palette';
+	const timestamp =
+		metadataElement.querySelector('Timestamp')?.textContent ||
+		new Date().toISOString();
+	const swatches = parseInt(
+		metadataElement.querySelector('Swatches')?.textContent || '0',
+		10
+	);
+	const type = metadataElement.querySelector('Type')?.textContent || '???';
 
-	const hex = parseColorString('hex', rawColors.hex) as Hex;
-	const hexColortring = convertToColorString(hex);
-	const hexCSSString = convertToCSSColorString(hex);
+	const flagsElement = metadataElement.querySelector('Flags');
+	const flags = {
+		enableAlpha:
+			flagsElement?.querySelector('EnableAlpha')?.textContent === 'true',
+		limitDarkness:
+			flagsElement?.querySelector('LimitDarkness')?.textContent ===
+			'true',
+		limitGrayness:
+			flagsElement?.querySelector('LimitGrayness')?.textContent ===
+			'true',
+		limitLightness:
+			flagsElement?.querySelector('LimitLightness')?.textContent ===
+			'true'
+	};
 
-	const hsl = parseColorString('hsl', rawColors.hsl) as HSL;
-	const hslColorString = convertToColorString(hsl);
-	const hslCSSString = convertToCSSColorString(hsl);
+	const customColorElement = metadataElement.querySelector('CustomColor');
 
-	const hsv = parseColorString('hsv', rawColors.hsv) as HSV;
-	const hsvColorString = convertToColorString(hsv);
-	const hsvCSSString = convertToCSSColorString(hsv);
+	let customColor: Palette['metadata']['customColor'] = false;
 
-	const lab = parseColorString('lab', rawColors.lab) as LAB;
-	const labColorString = convertToColorString(lab);
-	const labCSSString = convertToCSSColorString(lab);
+	if (customColorElement && customColorElement.textContent !== 'false') {
+		customColor = {
+			hslColor: {
+				value: parse.color.hsl(
+					customColorElement.querySelector('HSL')?.textContent || null
+				),
+				format: 'hsl'
+			},
+			convertedColors: {
+				cmyk: parse.color.cmyk(
+					customColorElement.querySelector('CMYK')?.textContent ||
+						null
+				),
+				hex: parse.color.hex(
+					customColorElement.querySelector('Hex')?.textContent || null
+				),
+				hsl: parse.color.hsl(
+					customColorElement.querySelector('HSL')?.textContent || null
+				),
+				hsv: parse.color.hsv(
+					customColorElement.querySelector('HSV')?.textContent || null
+				),
+				lab: parse.color.lab(
+					customColorElement.querySelector('LAB')?.textContent || null
+				),
+				rgb: parse.color.rgb(
+					customColorElement.querySelector('RGB')?.textContent || null
+				),
+				xyz: parse.color.xyz(
+					customColorElement.querySelector('XYZ')?.textContent || null
+				)
+			}
+		};
+	}
 
-	const rgb = parseColorString('rgb', rawColors.rgb) as RGB;
-	const rgbColorString = convertToColorString(rgb);
-	const rgbCSSString = convertToCSSColorString(rgb);
-
-	const xyz = parseColorString('xyz', rawColors.xyz) as XYZ;
-	const xyzColorString = convertToColorString(xyz);
-	const xyzCSSString = convertToCSSColorString(xyz);
-
+	// 2. parse palette items
 	const items: PaletteItem[] = Array.from(
 		paletteElement.querySelectorAll('PaletteItem')
-	).map(item => {
-		const id = item.getAttribute('id') || '';
+	).map(itemElement => {
+		const id = parseInt(itemElement.getAttribute('id') || '0', 10);
+
 		const colors = {
-			cmyk: cmyk.value,
-			hex: hex.value,
-			hsl: hsl.value,
-			hsv: hsv.value,
-			lab: lab.value,
-			rgb: rgb.value,
-			xyz: xyz.value
+			cmyk: parse.color.cmyk(
+				itemElement.querySelector('Colors > CMYK')?.textContent || null
+			),
+			hex: parse.color.hex(
+				itemElement.querySelector('Colors > Hex')?.textContent || null
+			),
+			hsl: parse.color.hsl(
+				itemElement.querySelector('Colors > HSL')?.textContent || null
+			),
+			hsv: parse.color.hsv(
+				itemElement.querySelector('Colors > HSV')?.textContent || null
+			),
+			lab: parse.color.lab(
+				itemElement.querySelector('Colors > LAB')?.textContent || null
+			),
+			rgb: parse.color.rgb(
+				itemElement.querySelector('Colors > RGB')?.textContent || null
+			),
+			xyz: parse.color.xyz(
+				itemElement.querySelector('Colors > XYZ')?.textContent || null
+			)
 		};
-		const colorStrings = {
-			cmykString: cmykColorString.value as CMYKValueString,
-			hexString: hexColortring.value as HexValueString,
-			hslString: hslColorString.value as HSLValueString,
-			hsvString: hsvColorString.value as HSVValueString,
-			labString: labColorString.value as LABValueString,
-			rgbString: rgbColorString.value as RGBValueString,
-			xyzString: xyzColorString.value as XYZValueString
-		};
+
 		const cssStrings = {
-			cmykCSSString,
-			hexCSSString,
-			hslCSSString,
-			hsvCSSString,
-			labCSSString,
-			rgbCSSString,
-			xyzCSSString
+			cmykCSSString:
+				itemElement.querySelector('CSS_Colors > CMYK_CSS')
+					?.textContent || '',
+			hexCSSString:
+				itemElement.querySelector('CSS_Colors > Hex_CSS')
+					?.textContent || '',
+			hslCSSString:
+				itemElement.querySelector('CSS_Colors > HSL_CSS')
+					?.textContent || '',
+			hsvCSSString:
+				itemElement.querySelector('CSS_Colors > HSV_CSS')
+					?.textContent || '',
+			labCSSString:
+				itemElement.querySelector('CSS_Colors > LAB_CSS')
+					?.textContent || '',
+			rgbCSSString:
+				itemElement.querySelector('CSS_Colors > RGB_CSS')
+					?.textContent || '',
+			xyzCSSString:
+				itemElement.querySelector('CSS_Colors > XYZ_CSS')
+					?.textContent || ''
+		};
+
+		// 2.1 derive color strings from colors
+		const colorStrings = {
+			cmykString: convertToColorString({
+				value: colors.cmyk,
+				format: 'cmyk'
+			}).value as CMYKValueString,
+			hexString: convertToColorString({
+				value: colors.hex,
+				format: 'hex'
+			}).value as HexValueString,
+			hslString: convertToColorString({
+				value: colors.hsl,
+				format: 'hsl'
+			}).value as HSLValueString,
+			hsvString: convertToColorString({
+				value: colors.hsv,
+				format: 'hsv'
+			}).value as HSVValueString,
+			labString: convertToColorString({
+				value: colors.lab,
+				format: 'lab'
+			}).value as LABValueString,
+			rgbString: convertToColorString({
+				value: colors.rgb,
+				format: 'rgb'
+			}).value as RGBValueString,
+			xyzString: convertToColorString({
+				value: colors.xyz,
+				format: 'xyz'
+			}).value as XYZValueString
 		};
 
 		return { id, colors, colorStrings, cssStrings };
 	});
 
+	// 3. return the constructed Palette
 	return {
-		id: rawID,
+		id,
 		items,
-		flags: { enableAlpha, limitDarkness, limitGrayness, limitLightness },
-		metadata: { numBoxes, paletteType, customColor, timestamp }
-	} as Palette;
+		metadata: { name, timestamp, swatches, type, flags, customColor }
+	};
 }
 
-export const deserialize: IO_Fn_DeserializeInterface = {
+export const deserialize: IO_Interface['deserialize'] = {
 	fromCSS,
 	fromJSON,
 	fromXML

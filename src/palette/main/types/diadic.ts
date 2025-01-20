@@ -5,8 +5,8 @@ import {
 	HSL,
 	Palette,
 	PaletteItem
-} from '../../../index/index.js';
-import { IDBManager } from '../../../classes/idb/index.js';
+} from '../../../types/index.js';
+import { IDBManager } from '../../../db/index.js';
 import { core } from '../../../common/index.js';
 import { data } from '../../../data/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
@@ -19,10 +19,9 @@ const paletteRanges = consts.paletteRanges;
 
 const idb = IDBManager.getInstance();
 
-// *DEV-NOTE* update to reflect the fact this will always return 2 color swatches
 export async function diadic(args: GenPaletteArgs): Promise<Palette> {
 	// ensure exactly 2 color swatches
-	if (args.numBoxes !== 2) {
+	if (args.swatches !== 2) {
 		ui.enforceSwatchRules(2, 2);
 	}
 
@@ -30,7 +29,7 @@ export async function diadic(args: GenPaletteArgs): Promise<Palette> {
 	const hues = genHues.diadic(baseColor.value.hue);
 	const paletteItems: PaletteItem[] = [];
 
-	for (let i = 0; i < args.numBoxes; i++) {
+	for (let i = 0; i < 2; i++) {
 		const saturationShift =
 			Math.random() * paletteRanges.diadic.satShift -
 			paletteRanges.diadic.satShift / 2;
@@ -73,7 +72,7 @@ export async function diadic(args: GenPaletteArgs): Promise<Palette> {
 		'diadic',
 		paletteItems,
 		baseColor,
-		args.numBoxes,
+		2,
 		args.enableAlpha,
 		args.limitDark,
 		args.limitGray,

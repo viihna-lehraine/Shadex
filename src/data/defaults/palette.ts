@@ -1,21 +1,15 @@
 // File: src/data/defaults/palette.js
 
 import {
-	PaletteDefaultsData,
+	DefaultPaletteData,
 	PaletteItemUnbranded,
 	PaletteUnbranded,
 	StoredPaletteUnbranded
-} from '../../index/index.js';
+} from '../../types/index.js';
 
 const unbrandedData: PaletteUnbranded = {
 	id: `null-palette-${Date.now()}`,
 	items: [],
-	flags: {
-		enableAlpha: false,
-		limitDarkness: false,
-		limitGrayness: false,
-		limitLightness: false
-	},
 	metadata: {
 		customColor: {
 			hslColor: {
@@ -32,14 +26,21 @@ const unbrandedData: PaletteUnbranded = {
 				xyz: { x: 0, y: 0, z: 0, alpha: 1 }
 			}
 		},
-		numBoxes: 1,
-		paletteType: 'ERROR: DEFAULT UNBRANDED PALETTE',
-		timestamp: Date.now()
+		flags: {
+			enableAlpha: false,
+			limitDarkness: false,
+			limitGrayness: false,
+			limitLightness: false
+		},
+		name: 'UNBRANDED DEFAULT PALETTE',
+		swatches: 1,
+		type: '???',
+		timestamp: '???'
 	}
 };
 
 const unbrandedItem: PaletteItemUnbranded = {
-	id: 'fake',
+	id: 'DEFAULT UNBRANDED PALETTE ITEM',
 	colors: {
 		cmyk: { cyan: 0, magenta: 0, yellow: 0, key: 0, alpha: 1 },
 		hex: { hex: '#000000FF', alpha: 'FF', numAlpha: 1 },
@@ -80,7 +81,7 @@ const unbrandedStored: StoredPaletteUnbranded = {
 	palette: unbrandedData
 };
 
-export const palette: PaletteDefaultsData = {
+export const palette: DefaultPaletteData = {
 	unbrandedData,
 	unbrandedItem,
 	unbrandedStored

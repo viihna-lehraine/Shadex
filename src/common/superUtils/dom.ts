@@ -3,33 +3,30 @@
 import {
 	ColorInputElement,
 	ColorSpace,
-	CommonSuperUtilsDOM,
+	CommonFunctionsMasterInterface,
 	GenButtonArgs,
 	HSL
-} from '../../index/index.js';
+} from '../../types/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
 import { helpers } from '../helpers/index.js';
-import { log } from '../../classes/logger/index.js';
+import { logger } from '../../logger/index.js';
 import { utils } from '../utils/index.js';
 
 const mode = data.mode;
 const logMode = data.mode.logging;
 
+const domInputElements = data.consts.dom.elements.inputs;
+
 function getGenButtonArgs(): GenButtonArgs | null {
 	try {
-		const paletteNumberOptions =
-			data.consts.dom.elements.paletteNumberOptions;
-		const paletteTypeOptions = data.consts.dom.elements.paletteTypeOptions;
-		const customColorRaw = data.consts.dom.elements.customColorInput?.value;
-		const enableAlphaCheckbox =
-			data.consts.dom.elements.enableAlphaCheckbox;
-		const limitDarknessCheckbox =
-			data.consts.dom.elements.limitDarknessCheckbox;
-		const limitGraynessCheckbox =
-			data.consts.dom.elements.limitGraynessCheckbox;
-		const limitLightnessCheckbox =
-			data.consts.dom.elements.limitLightnessCheckbox;
+		const paletteNumberOptions = domInputElements.paletteNumberOptions;
+		const paletteTypeOptions = domInputElements.paletteTypeOptions;
+		const customColorRaw = domInputElements.customColorInput?.value;
+		const enableAlphaCheckbox = domInputElements.enableAlphaCheckbox;
+		const limitDarknessCheckbox = domInputElements.limitDarknessCheckbox;
+		const limitGraynessCheckbox = domInputElements.limitGraynessCheckbox;
+		const limitLightnessCheckbox = domInputElements.limitLightnessCheckbox;
 
 		if (
 			paletteNumberOptions === null ||
@@ -39,18 +36,18 @@ function getGenButtonArgs(): GenButtonArgs | null {
 			limitGraynessCheckbox === null ||
 			limitLightnessCheckbox === null
 		) {
-			if (logMode.errors) log.error('One or more elements are null');
+			if (logMode.errors) logger.error('One or more elements are null');
 
 			return null;
 		}
 
 		if (!mode.quiet && logMode.info && logMode.verbosity >= 2)
-			log.info(
+			logger.info(
 				`numBoxes: ${parseInt(paletteNumberOptions.value, 10)}\npaletteType: ${parseInt(paletteTypeOptions.value, 10)}`
 			);
 
 		return {
-			numBoxes: parseInt(paletteNumberOptions.value, 10),
+			swatches: parseInt(paletteNumberOptions.value, 10),
 			paletteType: parseInt(paletteTypeOptions.value, 10),
 			customColor: customColorRaw
 				? (core.base.parseCustomColor(customColorRaw) as HSL | null)
@@ -62,7 +59,9 @@ function getGenButtonArgs(): GenButtonArgs | null {
 		};
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Failed to retrieve generateButton parameters: ${error}`);
+			logger.error(
+				`Failed to retrieve generateButton parameters: ${error}`
+			);
 
 		return null;
 	}
@@ -81,7 +80,7 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 
 			if (!colorValues || !core.validate.colorValues(colorValues)) {
 				if (logMode.errors)
-					log.error('Invalid color values. Cannot display toast.');
+					logger.error('Invalid color values. Cannot display toast.');
 
 				helpers.dom.showToast('Invalid color.');
 
@@ -93,7 +92,9 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 			) as ColorSpace;
 
 			if (!mode.quiet && logMode.info && logMode.verbosity >= 2)
-				log.info(`Converting from ${currentFormat} to ${targetFormat}`);
+				logger.info(
+					`Converting from ${currentFormat} to ${targetFormat}`
+				);
 
 			const convertFn = utils.conversion.getConversionFn(
 				currentFormat,
@@ -102,7 +103,7 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 
 			if (!convertFn) {
 				if (logMode.errors)
-					log.error(
+					logger.error(
 						`Conversion from ${currentFormat} to ${targetFormat} is not supported.`
 					);
 
@@ -113,7 +114,7 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 
 			if (colorValues.format === 'xyz') {
 				if (logMode.errors)
-					log.error(
+					logger.error(
 						'Cannot convert from XYZ to another color space.'
 					);
 
@@ -131,7 +132,7 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 				utils.color.isXYZ(clonedColor)
 			) {
 				if (logMode.verbosity >= 3 && logMode.errors)
-					log.error(
+					logger.error(
 						'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.'
 					);
 
@@ -142,7 +143,7 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 
 			if (!clonedColor) {
 				if (logMode.errors)
-					log.error(`Conversion to ${targetFormat} failed.`);
+					logger.error(`Conversion to ${targetFormat} failed.`);
 
 				helpers.dom.showToast('Conversion failed.');
 
@@ -153,7 +154,7 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 
 			if (!newColor) {
 				if (logMode.errors)
-					log.error(`Conversion to ${targetFormat} failed.`);
+					logger.error(`Conversion to ${targetFormat} failed.`);
 
 				helpers.dom.showToast('Conversion failed.');
 
@@ -168,15 +169,15 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 		helpers.dom.showToast('Failed to convert colors.');
 
 		if (!mode.quiet && logMode.warnings)
-			log.warning('Failed to convert colors.');
+			logger.warning('Failed to convert colors.');
 		else if (!mode.gracefulErrors)
 			throw new Error(`Failed to convert colors: ${error as Error}`);
 		else if (logMode.errors)
-			log.error(`Failed to convert colors: ${error as Error}`);
+			logger.error(`Failed to convert colors: ${error as Error}`);
 	}
 }
 
-export const dom: CommonSuperUtilsDOM = {
+export const dom: CommonFunctionsMasterInterface['superUtils']['dom'] = {
 	getGenButtonArgs,
 	switchColorSpace
 } as const;

@@ -1,6 +1,6 @@
 // File: src/data/consts/dom/elements.js
 
-import { DOMElementData } from '../../../index/index.js';
+import { DOMElementData } from '../../../types/index.js';
 import { domUtils } from '../../../common/dom/index.js';
 
 const getElement = domUtils.getElement;

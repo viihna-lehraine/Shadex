@@ -5,9 +5,9 @@ import {
 	HSL,
 	Palette,
 	PaletteItem
-} from '../../../index/index.js';
+} from '../../../types/index.js';
 import { core } from '../../../common/index.js';
-import { IDBManager } from '../../../classes/idb/index.js';
+import { IDBManager } from '../../../db/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
 import { ui } from '../../../ui/index.js';
 
@@ -18,12 +18,12 @@ const idb = IDBManager.getInstance();
 
 export async function analogous(args: GenPaletteArgs): Promise<Palette> {
 	// ensure at least 2 color swatches
-	if (args.numBoxes < 2) {
+	if (args.swatches < 2) {
 		ui.enforceSwatchRules(2);
 	}
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
-	const hues = genHues.analogous(baseColor, args.numBoxes);
+	const hues = genHues.analogous(baseColor, args.swatches);
 	const paletteItems: PaletteItem[] = [];
 
 	for (const [i, hue] of hues.entries()) {
@@ -68,7 +68,7 @@ export async function analogous(args: GenPaletteArgs): Promise<Palette> {
 		'analogous',
 		paletteItems,
 		baseColor,
-		args.numBoxes,
+		args.swatches,
 		args.enableAlpha,
 		args.limitDark,
 		args.limitGray,

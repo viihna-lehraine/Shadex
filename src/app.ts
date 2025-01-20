@@ -11,25 +11,25 @@
 
 import { data } from './data/index.js';
 import { dom } from './dom/index.js';
-import { log } from './classes/logger/index.js';
-import { IDBManager } from './classes/idb/index.js';
+import { logger } from './logger/index.js';
+import { IDBManager } from './db/index.js';
 
 const consts = data.consts;
 const mode = data.mode;
 const logMode = mode.logging;
 
-if (mode.debug) log.info('Executing main application script');
+if (mode.debug) logger.info('Executing main application script');
 
 if (document.readyState === 'loading') {
 	if (mode.debug)
-		log.info(
+		logger.info(
 			'DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...'
 		);
 
 	document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
 	if (mode.debug)
-		log.info(
+		logger.info(
 			'DOM content already loaded. Initializing application immediately.'
 		);
 
@@ -37,16 +37,17 @@ if (document.readyState === 'loading') {
 }
 
 async function initializeApp(): Promise<void> {
-	log.info('DOM content loaded - Initializing application');
+	logger.info('DOM content loaded - Initializing application');
 
 	try {
 		if (mode.logging.verbosity > 1)
-			log.info(
+			logger.info(
 				'Creating new IDBManager instance. Initializing database and its dependencies.'
 			);
 
 		if (mode.expose.idbManager) {
-			if (mode.debug) log.info('Exposing IDBManager instance to window.');
+			if (mode.debug)
+				logger.info('Exposing IDBManager instance to window.');
 
 			try {
 				(async () => {
@@ -56,13 +57,13 @@ async function initializeApp(): Promise<void> {
 					// binds the IDBManager instance to the window object
 					window.idbManager = idbManagerInstance;
 
-					log.info(
+					logger.info(
 						'IDBManager instance successfully exposed to window.'
 					);
 				})();
 			} catch (error) {
 				if (logMode.errors)
-					log.error(
+					logger.error(
 						`Failed to expose IDBManager instance to window. Error: ${error}`
 					);
 
@@ -72,7 +73,7 @@ async function initializeApp(): Promise<void> {
 		}
 	} catch (error) {
 		if (logMode.errors)
-			log.error(
+			logger.error(
 				`Failed to create initial IDBManager instance. Error: ${error}`
 			);
 
@@ -85,13 +86,13 @@ async function initializeApp(): Promise<void> {
 	if (mode.debug) {
 		if (logMode.debug)
 			if (!mode.quiet && logMode.verbosity > 1) {
-				log.debug('Validating DOM elements');
+				logger.debug('Validating DOM elements');
 			}
 
 		dom.validate.elements();
 	} else {
 		if (!mode.quiet) {
-			log.info('Skipping DOM element validation');
+			logger.info('Skipping DOM element validation');
 		}
 	}
 
@@ -100,21 +101,23 @@ async function initializeApp(): Promise<void> {
 		: 0;
 
 	if (!mode.quiet && mode.debug)
-		log.debug(`Selected color: ${selectedColor}`);
+		logger.debug(`Selected color: ${selectedColor}`);
 
 	try {
 		dom.events.initializeEventListeners();
 
 		if (!mode.quiet)
-			log.info('Event listeners have been successfully initialized');
+			logger.info('Event listeners have been successfully initialized');
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Failed to initialize event listeners.\n${error}`);
+			logger.error(`Failed to initialize event listeners.\n${error}`);
 
 		if (mode.showAlerts)
 			alert('An error occurred. Check console for details.');
 	}
 
 	if (!mode.quiet && logMode.info)
-		log.info('Application successfully initialized. Awaiting user input.');
+		logger.info(
+			'Application successfully initialized. Awaiting user input.'
+		);
 }

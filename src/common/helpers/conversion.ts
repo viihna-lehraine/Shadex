@@ -1,14 +1,14 @@
 // File: src/common/helpers/conversion.js
 
 import {
-	CommonHelpersConversion,
+	CommonFunctionsMasterInterface,
 	HSL,
 	HSLValue,
 	RGB
-} from '../../index/index.js';
+} from '../../types/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
-import { log } from '../../classes/logger/index.js';
+import { logger } from '../../logger/index.js';
 
 const logMode = data.mode.logging;
 
@@ -19,19 +19,21 @@ export function applyGammaCorrection(value: number): number {
 			: 12.92 * value;
 	} catch (error) {
 		if (logMode.errors)
-			log.error(`Error applying gamma correction: ${error}`);
+			logger.error(`Error applying gamma correction: ${error}`);
 
 		return value;
 	}
 }
 
 export function clampRGB(rgb: RGB): RGB {
-	const defaultRGBUnbranded = core.base.clone(data.defaults.colors.rgb);
+	const defaultRGBUnbranded = core.base.clone(
+		data.defaults.colors.base.unbranded.rgb
+	);
 	const defaultRGBBranded = core.brandColor.asRGB(defaultRGBUnbranded);
 
 	if (!core.validate.colorValues(rgb)) {
 		if (logMode.errors)
-			log.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+			logger.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
 
 		return defaultRGBBranded;
 	}
@@ -57,7 +59,7 @@ export function clampRGB(rgb: RGB): RGB {
 			format: 'rgb'
 		};
 	} catch (error) {
-		if (logMode.errors) log.error(`Error clamping RGB values: ${error}`);
+		if (logMode.errors) logger.error(`Error clamping RGB values: ${error}`);
 
 		return rgb;
 	}
@@ -79,35 +81,39 @@ export function hueToRGB(p: number, q: number, t: number): number {
 
 		return clonedP;
 	} catch (error) {
-		if (logMode.errors) log.error(`Error converting hue to RGB: ${error}`);
+		if (logMode.errors)
+			logger.error(`Error converting hue to RGB: ${error}`);
 
 		return 0;
 	}
 }
 
 export function hslAddFormat(value: HSLValue): HSL {
-	const defaultHSLUnbranded = core.base.clone(data.defaults.colors.hsl);
+	const defaultHSLUnbranded = core.base.clone(
+		data.defaults.colors.base.unbranded.hsl
+	);
 	const defaultHSLBranded = core.brandColor.asHSL(defaultHSLUnbranded);
 
 	try {
 		if (!core.validate.colorValues({ value: value, format: 'hsl' })) {
 			if (logMode.errors)
-				log.error(`Invalid HSL value ${JSON.stringify(value)}`);
+				logger.error(`Invalid HSL value ${JSON.stringify(value)}`);
 
 			return defaultHSLBranded;
 		}
 
 		return { value: value, format: 'hsl' } as HSL;
 	} catch (error) {
-		if (logMode.errors) log.error(`Error adding HSL format: ${error}`);
+		if (logMode.errors) logger.error(`Error adding HSL format: ${error}`);
 
 		return defaultHSLBranded;
 	}
 }
 
-export const conversion: CommonHelpersConversion = {
-	applyGammaCorrection,
-	clampRGB,
-	hslAddFormat,
-	hueToRGB
-} as const;
+export const conversion: CommonFunctionsMasterInterface['helpers']['conversion'] =
+	{
+		applyGammaCorrection,
+		clampRGB,
+		hslAddFormat,
+		hueToRGB
+	} as const;

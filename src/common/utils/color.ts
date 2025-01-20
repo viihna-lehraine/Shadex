@@ -37,10 +37,10 @@ import {
 	XYZ,
 	XYZValue,
 	XYZValueString
-} from '../../index/index.js';
+} from '../../types/index.js';
 import { core } from '../core/index.js';
 import { data } from '../../data/index.js';
-import { log } from '../../classes/logger/index.js';
+import { logger } from '../../logger/index.js';
 
 const mode = data.mode;
 const logMode = mode.logging;
@@ -357,7 +357,7 @@ function isStoredPalette(obj: unknown): obj is StoredPalette {
 
 function narrowToColor(color: Color | ColorString): Color | null {
 	if (isColorString(color)) {
-		return core.convert.toColor(color);
+		return core.convert.colorStringToColor(color);
 	}
 
 	switch (color.format as ColorSpaceExtended) {
@@ -383,7 +383,7 @@ function colorToColorString(color: Color): ColorString {
 
 	if (isColorString(clonedColor)) {
 		if (logMode.errors) {
-			log.error(
+			logger.error(
 				`Already formatted as color string: ${JSON.stringify(color)}`
 			);
 		}
@@ -479,12 +479,12 @@ function colorToColorString(color: Color): ColorString {
 		if (!mode.gracefulErrors) {
 			throw new Error(`Unsupported format: ${clonedColor.format}`);
 		} else if (logMode.errors) {
-			log.error(`Unsupported format: ${clonedColor.format}`);
+			logger.error(`Unsupported format: ${clonedColor.format}`);
 		} else if (!mode.quiet && logMode.warnings) {
-			log.warning('Failed to convert to color string.');
+			logger.warning('Failed to convert to color string.');
 		}
 
-		return data.defaults.colorStrings.hsl;
+		return data.defaults.colors.strings.hsl;
 	}
 }
 
@@ -517,9 +517,11 @@ function getAlphaFromHex(hex: string): number {
 				`Invalid hex color: ${hex}. Expected format #RRGGBBAA`
 			);
 		else if (logMode.errors)
-			log.error(`Invalid hex color: ${hex}. Expected format #RRGGBBAA`);
+			logger.error(
+				`Invalid hex color: ${hex}. Expected format #RRGGBBAA`
+			);
 		else if (!mode.quiet && logMode.warnings)
-			log.warning('Failed to parse alpha from hex color.');
+			logger.warning('Failed to parse alpha from hex color.');
 	}
 
 	const alphaHex = hex.slice(-2);
@@ -563,12 +565,12 @@ function getColorString(color: Color): string | null {
 				return formatters.xyz(color);
 			default:
 				if (!logMode.errors)
-					log.error(`Unsupported color format for ${color}`);
+					logger.error(`Unsupported color format for ${color}`);
 
 				return null;
 		}
 	} catch (error) {
-		if (!logMode.errors) log.error(`getColorString error: ${error}`);
+		if (!logMode.errors) logger.error(`getColorString error: ${error}`);
 
 		return null;
 	}
@@ -668,9 +670,9 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 				const message = `Unsupported color format: ${colorSpace}`;
 
 				if (mode.gracefulErrors) {
-					if (logMode.errors) log.error(message);
+					if (logMode.errors) logger.error(message);
 					else if (!mode.quiet && logMode.warnings)
-						log.warning(`Failed to parse color: ${message}`);
+						logger.warning(`Failed to parse color: ${message}`);
 				} else {
 					throw new Error(message);
 				}
@@ -678,7 +680,7 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 				return null;
 		}
 	} catch (error) {
-		if (logMode.errors) log.error(`parseColor error: ${error}`);
+		if (logMode.errors) logger.error(`parseColor error: ${error}`);
 
 		return null;
 	}
@@ -699,14 +701,14 @@ function parseComponents(value: string, count: number): number[] {
 				throw new Error(`Expected ${count} components.`);
 			else if (logMode.errors) {
 				if (!mode.quiet && logMode.warnings)
-					log.warning(`Expected ${count} components.`);
+					logger.warning(`Expected ${count} components.`);
 
 				return [];
 			}
 
 		return components;
 	} catch (error) {
-		if (logMode.errors) log.error(`Error parsing components: ${error}`);
+		if (logMode.errors) logger.error(`Error parsing components: ${error}`);
 
 		return [];
 	}
@@ -743,9 +745,11 @@ function stripHashFromHex(hex: Hex): Hex {
 				}
 			: hex;
 	} catch (error) {
-		if (logMode.errors) log.error(`stripHashFromHex error: ${error}`);
+		if (logMode.errors) logger.error(`stripHashFromHex error: ${error}`);
 
-		const unbrandedHex = core.base.clone(data.defaults.colors.hex);
+		const unbrandedHex = core.base.clone(
+			data.defaults.colors.base.unbranded.hex
+		);
 
 		return core.brandColor.asHex(unbrandedHex);
 	}

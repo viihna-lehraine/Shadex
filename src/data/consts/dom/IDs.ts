@@ -1,6 +1,6 @@
 // File: src/data/consts/dom/IDs.js
 
-import { DOM_ID_Data } from '../../../index/index.js';
+import { DOM_ID_Data } from '../../../types/index.js';
 
 const advancedMenu = 'advanced-menu';
 const advancedMenuButton = 'advanced-menu-button';

@@ -1,6 +1,6 @@
 // File: src/io/base.ts
 
-import { Palette } from '../index/index.js';
+import { Palette } from '../types/index.js';
 import { deserialize } from './deserialize.js';
 import { dom } from '../dom/index.js';
 import { serialize } from './serialize.js';

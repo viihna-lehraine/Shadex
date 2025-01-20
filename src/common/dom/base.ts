@@ -1,10 +1,11 @@
 // File: src/common/dom/base.js
 
-import { CommonDOMBase } from '../../index/index.js';
-import { log } from '../../classes/logger/index.js';
-import { mode } from '../../data/mode/index.js';
+import { CommonDOMBase } from '../../types/index.js';
+import { logger } from '../../logger/index.js';
+import { data } from '../../data/index.js';
 
-const logMode = mode.logging;
+const logMode = data.mode.logging;
+const mode = data.mode;
 
 function getElement<T extends HTMLElement>(id: string): T | null {
 	const element = document.getElementById(id) as T | null;
@@ -13,7 +14,7 @@ function getElement<T extends HTMLElement>(id: string): T | null {
 
 	if (!element) {
 		if (logMode.warnings) {
-			log.warning(`Element with ID ${id} not found`);
+			logger.warning(`Element with ID ${id} not found`);
 		}
 	}
 
