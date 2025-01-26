@@ -6,11 +6,13 @@ import {
 	HSLValue,
 	RGB
 } from '../../types/index.js';
+import { createLogger } from '../../logger/index.js';
+import { defaults, mode } from '../data/base.js';
 import { core } from '../core/index.js';
-import { data } from '../../data/index.js';
-import { logger } from '../../logger/index.js';
 
-const logMode = data.mode.logging;
+const logger = await createLogger();
+
+const logMode = mode.logging;
 
 export function applyGammaCorrection(value: number): number {
 	try {
@@ -18,8 +20,11 @@ export function applyGammaCorrection(value: number): number {
 			? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
 			: 12.92 * value;
 	} catch (error) {
-		if (logMode.errors)
-			logger.error(`Error applying gamma correction: ${error}`);
+		if (logMode.error)
+			logger.error(
+				`Error applying gamma correction: ${error}`,
+				'applyGammaCorrection()'
+			);
 
 		return value;
 	}
@@ -27,13 +32,16 @@ export function applyGammaCorrection(value: number): number {
 
 export function clampRGB(rgb: RGB): RGB {
 	const defaultRGBUnbranded = core.base.clone(
-		data.defaults.colors.base.unbranded.rgb
+		defaults.colors.base.unbranded.rgb
 	);
 	const defaultRGBBranded = core.brandColor.asRGB(defaultRGBUnbranded);
 
 	if (!core.validate.colorValues(rgb)) {
-		if (logMode.errors)
-			logger.error(`Invalid RGB value ${JSON.stringify(rgb)}`);
+		if (logMode.error)
+			logger.error(
+				`Invalid RGB value ${JSON.stringify(rgb)}`,
+				'clampRGB()'
+			);
 
 		return defaultRGBBranded;
 	}
@@ -59,7 +67,8 @@ export function clampRGB(rgb: RGB): RGB {
 			format: 'rgb'
 		};
 	} catch (error) {
-		if (logMode.errors) logger.error(`Error clamping RGB values: ${error}`);
+		if (logMode.error)
+			logger.error(`Error clamping RGB values: ${error}`, 'clampRGB()');
 
 		return rgb;
 	}
@@ -81,8 +90,8 @@ export function hueToRGB(p: number, q: number, t: number): number {
 
 		return clonedP;
 	} catch (error) {
-		if (logMode.errors)
-			logger.error(`Error converting hue to RGB: ${error}`);
+		if (logMode.error)
+			logger.error(`Error converting hue to RGB: ${error}`, 'hueToRGB()');
 
 		return 0;
 	}
@@ -90,21 +99,25 @@ export function hueToRGB(p: number, q: number, t: number): number {
 
 export function hslAddFormat(value: HSLValue): HSL {
 	const defaultHSLUnbranded = core.base.clone(
-		data.defaults.colors.base.unbranded.hsl
+		defaults.colors.base.unbranded.hsl
 	);
 	const defaultHSLBranded = core.brandColor.asHSL(defaultHSLUnbranded);
 
 	try {
 		if (!core.validate.colorValues({ value: value, format: 'hsl' })) {
-			if (logMode.errors)
-				logger.error(`Invalid HSL value ${JSON.stringify(value)}`);
+			if (logMode.error)
+				logger.error(
+					`Invalid HSL value ${JSON.stringify(value)}`,
+					'hslAddFormat()'
+				);
 
 			return defaultHSLBranded;
 		}
 
 		return { value: value, format: 'hsl' } as HSL;
 	} catch (error) {
-		if (logMode.errors) logger.error(`Error adding HSL format: ${error}`);
+		if (logMode.error)
+			logger.error(`Error adding HSL format: ${error}`, 'hslAddFormat()');
 
 		return defaultHSLBranded;
 	}

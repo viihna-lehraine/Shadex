@@ -8,7 +8,7 @@ export interface ColorInputElement extends HTMLInputElement {
 
 export interface GenButtonArgs {
 	swatches: number;
-	paletteType: number;
+	type: number;
 	customColor: HSL | null;
 	enableAlpha: boolean;
 	limitDarkness: boolean;

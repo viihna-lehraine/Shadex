@@ -102,22 +102,22 @@ export interface PaletteItemUnbranded {
 		xyz: XYZValueUnbranded;
 	};
 	colorStrings: {
-		cmyk: CMYKValueString;
-		hex: HexValueString;
-		hsl: HSLValueString;
-		hsv: HSVValueString;
-		lab: LABValueString;
-		rgb: RGBValueString;
-		xyz: XYZValueString;
+		cmykString: CMYKValueString;
+		hexString: HexValueString;
+		hslString: HSLValueString;
+		hsvString: HSVValueString;
+		labString: LABValueString;
+		rgbString: RGBValueString;
+		xyzString: XYZValueString;
 	};
 	cssStrings: {
-		cmyk: string;
-		hex: string;
-		hsl: string;
-		hsv: string;
-		lab: string;
-		rgb: string;
-		xyz: string;
+		cmykCSSString: string;
+		hexCSSString: string;
+		hslCSSString: string;
+		hsvCSSString: string;
+		labCSSString: string;
+		rgbCSSString: string;
+		xyzCSSString: string;
 	};
 }
 

@@ -7,10 +7,8 @@
 	"description": "*** Web-based color palette generator.",
 	"main": "./public/dist/bundle.js",
 	"scripts": {
-		"build:dist": "npm run clean:all && tsc && rollup -c",
-		"build:js": "npm run clean:all && tsc",
-		"clean:all": "rm -rf ./public/dist && rm -rf ./public/js && mkdir ./public/dist && mkdir ./public/js",
-		"clean:js": "rm -rf ./public/js && mkdir ./public/js",
+		"build": "npm run clean && tsc && rollup -c",
+		"clean": "rm -rf ./public/dist && rm -rf ./public/js && mkdir ./public/dist && mkdir ./public/js",
 		"fix": "npm run format && npm run lint:fix",
 		"format": "npx prettier . --write",
 		"lint": "npx eslint",
@@ -40,7 +38,9 @@
 	"dependencies": {
 		"@rollup/plugin-commonjs": "^28.0.2",
 		"@rollup/plugin-node-resolve": "^16.0.0",
-		"idb": "^8.0.0",
-		"rollup": "^4.30.1"
+		"@rollup/plugin-typescript": "^12.1.2",
+		"idb": "^8.0.1",
+		"rollup": "^4.30.1",
+		"source-map-support": "^0.5.21"
 	}
 }

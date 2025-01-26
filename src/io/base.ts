@@ -2,7 +2,7 @@
 
 import { Palette } from '../types/index.js';
 import { deserialize } from './deserialize.js';
-import { dom } from '../dom/index.js';
+import { fileUtils } from '../dom/fileUtils.js';
 import { serialize } from './serialize.js';
 
 // *DEV-NOTE* improve error handling and logging throughout
@@ -22,11 +22,7 @@ export const file = {
 			xml: 'application/xml'
 		}[format];
 
-		dom.fileUtils.download(
-			data,
-			`palette_${palette.id}.${format}`,
-			mimeType
-		);
+		fileUtils.download(data, `palette_${palette.id}.${format}`, mimeType);
 	}
 };
 

@@ -9,13 +9,9 @@ import { ui } from '../../../ui/index.js';
 const brand = common.core.brand;
 const create = paletteSuperUtils.create;
 
-const idb = IDBManager.getInstance();
-
 export async function complementary(args: GenPaletteArgs): Promise<Palette> {
 	// ensure at least 2 color swatches
-	if (args.swatches < 2) {
-		ui.enforceSwatchRules(2);
-	}
+	if (args.swatches !== 2) ui.enforceSwatchRules(2);
 
 	const swatches = 2;
 
@@ -40,10 +36,15 @@ export async function complementary(args: GenPaletteArgs): Promise<Palette> {
 		args.enableAlpha
 	);
 
-	const complementaryPalette = await idb.savePaletteToDB(
+	const idbManager = await IDBManager.getInstance();
+	const paletteID = await idbManager.getNextPaletteID();
+
+	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
+
+	const complementaryPalette = await idbManager.savePaletteToDB(
 		'complementary',
 		[basePaletteItem, complementaryPaletteItem],
-		baseColor,
+		paletteID,
 		swatches,
 		args.enableAlpha,
 		args.limitDark,

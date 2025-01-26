@@ -7,16 +7,16 @@ import {
 	GenButtonArgs,
 	HSL
 } from '../../types/index.js';
+import { consts, mode } from '../data/base.js';
+import { createLogger } from '../../logger/index.js';
 import { core } from '../core/index.js';
-import { data } from '../../data/index.js';
 import { helpers } from '../helpers/index.js';
-import { logger } from '../../logger/index.js';
 import { utils } from '../utils/index.js';
 
-const mode = data.mode;
-const logMode = data.mode.logging;
+const logger = await createLogger();
 
-const domInputElements = data.consts.dom.elements.inputs;
+const logMode = mode.logging;
+const domInputElements = consts.dom.elements.inputs;
 
 function getGenButtonArgs(): GenButtonArgs | null {
 	try {
@@ -36,19 +36,24 @@ function getGenButtonArgs(): GenButtonArgs | null {
 			limitGraynessCheckbox === null ||
 			limitLightnessCheckbox === null
 		) {
-			if (logMode.errors) logger.error('One or more elements are null');
+			if (logMode.error)
+				logger.error(
+					'One or more elements are null',
+					'common > superUtils > dom > getGenButtonArgs()'
+				);
 
 			return null;
 		}
 
 		if (!mode.quiet && logMode.info && logMode.verbosity >= 2)
 			logger.info(
-				`numBoxes: ${parseInt(paletteNumberOptions.value, 10)}\npaletteType: ${parseInt(paletteTypeOptions.value, 10)}`
+				`numBoxes: ${parseInt(paletteNumberOptions.value, 10)}\npaletteType: ${parseInt(paletteTypeOptions.value, 10)}`,
+				'getGenButtonArgs()'
 			);
 
 		return {
 			swatches: parseInt(paletteNumberOptions.value, 10),
-			paletteType: parseInt(paletteTypeOptions.value, 10),
+			type: parseInt(paletteTypeOptions.value, 10),
 			customColor: customColorRaw
 				? (core.base.parseCustomColor(customColorRaw) as HSL | null)
 				: null,
@@ -58,33 +63,36 @@ function getGenButtonArgs(): GenButtonArgs | null {
 			limitLightness: limitLightnessCheckbox.checked
 		};
 	} catch (error) {
-		if (logMode.errors)
+		if (logMode.error)
 			logger.error(
-				`Failed to retrieve generateButton parameters: ${error}`
+				`Failed to retrieve generateButton parameters: ${error}`,
+				'common > superUtils > dom > getGenButtonArgs()'
 			);
 
 		return null;
 	}
 }
 
-function switchColorSpace(targetFormat: ColorSpace): void {
+async function switchColorSpace(targetFormat: ColorSpace): Promise<void> {
 	try {
 		const colorTextOutputBoxes =
 			document.querySelectorAll<HTMLInputElement>(
 				'.color-text-output-box'
 			);
 
-		colorTextOutputBoxes.forEach(box => {
+		for (const box of colorTextOutputBoxes) {
 			const inputBox = box as ColorInputElement;
 			const colorValues = inputBox.colorValues;
 
 			if (!colorValues || !core.validate.colorValues(colorValues)) {
-				if (logMode.errors)
-					logger.error('Invalid color values. Cannot display toast.');
+				if (logMode.error)
+					logger.error(
+						'Invalid color values. Cannot display toast.',
+						'common > superUtils > switchColorSpace()'
+					);
 
 				helpers.dom.showToast('Invalid color.');
-
-				return;
+				continue;
 			}
 
 			const currentFormat = inputBox.getAttribute(
@@ -93,7 +101,8 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 
 			if (!mode.quiet && logMode.info && logMode.verbosity >= 2)
 				logger.info(
-					`Converting from ${currentFormat} to ${targetFormat}`
+					`Converting from ${currentFormat} to ${targetFormat}`,
+					'common > superUtils > dom > switchColorSpace()'
 				);
 
 			const convertFn = utils.conversion.getConversionFn(
@@ -102,28 +111,29 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 			);
 
 			if (!convertFn) {
-				if (logMode.errors)
+				if (logMode.error)
 					logger.error(
-						`Conversion from ${currentFormat} to ${targetFormat} is not supported.`
+						`Conversion from ${currentFormat} to ${targetFormat} is not supported.`,
+						'common > superUtils > dom > switchColorSpace()'
 					);
 
 				helpers.dom.showToast('Conversion not supported.');
-
-				return;
+				continue;
 			}
 
 			if (colorValues.format === 'xyz') {
-				if (logMode.errors)
+				if (logMode.error)
 					logger.error(
-						'Cannot convert from XYZ to another color space.'
+						'Cannot convert from XYZ to another color space.',
+						'common > superUtils > dom > switchColorSpace()'
 					);
 
 				helpers.dom.showToast('Conversion not supported.');
 
-				return;
+				continue;
 			}
 
-			const clonedColor = utils.color.narrowToColor(colorValues);
+			const clonedColor = await utils.color.narrowToColor(colorValues);
 
 			if (
 				!clonedColor ||
@@ -131,48 +141,58 @@ function switchColorSpace(targetFormat: ColorSpace): void {
 				utils.color.isSVColor(clonedColor) ||
 				utils.color.isXYZ(clonedColor)
 			) {
-				if (logMode.verbosity >= 3 && logMode.errors)
+				if (logMode.verbosity >= 3 && logMode.error)
 					logger.error(
-						'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.'
+						'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.',
+						'common > superUtils > dom > switchColorSpace()'
 					);
 
 				helpers.dom.showToast('Conversion not supported.');
 
-				return;
+				continue;
 			}
 
 			if (!clonedColor) {
-				if (logMode.errors)
-					logger.error(`Conversion to ${targetFormat} failed.`);
+				if (logMode.error)
+					logger.error(
+						`Conversion to ${targetFormat} failed.`,
+						'common > superUtils > dom > switchColorSpace()'
+					);
 
 				helpers.dom.showToast('Conversion failed.');
 
-				return;
+				continue;
 			}
 
 			const newColor = core.base.clone(convertFn(clonedColor));
 
 			if (!newColor) {
-				if (logMode.errors)
-					logger.error(`Conversion to ${targetFormat} failed.`);
+				if (logMode.error)
+					logger.error(
+						`Conversion to ${targetFormat} failed.`,
+						'common > superUtils > dom > switchColorSpace()'
+					);
 
 				helpers.dom.showToast('Conversion failed.');
 
-				return;
+				continue;
 			}
 
 			inputBox.value = String(newColor);
 
 			inputBox.setAttribute('data-format', targetFormat);
-		});
+		}
 	} catch (error) {
 		helpers.dom.showToast('Failed to convert colors.');
 
-		if (!mode.quiet && logMode.warnings)
-			logger.warning('Failed to convert colors.');
+		if (!mode.quiet && logMode.warn)
+			logger.warn(
+				'Failed to convert colors.',
+				'common > superUtils > dom > switchColorSpace()'
+			);
 		else if (!mode.gracefulErrors)
 			throw new Error(`Failed to convert colors: ${error as Error}`);
-		else if (logMode.errors)
+		else if (logMode.error)
 			logger.error(`Failed to convert colors: ${error as Error}`);
 	}
 }

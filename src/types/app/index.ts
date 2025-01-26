@@ -5,7 +5,14 @@ export type {
 	CommonDOMFnMasterInterface,
 	CommonFunctionsMasterInterface
 } from './common.js';
-export type { AppModeData, DataInterface } from './data.js';
+export type {
+	AppModeData,
+	ConfigDataInterface,
+	ConstsDataInterface,
+	DefaultsDataInterface,
+	ModeDataInterface,
+	SetsDataInterface
+} from './data.js';
 export type { DOM_FunctionsMasterInterface } from './dom.js';
 export type {
 	GenPaletteArgs,

@@ -5,12 +5,16 @@ export type {
 	CommonDOMBase,
 	CommonDOMFnMasterInterface,
 	CommonFunctionsMasterInterface,
-	DataInterface,
+	ConfigDataInterface,
+	ConstsDataInterface,
+	DefaultsDataInterface,
 	DOM_FunctionsMasterInterface,
 	GenPaletteArgs,
 	GenPaletteFnInterface,
 	IO_Interface,
+	ModeDataInterface,
 	PaletteFnMasterInterface,
+	SetsDataInterface,
 	UIFnBaseInterface,
 	UIFnMasterInterface
 } from './app/index.js';

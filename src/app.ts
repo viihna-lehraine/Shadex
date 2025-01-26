@@ -9,60 +9,72 @@
 
 // File: src/app.js
 
-import { data } from './data/index.js';
+import { consts, mode } from './common/data/base.js';
+import { getIDBInstance } from './db/instance.js';
+import { createLogger } from './logger/index.js';
 import { dom } from './dom/index.js';
-import { logger } from './logger/index.js';
-import { IDBManager } from './db/index.js';
 
-const consts = data.consts;
-const mode = data.mode;
+const logger = await createLogger();
+
 const logMode = mode.logging;
 
-if (mode.debug) logger.info('Executing main application script');
+if (mode.debug)
+	logger.info('Executing main application script', 'app.js [STEP 1]');
 
 if (document.readyState === 'loading') {
 	if (mode.debug)
 		logger.info(
-			'DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...'
+			'DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...',
+			'app.js [STEP 2]'
 		);
 
 	document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
 	if (mode.debug)
 		logger.info(
-			'DOM content already loaded. Initializing application immediately.'
+			'DOM content already loaded. Initializing application immediately.',
+			'app.js [STEP 2]: ERROR'
 		);
 
 	initializeApp();
 }
 
 async function initializeApp(): Promise<void> {
-	logger.info('DOM content loaded - Initializing application');
+	logger.info('DOM content loaded - Initializing application', 'app.js');
 
 	try {
 		if (mode.logging.verbosity > 1)
 			logger.info(
-				'Creating new IDBManager instance. Initializing database and its dependencies.'
+				'Creating new IDBManager instance. Initializing database and its dependencies.',
+				'app.js, ['
 			);
 
 		if (mode.expose.idbManager) {
 			if (mode.debug)
-				logger.info('Exposing IDBManager instance to window.');
+				logger.info(
+					'Exposing IDBManager instance to window.',
+					'app.js'
+				);
 
 			try {
 				(async () => {
-					const idbManagerInstance =
-						await IDBManager.createInstance(data);
-
-					// binds the IDBManager instance to the window object
-					window.idbManager = idbManagerInstance;
+					const idbManager = await getIDBInstance();
 
 					logger.info(
-						'IDBManager instance successfully exposed to window.'
+						`IDBManager instance successfully initialized.`,
+						'app.js > initializeApp()'
+					);
+
+					// binds the IDBManager instance to the window object
+					window.idbManager = idbManager;
+
+					logger.info(
+						'IDBManager instance successfully exposed to window.',
+						'app.js > initializeApp()'
 					);
 				})();
 			} catch (error) {
-				if (logMode.errors)
+				if (logMode.error)
 					logger.error(
 						`Failed to expose IDBManager instance to window. Error: ${error}`
 					);
@@ -72,7 +84,7 @@ async function initializeApp(): Promise<void> {
 			}
 		}
 	} catch (error) {
-		if (logMode.errors)
+		if (logMode.error)
 			logger.error(
 				`Failed to create initial IDBManager instance. Error: ${error}`
 			);
@@ -81,7 +93,7 @@ async function initializeApp(): Promise<void> {
 			alert('An error occurred. Check console for details.');
 	}
 
-	const selectedColorOption = consts.dom.elements.selectedColorOption;
+	const selectedColorOption = consts.dom.elements.inputs.selectedColorOption;
 
 	if (mode.debug) {
 		if (logMode.debug)
@@ -109,7 +121,7 @@ async function initializeApp(): Promise<void> {
 		if (!mode.quiet)
 			logger.info('Event listeners have been successfully initialized');
 	} catch (error) {
-		if (logMode.errors)
+		if (logMode.error)
 			logger.error(`Failed to initialize event listeners.\n${error}`);
 
 		if (mode.showAlerts)

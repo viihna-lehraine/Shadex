@@ -1,6 +1,12 @@
 // File: src/db/instance.ts
 
-import { data } from '../data/index.js';
 import { IDBManager } from './IDBManager.js';
 
-export const idbInstance = await IDBManager.createInstance(data);
+let idbInstance: IDBManager | null = null;
+
+export const getIDBInstance = async (): Promise<IDBManager> => {
+	if (!idbInstance) {
+		idbInstance = await IDBManager.getInstance();
+	}
+	return idbInstance;
+};

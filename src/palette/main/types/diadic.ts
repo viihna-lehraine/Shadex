@@ -8,22 +8,17 @@ import {
 } from '../../../types/index.js';
 import { IDBManager } from '../../../db/index.js';
 import { core } from '../../../common/index.js';
-import { data } from '../../../data/index.js';
+import { consts } from '../../../common/data/base.js';
 import { paletteSuperUtils } from '../../common/index.js';
 import { ui } from '../../../ui/index.js';
 
-const consts = data.consts;
 const create = paletteSuperUtils.create;
 const genHues = paletteSuperUtils.genHues;
 const paletteRanges = consts.paletteRanges;
 
-const idb = IDBManager.getInstance();
-
 export async function diadic(args: GenPaletteArgs): Promise<Palette> {
 	// ensure exactly 2 color swatches
-	if (args.swatches !== 2) {
-		ui.enforceSwatchRules(2, 2);
-	}
+	if (args.swatches !== 2) ui.enforceSwatchRules(2, 2);
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const hues = genHues.diadic(baseColor.value.hue);
@@ -68,10 +63,15 @@ export async function diadic(args: GenPaletteArgs): Promise<Palette> {
 		paletteItems.push(paletteItem);
 	}
 
-	const diadicPalette = await idb.savePaletteToDB(
+	const idbManager = await IDBManager.getInstance();
+	const paletteID = await idbManager.getNextPaletteID();
+
+	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
+
+	const diadicPalette = await idbManager.savePaletteToDB(
 		'diadic',
 		paletteItems,
-		baseColor,
+		paletteID,
 		2,
 		args.enableAlpha,
 		args.limitDark,

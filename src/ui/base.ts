@@ -1,12 +1,13 @@
 // File: src/dom/events/palette.js
 
 import { UIFnBaseInterface } from '../types/index.js';
-import { data } from '../data/index.js';
-import { logger } from '../logger/index.js';
+import { consts, mode } from '../common/data/base.js';
+import { createLogger } from '../logger/index.js';
 
-const domIDs = data.consts.dom.ids;
-const logMode = data.mode.logging;
-const mode = data.mode;
+const logger = await createLogger();
+
+const domIDs = consts.dom.ids;
+const logMode = mode.logging;
 
 function enforceSwatchRules(
 	minimumSwatches: number,
@@ -17,8 +18,11 @@ function enforceSwatchRules(
 	) as HTMLSelectElement;
 
 	if (!paletteDropdown) {
-		if (logMode.errors) {
-			logger.error('paletteDropdown not found');
+		if (logMode.error) {
+			logger.error(
+				'paletteDropdown not found',
+				'ui > base > enforceSwatchRules()'
+			);
 		}
 		if (mode.stackTrace && logMode.verbosity > 3) {
 			console.trace('enforceMinimumSwatches stack trace');
@@ -50,9 +54,10 @@ function enforceSwatchRules(
 		try {
 			paletteDropdown.dispatchEvent(event);
 		} catch (error) {
-			if (logMode.errors) {
+			if (logMode.error) {
 				logger.error(
-					`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`
+					`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`,
+					'ui > base > enforceSwatchRules()'
 				);
 			}
 			throw new Error(`Failed to dispatch change event: ${error}`);

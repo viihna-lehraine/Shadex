@@ -1,11 +1,11 @@
 // File: src/io/parse/json.ts
 
 import { Palette } from '../../types/index.js';
-import { data } from '../../data/index.js';
-import { logger } from '../../logger/factory.js';
+import { createLogger } from '../../logger/factory.js';
+import { mode } from '../../common/data/base.js';
 
-const logMode = data.mode.logging;
-const mode = data.mode;
+const logger = await createLogger();
+const logMode = mode.logging;
 
 function file(jsonData: string): Promise<Palette | null> {
 	try {
@@ -18,8 +18,11 @@ function file(jsonData: string): Promise<Palette | null> {
 
 		return Promise.resolve(parsed as Palette);
 	} catch (error) {
-		if (!mode.quiet && logMode.errors && logMode.verbosity > 1) {
-			logger.error(`Error parsing JSON file: ${error}`);
+		if (!mode.quiet && logMode.error && logMode.verbosity > 1) {
+			logger.error(
+				`Error parsing JSON file: ${error}`,
+				'io > parse > json > file()'
+			);
 
 			if (mode.showAlerts)
 				alert(`Error parsing JSON file. See console for details.`);

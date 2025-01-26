@@ -1,79 +1,67 @@
 // File: src/logger/factory.ts
 
-import {
-	AsyncLoggerFactory,
-	MutationLog,
-	SyncLoggerFactory
-} from '../types/index.js';
+import { MutationLog } from '../types/index.js';
 import { AppLogger } from './AppLogger.js';
-import { data } from '../data/index.js';
+import { mode } from '../common/data/base.js';
 
-const debugLevel = data.mode.debugLevel;
+export const createLogger = async () => {
+	const debugLevel = mode.debugLevel;
+	const appLogger = AppLogger.getInstance(mode);
 
-const appLogger = AppLogger.getInstance(data.mode);
+	return {
+		debug: (message: string, caller?: string) =>
+			appLogger.log(message, 'debug', debugLevel, caller),
+		info: (message: string, caller?: string) =>
+			appLogger.log(message, 'info', debugLevel, caller),
+		warn: (message: string, caller?: string) =>
+			appLogger.log(message, 'warn', debugLevel, caller),
+		error: (message: string, caller?: string) =>
+			appLogger.log(message, 'error', debugLevel, caller),
+		mutation: (
+			data: MutationLog,
+			logCallback: (data: MutationLog) => void,
+			caller?: string
+		) => {
+			appLogger.logMutation(data, logCallback);
 
-// Synchronous Log Functions
-
-function logDebug(message: string): void {
-	appLogger.log(message, 'debug', debugLevel);
-}
-
-function logInfo(message: string): void {
-	appLogger.log(message, 'info', debugLevel);
-}
-
-function logWarning(message: string): void {
-	appLogger.log(message, 'warn', debugLevel);
-}
-
-function logError(message: string): void {
-	appLogger.log(message, 'error', debugLevel);
-}
-
-function logMutation(
-	data: MutationLog,
-	logCallback: (data: MutationLog) => void = () => {}
-): void {
-	appLogger.logMutation(data, logCallback);
-}
-
-// Async Log Functions
-
-async function logAsyncDebug(message: string): Promise<void> {
-	appLogger.logAsync(message, 'debug', debugLevel);
-}
-
-async function logAsyncInfo(message: string): Promise<void> {
-	appLogger.logAsync(message, 'info', debugLevel);
-}
-
-async function logAsyncWarning(message: string): Promise<void> {
-	appLogger.logAsync(message, 'warn', debugLevel);
-}
-
-async function logAsyncError(message: string): Promise<void> {
-	appLogger.logAsync(message, 'error', debugLevel);
-}
-
-async function logAsyncMutation(
-	data: MutationLog,
-	logCallback: (data: MutationLog) => void = () => {}
-): Promise<void> {
-	appLogger.logMutation(data, logCallback);
-}
-
-export const logger: SyncLoggerFactory = {
-	debug: logDebug,
-	info: logInfo,
-	warning: logWarning,
-	error: logError,
-	mutation: logMutation
+			if (caller) {
+				appLogger.log(
+					`Mutation logged by ${caller}`,
+					'debug',
+					debugLevel
+				);
+			}
+		}
+	};
 };
 
-export const asyncLogger: AsyncLoggerFactory = {
-	debug: logAsyncDebug,
-	info: logAsyncInfo,
-	warning: logAsyncWarning,
-	error: logAsyncError,
-	mutation: logAsyncMutation
+export const createAsyncLogger = async () => {
+	const debugLevel = mode.debugLevel;
+	const appLogger = AppLogger.getInstance(mode);
+
+	return {
+		debug: (message: string, caller?: string) =>
+			appLogger.logAsync(message, 'debug', debugLevel, caller),
+		info: (message: string, caller?: string) =>
+			appLogger.logAsync(message, 'info', debugLevel, caller),
+		warn: (message: string, caller?: string) =>
+			appLogger.logAsync(message, 'warn', debugLevel, caller),
+		error: (message: string, caller?: string) =>
+			appLogger.logAsync(message, 'error', debugLevel, caller),
+		mutation: (
+			data: MutationLog,
+			logCallback: (data: MutationLog) => void,
+			caller?: string
+		) => {
+			appLogger.logMutation(data, logCallback);
+
+			if (caller) {
+				appLogger.logAsync(
+					`Mutation logged by ${caller}`,
+					'debug',
+					debugLevel
+				);
+			}
+		}
+	};
 };

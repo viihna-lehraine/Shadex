@@ -1,17 +1,20 @@
 // File: src/palette/common/paletteHelpers/limits.js
 
-import { HSL, PaletteCommon_Helpers_Limits } from '../../../types/index.js';
+import { HSL } from '../../../types/index.js';
 import { core } from '../../../common/index.js';
-import { data } from '../../../data/index.js';
-import { logger } from '../../../logger/index.js';
+import { consts, mode } from '../../../common/data/base.js';
+import { createLogger } from '../../../logger/index.js';
 
-const logMode = data.mode.logging;
+const logger = await createLogger();
+
+const logMode = mode.logging;
 
 function isColorInBounds(hsl: HSL): boolean {
 	if (!core.validate.colorValues(hsl)) {
-		if (logMode.errors)
+		if (logMode.error)
 			logger.error(
-				`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`
+				`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`,
+				'paletteHelpers > limits > isColorInBounds()'
 			);
 
 		return false;
@@ -22,40 +25,47 @@ function isColorInBounds(hsl: HSL): boolean {
 
 function isTooDark(hsl: HSL): boolean {
 	if (!core.validate.colorValues(hsl)) {
-		if (logMode.errors)
-			logger.error(`isTooDark: Invalid HSL value ${JSON.stringify(hsl)}`);
-
-		return false;
-	}
-
-	return core.base.clone(hsl).value.lightness < data.consts.thresholds.dark;
-}
-
-function isTooGray(hsl: HSL): boolean {
-	if (!core.validate.colorValues(hsl)) {
-		if (logMode.errors)
-			logger.error(`isTooGray: Invalid HSL value ${JSON.stringify(hsl)}`);
-
-		return false;
-	}
-
-	return core.base.clone(hsl).value.saturation < data.consts.thresholds.gray;
-}
-
-function isTooLight(hsl: HSL): boolean {
-	if (!core.validate.colorValues(hsl)) {
-		if (logMode.errors)
+		if (logMode.error)
 			logger.error(
-				`isTooLight: Invalid HSL value ${JSON.stringify(hsl)}`
+				`isTooDark: Invalid HSL value ${JSON.stringify(hsl)}`,
+				'paletteHelpers > limits > isTooDark()'
 			);
 
 		return false;
 	}
 
-	return core.base.clone(hsl).value.lightness > data.consts.thresholds.light;
+	return core.base.clone(hsl).value.lightness < consts.thresholds.dark;
 }
 
-export const limits: PaletteCommon_Helpers_Limits = {
+function isTooGray(hsl: HSL): boolean {
+	if (!core.validate.colorValues(hsl)) {
+		if (logMode.error)
+			logger.error(
+				`isTooGray: Invalid HSL value ${JSON.stringify(hsl)}`,
+				'paletteHelpers > limits > isTooGray()'
+			);
+
+		return false;
+	}
+
+	return core.base.clone(hsl).value.saturation < consts.thresholds.gray;
+}
+
+function isTooLight(hsl: HSL): boolean {
+	if (!core.validate.colorValues(hsl)) {
+		if (logMode.error)
+			logger.error(
+				`isTooLight: Invalid HSL value ${JSON.stringify(hsl)}`,
+				'paletteHelpers > limits > isTooLight()'
+			);
+
+		return false;
+	}
+
+	return core.base.clone(hsl).value.lightness > consts.thresholds.light;
+}
+
+export const limits = {
 	isColorInBounds,
 	isTooDark,
 	isTooGray,

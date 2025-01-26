@@ -16,15 +16,16 @@
         "noImplicitThis": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "outDir": "./public/js",
+        "outDir": "./public/dist",
         "resolveJsonModule": true,
         "rootDir": "./src",
         "skipLibCheck": true,
         "strict": true,
         "target": "ES2022",
+		"types": ["./types/global"],
         "useDefineForClassFields": true,
         "useUnknownInCatchVariables": true
     },
-    "include": ["src/**/*.ts", "types/**/*.d.ts"],
+    "include": ["src/**/*.ts", "types/global.d.ts"],
     "exclude": ["node_modules", "public/js"]
 }

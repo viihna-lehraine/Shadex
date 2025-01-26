@@ -2,9 +2,9 @@
 
 import { openDB, IDBPDatabase } from 'idb';
 import { PaletteSchema } from '../types/index.js';
-import { data } from '../data/index.js';
+import { config } from '../common/data/base.js';
 
-const dbConfig = data.config.db;
+const dbConfig = config.db;
 
 export async function initializeDB(): Promise<IDBPDatabase<PaletteSchema>> {
 	return openDB<PaletteSchema>('paletteDB', 1, {

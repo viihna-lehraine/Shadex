@@ -1,6 +1,6 @@
 // File: src/types/sets.js
 
-import { data } from '../data/index.js';
+import { sets } from '../common/data/sets.js';
 
 export type AlphaRange = number & { __brand: 'AlphaRange' };
 
@@ -43,9 +43,10 @@ export type RangeKeyMap = {
 
 export type ColorValueRange = RangeKeyMap[keyof RangeKeyMap];
 
-export type NumericRangeKey = Exclude<
-	keyof typeof data.sets,
-	'HexSet' | 'HexComponent'
->;
+export type NumericRangeKey = {
+	[K in keyof typeof sets]: (typeof sets)[K] extends readonly [number, number]
+		? K
+		: never;
+}[keyof typeof sets & string];
 
-export type Sets = typeof data.sets;
+export type Sets = typeof sets;

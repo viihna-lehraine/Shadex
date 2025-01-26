@@ -1,8 +1,19 @@
 // File: src/common/dom/index.js
 
 import { CommonDOMFnMasterInterface } from '../../types/index.js';
-import { base } from './base.js';
+
+async function getElement<T extends HTMLElement>(
+	id: string
+): Promise<T | null> {
+	const element = document.getElementById(id) as T | null;
+
+	if (!element) {
+		console.warn(`Element with ID ${id} not found`);
+	}
+
+	return element;
+}
 
 export const domUtils: CommonDOMFnMasterInterface = {
-	...base
-} as const;
+	getElement: (id: string) => getElement(id)
+};

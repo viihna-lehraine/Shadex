@@ -13,26 +13,28 @@
 		<link rel="shortcut icon" type="image/png" href="./assets/favicons/favicon-android-chrome.png"/>
 	</head>
 	<body>
-		<div id="container">
-			<div id="app">
+		<div id="container" class="align-center flex flex-column justify-center justify-flex-start margin-top-sm padding-0">
+			<div id="app" class="bg-color-3 flex flex-column gap-lg padding-sm">
 				<header>
-					<h1>ColorGen</h1>
+					<h1 class="margin-0 padding-top-md padding-right-0 padding-bottom-0 padding-left-md">
+						ColorGen
+					</h1>
 				</header>
 				<main>
 
 					<!-- MAIN USER INTERFACE -->
-					<div id="main-ui">
+					<div id="main-ui" class="gap-lg">
 
 						<!-- UI LEFT COLUMN -->
-						<div id="left-column">
+						<div id="left-column" class="flex flex-column gap-md">
 
 							<!-- PALETTE DETAILS SELECTION MENU -->
 							<section id="main-options-section" class="bg-color-3">
 								<form id="ui-form">
 									<div class="ui-sub-box">
 										<fieldset aria-labelledby="main-options-legend">
-											<div id="main-options-top-half" class="column-half">
-												<legend id="color-options-legend" class="sub-menu-title">
+											<div id="main-options-top-half" class="column-half padding-top-xs padding-right-0 padding-bottom-xs padding-left-0">
+												<legend id="color-options-legend" class="sub-menu-title bold">
 													Main Options
 												</legend>
 											</div>
@@ -68,12 +70,12 @@
 							<section id="color-limit-options" class="bg-color-3">
 								<div class="ui-sub-box">
 									<fieldset aria-labelledby="color-limit-options-legend">
-										<div class="ui-sub-box-top column-half">
-											<legend id="color-limit-options-legend" class="sub-menu-title">
+										<div class="column-half align-center flex justify-center">
+											<legend id="color-limit-options-legend" class="sub-menu-title bold">
 												Color Limit Options
 											</legend>
 										</div>
-										<div class="ui-sub-box-bottom column-half">
+										<div class="ui-sub-box-bottom column-half flex justify-center">
 											<div>
 												<div>
 													<label for="limit-darkness-checkbox" class="checkbox-label">
@@ -107,14 +109,14 @@
 						</div>
 
 						<!-- UI RIGHT COLUMN -->
-						<div id="right-column">
+						<div id="right-column" class="flex flex-column gap-md">
 
 							<!-- COLOR ADJUSTMENT SECTION -->
 							<section id="actions-section" class="bg-color-3">
-								<div class="inside-left-column">
+								<div class="inside-left-column align-center gap-md flex flex-column justify-center">
 									<fieldset aria-labelledby="select-color-swatch-number-legend">
 										<label for="selected-color-option">
-											<legend id="select-color-swatch-number-legend" class="sub-menu-title">
+											<legend id="select-color-swatch-number-legend" class="sub-menu-title bold">
 												<i>Select Swatch #</i>
 											</legend>
 										</label>
@@ -128,10 +130,10 @@
 										</select>
 									</fieldset>
 								</div>
-								<div class="inside-right-column" id="adjust-color-left-column">
+								<div id="adjust-color-left-column" class="inside-right-column align-center gap-md flex flex-column justify-center">
 									<fieldset aria-labelledby="adjust-color-legend">
-										<div class="ui-sub-box-top">
-											<legend id="adjust-color-legend" class="sub-menu-title">Adjust Color</legend>
+										<div class="align-center flex justify-center">
+											<legend id="adjust-color-legend" class="sub-menu-title bold">Adjust Color</legend>
 										</div>
 										<div>
 											<button id="saturate-button" class="saturate-desaturate-buttons" type="button" aria-label="Saturate Selected Color">
@@ -152,13 +154,13 @@
 							<section id="conversion-buttons-section" class="bg-color-3">
 								<fieldset aria-labelledby="conversion-button-legend">
 									<div class="ui-sub-box">
-										<div class="ui-sub-box-top">
-											<legend id="conversion-button-legend" class="sub-menu-title">
+										<div class="align-center flex justify-center">
+											<legend id="conversion-button-legend" class="sub-menu-title bold">
 												Convert To
 											</legend>
 										</div>
 										<div>
-											<div id="button-row">
+											<div id="button-row" class="flex flex-wrap gap-md justify-center">
 												<button id="show-as-hex-button" class="button-row-button" type="button" aria-label="Convert Colors to Hex">
 													Hex
 												</button>
@@ -186,16 +188,16 @@
 					</div>
 
 					<!-- MENU BUTTONS -->
-					<section id="menu-buttons-section" class="bg-color-3">
+					<section id="menu-buttons-section">
 						<fieldset aria-labelledby="more-options-legend">
 							<div class="ui-sub-box">
-								<div class="ui-sub-box-top">
-									<legend id="more-options-legend" class="sub-menu-title">
+								<div class="align-center flex justify-center">
+									<legend id="more-options-legend" class="sub-menu-title bold">
 										More Options
 									</legend>
 								</div>
 								<div class="ui-sub-box-bottom">
-									<div id="menu-buttons">
+									<div id="menu-buttons" class="flex gap-lg justify-center margin-top-sm">
 										<button id="advanced-menu-button" class="modal-button" type="button" aria-label="Open Advanced Menu">
 											Advanced Menu
 										</button>
@@ -224,7 +226,7 @@
 			</div>
 
 			<!-- PALETTE OUTPUT -->
-			<section id="palette-row" class="bg-color-3">
+			<section id="palette-row" class="bg-color-3 flex">
 				<header>
 					<h2>
 						Generated Palette
@@ -250,7 +252,7 @@
 				<div id="custom-color-menu-content" class="modal-menu-content">
 					<section class="custom-color-menu-section" class="bg-color-3">
 						<fieldset aria-labelledby="custom-color-menu-legend">
-							<legend id="custom-color-menu-legend" class="sub-menu-title">
+							<legend id="custom-color-menu-legend" class="sub-menu-title bold">
 								Custom Color Menu
 							</legend>
 							<div class="custom-color-menu-content">
@@ -299,7 +301,7 @@
 				<div id="history-menu-content" class="modal-menu-content">
 					<section id="history-menu-section" class="bg-color-3 border-none">
 						<fieldset aria-labelledby="palette-history-legend">
-							<legend id="palette-history-legend" class="sub-menu-title">
+							<legend id="palette-history-legend" class="sub-menu-title bold">
 								Palette History
 							</legend>
 							<div id="palette-history-list" class="palette-list hidden" aria-hidden="true">
@@ -314,12 +316,12 @@
 				<div id="import-export-menu-content" class="modal-menu-content">
 					<section id="import-export-menu-section" class="bg-color-3 border-none">
 						<fieldset aria-labelledby="import-export-legend">
-							<legend id="import-export-legend" class="sub-menu-title">
+							<legend id="import-export-legend" class="sub-menu-title bold">
 								Import/Export
 							</legend>
 							<div id="import-export-content">
 								<div>
-									<legend for="import-palette-sub-menu" class="sub-menu-title">
+									<legend for="import-palette-sub-menu" class="sub-menu-title bold">
 										Import Palette
 									</legend>
 									<div id="import-palette-sub-menu" aria-labelledby="import-palette-sub-menu">
@@ -355,7 +357,7 @@
 				<div id="developer-menu-content" class="modal-menu-content">
 					<section id="developer-menu-section" class="bg-color-3 border-none">
 						<fieldset arialabelled-by="developer-menu-legend">
-							<legend id="developer-menu-legend" class="sub-menu-title">
+							<legend id="developer-menu-legend" class="sub-menu-title bold">
 								Developer Menu
 							</legend>
 							<button id="reset-database-button" type="button">
@@ -375,7 +377,7 @@
 		</div>
 
 		<!-- MAIN APPLICATION SCRIPT -->
-		<script type="module" src="./dist/bundle.js"></script>
+		<script type="module" src="./dist/app.js"></script>
 
 	</body>
 </html>

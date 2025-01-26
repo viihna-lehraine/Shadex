@@ -4,27 +4,24 @@ import {
 	GenPaletteArgs,
 	HSL,
 	Palette,
-	PaletteGenerateFnInterface,
 	PaletteItem,
-	PaletteOptions,
-	PaletteStartFnInterface
+	PaletteOptions
 } from '../types/index.js';
 import { IDBManager } from '../db/index.js';
 import { core, helpers, utils } from '../common/index.js';
-import { data } from '../data/index.js';
+import { createLogger } from '../logger/index.js';
+import { defaults, mode } from '../common/data/base.js';
 import { genPalette as genPaletteType } from './main/index.js';
-import { logger } from '../logger/index.js';
 import { paletteHelpers } from './common/index.js';
 import { transform } from '../common/transform/index.js';
 
-const defaultPalette = data.defaults.palette.unbrandedData;
+const logger = await createLogger();
+
+const defaultPalette = defaults.palette.unbranded.data;
 const defaultBrandedPalete = transform.brandPalette(defaultPalette);
 
 const limits = paletteHelpers.limits;
-const logMode = data.mode.logging;
-const mode = data.mode;
-
-const idb = IDBManager.getInstance();
+const logMode = mode.logging;
 
 const isTooDark = limits.isTooDark;
 const isTooGray = limits.isTooGray;
@@ -32,51 +29,67 @@ const isTooLight = limits.isTooLight;
 
 async function genPalette(options: PaletteOptions): Promise<void> {
 	try {
-		let { numBoxes, customColor } = options;
+		let { swatches, customColor } = options;
 
 		if (logMode.info && logMode.verbosity > 2)
-			logger.info('Retrieving existing IDBManager instance.');
+			logger.info(
+				'Retrieving existing IDBManager instance.',
+				'palette > main > genPalette()'
+			);
 
-		const idb = IDBManager.getInstance();
+		const idb = await IDBManager.getInstance();
 
 		if (customColor === null || customColor === undefined) {
-			if (logMode.errors)
-				logger.error('Custom color is null or undefined.');
+			if (logMode.error)
+				logger.error(
+					'Custom color is null or undefined.',
+					'palette > main > genPalette()'
+				);
 
 			return;
 		}
 
 		const validatedCustomColor: HSL =
-			(helpers.dom.validateAndConvertColor(customColor) as HSL) ??
-			utils.random.hsl(options.enableAlpha);
+			((await helpers.dom.validateAndConvertColor(customColor)) as HSL) ??
+			utils.random.hsl(options.flags.enableAlpha);
 
 		if (mode.debug && logMode.info && logMode.verbosity > 2)
-			logger.info(`Custom color: ${JSON.stringify(customColor)}`);
+			logger.info(
+				`Custom color: ${JSON.stringify(customColor)}`,
+				'palette > main > genPalette()'
+			);
 
 		options.customColor = validatedCustomColor;
 
 		const palette = await generate.selectedPalette(options);
 
 		if (palette.items.length === 0) {
-			if (logMode.errors)
-				logger.error('Colors array is empty or invalid.');
+			if (logMode.error)
+				logger.error(
+					'Colors array is empty or invalid.',
+					'palette > main > genPalette()'
+				);
 
 			return;
 		}
 
 		if (!mode.quiet && logMode.info && logMode.verbosity > 0)
 			logger.info(
-				`Colors array generated: ${JSON.stringify(palette.items)}`
+				`Colors array generated: ${JSON.stringify(palette.items)}`,
+				'palette > main > genPalette()'
 			);
 
 		const tableId = await idb.getNextTableID();
 
 		if (!tableId) throw new Error('Table ID is null or undefined.');
 
-		await genPaletteDOMBox(palette.items, numBoxes, tableId);
+		await genPaletteDOMBox(palette.items, swatches, tableId);
 	} catch (error) {
-		if (logMode.errors)
-			logger.error(`Error starting palette generation: ${error}`);
+		if (logMode.error)
+			logger.error(
+				`Error starting palette generation: ${error}`,
+				'palette > main > genPalette()'
+			);
 	}
 }
 
@@ -87,9 +100,14 @@ async function genPaletteDOMBox(
 ): Promise<void> {
 	try {
 		const paletteRow = document.getElementById('palette-row');
+		const idbManager = await IDBManager.getInstance();
 
 		if (!paletteRow) {
-			if (logMode.errors) logger.error('paletteRow is undefined.');
+			if (logMode.error)
+				logger.error(
+					'paletteRow is undefined.',
+					'palette > main > genPaletteDOMBox()'
+				);
 
 			return;
 		}
@@ -98,28 +116,38 @@ async function genPaletteDOMBox(
 
 		const fragment = document.createDocumentFragment();
 
-		items.slice(0, numBoxes).forEach((item, i) => {
+		for (let i = 0; i < Math.min(items.length, numBoxes); i++) {
+			const item = items[i];
 			const color: HSL = { value: item.colors.hsl, format: 'hsl' };
-			const { colorStripe } = helpers.dom.makePaletteBox(color, i + 1);
+			const { colorStripe } = await helpers.dom.makePaletteBox(
+				color,
+				i + 1
+			);
 
 			fragment.appendChild(colorStripe);
 
 			utils.palette.populateOutputBox(color, i + 1);
-		});
+		}
 
 		paletteRow.appendChild(fragment);
 
 		if (!mode.quiet && logMode.info && logMode.verbosity > 1)
-			logger.info('Palette boxes generated and rendered.');
+			logger.info(
+				'Palette boxes generated and rendered.',
+				'palette > main > genPaletteDOMBox()'
+			);
 
-		await idb.saveData('tables', tableId, { palette: items });
+		await idbManager.saveData('tables', tableId, { palette: items });
 	} catch (error) {
-		if (logMode.errors)
-			logger.error(`Error generating palette box: ${error}`);
+		if (logMode.error)
+			logger.error(
+				`Error generating palette box: ${error}`,
+				'palette > main > genPaletteDOMBox()'
+			);
 	}
 }
 
-export const start: PaletteStartFnInterface = {
+export const start = {
 	genPalette,
 	genPaletteDOMBox
 } as const;
@@ -158,26 +186,18 @@ function limitedHSL(
 
 async function selectedPalette(options: PaletteOptions): Promise<Palette> {
 	try {
-		const {
-			paletteType,
-			numBoxes,
-			customColor,
-			enableAlpha,
-			limitDarkness,
-			limitGrayness,
-			limitLightness
-		} = options;
+		const { customColor, flags, swatches, type } = options;
 
 		const args: GenPaletteArgs = {
-			numBoxes,
+			swatches,
 			customColor,
-			enableAlpha,
-			limitDark: limitDarkness,
-			limitGray: limitGrayness,
-			limitLight: limitLightness
+			enableAlpha: flags.enableAlpha,
+			limitDark: flags.limitDarkness,
+			limitGray: flags.limitGrayness,
+			limitLight: flags.limitLightness
 		};
 
-		switch (paletteType) {
+		switch (type) {
 			case 1:
 				return genPaletteType.random(args);
 			case 2:
@@ -197,18 +217,26 @@ async function selectedPalette(options: PaletteOptions): Promise<Palette> {
 			case 9:
 				return genPaletteType.monochromatic(args);
 			default:
-				if (logMode.errors) logger.error('Invalid palette type.');
+				if (logMode.error)
+					logger.error(
+						'Invalid palette type.',
+						'palette > main > selectedPalette()'
+					);
 
 				return Promise.resolve(defaultBrandedPalete);
 		}
 	} catch (error) {
-		if (logMode.errors) console.error(`Error generating palette: ${error}`);
+		if (logMode.error)
+			logger.error(
+				`Error generating palette: ${error}`,
+				'palette > main > selectedPalette()'
+			);
 
 		return Promise.resolve(defaultBrandedPalete);
 	}
 }
 
-export const generate: PaletteGenerateFnInterface = {
+export const generate = {
 	limitedHSL,
 	selectedPalette
 } as const;

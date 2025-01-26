@@ -1,11 +1,12 @@
 // File: src/paelette/common/paletteUtils/probability.js
 
-import { PaletteCommon_Utils_Probability } from '../../../types/index.js';
-import { data } from '../../../data/index.js';
-import { logger } from '../../../logger/index.js';
+import { consts, mode } from '../../../common/data/base.js';
+import { createLogger } from '../../../logger/index.js';
 
-const logMode = data.mode.logging;
-const probabilities = data.consts.probabilities;
+const logger = await createLogger();
+
+const logMode = mode.logging;
+const probabilities = consts.probabilities;
 
 function getWeightedRandomInterval(): number {
 	try {
@@ -14,6 +15,7 @@ function getWeightedRandomInterval(): number {
 		const cumulativeProbabilities: number[] = probabilityValues.reduce(
 			(acc: number[], prob: number, i: number) => {
 				acc[i] = (acc[i - 1] || 0) + prob;
+
 				return acc;
 			},
 			[]
@@ -21,20 +23,19 @@ function getWeightedRandomInterval(): number {
 		const random = Math.random();
 
 		for (let i = 0; i < cumulativeProbabilities.length; i++) {
-			if (random < cumulativeProbabilities[i]) {
-				return weights[i];
-			}
+			if (random < cumulativeProbabilities[i]) return weights[i];
 		}
 
 		return weights[weights.length - 1];
 	} catch (error) {
-		if (logMode.errors)
-			logger.error(`Error generating weighted random interval: ${error}`);
+		if (logMode.error)
+			// eslint-disable-next-line prettier/prettier
+			logger.error(`Error generating weighted random interval: ${error}`, 'palette > common > paletteUtils > getWeightedRandomInterval()');
 
 		return 50;
 	}
 }
 
-export const probability: PaletteCommon_Utils_Probability = {
+export const probability = {
 	getWeightedRandomInterval
 } as const;

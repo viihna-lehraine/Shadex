@@ -1,69 +1,40 @@
-// File: src/logger/AppLogger.ts
-
-import { AppLoggerInterface, ModeData, MutationLog } from '../types/index.js';
+import {
+	AppLoggerInterface,
+	ModeDataInterface,
+	MutationLog
+} from '../types/index.js';
 
 export class AppLogger implements AppLoggerInterface {
 	private static instance: AppLogger | null = null;
-	private mode: ModeData;
+	private mode: ModeDataInterface;
 
-	private constructor(mode: ModeData) {
+	private constructor(mode: ModeDataInterface) {
 		this.mode = mode;
 	}
 
-	public static getInstance(mode: ModeData): AppLogger {
+	public static getInstance(mode: ModeDataInterface): AppLogger {
 		if (!AppLogger.instance) {
 			AppLogger.instance = new AppLogger(mode);
 		}
-
 		return AppLogger.instance;
 	}
 
 	public log(
 		message: string,
 		level: 'debug' | 'info' | 'warn' | 'error' = 'info',
-		debugLevel: number = 0
+		debugLevel: number = 0,
+		caller?: string
 	): void {
-		if (level === 'info' && this.mode.quiet) return;
-
-		const formattedMessage = this.formatLog(level.toUpperCase(), {
-			message
-		});
-
-		try {
-			console[level](formattedMessage);
-		} catch (error) {
-			console.error(
-				`AppLogger encountered an unexpected error:, ${error}`
-			);
-
-			if (debugLevel > 1) console.trace('Trace:');
-		}
-
-		if (debugLevel > 1) console.trace('Trace:');
+		this.logMessage(message, level, debugLevel, caller);
 	}
 
 	public async logAsync(
 		message: string,
 		level: 'debug' | 'info' | 'warn' | 'error' = 'info',
-		debugLevel: number = 0
+		debugLevel: number = 0,
+		caller?: string
 	): Promise<void> {
-		if (level === 'info' && this.mode.quiet) return;
-
-		const formattedMessage = this.formatLog(level.toUpperCase(), {
-			message
-		});
-
-		try {
-			console[level](formattedMessage);
-		} catch (error) {
-			console.error(
-				`AppLogger encountered an unexpected error:, ${error}`
-			);
-
-			if (debugLevel > 1) console.trace('Trace:');
-		}
-
-		if (debugLevel > 1) console.trace('Trace:');
+		await this.logMessage(message, level, debugLevel, caller);
 	}
 
 	public logMutation(
@@ -75,15 +46,112 @@ export class AppLogger implements AppLoggerInterface {
 		logCallback(data);
 	}
 
-	private formatLog(action: string, details: Record<string, unknown>) {
-		return JSON.stringify({
-			timestamp: new Date().toISOString(),
-			action,
-			details
-		});
+	private logMessage(
+		message: string,
+		level: 'debug' | 'info' | 'warn' | 'error',
+		debugLevel: number,
+		caller?: string
+	): void {
+		if (
+			(level === 'info' && this.mode.quiet) ||
+			debugLevel < this.getDebugThreshold(level)
+		) {
+			return;
+		}
+
+		const callerInfo = caller || this.getCallerInfo();
+		const timestamp = this.getFormattedTimestamp();
+
+		try {
+			console.log(
+				`%c[${level.toUpperCase()}]%c ${timestamp} [${callerInfo}] %c${message}`,
+				this.getLevelColor(level),
+				'color: gray',
+				'color: inherit'
+			);
+		} catch (error) {
+			console.error(
+				`AppLogger encountered an unexpected error: ${error}`
+			);
+		}
+
+		if (
+			callerInfo === 'Unknown caller' &&
+			debugLevel > 1 &&
+			this.mode.stackTrace
+		) {
+			console.trace('Full Stack Trace:');
+		}
 	}
 
 	private formatMutationLog(data: MutationLog): string {
 		return `Mutation logged: ${JSON.stringify(data)}`;
+	}
+
+	private getDebugThreshold(
+		level: 'debug' | 'info' | 'warn' | 'error'
+	): number {
+		switch (level) {
+			case 'debug':
+				return 2;
+			case 'info':
+				return 1;
+			case 'warn':
+				return 0;
+			case 'error':
+				return 0;
+			default:
+				return 0;
+		}
+	}
+
+	private getCallerInfo(): string {
+		const stack = new Error().stack;
+
+		if (stack) {
+			const stackLines = stack.split('\n');
+
+			for (const line of stackLines) {
+				if (!line.includes('AppLogger') && line.includes('at ')) {
+					const match =
+						line.match(/at\s+(.*)\s+\((.*):(\d+):(\d+)\)/) ||
+						line.match(/at\s+(.*):(\d+):(\d+)/);
+					if (match) {
+						return match[1]
+							? `${match[1]} (${match[2]}:${match[3]})`
+							: `${match[2]}:${match[3]}`;
+					}
+				}
+			}
+		}
+
+		return 'Unknown caller';
+	}
+
+	private getFormattedTimestamp(): string {
+		return new Date().toLocaleString('en-US', {
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit',
+			hour12: false
+		});
+	}
+
+	private getLevelColor(level: 'debug' | 'info' | 'warn' | 'error'): string {
+		switch (level) {
+			case 'debug':
+				return 'color: green';
+			case 'info':
+				return 'color: blue';
+			case 'warn':
+				return 'color: orange';
+			case 'error':
+				return 'color: red';
+			default:
+				return 'color: black';
+		}
 	}
 }

@@ -84,8 +84,8 @@ export interface IDBManagerInterface {
 	savePaletteToDB(
 		type: string,
 		items: PaletteItem[],
-		baseColor: HSL,
-		numBoxes: number,
+		paletteID: number,
+		swatches: number,
 		enableAlpha: boolean,
 		limitDark: boolean,
 		limitGray: boolean,
@@ -101,7 +101,7 @@ export interface MutationTrackerInterface {
 export interface UIManagerInterface {
 	addPaletteToHistory(palette: Palette): void;
 	applyCustomColor(): HSL;
-	applyFirstColorToUI(color: HSL): HSL;
+	applyFirstColorToUI(color: HSL): Promise<HSL>;
 	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
 	createPaletteTable(palette: StoredPalette): HTMLElement;
 	getCurrentPalette(): Promise<Palette | null>;

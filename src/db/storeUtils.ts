@@ -1,7 +1,7 @@
 // File: src/db/storeUtils.ts
 
 import { IDBPDatabase, IDBPObjectStore } from 'idb';
-import { PaletteSchema, StoreUtilsFnInterface } from '../types/index.js';
+import { PaletteSchema } from '../types/index.js';
 
 async function withStore<
 	StoreName extends keyof PaletteSchema,
@@ -22,6 +22,6 @@ async function withStore<
 	await tx.done;
 }
 
-export const storeUtils: StoreUtilsFnInterface = {
+export const storeUtils = {
 	withStore
 };

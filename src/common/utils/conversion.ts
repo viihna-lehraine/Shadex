@@ -4,7 +4,7 @@ import {
 	CMYK,
 	ColorDataAssertion,
 	ColorDataExtended,
-	CommonUtilsFnConversion,
+	CommonFunctionsMasterInterface,
 	Hex,
 	HSL,
 	HSV,
@@ -15,11 +15,12 @@ import {
 	XYZ
 } from '../../types/index.js';
 import { convert } from '../convert/index.js';
+import { createLogger } from '../../logger/index.js';
 import { core } from '../core/index.js';
-import { data } from '../../data/index.js';
-import { logger } from '../../logger/index.js';
+import { mode } from '../data/base.js';
 
-const mode = data.mode;
+const logger = await createLogger();
+
 const logMode = mode.logging;
 
 function getConversionFn<
@@ -42,8 +43,11 @@ function getConversionFn<
 		return (value: ColorDataAssertion[From]): ColorDataAssertion[To] =>
 			structuredClone(conversionFn(value));
 	} catch (error) {
-		if (logMode.errors)
-			logger.error(`Error getting conversion function: ${error}`);
+		if (logMode.error)
+			logger.error(
+				`Error getting conversion function: ${error}`,
+				'common > utils > conversion > getConversionFn()'
+			);
 
 		return undefined;
 	}
@@ -56,8 +60,11 @@ function genAllColorValues(color: HSL): Partial<ColorDataExtended> {
 		const clonedColor = core.base.clone(color);
 
 		if (!core.validate.colorValues(clonedColor)) {
-			if (logMode.errors)
-				logger.error(`Invalid color: ${JSON.stringify(clonedColor)}`);
+			if (logMode.error)
+				logger.error(
+					`Invalid color: ${JSON.stringify(clonedColor)}`,
+					'common > utils > conversion > genAllColorValues()'
+				);
 
 			return {};
 		}
@@ -74,14 +81,18 @@ function genAllColorValues(color: HSL): Partial<ColorDataExtended> {
 
 		return result;
 	} catch (error) {
-		if (logMode.errors)
-			logger.error(`Error generating all color values: ${error}`);
+		if (logMode.error)
+			logger.error(
+				`Error generating all color values: ${error}`,
+				'common > utils > conversion > genAllColorValues()'
+			);
 
 		return {};
 	}
 }
 
-export const conversion: CommonUtilsFnConversion = {
-	genAllColorValues,
-	getConversionFn
-} as const;
+export const conversion: CommonFunctionsMasterInterface['utils']['conversion'] =
+	{
+		genAllColorValues,
+		getConversionFn
+	} as const;

@@ -67,12 +67,15 @@ import {
 	XYZ_Y,
 	XYZ_Z
 } from '../index.js';
-import { data } from '../../data/index.js';
+import { sets } from '../../common/data/sets.js';
 
-const _sets = data.sets;
+const _sets = sets;
 
 export interface CommonDOMBase {
-	getElement<T extends HTMLElement>(id: string): T | null;
+	getElement<T extends HTMLElement>(
+		id: string,
+		mode: { logging: { warn: boolean }; debugLevel: number }
+	): Promise<T | null>;
 }
 
 export interface CommonDOMFnMasterInterface extends CommonDOMBase {}
@@ -129,8 +132,8 @@ export interface CommonFunctionsMasterInterface {
 			asXYZ(color: XYZUnbranded): XYZ;
 		};
 		convert: {
-			colorStringToColor(colorString: ColorString): Color;
-			colorToCSSColorString(color: Color): string;
+			colorStringToColor(colorString: ColorString): Promise<Color>;
+			colorToCSSColorString(color: Color): Promise<string>;
 			hexAlphaToNumericAlpha(hexAlpha: string): number;
 			stringToValue: {
 				cmyk(cmyk: CMYKValueString): CMYKValue;
@@ -200,18 +203,18 @@ export interface CommonFunctionsMasterInterface {
 			makePaletteBox(
 				color: Color,
 				paletteBoxCount: number
-			): MakePaletteBox;
+			): Promise<MakePaletteBox>;
 			showToast(message: string): void;
 			showTooltip(tooltipElement: HTMLElement): void;
 			validateAndConvertColor(
 				color: Color | ColorString | null
-			): Color | null;
+			): Promise<Color | null>;
 		};
 	};
 	superUtils: {
 		dom: {
 			getGenButtonArgs(): GenButtonArgs | null;
-			switchColorSpace(targetFormat: ColorSpace): void;
+			switchColorSpace(targetFormat: ColorSpace): Promise<void>;
 		};
 	};
 	transform: {
@@ -260,7 +263,7 @@ export interface CommonFunctionsMasterInterface {
 			): color is CMYK | Hex | HSL | HSV | LAB | RGB;
 			isInputElement(element: HTMLElement | null): element is HTMLElement;
 			isStoredPalette(obj: unknown): obj is StoredPalette;
-			narrowToColor(color: Color | ColorString): Color | null;
+			narrowToColor(color: Color | ColorString): Promise<Color | null>;
 			formatPercentageValues<T extends Record<string, unknown>>(
 				value: T
 			): T;
@@ -299,8 +302,7 @@ export interface CommonFunctionsMasterInterface {
 			createObject(
 				type: string,
 				items: PaletteItem[],
-				baseColor: HSL,
-				numBoxes: number,
+				swatches: number,
 				paletteID: number,
 				enableAlpha: boolean,
 				limitDark: boolean,
@@ -310,7 +312,7 @@ export interface CommonFunctionsMasterInterface {
 			populateOutputBox(
 				color: Color | ColorString,
 				boxNumber: number
-			): void;
+			): Promise<void>;
 		};
 		random: {
 			hsl(enableAlpha: boolean): HSL;

@@ -2,7 +2,8 @@
 
 import { openDB } from 'idb';
 import {
-	DataInterface,
+	ConfigDataInterface,
+	ModeDataInterface,
 	MutationLog,
 	MutationTrackerInterface,
 	PaletteDB,
@@ -13,16 +14,21 @@ import { AppLogger } from '../../logger/AppLogger.js';
 export class MutationTracker implements MutationTrackerInterface {
 	private static instance: MutationTracker;
 	private appLogger: AppLogger;
-	private storeNames: Record<string, string>;
+	private mode: ModeDataInterface;
+	private storeNames: ConfigDataInterface['db']['STORE_NAMES'];
 
-	constructor(data: DataInterface) {
-		this.appLogger = AppLogger.getInstance(data.mode);
-		this.storeNames = data.idb.STORE_NAMES;
+	constructor(dbData: ConfigDataInterface['db'], mode: ModeDataInterface) {
+		this.appLogger = AppLogger.getInstance(mode);
+		this.storeNames = dbData.STORE_NAMES;
+		this.mode = mode;
 	}
 
-	public static getInstance(data: DataInterface): MutationTracker {
+	public static getInstance(
+		dbData: ConfigDataInterface['db'],
+		mode: ModeDataInterface
+	): MutationTracker {
 		if (!MutationTracker.instance) {
-			MutationTracker.instance = new MutationTracker(data);
+			MutationTracker.instance = new MutationTracker(dbData, mode);
 		}
 
 		return MutationTracker.instance;
@@ -35,7 +41,9 @@ export class MutationTracker implements MutationTrackerInterface {
 
 		this.appLogger.log(
 			`Persisted mutation: ${JSON.stringify(data)}`,
-			'info'
+			'info',
+			this.mode.debugLevel,
+			'MutationTracker.persistMutation()'
 		);
 	}
 

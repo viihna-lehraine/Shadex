@@ -7,22 +7,18 @@ import {
 	PaletteItem
 } from '../../../types/index.js';
 import { core, utils } from '../../../common/index.js';
-import { data } from '../../../data/index.js';
+import { consts } from '../../../common/data/base.js';
 import { IDBManager } from '../../../db/index.js';
 import { paletteSuperUtils } from '../../common/index.js';
 import { ui } from '../../../ui/index.js';
 
 const create = paletteSuperUtils.create;
 const genHues = paletteSuperUtils.genHues;
-const paletteRanges = data.consts.paletteRanges;
-
-const idb = IDBManager.getInstance();
+const paletteRanges = consts.paletteRanges;
 
 export async function tetradic(args: GenPaletteArgs): Promise<Palette> {
 	// ensure exactly 4 swatches
-	if (args.numBoxes !== 4) {
-		ui.enforceSwatchRules(4, 4);
-	}
+	if (args.swatches !== 4) ui.enforceSwatchRules(4, 4);
 
 	// base color setup
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
@@ -88,12 +84,17 @@ export async function tetradic(args: GenPaletteArgs): Promise<Palette> {
 		paletteItems.push(paletteItem);
 	}
 
+	const idbManager = await IDBManager.getInstance();
+	const paletteID = await idbManager.getNextPaletteID();
+
+	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
+
 	// save the palette to the database
-	const tetradicPalette = await idb.savePaletteToDB(
+	const tetradicPalette = await idbManager.savePaletteToDB(
 		'tetradic',
 		paletteItems,
-		baseColor,
-		args.numBoxes,
+		paletteID,
+		args.swatches,
 		args.enableAlpha,
 		args.limitDark,
 		args.limitGray,

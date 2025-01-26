@@ -1,6 +1,6 @@
 // File: src/common/core/index.js
 
-import { CommonCoreFnMasterInterface } from '../../types/index.js';
+import { CommonFunctionsMasterInterface } from '../../types/index.js';
 import {
 	base,
 	brand,
@@ -12,7 +12,7 @@ import {
 	validate
 } from './base.js';
 
-export const core: CommonCoreFnMasterInterface = {
+export const core: CommonFunctionsMasterInterface['core'] = {
 	base,
 	brand,
 	brandColor,

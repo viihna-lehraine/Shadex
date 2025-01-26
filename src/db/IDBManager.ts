@@ -2,68 +2,71 @@
 
 import { IDBPDatabase, IDBPObjectStore } from 'idb';
 import {
-	CommonUtilsFnErrors,
-	DataInterface,
-	DefaultKeysInterface,
-	DBMasterFnInterface,
+	CommonFunctionsMasterInterface,
+	ConfigDataInterface,
 	HSL,
 	IDBManagerInterface,
-	ModeData,
+	ModeDataInterface,
 	MutationLog,
 	Palette,
 	PaletteDB,
 	PaletteItem,
 	PaletteSchema,
 	Settings,
-	StoreNamesInterface,
-	StoredPalette,
-	DefaultSettingsInterface
+	StoredPalette
 } from '../types/index.js';
-import { dbFn } from './index.js';
-import { logger } from '../logger/index.js';
+import { config, mode } from '../common/data/base.js';
+import { createLogger } from '../logger/index.js';
+import { initializeDB } from './initialize.js';
 import { MutationTracker } from './mutations/index.js';
+import { storeUtils } from './storeUtils.js';
 import { utils } from '../common/index.js';
+
+const logger = await createLogger();
 
 export class IDBManager implements IDBManagerInterface {
 	private static instance: IDBManager | null = null;
 
-	private dbFn: DBMasterFnInterface = dbFn;
-
 	private dbPromise: Promise<IDBPDatabase<PaletteSchema>>;
 
-	private data: DataInterface;
-	private mode: ModeData;
-	private logMode: ModeData['logging'];
+	private dbData: ConfigDataInterface['db'] = config.db;
+	private mode: ModeDataInterface = mode;
+	private logMode: ModeDataInterface['logging'] = mode.logging;
+
+	private storeUtils;
 
 	private cache: Partial<{
 		settings: Settings;
 		customColor: HSL;
 	}> = {};
 
-	private defaultKeys: DefaultKeysInterface;
-	private defaultSettings: DefaultSettingsInterface;
-	private storeNames: StoreNamesInterface;
+	private defaultKeys: ConfigDataInterface['db']['DEFAULT_KEYS'] =
+		config.db.DEFAULT_KEYS;
+	private defaultSettings: ConfigDataInterface['db']['DEFAULT_SETTINGS'] =
+		config.db.DEFAULT_SETTINGS;
+	private storeNames: ConfigDataInterface['db']['STORE_NAMES'] =
+		config.db.STORE_NAMES;
 
-	private storeUtils: DBMasterFnInterface['storeUtils'];
-	private errorUtils: CommonUtilsFnErrors;
+	private errorUtils: CommonFunctionsMasterInterface['utils']['errors'];
 
 	private mutationTracker: MutationTracker;
 
-	private constructor(data: DataInterface) {
-		this.dbPromise = this.dbFn.initializeDB();
+	private constructor() {
+		this.dbPromise = initializeDB();
 
-		this.data = data;
-		this.mode = this.data.mode;
-		this.logMode = this.data.mode.logging;
+		this.dbData = this.dbData;
 
-		this.defaultKeys = data.config.db.DEFAULT_KEYS;
-		this.defaultSettings = data.config.db.DEFAULT_SETTINGS;
-		this.storeNames = data.config.db.STORE_NAMES;
+		this.defaultKeys = config.db.DEFAULT_KEYS;
+		this.defaultSettings = config.db.DEFAULT_SETTINGS;
+		this.storeNames = config.db.STORE_NAMES;
 
-		this.storeUtils = this.dbFn.storeUtils;
+		this.storeUtils = storeUtils;
 		this.errorUtils = utils.errors;
 
-		this.mutationTracker = MutationTracker.getInstance(data);
+		this.mutationTracker = MutationTracker.getInstance(
+			this.dbData,
+			this.mode
+		);
 	}
 
 	//
@@ -74,23 +77,13 @@ export class IDBManager implements IDBManagerInterface {
 	///
 	//
 
-	public static async createInstance(
-		data: DataInterface
-	): Promise<IDBManager> {
+	public static async getInstance(): Promise<IDBManager> {
 		if (!this.instance) {
-			this.instance = new IDBManager(data);
+			this.instance = new IDBManager();
+
 			await this.instance.initializeDB();
 		}
 
-		return this.instance;
-	}
-
-	static getInstance(): IDBManager {
-		if (!this.instance) {
-			throw new Error(
-				'IDBManager instance has not been initialized. Call createInstance first.'
-			);
-		}
 		return this.instance;
 	}
 
@@ -126,15 +119,17 @@ export class IDBManager implements IDBManagerInterface {
 
 					if (self.logMode.info)
 						logger.info(
-							`Mutation detected: ${JSON.stringify(mutationLog)}`
+							`Mutation detected: ${JSON.stringify(mutationLog)}`,
+							'IDBManager.createMutationLogger()'
 						);
 
 					self.mutationTracker
 						.persistMutation(mutationLog)
 						.catch(err => {
-							if (self.logMode.errors)
+							if (self.logMode.error)
 								logger.error(
-									`Failed to persist mutation: ${err.message}`
+									`Failed to persist mutation: ${err.message}`,
+									'IDBManager.createMutationLogger()'
 								);
 						});
 				}
@@ -147,8 +142,8 @@ export class IDBManager implements IDBManagerInterface {
 	private createPaletteObject(
 		type: string,
 		items: PaletteItem[],
-		baseColor: HSL,
-		numBoxes: number,
+		paletteID: number,
+		swatches: number,
 		enableAlpha: boolean,
 		limitDark: boolean,
 		limitGray: boolean,
@@ -157,9 +152,8 @@ export class IDBManager implements IDBManagerInterface {
 		return utils.palette.createObject(
 			type,
 			items,
-			baseColor,
-			Date.now(),
-			numBoxes,
+			swatches,
+			paletteID,
 			enableAlpha,
 			limitDark,
 			limitGray,
@@ -174,8 +168,11 @@ export class IDBManager implements IDBManagerInterface {
 	): Promise<void | null> {
 		return this.errorUtils.handleAsync(async () => {
 			if (!(await this.ensureEntryExists(storeName, key))) {
-				if (this.logMode.warnings) {
-					logger.warning(`Entry with key ${key} not found.`);
+				if (this.logMode.warn) {
+					logger.warn(
+						`Entry with key ${key} not found.`,
+						'IDBManager.deleteEntry()'
+					);
 				}
 
 				return;
@@ -189,7 +186,10 @@ export class IDBManager implements IDBManagerInterface {
 			await store.delete(key);
 
 			if (!this.mode.quiet) {
-				logger.info(`Entry with key ${key} deleted successfully.`);
+				logger.info(
+					`Entry with key ${key} deleted successfully.`,
+					'IDBManager.deleteEntry()'
+				);
 			}
 		}, 'IDBManager.deleteData(): Error deleting entry');
 	}
@@ -216,7 +216,10 @@ export class IDBManager implements IDBManagerInterface {
 			await Promise.all(validKeys.map(key => store.delete(key)));
 
 			if (!this.mode.quiet) {
-				logger.info(`Entries deleted successfully. Keys: ${validKeys}`);
+				logger.info(
+					`Entries deleted successfully. Keys: ${validKeys}`,
+					'IDBManager.deleteEntries()'
+				);
 			}
 		}, 'IDBManager.deleteEntries(): Error deleting entries');
 	}
@@ -230,7 +233,10 @@ export class IDBManager implements IDBManagerInterface {
 			);
 
 			if (this.mode.debug)
-				logger.info(`Fetched settings from IndexedDB: ${settings}`);
+				logger.info(
+					`Fetched settings from IndexedDB: ${settings}`,
+					'IDBManager.getCurrentPaletteID()'
+				);
 
 			return settings?.lastPaletteID ?? 0;
 		}, 'IDBManager: getCurrentPaletteID(): Error fetching current palette ID');
@@ -347,8 +353,9 @@ export class IDBManager implements IDBManagerInterface {
 
 			for (const storeName of expectedStores) {
 				if (!availableStores.includes(storeName)) {
-					logger.warning(
-						`Object store "${storeName}" not found in IndexedDB.`
+					logger.warn(
+						`Object store "${storeName}" not found in IndexedDB.`,
+						'IDBManager.resetDatabase()'
 					);
 					continue;
 				}
@@ -368,7 +375,10 @@ export class IDBManager implements IDBManagerInterface {
 				);
 
 				if (!this.mode.quiet)
-					logger.info(`IndexedDB has been reset to default settins.`);
+					logger.info(
+						`IndexedDB has been reset to default settings.`,
+						'IDBManager.resetDatabase()'
+					);
 			}
 		}, 'IDBManager.resetDatabase(): Error resetting database');
 	}
@@ -392,19 +402,21 @@ export class IDBManager implements IDBManagerInterface {
 				deleteRequest.onsuccess = () => {
 					if (!this.mode.quiet)
 						logger.info(
-							`Database "${dbName}" deleted successfully.`
+							`Database "${dbName}" deleted successfully.`,
+							'IDBManager.deleteDatabase()'
 						);
 				};
 				deleteRequest.onerror = event => {
-					console.error(
-						`Error deleting database "${dbName}":`,
-						event
+					logger.error(
+						`Error deleting database "${dbName}":\nEvent: ${event}`,
+						'IDBManager.deleteDatabase()'
 					);
 				};
 				deleteRequest.onblocked = () => {
-					if (this.logMode.warnings)
-						logger.warning(
-							`Delete operation blocked. Ensure no open connections to "${dbName}".`
+					if (this.logMode.warn)
+						logger.warn(
+							`Delete operation blocked. Ensure no open connections to "${dbName}".`,
+							'IDBManager.deleteDatabase()'
 						);
 
 					if (this.mode.showAlerts)
@@ -417,7 +429,10 @@ export class IDBManager implements IDBManagerInterface {
 				};
 			} else {
 				if (!this.mode.quiet)
-					logger.warning(`Database "${dbName}" does not exist.`);
+					logger.warn(
+						`Database "${dbName}" does not exist.`,
+						'IDBManager.deleteDatabase()'
+					);
 			}
 		}, 'IDBManager.deleteDatabase(): Error deleting database');
 	}
@@ -438,7 +453,10 @@ export class IDBManager implements IDBManagerInterface {
 			await db.put(storeName, { key, ...this.defaultSettings });
 
 			if (!this.mode.quiet)
-				logger.info(`Palette ID has successfully been reset to 0`);
+				logger.info(
+					`Palette ID has successfully been reset to 0`,
+					'IDBManager.resetPaletteID()'
+				);
 		}, 'IDBManager.resetPaletteID(): Error resetting palette ID');
 	}
 
@@ -494,14 +512,17 @@ export class IDBManager implements IDBManagerInterface {
 			await store.put({ key: id, ...paletteToSave });
 
 			if (!this.mode.quiet)
-				logger.info(`Palette ${id} saved successfully.`);
+				logger.info(
+					`Palette ${id} saved successfully.`,
+					'IDBManager.savePalette()'
+				);
 		}, 'IDBManager.savePalette(): Error saving palette');
 	}
 
 	public async savePaletteToDB(
 		type: string,
 		items: PaletteItem[],
-		baseColor: HSL,
+		paletteID: number,
 		numBoxes: number,
 		enableAlpha: boolean,
 		limitDark: boolean,
@@ -512,7 +533,7 @@ export class IDBManager implements IDBManagerInterface {
 			const newPalette = this.createPaletteObject(
 				type,
 				items,
-				baseColor,
+				paletteID,
 				numBoxes,
 				enableAlpha,
 				limitDark,
@@ -540,7 +561,7 @@ export class IDBManager implements IDBManagerInterface {
 			await this.saveData('settings', 'appSettings', newSettings);
 
 			if (!this.mode.quiet && this.logMode.info)
-				logger.info('Settings updated');
+				logger.info('Settings updated', 'IDBManager.saveSettings()');
 		}, 'IDBManager.saveSettings(): Error saving settings');
 	}
 
@@ -566,12 +587,13 @@ export class IDBManager implements IDBManagerInterface {
 					throw new Error(
 						`Entry ${entryIndex} not found in palette ${tableID}.`
 					);
-				if (this.logMode.errors)
+				if (this.logMode.error)
 					logger.error(
-						`Entry ${entryIndex} not found in palette ${tableID}.`
+						`Entry ${entryIndex} not found in palette ${tableID}.`,
+						'IDBManager.updateEntryInPalette()'
 					);
 				if (!this.mode.quiet && this.logMode.info)
-					logger.warning('updateEntryInPalette: Entry not found.');
+					logger.warn('updateEntryInPalette: Entry not found.');
 			}
 
 			const oldEntry = items[entryIndex];
@@ -619,7 +641,8 @@ export class IDBManager implements IDBManagerInterface {
 		const key = this.getDefaultKey('APP_SETTINGS');
 
 		logger.info(
-			`Initializing DB with Store Name: ${storeName}, Key: ${key}`
+			`Initializing DB with Store Name: ${storeName}, Key: ${key}`,
+			'IDBManager > (private async) initializeDB()'
 		);
 
 		if (!storeName || !key) throw new Error('Invalid store name or key.');
@@ -628,7 +651,10 @@ export class IDBManager implements IDBManagerInterface {
 
 		if (!settings) {
 			if (!this.mode.quiet) {
-				logger.info(`Initializing default settings...`);
+				logger.info(
+					`Initializing default settings...`,
+					'IDBManager > (private async) initializeDB()'
+				);
 			}
 
 			await db.put(storeName, { key, ...this.defaultSettings });
@@ -647,8 +673,13 @@ export class IDBManager implements IDBManagerInterface {
 		return (await store.get(key)) !== undefined;
 	}
 
-	private getDefaultKey(key: keyof StoreNamesInterface): string {
-		const defaultKey = this.defaultKeys[key as keyof DefaultKeysInterface];
+	private getDefaultKey(
+		key: keyof ConfigDataInterface['db']['STORE_NAMES']
+	): string {
+		const defaultKey =
+			this.defaultKeys[
+				key as keyof ConfigDataInterface['db']['DEFAULT_KEYS']
+			];
 
 		if (!defaultKey) {
 			throw new Error(`[getDefaultKey()]: Invalid default key: ${key}`);
@@ -663,8 +694,11 @@ export class IDBManager implements IDBManagerInterface {
 			const result = await db.get(this.storeNames.TABLES, id);
 
 			if (!result) {
-				if (this.logMode.warnings)
-					logger.warning(`Table with ID ${id} not found.`);
+				if (this.logMode.warn)
+					logger.warn(
+						`Table with ID ${id} not found.`,
+						'IDBManager > (private async) getTable()'
+					);
 			}
 			return result;
 		}, 'IDBManager.getTable(): Error fetching table');
@@ -677,13 +711,19 @@ export class IDBManager implements IDBManagerInterface {
 			const store = tx.objectStore('settings');
 
 			if (this.mode.debug)
-				logger.info(`Updating curent palette ID to ${newID}`);
+				logger.info(
+					`Updating curent palette ID to ${newID}`,
+					'IDBManager > (private async) updateCurrentPaletteID()'
+				);
 
 			await store.put({ key: 'appSettings', lastPaletteID: newID });
 			await tx.done;
 
 			if (!this.mode.quiet)
-				logger.info(`Current palette ID updated to ${newID}`);
+				logger.info(
+					`Current palette ID updated to ${newID}`,
+					'IDBManager > (private async) updateCurrentPaletteID()'
+				);
 		}, 'IDBManager.updateCurrentPaletteID(): Error updating current palette ID');
 	}
 }

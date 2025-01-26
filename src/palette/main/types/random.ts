@@ -8,15 +8,13 @@ import { utils } from '../../../common/index.js';
 const create = paletteSuperUtils.create;
 const update = paletteHelpers.update;
 
-const idb = IDBManager.getInstance();
-
 export async function random(args: GenPaletteArgs): Promise<Palette> {
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const paletteItems: PaletteItem[] = [
 		await create.paletteItem(baseColor, args.enableAlpha)
 	];
 
-	for (let i = 1; i < args.numBoxes; i++) {
+	for (let i = 1; i < args.swatches; i++) {
 		const randomColor = utils.random.hsl(args.enableAlpha);
 		const nextPaletteItem = await create.paletteItem(
 			randomColor,
@@ -28,11 +26,16 @@ export async function random(args: GenPaletteArgs): Promise<Palette> {
 		update.colorBox(randomColor, i);
 	}
 
-	const randomPalette = await idb.savePaletteToDB(
+	const idbManager = await IDBManager.getInstance();
+	const paletteID = await idbManager.getNextPaletteID();
+
+	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
+
+	const randomPalette = await idbManager.savePaletteToDB(
 		'random',
 		paletteItems,
-		baseColor,
-		args.numBoxes,
+		paletteID,
+		args.swatches,
 		args.enableAlpha,
 		args.limitDark,
 		args.limitGray,

@@ -1,14 +1,18 @@
 // File: rollup.config.js
 
+import { defineConfig } from 'rollup';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
+import 'source-map-support/register.js';
+import typescript from '@rollup/plugin-typescript';
 
-export default {
-	input: 'public/js/app.js',
+export default defineConfig({
+	input: 'src/app.ts',
 	output: {
-		file: 'public/dist/bundle.js',
+		dir: 'public/dist',
 		format: 'esm',
-		sourcemap: false
+		inlineDynamicImports: true,
+		sourcemap: true
 	},
 	external: ['fs'],
 	plugins: [
@@ -16,5 +20,8 @@ export default {
 		resolve({
 			extensions: ['.js', '.ts']
 		}),
-	]
-};
+		typescript({
+			tsconfig: './tsconfig.json'
+		})
+	],
+});

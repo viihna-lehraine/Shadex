@@ -1,11 +1,12 @@
 // File: src/io/deserialize.ts
 
 import { IO_Interface, Palette } from '../types/index.js';
-import { data } from '../data/index.js';
-import { logger } from '../logger/index.js';
+import { createLogger } from '../logger/index.js';
+import { mode } from '../common/data/base.js';
 
-const logMode = data.mode.logging;
-const mode = data.mode;
+const logger = await createLogger();
+
+const logMode = mode.logging;
 
 async function toCSS(palette: Palette): Promise<string> {
 	return new Promise((resolve, reject) => {
@@ -30,15 +31,13 @@ async function toCSS(palette: Palette): Promise<string> {
 				? `
 				/* Optional Custom Color */
 				.palette-custom {
-					--custom-hsl-color: "hsl(${palette.metadata.customColor.hslColor.value.hue}, ${
-						palette.metadata.customColor.hslColor.value.saturation
-					}%, ${palette.metadata.customColor.hslColor.value.lightness}%)";
-					--custom-cmyk-color: "${palette.metadata.customColor.convertedColors.cmyk}";
-					--custom-hex-color: "${palette.metadata.customColor.convertedColors.hex}";
-					--custom-hsv-color: "${palette.metadata.customColor.convertedColors.hsv}";
-					--custom-lab-color: "${palette.metadata.customColor.convertedColors.lab}";
-					--custom-rgb-color: "${palette.metadata.customColor.convertedColors.rgb}";
-					--custom-xyz-color: "${palette.metadata.customColor.convertedColors.xyz}";
+					--custom-cmyk-color: "${palette.metadata.customColor.colors.cmyk}";
+					--custom-hex-color: "${palette.metadata.customColor.colors.hex}";
+					--custom-hsl-color: "${palette.metadata.customColor.colors.hsl}";
+					--custom-hsv-color: "${palette.metadata.customColor.colors.hsv}";
+					--custom-lab-color: "${palette.metadata.customColor.colors.lab}";
+					--custom-rgb-color: "${palette.metadata.customColor.colors.rgb}";
+					--custom-xyz-color: "${palette.metadata.customColor.colors.xyz}";
 				}`.trim()
 				: '';
 
@@ -48,9 +47,8 @@ async function toCSS(palette: Palette): Promise<string> {
 					const backgroundColor = item.cssStrings.hslCSSString;
 
 					return `
-					/* Palette Item: ${item.id} */
-					.color-${item.id} {
-						--id: "${item.id}";
+					/* Palette Item */
+					.color {
 						--cmyk-color: "${item.cssStrings.cmykCSSString}";
 						--hex-color: "${item.cssStrings.hexCSSString}";
 						--hsl-color: "${item.cssStrings.hslCSSString}";
@@ -71,11 +69,17 @@ async function toCSS(palette: Palette): Promise<string> {
 			// 5. resolve serialized CSS data
 			resolve(cssData.trim());
 		} catch (error) {
-			if (!mode.quiet && logMode.errors) {
+			if (!mode.quiet && logMode.error) {
 				if (logMode.verbosity > 1) {
-					logger.error(`Failed to convert palette to CSS: ${error}`);
+					logger.error(
+						`Failed to convert palette to CSS: ${error}`,
+						'io > serialize > toCSS()'
+					);
 				} else {
-					logger.error('Failed to convert palette to CSS');
+					logger.error(
+						'Failed to convert palette to CSS',
+						'io > serialize > toCSS()'
+					);
 				}
 			}
 
@@ -95,11 +99,17 @@ async function toJSON(palette: Palette): Promise<string> {
 
 			resolve(jsonData);
 		} catch (error) {
-			if (!mode.quiet && logMode.errors) {
+			if (!mode.quiet && logMode.error) {
 				if (logMode.verbosity > 1) {
-					logger.error(`Failed to convert palette to JSON: ${error}`);
+					logger.error(
+						`Failed to convert palette to JSON: ${error}`,
+						'io > serialize > toJSON()'
+					);
 				} else {
-					logger.error('Failed to convert palette to JSON');
+					logger.error(
+						'Failed to convert palette to JSON',
+						'io > serialize > toJSON()'
+					);
 				}
 			}
 
@@ -119,13 +129,13 @@ async function toXML(palette: Palette): Promise<string> {
 			const customColorXML = palette.metadata.customColor
 				? `
 				<CustomColor>
-					<CMYK>${palette.metadata.customColor.convertedColors.cmyk}</CMYK>
-					<Hex>${palette.metadata.customColor.convertedColors.hex}</Hex>
-					<HSL>${palette.metadata.customColor.convertedColors.hsl}</HSL>
-					<HSV>${palette.metadata.customColor.convertedColors.hsv}</HSV>
-					<LAB>${palette.metadata.customColor.convertedColors.lab}</LAB>
-					<RGB>${palette.metadata.customColor.convertedColors.rgb}</RGB>
-					<XYZ>${palette.metadata.customColor.convertedColors.xyz}</XYZ>
+					<CMYK>${palette.metadata.customColor.colors.cmyk}</CMYK>
+					<Hex>${palette.metadata.customColor.colors.hex}</Hex>
+					<HSL>${palette.metadata.customColor.colors.hsl}</HSL>
+					<HSV>${palette.metadata.customColor.colors.hsv}</HSV>
+					<LAB>${palette.metadata.customColor.colors.lab}</LAB>
+					<RGB>${palette.metadata.customColor.colors.rgb}</RGB>
+					<XYZ>${palette.metadata.customColor.colors.xyz}</XYZ>
 				</CustomColor>`.trim()
 				: '<CustomColor>false</CustomColor>';
 
@@ -182,11 +192,17 @@ async function toXML(palette: Palette): Promise<string> {
 
 			resolve(xmlData.trim());
 		} catch (error) {
-			if (!mode.quiet && logMode.errors) {
+			if (!mode.quiet && logMode.error) {
 				if (logMode.verbosity > 1) {
-					logger.error(`Failed to convert palette to XML: ${error}`);
+					logger.error(
+						`Failed to convert palette to XML: ${error}`,
+						'io > serialize > toXML()'
+					);
 				} else {
-					logger.error('Failed to convert palette to XML');
+					logger.error(
+						'Failed to convert palette to XML',
+						'io > serialize > toXML()'
+					);
 				}
 			}
 

@@ -1,13 +1,13 @@
 // File: src/common/utils/random.js
 
-import { CommonUtilsFnRandom, HSL, SL } from '../../types/index.js';
+import { CommonFunctionsMasterInterface, HSL, SL } from '../../types/index.js';
 import { core } from '../core/index.js';
-import { data } from '../../data/index.js';
-import { logger } from '../../logger/index.js';
+import { createLogger } from '../../logger/index.js';
+import { defaults, mode } from '../data/base.js';
 
-const defaults = data.defaults;
-const logMode = data.mode.logging;
-const mode = data.mode;
+const logger = await createLogger();
+
+const logMode = mode.logging;
 
 function hsl(enableAlpha: boolean): HSL {
 	try {
@@ -27,9 +27,10 @@ function hsl(enableAlpha: boolean): HSL {
 		};
 
 		if (!core.validate.colorValues(hsl)) {
-			if (logMode.errors)
+			if (logMode.error)
 				logger.error(
-					`Invalid random HSL color value ${JSON.stringify(hsl)}`
+					`Invalid random HSL color value ${JSON.stringify(hsl)}`,
+					'common > utils > random > hsl()'
 				);
 
 			const unbrandedHSL = core.base.clone(
@@ -40,12 +41,18 @@ function hsl(enableAlpha: boolean): HSL {
 		}
 
 		if (!mode.quiet && !logMode.info)
-			logger.info(`Generated randomHSL: ${JSON.stringify(hsl)}`);
+			logger.info(
+				`Generated randomHSL: ${JSON.stringify(hsl)}`,
+				'common > utils > random > hsl()'
+			);
 
 		return hsl;
 	} catch (error) {
-		if (logMode.errors)
-			logger.error(`Error generating random HSL color: ${error}`);
+		if (logMode.error)
+			logger.error(
+				`Error generating random HSL color: ${error}`,
+				'common > utils > random > hsl()'
+			);
 
 		const unbrandedHSL = core.base.clone(
 			defaults.colors.base.unbranded.hsl
@@ -72,9 +79,10 @@ function sl(enableAlpha: boolean): SL {
 		};
 
 		if (!core.validate.colorValues(sl as SL)) {
-			if (logMode.errors)
+			if (logMode.error)
 				logger.error(
-					`Invalid random SV color value ${JSON.stringify(sl)}`
+					`Invalid random SV color value ${JSON.stringify(sl)}`,
+					'common > utils > random > sl()'
 				);
 
 			const unbrandedSL = core.base.clone(
@@ -85,12 +93,18 @@ function sl(enableAlpha: boolean): SL {
 		}
 
 		if (!mode.quiet && logMode.info)
-			logger.info(`Generated randomSL: ${JSON.stringify(sl)}`);
+			logger.info(
+				`Generated randomSL: ${JSON.stringify(sl)}`,
+				'common > utils > random > sl()'
+			);
 
 		return sl;
 	} catch (error) {
-		if (logMode.errors)
-			logger.error(`Error generating random SL color: ${error}`);
+		if (logMode.error)
+			logger.error(
+				`Error generating random SL color: ${error}`,
+				'common > utils > random > sl()'
+			);
 
 		const unbrandedSL = core.base.clone(defaults.colors.base.unbranded.sl);
 
@@ -98,7 +112,7 @@ function sl(enableAlpha: boolean): SL {
 	}
 }
 
-export const random: CommonUtilsFnRandom = {
+export const random: CommonFunctionsMasterInterface['utils']['random'] = {
 	hsl,
 	sl
 } as const;

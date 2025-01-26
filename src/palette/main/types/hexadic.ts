@@ -8,22 +8,17 @@ import {
 } from '../../../types/index.js';
 import { IDBManager } from '../../../db/index.js';
 import { core } from '../../../common/index.js';
-import { data } from '../../../data/index.js';
+import { consts } from '../../../common/data/base.js';
 import { paletteSuperUtils } from '../../common/index.js';
 import { ui } from '../../../ui/index.js';
 
-const consts = data.consts;
 const create = paletteSuperUtils.create;
 const genHues = paletteSuperUtils.genHues;
 const paletteRanges = consts.paletteRanges;
 
-const idb = IDBManager.getInstance();
-
 export async function hexadic(args: GenPaletteArgs): Promise<Palette> {
 	// ensure exactly 6 color swatches
-	if (args.numBoxes !== 6) {
-		ui.enforceSwatchRules(6, 6);
-	}
+	if (args.swatches !== 6) ui.enforceSwatchRules(6, 6);
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const hues = genHues.hexadic(baseColor);
@@ -69,11 +64,16 @@ export async function hexadic(args: GenPaletteArgs): Promise<Palette> {
 		paletteItems.push(paletteItem);
 	}
 
-	const hexadicPalette = await idb.savePaletteToDB(
+	const idbManager = await IDBManager.getInstance();
+	const paletteID = await idbManager.getNextPaletteID();
+
+	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
+
+	const hexadicPalette = await idbManager.savePaletteToDB(
 		'hexadic',
 		paletteItems,
-		baseColor,
-		args.numBoxes,
+		paletteID,
+		args.swatches,
 		args.enableAlpha,
 		args.limitDark,
 		args.limitGray,

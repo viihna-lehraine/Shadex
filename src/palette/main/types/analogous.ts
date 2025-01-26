@@ -14,13 +14,9 @@ import { ui } from '../../../ui/index.js';
 const create = paletteSuperUtils.create;
 const genHues = paletteSuperUtils.genHues;
 
-const idb = IDBManager.getInstance();
-
 export async function analogous(args: GenPaletteArgs): Promise<Palette> {
 	// ensure at least 2 color swatches
-	if (args.swatches < 2) {
-		ui.enforceSwatchRules(2);
-	}
+	if (args.swatches < 2) ui.enforceSwatchRules(2);
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const hues = genHues.analogous(baseColor, args.swatches);
@@ -64,10 +60,16 @@ export async function analogous(args: GenPaletteArgs): Promise<Palette> {
 		paletteItems.push(paletteItem);
 	}
 
-	const analogousPalette = await idb.savePaletteToDB(
+	const idbManager = await IDBManager.getInstance();
+
+	const paletteID = await idbManager.getNextPaletteID();
+
+	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
+
+	const analogousPalette = await idbManager.savePaletteToDB(
 		'analogous',
 		paletteItems,
-		baseColor,
+		paletteID,
 		args.swatches,
 		args.enableAlpha,
 		args.limitDark,

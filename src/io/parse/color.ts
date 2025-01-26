@@ -18,10 +18,10 @@ import {
 	XYZValue
 } from '../../types/index.js';
 import { common } from '../../common/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../common/data/base.js';
 
 const brand = common.core.brand;
-const regex = data.config.regex;
+const regex = config.regex;
 
 const colorParsers: Record<string, ColorParser> = {};
 

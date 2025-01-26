@@ -1,10 +1,12 @@
 // File: src/common/utils/errors.ts
 
-import { CommonUtilsFnErrors } from '../../types/index.js';
-import { data } from '../../data/index.js';
-import { logger } from '../../logger/index.js';
+import { CommonFunctionsMasterInterface } from '../../types/index.js';
+import { createLogger } from '../../logger/index.js';
+import { mode } from '../data/base.js';
 
-const logMode = data.mode.logging;
+const logger = await createLogger();
+
+const logMode = mode.logging;
 
 async function handleAsync<T>(
 	action: () => Promise<T>,
@@ -14,19 +16,23 @@ async function handleAsync<T>(
 	try {
 		return await action();
 	} catch (error) {
-		if (logMode.errors)
+		if (logMode.error)
 			if (error instanceof Error) {
 				logger.error(
-					`${errorMessage}: ${error.message}. Context: ${context}`
+					`${errorMessage}: ${error.message}. Context: ${context}`,
+					'common > utils > errors > handleAsync()'
 				);
 			} else {
-				logger.error(`${errorMessage}: ${error}. Context: ${context}`);
+				logger.error(
+					`${errorMessage}: ${error}. Context: ${context}`,
+					'common > utils > errors > handleAsync()'
+				);
 			}
 
 		return null;
 	}
 }
 
-export const errors: CommonUtilsFnErrors = {
+export const errors: CommonFunctionsMasterInterface['utils']['errors'] = {
 	handleAsync
 };

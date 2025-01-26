@@ -8,13 +8,9 @@ import { ui } from '../../../ui/index.js';
 
 const create = paletteSuperUtils.create;
 
-const idb = IDBManager.getInstance();
-
 export async function monochromatic(args: GenPaletteArgs): Promise<Palette> {
 	// ensure at least 2 color swatches
-	if (args.numBoxes < 2) {
-		ui.enforceSwatchRules(2);
-	}
+	if (args.swatches < 2) ui.enforceSwatchRules(2);
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const paletteItems: PaletteItem[] = [];
@@ -25,7 +21,7 @@ export async function monochromatic(args: GenPaletteArgs): Promise<Palette> {
 
 	paletteItems.push(basePaletteItem);
 
-	for (let i = 1; i < args.numBoxes; i++) {
+	for (let i = 1; i < args.swatches; i++) {
 		const hueShift = Math.random() * 10 - 5;
 		const newColor = utils.conversion.genAllColorValues({
 			value: {
@@ -61,11 +57,16 @@ export async function monochromatic(args: GenPaletteArgs): Promise<Palette> {
 		}
 	}
 
-	const monochromaticPalette = await idb.savePaletteToDB(
+	const idbManager = await IDBManager.getInstance();
+	const paletteID = await idbManager.getNextPaletteID();
+
+	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
+
+	const monochromaticPalette = await idbManager.savePaletteToDB(
 		'monochromatic',
 		paletteItems,
-		baseColor,
-		args.numBoxes,
+		paletteID,
+		args.swatches,
 		args.enableAlpha,
 		args.limitDark,
 		args.limitGray,

@@ -54,83 +54,11 @@ import {
 	XYZ_Y,
 	XYZ_Z
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
-import { logger } from '../../logger/index.js';
+import { sets } from '../data/sets.js';
 
-const logMode = data.mode.logging;
-const defaultColors = data.defaults.colors.base.branded;
-const mode = data.mode;
-const _sets = data.sets;
+const _sets = sets;
 
-function clampToRange(value: number, rangeKey: NumericRangeKey): number {
-	const [min, max] = _sets[rangeKey];
-
-	return Math.min(Math.max(value, min), max);
-}
-
-function clone<T>(value: T): T {
-	return structuredClone(value);
-}
-
-function debounce<T extends (...args: Parameters<T>) => void>(
-	func: T,
-	delay: number
-) {
-	let timeout: ReturnType<typeof setTimeout> | null = null;
-
-	return (...args: Parameters<T>): void => {
-		if (timeout) clearTimeout(timeout);
-
-		timeout = setTimeout(() => {
-			func(...args);
-		}, delay);
-	};
-}
-
-function parseCustomColor(rawValue: string): HSL | null {
-	try {
-		if (!mode.quiet)
-			logger.info(`Parsing custom color: ${JSON.stringify(rawValue)}`);
-
-		const match = rawValue.match(
-			/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?,\s*(\d*\.?\d+)\)/
-		);
-
-		if (match) {
-			const [, hue, saturation, lightness, alpha] = match;
-
-			return {
-				value: {
-					hue: brand.asRadial(parseInt(hue)),
-					saturation: brand.asPercentile(parseInt(saturation)),
-					lightness: brand.asPercentile(parseInt(lightness)),
-					alpha: brand.asAlphaRange(parseFloat(alpha))
-				},
-				format: 'hsl'
-			};
-		} else {
-			if (logMode.errors)
-				logger.error(
-					'Invalid HSL custom color. Expected format: hsl(H, S%, L%, A)'
-				);
-
-			return null;
-		}
-	} catch (error) {
-		if (logMode.errors) logger.error(`parseCustomColor error: ${error}`);
-
-		return null;
-	}
-}
-
-export const base: CommonFunctionsMasterInterface['core']['base'] = {
-	clampToRange,
-	clone,
-	debounce,
-	parseCustomColor
-} as const;
-
-// ******** SECTION 2 ********
+// ******** SECTION 0 - Brand ********
 
 function asAlphaRange(value: number): AlphaRange {
 	validate.range(value, 'AlphaRange');
@@ -234,6 +162,158 @@ export const brand: CommonFunctionsMasterInterface['core']['brand'] = {
 	asXYZ_Y,
 	asXYZ_Z
 };
+
+// ******** SECTION 1 ********
+
+function initializeDefaultColors() {
+	return {
+		cmyk: {
+			value: {
+				cyan: brand.asPercentile(0),
+				magenta: brand.asPercentile(0),
+				yellow: brand.asPercentile(0),
+				key: brand.asPercentile(0),
+				alpha: brand.asAlphaRange(1)
+			},
+			format: 'cmyk'
+		},
+		hex: {
+			value: {
+				hex: brand.asHexSet('#000000'),
+				alpha: brand.asHexComponent('FF'),
+				numAlpha: brand.asAlphaRange(1)
+			},
+			format: 'hex'
+		},
+		hsl: {
+			value: {
+				hue: brand.asRadial(0),
+				saturation: brand.asPercentile(0),
+				lightness: brand.asPercentile(0),
+				alpha: brand.asAlphaRange(1)
+			},
+			format: 'hsl'
+		},
+		hsv: {
+			value: {
+				hue: brand.asRadial(0),
+				saturation: brand.asPercentile(0),
+				value: brand.asPercentile(0),
+				alpha: brand.asAlphaRange(1)
+			},
+			format: 'hsv'
+		},
+		lab: {
+			value: {
+				l: brand.asLAB_L(0),
+				a: brand.asLAB_A(0),
+				b: brand.asLAB_B(0),
+				alpha: brand.asAlphaRange(1)
+			},
+			format: 'lab'
+		},
+		rgb: {
+			value: {
+				red: brand.asByteRange(0),
+				green: brand.asByteRange(0),
+				blue: brand.asByteRange(0),
+				alpha: brand.asAlphaRange(1)
+			},
+			format: 'rgb'
+		},
+		sl: {
+			value: {
+				saturation: brand.asPercentile(0),
+				lightness: brand.asPercentile(0),
+				alpha: brand.asAlphaRange(1)
+			},
+			format: 'sl'
+		},
+		sv: {
+			value: {
+				saturation: brand.asPercentile(0),
+				value: brand.asPercentile(0),
+				alpha: brand.asAlphaRange(1)
+			},
+			format: 'sv'
+		},
+		xyz: {
+			value: {
+				x: brand.asXYZ_X(0),
+				y: brand.asXYZ_Y(0),
+				z: brand.asXYZ_Z(0),
+				alpha: brand.asAlphaRange(1)
+			},
+			format: 'xyz'
+		}
+	};
+}
+
+// ******** SECTION 1 ********
+
+function clampToRange(value: number, rangeKey: NumericRangeKey): number {
+	const [min, max] = _sets[rangeKey];
+
+	return Math.min(Math.max(value, min), max);
+}
+
+function clone<T>(value: T): T {
+	return structuredClone(value);
+}
+
+function debounce<T extends (...args: Parameters<T>) => void>(
+	func: T,
+	delay: number
+) {
+	let timeout: ReturnType<typeof setTimeout> | null = null;
+
+	return (...args: Parameters<T>): void => {
+		if (timeout) clearTimeout(timeout);
+
+		timeout = setTimeout(() => {
+			func(...args);
+		}, delay);
+	};
+}
+
+function parseCustomColor(rawValue: string): HSL | null {
+	try {
+		const match = rawValue.match(
+			/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?,\s*(\d*\.?\d+)\)/
+		);
+
+		if (match) {
+			const [, hue, saturation, lightness, alpha] = match;
+
+			return {
+				value: {
+					hue: brand.asRadial(parseInt(hue)),
+					saturation: brand.asPercentile(parseInt(saturation)),
+					lightness: brand.asPercentile(parseInt(lightness)),
+					alpha: brand.asAlphaRange(parseFloat(alpha))
+				},
+				format: 'hsl'
+			};
+		} else {
+			console.error(
+				'Invalid HSL custom color. Expected format: hsl(H, S%, L%, A)\ncaller: parseCustomColor()'
+			);
+
+			return null;
+		}
+	} catch (error) {
+		console.error(`parseCustomColor error: ${error}`);
+
+		return null;
+	}
+}
+
+export const base: CommonFunctionsMasterInterface['core']['base'] = {
+	clampToRange,
+	clone,
+	debounce,
+	parseCustomColor
+} as const;
 
 // ******** SECTION 2 - Brand Color ********
 
@@ -431,7 +511,7 @@ function cmykValueToString(cmyk: CMYKValue): CMYKValueString {
 	};
 }
 
-function colorStringToColor(colorString: ColorString): Color {
+async function colorStringToColor(colorString: ColorString): Promise<Color> {
 	const clonedColor = clone(colorString);
 
 	const parseValue = (value: string | number): number =>
@@ -461,8 +541,9 @@ function colorStringToColor(colorString: ColorString): Color {
 		case 'sv':
 			return { format: 'sv', value: newValue as SVValue };
 		default:
-			if (logMode.errors)
-				logger.error('Unsupported format for colorStringToColor');
+			console.error('Unsupported format for colorStringToColor');
+
+			const defaultColors = await initializeDefaultColors();
 
 			const unbrandedHSL = defaultColors.hsl;
 
@@ -487,7 +568,7 @@ function colorStringToColor(colorString: ColorString): Color {
 	}
 }
 
-function colorToCSSColorString(color: Color): string {
+async function colorToCSSColorString(color: Color): Promise<string> {
 	try {
 		switch (color.format) {
 			case 'cmyk':
@@ -505,8 +586,7 @@ function colorToCSSColorString(color: Color): string {
 			case 'xyz':
 				return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z}, ${color.value.alpha})`;
 			default:
-				if (logMode.errors)
-					logger.error(`Unexpected color format: ${color.format}`);
+				console.error(`Unexpected color format: ${color.format}`);
 
 				return '#FFFFFFFF';
 		}
@@ -755,7 +835,7 @@ function isInRange<T extends keyof typeof _sets>(
 		return value >= min && value <= max;
 	}
 
-	throw new Error(`Invalid range or value for ${rangeKey}`);
+	throw new Error(`Invalid range or value for ${String(rangeKey)}`);
 }
 
 export const guards: CommonFunctionsMasterInterface['core']['guards'] = {
@@ -802,7 +882,7 @@ export const sanitize = {
 	rgb
 };
 
-// ******** SECTION 6 - Validate ********
+// ******** SECTION 5.1 - Validate *********
 
 function colorValues(color: Color | SL | SV): boolean {
 	const clonedColor = clone(color);
@@ -928,8 +1008,7 @@ function colorValues(color: Color | SL | SV): boolean {
 				clonedColor.value.z <= 108.883
 			);
 		default:
-			if (logMode.errors)
-				logger.error(`Unsupported color format: ${color.format}`);
+			console.error(`Unsupported color format: ${color.format}`);
 
 			return false;
 	}
@@ -953,13 +1032,13 @@ function range<T extends keyof typeof _sets>(
 ): void {
 	if (!isInRange(value, rangeKey)) {
 		if (rangeKey === 'HexSet' || rangeKey === 'HexComponent') {
-			throw new Error(`Invalid value for ${rangeKey}: ${value}`);
+			throw new Error(`Invalid value for ${String(rangeKey)}: ${value}`);
 		}
 
 		const [min, max] = _sets[rangeKey] as [number, number];
 
 		throw new Error(
-			`Value ${value} is out of range for ${rangeKey} [${min}, ${max}]`
+			`Value ${value} is out of range for ${String(rangeKey)} [${min}, ${max}]`
 		);
 	}
 }

@@ -9,7 +9,7 @@ import {
 	ColorSpace,
 	ColorSpaceExtended,
 	ColorString,
-	CommonUtilsFnColor,
+	CommonFunctionsMasterInterface,
 	Format,
 	Hex,
 	HexString,
@@ -39,10 +39,11 @@ import {
 	XYZValueString
 } from '../../types/index.js';
 import { core } from '../core/index.js';
-import { data } from '../../data/index.js';
-import { logger } from '../../logger/index.js';
+import { createLogger } from '../../logger/index.js';
+import { defaults, mode } from '../data/base.js';
 
-const mode = data.mode;
+const logger = await createLogger();
+
 const logMode = mode.logging;
 
 // ******** SECTION 1: Robust Type Guards ********
@@ -355,7 +356,9 @@ function isStoredPalette(obj: unknown): obj is StoredPalette {
 	);
 }
 
-function narrowToColor(color: Color | ColorString): Color | null {
+async function narrowToColor(
+	color: Color | ColorString
+): Promise<Color | null> {
 	if (isColorString(color)) {
 		return core.convert.colorStringToColor(color);
 	}
@@ -382,9 +385,10 @@ function colorToColorString(color: Color): ColorString {
 	const clonedColor = core.base.clone(color);
 
 	if (isColorString(clonedColor)) {
-		if (logMode.errors) {
+		if (logMode.error) {
 			logger.error(
-				`Already formatted as color string: ${JSON.stringify(color)}`
+				`Already formatted as color string: ${JSON.stringify(color)}`,
+				'common > utils > color > isColorString()'
 			);
 		}
 
@@ -478,13 +482,19 @@ function colorToColorString(color: Color): ColorString {
 	} else {
 		if (!mode.gracefulErrors) {
 			throw new Error(`Unsupported format: ${clonedColor.format}`);
-		} else if (logMode.errors) {
-			logger.error(`Unsupported format: ${clonedColor.format}`);
-		} else if (!mode.quiet && logMode.warnings) {
-			logger.warning('Failed to convert to color string.');
+		} else if (logMode.error) {
+			logger.error(
+				`Unsupported format: ${clonedColor.format}`,
+				'common > utils > color > colorToColorString()'
+			);
+		} else if (!mode.quiet && logMode.warn) {
+			logger.warn(
+				'Failed to convert to color string.',
+				'common > utils > color > colorToColorString()'
+			);
 		}
 
-		return data.defaults.colors.strings.hsl;
+		return defaults.colors.strings.hsl;
 	}
 }
 
@@ -516,12 +526,16 @@ function getAlphaFromHex(hex: string): number {
 			throw new Error(
 				`Invalid hex color: ${hex}. Expected format #RRGGBBAA`
 			);
-		else if (logMode.errors)
+		else if (logMode.error)
 			logger.error(
-				`Invalid hex color: ${hex}. Expected format #RRGGBBAA`
+				`Invalid hex color: ${hex}. Expected format #RRGGBBAA`,
+				'common > utils > color > getAlphaFromHex()'
 			);
-		else if (!mode.quiet && logMode.warnings)
-			logger.warning('Failed to parse alpha from hex color.');
+		else if (!mode.quiet && logMode.warn)
+			logger.warn(
+				'Failed to parse alpha from hex color.',
+				'common > utils > color > getAlphaFromHex()'
+			);
 	}
 
 	const alphaHex = hex.slice(-2);
@@ -564,13 +578,20 @@ function getColorString(color: Color): string | null {
 			case 'xyz':
 				return formatters.xyz(color);
 			default:
-				if (!logMode.errors)
-					logger.error(`Unsupported color format for ${color}`);
+				if (!logMode.error)
+					logger.error(
+						`Unsupported color format for ${color}`,
+						'common > utils > color > getColorString()'
+					);
 
 				return null;
 		}
 	} catch (error) {
-		if (!logMode.errors) logger.error(`getColorString error: ${error}`);
+		if (!logMode.error)
+			logger.error(
+				`getColorString error: ${error}`,
+				'common > utils > color > getColorString()'
+			);
 
 		return null;
 	}
@@ -670,9 +691,12 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 				const message = `Unsupported color format: ${colorSpace}`;
 
 				if (mode.gracefulErrors) {
-					if (logMode.errors) logger.error(message);
-					else if (!mode.quiet && logMode.warnings)
-						logger.warning(`Failed to parse color: ${message}`);
+					if (logMode.error) logger.error(message);
+					else if (!mode.quiet && logMode.warn)
+						logger.warn(
+							`Failed to parse color: ${message}`,
+							'common > utils > color > parseColor()'
+						);
 				} else {
 					throw new Error(message);
 				}
@@ -680,7 +704,11 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 				return null;
 		}
 	} catch (error) {
-		if (logMode.errors) logger.error(`parseColor error: ${error}`);
+		if (logMode.error)
+			logger.error(
+				`parseColor error: ${error}`,
+				'common > utils > color > parseColor()'
+			);
 
 		return null;
 	}
@@ -699,16 +727,23 @@ function parseComponents(value: string, count: number): number[] {
 		if (components.length !== count)
 			if (!mode.gracefulErrors)
 				throw new Error(`Expected ${count} components.`);
-			else if (logMode.errors) {
-				if (!mode.quiet && logMode.warnings)
-					logger.warning(`Expected ${count} components.`);
+			else if (logMode.error) {
+				if (!mode.quiet && logMode.warn)
+					logger.warn(
+						`Expected ${count} components.`,
+						'common > utils > color > parseComponents()'
+					);
 
 				return [];
 			}
 
 		return components;
 	} catch (error) {
-		if (logMode.errors) logger.error(`Error parsing components: ${error}`);
+		if (logMode.error)
+			logger.error(
+				`Error parsing components: ${error}`,
+				'common > utils > color > parseComponents()'
+			);
 
 		return [];
 	}
@@ -745,10 +780,14 @@ function stripHashFromHex(hex: Hex): Hex {
 				}
 			: hex;
 	} catch (error) {
-		if (logMode.errors) logger.error(`stripHashFromHex error: ${error}`);
+		if (logMode.error)
+			logger.error(
+				`stripHashFromHex error: ${error}`,
+				'common > utils > color > stripHashFromHex()'
+			);
 
 		const unbrandedHex = core.base.clone(
-			data.defaults.colors.base.unbranded.hex
+			defaults.colors.base.unbranded.hex
 		);
 
 		return core.brandColor.asHex(unbrandedHex);
@@ -786,7 +825,7 @@ function toHexWithAlpha(rgbValue: RGBValue): string {
 	return `${hex}${alphaHex}`;
 }
 
-export const color: CommonUtilsFnColor = {
+export const color: CommonFunctionsMasterInterface['utils']['color'] = {
 	colorToColorString,
 	ensureHash,
 	formatPercentageValues,

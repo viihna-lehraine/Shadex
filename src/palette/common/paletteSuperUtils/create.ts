@@ -11,7 +11,6 @@ import {
 	HSVString,
 	LAB,
 	LABString,
-	PaletteCommon_SuperUtils_Create,
 	PaletteItem,
 	RGB,
 	RGBString,
@@ -20,7 +19,6 @@ import {
 	XYZString
 } from '../../../types/index.js';
 import { convert, core, utils } from '../../../common/index.js';
-import { idbInstance } from '../../../db/instance.js';
 import { paletteHelpers } from '../paletteHelpers/index.js';
 
 const limits = paletteHelpers.limits;
@@ -39,14 +37,12 @@ async function paletteItem(
 	enableAlpha: boolean
 ): Promise<PaletteItem> {
 	const clonedColor = core.base.clone(color) as HSL;
-	const nextPaletteID = await idbInstance.getNextPaletteID();
 
 	clonedColor.value.alpha = enableAlpha
 		? core.brand.asAlphaRange(Math.random())
 		: core.brand.asAlphaRange(1);
 
 	return {
-		id: nextPaletteID ?? 0, // *DEV-NOTE* re-write to auto-increment items in same palette
 		colors: {
 			cmyk: (hslTo(clonedColor, 'cmyk') as CMYK).value,
 			hex: (hslTo(clonedColor, 'hex') as Hex).value,
@@ -92,23 +88,23 @@ async function paletteItem(
 			).value
 		},
 		cssStrings: {
-			cmykCSSString: core.convert.colorToCSSColorString(
+			cmykCSSString: await core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'cmyk')
 			),
-			hexCSSString: core.convert.colorToCSSColorString(
+			hexCSSString: await core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'hex')
 			),
-			hslCSSString: core.convert.colorToCSSColorString(clonedColor),
-			hsvCSSString: core.convert.colorToCSSColorString(
+			hslCSSString: await core.convert.colorToCSSColorString(clonedColor),
+			hsvCSSString: await core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'hsv')
 			),
-			labCSSString: core.convert.colorToCSSColorString(
+			labCSSString: await core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'lab')
 			),
-			rgbCSSString: core.convert.colorToCSSColorString(
+			rgbCSSString: await core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'rgb')
 			),
-			xyzCSSString: core.convert.colorToCSSColorString(
+			xyzCSSString: await core.convert.colorToCSSColorString(
 				hslTo(clonedColor, 'xyz')
 			)
 		}
@@ -159,7 +155,7 @@ async function paletteItemArray(
 	return paletteItems;
 }
 
-export const create: PaletteCommon_SuperUtils_Create = {
+export const create = {
 	baseColor,
 	paletteItem,
 	paletteItemArray
