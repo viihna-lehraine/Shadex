@@ -1,26 +1,34 @@
-// File: src/dom/validate.ts
+// File: dom/validate.js
 
-import { DOM_FunctionsMasterInterface } from '../types/index.js';
-import { consts, mode } from '../common/data/base.js';
+import { DOMFn_MasterInterface } from '../types/index.js';
+import { domData } from '../data/dom.js';
 import { createLogger } from '../logger/index.js';
+import { modeData as mode } from '../data/mode.js';
+
+const logMode = mode.logging;
+const thisModule = 'dom/validate.js';
 
 const logger = await createLogger();
 
-const logMode = mode.logging;
-
 function validateElements(): void {
-	const ids = consts.dom.ids;
+	const thisFunction = 'validateElements()';
+	const ids = domData.ids;
+	const allowedMissingElements = new Set([
+		'color-box-1',
+		'export-palette-input'
+	]);
 	const missingElements: string[] = [];
 
 	Object.values(ids).forEach(id => {
 		const element = document.getElementById(id);
 
-		if (!element) {
+		if (!element && !allowedMissingElements.has(id)) {
 			if (logMode.error)
 				logger.error(
 					`Element with ID "${id}" not found`,
-					'dom > validate > validateElements()'
+					`${thisModule} > ${thisFunction}`
 				);
+
 			missingElements.push(id);
 		}
 	});
@@ -31,17 +39,17 @@ function validateElements(): void {
 				`Some DOM elements are missing (${missingElements.length}): ${missingElements.join(
 					', '
 				)}`,
-				'dom > validate > validateElements()'
+				`${thisModule} > ${thisFunction}`
 			);
 	} else {
 		if (logMode.info && mode.debug && logMode.verbosity > 1)
 			logger.info(
 				'All required DOM elements are present.',
-				'dom > validate > validateElements()'
+				`${thisModule} > ${thisFunction}`
 			);
 	}
 }
 
-export const validate: DOM_FunctionsMasterInterface['validate'] = {
+export const validate: DOMFn_MasterInterface['validate'] = {
 	elements: validateElements
 };

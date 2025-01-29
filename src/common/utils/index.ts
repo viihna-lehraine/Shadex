@@ -1,13 +1,13 @@
-// File src/common/utils/index.js
+// File common/utils/index.js
 
-import { CommonFunctionsMasterInterface } from '../../types/index.js';
-import { color } from './color.js';
-import { conversion } from './conversion.js';
-import { errors } from './errors.js';
-import { palette } from './palette.js';
-import { random } from './random.js';
+import { CommonFn_MasterInterface } from '../../types/index.js';
+import { colorUtils as color } from './color.js';
+import { conversionUtils as conversion } from './conversion.js';
+import { errorUtils as errors } from './errors.js';
+import { paletteUtils as palette } from './palette.js';
+import { randomUtils as random } from './random.js';
 
-export const utils: CommonFunctionsMasterInterface['utils'] = {
+export const utils: CommonFn_MasterInterface['utils'] = {
 	color,
 	conversion,
 	errors,

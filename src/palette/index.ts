@@ -1,11 +1,11 @@
-// File: src/palette/index.js
+// File: palette/index.js
 
-import { PaletteFnMasterInterface } from '../types/index.js';
+import { PaletteFn_MasterInterface } from '../types/index.js';
 import { generate, start } from './main.js';
 
 export { generate, start };
 
-export const palette: PaletteFnMasterInterface = {
+export const paletteFn: PaletteFn_MasterInterface = {
 	generate,
 	start
 } as const;

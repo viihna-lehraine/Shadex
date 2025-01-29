@@ -1,4 +1,4 @@
-// File: src/db/instance.ts
+// File: db/instance.js
 
 import { IDBManager } from './IDBManager.js';
 

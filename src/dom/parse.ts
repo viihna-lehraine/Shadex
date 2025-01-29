@@ -1,22 +1,26 @@
-// File: src/dom/parse.ts
+// File: dom/parse.js
 
-import { DOM_FunctionsMasterInterface } from '../types/index.js';
-import { consts, mode } from '../common/data/base.js';
+import { DOMFn_MasterInterface } from '../types/index.js';
 import { createLogger } from '../logger/index.js';
+import { domData } from '../data/dom.js';
+import { modeData as mode } from '../data/mode.js';
+
+const ids = domData.ids;
+const logMode = mode.logging;
+
+const thisModule = 'dom/parse.js';
 
 const logger = await createLogger();
 
-const domIDs = consts.dom.ids;
-const logMode = mode.logging;
-
 function checkbox(id: string): boolean | void {
+	const thisFunction = 'checkbox()';
 	const checkbox = document.getElementById(id) as HTMLInputElement;
 
 	if (!checkbox) {
 		if (logMode.error && !mode.quiet) {
 			logger.error(
 				`Checkbox element ${id} not found`,
-				'dom > parse > checkbox()'
+				`${thisModule} > ${thisFunction}`
 			);
 		}
 
@@ -27,7 +31,7 @@ function checkbox(id: string): boolean | void {
 		if (logMode.error && !mode.quiet) {
 			logger.error(
 				`Element ${id} is not a checkbox`,
-				'dom > parse > checkbox()'
+				`${thisModule} > ${thisFunction}`
 			);
 		}
 
@@ -38,15 +42,16 @@ function checkbox(id: string): boolean | void {
 }
 
 function paletteExportFormat(): string | void {
+	const thisFunction = 'paletteExportFormat()';
 	const formatSelectionMenu = document.getElementById(
-		domIDs.exportPaletteFormatOptions
+		ids.exportPaletteFormatOptions
 	) as HTMLSelectElement;
 
 	if (!formatSelectionMenu) {
 		if (logMode.error && !mode.quiet)
 			logger.error(
 				'Export format selection dropdown not found',
-				'dom > parse > paletteExportFormat()'
+				`${thisModule} > ${thisFunction}`
 			);
 	}
 
@@ -60,7 +65,7 @@ function paletteExportFormat(): string | void {
 		if (logMode.error && !mode.quiet)
 			logger.error(
 				'Invalid export format selected',
-				'dom > parse > paletteExportFormat()'
+				`${thisModule} > ${thisFunction}`
 			);
 
 		return;
@@ -69,7 +74,7 @@ function paletteExportFormat(): string | void {
 	}
 }
 
-export const parse: DOM_FunctionsMasterInterface['parse'] = {
+export const parse: DOMFn_MasterInterface['parse'] = {
 	checkbox,
 	paletteExportFormat
 };

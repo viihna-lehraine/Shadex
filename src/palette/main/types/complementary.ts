@@ -1,17 +1,17 @@
-// File: src/palette/main/types/complementary.js
+// File: palette/main/types/complementary.js
 
 import { GenPaletteArgs, HSL, Palette } from '../../../types/index.js';
 import { IDBManager } from '../../../db/index.js';
-import { common } from '../../../common/index.js';
-import { paletteSuperUtils } from '../../common/index.js';
-import { ui } from '../../../ui/index.js';
+import { commonFn } from '../../../common/index.js';
+import { superUtils as paletteSuperUtils } from '../../common/index.js';
+import { uiFn } from '../../../ui/index.js';
 
-const brand = common.core.brand;
+const brand = commonFn.core.brand;
 const create = paletteSuperUtils.create;
 
 export async function complementary(args: GenPaletteArgs): Promise<Palette> {
 	// ensure at least 2 color swatches
-	if (args.swatches !== 2) ui.enforceSwatchRules(2);
+	if (args.swatches !== 2) uiFn.enforceSwatchRules(2);
 
 	const swatches = 2;
 

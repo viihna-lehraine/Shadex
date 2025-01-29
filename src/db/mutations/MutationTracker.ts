@@ -1,17 +1,19 @@
-// File: src/classes/mutations/MutationTracker
+// File: db/mutations/MutationTracker.js
 
 import { openDB } from 'idb';
 import {
 	ConfigDataInterface,
 	ModeDataInterface,
 	MutationLog,
-	MutationTrackerInterface,
+	MutationTracker_ClassInterface,
 	PaletteDB,
 	PaletteSchema
 } from '../../types/index.js';
 import { AppLogger } from '../../logger/AppLogger.js';
 
-export class MutationTracker implements MutationTrackerInterface {
+const thisModule = 'db/mutations/MutationTracker.js';
+
+export class MutationTracker implements MutationTracker_ClassInterface {
 	private static instance: MutationTracker;
 	private appLogger: AppLogger;
 	private mode: ModeDataInterface;
@@ -35,6 +37,7 @@ export class MutationTracker implements MutationTrackerInterface {
 	}
 
 	public async persistMutation(data: MutationLog): Promise<void> {
+		const caller = 'persistMutation()';
 		const db = await this.getDB();
 
 		await db.put('mutations', data);
@@ -43,7 +46,7 @@ export class MutationTracker implements MutationTrackerInterface {
 			`Persisted mutation: ${JSON.stringify(data)}`,
 			'info',
 			this.mode.debugLevel,
-			'MutationTracker.persistMutation()'
+			`${thisModule} > ${caller}`
 		);
 	}
 

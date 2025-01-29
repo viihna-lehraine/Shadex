@@ -1,8 +1,11 @@
-// File: src/paletteGen/palettes/types/random.js
+// File: paletteGen/palettes/types/random.js
 
 import { GenPaletteArgs, Palette, PaletteItem } from '../../../types/index.js';
 import { IDBManager } from '../../../db/index.js';
-import { paletteHelpers, paletteSuperUtils } from '../../common/index.js';
+import {
+	helpers as paletteHelpers,
+	superUtils as paletteSuperUtils
+} from '../../common/index.js';
 import { utils } from '../../../common/index.js';
 
 const create = paletteSuperUtils.create;

@@ -1,0 +1,196 @@
+/* File: public/css/partials/base.css */
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	background-color: var(--background-color-1);
+	color: var(--font-color-primary);
+	font-family: Arial, sans-serif;
+}
+
+fieldset {
+	border: none;
+}
+
+section {
+	width: 100%;
+	background: var(--background-color-3);
+	padding: var(--padding-sm);
+	margin-bottom: var(--margin-md);
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	border: 1px solid var(--border-color-1);
+	margin: var(--margin-xs);
+}
+
+h1 {
+	margin: 0;
+	text-align: center;
+}
+
+h2 {
+	font-size: 1.2rem;
+}
+
+button {
+	padding: var(--padding-md) var(--padding-lg);
+	border: 1px solid var(--border-color-1);
+	border-radius: 4px;
+	background-color: var(--background-color-4);
+	color: var(--font-color-3);
+	cursor: pointer;
+	transition:
+		background-color 0.3s ease,
+		transform 0.15s ease;
+}
+
+button:active {
+	transform: scale(0.95);
+	background-color: var(--background-color-4);
+}
+
+button:hover {
+	background-color: var(--background-color-5);
+}
+
+#container {
+	min-height: 100vh;
+	min-width: 100vw;
+	overflow-x: hidden;
+}
+
+.column-half {
+	height: 50%;
+}
+
+#selected-color-option {
+	font-size: 0.95em;
+}
+
+#app {
+	width: 90vw;
+	max-width: 1200px;
+	border: 1px solid var(--border-color-1);
+	border-radius: 8px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#main-ui {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	width: 100%;
+}
+
+select:hover,
+select:focus,
+input[type='checkbox']:hover,
+input[type='checkbox']:focus {
+	border: 2px solid var(--highlight-color);
+	box-shadow: 0 0 5px var(--highlight-color);
+}
+
+#menu-buttons-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-lg);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin: var(--margin-sm) auto;
+    width: 100%;
+}
+
+
+#palette-row {
+	margin-top: var(--margin-md);
+	padding: var(--padding-md);
+	width: 90vw;
+	max-width: 1200px;
+	background: var(--background-color-3);
+	border: 1px solid var(--border-color-1);
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#palette-output {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--gap-md);
+	justify-content: center;
+}
+
+#main-options-section {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: var(--gap-lg);
+}
+
+.modal-content {
+	width: 100%;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	border: 1px solid var(--border-color-1);
+}
+
+#color-limit-options {
+	display: flex;
+	flex-direction: column;
+	gap: var(--gap-md);
+}
+
+#actions-section {
+	display: flex;
+	justify-content: center;
+	gap: var(--gap-lg);
+}
+
+#conversion-buttons-section {
+	text-align: center;
+}
+
+.modal {
+	display: flex;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 69;
+}
+
+.modal.hidden {
+	display: none;
+}
+
+.modal .modal-menu-content {
+	background: var(--background-color-3);
+	padding: var(--padding-xl);
+	border-radius: 8px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	max-width: 400px;
+	width: 90%;
+	text-align: center;
+}
+
+.modal button {
+	margin-top: var(--gap-md);
+}
+
+.modal-button {
+	flex: 1;
+	max-width: 200px;
+}
+
+.modal-button:hover {
+	background-color: var(--background-color-5);
+	transform: scale(1.05);
+}
+
+.sub-menu-title {
+	font-size: 1.1em;
+}

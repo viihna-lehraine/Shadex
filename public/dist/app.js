@@ -1,1599 +1,3 @@
-// File: src/common/data/sets.ts
-const sets = {
-    AlphaRange: [0, 1],
-    ByteRange: [0, 255],
-    HexComponent: 'HexComponent',
-    HexSet: 'HexSet',
-    LAB_L: [0, 100],
-    LAB_A: [-128, 127],
-    LAB_B: [-128, 127],
-    Percentile: [0, 100],
-    Radial: [0, 360],
-    XYZ_X: [0, 95.047],
-    XYZ_Y: [0, 100],
-    XYZ_Z: [0, 108.883]
-};
-
-// File: src/common/core/base.js
-const _sets = sets;
-// ******** SECTION 0 - Brand ********
-function asAlphaRange(value) {
-    validate$1.range(value, 'AlphaRange');
-    return value;
-}
-function asBranded(value, rangeKey) {
-    validate$1.range(value, rangeKey);
-    return value;
-}
-function asByteRange(value) {
-    validate$1.range(value, 'ByteRange');
-    return value;
-}
-function asHexComponent(value) {
-    if (!validate$1.hexComponent(value)) {
-        throw new Error(`Invalid HexComponent value: ${value}`);
-    }
-    return value;
-}
-function asHexSet(value) {
-    if (/^#[0-9a-fA-F]{8}$/.test(value)) {
-        value = value.slice(0, 7);
-    }
-    if (!validate$1.hexSet(value)) {
-        throw new Error(`Invalid HexSet value: ${value}`);
-    }
-    return value;
-}
-function asLAB_L(value) {
-    validate$1.range(value, 'LAB_L');
-    return value;
-}
-function asLAB_A(value) {
-    validate$1.range(value, 'LAB_A');
-    return value;
-}
-function asLAB_B(value) {
-    validate$1.range(value, 'LAB_B');
-    return value;
-}
-function asPercentile(value) {
-    validate$1.range(value, 'Percentile');
-    return value;
-}
-function asRadial(value) {
-    validate$1.range(value, 'Radial');
-    return value;
-}
-function asXYZ_X(value) {
-    validate$1.range(value, 'XYZ_X');
-    return value;
-}
-function asXYZ_Y(value) {
-    validate$1.range(value, 'XYZ_Y');
-    return value;
-}
-function asXYZ_Z(value) {
-    validate$1.range(value, 'XYZ_Z');
-    return value;
-}
-const brand$3 = {
-    asAlphaRange,
-    asBranded,
-    asByteRange,
-    asHexComponent,
-    asHexSet,
-    asLAB_L,
-    asLAB_A,
-    asLAB_B,
-    asPercentile,
-    asRadial,
-    asXYZ_X,
-    asXYZ_Y,
-    asXYZ_Z
-};
-// ******** SECTION 1 ********
-function initializeDefaultColors() {
-    return {
-        cmyk: {
-            value: {
-                cyan: brand$3.asPercentile(0),
-                magenta: brand$3.asPercentile(0),
-                yellow: brand$3.asPercentile(0),
-                key: brand$3.asPercentile(0),
-                alpha: brand$3.asAlphaRange(1)
-            },
-            format: 'cmyk'
-        },
-        hex: {
-            value: {
-                hex: brand$3.asHexSet('#000000'),
-                alpha: brand$3.asHexComponent('FF'),
-                numAlpha: brand$3.asAlphaRange(1)
-            },
-            format: 'hex'
-        },
-        hsl: {
-            value: {
-                hue: brand$3.asRadial(0),
-                saturation: brand$3.asPercentile(0),
-                lightness: brand$3.asPercentile(0),
-                alpha: brand$3.asAlphaRange(1)
-            },
-            format: 'hsl'
-        },
-        hsv: {
-            value: {
-                hue: brand$3.asRadial(0),
-                saturation: brand$3.asPercentile(0),
-                value: brand$3.asPercentile(0),
-                alpha: brand$3.asAlphaRange(1)
-            },
-            format: 'hsv'
-        },
-        lab: {
-            value: {
-                l: brand$3.asLAB_L(0),
-                a: brand$3.asLAB_A(0),
-                b: brand$3.asLAB_B(0),
-                alpha: brand$3.asAlphaRange(1)
-            },
-            format: 'lab'
-        },
-        rgb: {
-            value: {
-                red: brand$3.asByteRange(0),
-                green: brand$3.asByteRange(0),
-                blue: brand$3.asByteRange(0),
-                alpha: brand$3.asAlphaRange(1)
-            },
-            format: 'rgb'
-        },
-        sl: {
-            value: {
-                saturation: brand$3.asPercentile(0),
-                lightness: brand$3.asPercentile(0),
-                alpha: brand$3.asAlphaRange(1)
-            },
-            format: 'sl'
-        },
-        sv: {
-            value: {
-                saturation: brand$3.asPercentile(0),
-                value: brand$3.asPercentile(0),
-                alpha: brand$3.asAlphaRange(1)
-            },
-            format: 'sv'
-        },
-        xyz: {
-            value: {
-                x: brand$3.asXYZ_X(0),
-                y: brand$3.asXYZ_Y(0),
-                z: brand$3.asXYZ_Z(0),
-                alpha: brand$3.asAlphaRange(1)
-            },
-            format: 'xyz'
-        }
-    };
-}
-// ******** SECTION 1 ********
-function clampToRange(value, rangeKey) {
-    const [min, max] = _sets[rangeKey];
-    return Math.min(Math.max(value, min), max);
-}
-function clone(value) {
-    return structuredClone(value);
-}
-function debounce$1(func, delay) {
-    let timeout = null;
-    return (...args) => {
-        if (timeout)
-            clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            func(...args);
-        }, delay);
-    };
-}
-function parseCustomColor(rawValue) {
-    try {
-        const match = rawValue.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?,\s*(\d*\.?\d+)\)/);
-        if (match) {
-            const [, hue, saturation, lightness, alpha] = match;
-            return {
-                value: {
-                    hue: brand$3.asRadial(parseInt(hue)),
-                    saturation: brand$3.asPercentile(parseInt(saturation)),
-                    lightness: brand$3.asPercentile(parseInt(lightness)),
-                    alpha: brand$3.asAlphaRange(parseFloat(alpha))
-                },
-                format: 'hsl'
-            };
-        }
-        else {
-            console.error('Invalid HSL custom color. Expected format: hsl(H, S%, L%, A)\ncaller: parseCustomColor()');
-            return null;
-        }
-    }
-    catch (error) {
-        console.error(`parseCustomColor error: ${error}`);
-        return null;
-    }
-}
-const base$3 = {
-    clampToRange,
-    clone,
-    debounce: debounce$1,
-    parseCustomColor
-};
-// ******** SECTION 2 - Brand Color ********
-function asCMYK(color) {
-    const brandedCyan = brand$3.asPercentile(color.value.cyan);
-    const brandedMagenta = brand$3.asPercentile(color.value.magenta);
-    const brandedYellow = brand$3.asPercentile(color.value.yellow);
-    const brandedKey = brand$3.asPercentile(color.value.key);
-    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
-    return {
-        value: {
-            cyan: brandedCyan,
-            magenta: brandedMagenta,
-            yellow: brandedYellow,
-            key: brandedKey,
-            alpha: brandedAlpha
-        },
-        format: 'cmyk'
-    };
-}
-function asHex(color) {
-    let hex = color.value.hex;
-    if (!hex.startsWith('#'))
-        hex = `#${hex}`;
-    if (!/^#[0-9A-Fa-f]{8}$/.test(hex))
-        throw new Error(`Invalid Hex color format: ${hex}`);
-    const hexMain = hex.slice(0, 7);
-    const alpha = hex.slice(7, 9);
-    const brandedHex = brand$3.asHexSet(hexMain);
-    const brandedHexAlpha = brand$3.asHexComponent(alpha);
-    const brandedNumAlpha = brand$3.asAlphaRange(color.value.numAlpha);
-    return {
-        value: {
-            hex: brandedHex,
-            alpha: brandedHexAlpha,
-            numAlpha: brandedNumAlpha
-        },
-        format: 'hex'
-    };
-}
-function asHSL(color) {
-    const brandedHue = brand$3.asRadial(color.value.hue);
-    const brandedSaturation = brand$3.asPercentile(color.value.saturation);
-    const brandedLightness = brand$3.asPercentile(color.value.lightness);
-    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
-    return {
-        value: {
-            hue: brandedHue,
-            saturation: brandedSaturation,
-            lightness: brandedLightness,
-            alpha: brandedAlpha
-        },
-        format: 'hsl'
-    };
-}
-function asHSV(color) {
-    const brandedHue = brand$3.asRadial(color.value.hue);
-    const brandedSaturation = brand$3.asPercentile(color.value.saturation);
-    const brandedValue = brand$3.asPercentile(color.value.value);
-    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
-    return {
-        value: {
-            hue: brandedHue,
-            saturation: brandedSaturation,
-            value: brandedValue,
-            alpha: brandedAlpha
-        },
-        format: 'hsv'
-    };
-}
-function asLAB(color) {
-    const brandedL = brand$3.asLAB_L(color.value.l);
-    const brandedA = brand$3.asLAB_A(color.value.a);
-    const brandedB = brand$3.asLAB_B(color.value.b);
-    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
-    return {
-        value: {
-            l: brandedL,
-            a: brandedA,
-            b: brandedB,
-            alpha: brandedAlpha
-        },
-        format: 'lab'
-    };
-}
-function asRGB(color) {
-    const brandedRed = brand$3.asByteRange(color.value.red);
-    const brandedGreen = brand$3.asByteRange(color.value.green);
-    const brandedBlue = brand$3.asByteRange(color.value.blue);
-    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
-    return {
-        value: {
-            red: brandedRed,
-            green: brandedGreen,
-            blue: brandedBlue,
-            alpha: brandedAlpha
-        },
-        format: 'rgb'
-    };
-}
-function asSL(color) {
-    const brandedSaturation = brand$3.asPercentile(color.value.saturation);
-    const brandedLightness = brand$3.asPercentile(color.value.lightness);
-    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
-    return {
-        value: {
-            saturation: brandedSaturation,
-            lightness: brandedLightness,
-            alpha: brandedAlpha
-        },
-        format: 'sl'
-    };
-}
-function asSV(color) {
-    const brandedSaturation = brand$3.asPercentile(color.value.saturation);
-    const brandedValue = brand$3.asPercentile(color.value.value);
-    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
-    return {
-        value: {
-            saturation: brandedSaturation,
-            value: brandedValue,
-            alpha: brandedAlpha
-        },
-        format: 'sv'
-    };
-}
-function asXYZ(color) {
-    const brandedX = brand$3.asXYZ_X(color.value.x);
-    const brandedY = brand$3.asXYZ_Y(color.value.y);
-    const brandedZ = brand$3.asXYZ_Z(color.value.z);
-    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
-    return {
-        value: {
-            x: brandedX,
-            y: brandedY,
-            z: brandedZ,
-            alpha: brandedAlpha
-        },
-        format: 'xyz'
-    };
-}
-const brandColor = {
-    asCMYK,
-    asHex,
-    asHSL,
-    asHSV,
-    asLAB,
-    asRGB,
-    asSL,
-    asSV,
-    asXYZ
-};
-// ******** SECTION 3 - Convert ********
-function cmykStringToValue(cmyk) {
-    return {
-        cyan: brand$3.asPercentile(parseFloat(cmyk.cyan) / 100),
-        magenta: brand$3.asPercentile(parseFloat(cmyk.magenta) / 100),
-        yellow: brand$3.asPercentile(parseFloat(cmyk.yellow) / 100),
-        key: brand$3.asPercentile(parseFloat(cmyk.key) / 100),
-        alpha: brand$3.asAlphaRange(parseFloat(cmyk.alpha))
-    };
-}
-function cmykValueToString(cmyk) {
-    return {
-        cyan: `${cmyk.cyan * 100}%`,
-        magenta: `${cmyk.magenta * 100}%`,
-        yellow: `${cmyk.yellow * 100}%`,
-        key: `${cmyk.key * 100}%`,
-        alpha: `${cmyk.alpha}`
-    };
-}
-async function colorStringToColor(colorString) {
-    const clonedColor = clone(colorString);
-    const parseValue = (value) => typeof value === 'string' && value.endsWith('%')
-        ? parseFloat(value.slice(0, -1))
-        : Number(value);
-    const newValue = Object.entries(clonedColor.value).reduce((acc, [key, val]) => {
-        acc[key] = parseValue(val);
-        return acc;
-    }, {});
-    switch (clonedColor.format) {
-        case 'cmyk':
-            return { format: 'cmyk', value: newValue };
-        case 'hsl':
-            return { format: 'hsl', value: newValue };
-        case 'hsv':
-            return { format: 'hsv', value: newValue };
-        case 'sl':
-            return { format: 'sl', value: newValue };
-        case 'sv':
-            return { format: 'sv', value: newValue };
-        default:
-            console.error('Unsupported format for colorStringToColor');
-            const defaultColors = await initializeDefaultColors();
-            const unbrandedHSL = defaultColors.hsl;
-            const brandedHue = brand$3.asRadial(unbrandedHSL.value.hue);
-            const brandedSaturation = brand$3.asPercentile(unbrandedHSL.value.saturation);
-            const brandedLightness = brand$3.asPercentile(unbrandedHSL.value.lightness);
-            const brandedAlpha = brand$3.asAlphaRange(unbrandedHSL.value.alpha);
-            return {
-                value: {
-                    hue: brandedHue,
-                    saturation: brandedSaturation,
-                    lightness: brandedLightness,
-                    alpha: brandedAlpha
-                },
-                format: 'hsl'
-            };
-    }
-}
-async function colorToCSSColorString(color) {
-    try {
-        switch (color.format) {
-            case 'cmyk':
-                return `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key}, ${color.value.alpha})`;
-            case 'hex':
-                return String(color.value.hex);
-            case 'hsl':
-                return `hsl(${color.value.hue}, ${color.value.saturation}%, ${color.value.lightness}%, ${color.value.alpha})`;
-            case 'hsv':
-                return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%, ${color.value.alpha})`;
-            case 'lab':
-                return `lab(${color.value.l}, ${color.value.a}, ${color.value.b}, ${color.value.alpha})`;
-            case 'rgb':
-                return `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue}, ${color.value.alpha})`;
-            case 'xyz':
-                return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z}, ${color.value.alpha})`;
-            default:
-                console.error(`Unexpected color format: ${color.format}`);
-                return '#FFFFFFFF';
-        }
-    }
-    catch (error) {
-        throw new Error(`getCSSColorString error: ${error}`);
-    }
-}
-function hexAlphaToNumericAlpha$1(hexAlpha) {
-    return parseInt(hexAlpha, 16) / 255;
-}
-function hexStringToValue(hex) {
-    return {
-        hex: brand$3.asHexSet(hex.hex),
-        alpha: brand$3.asHexComponent(hex.alpha),
-        numAlpha: brand$3.asAlphaRange(parseFloat(hex.numAlpha))
-    };
-}
-function hexValueToString(hex) {
-    return {
-        hex: hex.hex,
-        alpha: `${hex.alpha}`,
-        numAlpha: `${hex.numAlpha}`
-    };
-}
-function hslStringToValue(hsl) {
-    return {
-        hue: brand$3.asRadial(parseFloat(hsl.hue)),
-        saturation: brand$3.asPercentile(parseFloat(hsl.saturation) / 100),
-        lightness: brand$3.asPercentile(parseFloat(hsl.lightness) / 100),
-        alpha: brand$3.asAlphaRange(parseFloat(hsl.alpha))
-    };
-}
-function hslValueToString(hsl) {
-    return {
-        hue: `${hsl.hue}°`,
-        saturation: `${hsl.saturation * 100}%`,
-        lightness: `${hsl.lightness * 100}%`,
-        alpha: `${hsl.alpha}`
-    };
-}
-function hsvStringToValue(hsv) {
-    return {
-        hue: brand$3.asRadial(parseFloat(hsv.hue)),
-        saturation: brand$3.asPercentile(parseFloat(hsv.saturation) / 100),
-        value: brand$3.asPercentile(parseFloat(hsv.value) / 100),
-        alpha: brand$3.asAlphaRange(parseFloat(hsv.alpha))
-    };
-}
-function hsvValueToString(hsv) {
-    return {
-        hue: `${hsv.hue}°`,
-        saturation: `${hsv.saturation * 100}%`,
-        value: `${hsv.value * 100}%`,
-        alpha: `${hsv.alpha}`
-    };
-}
-function labValueToString(lab) {
-    return {
-        l: `${lab.l}`,
-        a: `${lab.a}`,
-        b: `${lab.b}`,
-        alpha: `${lab.alpha}`
-    };
-}
-function labStringToValue(lab) {
-    return {
-        l: brand$3.asLAB_L(parseFloat(lab.l)),
-        a: brand$3.asLAB_A(parseFloat(lab.a)),
-        b: brand$3.asLAB_B(parseFloat(lab.b)),
-        alpha: brand$3.asAlphaRange(parseFloat(lab.alpha))
-    };
-}
-function rgbValueToString(rgb) {
-    return {
-        red: `${rgb.red}`,
-        green: `${rgb.green}`,
-        blue: `${rgb.blue}`,
-        alpha: `${rgb.alpha}`
-    };
-}
-function rgbStringToValue(rgb) {
-    return {
-        red: brand$3.asByteRange(parseFloat(rgb.red)),
-        green: brand$3.asByteRange(parseFloat(rgb.green)),
-        blue: brand$3.asByteRange(parseFloat(rgb.blue)),
-        alpha: brand$3.asAlphaRange(parseFloat(rgb.alpha))
-    };
-}
-function toColorValueRange(value, rangeKey) {
-    validate$1.range(value, rangeKey);
-    if (rangeKey === 'HexSet') {
-        return brand$3.asHexSet(value);
-    }
-    if (rangeKey === 'HexComponent') {
-        return brand$3.asHexComponent(value);
-    }
-    return brand$3.asBranded(value, rangeKey);
-}
-function xyzValueToString(xyz) {
-    return {
-        x: `${xyz.x}`,
-        y: `${xyz.y}`,
-        z: `${xyz.z}`,
-        alpha: `${xyz.alpha}`
-    };
-}
-function xyzStringToValue(xyz) {
-    return {
-        x: brand$3.asXYZ_X(parseFloat(xyz.x)),
-        y: brand$3.asXYZ_Y(parseFloat(xyz.y)),
-        z: brand$3.asXYZ_Z(parseFloat(xyz.z)),
-        alpha: brand$3.asAlphaRange(parseFloat(xyz.alpha))
-    };
-}
-const stringToValue = {
-    cmyk: cmykStringToValue,
-    hex: hexStringToValue,
-    hsl: hslStringToValue,
-    hsv: hsvStringToValue,
-    lab: labStringToValue,
-    rgb: rgbStringToValue,
-    xyz: xyzStringToValue
-};
-const valueToString = {
-    cmyk: cmykValueToString,
-    hex: hexValueToString,
-    hsl: hslValueToString,
-    hsv: hsvValueToString,
-    lab: labValueToString,
-    rgb: rgbValueToString,
-    xyz: xyzValueToString
-};
-const convert$1 = {
-    colorStringToColor,
-    hexAlphaToNumericAlpha: hexAlphaToNumericAlpha$1,
-    stringToValue,
-    toColorValueRange,
-    colorToCSSColorString,
-    valueToString
-};
-// ******** SECTION 4 - Guards ********
-function isColor(value) {
-    if (typeof value !== 'object' || value === null)
-        return false;
-    const color = value;
-    const validFormats = [
-        'cmyk',
-        'hex',
-        'hsl',
-        'hsv',
-        'lab',
-        'rgb',
-        'sl',
-        'sv',
-        'xyz'
-    ];
-    return ('value' in color &&
-        'format' in color &&
-        validFormats.includes(color.format));
-}
-function isColorSpace$1(value) {
-    const validColorSpaces = [
-        'cmyk',
-        'hex',
-        'hsl',
-        'hsv',
-        'lab',
-        'rgb',
-        'xyz'
-    ];
-    return (typeof value === 'string' &&
-        validColorSpaces.includes(value));
-}
-function isColorString$1(value) {
-    if (typeof value !== 'object' || value === null)
-        return false;
-    const colorString = value;
-    const validStringFormats = [
-        'cmyk',
-        'hsl',
-        'hsv',
-        'sl',
-        'sv'
-    ];
-    return ('value' in colorString &&
-        'format' in colorString &&
-        validStringFormats.includes(colorString.format));
-}
-function isInRange(value, rangeKey) {
-    if (rangeKey === 'HexSet') {
-        return validate$1.hexSet(value);
-    }
-    if (rangeKey === 'HexComponent') {
-        return validate$1.hexComponent(value);
-    }
-    if (typeof value === 'number' && Array.isArray(_sets[rangeKey])) {
-        const [min, max] = _sets[rangeKey];
-        return value >= min && value <= max;
-    }
-    throw new Error(`Invalid range or value for ${String(rangeKey)}`);
-}
-const guards = {
-    isColor,
-    isColorSpace: isColorSpace$1,
-    isColorString: isColorString$1,
-    isInRange
-};
-// ******** SECTION 5 - Sanitize ********
-function lab(value, output) {
-    if (output === 'l') {
-        return brand$3.asLAB_L(Math.round(Math.min(Math.max(value, 0), 100)));
-    }
-    else if (output === 'a') {
-        return brand$3.asLAB_A(Math.round(Math.min(Math.max(value, -125), 125)));
-    }
-    else if (output === 'b') {
-        return brand$3.asLAB_B(Math.round(Math.min(Math.max(value, -125), 125)));
-    }
-    else
-        throw new Error('Unable to return LAB value');
-}
-function percentile(value) {
-    const rawPercentile = Math.round(Math.min(Math.max(value, 0), 100));
-    return brand$3.asPercentile(rawPercentile);
-}
-function radial(value) {
-    const rawRadial = Math.round(Math.min(Math.max(value, 0), 360)) & 360;
-    return brand$3.asRadial(rawRadial);
-}
-function rgb(value) {
-    const rawByteRange = Math.round(Math.min(Math.max(value, 0), 255));
-    return toColorValueRange(rawByteRange, 'ByteRange');
-}
-const sanitize = {
-    lab,
-    percentile,
-    radial,
-    rgb
-};
-// ******** SECTION 5.1 - Validate *********
-function colorValues(color) {
-    const clonedColor = clone(color);
-    const isNumericValid = (value) => typeof value === 'number' && !isNaN(value);
-    const normalizePercentage = (value) => {
-        if (typeof value === 'string' && value.endsWith('%')) {
-            return parseFloat(value.slice(0, -1));
-        }
-        return typeof value === 'number' ? value : NaN;
-    };
-    switch (clonedColor.format) {
-        case 'cmyk':
-            return ([
-                clonedColor.value.cyan,
-                clonedColor.value.magenta,
-                clonedColor.value.yellow,
-                clonedColor.value.key
-            ].every(isNumericValid) &&
-                clonedColor.value.cyan >= 0 &&
-                clonedColor.value.cyan <= 100 &&
-                clonedColor.value.magenta >= 0 &&
-                clonedColor.value.magenta <= 100 &&
-                clonedColor.value.yellow >= 0 &&
-                clonedColor.value.yellow <= 100 &&
-                clonedColor.value.key >= 0 &&
-                clonedColor.value.key <= 100);
-        case 'hex':
-            return /^#[0-9A-Fa-f]{6}$/.test(clonedColor.value.hex);
-        case 'hsl':
-            const isValidHSLHue = isNumericValid(clonedColor.value.hue) &&
-                clonedColor.value.hue >= 0 &&
-                clonedColor.value.hue <= 360;
-            const isValidHSLSaturation = normalizePercentage(clonedColor.value.saturation) >= 0 &&
-                normalizePercentage(clonedColor.value.saturation) <= 100;
-            const isValidHSLLightness = clonedColor.value.lightness
-                ? normalizePercentage(clonedColor.value.lightness) >= 0 &&
-                    normalizePercentage(clonedColor.value.lightness) <= 100
-                : true;
-            return isValidHSLHue && isValidHSLSaturation && isValidHSLLightness;
-        case 'hsv':
-            const isValidHSVHue = isNumericValid(clonedColor.value.hue) &&
-                clonedColor.value.hue >= 0 &&
-                clonedColor.value.hue <= 360;
-            const isValidHSVSaturation = normalizePercentage(clonedColor.value.saturation) >= 0 &&
-                normalizePercentage(clonedColor.value.saturation) <= 100;
-            const isValidHSVValue = clonedColor.value.value
-                ? normalizePercentage(clonedColor.value.value) >= 0 &&
-                    normalizePercentage(clonedColor.value.value) <= 100
-                : true;
-            return isValidHSVHue && isValidHSVSaturation && isValidHSVValue;
-        case 'lab':
-            return ([
-                clonedColor.value.l,
-                clonedColor.value.a,
-                clonedColor.value.b
-            ].every(isNumericValid) &&
-                clonedColor.value.l >= 0 &&
-                clonedColor.value.l <= 100 &&
-                clonedColor.value.a >= -125 &&
-                clonedColor.value.a <= 125 &&
-                clonedColor.value.b >= -125 &&
-                clonedColor.value.b <= 125);
-        case 'rgb':
-            return ([
-                clonedColor.value.red,
-                clonedColor.value.green,
-                clonedColor.value.blue
-            ].every(isNumericValid) &&
-                clonedColor.value.red >= 0 &&
-                clonedColor.value.red <= 255 &&
-                clonedColor.value.green >= 0 &&
-                clonedColor.value.green <= 255 &&
-                clonedColor.value.blue >= 0 &&
-                clonedColor.value.blue <= 255);
-        case 'sl':
-            return ([
-                clonedColor.value.saturation,
-                clonedColor.value.lightness
-            ].every(isNumericValid) &&
-                clonedColor.value.saturation >= 0 &&
-                clonedColor.value.saturation <= 100 &&
-                clonedColor.value.lightness >= 0 &&
-                clonedColor.value.lightness <= 100);
-        case 'sv':
-            return ([clonedColor.value.saturation, clonedColor.value.value].every(isNumericValid) &&
-                clonedColor.value.saturation >= 0 &&
-                clonedColor.value.saturation <= 100 &&
-                clonedColor.value.value >= 0 &&
-                clonedColor.value.value <= 100);
-        case 'xyz':
-            return ([
-                clonedColor.value.x,
-                clonedColor.value.y,
-                clonedColor.value.z
-            ].every(isNumericValid) &&
-                clonedColor.value.x >= 0 &&
-                clonedColor.value.x <= 95.047 &&
-                clonedColor.value.y >= 0 &&
-                clonedColor.value.y <= 100.0 &&
-                clonedColor.value.z >= 0 &&
-                clonedColor.value.z <= 108.883);
-        default:
-            console.error(`Unsupported color format: ${color.format}`);
-            return false;
-    }
-}
-function hex(value, pattern) {
-    return pattern.test(value);
-}
-function hexComponent(value) {
-    return hex(value, /^[A-Fa-f0-9]{2}$/);
-}
-function hexSet(value) {
-    return /^#[0-9a-fA-F]{6}$/.test(value);
-}
-function range(value, rangeKey) {
-    if (!isInRange(value, rangeKey)) {
-        if (rangeKey === 'HexSet' || rangeKey === 'HexComponent') {
-            throw new Error(`Invalid value for ${String(rangeKey)}: ${value}`);
-        }
-        const [min, max] = _sets[rangeKey];
-        throw new Error(`Value ${value} is out of range for ${String(rangeKey)} [${min}, ${max}]`);
-    }
-}
-const validate$1 = {
-    colorValues,
-    hex,
-    hexComponent,
-    hexSet,
-    range
-};
-// ******** SECTION 6 - Other ********
-function getFormattedTimestamp$1() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-const other = { getFormattedTimestamp: getFormattedTimestamp$1 };
-
-// File: src/common/dom/index.js
-async function getElement$1(id) {
-    const element = document.getElementById(id);
-    if (!element) {
-        console.warn(`Element with ID ${id} not found`);
-    }
-    return element;
-}
-const domUtils = {
-    getElement: (id) => getElement$1(id)
-};
-
-// File: src/common/data/base.ts
-// * * * *  1. MODE DATA * * * * * * * *
-const mode = {
-    environment: 'dev',
-    debug: true,
-    debugLevel: 1,
-    expose: { idbManager: true, logger: true, uiManager: true },
-    gracefulErrors: false,
-    logging: {
-        args: true,
-        clicks: false,
-        debug: true,
-        error: true,
-        info: true,
-        verbosity: 3,
-        warn: true
-    },
-    quiet: false,
-    showAlerts: true,
-    stackTrace: true
-};
-// * * * *  2. CONFIG DATA  * * * *
-const DEFAULT_KEYS = {
-    APP_SETTINGS: 'appSettings',
-    CUSTOM_COLOR: 'customColor'
-};
-const DEFAULT_SETTINGS = {
-    colorSpace: 'hsl',
-    lastTableID: 0,
-    theme: 'light',
-    loggingEnabled: true
-};
-const STORE_NAMES = {
-    APP_SETTINGS: 'appSettings',
-    CUSTOM_COLOR: 'customColor',
-    MUTATIONS: 'mutations',
-    PALLETES: 'palettes',
-    SETTINGS: 'settings',
-    TABLES: 'tables'
-};
-const db = { DEFAULT_KEYS, DEFAULT_SETTINGS, STORE_NAMES };
-const regex$3 = {
-    colors: {
-        cmyk: /cmyk\((\d+)%?,\s*(\d+)%?,\s*(\d+)%?,\s*(\d+)%?(?:,\s*([\d.]+))?\)/i,
-        hex: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/,
-        hsl: /hsl\(([\d.]+),\s*([\d.]+)%?,\s*([\d.]+)%?(?:,\s*([\d.]+))?\)/i,
-        hsv: /hsv\(([\d.]+),\s*([\d.]+)%?,\s*([\d.]+)%?(?:,\s*([\d.]+))?\)/i,
-        lab: /lab\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i,
-        rgb: /rgb\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i,
-        xyz: /xyz\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i
-    },
-    file: {
-        palette: {
-            css: {
-                color: /\.color-\d+\s*{\s*([\s\S]*?)\s*}/i,
-                metadata: /\.palette\s*{\s*([\s\S]*?)\s*}/i
-            }
-        }
-    }
-};
-const config = { db, regex: regex$3 };
-// * * * *  2. CONSTS DATA  * * * * *
-const getElement = domUtils.getElement;
-const adjustments$1 = { slaValue: 10 };
-const debounce = { button: 300, input: 200 };
-const limits$3 = {
-    xyz: { max: { x: 95.047, y: 100, z: 108.883 }, min: { x: 0, y: 0, z: 0 } }
-};
-const paletteRanges$5 = {
-    comp: { hueShift: 10, lightShift: 0, satShift: 0 },
-    diadic: { hueShift: 30, lightShift: 30, satShift: 30 },
-    hexad: { hueShift: 0, lightShift: 30, satShift: 30 },
-    random: { hueShift: 0, lightShift: 0, satShift: 0 },
-    splitComp: { hueShift: 30, lightShift: 30, satShift: 30 },
-    tetra: { hueShift: 0, lightShift: 30, satShift: 30 },
-    triad: { hueShift: 0, lightShift: 30, satShift: 30 }
-};
-const probabilities$1 = {
-    values: [40, 45, 50, 55, 60, 65, 70],
-    weights: [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05]
-};
-const thresholds = { dark: 25, gray: 20, light: 75 };
-const timeouts$1 = { copyButtonText: 1000, toast: 3000, tooltip: 1000 };
-const createDOMElements = async () => {
-    const advancedMenu = await getElement('advanced-menu', mode);
-    const advancedMenuButton = await getElement('advanced-menu-button', mode);
-    const advancedMenuContent = await getElement('advanced-menu-content', mode);
-    const applyCustomColorButton = await getElement('apply-custom-color-button', mode);
-    const clearCustomColorButton = await getElement('clear-custom-color-button', mode);
-    const colorBox1 = await getElement('color-box-1', mode);
-    const customColorDisplay = await getElement('custom-color-display', mode);
-    const customColorInput = await getElement('custom-color-input', mode);
-    const customColorMenu = await getElement('custom-color-menu', mode);
-    const customColorMenuButton = await getElement('custom-color-menu-button', mode);
-    const deleteDatabaseButton = await getElement('delete-database-button', mode);
-    const desaturateButton = await getElement('desaturate-button', mode);
-    const developerMenu = await getElement('developer-menu', mode);
-    const developerMenuButton = await getElement('developer-menu-button', mode);
-    const enableAlphaCheckbox = await getElement('enable-alpha-checkbox', mode);
-    const exportPaletteButton = await getElement('export-palette-button', mode);
-    const exportPaletteFormatOptions = await getElement('export-palette-format-options', mode);
-    const exportPaletteInput = await getElement('export-palette-input', mode);
-    const generateButton = await getElement('generate-button', mode);
-    const helpMenu = await getElement('help-menu', mode);
-    const helpMenuButton = await getElement('help-menu-button', mode);
-    const helpMenuContent = await getElement('help-menu-content', mode);
-    const historyMenu = await getElement('history-menu', mode);
-    const historyMenuButton = await getElement('history-menu-button', mode);
-    const historyMenuContent = await getElement('history-menu-content', mode);
-    const importExportMenu = await getElement('import-export-menu', mode);
-    const importExportMenuButton = await getElement('import-export-menu-button', mode);
-    const importPaletteInput = await getElement('import-palette-input', mode);
-    const limitDarknessCheckbox = await getElement('limit-darkness-checkbox', mode);
-    const limitGraynessCheckbox = await getElement('limit-grayness-checkbox', mode);
-    const limitLightnessCheckbox = await getElement('limit-lightness-checkbox', mode);
-    const paletteNumberOptions = await getElement('palette-number-options', mode);
-    const paletteTypeOptions = await getElement('palette-type-options', mode);
-    const resetDatabaseButton = await getElement('reset-database-button', mode);
-    const resetPaletteIDButton = await getElement('reset-palette-id-button', mode);
-    const saturateButton = await getElement('saturate-button', mode);
-    const selectedColorOption = await getElement('selected-color-option', mode);
-    const showAsCMYKButton = await getElement('show-as-cmyk-button', mode);
-    const showAsHexButton = await getElement('show-as-hex-button', mode);
-    const showAsHSLButton = await getElement('show-as-hsl-button', mode);
-    const showAsHSVButton = await getElement('show-as-hsv-button', mode);
-    const showAsLABButton = await getElement('show-as-lab-button', mode);
-    const showAsRGBButton = await getElement('show-as-rgb-button', mode);
-    const buttons = {
-        advancedMenuButton,
-        applyCustomColorButton,
-        clearCustomColorButton,
-        customColorMenuButton,
-        deleteDatabaseButton,
-        desaturateButton,
-        developerMenuButton,
-        exportPaletteButton,
-        generateButton,
-        helpMenuButton,
-        historyMenuButton,
-        importExportMenuButton,
-        resetDatabaseButton,
-        resetPaletteIDButton,
-        saturateButton,
-        showAsCMYKButton,
-        showAsHexButton,
-        showAsHSLButton,
-        showAsHSVButton,
-        showAsLABButton,
-        showAsRGBButton
-    };
-    const divs = {
-        advancedMenu,
-        advancedMenuContent,
-        colorBox1,
-        customColorMenu,
-        developerMenu,
-        helpMenu,
-        helpMenuContent,
-        historyMenu,
-        historyMenuContent,
-        importExportMenu
-    };
-    const inputs = {
-        customColorInput,
-        enableAlphaCheckbox,
-        exportPaletteInput,
-        importPaletteInput,
-        limitDarknessCheckbox,
-        limitGraynessCheckbox,
-        limitLightnessCheckbox,
-        paletteNumberOptions
-    };
-    const select = {
-        exportPaletteFormatOptions,
-        paletteTypeOptions,
-        selectedColorOption
-    };
-    const spans = { customColorDisplay };
-    return {
-        buttons,
-        divs,
-        inputs,
-        select,
-        spans
-    };
-};
-const advancedMenu = 'advanced-menu';
-const advancedMenuButton = 'advanced-menu-button';
-const advancedMenuContent = 'advanced-menu-content';
-const applyCustomColorButton = 'apply-custom-color-button';
-const colorBox1 = 'color-box-1';
-const clearCustomColorButton = 'clear-custom-color-button';
-const customColorDisplay = 'custom-color-display';
-const customColorInput = 'custom-color-input';
-const customColorMenu = 'custom-color-menu';
-const customColorMenuButton = 'custom-color-menu-button';
-const deleteDatabaseButton = 'delete-database-button';
-const desaturateButton = 'desaturate-button';
-const developerMenu = 'developer-menu';
-const developerMenuButton = 'developer-menu-button';
-const enableAlphaCheckbox = 'enable-alpha-checkbox';
-const exportPaletteButton = 'export-palette-button';
-const exportPaletteFormatOptions = 'export-palette-format-options';
-const exportPaletteInput = 'export-palette-input';
-const generateButton = 'generate-button';
-const helpMenu = 'help-menu';
-const helpMenuButton = 'help-menu-button';
-const helpMenuContent = 'help-menu-content';
-const historyMenu = 'history-menu';
-const historyMenuButton = 'history-menu-button';
-const historyMenuContent = 'history-menu-content';
-const importExportMenu = 'import-export-menu';
-const importExportMenuButton = 'import-export-menu-button';
-const importPaletteInput = 'import-palette-input';
-const limitDarknessCheckbox = 'limit-darkness-checkbox';
-const limitGraynessCheckbox = 'limit-grayness-checkbox';
-const limitLightnessCheckbox = 'limit-lightness-checkbox';
-const paletteNumberOptions = 'palette-number-options';
-const paletteTypeOptions = 'palette-type-options';
-const resetDatabaseButton = 'reset-database-button';
-const resetPaletteIDButton = 'reset-palette-id-button';
-const saturateButton = 'saturate-button';
-const selectedColorOption = 'selected-color-option';
-const showAsCMYKButton = 'show-as-cmyk-button';
-const showAsHexButton = 'show-as-hex-button';
-const showAsHSLButton = 'show-as-hsl-button';
-const showAsHSVButton = 'show-as-hsv-button';
-const showAsLABButton = 'show-as-lab-button';
-const showAsRGBButton = 'show-as-rgb-button';
-const domIDs$3 = {
-    advancedMenu,
-    advancedMenuButton,
-    advancedMenuContent,
-    applyCustomColorButton,
-    clearCustomColorButton,
-    colorBox1,
-    customColorDisplay,
-    customColorInput,
-    customColorMenu,
-    customColorMenuButton,
-    deleteDatabaseButton,
-    desaturateButton,
-    developerMenu,
-    developerMenuButton,
-    enableAlphaCheckbox,
-    exportPaletteButton,
-    exportPaletteFormatOptions,
-    exportPaletteInput,
-    generateButton,
-    helpMenu,
-    helpMenuButton,
-    helpMenuContent,
-    historyMenu,
-    historyMenuButton,
-    historyMenuContent,
-    importExportMenu,
-    importExportMenuButton,
-    importPaletteInput,
-    limitDarknessCheckbox,
-    limitGraynessCheckbox,
-    limitLightnessCheckbox,
-    paletteNumberOptions,
-    paletteTypeOptions,
-    resetDatabaseButton,
-    resetPaletteIDButton,
-    saturateButton,
-    selectedColorOption,
-    showAsCMYKButton,
-    showAsHexButton,
-    showAsHSLButton,
-    showAsHSVButton,
-    showAsLABButton,
-    showAsRGBButton
-};
-const dom$3 = {
-    elements: await createDOMElements(),
-    ids: domIDs$3
-};
-const consts = {
-    adjustments: adjustments$1,
-    debounce,
-    dom: dom$3,
-    limits: limits$3,
-    paletteRanges: paletteRanges$5,
-    probabilities: probabilities$1,
-    thresholds,
-    timeouts: timeouts$1
-};
-// * * * *  3. DEFAULTS  * * * *
-const colors = {
-    base: {
-        branded: {
-            cmyk: {
-                value: {
-                    cyan: brand$3.asPercentile(0),
-                    magenta: brand$3.asPercentile(0),
-                    yellow: brand$3.asPercentile(0),
-                    key: brand$3.asPercentile(0),
-                    alpha: brand$3.asAlphaRange(1)
-                },
-                format: 'cmyk'
-            },
-            hex: {
-                value: {
-                    hex: brand$3.asHexSet('#000000'),
-                    alpha: brand$3.asHexComponent('FF'),
-                    numAlpha: brand$3.asAlphaRange(1)
-                },
-                format: 'hex'
-            },
-            hsl: {
-                value: {
-                    hue: brand$3.asRadial(0),
-                    saturation: brand$3.asPercentile(0),
-                    lightness: brand$3.asPercentile(0),
-                    alpha: brand$3.asAlphaRange(1)
-                },
-                format: 'hsl'
-            },
-            hsv: {
-                value: {
-                    hue: brand$3.asRadial(0),
-                    saturation: brand$3.asPercentile(0),
-                    value: brand$3.asPercentile(0),
-                    alpha: brand$3.asAlphaRange(1)
-                },
-                format: 'hsv'
-            },
-            lab: {
-                value: {
-                    l: brand$3.asLAB_L(0),
-                    a: brand$3.asLAB_A(0),
-                    b: brand$3.asLAB_B(0),
-                    alpha: brand$3.asAlphaRange(1)
-                },
-                format: 'lab'
-            },
-            rgb: {
-                value: {
-                    red: brand$3.asByteRange(0),
-                    green: brand$3.asByteRange(0),
-                    blue: brand$3.asByteRange(0),
-                    alpha: brand$3.asAlphaRange(1)
-                },
-                format: 'rgb'
-            },
-            sl: {
-                value: {
-                    saturation: brand$3.asPercentile(0),
-                    lightness: brand$3.asPercentile(0),
-                    alpha: brand$3.asAlphaRange(1)
-                },
-                format: 'sl'
-            },
-            sv: {
-                value: {
-                    saturation: brand$3.asPercentile(0),
-                    value: brand$3.asPercentile(0),
-                    alpha: brand$3.asAlphaRange(1)
-                },
-                format: 'sv'
-            },
-            xyz: {
-                value: {
-                    x: brand$3.asXYZ_X(0),
-                    y: brand$3.asXYZ_Y(0),
-                    z: brand$3.asXYZ_Z(0),
-                    alpha: brand$3.asAlphaRange(1)
-                },
-                format: 'xyz'
-            }
-        },
-        unbranded: {
-            cmyk: {
-                value: {
-                    cyan: 0,
-                    magenta: 0,
-                    yellow: 0,
-                    key: 0,
-                    alpha: 1
-                },
-                format: 'cmyk'
-            },
-            hex: {
-                value: {
-                    hex: '#000000FF',
-                    alpha: 'FF',
-                    numAlpha: 1
-                },
-                format: 'hex'
-            },
-            hsl: {
-                value: {
-                    hue: 0,
-                    saturation: 0,
-                    lightness: 0,
-                    alpha: 1
-                },
-                format: 'hsl'
-            },
-            hsv: {
-                value: {
-                    hue: 0,
-                    saturation: 0,
-                    value: 0,
-                    alpha: 1
-                },
-                format: 'hsv'
-            },
-            lab: {
-                value: {
-                    l: 0,
-                    a: 0,
-                    b: 0,
-                    alpha: 1
-                },
-                format: 'lab'
-            },
-            sl: {
-                value: {
-                    saturation: 0,
-                    lightness: 0,
-                    alpha: 1
-                },
-                format: 'sl'
-            },
-            rgb: {
-                value: {
-                    red: 0,
-                    green: 0,
-                    blue: 0,
-                    alpha: 1
-                },
-                format: 'rgb'
-            },
-            sv: {
-                value: {
-                    saturation: 0,
-                    value: 0,
-                    alpha: 1
-                },
-                format: 'sv'
-            },
-            xyz: {
-                value: {
-                    x: 0,
-                    y: 0,
-                    z: 0,
-                    alpha: 1
-                },
-                format: 'xyz'
-            }
-        }
-    },
-    cssColorStrings: {
-        cmyk: 'cmyk(0%, 0%, 0%, 0%, 1)',
-        hex: '#000000FF',
-        hsl: 'hsl(0, 0%, 0%, 1)',
-        hsv: 'hsv(0, 0%, 0%, 1)',
-        lab: 'lab(0, 0, 0, 1)',
-        rgb: 'rgb(0, 0, 0, 1)',
-        sl: 'sl(0%, 0%, 1)',
-        sv: 'sv(0%, 0%, 1)',
-        xyz: 'xyz(0, 0, 0, 1)'
-    },
-    strings: {
-        cmyk: {
-            value: {
-                cyan: '0',
-                magenta: '0',
-                yellow: '0',
-                key: '0',
-                alpha: '1'
-            },
-            format: 'cmyk'
-        },
-        hex: {
-            value: {
-                hex: '#000000',
-                alpha: 'FF',
-                numAlpha: '1'
-            },
-            format: 'hex'
-        },
-        hsl: {
-            value: {
-                hue: '0',
-                saturation: '0',
-                lightness: '0',
-                alpha: '1'
-            },
-            format: 'hsl'
-        },
-        hsv: {
-            value: {
-                hue: '0',
-                saturation: '0',
-                value: '0',
-                alpha: '1'
-            },
-            format: 'hsv'
-        },
-        lab: {
-            value: {
-                l: '0',
-                a: '0',
-                b: '0',
-                alpha: '1'
-            },
-            format: 'lab'
-        },
-        rgb: {
-            value: {
-                red: '0',
-                green: '0',
-                blue: '0',
-                alpha: '1'
-            },
-            format: 'rgb'
-        },
-        sl: {
-            value: {
-                saturation: '0',
-                lightness: '0',
-                alpha: '1'
-            },
-            format: 'sl'
-        },
-        sv: {
-            value: {
-                saturation: '0',
-                value: '0',
-                alpha: '1'
-            },
-            format: 'sv'
-        },
-        xyz: {
-            value: {
-                x: '0',
-                y: '0',
-                z: '0',
-                alpha: '1'
-            },
-            format: 'xyz'
-        }
-    }
-};
-const mutation = {
-    timestamp: new Date().toISOString(),
-    key: 'default_key',
-    action: 'update',
-    newValue: { value: 'new_value' },
-    oldValue: { value: 'old_value' },
-    origin: 'DEFAULT'
-};
-const idb$1 = {
-    mutation
-};
-const unbrandedData = {
-    id: `null-palette-${Date.now()}`,
-    items: [],
-    metadata: {
-        customColor: false,
-        flags: {
-            enableAlpha: false,
-            limitDarkness: false,
-            limitGrayness: false,
-            limitLightness: false
-        },
-        name: 'UNBRANDED DEFAULT PALETTE',
-        swatches: 1,
-        type: '???',
-        timestamp: '???'
-    }
-};
-const unbrandedItem = {
-    colors: {
-        cmyk: { cyan: 0, magenta: 0, yellow: 0, key: 0, alpha: 1 },
-        hex: { hex: '#000000FF', alpha: 'FF', numAlpha: 1 },
-        hsl: { hue: 0, saturation: 0, lightness: 0, alpha: 1 },
-        hsv: { hue: 0, saturation: 0, value: 0, alpha: 1 },
-        lab: { l: 0, a: 0, b: 0, alpha: 1 },
-        rgb: { red: 0, green: 0, blue: 0, alpha: 1 },
-        xyz: { x: 0, y: 0, z: 0, alpha: 1 }
-    },
-    colorStrings: {
-        cmykString: {
-            cyan: '0%',
-            magenta: '0%',
-            yellow: '0%',
-            key: '0%',
-            alpha: '1'
-        },
-        hexString: { hex: '#000000FF', alpha: 'FF', numAlpha: '1' },
-        hslString: { hue: '0', saturation: '0%', lightness: '0%', alpha: '1' },
-        hsvString: { hue: '0', saturation: '0%', value: '0%', alpha: '1' },
-        labString: { l: '0', a: '0', b: '0', alpha: '1' },
-        rgbString: { red: '0', green: '0', blue: '0', alpha: '1' },
-        xyzString: { x: '0', y: '0', z: '0', alpha: '1' }
-    },
-    cssStrings: {
-        cmykCSSString: 'cmyk(0%, 0%, 0%, 100%, 1)',
-        hexCSSString: '#000000FF',
-        hslCSSString: 'hsl(0, 0%, 0%, 0)',
-        hsvCSSString: 'hsv(0, 0%, 0%, 0)',
-        labCSSString: 'lab(0, 0, 0, 0)',
-        rgbCSSString: 'rgb(0, 0, 0, 1)',
-        xyzCSSString: 'xyz(0, 0, 0, 0)'
-    }
-};
-const unbrandedStored = {
-    tableID: 1,
-    palette: unbrandedData
-};
-const palette$1 = {
-    unbranded: {
-        data: unbrandedData,
-        item: unbrandedItem,
-        stored: unbrandedStored
-    }
-};
-const defaults = {
-    colors,
-    idb: idb$1,
-    palette: palette$1
-};
-
-class AppLogger {
-    static instance = null;
-    mode;
-    constructor(mode) {
-        this.mode = mode;
-    }
-    static getInstance(mode) {
-        if (!AppLogger.instance) {
-            AppLogger.instance = new AppLogger(mode);
-        }
-        return AppLogger.instance;
-    }
-    log(message, level = 'info', debugLevel = 0, caller) {
-        this.logMessage(message, level, debugLevel, caller);
-    }
-    async logAsync(message, level = 'info', debugLevel = 0, caller) {
-        await this.logMessage(message, level, debugLevel, caller);
-    }
-    logMutation(data, logCallback = () => { }) {
-        this.log(this.formatMutationLog(data), 'info');
-        logCallback(data);
-    }
-    logMessage(message, level, debugLevel, caller) {
-        if ((level === 'info' && this.mode.quiet) ||
-            debugLevel < this.getDebugThreshold(level)) {
-            return;
-        }
-        const callerInfo = caller || this.getCallerInfo();
-        const timestamp = this.getFormattedTimestamp();
-        try {
-            console.log(`%c[${level.toUpperCase()}]%c ${timestamp} [${callerInfo}] %c${message}`, this.getLevelColor(level), 'color: gray', 'color: inherit');
-        }
-        catch (error) {
-            console.error(`AppLogger encountered an unexpected error: ${error}`);
-        }
-        if (callerInfo === 'Unknown caller' &&
-            debugLevel > 1 &&
-            this.mode.stackTrace) {
-            console.trace('Full Stack Trace:');
-        }
-    }
-    formatMutationLog(data) {
-        return `Mutation logged: ${JSON.stringify(data)}`;
-    }
-    getDebugThreshold(level) {
-        switch (level) {
-            case 'debug':
-                return 2;
-            case 'info':
-                return 1;
-            case 'warn':
-                return 0;
-            case 'error':
-                return 0;
-            default:
-                return 0;
-        }
-    }
-    getCallerInfo() {
-        const stack = new Error().stack;
-        if (stack) {
-            const stackLines = stack.split('\n');
-            for (const line of stackLines) {
-                if (!line.includes('AppLogger') && line.includes('at ')) {
-                    const match = line.match(/at\s+(.*)\s+\((.*):(\d+):(\d+)\)/) ||
-                        line.match(/at\s+(.*):(\d+):(\d+)/);
-                    if (match) {
-                        return match[1]
-                            ? `${match[1]} (${match[2]}:${match[3]})`
-                            : `${match[2]}:${match[3]}`;
-                    }
-                }
-            }
-        }
-        return 'Unknown caller';
-    }
-    getFormattedTimestamp() {
-        return new Date().toLocaleString('en-US', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
-        });
-    }
-    getLevelColor(level) {
-        switch (level) {
-            case 'debug':
-                return 'color: green';
-            case 'info':
-                return 'color: blue';
-            case 'warn':
-                return 'color: orange';
-            case 'error':
-                return 'color: red';
-            default:
-                return 'color: black';
-        }
-    }
-}
-
-// File: src/logger/factory.ts
-const createLogger = async () => {
-    const debugLevel = mode.debugLevel;
-    const appLogger = AppLogger.getInstance(mode);
-    return {
-        debug: (message, caller) => appLogger.log(message, 'debug', debugLevel, caller),
-        info: (message, caller) => appLogger.log(message, 'info', debugLevel, caller),
-        warn: (message, caller) => appLogger.log(message, 'warn', debugLevel, caller),
-        error: (message, caller) => appLogger.log(message, 'error', debugLevel, caller),
-        mutation: (data, logCallback, caller) => {
-            appLogger.logMutation(data, logCallback);
-            if (caller) {
-                appLogger.log(`Mutation logged by ${caller}`, 'debug', debugLevel);
-            }
-        }
-    };
-};
-
 const instanceOfAny = (object, constructors) => constructors.some((c) => object instanceof c);
 
 let idbProxyableTypes;
@@ -1884,22 +288,112 @@ replaceTraps((oldTraps) => ({
     },
 }));
 
-// File: src/db/initialize.ts
-const dbConfig = config.db;
-async function initializeDB() {
-    return openDB('paletteDB', 1, {
-        upgrade: db => {
-            const storeNames = Object.values(dbConfig.STORE_NAMES);
-            storeNames.forEach(storeName => {
-                if (!db.objectStoreNames.contains(storeName)) {
-                    db.createObjectStore(storeName, { keyPath: 'key' });
-                }
-            });
+// File: logger/AppLogger.js
+class AppLogger {
+    static instance = null;
+    mode;
+    constructor(mode) {
+        this.mode = mode;
+    }
+    static getInstance(mode) {
+        if (!AppLogger.instance) {
+            AppLogger.instance = new AppLogger(mode);
         }
-    });
+        return AppLogger.instance;
+    }
+    log(message, level = 'info', debugLevel = 0, caller) {
+        this.logMessage(message, level, debugLevel, caller);
+    }
+    async logAsync(message, level = 'info', debugLevel = 0, caller) {
+        this.logMessage(message, level, debugLevel, caller);
+    }
+    logMutation(data, logCallback = () => { }) {
+        this.log(this.formatMutationLog(data), 'info');
+        logCallback(data);
+    }
+    logMessage(message, level, debugLevel, caller) {
+        if ((level === 'info' && this.mode.quiet) ||
+            debugLevel < this.getDebugThreshold(level)) {
+            return;
+        }
+        const callerInfo = caller || this.getCallerInfo();
+        const timestamp = this.getFormattedTimestamp();
+        try {
+            console.log(`%c[${level.toUpperCase()}]%c ${timestamp} [${callerInfo}] %c${message}`, this.getLevelColor(level), 'color: gray', 'color: inherit');
+        }
+        catch (error) {
+            console.error(`AppLogger encountered an unexpected error: ${error}`);
+        }
+        if (callerInfo === 'Unknown caller' &&
+            debugLevel > 1 &&
+            this.mode.stackTrace) {
+            console.trace('Full Stack Trace:');
+        }
+    }
+    formatMutationLog(data) {
+        return `Mutation logged: ${JSON.stringify(data)}`;
+    }
+    getDebugThreshold(level) {
+        switch (level) {
+            case 'debug':
+                return 2;
+            case 'info':
+                return 1;
+            case 'warn':
+                return 0;
+            case 'error':
+                return 0;
+            default:
+                return 0;
+        }
+    }
+    getCallerInfo() {
+        const stack = new Error().stack;
+        if (stack) {
+            const stackLines = stack.split('\n');
+            for (const line of stackLines) {
+                if (!line.includes('AppLogger') && line.includes('at ')) {
+                    const match = line.match(/at\s+(.*)\s+\((.*):(\d+):(\d+)\)/) ||
+                        line.match(/at\s+(.*):(\d+):(\d+)/);
+                    if (match) {
+                        return match[1]
+                            ? `${match[1]} (${match[2]}:${match[3]})`
+                            : `${match[2]}:${match[3]}`;
+                    }
+                }
+            }
+        }
+        return 'Unknown caller';
+    }
+    getFormattedTimestamp() {
+        return new Date().toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+    }
+    getLevelColor(level) {
+        switch (level) {
+            case 'debug':
+                return 'color: green';
+            case 'info':
+                return 'color: blue';
+            case 'warn':
+                return 'color: orange';
+            case 'error':
+                return 'color: red';
+            default:
+                return 'color: black';
+        }
+    }
 }
 
-// File: src/classes/mutations/MutationTracker
+// File: db/mutations/MutationTracker.js
+const thisModule$q = 'db/mutations/MutationTracker.js';
 class MutationTracker {
     static instance;
     appLogger;
@@ -1917,9 +411,10 @@ class MutationTracker {
         return MutationTracker.instance;
     }
     async persistMutation(data) {
+        const caller = 'persistMutation()';
         const db = await this.getDB();
         await db.put('mutations', data);
-        this.appLogger.log(`Persisted mutation: ${JSON.stringify(data)}`, 'info', this.mode.debugLevel, 'MutationTracker.persistMutation()');
+        this.appLogger.log(`Persisted mutation: ${JSON.stringify(data)}`, 'info', this.mode.debugLevel, `${thisModule$q} > ${caller}`);
     }
     async getDB() {
         return openDB('paletteDB', 1, {
@@ -1935,33 +430,1280 @@ class MutationTracker {
     }
 }
 
-// File: src/db/storeUtils.ts
-async function withStore(db, storeName, mode, callback) {
-    const tx = db.transaction(storeName, mode);
-    const store = tx.objectStore(storeName);
-    callback(store);
-    await tx.done;
-}
-const storeUtils = {
-    withStore
+// File: src/data/config.js
+const DEFAULT_KEYS = {
+    APP_SETTINGS: 'appSettings',
+    CUSTOM_COLOR: 'customColor'
+};
+const DEFAULT_SETTINGS = {
+    colorSpace: 'hsl',
+    lastTableID: 0,
+    theme: 'light',
+    loggingEnabled: true
+};
+const STORE_NAMES = {
+    APP_SETTINGS: 'appSettings',
+    CUSTOM_COLOR: 'customColor',
+    MUTATIONS: 'mutations',
+    PALLETES: 'palettes',
+    SETTINGS: 'settings',
+    TABLES: 'tables'
+};
+const db = { DEFAULT_KEYS, DEFAULT_SETTINGS, STORE_NAMES };
+const regex$3 = {
+    colors: {
+        cmyk: /cmyk\((\d+)%?,\s*(\d+)%?,\s*(\d+)%?,\s*(\d+)%?(?:,\s*([\d.]+))?\)/i,
+        hex: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/,
+        hsl: /hsl\(([\d.]+),\s*([\d.]+)%?,\s*([\d.]+)%?(?:,\s*([\d.]+))?\)/i,
+        hsv: /hsv\(([\d.]+),\s*([\d.]+)%?,\s*([\d.]+)%?(?:,\s*([\d.]+))?\)/i,
+        lab: /lab\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i,
+        rgb: /rgb\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i,
+        xyz: /xyz\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i
+    },
+    file: {
+        palette: {
+            css: {
+                color: /\.color-\d+\s*{\s*([\s\S]*?)\s*}/i,
+                metadata: /\.palette\s*{\s*([\s\S]*?)\s*}/i
+            }
+        }
+    }
+};
+const configData = { db, regex: regex$3 };
+
+// File: data/mode.js
+const modeData = {
+    environment: 'dev',
+    debug: true,
+    debugLevel: 1,
+    expose: { idbManager: true, logger: true, uiManager: true },
+    gracefulErrors: false,
+    logging: {
+        args: true,
+        clicks: false,
+        debug: true,
+        error: true,
+        info: true,
+        verbosity: 3,
+        warn: true
+    },
+    quiet: false,
+    showAlerts: true,
+    stackTrace: true
 };
 
-// File: src/common/core/index.js
-const core = {
-    base: base$3,
+// File: logger/factory.js
+const createLogger = async () => {
+    const debugLevel = modeData.debugLevel;
+    const appLogger = AppLogger.getInstance(modeData);
+    return {
+        debug: (message, caller) => appLogger.log(message, 'debug', debugLevel, caller),
+        info: (message, caller) => appLogger.log(message, 'info', debugLevel, caller),
+        warn: (message, caller) => appLogger.log(message, 'warn', debugLevel, caller),
+        error: (message, caller) => appLogger.log(message, 'error', debugLevel, caller),
+        mutation: (data, logCallback, caller) => {
+            appLogger.logMutation(data, logCallback);
+            if (caller) {
+                appLogger.log(`Mutation logged by ${caller}`, 'debug', debugLevel);
+            }
+        }
+    };
+};
+
+// File: data/sets.js
+const dataSets = {
+    AlphaRange: [0, 1],
+    ByteRange: [0, 255],
+    HexComponent: 'HexComponent',
+    HexSet: 'HexSet',
+    LAB_L: [0, 100],
+    LAB_A: [-128, 127],
+    LAB_B: [-128, 127],
+    Percentile: [0, 100],
+    Radial: [0, 360],
+    XYZ_X: [0, 95.047],
+    XYZ_Y: [0, 100],
+    XYZ_Z: [0, 108.883]
+};
+
+// File: common/core.js
+const _sets = dataSets;
+// ******** SECTION 0 - Brand ********
+function asAlphaRange(value) {
+    validate$1.range(value, 'AlphaRange');
+    return value;
+}
+function asBranded(value, rangeKey) {
+    validate$1.range(value, rangeKey);
+    return value;
+}
+function asByteRange(value) {
+    validate$1.range(value, 'ByteRange');
+    return value;
+}
+function asHexComponent(value) {
+    if (!validate$1.hexComponent(value)) {
+        throw new Error(`Invalid HexComponent value: ${value}`);
+    }
+    return value;
+}
+function asHexSet(value) {
+    if (/^#[0-9a-fA-F]{8}$/.test(value)) {
+        value = value.slice(0, 7);
+    }
+    if (!validate$1.hexSet(value)) {
+        throw new Error(`Invalid HexSet value: ${value}`);
+    }
+    return value;
+}
+function asLAB_L(value) {
+    validate$1.range(value, 'LAB_L');
+    return value;
+}
+function asLAB_A(value) {
+    validate$1.range(value, 'LAB_A');
+    return value;
+}
+function asLAB_B(value) {
+    validate$1.range(value, 'LAB_B');
+    return value;
+}
+function asPercentile(value) {
+    validate$1.range(value, 'Percentile');
+    return value;
+}
+function asRadial(value) {
+    validate$1.range(value, 'Radial');
+    return value;
+}
+function asXYZ_X(value) {
+    validate$1.range(value, 'XYZ_X');
+    return value;
+}
+function asXYZ_Y(value) {
+    validate$1.range(value, 'XYZ_Y');
+    return value;
+}
+function asXYZ_Z(value) {
+    validate$1.range(value, 'XYZ_Z');
+    return value;
+}
+const brand$3 = {
+    asAlphaRange,
+    asBranded,
+    asByteRange,
+    asHexComponent,
+    asHexSet,
+    asLAB_L,
+    asLAB_A,
+    asLAB_B,
+    asPercentile,
+    asRadial,
+    asXYZ_X,
+    asXYZ_Y,
+    asXYZ_Z
+};
+// ******** SECTION 1 ********
+function initializeDefaultColors() {
+    return {
+        cmyk: {
+            value: {
+                cyan: brand$3.asPercentile(0),
+                magenta: brand$3.asPercentile(0),
+                yellow: brand$3.asPercentile(0),
+                key: brand$3.asPercentile(0),
+                alpha: brand$3.asAlphaRange(1)
+            },
+            format: 'cmyk'
+        },
+        hex: {
+            value: {
+                hex: brand$3.asHexSet('#000000'),
+                alpha: brand$3.asHexComponent('FF'),
+                numAlpha: brand$3.asAlphaRange(1)
+            },
+            format: 'hex'
+        },
+        hsl: {
+            value: {
+                hue: brand$3.asRadial(0),
+                saturation: brand$3.asPercentile(0),
+                lightness: brand$3.asPercentile(0),
+                alpha: brand$3.asAlphaRange(1)
+            },
+            format: 'hsl'
+        },
+        hsv: {
+            value: {
+                hue: brand$3.asRadial(0),
+                saturation: brand$3.asPercentile(0),
+                value: brand$3.asPercentile(0),
+                alpha: brand$3.asAlphaRange(1)
+            },
+            format: 'hsv'
+        },
+        lab: {
+            value: {
+                l: brand$3.asLAB_L(0),
+                a: brand$3.asLAB_A(0),
+                b: brand$3.asLAB_B(0),
+                alpha: brand$3.asAlphaRange(1)
+            },
+            format: 'lab'
+        },
+        rgb: {
+            value: {
+                red: brand$3.asByteRange(0),
+                green: brand$3.asByteRange(0),
+                blue: brand$3.asByteRange(0),
+                alpha: brand$3.asAlphaRange(1)
+            },
+            format: 'rgb'
+        },
+        sl: {
+            value: {
+                saturation: brand$3.asPercentile(0),
+                lightness: brand$3.asPercentile(0),
+                alpha: brand$3.asAlphaRange(1)
+            },
+            format: 'sl'
+        },
+        sv: {
+            value: {
+                saturation: brand$3.asPercentile(0),
+                value: brand$3.asPercentile(0),
+                alpha: brand$3.asAlphaRange(1)
+            },
+            format: 'sv'
+        },
+        xyz: {
+            value: {
+                x: brand$3.asXYZ_X(0),
+                y: brand$3.asXYZ_Y(0),
+                z: brand$3.asXYZ_Z(0),
+                alpha: brand$3.asAlphaRange(1)
+            },
+            format: 'xyz'
+        }
+    };
+}
+// ******** SECTION 1 ********
+function clampToRange(value, rangeKey) {
+    const [min, max] = _sets[rangeKey];
+    return Math.min(Math.max(value, min), max);
+}
+function clone(value) {
+    return structuredClone(value);
+}
+function debounce$1(func, delay) {
+    let timeout = null;
+    return (...args) => {
+        if (timeout)
+            clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            func(...args);
+        }, delay);
+    };
+}
+function parseCustomColor(rawValue) {
+    try {
+        const match = rawValue.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?,\s*(\d*\.?\d+)\)/);
+        if (match) {
+            const [, hue, saturation, lightness, alpha] = match;
+            return {
+                value: {
+                    hue: brand$3.asRadial(parseInt(hue)),
+                    saturation: brand$3.asPercentile(parseInt(saturation)),
+                    lightness: brand$3.asPercentile(parseInt(lightness)),
+                    alpha: brand$3.asAlphaRange(parseFloat(alpha))
+                },
+                format: 'hsl'
+            };
+        }
+        else {
+            console.error('Invalid HSL custom color. Expected format: hsl(H, S%, L%, A)\ncaller: parseCustomColor()');
+            return null;
+        }
+    }
+    catch (error) {
+        console.error(`parseCustomColor error: ${error}`);
+        return null;
+    }
+}
+const base$2 = {
+    clampToRange,
+    clone,
+    debounce: debounce$1,
+    parseCustomColor
+};
+// ******** SECTION 2 - Brand Color ********
+function asCMYK(color) {
+    const brandedCyan = brand$3.asPercentile(color.value.cyan);
+    const brandedMagenta = brand$3.asPercentile(color.value.magenta);
+    const brandedYellow = brand$3.asPercentile(color.value.yellow);
+    const brandedKey = brand$3.asPercentile(color.value.key);
+    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
+    return {
+        value: {
+            cyan: brandedCyan,
+            magenta: brandedMagenta,
+            yellow: brandedYellow,
+            key: brandedKey,
+            alpha: brandedAlpha
+        },
+        format: 'cmyk'
+    };
+}
+function asHex(color) {
+    let hex = color.value.hex;
+    if (!hex.startsWith('#'))
+        hex = `#${hex}`;
+    if (!/^#[0-9A-Fa-f]{8}$/.test(hex))
+        throw new Error(`Invalid Hex color format: ${hex}`);
+    const hexMain = hex.slice(0, 7);
+    const alpha = hex.slice(7, 9);
+    const brandedHex = brand$3.asHexSet(hexMain);
+    const brandedHexAlpha = brand$3.asHexComponent(alpha);
+    const brandedNumAlpha = brand$3.asAlphaRange(color.value.numAlpha);
+    return {
+        value: {
+            hex: brandedHex,
+            alpha: brandedHexAlpha,
+            numAlpha: brandedNumAlpha
+        },
+        format: 'hex'
+    };
+}
+function asHSL(color) {
+    const brandedHue = brand$3.asRadial(color.value.hue);
+    const brandedSaturation = brand$3.asPercentile(color.value.saturation);
+    const brandedLightness = brand$3.asPercentile(color.value.lightness);
+    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
+    return {
+        value: {
+            hue: brandedHue,
+            saturation: brandedSaturation,
+            lightness: brandedLightness,
+            alpha: brandedAlpha
+        },
+        format: 'hsl'
+    };
+}
+function asHSV(color) {
+    const brandedHue = brand$3.asRadial(color.value.hue);
+    const brandedSaturation = brand$3.asPercentile(color.value.saturation);
+    const brandedValue = brand$3.asPercentile(color.value.value);
+    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
+    return {
+        value: {
+            hue: brandedHue,
+            saturation: brandedSaturation,
+            value: brandedValue,
+            alpha: brandedAlpha
+        },
+        format: 'hsv'
+    };
+}
+function asLAB(color) {
+    const brandedL = brand$3.asLAB_L(color.value.l);
+    const brandedA = brand$3.asLAB_A(color.value.a);
+    const brandedB = brand$3.asLAB_B(color.value.b);
+    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
+    return {
+        value: {
+            l: brandedL,
+            a: brandedA,
+            b: brandedB,
+            alpha: brandedAlpha
+        },
+        format: 'lab'
+    };
+}
+function asRGB(color) {
+    const brandedRed = brand$3.asByteRange(color.value.red);
+    const brandedGreen = brand$3.asByteRange(color.value.green);
+    const brandedBlue = brand$3.asByteRange(color.value.blue);
+    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
+    return {
+        value: {
+            red: brandedRed,
+            green: brandedGreen,
+            blue: brandedBlue,
+            alpha: brandedAlpha
+        },
+        format: 'rgb'
+    };
+}
+function asSL(color) {
+    const brandedSaturation = brand$3.asPercentile(color.value.saturation);
+    const brandedLightness = brand$3.asPercentile(color.value.lightness);
+    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
+    return {
+        value: {
+            saturation: brandedSaturation,
+            lightness: brandedLightness,
+            alpha: brandedAlpha
+        },
+        format: 'sl'
+    };
+}
+function asSV(color) {
+    const brandedSaturation = brand$3.asPercentile(color.value.saturation);
+    const brandedValue = brand$3.asPercentile(color.value.value);
+    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
+    return {
+        value: {
+            saturation: brandedSaturation,
+            value: brandedValue,
+            alpha: brandedAlpha
+        },
+        format: 'sv'
+    };
+}
+function asXYZ(color) {
+    const brandedX = brand$3.asXYZ_X(color.value.x);
+    const brandedY = brand$3.asXYZ_Y(color.value.y);
+    const brandedZ = brand$3.asXYZ_Z(color.value.z);
+    const brandedAlpha = brand$3.asAlphaRange(color.value.alpha);
+    return {
+        value: {
+            x: brandedX,
+            y: brandedY,
+            z: brandedZ,
+            alpha: brandedAlpha
+        },
+        format: 'xyz'
+    };
+}
+const brandColor = {
+    asCMYK,
+    asHex,
+    asHSL,
+    asHSV,
+    asLAB,
+    asRGB,
+    asSL,
+    asSV,
+    asXYZ
+};
+// ******** SECTION 3 - Convert ********
+function cmykStringToValue(cmyk) {
+    return {
+        cyan: brand$3.asPercentile(parseFloat(cmyk.cyan) / 100),
+        magenta: brand$3.asPercentile(parseFloat(cmyk.magenta) / 100),
+        yellow: brand$3.asPercentile(parseFloat(cmyk.yellow) / 100),
+        key: brand$3.asPercentile(parseFloat(cmyk.key) / 100),
+        alpha: brand$3.asAlphaRange(parseFloat(cmyk.alpha))
+    };
+}
+function cmykValueToString(cmyk) {
+    return {
+        cyan: `${cmyk.cyan * 100}%`,
+        magenta: `${cmyk.magenta * 100}%`,
+        yellow: `${cmyk.yellow * 100}%`,
+        key: `${cmyk.key * 100}%`,
+        alpha: `${cmyk.alpha}`
+    };
+}
+async function colorStringToColor(colorString) {
+    const clonedColor = clone(colorString);
+    const parseValue = (value) => typeof value === 'string' && value.endsWith('%')
+        ? parseFloat(value.slice(0, -1))
+        : Number(value);
+    const newValue = Object.entries(clonedColor.value).reduce((acc, [key, val]) => {
+        acc[key] = parseValue(val);
+        return acc;
+    }, {});
+    switch (clonedColor.format) {
+        case 'cmyk':
+            return { format: 'cmyk', value: newValue };
+        case 'hsl':
+            return { format: 'hsl', value: newValue };
+        case 'hsv':
+            return { format: 'hsv', value: newValue };
+        case 'sl':
+            return { format: 'sl', value: newValue };
+        case 'sv':
+            return { format: 'sv', value: newValue };
+        default:
+            console.error('Unsupported format for colorStringToColor');
+            const defaultColors = initializeDefaultColors();
+            const unbrandedHSL = defaultColors.hsl;
+            const brandedHue = brand$3.asRadial(unbrandedHSL.value.hue);
+            const brandedSaturation = brand$3.asPercentile(unbrandedHSL.value.saturation);
+            const brandedLightness = brand$3.asPercentile(unbrandedHSL.value.lightness);
+            const brandedAlpha = brand$3.asAlphaRange(unbrandedHSL.value.alpha);
+            return {
+                value: {
+                    hue: brandedHue,
+                    saturation: brandedSaturation,
+                    lightness: brandedLightness,
+                    alpha: brandedAlpha
+                },
+                format: 'hsl'
+            };
+    }
+}
+async function colorToCSSColorString(color) {
+    try {
+        switch (color.format) {
+            case 'cmyk':
+                return `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key}, ${color.value.alpha})`;
+            case 'hex':
+                return String(color.value.hex);
+            case 'hsl':
+                return `hsl(${color.value.hue}, ${color.value.saturation}%, ${color.value.lightness}%, ${color.value.alpha})`;
+            case 'hsv':
+                return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%, ${color.value.alpha})`;
+            case 'lab':
+                return `lab(${color.value.l}, ${color.value.a}, ${color.value.b}, ${color.value.alpha})`;
+            case 'rgb':
+                return `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue}, ${color.value.alpha})`;
+            case 'xyz':
+                return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z}, ${color.value.alpha})`;
+            default:
+                console.error(`Unexpected color format: ${color.format}`);
+                return '#FFFFFFFF';
+        }
+    }
+    catch (error) {
+        throw new Error(`getCSSColorString error: ${error}`);
+    }
+}
+function hexAlphaToNumericAlpha$1(hexAlpha) {
+    return parseInt(hexAlpha, 16) / 255;
+}
+function hexStringToValue(hex) {
+    return {
+        hex: brand$3.asHexSet(hex.hex),
+        alpha: brand$3.asHexComponent(hex.alpha),
+        numAlpha: brand$3.asAlphaRange(parseFloat(hex.numAlpha))
+    };
+}
+function hexValueToString(hex) {
+    return {
+        hex: hex.hex,
+        alpha: `${hex.alpha}`,
+        numAlpha: `${hex.numAlpha}`
+    };
+}
+function hslStringToValue(hsl) {
+    return {
+        hue: brand$3.asRadial(parseFloat(hsl.hue)),
+        saturation: brand$3.asPercentile(parseFloat(hsl.saturation) / 100),
+        lightness: brand$3.asPercentile(parseFloat(hsl.lightness) / 100),
+        alpha: brand$3.asAlphaRange(parseFloat(hsl.alpha))
+    };
+}
+function hslValueToString(hsl) {
+    return {
+        hue: `${hsl.hue}°`,
+        saturation: `${hsl.saturation * 100}%`,
+        lightness: `${hsl.lightness * 100}%`,
+        alpha: `${hsl.alpha}`
+    };
+}
+function hsvStringToValue(hsv) {
+    return {
+        hue: brand$3.asRadial(parseFloat(hsv.hue)),
+        saturation: brand$3.asPercentile(parseFloat(hsv.saturation) / 100),
+        value: brand$3.asPercentile(parseFloat(hsv.value) / 100),
+        alpha: brand$3.asAlphaRange(parseFloat(hsv.alpha))
+    };
+}
+function hsvValueToString(hsv) {
+    return {
+        hue: `${hsv.hue}°`,
+        saturation: `${hsv.saturation * 100}%`,
+        value: `${hsv.value * 100}%`,
+        alpha: `${hsv.alpha}`
+    };
+}
+function labValueToString(lab) {
+    return {
+        l: `${lab.l}`,
+        a: `${lab.a}`,
+        b: `${lab.b}`,
+        alpha: `${lab.alpha}`
+    };
+}
+function labStringToValue(lab) {
+    return {
+        l: brand$3.asLAB_L(parseFloat(lab.l)),
+        a: brand$3.asLAB_A(parseFloat(lab.a)),
+        b: brand$3.asLAB_B(parseFloat(lab.b)),
+        alpha: brand$3.asAlphaRange(parseFloat(lab.alpha))
+    };
+}
+function rgbValueToString(rgb) {
+    return {
+        red: `${rgb.red}`,
+        green: `${rgb.green}`,
+        blue: `${rgb.blue}`,
+        alpha: `${rgb.alpha}`
+    };
+}
+function rgbStringToValue(rgb) {
+    return {
+        red: brand$3.asByteRange(parseFloat(rgb.red)),
+        green: brand$3.asByteRange(parseFloat(rgb.green)),
+        blue: brand$3.asByteRange(parseFloat(rgb.blue)),
+        alpha: brand$3.asAlphaRange(parseFloat(rgb.alpha))
+    };
+}
+function toColorValueRange(value, rangeKey) {
+    validate$1.range(value, rangeKey);
+    if (rangeKey === 'HexSet') {
+        return brand$3.asHexSet(value);
+    }
+    if (rangeKey === 'HexComponent') {
+        return brand$3.asHexComponent(value);
+    }
+    return brand$3.asBranded(value, rangeKey);
+}
+function xyzValueToString(xyz) {
+    return {
+        x: `${xyz.x}`,
+        y: `${xyz.y}`,
+        z: `${xyz.z}`,
+        alpha: `${xyz.alpha}`
+    };
+}
+function xyzStringToValue(xyz) {
+    return {
+        x: brand$3.asXYZ_X(parseFloat(xyz.x)),
+        y: brand$3.asXYZ_Y(parseFloat(xyz.y)),
+        z: brand$3.asXYZ_Z(parseFloat(xyz.z)),
+        alpha: brand$3.asAlphaRange(parseFloat(xyz.alpha))
+    };
+}
+const stringToValue = {
+    cmyk: cmykStringToValue,
+    hex: hexStringToValue,
+    hsl: hslStringToValue,
+    hsv: hsvStringToValue,
+    lab: labStringToValue,
+    rgb: rgbStringToValue,
+    xyz: xyzStringToValue
+};
+const valueToString = {
+    cmyk: cmykValueToString,
+    hex: hexValueToString,
+    hsl: hslValueToString,
+    hsv: hsvValueToString,
+    lab: labValueToString,
+    rgb: rgbValueToString,
+    xyz: xyzValueToString
+};
+const convert = {
+    colorStringToColor,
+    hexAlphaToNumericAlpha: hexAlphaToNumericAlpha$1,
+    stringToValue,
+    toColorValueRange,
+    colorToCSSColorString,
+    valueToString
+};
+// ******** SECTION 4 - Guards ********
+function isColor(value) {
+    if (typeof value !== 'object' || value === null)
+        return false;
+    const color = value;
+    const validFormats = [
+        'cmyk',
+        'hex',
+        'hsl',
+        'hsv',
+        'lab',
+        'rgb',
+        'sl',
+        'sv',
+        'xyz'
+    ];
+    return ('value' in color &&
+        'format' in color &&
+        validFormats.includes(color.format));
+}
+function isColorSpace$1(value) {
+    const validColorSpaces = [
+        'cmyk',
+        'hex',
+        'hsl',
+        'hsv',
+        'lab',
+        'rgb',
+        'xyz'
+    ];
+    return (typeof value === 'string' &&
+        validColorSpaces.includes(value));
+}
+function isColorString$1(value) {
+    if (typeof value !== 'object' || value === null)
+        return false;
+    const colorString = value;
+    const validStringFormats = [
+        'cmyk',
+        'hsl',
+        'hsv',
+        'sl',
+        'sv'
+    ];
+    return ('value' in colorString &&
+        'format' in colorString &&
+        validStringFormats.includes(colorString.format));
+}
+function isInRange(value, rangeKey) {
+    if (rangeKey === 'HexSet') {
+        return validate$1.hexSet(value);
+    }
+    if (rangeKey === 'HexComponent') {
+        return validate$1.hexComponent(value);
+    }
+    if (typeof value === 'number' && Array.isArray(_sets[rangeKey])) {
+        const [min, max] = _sets[rangeKey];
+        return value >= min && value <= max;
+    }
+    throw new Error(`Invalid range or value for ${String(rangeKey)}`);
+}
+const guards = {
+    isColor,
+    isColorSpace: isColorSpace$1,
+    isColorString: isColorString$1,
+    isInRange
+};
+// ******** SECTION 5 - Sanitize ********
+function lab(value, output) {
+    if (output === 'l') {
+        return brand$3.asLAB_L(Math.round(Math.min(Math.max(value, 0), 100)));
+    }
+    else if (output === 'a') {
+        return brand$3.asLAB_A(Math.round(Math.min(Math.max(value, -125), 125)));
+    }
+    else if (output === 'b') {
+        return brand$3.asLAB_B(Math.round(Math.min(Math.max(value, -125), 125)));
+    }
+    else
+        throw new Error('Unable to return LAB value');
+}
+function percentile(value) {
+    const rawPercentile = Math.round(Math.min(Math.max(value, 0), 100));
+    return brand$3.asPercentile(rawPercentile);
+}
+function radial(value) {
+    const rawRadial = Math.round(Math.min(Math.max(value, 0), 360)) & 360;
+    return brand$3.asRadial(rawRadial);
+}
+function rgb(value) {
+    const rawByteRange = Math.round(Math.min(Math.max(value, 0), 255));
+    return toColorValueRange(rawByteRange, 'ByteRange');
+}
+const sanitize = {
+    lab,
+    percentile,
+    radial,
+    rgb
+};
+// ******** SECTION 5.1 - Validate *********
+function colorValues(color) {
+    const clonedColor = clone(color);
+    const isNumericValid = (value) => typeof value === 'number' && !isNaN(value);
+    const normalizePercentage = (value) => {
+        if (typeof value === 'string' && value.endsWith('%')) {
+            return parseFloat(value.slice(0, -1));
+        }
+        return typeof value === 'number' ? value : NaN;
+    };
+    switch (clonedColor.format) {
+        case 'cmyk':
+            return ([
+                clonedColor.value.cyan,
+                clonedColor.value.magenta,
+                clonedColor.value.yellow,
+                clonedColor.value.key
+            ].every(isNumericValid) &&
+                clonedColor.value.cyan >= 0 &&
+                clonedColor.value.cyan <= 100 &&
+                clonedColor.value.magenta >= 0 &&
+                clonedColor.value.magenta <= 100 &&
+                clonedColor.value.yellow >= 0 &&
+                clonedColor.value.yellow <= 100 &&
+                clonedColor.value.key >= 0 &&
+                clonedColor.value.key <= 100);
+        case 'hex':
+            return /^#[0-9A-Fa-f]{6}$/.test(clonedColor.value.hex);
+        case 'hsl':
+            const isValidHSLHue = isNumericValid(clonedColor.value.hue) &&
+                clonedColor.value.hue >= 0 &&
+                clonedColor.value.hue <= 360;
+            const isValidHSLSaturation = normalizePercentage(clonedColor.value.saturation) >= 0 &&
+                normalizePercentage(clonedColor.value.saturation) <= 100;
+            const isValidHSLLightness = clonedColor.value.lightness
+                ? normalizePercentage(clonedColor.value.lightness) >= 0 &&
+                    normalizePercentage(clonedColor.value.lightness) <= 100
+                : true;
+            return isValidHSLHue && isValidHSLSaturation && isValidHSLLightness;
+        case 'hsv':
+            const isValidHSVHue = isNumericValid(clonedColor.value.hue) &&
+                clonedColor.value.hue >= 0 &&
+                clonedColor.value.hue <= 360;
+            const isValidHSVSaturation = normalizePercentage(clonedColor.value.saturation) >= 0 &&
+                normalizePercentage(clonedColor.value.saturation) <= 100;
+            const isValidHSVValue = clonedColor.value.value
+                ? normalizePercentage(clonedColor.value.value) >= 0 &&
+                    normalizePercentage(clonedColor.value.value) <= 100
+                : true;
+            return isValidHSVHue && isValidHSVSaturation && isValidHSVValue;
+        case 'lab':
+            return ([
+                clonedColor.value.l,
+                clonedColor.value.a,
+                clonedColor.value.b
+            ].every(isNumericValid) &&
+                clonedColor.value.l >= 0 &&
+                clonedColor.value.l <= 100 &&
+                clonedColor.value.a >= -125 &&
+                clonedColor.value.a <= 125 &&
+                clonedColor.value.b >= -125 &&
+                clonedColor.value.b <= 125);
+        case 'rgb':
+            return ([
+                clonedColor.value.red,
+                clonedColor.value.green,
+                clonedColor.value.blue
+            ].every(isNumericValid) &&
+                clonedColor.value.red >= 0 &&
+                clonedColor.value.red <= 255 &&
+                clonedColor.value.green >= 0 &&
+                clonedColor.value.green <= 255 &&
+                clonedColor.value.blue >= 0 &&
+                clonedColor.value.blue <= 255);
+        case 'sl':
+            return ([
+                clonedColor.value.saturation,
+                clonedColor.value.lightness
+            ].every(isNumericValid) &&
+                clonedColor.value.saturation >= 0 &&
+                clonedColor.value.saturation <= 100 &&
+                clonedColor.value.lightness >= 0 &&
+                clonedColor.value.lightness <= 100);
+        case 'sv':
+            return ([clonedColor.value.saturation, clonedColor.value.value].every(isNumericValid) &&
+                clonedColor.value.saturation >= 0 &&
+                clonedColor.value.saturation <= 100 &&
+                clonedColor.value.value >= 0 &&
+                clonedColor.value.value <= 100);
+        case 'xyz':
+            return ([
+                clonedColor.value.x,
+                clonedColor.value.y,
+                clonedColor.value.z
+            ].every(isNumericValid) &&
+                clonedColor.value.x >= 0 &&
+                clonedColor.value.x <= 95.047 &&
+                clonedColor.value.y >= 0 &&
+                clonedColor.value.y <= 100.0 &&
+                clonedColor.value.z >= 0 &&
+                clonedColor.value.z <= 108.883);
+        default:
+            console.error(`Unsupported color format: ${color.format}`);
+            return false;
+    }
+}
+function hex(value, pattern) {
+    return pattern.test(value);
+}
+function hexComponent(value) {
+    return hex(value, /^[A-Fa-f0-9]{2}$/);
+}
+function hexSet(value) {
+    return /^#[0-9a-fA-F]{6}$/.test(value);
+}
+function range(value, rangeKey) {
+    if (!isInRange(value, rangeKey)) {
+        if (rangeKey === 'HexSet' || rangeKey === 'HexComponent') {
+            throw new Error(`Invalid value for ${String(rangeKey)}: ${value}`);
+        }
+        const [min, max] = _sets[rangeKey];
+        throw new Error(`Value ${value} is out of range for ${String(rangeKey)} [${min}, ${max}]`);
+    }
+}
+const validate$1 = {
+    colorValues,
+    hex,
+    hexComponent,
+    hexSet,
+    range
+};
+// ******** SECTION 6 - Other ********
+function getFormattedTimestamp$1() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+const other = { getFormattedTimestamp: getFormattedTimestamp$1 };
+// ******** SECTION 7 - Final Export ********
+const coreUtils = {
+    base: base$2,
     brand: brand$3,
     brandColor,
-    convert: convert$1,
+    convert,
     guards,
     ...other,
     sanitize,
     validate: validate$1
 };
 
-// File: src/common/helpers/conversion.js
+// File: data/defaults.js
+const colors = {
+    base: {
+        branded: {
+            cmyk: {
+                value: {
+                    cyan: brand$3.asPercentile(0),
+                    magenta: brand$3.asPercentile(0),
+                    yellow: brand$3.asPercentile(0),
+                    key: brand$3.asPercentile(0),
+                    alpha: brand$3.asAlphaRange(1)
+                },
+                format: 'cmyk'
+            },
+            hex: {
+                value: {
+                    hex: brand$3.asHexSet('#000000'),
+                    alpha: brand$3.asHexComponent('FF'),
+                    numAlpha: brand$3.asAlphaRange(1)
+                },
+                format: 'hex'
+            },
+            hsl: {
+                value: {
+                    hue: brand$3.asRadial(0),
+                    saturation: brand$3.asPercentile(0),
+                    lightness: brand$3.asPercentile(0),
+                    alpha: brand$3.asAlphaRange(1)
+                },
+                format: 'hsl'
+            },
+            hsv: {
+                value: {
+                    hue: brand$3.asRadial(0),
+                    saturation: brand$3.asPercentile(0),
+                    value: brand$3.asPercentile(0),
+                    alpha: brand$3.asAlphaRange(1)
+                },
+                format: 'hsv'
+            },
+            lab: {
+                value: {
+                    l: brand$3.asLAB_L(0),
+                    a: brand$3.asLAB_A(0),
+                    b: brand$3.asLAB_B(0),
+                    alpha: brand$3.asAlphaRange(1)
+                },
+                format: 'lab'
+            },
+            rgb: {
+                value: {
+                    red: brand$3.asByteRange(0),
+                    green: brand$3.asByteRange(0),
+                    blue: brand$3.asByteRange(0),
+                    alpha: brand$3.asAlphaRange(1)
+                },
+                format: 'rgb'
+            },
+            sl: {
+                value: {
+                    saturation: brand$3.asPercentile(0),
+                    lightness: brand$3.asPercentile(0),
+                    alpha: brand$3.asAlphaRange(1)
+                },
+                format: 'sl'
+            },
+            sv: {
+                value: {
+                    saturation: brand$3.asPercentile(0),
+                    value: brand$3.asPercentile(0),
+                    alpha: brand$3.asAlphaRange(1)
+                },
+                format: 'sv'
+            },
+            xyz: {
+                value: {
+                    x: brand$3.asXYZ_X(0),
+                    y: brand$3.asXYZ_Y(0),
+                    z: brand$3.asXYZ_Z(0),
+                    alpha: brand$3.asAlphaRange(1)
+                },
+                format: 'xyz'
+            }
+        },
+        unbranded: {
+            cmyk: {
+                value: {
+                    cyan: 0,
+                    magenta: 0,
+                    yellow: 0,
+                    key: 0,
+                    alpha: 1
+                },
+                format: 'cmyk'
+            },
+            hex: {
+                value: {
+                    hex: '#000000FF',
+                    alpha: 'FF',
+                    numAlpha: 1
+                },
+                format: 'hex'
+            },
+            hsl: {
+                value: {
+                    hue: 0,
+                    saturation: 0,
+                    lightness: 0,
+                    alpha: 1
+                },
+                format: 'hsl'
+            },
+            hsv: {
+                value: {
+                    hue: 0,
+                    saturation: 0,
+                    value: 0,
+                    alpha: 1
+                },
+                format: 'hsv'
+            },
+            lab: {
+                value: {
+                    l: 0,
+                    a: 0,
+                    b: 0,
+                    alpha: 1
+                },
+                format: 'lab'
+            },
+            sl: {
+                value: {
+                    saturation: 0,
+                    lightness: 0,
+                    alpha: 1
+                },
+                format: 'sl'
+            },
+            rgb: {
+                value: {
+                    red: 0,
+                    green: 0,
+                    blue: 0,
+                    alpha: 1
+                },
+                format: 'rgb'
+            },
+            sv: {
+                value: {
+                    saturation: 0,
+                    value: 0,
+                    alpha: 1
+                },
+                format: 'sv'
+            },
+            xyz: {
+                value: {
+                    x: 0,
+                    y: 0,
+                    z: 0,
+                    alpha: 1
+                },
+                format: 'xyz'
+            }
+        }
+    },
+    css: {
+        cmyk: 'cmyk(0%, 0%, 0%, 0%, 1)',
+        hex: '#000000FF',
+        hsl: 'hsl(0, 0%, 0%, 1)',
+        hsv: 'hsv(0, 0%, 0%, 1)',
+        lab: 'lab(0, 0, 0, 1)',
+        rgb: 'rgb(0, 0, 0, 1)',
+        sl: 'sl(0%, 0%, 1)',
+        sv: 'sv(0%, 0%, 1)',
+        xyz: 'xyz(0, 0, 0, 1)'
+    },
+    strings: {
+        cmyk: {
+            value: {
+                cyan: '0',
+                magenta: '0',
+                yellow: '0',
+                key: '0',
+                alpha: '1'
+            },
+            format: 'cmyk'
+        },
+        hex: {
+            value: {
+                hex: '#000000',
+                alpha: 'FF',
+                numAlpha: '1'
+            },
+            format: 'hex'
+        },
+        hsl: {
+            value: {
+                hue: '0',
+                saturation: '0',
+                lightness: '0',
+                alpha: '1'
+            },
+            format: 'hsl'
+        },
+        hsv: {
+            value: {
+                hue: '0',
+                saturation: '0',
+                value: '0',
+                alpha: '1'
+            },
+            format: 'hsv'
+        },
+        lab: {
+            value: {
+                l: '0',
+                a: '0',
+                b: '0',
+                alpha: '1'
+            },
+            format: 'lab'
+        },
+        rgb: {
+            value: {
+                red: '0',
+                green: '0',
+                blue: '0',
+                alpha: '1'
+            },
+            format: 'rgb'
+        },
+        sl: {
+            value: {
+                saturation: '0',
+                lightness: '0',
+                alpha: '1'
+            },
+            format: 'sl'
+        },
+        sv: {
+            value: {
+                saturation: '0',
+                value: '0',
+                alpha: '1'
+            },
+            format: 'sv'
+        },
+        xyz: {
+            value: {
+                x: '0',
+                y: '0',
+                z: '0',
+                alpha: '1'
+            },
+            format: 'xyz'
+        }
+    }
+};
+const mutation = {
+    timestamp: new Date().toISOString(),
+    key: 'default_key',
+    action: 'update',
+    newValue: { value: 'new_value' },
+    oldValue: { value: 'old_value' },
+    origin: 'DEFAULT'
+};
+const idb$1 = {
+    mutation
+};
+const unbrandedData = {
+    id: `null-palette-${Date.now()}`,
+    items: [],
+    metadata: {
+        customColor: false,
+        flags: {
+            enableAlpha: false,
+            limitDarkness: false,
+            limitGrayness: false,
+            limitLightness: false
+        },
+        name: 'UNBRANDED DEFAULT PALETTE',
+        swatches: 1,
+        type: '???',
+        timestamp: '???'
+    }
+};
+const unbrandedItem = {
+    colors: {
+        main: {
+            cmyk: { cyan: 0, magenta: 0, yellow: 0, key: 0, alpha: 1 },
+            hex: { hex: '#000000FF', alpha: 'FF', numAlpha: 1 },
+            hsl: { hue: 0, saturation: 0, lightness: 0, alpha: 1 },
+            hsv: { hue: 0, saturation: 0, value: 0, alpha: 1 },
+            lab: { l: 0, a: 0, b: 0, alpha: 1 },
+            rgb: { red: 0, green: 0, blue: 0, alpha: 1 },
+            xyz: { x: 0, y: 0, z: 0, alpha: 1 }
+        },
+        stringProps: {
+            cmyk: {
+                cyan: '0%',
+                magenta: '0%',
+                yellow: '0%',
+                key: '0%',
+                alpha: '1'
+            },
+            hex: { hex: '#000000FF', alpha: 'FF', numAlpha: '1' },
+            hsl: { hue: '0', saturation: '0%', lightness: '0%', alpha: '1' },
+            hsv: { hue: '0', saturation: '0%', value: '0%', alpha: '1' },
+            lab: { l: '0', a: '0', b: '0', alpha: '1' },
+            rgb: { red: '0', green: '0', blue: '0', alpha: '1' },
+            xyz: { x: '0', y: '0', z: '0', alpha: '1' }
+        },
+        css: {
+            cmyk: 'cmyk(0%, 0%, 0%, 100%, 1)',
+            hex: '#000000FF',
+            hsl: 'hsl(0, 0%, 0%, 0)',
+            hsv: 'hsv(0, 0%, 0%, 0)',
+            lab: 'lab(0, 0, 0, 0)',
+            rgb: 'rgb(0, 0, 0, 1)',
+            xyz: 'xyz(0, 0, 0, 0)'
+        }
+    }
+};
+const unbrandedStored = {
+    tableID: 1,
+    palette: unbrandedData
+};
+const palette = {
+    unbranded: {
+        data: unbrandedData,
+        item: unbrandedItem,
+        stored: unbrandedStored
+    }
+};
+const defaultData = {
+    colors,
+    idb: idb$1,
+    palette
+};
+
+// File: common/helpers/conversion.js
+const logMode$m = modeData.logging;
+const thisModule$p = 'common/helpers/conversion.js';
 const logger$p = await createLogger();
-const logMode$m = mode.logging;
 function applyGammaCorrection(value) {
+    const thisMethod = 'applyGammaCorrection()';
     try {
         return value > 0.0031308
             ? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
@@ -1969,40 +1711,42 @@ function applyGammaCorrection(value) {
     }
     catch (error) {
         if (logMode$m.error)
-            logger$p.error(`Error applying gamma correction: ${error}`, 'applyGammaCorrection()');
+            logger$p.error(`Error applying gamma correction: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return value;
     }
 }
 function clampRGB(rgb) {
-    const defaultRGBUnbranded = core.base.clone(defaults.colors.base.unbranded.rgb);
-    const defaultRGBBranded = core.brandColor.asRGB(defaultRGBUnbranded);
-    if (!core.validate.colorValues(rgb)) {
+    const thisMethod = 'clampRGB()';
+    const defaultRGBUnbranded = coreUtils.base.clone(defaultData.colors.base.unbranded.rgb);
+    const defaultRGBBranded = coreUtils.brandColor.asRGB(defaultRGBUnbranded);
+    if (!coreUtils.validate.colorValues(rgb)) {
         if (logMode$m.error)
-            logger$p.error(`Invalid RGB value ${JSON.stringify(rgb)}`, 'clampRGB()');
+            logger$p.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$p} > ${thisMethod}`);
         return defaultRGBBranded;
     }
     try {
         return {
             value: {
-                red: core.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.red), 1) * 255)),
-                green: core.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.green), 1) * 255)),
-                blue: core.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.blue), 1) * 255)),
-                alpha: core.brand.asAlphaRange(parseFloat(Math.min(Math.max(0, rgb.value.alpha), 1).toFixed(2)))
+                red: coreUtils.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.red), 1) * 255)),
+                green: coreUtils.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.green), 1) * 255)),
+                blue: coreUtils.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.blue), 1) * 255)),
+                alpha: coreUtils.brand.asAlphaRange(parseFloat(Math.min(Math.max(0, rgb.value.alpha), 1).toFixed(2)))
             },
             format: 'rgb'
         };
     }
     catch (error) {
         if (logMode$m.error)
-            logger$p.error(`Error clamping RGB values: ${error}`, 'clampRGB()');
+            logger$p.error(`Error clamping RGB values: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return rgb;
     }
 }
 function hueToRGB(p, q, t) {
+    const thisMethod = 'hueToRGB()';
     try {
-        const clonedP = core.base.clone(p);
-        const clonedQ = core.base.clone(q);
-        let clonedT = core.base.clone(t);
+        const clonedP = coreUtils.base.clone(p);
+        const clonedQ = coreUtils.base.clone(q);
+        let clonedT = coreUtils.base.clone(t);
         if (clonedT < 0)
             clonedT += 1;
         if (clonedT > 1)
@@ -2017,35 +1761,37 @@ function hueToRGB(p, q, t) {
     }
     catch (error) {
         if (logMode$m.error)
-            logger$p.error(`Error converting hue to RGB: ${error}`, 'hueToRGB()');
+            logger$p.error(`Error converting hue to RGB: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return 0;
     }
 }
 function hslAddFormat(value) {
-    const defaultHSLUnbranded = core.base.clone(defaults.colors.base.unbranded.hsl);
-    const defaultHSLBranded = core.brandColor.asHSL(defaultHSLUnbranded);
+    const thisMethod = 'hslAddFormat()';
+    const defaultHSLUnbranded = coreUtils.base.clone(defaultData.colors.base.unbranded.hsl);
+    const defaultHSLBranded = coreUtils.brandColor.asHSL(defaultHSLUnbranded);
     try {
-        if (!core.validate.colorValues({ value: value, format: 'hsl' })) {
+        if (!coreUtils.validate.colorValues({ value: value, format: 'hsl' })) {
             if (logMode$m.error)
-                logger$p.error(`Invalid HSL value ${JSON.stringify(value)}`, 'hslAddFormat()');
+                logger$p.error(`Invalid HSL value ${JSON.stringify(value)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultHSLBranded;
         }
         return { value: value, format: 'hsl' };
     }
     catch (error) {
         if (logMode$m.error)
-            logger$p.error(`Error adding HSL format: ${error}`, 'hslAddFormat()');
+            logger$p.error(`Error adding HSL format: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
-const conversion$2 = {
+const conversionHelpers = {
     applyGammaCorrection,
     clampRGB,
     hslAddFormat,
     hueToRGB
 };
 
-// File: src/common/transform/base.js
+// File: common/transform.js
+const thisModule$o = 'common/transform/base.ts';
 const logger$o = await createLogger();
 function addHashToHex(hex) {
     try {
@@ -2072,258 +1818,275 @@ function brandPalette(data) {
             customColor: data.metadata.customColor
                 ? {
                     colors: {
-                        cmyk: {
-                            cyan: brand$3.asPercentile(data.metadata.customColor.colors.cmyk
-                                .cyan ?? 0),
-                            magenta: brand$3.asPercentile(data.metadata.customColor.colors.cmyk
-                                .magenta ?? 0),
-                            yellow: brand$3.asPercentile(data.metadata.customColor.colors.cmyk
-                                .yellow ?? 0),
-                            key: brand$3.asPercentile(data.metadata.customColor.colors.cmyk.key ??
-                                0),
-                            alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.cmyk
-                                .alpha ?? 1)
+                        main: {
+                            cmyk: {
+                                cyan: brand$3.asPercentile(data.metadata.customColor.colors.main
+                                    .cmyk.cyan ?? 0),
+                                magenta: brand$3.asPercentile(data.metadata.customColor.colors.main
+                                    .cmyk.magenta ?? 0),
+                                yellow: brand$3.asPercentile(data.metadata.customColor.colors.main
+                                    .cmyk.yellow ?? 0),
+                                key: brand$3.asPercentile(data.metadata.customColor.colors.main
+                                    .cmyk.key ?? 0),
+                                alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.main
+                                    .cmyk.alpha ?? 1)
+                            },
+                            hex: {
+                                hex: brand$3.asHexSet(data.metadata.customColor.colors.main
+                                    .hex.hex ?? '#000000FF'),
+                                alpha: brand$3.asHexComponent(data.metadata.customColor.colors.main
+                                    .hex.alpha ?? 'FF'),
+                                numAlpha: brand$3.asAlphaRange(data.metadata.customColor.colors.main
+                                    .hex.numAlpha ?? 1)
+                            },
+                            hsl: {
+                                hue: brand$3.asRadial(data.metadata.customColor.colors.main
+                                    .hsl.hue ?? 0),
+                                saturation: brand$3.asPercentile(data.metadata.customColor.colors.main
+                                    .hsl.saturation ?? 0),
+                                lightness: brand$3.asPercentile(data.metadata.customColor.colors.main
+                                    .hsl.lightness ?? 0),
+                                alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.main
+                                    .hsl.alpha ?? 1)
+                            },
+                            hsv: {
+                                hue: brand$3.asRadial(data.metadata.customColor.colors.main
+                                    .hsv.hue ?? 0),
+                                saturation: brand$3.asPercentile(data.metadata.customColor.colors.main
+                                    .hsv.saturation ?? 0),
+                                value: brand$3.asPercentile(data.metadata.customColor.colors.main
+                                    .hsv.value ?? 0),
+                                alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.main
+                                    .hsv.alpha ?? 1)
+                            },
+                            lab: {
+                                l: brand$3.asLAB_L(data.metadata.customColor.colors.main
+                                    .lab.l ?? 0),
+                                a: brand$3.asLAB_A(data.metadata.customColor.colors.main
+                                    .lab.a ?? 0),
+                                b: brand$3.asLAB_B(data.metadata.customColor.colors.main
+                                    .lab.b ?? 0),
+                                alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.main
+                                    .lab.alpha ?? 1)
+                            },
+                            rgb: {
+                                red: brand$3.asByteRange(data.metadata.customColor.colors.main
+                                    .rgb.red ?? 0),
+                                green: brand$3.asByteRange(data.metadata.customColor.colors.main
+                                    .rgb.green ?? 0),
+                                blue: brand$3.asByteRange(data.metadata.customColor.colors.main
+                                    .rgb.blue ?? 0),
+                                alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.main
+                                    .rgb.alpha ?? 1)
+                            },
+                            xyz: {
+                                x: brand$3.asXYZ_X(data.metadata.customColor.colors.main
+                                    .xyz.x ?? 0),
+                                y: brand$3.asXYZ_Y(data.metadata.customColor.colors.main
+                                    .xyz.y ?? 0),
+                                z: brand$3.asXYZ_Z(data.metadata.customColor.colors.main
+                                    .xyz.z ?? 0),
+                                alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.main
+                                    .xyz.alpha ?? 1)
+                            }
                         },
-                        hex: {
-                            hex: brand$3.asHexSet(data.metadata.customColor.colors.hex.hex ??
-                                '#000000FF'),
-                            alpha: brand$3.asHexComponent(data.metadata.customColor.colors.hex
-                                .alpha ?? 'FF'),
-                            numAlpha: brand$3.asAlphaRange(data.metadata.customColor.colors.hex
-                                .numAlpha ?? 1)
+                        stringProps: {
+                            cmyk: {
+                                cyan: String(data.metadata.customColor.colors.main
+                                    .cmyk.cyan ?? 0),
+                                magenta: String(data.metadata.customColor.colors.main
+                                    .cmyk.magenta ?? 0),
+                                yellow: String(data.metadata.customColor.colors.main
+                                    .cmyk.yellow ?? 0),
+                                key: String(data.metadata.customColor.colors.main
+                                    .cmyk.key ?? 0),
+                                alpha: String(data.metadata.customColor.colors.main
+                                    .cmyk.alpha ?? 1)
+                            },
+                            hex: {
+                                hex: String(data.metadata.customColor.colors.main
+                                    .hex.hex ?? '#000000FF'),
+                                alpha: String(data.metadata.customColor.colors.main
+                                    .hex.alpha ?? 'FF'),
+                                numAlpha: String(data.metadata.customColor.colors.main
+                                    .hex.numAlpha ?? 1)
+                            },
+                            hsl: {
+                                hue: String(data.metadata.customColor.colors.main
+                                    .hsl.hue ?? 0),
+                                saturation: String(data.metadata.customColor.colors.main
+                                    .hsl.saturation ?? 0),
+                                lightness: String(data.metadata.customColor.colors.main
+                                    .hsl.lightness ?? 0),
+                                alpha: String(data.metadata.customColor.colors.main
+                                    .hsl.alpha ?? 1)
+                            },
+                            hsv: {
+                                hue: String(data.metadata.customColor.colors.main
+                                    .hsv.hue ?? 0),
+                                saturation: String(data.metadata.customColor.colors.main
+                                    .hsv.saturation ?? 0),
+                                value: String(data.metadata.customColor.colors.main
+                                    .hsv.value ?? 0),
+                                alpha: String(data.metadata.customColor.colors.main
+                                    .hsv.alpha ?? 1)
+                            },
+                            lab: {
+                                l: String(data.metadata.customColor.colors.main
+                                    .lab.l ?? 0),
+                                a: String(data.metadata.customColor.colors.main
+                                    .lab.a ?? 0),
+                                b: String(data.metadata.customColor.colors.main
+                                    .lab.b ?? 0),
+                                alpha: String(data.metadata.customColor.colors.main
+                                    .lab.alpha ?? 1)
+                            },
+                            rgb: {
+                                red: String(data.metadata.customColor.colors.main
+                                    .rgb.red ?? 0),
+                                green: String(data.metadata.customColor.colors.main
+                                    .rgb.green ?? 0),
+                                blue: String(data.metadata.customColor.colors.main
+                                    .rgb.blue ?? 0),
+                                alpha: String(data.metadata.customColor.colors.main
+                                    .rgb.alpha ?? 1)
+                            },
+                            xyz: {
+                                x: String(data.metadata.customColor.colors.main
+                                    .xyz.x ?? 0),
+                                y: String(data.metadata.customColor.colors.main
+                                    .xyz.y ?? 0),
+                                z: String(data.metadata.customColor.colors.main
+                                    .xyz.z ?? 0),
+                                alpha: String(data.metadata.customColor.colors.main
+                                    .xyz.alpha ?? 1)
+                            }
                         },
-                        hsl: {
-                            hue: brand$3.asRadial(data.metadata.customColor.colors.hsl.hue ??
-                                0),
-                            saturation: brand$3.asPercentile(data.metadata.customColor.colors.hsl
-                                .saturation ?? 0),
-                            lightness: brand$3.asPercentile(data.metadata.customColor.colors.hsl
-                                .lightness ?? 0),
-                            alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.hsl
-                                .alpha ?? 1)
-                        },
-                        hsv: {
-                            hue: brand$3.asRadial(data.metadata.customColor.colors.hsv.hue ??
-                                0),
-                            saturation: brand$3.asPercentile(data.metadata.customColor.colors.hsv
-                                .saturation ?? 0),
-                            value: brand$3.asPercentile(data.metadata.customColor.colors.hsv
-                                .value ?? 0),
-                            alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.hsv
-                                .alpha ?? 1)
-                        },
-                        lab: {
-                            l: brand$3.asLAB_L(data.metadata.customColor.colors.lab.l ?? 0),
-                            a: brand$3.asLAB_A(data.metadata.customColor.colors.lab.a ?? 0),
-                            b: brand$3.asLAB_B(data.metadata.customColor.colors.lab.b ?? 0),
-                            alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.lab
-                                .alpha ?? 1)
-                        },
-                        rgb: {
-                            red: brand$3.asByteRange(data.metadata.customColor.colors.rgb.red ??
-                                0),
-                            green: brand$3.asByteRange(data.metadata.customColor.colors.rgb
-                                .green ?? 0),
-                            blue: brand$3.asByteRange(data.metadata.customColor.colors.rgb.blue ??
-                                0),
-                            alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.rgb
-                                .alpha ?? 1)
-                        },
-                        xyz: {
-                            x: brand$3.asXYZ_X(data.metadata.customColor.colors.xyz.x ?? 0),
-                            y: brand$3.asXYZ_Y(data.metadata.customColor.colors.xyz.y ?? 0),
-                            z: brand$3.asXYZ_Z(data.metadata.customColor.colors.xyz.z ?? 0),
-                            alpha: brand$3.asAlphaRange(data.metadata.customColor.colors.xyz
-                                .alpha ?? 1)
+                        css: {
+                            cmyk: `cmyk(${data.metadata.customColor.colors.main.cmyk.cyan}%, ${data.metadata.customColor.colors.main.cmyk.magenta}%, ${data.metadata.customColor.colors.main.cmyk.yellow}%, ${data.metadata.customColor.colors.main.cmyk.key}%)`,
+                            hex: `${data.metadata.customColor.colors.main.hex.hex}${data.metadata.customColor.colors.main.hex.alpha}`,
+                            hsl: `hsl(${data.metadata.customColor.colors.main.hsl.hue}, ${data.metadata.customColor.colors.main.hsl.saturation}%, ${data.metadata.customColor.colors.main.hsl.lightness}%)`,
+                            hsv: `hsv(${data.metadata.customColor.colors.main.hsv.hue}, ${data.metadata.customColor.colors.main.hsv.saturation}%, ${data.metadata.customColor.colors.main.hsv.value}%)`,
+                            lab: `lab(${data.metadata.customColor.colors.main.lab.l}, ${data.metadata.customColor.colors.main.lab.a}, ${data.metadata.customColor.colors.main.lab.b})`,
+                            rgb: `rgb(${data.metadata.customColor.colors.main.rgb.red}, ${data.metadata.customColor.colors.main.rgb.green}, ${data.metadata.customColor.colors.main.rgb.blue})`,
+                            xyz: `xyz(${data.metadata.customColor.colors.main.xyz.x}, ${data.metadata.customColor.colors.main.xyz.y}, ${data.metadata.customColor.colors.main.xyz.z})`
                         }
-                    },
-                    colorStrings: {
-                        cmykString: {
-                            cyan: String(data.metadata.customColor.colors.cmyk
-                                .cyan ?? 0),
-                            magenta: String(data.metadata.customColor.colors.cmyk
-                                .magenta ?? 0),
-                            yellow: String(data.metadata.customColor.colors.cmyk
-                                .yellow ?? 0),
-                            key: String(data.metadata.customColor.colors.cmyk.key ??
-                                0),
-                            alpha: String(data.metadata.customColor.colors.cmyk
-                                .alpha ?? 1)
-                        },
-                        hexString: {
-                            hex: String(data.metadata.customColor.colors.hex.hex ??
-                                '#000000FF'),
-                            alpha: String(data.metadata.customColor.colors.hex
-                                .alpha ?? 'FF'),
-                            numAlpha: String(data.metadata.customColor.colors.hex
-                                .numAlpha ?? 1)
-                        },
-                        hslString: {
-                            hue: String(data.metadata.customColor.colors.hsl.hue ??
-                                0),
-                            saturation: String(data.metadata.customColor.colors.hsl
-                                .saturation ?? 0),
-                            lightness: String(data.metadata.customColor.colors.hsl
-                                .lightness ?? 0),
-                            alpha: String(data.metadata.customColor.colors.hsl
-                                .alpha ?? 1)
-                        },
-                        hsvString: {
-                            hue: String(data.metadata.customColor.colors.hsv.hue ??
-                                0),
-                            saturation: String(data.metadata.customColor.colors.hsv
-                                .saturation ?? 0),
-                            value: String(data.metadata.customColor.colors.hsv
-                                .value ?? 0),
-                            alpha: String(data.metadata.customColor.colors.hsv
-                                .alpha ?? 1)
-                        },
-                        labString: {
-                            l: String(data.metadata.customColor.colors.lab.l ?? 0),
-                            a: String(data.metadata.customColor.colors.lab.a ?? 0),
-                            b: String(data.metadata.customColor.colors.lab.b ?? 0),
-                            alpha: String(data.metadata.customColor.colors.lab
-                                .alpha ?? 1)
-                        },
-                        rgbString: {
-                            red: String(data.metadata.customColor.colors.rgb.red ??
-                                0),
-                            green: String(data.metadata.customColor.colors.rgb
-                                .green ?? 0),
-                            blue: String(data.metadata.customColor.colors.rgb.blue ??
-                                0),
-                            alpha: String(data.metadata.customColor.colors.rgb
-                                .alpha ?? 1)
-                        },
-                        xyzString: {
-                            x: String(data.metadata.customColor.colors.xyz.x ?? 0),
-                            y: String(data.metadata.customColor.colors.xyz.y ?? 0),
-                            z: String(data.metadata.customColor.colors.xyz.z ?? 0),
-                            alpha: String(data.metadata.customColor.colors.xyz
-                                .alpha ?? 1)
-                        }
-                    },
-                    cssStrings: {
-                        cmykCSSString: `cmyk(${data.metadata.customColor.colors.cmyk.cyan}%, ${data.metadata.customColor.colors.cmyk.magenta}%, ${data.metadata.customColor.colors.cmyk.yellow}%, ${data.metadata.customColor.colors.cmyk.key}%)`,
-                        hexCSSString: `${data.metadata.customColor.colors.hex.hex}${data.metadata.customColor.colors.hex.alpha}`,
-                        hslCSSString: `hsl(${data.metadata.customColor.colors.hsl.hue}, ${data.metadata.customColor.colors.hsl.saturation}%, ${data.metadata.customColor.colors.hsl.lightness}%)`,
-                        hsvCSSString: `hsv(${data.metadata.customColor.colors.hsv.hue}, ${data.metadata.customColor.colors.hsv.saturation}%, ${data.metadata.customColor.colors.hsv.value}%)`,
-                        labCSSString: `lab(${data.metadata.customColor.colors.lab.l}, ${data.metadata.customColor.colors.lab.a}, ${data.metadata.customColor.colors.lab.b})`,
-                        rgbCSSString: `rgb(${data.metadata.customColor.colors.rgb.red}, ${data.metadata.customColor.colors.rgb.green}, ${data.metadata.customColor.colors.rgb.blue})`,
-                        xyzCSSString: `xyz(${data.metadata.customColor.colors.xyz.x}, ${data.metadata.customColor.colors.xyz.y}, ${data.metadata.customColor.colors.xyz.z})`
                     }
                 }
                 : false
         },
         items: data.items.map(item => ({
             colors: {
-                cmyk: {
-                    cyan: brand$3.asPercentile(item.colors.cmyk.cyan ?? 0),
-                    magenta: brand$3.asPercentile(item.colors.cmyk.magenta ?? 0),
-                    yellow: brand$3.asPercentile(item.colors.cmyk.yellow ?? 0),
-                    key: brand$3.asPercentile(item.colors.cmyk.key ?? 0),
-                    alpha: brand$3.asAlphaRange(item.colors.cmyk.alpha ?? 1)
+                main: {
+                    cmyk: {
+                        cyan: brand$3.asPercentile(item.colors.main.cmyk.cyan ?? 0),
+                        magenta: brand$3.asPercentile(item.colors.main.cmyk.magenta ?? 0),
+                        yellow: brand$3.asPercentile(item.colors.main.cmyk.yellow ?? 0),
+                        key: brand$3.asPercentile(item.colors.main.cmyk.key ?? 0),
+                        alpha: brand$3.asAlphaRange(item.colors.main.cmyk.alpha ?? 1)
+                    },
+                    hex: {
+                        hex: brand$3.asHexSet(item.colors.main.hex.hex ?? '#000000FF'),
+                        alpha: brand$3.asHexComponent(item.colors.main.hex.alpha ?? 'FF'),
+                        numAlpha: brand$3.asAlphaRange(item.colors.main.hex.numAlpha ?? 1)
+                    },
+                    hsl: {
+                        hue: brand$3.asRadial(item.colors.main.hsl.hue ?? 0),
+                        saturation: brand$3.asPercentile(item.colors.main.hsl.saturation ?? 0),
+                        lightness: brand$3.asPercentile(item.colors.main.hsl.lightness ?? 0),
+                        alpha: brand$3.asAlphaRange(item.colors.main.hsl.alpha ?? 1)
+                    },
+                    hsv: {
+                        hue: brand$3.asRadial(item.colors.main.hsv.hue ?? 0),
+                        saturation: brand$3.asPercentile(item.colors.main.hsv.saturation ?? 0),
+                        value: brand$3.asPercentile(item.colors.main.hsv.value ?? 0),
+                        alpha: brand$3.asAlphaRange(item.colors.main.hsv.alpha ?? 1)
+                    },
+                    lab: {
+                        l: brand$3.asLAB_L(item.colors.main.lab.l ?? 0),
+                        a: brand$3.asLAB_A(item.colors.main.lab.a ?? 0),
+                        b: brand$3.asLAB_B(item.colors.main.lab.b ?? 0),
+                        alpha: brand$3.asAlphaRange(item.colors.main.lab.alpha ?? 1)
+                    },
+                    rgb: {
+                        red: brand$3.asByteRange(item.colors.main.rgb.red ?? 0),
+                        green: brand$3.asByteRange(item.colors.main.rgb.green ?? 0),
+                        blue: brand$3.asByteRange(item.colors.main.rgb.blue ?? 0),
+                        alpha: brand$3.asAlphaRange(item.colors.main.rgb.alpha ?? 1)
+                    },
+                    xyz: {
+                        x: brand$3.asXYZ_X(item.colors.main.xyz.x ?? 0),
+                        y: brand$3.asXYZ_Y(item.colors.main.xyz.y ?? 0),
+                        z: brand$3.asXYZ_Z(item.colors.main.xyz.z ?? 0),
+                        alpha: brand$3.asAlphaRange(item.colors.main.xyz.alpha ?? 1)
+                    }
                 },
-                hex: {
-                    hex: brand$3.asHexSet(item.colors.hex.hex ?? '#000000FF'),
-                    alpha: brand$3.asHexComponent(item.colors.hex.alpha ?? 'FF'),
-                    numAlpha: brand$3.asAlphaRange(item.colors.hex.numAlpha ?? 1)
+                stringProps: {
+                    cmyk: {
+                        cyan: String(item.colors.main.cmyk.cyan ?? 0),
+                        magenta: String(item.colors.main.cmyk.magenta ?? 0),
+                        yellow: String(item.colors.main.cmyk.yellow ?? 0),
+                        key: String(item.colors.main.cmyk.key ?? 0),
+                        alpha: String(item.colors.main.cmyk.alpha ?? 1)
+                    },
+                    hex: {
+                        hex: String(item.colors.main.hex.hex ?? '#000000FF'),
+                        alpha: String(item.colors.main.hex.alpha ?? 'FF'),
+                        numAlpha: String(item.colors.main.hex.numAlpha ?? 1)
+                    },
+                    hsl: {
+                        hue: String(item.colors.main.hsl.hue ?? 0),
+                        saturation: String(item.colors.main.hsl.saturation ?? 0),
+                        lightness: String(item.colors.main.hsl.lightness ?? 0),
+                        alpha: String(item.colors.main.hsl.alpha ?? 1)
+                    },
+                    hsv: {
+                        hue: String(item.colors.main.hsv.hue ?? 0),
+                        saturation: String(item.colors.main.hsv.saturation ?? 0),
+                        value: String(item.colors.main.hsv.value ?? 0),
+                        alpha: String(item.colors.main.hsv.alpha ?? 1)
+                    },
+                    lab: {
+                        l: String(item.colors.main.lab.l ?? 0),
+                        a: String(item.colors.main.lab.a ?? 0),
+                        b: String(item.colors.main.lab.b ?? 0),
+                        alpha: String(item.colors.main.lab.alpha ?? 1)
+                    },
+                    rgb: {
+                        red: String(item.colors.main.rgb.red ?? 0),
+                        green: String(item.colors.main.rgb.green ?? 0),
+                        blue: String(item.colors.main.rgb.blue ?? 0),
+                        alpha: String(item.colors.main.rgb.alpha ?? 1)
+                    },
+                    xyz: {
+                        x: String(item.colors.main.xyz.x ?? 0),
+                        y: String(item.colors.main.xyz.y ?? 0),
+                        z: String(item.colors.main.xyz.z ?? 0),
+                        alpha: String(item.colors.main.xyz.alpha ?? 1)
+                    }
                 },
-                hsl: {
-                    hue: brand$3.asRadial(item.colors.hsl.hue ?? 0),
-                    saturation: brand$3.asPercentile(item.colors.hsl.saturation ?? 0),
-                    lightness: brand$3.asPercentile(item.colors.hsl.lightness ?? 0),
-                    alpha: brand$3.asAlphaRange(item.colors.hsl.alpha ?? 1)
-                },
-                hsv: {
-                    hue: brand$3.asRadial(item.colors.hsv.hue ?? 0),
-                    saturation: brand$3.asPercentile(item.colors.hsv.saturation ?? 0),
-                    value: brand$3.asPercentile(item.colors.hsv.value ?? 0),
-                    alpha: brand$3.asAlphaRange(item.colors.hsv.alpha ?? 1)
-                },
-                lab: {
-                    l: brand$3.asLAB_L(item.colors.lab.l ?? 0),
-                    a: brand$3.asLAB_A(item.colors.lab.a ?? 0),
-                    b: brand$3.asLAB_B(item.colors.lab.b ?? 0),
-                    alpha: brand$3.asAlphaRange(item.colors.lab.alpha ?? 1)
-                },
-                rgb: {
-                    red: brand$3.asByteRange(item.colors.rgb.red ?? 0),
-                    green: brand$3.asByteRange(item.colors.rgb.green ?? 0),
-                    blue: brand$3.asByteRange(item.colors.rgb.blue ?? 0),
-                    alpha: brand$3.asAlphaRange(item.colors.rgb.alpha ?? 1)
-                },
-                xyz: {
-                    x: brand$3.asXYZ_X(item.colors.xyz.x ?? 0),
-                    y: brand$3.asXYZ_Y(item.colors.xyz.y ?? 0),
-                    z: brand$3.asXYZ_Z(item.colors.xyz.z ?? 0),
-                    alpha: brand$3.asAlphaRange(item.colors.xyz.alpha ?? 1)
+                css: {
+                    cmyk: `cmyk(${item.colors.main.cmyk.cyan}%, ${item.colors.main.cmyk.magenta}%, ${item.colors.main.cmyk.yellow}%, ${item.colors.main.cmyk.key}%, ${item.colors.main.cmyk.alpha})`,
+                    hex: `${item.colors.main.hex.hex}${item.colors.main.hex.alpha}`,
+                    hsl: `hsl(${item.colors.main.hsl.hue}, ${item.colors.main.hsl.saturation}%, ${item.colors.main.hsl.lightness}%, ${item.colors.main.hsl.alpha})`,
+                    hsv: `hsv(${item.colors.main.hsv.hue}, ${item.colors.main.hsv.saturation}%, ${item.colors.main.hsv.value}%, ${item.colors.main.hsv.alpha})`,
+                    lab: `lab(${item.colors.main.lab.l}, ${item.colors.main.lab.a}, ${item.colors.main.lab.b}, ${item.colors.main.lab.alpha})`,
+                    rgb: `rgb(${item.colors.main.rgb.red}, ${item.colors.main.rgb.green}, ${item.colors.main.rgb.blue}, ${item.colors.main.rgb.alpha})`,
+                    xyz: `xyz(${item.colors.main.xyz.x}, ${item.colors.main.xyz.y}, ${item.colors.main.xyz.z}, ${item.colors.main.xyz.alpha})`
                 }
-            },
-            colorStrings: {
-                cmykString: {
-                    cyan: String(item.colors.cmyk.cyan ?? 0),
-                    magenta: String(item.colors.cmyk.magenta ?? 0),
-                    yellow: String(item.colors.cmyk.yellow ?? 0),
-                    key: String(item.colors.cmyk.key ?? 0),
-                    alpha: String(item.colors.cmyk.alpha ?? 1)
-                },
-                hexString: {
-                    hex: String(item.colors.hex.hex ?? '#000000FF'),
-                    alpha: String(item.colors.hex.alpha ?? 'FF'),
-                    numAlpha: String(item.colors.hex.numAlpha ?? 1)
-                },
-                hslString: {
-                    hue: String(item.colors.hsl.hue ?? 0),
-                    saturation: String(item.colors.hsl.saturation ?? 0),
-                    lightness: String(item.colors.hsl.lightness ?? 0),
-                    alpha: String(item.colors.hsl.alpha ?? 1)
-                },
-                hsvString: {
-                    hue: String(item.colors.hsv.hue ?? 0),
-                    saturation: String(item.colors.hsv.saturation ?? 0),
-                    value: String(item.colors.hsv.value ?? 0),
-                    alpha: String(item.colors.hsv.alpha ?? 1)
-                },
-                labString: {
-                    l: String(item.colors.lab.l ?? 0),
-                    a: String(item.colors.lab.a ?? 0),
-                    b: String(item.colors.lab.b ?? 0),
-                    alpha: String(item.colors.lab.alpha ?? 1)
-                },
-                rgbString: {
-                    red: String(item.colors.rgb.red ?? 0),
-                    green: String(item.colors.rgb.green ?? 0),
-                    blue: String(item.colors.rgb.blue ?? 0),
-                    alpha: String(item.colors.rgb.alpha ?? 1)
-                },
-                xyzString: {
-                    x: String(item.colors.xyz.x ?? 0),
-                    y: String(item.colors.xyz.y ?? 0),
-                    z: String(item.colors.xyz.z ?? 0),
-                    alpha: String(item.colors.xyz.alpha ?? 1)
-                }
-            },
-            cssStrings: {
-                cmykCSSString: `cmyk(${item.colors.cmyk.cyan}%, ${item.colors.cmyk.magenta}%, ${item.colors.cmyk.yellow}%, ${item.colors.cmyk.key}%)`,
-                hexCSSString: item.colors.hex.hex,
-                hslCSSString: `hsl(${item.colors.hsl.hue}, ${item.colors.hsl.saturation}%, ${item.colors.hsl.lightness}%)`,
-                hsvCSSString: `hsv(${item.colors.hsv.hue}, ${item.colors.hsv.saturation}%, ${item.colors.hsv.value}%)`,
-                labCSSString: `lab(${item.colors.lab.l}, ${item.colors.lab.a}, ${item.colors.lab.b})`,
-                rgbCSSString: `rgb(${item.colors.rgb.red}, ${item.colors.rgb.green}, ${item.colors.rgb.blue})`,
-                xyzCSSString: `xyz(${item.colors.xyz.x}, ${item.colors.xyz.y}, ${item.colors.xyz.z})`
             }
         }))
     };
 }
 function componentToHex(component) {
+    const thisMethod = 'common > transform > base > componentToHex()';
     try {
         const hex = Math.max(0, Math.min(255, component)).toString(16);
         return hex.length === 1 ? '0' + hex : hex;
     }
     catch (error) {
-        if (!mode.quiet && mode.logging.error)
-            logger$o.error(`componentToHex error: ${error}`);
+        if (!modeData.quiet && modeData.logging.error)
+            logger$o.error(`componentToHex error: ${error}`, `${thisModule$o} > ${thisMethod}`);
         return '00';
     }
 }
@@ -2422,16 +2185,17 @@ function defaultColorValue(color) {
 				Unknown color format\nDetails: ${JSON.stringify(color)}`);
     }
 }
-const base$2 = {
+const transformUtils = {
     addHashToHex,
     componentToHex,
     brandPalette,
     defaultColorValue
 };
 
-// File: src/common/utils/color.js
+// File: common/utils/color.js
+const logMode$l = modeData.logging;
+const thisModule$n = 'common/utils/color.js';
 const logger$n = await createLogger();
-const logMode$l = mode.logging;
 // ******** SECTION 1: Robust Type Guards ********
 function isColorFormat(color, format) {
     return color.format === format;
@@ -2529,7 +2293,7 @@ function isHSLString(value) {
         typeof value.value.lightness === 'string');
 }
 function isHSVColor(value) {
-    return (core.guards.isColor(value) &&
+    return (coreUtils.guards.isColor(value) &&
         typeof value === 'object' &&
         value !== null &&
         'format' in value &&
@@ -2554,7 +2318,7 @@ function isHSVString(value) {
         typeof value.value.value === 'string');
 }
 function isLAB(value) {
-    return (core.guards.isColor(value) &&
+    return (coreUtils.guards.isColor(value) &&
         typeof value === 'object' &&
         value !== null &&
         'format' in value &&
@@ -2568,7 +2332,7 @@ function isLABFormat(color) {
     return isColorFormat(color, 'lab');
 }
 function isRGB(value) {
-    return (core.guards.isColor(value) &&
+    return (coreUtils.guards.isColor(value) &&
         typeof value === 'object' &&
         value !== null &&
         'format' in value &&
@@ -2662,7 +2426,7 @@ function isStoredPalette(obj) {
 }
 async function narrowToColor(color) {
     if (isColorString(color)) {
-        return core.convert.colorStringToColor(color);
+        return coreUtils.convert.colorStringToColor(color);
     }
     switch (color.format) {
         case 'cmyk':
@@ -2681,10 +2445,11 @@ async function narrowToColor(color) {
 }
 // ******** SECTION 4: TRANSFORM UTILS ********
 function colorToColorString(color) {
-    const clonedColor = core.base.clone(color);
+    const thisMethod = 'colorToColorString()';
+    const clonedColor = coreUtils.base.clone(color);
     if (isColorString(clonedColor)) {
         if (logMode$l.error) {
-            logger$n.error(`Already formatted as color string: ${JSON.stringify(color)}`, 'common > utils > color > isColorString()');
+            logger$n.error(`Already formatted as color string: ${JSON.stringify(color)}`, `${thisModule$n} > ${thisMethod}`);
         }
         return clonedColor;
     }
@@ -2773,16 +2538,16 @@ function colorToColorString(color) {
         };
     }
     else {
-        if (!mode.gracefulErrors) {
+        if (!modeData.gracefulErrors) {
             throw new Error(`Unsupported format: ${clonedColor.format}`);
         }
         else if (logMode$l.error) {
-            logger$n.error(`Unsupported format: ${clonedColor.format}`, 'common > utils > color > colorToColorString()');
+            logger$n.error(`Unsupported format: ${clonedColor.format}`, `${thisModule$n} > ${thisMethod}`);
         }
-        else if (!mode.quiet && logMode$l.warn) {
-            logger$n.warn('Failed to convert to color string.', 'common > utils > color > colorToColorString()');
+        else if (!modeData.quiet && logMode$l.warn) {
+            logger$n.warn('Failed to convert to color string.', `${thisModule$n} > ${thisMethod}`);
         }
-        return defaults.colors.strings.hsl;
+        return defaultData.colors.strings.hsl;
     }
 }
 function formatPercentageValues(value) {
@@ -2803,18 +2568,19 @@ function formatPercentageValues(value) {
 }
 function getAlphaFromHex(hex) {
     if (hex.length !== 9 || !hex.startsWith('#')) {
-        if (!mode.gracefulErrors)
+        if (!modeData.gracefulErrors)
             throw new Error(`Invalid hex color: ${hex}. Expected format #RRGGBBAA`);
         else if (logMode$l.error)
-            logger$n.error(`Invalid hex color: ${hex}. Expected format #RRGGBBAA`, 'common > utils > color > getAlphaFromHex()');
-        else if (!mode.quiet && logMode$l.warn)
-            logger$n.warn('Failed to parse alpha from hex color.', 'common > utils > color > getAlphaFromHex()');
+            logger$n.error(`Invalid hex color: ${hex}. Expected format #RRGGBBAA`, `${thisModule$n} > getAlphaFromHex()`);
+        else if (!modeData.quiet && logMode$l.warn)
+            logger$n.warn('Failed to parse alpha from hex color.', `${thisModule$n} > getAlphaFromHex()`);
     }
     const alphaHex = hex.slice(-2);
     const alphaDecimal = parseInt(alphaHex, 16);
     return alphaDecimal / 255;
 }
 function getColorString(color) {
+    const thisMethod = 'getColorString()';
     try {
         const formatters = {
             cmyk: (c) => `cmyk(${c.value.cyan}, ${c.value.magenta}, ${c.value.yellow}, ${c.value.key}, ${c.value.alpha})`,
@@ -2842,13 +2608,13 @@ function getColorString(color) {
                 return formatters.xyz(color);
             default:
                 if (!logMode$l.error)
-                    logger$n.error(`Unsupported color format for ${color}`, 'common > utils > color > getColorString()');
+                    logger$n.error(`Unsupported color format for ${color}`, `${thisModule$n} > ${thisMethod}`);
                 return null;
         }
     }
     catch (error) {
         if (!logMode$l.error)
-            logger$n.error(`getColorString error: ${error}`, 'common > utils > color > getColorString()');
+            logger$n.error(`getColorString error: ${error}`, `${thisModule$n} > ${thisMethod}`);
         return null;
     }
 }
@@ -2856,17 +2622,18 @@ function hexAlphaToNumericAlpha(hexAlpha) {
     return parseInt(hexAlpha, 16) / 255;
 }
 const parseColor = (colorSpace, value) => {
+    const thisMethod = 'parseColor';
     try {
         switch (colorSpace) {
             case 'cmyk': {
                 const [c, m, y, k, a] = parseComponents(value, 5);
                 return {
                     value: {
-                        cyan: core.brand.asPercentile(c),
-                        magenta: core.brand.asPercentile(m),
-                        yellow: core.brand.asPercentile(y),
-                        key: core.brand.asPercentile(k),
-                        alpha: core.brand.asAlphaRange(a)
+                        cyan: coreUtils.brand.asPercentile(c),
+                        magenta: coreUtils.brand.asPercentile(m),
+                        yellow: coreUtils.brand.asPercentile(y),
+                        key: coreUtils.brand.asPercentile(k),
+                        alpha: coreUtils.brand.asAlphaRange(a)
                     },
                     format: 'cmyk'
                 };
@@ -2877,9 +2644,9 @@ const parseColor = (colorSpace, value) => {
                 const numAlpha = hexAlphaToNumericAlpha(alpha);
                 return {
                     value: {
-                        hex: core.brand.asHexSet(hexValue),
-                        alpha: core.brand.asHexComponent(alpha),
-                        numAlpha: core.brand.asAlphaRange(numAlpha)
+                        hex: coreUtils.brand.asHexSet(hexValue),
+                        alpha: coreUtils.brand.asHexComponent(alpha),
+                        numAlpha: coreUtils.brand.asAlphaRange(numAlpha)
                     },
                     format: 'hex'
                 };
@@ -2887,10 +2654,10 @@ const parseColor = (colorSpace, value) => {
                 const [h, s, l, a] = parseComponents(value, 4);
                 return {
                     value: {
-                        hue: core.brand.asRadial(h),
-                        saturation: core.brand.asPercentile(s),
-                        lightness: core.brand.asPercentile(l),
-                        alpha: core.brand.asAlphaRange(a)
+                        hue: coreUtils.brand.asRadial(h),
+                        saturation: coreUtils.brand.asPercentile(s),
+                        lightness: coreUtils.brand.asPercentile(l),
+                        alpha: coreUtils.brand.asAlphaRange(a)
                     },
                     format: 'hsl'
                 };
@@ -2899,10 +2666,10 @@ const parseColor = (colorSpace, value) => {
                 const [h, s, v, a] = parseComponents(value, 4);
                 return {
                     value: {
-                        hue: core.brand.asRadial(h),
-                        saturation: core.brand.asPercentile(s),
-                        value: core.brand.asPercentile(v),
-                        alpha: core.brand.asAlphaRange(a)
+                        hue: coreUtils.brand.asRadial(h),
+                        saturation: coreUtils.brand.asPercentile(s),
+                        value: coreUtils.brand.asPercentile(v),
+                        alpha: coreUtils.brand.asAlphaRange(a)
                     },
                     format: 'hsv'
                 };
@@ -2911,10 +2678,10 @@ const parseColor = (colorSpace, value) => {
                 const [l, a, b, alpha] = parseComponents(value, 4);
                 return {
                     value: {
-                        l: core.brand.asLAB_L(l),
-                        a: core.brand.asLAB_A(a),
-                        b: core.brand.asLAB_B(b),
-                        alpha: core.brand.asAlphaRange(alpha)
+                        l: coreUtils.brand.asLAB_L(l),
+                        a: coreUtils.brand.asLAB_A(a),
+                        b: coreUtils.brand.asLAB_B(b),
+                        alpha: coreUtils.brand.asAlphaRange(alpha)
                     },
                     format: 'lab'
                 };
@@ -2926,21 +2693,21 @@ const parseColor = (colorSpace, value) => {
                 const [r, g, b, a] = components;
                 return {
                     value: {
-                        red: core.brand.asByteRange(r),
-                        green: core.brand.asByteRange(g),
-                        blue: core.brand.asByteRange(b),
-                        alpha: core.brand.asAlphaRange(a)
+                        red: coreUtils.brand.asByteRange(r),
+                        green: coreUtils.brand.asByteRange(g),
+                        blue: coreUtils.brand.asByteRange(b),
+                        alpha: coreUtils.brand.asAlphaRange(a)
                     },
                     format: 'rgb'
                 };
             }
             default:
                 const message = `Unsupported color format: ${colorSpace}`;
-                if (mode.gracefulErrors) {
+                if (modeData.gracefulErrors) {
                     if (logMode$l.error)
                         logger$n.error(message);
-                    else if (!mode.quiet && logMode$l.warn)
-                        logger$n.warn(`Failed to parse color: ${message}`, 'common > utils > color > parseColor()');
+                    else if (!modeData.quiet && logMode$l.warn)
+                        logger$n.warn(`Failed to parse color: ${message}`, `${thisModule$n} > ${thisMethod}`);
                 }
                 else {
                     throw new Error(message);
@@ -2950,11 +2717,12 @@ const parseColor = (colorSpace, value) => {
     }
     catch (error) {
         if (logMode$l.error)
-            logger$n.error(`parseColor error: ${error}`, 'common > utils > color > parseColor()');
+            logger$n.error(`parseColor error: ${error}`, `${thisModule$n} > ${thisMethod}`);
         return null;
     }
 };
 function parseComponents(value, count) {
+    const thisMethod = 'parseComponents()';
     try {
         const components = value
             .split(',')
@@ -2962,18 +2730,18 @@ function parseComponents(value, count) {
             ? parseFloat(val)
             : parseFloat(val) * 100);
         if (components.length !== count)
-            if (!mode.gracefulErrors)
+            if (!modeData.gracefulErrors)
                 throw new Error(`Expected ${count} components.`);
             else if (logMode$l.error) {
-                if (!mode.quiet && logMode$l.warn)
-                    logger$n.warn(`Expected ${count} components.`, 'common > utils > color > parseComponents()');
+                if (!modeData.quiet && logMode$l.warn)
+                    logger$n.warn(`Expected ${count} components.`, `${thisModule$n} > ${thisMethod}`);
                 return [];
             }
         return components;
     }
     catch (error) {
         if (logMode$l.error)
-            logger$n.error(`Error parsing components: ${error}`, 'common > utils > color > parseComponents()');
+            logger$n.error(`Error parsing components: ${error}`, `${thisModule$n} > ${thisMethod}`);
         return [];
     }
 }
@@ -2982,20 +2750,21 @@ function parseHexWithAlpha(hexValue) {
     const alpha = hex.length === 9 ? hex.slice(-2) : 'FF';
     const numAlpha = hexAlphaToNumericAlpha(alpha);
     return {
-        hex: core.brand.asHexSet(hex),
-        alpha: core.brand.asHexComponent(alpha),
-        numAlpha: core.brand.asAlphaRange(numAlpha)
+        hex: coreUtils.brand.asHexSet(hex),
+        alpha: coreUtils.brand.asHexComponent(alpha),
+        numAlpha: coreUtils.brand.asAlphaRange(numAlpha)
     };
 }
 function stripHashFromHex(hex) {
+    const thisMethod = 'stripHashFromHex()';
     try {
         const hexString = `${hex.value.hex}${hex.value.alpha}`;
         return hex.value.hex.startsWith('#')
             ? {
                 value: {
-                    hex: core.brand.asHexSet(hexString.slice(1)),
-                    alpha: core.brand.asHexComponent(String(hex.value.alpha)),
-                    numAlpha: core.brand.asAlphaRange(hexAlphaToNumericAlpha(String(hex.value.alpha)))
+                    hex: coreUtils.brand.asHexSet(hexString.slice(1)),
+                    alpha: coreUtils.brand.asHexComponent(String(hex.value.alpha)),
+                    numAlpha: coreUtils.brand.asAlphaRange(hexAlphaToNumericAlpha(String(hex.value.alpha)))
                 },
                 format: 'hex'
             }
@@ -3003,9 +2772,9 @@ function stripHashFromHex(hex) {
     }
     catch (error) {
         if (logMode$l.error)
-            logger$n.error(`stripHashFromHex error: ${error}`, 'common > utils > color > stripHashFromHex()');
-        const unbrandedHex = core.base.clone(defaults.colors.base.unbranded.hex);
-        return core.brandColor.asHex(unbrandedHex);
+            logger$n.error(`stripHashFromHex error: ${error}`, `${thisModule$n} > ${thisMethod}`);
+        const unbrandedHex = coreUtils.base.clone(defaultData.colors.base.unbranded.hex);
+        return coreUtils.brandColor.asHex(unbrandedHex);
     }
 }
 function stripPercentFromValues(value) {
@@ -3027,7 +2796,7 @@ function toHexWithAlpha(rgbValue) {
         .padStart(2, '0');
     return `${hex}${alphaHex}`;
 }
-const color$1 = {
+const colorUtils = {
     colorToColorString,
     ensureHash,
     formatPercentageValues,
@@ -3074,18 +2843,20 @@ const color$1 = {
     toHexWithAlpha
 };
 
-// File: src/common/convert/base.js
+// File: common/convert.js
+const defaultColors$1 = defaultData.colors.base.unbranded;
+const logMode$k = modeData.logging;
+const thisModule$m = 'common/convert/base.js';
 const logger$m = await createLogger();
-const logMode$k = mode.logging;
-const defaultCMYKUnbranded = base$3.clone(defaults.colors.base.unbranded.cmyk);
-const defaultHexUnbranded = base$3.clone(defaults.colors.base.unbranded.hex);
-const defaultHSLUnbranded = base$3.clone(defaults.colors.base.unbranded.hsl);
-const defaultHSVUnbranded = base$3.clone(defaults.colors.base.unbranded.hsv);
-const defaultLABUnbranded = base$3.clone(defaults.colors.base.unbranded.lab);
-const defaultRGBUnbranded = base$3.clone(defaults.colors.base.unbranded.rgb);
-const defaultSLUnbranded = base$3.clone(defaults.colors.base.unbranded.sl);
-const defaultSVUnbranded = base$3.clone(defaults.colors.base.unbranded.sv);
-const defaultXYZUnbranded = base$3.clone(defaults.colors.base.unbranded.xyz);
+const defaultCMYKUnbranded = base$2.clone(defaultColors$1.cmyk);
+const defaultHexUnbranded = base$2.clone(defaultColors$1.hex);
+const defaultHSLUnbranded = base$2.clone(defaultColors$1.hsl);
+const defaultHSVUnbranded = base$2.clone(defaultColors$1.hsv);
+const defaultLABUnbranded = base$2.clone(defaultColors$1.lab);
+const defaultRGBUnbranded = base$2.clone(defaultColors$1.rgb);
+const defaultSLUnbranded = base$2.clone(defaultColors$1.sl);
+const defaultSVUnbranded = base$2.clone(defaultColors$1.sv);
+const defaultXYZUnbranded = base$2.clone(defaultColors$1.xyz);
 const defaultCMYKBranded = brandColor.asCMYK(defaultCMYKUnbranded);
 const defaultHexBranded = brandColor.asHex(defaultHexUnbranded);
 const defaultHSLBranded = brandColor.asHSL(defaultHSLUnbranded);
@@ -3096,28 +2867,30 @@ const defaultSLBranded = brandColor.asSL(defaultSLUnbranded);
 const defaultSVBranded = brandColor.asSV(defaultSVUnbranded);
 const defaultXYZBranded = brandColor.asXYZ(defaultXYZUnbranded);
 function cmykToHSL(cmyk) {
+    const thisMethod = 'cmykToHSL()';
     try {
         if (!validate$1.colorValues(cmyk)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`, 'common > convert > base > cmykToHSL()');
+                logger$m.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultHSLBranded;
         }
-        return rgbToHSL(cmykToRGB(base$3.clone(cmyk)));
+        return rgbToHSL(cmykToRGB(base$2.clone(cmyk)));
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`cmykToHSL() error: ${error}`, 'common > convert > base > cmykToHSL()');
+            logger$m.error(`cmykToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
 function cmykToRGB(cmyk) {
+    const thisMethod = 'cmykToRGB()';
     try {
         if (!validate$1.colorValues(cmyk)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`, 'common > convert > base > cmykToRGB()');
+                logger$m.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultRGBBranded;
         }
-        const clonedCMYK = base$3.clone(cmyk);
+        const clonedCMYK = base$2.clone(cmyk);
         const r = 255 *
             (1 - clonedCMYK.value.cyan / 100) *
             (1 - clonedCMYK.value.key / 100);
@@ -3141,28 +2914,30 @@ function cmykToRGB(cmyk) {
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`cmykToRGB error: ${error}`, 'common > convert > base > cmykToRGB()');
+            logger$m.error(`cmykToRGB error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultRGBBranded;
     }
 }
 function hexToHSL(hex) {
+    const thisMethod = 'hexToHSL()';
     try {
         if (!validate$1.colorValues(hex)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid Hex value ${JSON.stringify(hex)}`, 'common > convert > base > hexToHSL()');
+                logger$m.error(`Invalid Hex value ${JSON.stringify(hex)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultHSLBranded;
         }
-        return rgbToHSL(hexToRGB(base$3.clone(hex)));
+        return rgbToHSL(hexToRGB(base$2.clone(hex)));
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`hexToHSL() error: ${error}`, 'common > convert > base > hexToHSL()');
+            logger$m.error(`hexToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
 function hexToHSLWrapper(input) {
+    const thisMethod = 'hexToHSLWrapper()';
     try {
-        const clonedInput = base$3.clone(input);
+        const clonedInput = base$2.clone(input);
         const hex = typeof clonedInput === 'string'
             ? {
                 value: {
@@ -3183,16 +2958,17 @@ function hexToHSLWrapper(input) {
     }
     catch (error) {
         if (logMode$k.error) {
-            logger$m.error(`Error converting hex to HSL: ${error}`, 'common > convert > base > hexToHSLWrapper()');
+            logger$m.error(`Error converting hex to HSL: ${error}`, `${thisModule$m} > ${thisMethod}`);
         }
         return defaultHSLBranded;
     }
 }
 function hexToRGB(hex) {
+    const thisMethod = 'hexToRGB()';
     try {
         if (!validate$1.colorValues(hex)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid Hex value ${JSON.stringify(hex)}`, 'common > convert > base > hexToRGB()');
+                logger$m.error(`Invalid Hex value ${JSON.stringify(hex)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultRGBBranded;
         }
         const clonedHex = clone(hex);
@@ -3210,45 +2986,48 @@ function hexToRGB(hex) {
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`hexToRGB error: ${error}`, 'common > convert > base > hexToRGB()');
+            logger$m.error(`hexToRGB error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultRGBBranded;
     }
 }
 function hslToCMYK(hsl) {
+    const thisMethod = 'hslToCMYK()';
     try {
         if (!validate$1.colorValues(hsl)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, 'common > convert > base > hslToCMYK()');
+                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultCMYKBranded;
         }
         return rgbToCMYK(hslToRGB(clone(hsl)));
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`Error converting HSL ${JSON.stringify(hsl)} to CMYK: ${error}`, 'common > convert > base > hslToCMYK()');
+            logger$m.error(`Error converting HSL ${JSON.stringify(hsl)} to CMYK: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultCMYKBranded;
     }
 }
 function hslToHex(hsl) {
+    const thisMethod = 'hslToHex()';
     try {
         if (!validate$1.colorValues(hsl)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, 'common > convert > base > hslToHex()');
+                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultHexBranded;
         }
         return rgbToHex(hslToRGB(clone(hsl)));
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`hslToHex error: ${error}`, 'common > convert > base > hslToHex()');
+            logger$m.error(`hslToHex error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultHexBranded;
     }
 }
 function hslToHSV(hsl) {
+    const thisMethod = 'hslToHSV()';
     try {
         if (!validate$1.colorValues(hsl)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, 'common > convert > base > hslToHSV()');
+                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultHSVBranded;
         }
         const clonedHSL = clone(hsl);
@@ -3268,30 +3047,32 @@ function hslToHSV(hsl) {
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`hslToHSV() error: ${error}`, 'common > convert > base > hslToHSV()');
+            logger$m.error(`hslToHSV() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultHSVBranded;
     }
 }
 function hslToLAB(hsl) {
+    const thisMethod = 'hslToLAB()';
     try {
         if (!validate$1.colorValues(hsl)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, 'common > convert > base > hslToLAB()');
+                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultLABBranded;
         }
         return xyzToLAB(rgbToXYZ(hslToRGB(clone(hsl))));
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`hslToLab() error: ${error}`, 'common > convert > base > hslToLAB()');
+            logger$m.error(`hslToLab() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultLABBranded;
     }
 }
 function hslToRGB(hsl) {
+    const thisMethod = 'hslToRGB()';
     try {
         if (!validate$1.colorValues(hsl)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, 'common > convert > base > hslToRGB()');
+                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultRGBBranded;
         }
         const clonedHSL = clone(hsl);
@@ -3311,15 +3092,16 @@ function hslToRGB(hsl) {
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`hslToRGB error: ${error}`, 'common > convert > base > hslToRGB()');
+            logger$m.error(`hslToRGB error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultRGBBranded;
     }
 }
 function hslToSL(hsl) {
+    const thisMethod = 'hslToSL()';
     try {
         if (!validate$1.colorValues(hsl)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, 'common > convert > base > hslToSL()');
+                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultSLBranded;
         }
         return {
@@ -3333,45 +3115,48 @@ function hslToSL(hsl) {
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`Error converting HSL to SL: ${error}`, 'common > convert > base > hslToSL()');
+            logger$m.error(`Error converting HSL to SL: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultSLBranded;
     }
 }
 function hslToSV(hsl) {
+    const thisMethod = 'hslToSV()';
     try {
         if (!validate$1.colorValues(hsl)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, 'common > convert > base > hslToSV()');
+                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultSVBranded;
         }
         return hsvToSV(rgbToHSV(hslToRGB(clone(hsl))));
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`Error converting HSL to SV: ${error}`, 'common > convert > base > hslToSV()');
+            logger$m.error(`Error converting HSL to SV: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultSVBranded;
     }
 }
 function hslToXYZ(hsl) {
+    const thisMethod = 'hslToXYZ()';
     try {
         if (!validate$1.colorValues(hsl)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, 'common > convert > base > hslToXYZ()');
+                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultXYZBranded;
         }
         return labToXYZ(hslToLAB(clone(hsl)));
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`hslToXYZ error: ${error}`, 'common > convert > base > hslToXYZ()');
+            logger$m.error(`hslToXYZ error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultXYZBranded;
     }
 }
 function hsvToHSL(hsv) {
+    const thisMethod = 'hsvToHSL()';
     try {
         if (!validate$1.colorValues(hsv)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid HSV value ${JSON.stringify(hsv)}`, 'common > convert > base > hsvToHSL()');
+                logger$m.error(`Invalid HSV value ${JSON.stringify(hsv)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultHSLBranded;
         }
         const clonedHSV = clone(hsv);
@@ -3395,15 +3180,16 @@ function hsvToHSL(hsv) {
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`hsvToHSL() error: ${error}`, 'common > convert > base > hsvToHSL()');
+            logger$m.error(`hsvToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
 function hsvToSV(hsv) {
+    const thisMethod = 'hsvToSV()';
     try {
         if (!validate$1.colorValues(hsv)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid HSV value ${JSON.stringify(hsv)}`, 'common > convert > base > hsvToSV()');
+                logger$m.error(`Invalid HSV value ${JSON.stringify(hsv)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultSVBranded;
         }
         return {
@@ -3417,22 +3203,23 @@ function hsvToSV(hsv) {
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`Error converting HSV to SV: ${error}`, 'common > convert > base > hsvToSV()');
+            logger$m.error(`Error converting HSV to SV: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultSVBranded;
     }
 }
 function labToHSL(lab) {
+    const thisMethod = 'labToHSL()';
     try {
         if (!validate$1.colorValues(lab)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, 'common > convert > base > labToHSL()');
+                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultHSLBranded;
         }
         return rgbToHSL(labToRGB(clone(lab)));
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`labToHSL() error: ${error}`, 'common > convert > base > labToHSL()');
+            logger$m.error(`labToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
@@ -3440,22 +3227,23 @@ function labToRGB(lab) {
     try {
         if (!validate$1.colorValues(lab)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, 'common > convert > base > labToRGB()');
+                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$m} > labToRGB()`);
             return defaultRGBBranded;
         }
         return xyzToRGB(labToXYZ(clone(lab)));
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`labToRGB error: ${error}`, 'common > convert > base > labToRGB()');
+            logger$m.error(`labToRGB error: ${error}`, `${thisModule$m} > labToRGB()`);
         return defaultRGBBranded;
     }
 }
 function labToXYZ(lab) {
+    const thisMethod = 'labToXYZ()';
     try {
         if (!validate$1.colorValues(lab)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, 'common > convert > base > labToXYZ()');
+                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultXYZBranded;
         }
         const clonedLAB = clone(lab);
@@ -3485,15 +3273,16 @@ function labToXYZ(lab) {
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`labToXYZ error: ${error}`, 'common > convert > base > labToXYZ()');
+            logger$m.error(`labToXYZ error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultXYZBranded;
     }
 }
 function rgbToCMYK(rgb) {
+    const thisMethod = 'rgbToCMYK()';
     try {
         if (!validate$1.colorValues(rgb)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, 'common > convert > base > rgbToCMYK()');
+                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultCMYKBranded;
         }
         const clonedRGB = clone(rgb);
@@ -3507,21 +3296,22 @@ function rgbToCMYK(rgb) {
         const alpha = brand$3.asAlphaRange(rgb.value.alpha);
         const format = 'cmyk';
         const cmyk = { value: { cyan, magenta, yellow, key, alpha }, format };
-        if (!mode.quiet)
-            logger$m.info(`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(clone(cmyk))}`, 'common > convert > base > rgbToCMYK()');
+        if (!modeData.quiet)
+            logger$m.info(`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(clone(cmyk))}`, `${thisModule$m} > ${thisMethod}`);
         return cmyk;
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`Error converting RGB to CMYK: ${error}`, 'common > convert > base > rgbToCMYK()');
+            logger$m.error(`Error converting RGB to CMYK: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultCMYKBranded;
     }
 }
 function rgbToHex(rgb) {
+    const thisMethod = 'rgbToHex()';
     try {
         if (!validate$1.colorValues(rgb)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, 'common > convert > base > rgbToHex()');
+                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultHexBranded;
         }
         const clonedRGB = clone(rgb);
@@ -3532,7 +3322,7 @@ function rgbToHex(rgb) {
         ].some(v => isNaN(v) || v < 0 || v > 255) ||
             [clonedRGB.value.alpha].some(v => isNaN(v) || v < 0 || v > 1)) {
             if (logMode$k.warn)
-                logger$m.warn(`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}\nA=${JSON.stringify(clonedRGB.value.alpha)}`, 'common > convert > base > rgbToHex()');
+                logger$m.warn(`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}\nA=${JSON.stringify(clonedRGB.value.alpha)}`, `${thisModule$m} > ${thisMethod}`);
             return {
                 value: {
                     hex: brand$3.asHexSet('#000000FF'),
@@ -3553,15 +3343,16 @@ function rgbToHex(rgb) {
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.warn(`rgbToHex error: ${error}`, 'rgbToHex()');
+            logger$m.warn(`rgbToHex error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultHexBranded;
     }
 }
 function rgbToHSL(rgb) {
+    const thisMethod = 'rgbToHSL()';
     try {
         if (!validate$1.colorValues(rgb)) {
             if (logMode$k.error) {
-                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, 'common > convert > base > rgbToHSL()');
+                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$m} > ${thisMethod}`);
             }
             return defaultHSLBranded;
         }
@@ -3601,16 +3392,17 @@ function rgbToHSL(rgb) {
     }
     catch (error) {
         if (logMode$k.error) {
-            logger$m.error(`rgbToHSL() error: ${error}`, 'common > convert > base > rgbToHSL()');
+            logger$m.error(`rgbToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         }
         return defaultHSLBranded;
     }
 }
 function rgbToHSV(rgb) {
+    const thisMethod = 'rgbToHSV()';
     try {
         if (!validate$1.colorValues(rgb)) {
             if (logMode$k.error) {
-                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, 'common > convert > base > rgbToHSV()');
+                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$m} > ${thisMethod}`);
             }
             return defaultHSVBranded;
         }
@@ -3649,16 +3441,17 @@ function rgbToHSV(rgb) {
     }
     catch (error) {
         if (logMode$k.error) {
-            logger$m.error(`rgbToHSV() error: ${error}`, 'common > convert > base > rgbToHSV()');
+            logger$m.error(`rgbToHSV() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         }
         return defaultHSVBranded;
     }
 }
 function rgbToXYZ(rgb) {
+    const thisMethod = 'rgbToXYZ()';
     try {
         if (!validate$1.colorValues(rgb)) {
             if (logMode$k.error) {
-                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, 'rgbToXYZ()');
+                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$m} > ${thisMethod}`);
             }
             return defaultXYZBranded;
         }
@@ -3693,31 +3486,33 @@ function rgbToXYZ(rgb) {
     }
     catch (error) {
         if (logMode$k.error) {
-            logger$m.error(`rgbToXYZ error: ${error}`, 'common > convert > base > rgbToXYZ()');
+            logger$m.error(`rgbToXYZ error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         }
         return defaultXYZBranded;
     }
 }
 function xyzToHSL(xyz) {
+    const thisMethod = 'xyzToHSL()';
     try {
         if (!validate$1.colorValues(xyz)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, 'common > convert > base > xyzToHSL()');
+                logger$m.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultHSLBranded;
         }
         return rgbToHSL(xyzToRGB(clone(xyz)));
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`xyzToHSL() error: ${error}`, 'common > convert > base > xyzToHSL()');
+            logger$m.error(`xyzToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
 function xyzToLAB(xyz) {
+    const thisMethod = 'xyzToLAB()';
     try {
         if (!validate$1.colorValues(xyz)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, 'common > convert > base > xyzToLAB()');
+                logger$m.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultLABBranded;
         }
         const clonedXYZ = clone(xyz);
@@ -3751,22 +3546,23 @@ function xyzToLAB(xyz) {
         };
         if (!validate$1.colorValues(lab)) {
             if (logMode$k.error)
-                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, 'xyzToLAB()');
+                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultLABBranded;
         }
         return lab;
     }
     catch (error) {
         if (logMode$k.error)
-            logger$m.error(`xyzToLab() error: ${error}`, 'common > convert > base > xyzToLAB()');
+            logger$m.error(`xyzToLab() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         return defaultLABBranded;
     }
 }
 function xyzToRGB(xyz) {
+    const thisMethod = 'xyzToRGB()';
     try {
         if (!validate$1.colorValues(xyz)) {
             if (logMode$k.error) {
-                logger$m.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, 'common > convert > base > xyzToRGB()');
+                logger$m.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, `${thisModule$m} > ${thisMethod}`);
             }
             return defaultRGBBranded;
         }
@@ -3792,16 +3588,17 @@ function xyzToRGB(xyz) {
     }
     catch (error) {
         if (logMode$k.error) {
-            logger$m.error(`xyzToRGB error: ${error}`, 'common > convert > base > xyzToRGB()');
+            logger$m.error(`xyzToRGB error: ${error}`, `${thisModule$m} > ${thisMethod}`);
         }
         return defaultRGBBranded;
     }
 }
 // ******** BUNDLED CONVERSION FUNCTIONS ********
 function hslTo$1(color, colorSpace) {
+    const thisMethod = 'hslTo()';
     try {
         if (!validate$1.colorValues(color)) {
-            logger$m.error(`Invalid color value ${JSON.stringify(color)}`, 'hslTo()');
+            logger$m.error(`Invalid color value ${JSON.stringify(color)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultRGBBranded;
         }
         const clonedColor = clone(color);
@@ -3833,9 +3630,10 @@ function hslTo$1(color, colorSpace) {
     }
 }
 function toHSL(color) {
+    const thisMethod = 'toHSL()';
     try {
         if (!validate$1.colorValues(color)) {
-            logger$m.error(`Invalid color value ${JSON.stringify(color)}`, 'toHSL()');
+            logger$m.error(`Invalid color value ${JSON.stringify(color)}`, `${thisModule$m} > ${thisMethod}`);
             return defaultHSLBranded;
         }
         const clonedColor = clone(color);
@@ -3862,7 +3660,7 @@ function toHSL(color) {
         throw new Error(`toHSL() error: ${error}`);
     }
 }
-const convert = {
+const coreConversionUtils = {
     hslTo: hslTo$1,
     toHSL,
     wrappers: {
@@ -3870,12 +3668,45 @@ const convert = {
     }
 };
 
-// File: src/common/helpers/dom.js
+// File: data/consts.js
+const adjustments$1 = { slaValue: 10 };
+const debounce = { button: 300, input: 200 };
+const limits$3 = {
+    xyz: { max: { x: 95.047, y: 100, z: 108.883 }, min: { x: 0, y: 0, z: 0 } }
+};
+const paletteRanges$5 = {
+    comp: { hueShift: 10, lightShift: 0, satShift: 0 },
+    diadic: { hueShift: 30, lightShift: 30, satShift: 30 },
+    hexad: { hueShift: 0, lightShift: 30, satShift: 30 },
+    random: { hueShift: 0, lightShift: 0, satShift: 0 },
+    splitComp: { hueShift: 30, lightShift: 30, satShift: 30 },
+    tetra: { hueShift: 0, lightShift: 30, satShift: 30 },
+    triad: { hueShift: 0, lightShift: 30, satShift: 30 }
+};
+const probabilities$1 = {
+    values: [40, 45, 50, 55, 60, 65, 70],
+    weights: [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05]
+};
+const thresholds = { dark: 25, gray: 20, light: 75 };
+const timeouts$1 = { copyButtonText: 1000, toast: 3000, tooltip: 1000 };
+const constsData = {
+    adjustments: adjustments$1,
+    debounce,
+    limits: limits$3,
+    paletteRanges: paletteRanges$5,
+    probabilities: probabilities$1,
+    thresholds,
+    timeouts: timeouts$1
+};
+
+// File: common/helpers/dom.js
+const thisModule$l = 'common/helpers/dom.js';
 const logger$l = await createLogger();
-const logMode$j = mode.logging;
-const timeouts = consts.timeouts;
+const logMode$j = modeData.logging;
+const timeouts = constsData.timeouts;
 let dragSrcEl = null;
 function attachDragAndDropListeners(element) {
+    const thisMethod = 'attachDragAndDropEventListeners()';
     try {
         if (element) {
             element.addEventListener('dragstart', dragStart);
@@ -3883,61 +3714,65 @@ function attachDragAndDropListeners(element) {
             element.addEventListener('drop', drop);
             element.addEventListener('dragend', dragEnd);
         }
-        if (!mode.quiet)
-            logger$l.info('Drag and drop event listeners successfully attached', 'common > helpers > dom > attachDragAndDropEventListeners()');
+        if (!modeData.quiet)
+            logger$l.info('Drag and drop event listeners successfully attached', `${thisModule$l} > ${thisMethod}`);
     }
     catch (error) {
         if (!logMode$j.error)
-            logger$l.error(`Failed to execute attachDragAndDropEventListeners: ${error}`, 'common > helpers > dom > attachDragAndDropEventListeners()');
+            logger$l.error(`Failed to execute attachDragAndDropEventListeners: ${error}`, `${thisModule$l} > ${thisMethod}`);
     }
 }
 function dragStart(e) {
+    const thisMethod = 'handleDragStart()';
     try {
         dragSrcEl = e.currentTarget;
         if (e.dataTransfer) {
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/html', dragSrcEl.outerHTML);
         }
-        if (!mode.quiet && mode.debug && logMode$j.verbosity > 3)
-            logger$l.info('handleDragStart complete', 'common > helpers > dom > dragStart()');
+        if (!modeData.quiet && modeData.debug && logMode$j.verbosity > 3)
+            logger$l.info('handleDragStart complete', `${thisModule$l} > ${thisMethod}`);
     }
     catch (error) {
         if (logMode$j.error)
-            logger$l.error(`Error in handleDragStart: ${error}`, 'common > helpers > dom > dragStart()');
+            logger$l.error(`Error in handleDragStart: ${error}`, `${thisModule$l} > ${thisMethod}`);
     }
 }
 function dragOver(e) {
+    const thisMethod = 'handleDragOver()';
     try {
         e.preventDefault();
         if (e.dataTransfer) {
             e.dataTransfer.dropEffect = 'move';
         }
-        if (!mode.quiet && mode.debug && logMode$j.verbosity > 3)
-            logger$l.info('handleDragOver complete', 'common > helpers > dom > dragOver()');
+        if (!modeData.quiet && modeData.debug && logMode$j.verbosity > 3)
+            logger$l.info('handleDragOver complete', `${thisModule$l} > ${thisMethod}`);
         return false;
     }
     catch (error) {
         if (logMode$j.error)
-            logger$l.error(`Error in handleDragOver: ${error}`, 'common > helpers > dom > dragOver()');
+            logger$l.error(`Error in handleDragOver: ${error}`, `${thisModule$l} > ${thisMethod}`);
         return false;
     }
 }
 function dragEnd(e) {
+    const thisMethod = 'handleDragEnd()';
     try {
         const target = e.currentTarget;
         target.classList.remove('dragging');
         document.querySelectorAll('.color-stripe').forEach(el => {
             el.classList.remove('dragging');
         });
-        if (!mode.quiet && mode.debug && logMode$j.verbosity > 3)
-            logger$l.info('handleDragEnd complete', 'common > helpers > dom > dragEnd()');
+        if (!modeData.quiet && modeData.debug && logMode$j.verbosity > 3)
+            logger$l.info('handleDragEnd complete', `${thisModule$l} > ${thisMethod}`);
     }
     catch (error) {
         if (logMode$j.error)
-            logger$l.error(`Error in handleDragEnd: ${error}`, 'common > helpers > dom > dragEnd()');
+            logger$l.error(`Error in handleDragEnd: ${error}`, `${thisModule$l} > ${thisMethod}`);
     }
 }
 function drop(e) {
+    const thisMethod = 'drop()';
     try {
         e.stopPropagation();
         const target = e.currentTarget;
@@ -3956,30 +3791,31 @@ function drop(e) {
             newDropTargetEl.id = dropTargetId;
             newDragSrcEl.querySelector('.color-text-output-box').value = dropTargetText;
             newDropTargetEl.querySelector('.color-text-output-box').value = dragSrcText;
-            if (!mode.quiet && mode.debug && logMode$j.verbosity > 3)
-                logger$l.info('calling attachDragAndDropEventListeners for new elements', 'common > helpers > dom > drop()');
+            if (!modeData.quiet && modeData.debug && logMode$j.verbosity > 3)
+                logger$l.info('calling attachDragAndDropEventListeners for new elements', `${thisModule$l} > ${thisMethod}`);
             attachDragAndDropListeners(newDragSrcEl);
             attachDragAndDropListeners(newDropTargetEl);
         }
-        if (!mode.quiet && mode.debug && logMode$j.verbosity > 3)
-            logger$l.info('handleDrop complete', 'common > helpers > dom > drop()');
+        if (!modeData.quiet && modeData.debug && logMode$j.verbosity > 3)
+            logger$l.info('handleDrop complete', `${thisModule$l} > ${thisMethod}`);
     }
     catch (error) {
         if (!logMode$j.error)
-            logger$l.error(`Error in handleDrop: ${error}`, 'common > helpers > dom > drop()');
+            logger$l.error(`Error in handleDrop: ${error}`, `${thisModule$l} > ${thisMethod}`);
     }
 }
 async function makePaletteBox(color, paletteBoxCount) {
+    const thisMethod = 'makePaletteBox()';
     try {
-        if (!core.validate.colorValues(color)) {
+        if (!coreUtils.validate.colorValues(color)) {
             if (!logMode$j.error)
-                logger$l.error(`Invalid ${color.format} color value ${JSON.stringify(color)}`, 'common > helpers > dom > makePaletteBox()');
+                logger$l.error(`Invalid ${color.format} color value ${JSON.stringify(color)}`, `${thisModule$l} > ${thisMethod}`);
             return {
                 colorStripe: document.createElement('div'),
                 paletteBoxCount
             };
         }
-        const clonedColor = core.base.clone(color);
+        const clonedColor = coreUtils.base.clone(color);
         const paletteBox = document.createElement('div');
         paletteBox.className = 'palette-box';
         paletteBox.id = `palette-box-${paletteBoxCount}`;
@@ -3991,7 +3827,7 @@ async function makePaletteBox(color, paletteBoxCount) {
         colorTextOutputBox.className = 'color-text-output-box tooltip';
         colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
         colorTextOutputBox.setAttribute('data-format', 'hex');
-        const colorString = await core.convert.colorToCSSColorString(clonedColor);
+        const colorString = await coreUtils.convert.colorToCSSColorString(clonedColor);
         colorTextOutputBox.value = colorString || '';
         colorTextOutputBox.colorValues = clonedColor;
         colorTextOutputBox.readOnly = false;
@@ -4007,16 +3843,16 @@ async function makePaletteBox(color, paletteBoxCount) {
             try {
                 await navigator.clipboard.writeText(colorTextOutputBox.value);
                 showTooltip(colorTextOutputBox);
-                clearTimeout(consts.timeouts.tooltip || 1000);
+                clearTimeout(constsData.timeouts.tooltip || 1000);
                 copyButton.textContent = 'Copied!';
-                setTimeout(() => (copyButton.textContent = 'Copy'), consts.timeouts.copyButtonText || 1000);
+                setTimeout(() => (copyButton.textContent = 'Copy'), constsData.timeouts.copyButtonText || 1000);
             }
             catch (error) {
                 if (!logMode$j.error)
-                    logger$l.error(`Failed to copy: ${error}`, 'common > helpers > dom > makePaletteBox()');
+                    logger$l.error(`Failed to copy: ${error}`, `${thisModule$l} > ${thisMethod}`);
             }
         });
-        colorTextOutputBox.addEventListener('input', core.base.debounce((e) => {
+        colorTextOutputBox.addEventListener('input', coreUtils.base.debounce((e) => {
             const target = e.target;
             if (target) {
                 const cssColor = target.value.trim();
@@ -4027,7 +3863,7 @@ async function makePaletteBox(color, paletteBoxCount) {
                 if (stripeElement)
                     stripeElement.style.backgroundColor = cssColor;
             }
-        }, consts.debounce.input || 200));
+        }, constsData.debounce.input || 200));
         paletteBoxTopHalf.appendChild(colorTextOutputBox);
         paletteBoxTopHalf.appendChild(copyButton);
         const paletteBoxBottomHalf = document.createElement('div');
@@ -4055,7 +3891,7 @@ async function makePaletteBox(color, paletteBoxCount) {
     }
     catch (error) {
         if (!logMode$j.error)
-            logger$l.error(`Failed to execute makePaletteBox: ${error}`, 'common > helpers > dom > makePaletteBox()');
+            logger$l.error(`Failed to execute makePaletteBox: ${error}`, `${thisModule$l} > ${thisMethod}`);
         return {
             colorStripe: document.createElement('div'),
             paletteBoxCount
@@ -4063,20 +3899,22 @@ async function makePaletteBox(color, paletteBoxCount) {
     }
 }
 function showToast(message) {
+    const thisMethod = 'showToast()';
     const toast = document.createElement('div');
     toast.className = 'toast-message';
     toast.textContent = message;
     document.body.appendChild(toast);
-    if (!mode.quiet && logMode$j.verbosity > 3)
-        logger$l.info('Toast message added', 'common > helpers > dom > showToast()');
+    if (!modeData.quiet && logMode$j.verbosity > 3)
+        logger$l.info('Toast message added', `${thisModule$l} > ${thisMethod}`);
     setTimeout(() => {
         toast.classList.add('fade-out');
-        if (!mode.quiet && logMode$j.verbosity > 3)
-            logger$l.info('Toast message faded out', 'common > helpers > dom > showToast()');
+        if (!modeData.quiet && logMode$j.verbosity > 3)
+            logger$l.info('Toast message faded out', `${thisModule$l} > ${thisMethod}`);
         toast.addEventListener('transitioned', () => toast.remove());
-    }, timeouts.toast);
+    }, timeouts.toast || 3000);
 }
 function showTooltip(tooltipElement) {
+    const thisMethod = 'showTooltip()';
     try {
         const tooltip = tooltipElement.querySelector('.tooltiptext');
         if (tooltip) {
@@ -4085,30 +3923,31 @@ function showTooltip(tooltipElement) {
             setTimeout(() => {
                 tooltip.style.visibility = 'hidden';
                 tooltip.style.opacity = '0';
-            }, consts.timeouts.tooltip || 1000);
+            }, constsData.timeouts.tooltip || 1000);
         }
-        if (!mode.quiet && logMode$j.verbosity > 3)
-            logger$l.info('showTooltip executed', 'showTooltip()');
+        if (!modeData.quiet && logMode$j.verbosity > 3)
+            logger$l.info('showTooltip executed', `${thisModule$l} > ${thisMethod}`);
     }
     catch (error) {
         if (logMode$j.error)
-            logger$l.error(`Failed to execute showTooltip: ${error}`, 'common > helpers > dom > showTooltip()');
+            logger$l.error(`Failed to execute showTooltip: ${error}`, `${thisModule$l} > ${thisMethod}`);
     }
 }
 async function validateAndConvertColor(color) {
+    const thisMethod = 'validateAndConvertColor()';
     if (!color)
         return null;
-    const convertedColor = core.guards.isColorString(color)
-        ? await core.convert.colorStringToColor(color)
+    const convertedColor = coreUtils.guards.isColorString(color)
+        ? await coreUtils.convert.colorStringToColor(color)
         : color;
-    if (!core.validate.colorValues(convertedColor)) {
+    if (!coreUtils.validate.colorValues(convertedColor)) {
         if (logMode$j.error)
-            logger$l.error(`Invalid color: ${JSON.stringify(convertedColor)}`, 'common > helpers > dom > validateAndConvertColor()');
+            logger$l.error(`Invalid color: ${JSON.stringify(convertedColor)}`, `${thisModule$l} > ${thisMethod}`);
         return null;
     }
     return convertedColor;
 }
-const dom$2 = {
+const domHelpers = {
     attachDragAndDropListeners,
     handle: {
         dragStart,
@@ -4122,92 +3961,203 @@ const dom$2 = {
     validateAndConvertColor
 };
 
-// File: src/common/helpers/index.js
-const helpers = {
-    conversion: conversion$2,
-    dom: dom$2
+// File: common/helpers/index.js
+const helpers$1 = {
+    conversion: conversionHelpers,
+    dom: domHelpers
 };
 
-// File: src/common/utils/conversion.js
+// File: data/dom/dom.js
+const ids$2 = {
+    advancedMenu: 'advanced-menu',
+    advancedMenuButton: 'advanced-menu-button',
+    advancedMenuContent: 'advanced-menu-content',
+    applyCustomColorButton: 'apply-custom-color-button',
+    clearCustomColorButton: 'clear-custom-color-button',
+    colorBox1: 'color-box-1',
+    customColorDisplay: 'custom-color-display',
+    customColorInput: 'custom-color-input',
+    customColorMenu: 'custom-color-menu',
+    customColorMenuButton: 'custom-color-menu-button',
+    deleteDatabaseButton: 'delete-database-button',
+    desaturateButton: 'desaturate-button',
+    developerMenu: 'developer-menu',
+    developerMenuButton: 'developer-menu-button',
+    enableAlphaCheckbox: 'enable-alpha-checkbox',
+    exportPaletteButton: 'export-palette-button',
+    exportPaletteFormatOptions: 'export-palette-format-options',
+    exportPaletteInput: 'export-palette-input',
+    generateButton: 'generate-button',
+    helpMenu: 'help-menu',
+    helpMenuButton: 'help-menu-button',
+    helpMenuContent: 'help-menu-content',
+    historyMenu: 'history-menu',
+    historyMenuButton: 'history-menu-button',
+    historyMenuContent: 'history-menu-content',
+    importExportMenu: 'import-export-menu',
+    importExportMenuButton: 'import-export-menu-button',
+    importPaletteInput: 'import-palette-input',
+    limitDarknessCheckbox: 'limit-darkness-checkbox',
+    limitGraynessCheckbox: 'limit-grayness-checkbox',
+    limitLightnessCheckbox: 'limit-lightness-checkbox',
+    paletteNumberOptions: 'palette-number-options',
+    paletteTypeOptions: 'palette-type-options',
+    resetDatabaseButton: 'reset-database-button',
+    resetPaletteIDButton: 'reset-palette-id-button',
+    saturateButton: 'saturate-button',
+    selectedColorOption: 'selected-color-option',
+    showAsCMYKButton: 'show-as-cmyk-button',
+    showAsHexButton: 'show-as-hex-button',
+    showAsHSLButton: 'show-as-hsl-button',
+    showAsHSVButton: 'show-as-hsv-button',
+    showAsLABButton: 'show-as-lab-button',
+    showAsRGBButton: 'show-as-rgb-button'
+};
+const domData = {
+    elements: {
+        buttons: {
+            advancedMenuButton: document.getElementById(ids$2.advancedMenuButton),
+            applyCustomColorButton: document.getElementById(ids$2.applyCustomColorButton),
+            clearCustomColorButton: document.getElementById(ids$2.clearCustomColorButton),
+            customColorMenuButton: document.getElementById(ids$2.customColorMenuButton),
+            deleteDatabaseButton: document.getElementById(ids$2.deleteDatabaseButton),
+            desaturateButton: document.getElementById(ids$2.desaturateButton),
+            developerMenuButton: document.getElementById(ids$2.developerMenuButton),
+            exportPaletteButton: document.getElementById(ids$2.exportPaletteButton),
+            generateButton: document.getElementById(ids$2.generateButton),
+            helpMenuButton: document.getElementById(ids$2.helpMenuButton),
+            historyMenuButton: document.getElementById(ids$2.historyMenuButton),
+            importExportMenuButton: document.getElementById(ids$2.importExportMenuButton),
+            resetDatabaseButton: document.getElementById(ids$2.resetDatabaseButton),
+            resetPaletteIDButton: document.getElementById(ids$2.resetPaletteIDButton),
+            saturateButton: document.getElementById(ids$2.saturateButton),
+            showAsCMYKButton: document.getElementById(ids$2.showAsCMYKButton),
+            showAsHexButton: document.getElementById(ids$2.showAsHexButton),
+            showAsHSLButton: document.getElementById(ids$2.showAsHSLButton),
+            showAsHSVButton: document.getElementById(ids$2.showAsHSVButton),
+            showAsLABButton: document.getElementById(ids$2.showAsLABButton),
+            showAsRGBButton: document.getElementById(ids$2.showAsRGBButton)
+        },
+        divs: {
+            advancedMenu: document.getElementById(ids$2.advancedMenu),
+            advancedMenuContent: document.getElementById(ids$2.advancedMenuContent),
+            colorBox1: document.getElementById(ids$2.colorBox1),
+            customColorMenu: document.getElementById(ids$2.customColorMenu),
+            developerMenu: document.getElementById(ids$2.developerMenu),
+            helpMenu: document.getElementById(ids$2.helpMenu),
+            helpMenuContent: document.getElementById(ids$2.helpMenuContent),
+            historyMenu: document.getElementById(ids$2.historyMenu),
+            historyMenuContent: document.getElementById(ids$2.historyMenuContent),
+            importExportMenu: document.getElementById(ids$2.importExportMenu)
+        },
+        inputs: {
+            customColorInput: document.getElementById(ids$2.customColorInputID),
+            enableAlphaCheckbox: document.getElementById(ids$2.enableAlphaCheckbox),
+            exportPaletteInput: document.getElementById(ids$2.exportPaletteInput),
+            importPaletteInput: document.getElementById(ids$2.importPaletteInput),
+            limitDarknessCheckbox: document.getElementById(ids$2.limitDarknessCheckbox),
+            limitGraynessCheckbox: document.getElementById(ids$2.limitGraynessCheckbox),
+            limitLightnessCheckbox: document.getElementById(ids$2.limitLightnessCheckbox),
+            paletteNumberOptions: document.getElementById(ids$2.paletteNumberOptions)
+        },
+        select: {
+            exportPaletteFormatOptions: document.getElementById(ids$2.exportPaletteFormatOptions),
+            paletteTypeOptions: document.getElementById(ids$2.paletteTypeOptions),
+            selectedColorOption: document.getElementById(ids$2.selectedColorOption)
+        },
+        spans: {
+            customColorDisplay: document.getElementById(ids$2.customColorDisplay)
+        }
+    },
+    ids: ids$2
+};
+
+// File: common/utils/conversion.js
+const logMode$i = modeData.logging;
+const thisModule$k = 'common/utils/conversion.js';
 const logger$k = await createLogger();
-const logMode$i = mode.logging;
 function getConversionFn(from, to) {
+    const thisMethod = 'getConversionFn()';
     try {
         const fnName = `${from}To${to[0].toUpperCase() + to.slice(1)}`;
-        if (!(fnName in convert))
+        if (!(fnName in conversionUtils))
             return undefined;
-        const conversionFn = convert[fnName];
+        const conversionFn = conversionUtils[fnName];
         return (value) => structuredClone(conversionFn(value));
     }
     catch (error) {
         if (logMode$i.error)
-            logger$k.error(`Error getting conversion function: ${error}`, 'common > utils > conversion > getConversionFn()');
+            logger$k.error(`Error getting conversion function: ${error}`, `${thisModule$k} > ${thisMethod}`);
         return undefined;
     }
 }
 function genAllColorValues$1(color) {
+    const thisMethod = 'genAllColorValues()';
     const result = {};
     try {
-        const clonedColor = core.base.clone(color);
-        if (!core.validate.colorValues(clonedColor)) {
+        const clonedColor = coreUtils.base.clone(color);
+        if (!coreUtils.validate.colorValues(clonedColor)) {
             if (logMode$i.error)
-                logger$k.error(`Invalid color: ${JSON.stringify(clonedColor)}`, 'common > utils > conversion > genAllColorValues()');
+                logger$k.error(`Invalid color: ${JSON.stringify(clonedColor)}`, `${thisModule$k} > ${thisMethod}`);
             return {};
         }
-        result.cmyk = convert.hslTo(clonedColor, 'cmyk');
-        result.hex = convert.hslTo(clonedColor, 'hex');
+        result.cmyk = coreConversionUtils.hslTo(clonedColor, 'cmyk');
+        result.hex = coreConversionUtils.hslTo(clonedColor, 'hex');
         result.hsl = clonedColor;
-        result.hsv = convert.hslTo(clonedColor, 'hsv');
-        result.lab = convert.hslTo(clonedColor, 'lab');
-        result.rgb = convert.hslTo(clonedColor, 'rgb');
-        result.sl = convert.hslTo(clonedColor, 'sl');
-        result.sv = convert.hslTo(clonedColor, 'sv');
-        result.xyz = convert.hslTo(clonedColor, 'xyz');
+        result.hsv = coreConversionUtils.hslTo(clonedColor, 'hsv');
+        result.lab = coreConversionUtils.hslTo(clonedColor, 'lab');
+        result.rgb = coreConversionUtils.hslTo(clonedColor, 'rgb');
+        result.sl = coreConversionUtils.hslTo(clonedColor, 'sl');
+        result.sv = coreConversionUtils.hslTo(clonedColor, 'sv');
+        result.xyz = coreConversionUtils.hslTo(clonedColor, 'xyz');
         return result;
     }
     catch (error) {
         if (logMode$i.error)
-            logger$k.error(`Error generating all color values: ${error}`, 'common > utils > conversion > genAllColorValues()');
+            logger$k.error(`Error generating all color values: ${error}`, `${thisModule$k} > ${thisMethod}`);
         return {};
     }
 }
-const conversion$1 = {
+const conversionUtils = {
     genAllColorValues: genAllColorValues$1,
     getConversionFn
 };
 
-// File: src/common/utils/errors.ts
+// File: common/utils/errors.js
+const logMode$h = modeData.logging;
+const thisModule$j = 'common/utils/errors.ts';
 const logger$j = await createLogger();
-const logMode$h = mode.logging;
 async function handleAsync(action, errorMessage, context) {
+    const thisMethod = 'handleAsync()';
     try {
         return await action();
     }
     catch (error) {
         if (logMode$h.error)
             if (error instanceof Error) {
-                logger$j.error(`${errorMessage}: ${error.message}. Context: ${context}`, 'common > utils > errors > handleAsync()');
+                logger$j.error(`${errorMessage}: ${error.message}. Context: ${context}`, `${thisModule$j} > ${thisMethod}`);
             }
             else {
-                logger$j.error(`${errorMessage}: ${error}. Context: ${context}`, 'common > utils > errors > handleAsync()');
+                logger$j.error(`${errorMessage}: ${error}. Context: ${context}`, `${thisModule$j} > ${thisMethod}`);
             }
         return null;
     }
 }
-const errors = {
+const errorUtils = {
     handleAsync
 };
 
-// File: src/common/utils/palette.js
+// File: common/utils/palette.js
+const logMode$g = modeData.logging;
+const thisModule$i = 'common/utils/palette.js';
 const logger$i = await createLogger();
-const logMode$g = mode.logging;
 function createObject(type, items, swatches, paletteID, enableAlpha, limitDark, limitGray, limitLight) {
     return {
         id: `${type}_${paletteID}`,
         items,
         metadata: {
             name: '',
-            timestamp: core.getFormattedTimestamp(),
+            timestamp: coreUtils.getFormattedTimestamp(),
             swatches,
             type,
             flags: {
@@ -4217,123 +4167,131 @@ function createObject(type, items, swatches, paletteID, enableAlpha, limitDark, 
                 limitLightness: limitLight
             },
             customColor: {
-                colors: items[0]?.colors || {},
-                colorStrings: items[0]?.colorStrings || {},
-                cssStrings: items[0]?.cssStrings || {}
+                colors: {
+                    main: items[0]?.colors.main || {},
+                    stringProps: items[0]?.colors.stringProps || {},
+                    css: items[0]?.colors.css || {}
+                }
             }
         }
     };
 }
 async function populateOutputBox(color, boxNumber) {
+    const thisMethod = 'populateOutputBox()';
     try {
-        const clonedColor = core.guards.isColor(color)
-            ? core.base.clone(color)
-            : await core.convert.colorStringToColor(color);
-        if (!core.validate.colorValues(clonedColor)) {
+        const clonedColor = coreUtils.guards.isColor(color)
+            ? coreUtils.base.clone(color)
+            : await coreUtils.convert.colorStringToColor(color);
+        if (!coreUtils.validate.colorValues(clonedColor)) {
             if (logMode$g.error)
-                logger$i.error('Invalid color values.', 'common > utils > palette > populateOutputBox()');
-            helpers.dom.showToast('Invalid color.');
+                logger$i.error('Invalid color values.', `${thisModule$i} > ${thisMethod}`);
+            helpers$1.dom.showToast('Invalid color.');
             return;
         }
         const colorTextOutputBox = document.getElementById(`color-text-output-box-${boxNumber}`);
         if (!colorTextOutputBox)
             return;
-        const stringifiedColor = await core.convert.colorToCSSColorString(clonedColor);
-        if (!mode.quiet && logMode$g.info && logMode$g.verbosity > 0)
-            logger$i.info(`Adding CSS-formatted color to DOM ${stringifiedColor}`, 'common > utils > palette > populateOutputBox()');
+        const stringifiedColor = await coreUtils.convert.colorToCSSColorString(clonedColor);
+        if (!modeData.quiet && logMode$g.info && logMode$g.verbosity > 0)
+            logger$i.info(`Adding CSS-formatted color to DOM ${stringifiedColor}`, `${thisModule$i} > ${thisMethod}`);
         colorTextOutputBox.value = stringifiedColor;
         colorTextOutputBox.setAttribute('data-format', color.format);
     }
     catch (error) {
         if (logMode$g.error)
-            logger$i.error(`Failed to populate color text output box: ${error}`, 'common > utils > palette > populateOutputBox()');
+            logger$i.error(`Failed to populate color text output box: ${error}`, `${thisModule$i} > ${thisMethod}`);
         return;
     }
 }
-const palette = {
+const paletteUtils = {
     createObject,
     populateOutputBox
 };
 
-// File: src/common/utils/random.js
+// File: common/utils/random.js
+const logMode$f = modeData.logging;
+const thisModule$h = 'common/utils/random.js';
 const logger$h = await createLogger();
-const logMode$f = mode.logging;
 function hsl(enableAlpha) {
+    const thisMethod = 'hsl()';
     try {
         const alpha = enableAlpha ? Math.round(Math.random() * 100) / 100 : 1;
         const hsl = {
             value: {
-                hue: core.sanitize.radial(Math.floor(Math.random() * 360)),
-                saturation: core.sanitize.percentile(Math.floor(Math.random() * 101)),
-                lightness: core.sanitize.percentile(Math.floor(Math.random() * 101)),
-                alpha: core.brand.asAlphaRange(alpha)
+                hue: coreUtils.sanitize.radial(Math.floor(Math.random() * 360)),
+                saturation: coreUtils.sanitize.percentile(Math.floor(Math.random() * 101)),
+                lightness: coreUtils.sanitize.percentile(Math.floor(Math.random() * 101)),
+                alpha: coreUtils.brand.asAlphaRange(alpha)
             },
             format: 'hsl'
         };
-        if (!core.validate.colorValues(hsl)) {
+        if (!coreUtils.validate.colorValues(hsl)) {
             if (logMode$f.error)
-                logger$h.error(`Invalid random HSL color value ${JSON.stringify(hsl)}`, 'common > utils > random > hsl()');
-            const unbrandedHSL = core.base.clone(defaults.colors.base.unbranded.hsl);
-            return core.brandColor.asHSL(unbrandedHSL);
+                logger$h.error(`Invalid random HSL color value ${JSON.stringify(hsl)}`, `${thisModule$h} > ${thisMethod}`);
+            const unbrandedHSL = coreUtils.base.clone(defaultData.colors.base.unbranded.hsl);
+            return coreUtils.brandColor.asHSL(unbrandedHSL);
         }
-        if (!mode.quiet && !logMode$f.info)
-            logger$h.info(`Generated randomHSL: ${JSON.stringify(hsl)}`, 'common > utils > random > hsl()');
+        if (!modeData.quiet && !logMode$f.info)
+            logger$h.info(`Generated randomHSL: ${JSON.stringify(hsl)}`, `${thisModule$h} > ${thisMethod}`);
         return hsl;
     }
     catch (error) {
         if (logMode$f.error)
-            logger$h.error(`Error generating random HSL color: ${error}`, 'common > utils > random > hsl()');
-        const unbrandedHSL = core.base.clone(defaults.colors.base.unbranded.hsl);
-        return core.brandColor.asHSL(unbrandedHSL);
+            logger$h.error(`Error generating random HSL color: ${error}`, `${thisModule$h} > ${thisMethod}`);
+        const unbrandedHSL = coreUtils.base.clone(defaultData.colors.base.unbranded.hsl);
+        return coreUtils.brandColor.asHSL(unbrandedHSL);
     }
 }
 function sl$1(enableAlpha) {
+    const thisMethod = 'sl()';
     try {
         const alpha = enableAlpha ? Math.round(Math.random() * 100) / 100 : 1;
         const sl = {
             value: {
-                saturation: core.sanitize.percentile(Math.max(0, Math.min(100, Math.random() * 100))),
-                lightness: core.sanitize.percentile(Math.max(0, Math.min(100, Math.random() * 100))),
-                alpha: core.brand.asAlphaRange(alpha)
+                saturation: coreUtils.sanitize.percentile(Math.max(0, Math.min(100, Math.random() * 100))),
+                lightness: coreUtils.sanitize.percentile(Math.max(0, Math.min(100, Math.random() * 100))),
+                alpha: coreUtils.brand.asAlphaRange(alpha)
             },
             format: 'sl'
         };
-        if (!core.validate.colorValues(sl)) {
+        if (!coreUtils.validate.colorValues(sl)) {
             if (logMode$f.error)
-                logger$h.error(`Invalid random SV color value ${JSON.stringify(sl)}`, 'common > utils > random > sl()');
-            const unbrandedSL = core.base.clone(defaults.colors.base.unbranded.sl);
-            return core.brandColor.asSL(unbrandedSL);
+                logger$h.error(`Invalid random SV color value ${JSON.stringify(sl)}`, `${thisModule$h} > ${thisMethod}`);
+            const unbrandedSL = coreUtils.base.clone(defaultData.colors.base.unbranded.sl);
+            return coreUtils.brandColor.asSL(unbrandedSL);
         }
-        if (!mode.quiet && logMode$f.info)
-            logger$h.info(`Generated randomSL: ${JSON.stringify(sl)}`, 'common > utils > random > sl()');
+        if (!modeData.quiet && logMode$f.info)
+            logger$h.info(`Generated randomSL: ${JSON.stringify(sl)}`, `${thisModule$h} > ${thisMethod}`);
         return sl;
     }
     catch (error) {
         if (logMode$f.error)
-            logger$h.error(`Error generating random SL color: ${error}`, 'common > utils > random > sl()');
-        const unbrandedSL = core.base.clone(defaults.colors.base.unbranded.sl);
-        return core.brandColor.asSL(unbrandedSL);
+            logger$h.error(`Error generating random SL color: ${error}`, `${thisModule$h} > ${thisMethod}`);
+        const unbrandedSL = coreUtils.base.clone(defaultData.colors.base.unbranded.sl);
+        return coreUtils.brandColor.asSL(unbrandedSL);
     }
 }
-const random$1 = {
+const randomUtils = {
     hsl,
     sl: sl$1
 };
 
-// File src/common/utils/index.js
-const utils = {
-    color: color$1,
-    conversion: conversion$1,
-    errors,
-    palette,
-    random: random$1
+// File common/utils/index.js
+const utils$1 = {
+    color: colorUtils,
+    conversion: conversionUtils,
+    errors: errorUtils,
+    palette: paletteUtils,
+    random: randomUtils
 };
 
-// File: src/common/superUtils/dom.js
+// File: common/superUtils.js
+const domInputElements = domData.elements.inputs;
+const logMode$e = modeData.logging;
+const thisModule$g = 'common/superUtils/dom.js';
 const logger$g = await createLogger();
-const logMode$e = mode.logging;
-const domInputElements = consts.dom.elements.inputs;
 function getGenButtonArgs() {
+    const thisMethod = 'getGenButtonArgs()';
     try {
         const paletteNumberOptions = domInputElements.paletteNumberOptions;
         const paletteTypeOptions = domInputElements.paletteTypeOptions;
@@ -4349,78 +4307,79 @@ function getGenButtonArgs() {
             limitGraynessCheckbox === null ||
             limitLightnessCheckbox === null) {
             if (logMode$e.error)
-                logger$g.error('One or more elements are null', 'common > superUtils > dom > getGenButtonArgs()');
+                logger$g.error('One or more elements are null', `${thisModule$g} > ${thisMethod}`);
             return null;
         }
-        if (!mode.quiet && logMode$e.info && logMode$e.verbosity >= 2)
-            logger$g.info(`numBoxes: ${parseInt(paletteNumberOptions.value, 10)}\npaletteType: ${parseInt(paletteTypeOptions.value, 10)}`, 'getGenButtonArgs()');
+        if (!modeData.quiet && logMode$e.info && logMode$e.verbosity >= 2)
+            logger$g.info(`numBoxes: ${parseInt(paletteNumberOptions.value, 10)}\npaletteType: ${parseInt(paletteTypeOptions.value, 10)}`, `${thisModule$g} > ${thisMethod}`);
         return {
             swatches: parseInt(paletteNumberOptions.value, 10),
             type: parseInt(paletteTypeOptions.value, 10),
             customColor: customColorRaw
-                ? core.base.parseCustomColor(customColorRaw)
+                ? coreUtils.base.parseCustomColor(customColorRaw)
                 : null,
             enableAlpha: enableAlphaCheckbox.checked,
-            limitDarkness: limitDarknessCheckbox.checked,
-            limitGrayness: limitGraynessCheckbox.checked,
-            limitLightness: limitLightnessCheckbox.checked
+            limitDark: limitDarknessCheckbox.checked,
+            limitGray: limitGraynessCheckbox.checked,
+            limitLight: limitLightnessCheckbox.checked
         };
     }
     catch (error) {
         if (logMode$e.error)
-            logger$g.error(`Failed to retrieve generateButton parameters: ${error}`, 'common > superUtils > dom > getGenButtonArgs()');
+            logger$g.error(`Failed to retrieve generateButton parameters: ${error}`, `${thisModule$g} > ${thisMethod}`);
         return null;
     }
 }
 async function switchColorSpace(targetFormat) {
+    const thisMethod = 'switchColorSpace()';
     try {
         const colorTextOutputBoxes = document.querySelectorAll('.color-text-output-box');
         for (const box of colorTextOutputBoxes) {
             const inputBox = box;
             const colorValues = inputBox.colorValues;
-            if (!colorValues || !core.validate.colorValues(colorValues)) {
+            if (!colorValues || !coreUtils.validate.colorValues(colorValues)) {
                 if (logMode$e.error)
-                    logger$g.error('Invalid color values. Cannot display toast.', 'common > superUtils > switchColorSpace()');
-                helpers.dom.showToast('Invalid color.');
+                    logger$g.error('Invalid color values. Cannot display toast.', `${thisModule$g} > ${thisMethod}`);
+                helpers$1.dom.showToast('Invalid color.');
                 continue;
             }
             const currentFormat = inputBox.getAttribute('data-format');
-            if (!mode.quiet && logMode$e.info && logMode$e.verbosity >= 2)
-                logger$g.info(`Converting from ${currentFormat} to ${targetFormat}`, 'common > superUtils > dom > switchColorSpace()');
-            const convertFn = utils.conversion.getConversionFn(currentFormat, targetFormat);
+            if (!modeData.quiet && logMode$e.info && logMode$e.verbosity >= 2)
+                logger$g.info(`Converting from ${currentFormat} to ${targetFormat}`, `${thisModule$g} > ${thisMethod}`);
+            const convertFn = utils$1.conversion.getConversionFn(currentFormat, targetFormat);
             if (!convertFn) {
                 if (logMode$e.error)
-                    logger$g.error(`Conversion from ${currentFormat} to ${targetFormat} is not supported.`, 'common > superUtils > dom > switchColorSpace()');
-                helpers.dom.showToast('Conversion not supported.');
+                    logger$g.error(`Conversion from ${currentFormat} to ${targetFormat} is not supported.`, `${thisModule$g} > ${thisMethod}`);
+                helpers$1.dom.showToast('Conversion not supported.');
                 continue;
             }
             if (colorValues.format === 'xyz') {
                 if (logMode$e.error)
-                    logger$g.error('Cannot convert from XYZ to another color space.', 'common > superUtils > dom > switchColorSpace()');
-                helpers.dom.showToast('Conversion not supported.');
+                    logger$g.error('Cannot convert from XYZ to another color space.', `${thisModule$g} > ${thisMethod}`);
+                helpers$1.dom.showToast('Conversion not supported.');
                 continue;
             }
-            const clonedColor = await utils.color.narrowToColor(colorValues);
+            const clonedColor = await utils$1.color.narrowToColor(colorValues);
             if (!clonedColor ||
-                utils.color.isSLColor(clonedColor) ||
-                utils.color.isSVColor(clonedColor) ||
-                utils.color.isXYZ(clonedColor)) {
+                utils$1.color.isSLColor(clonedColor) ||
+                utils$1.color.isSVColor(clonedColor) ||
+                utils$1.color.isXYZ(clonedColor)) {
                 if (logMode$e.verbosity >= 3 && logMode$e.error)
-                    logger$g.error('Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.', 'common > superUtils > dom > switchColorSpace()');
-                helpers.dom.showToast('Conversion not supported.');
+                    logger$g.error('Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.', `${thisModule$g} > ${thisMethod}`);
+                helpers$1.dom.showToast('Conversion not supported.');
                 continue;
             }
             if (!clonedColor) {
                 if (logMode$e.error)
-                    logger$g.error(`Conversion to ${targetFormat} failed.`, 'common > superUtils > dom > switchColorSpace()');
-                helpers.dom.showToast('Conversion failed.');
+                    logger$g.error(`Conversion to ${targetFormat} failed.`, `${thisModule$g} > ${thisMethod}`);
+                helpers$1.dom.showToast('Conversion failed.');
                 continue;
             }
-            const newColor = core.base.clone(convertFn(clonedColor));
+            const newColor = coreUtils.base.clone(convertFn(clonedColor));
             if (!newColor) {
                 if (logMode$e.error)
-                    logger$g.error(`Conversion to ${targetFormat} failed.`, 'common > superUtils > dom > switchColorSpace()');
-                helpers.dom.showToast('Conversion failed.');
+                    logger$g.error(`Conversion to ${targetFormat} failed.`, `${thisModule$g} > ${thisMethod}`);
+                helpers$1.dom.showToast('Conversion failed.');
                 continue;
             }
             inputBox.value = String(newColor);
@@ -4428,63 +4387,81 @@ async function switchColorSpace(targetFormat) {
         }
     }
     catch (error) {
-        helpers.dom.showToast('Failed to convert colors.');
-        if (!mode.quiet && logMode$e.warn)
-            logger$g.warn('Failed to convert colors.', 'common > superUtils > dom > switchColorSpace()');
-        else if (!mode.gracefulErrors)
+        helpers$1.dom.showToast('Failed to convert colors.');
+        if (!modeData.quiet && logMode$e.warn)
+            logger$g.warn('Failed to convert colors.', `${thisModule$g} > ${thisMethod}`);
+        else if (!modeData.gracefulErrors)
             throw new Error(`Failed to convert colors: ${error}`);
         else if (logMode$e.error)
             logger$g.error(`Failed to convert colors: ${error}`);
     }
 }
-const dom$1 = {
-    getGenButtonArgs,
-    switchColorSpace
+const superUtils$1 = {
+    dom: {
+        getGenButtonArgs,
+        switchColorSpace
+    }
 };
 
-// File: src/common/superUtils/index.js
-const superUtils = {
-    dom: dom$1
+// File: common/index.js
+const commonFn = {
+    convert: coreConversionUtils,
+    core: coreUtils,
+    helpers: helpers$1,
+    superUtils: superUtils$1,
+    transform: transformUtils,
+    utils: utils$1
 };
 
-// File: src/common/transform/index.js
-const transform = {
-    ...base$2
+// File: db/initialize.js
+async function initializeDB() {
+    return openDB('paletteDB', 1, {
+        upgrade: db => {
+            const storeNames = Object.values(configData.db.STORE_NAMES);
+            storeNames.forEach(storeName => {
+                if (!db.objectStoreNames.contains(storeName)) {
+                    db.createObjectStore(storeName, { keyPath: 'key' });
+                }
+            });
+        }
+    });
+}
+
+// File: db/utils.js
+async function withStore(db, storeName, mode, callback) {
+    const tx = db.transaction(storeName, mode);
+    const store = tx.objectStore(storeName);
+    callback(store);
+    await tx.done;
+}
+const dbUtils = {
+    store: { withStore }
 };
 
-// File: src/common/index.js
-const common = {
-    convert,
-    core,
-    helpers,
-    superUtils,
-    transform,
-    utils
-};
-
-// File: src/db/IDBManager.js
+// File: db/IDBManager.js
+const thisModule$f = 'db/IDBManager.js';
 const logger$f = await createLogger();
 class IDBManager {
     static instance = null;
     dbPromise;
-    dbData = config.db;
-    mode = mode;
-    logMode = mode.logging;
-    storeUtils;
+    dbData = configData.db;
+    mode = modeData;
+    logMode = modeData.logging;
     cache = {};
-    defaultKeys = config.db.DEFAULT_KEYS;
-    defaultSettings = config.db.DEFAULT_SETTINGS;
-    storeNames = config.db.STORE_NAMES;
-    errorUtils;
+    defaultKeys = configData.db.DEFAULT_KEYS;
+    defaultSettings = configData.db.DEFAULT_SETTINGS;
+    storeNames = configData.db.STORE_NAMES;
+    dbUtils;
+    utils;
     mutationTracker;
     constructor() {
         this.dbPromise = initializeDB();
         this.dbData = this.dbData;
-        this.defaultKeys = config.db.DEFAULT_KEYS;
-        this.defaultSettings = config.db.DEFAULT_SETTINGS;
-        this.storeNames = config.db.STORE_NAMES;
-        this.storeUtils = storeUtils;
-        this.errorUtils = utils.errors;
+        this.defaultKeys = configData.db.DEFAULT_KEYS;
+        this.defaultSettings = configData.db.DEFAULT_SETTINGS;
+        this.storeNames = configData.db.STORE_NAMES;
+        this.dbUtils = dbUtils;
+        this.utils = commonFn.utils;
         this.mutationTracker = MutationTracker.getInstance(this.dbData, this.mode);
     }
     //
@@ -4512,6 +4489,7 @@ class IDBManager {
     ///
     //
     createMutationLogger(obj, key) {
+        const thisMethod = 'createMutationLogger()';
         const self = this;
         return new Proxy(obj, {
             set(target, property, value) {
@@ -4527,12 +4505,12 @@ class IDBManager {
                         origin: 'Proxy'
                     };
                     if (self.logMode.info)
-                        logger$f.info(`Mutation detected: ${JSON.stringify(mutationLog)}`, 'IDBManager.createMutationLogger()');
+                        logger$f.info(`Mutation detected: ${JSON.stringify(mutationLog)}`, `${thisModule$f} > ${thisMethod}`);
                     self.mutationTracker
                         .persistMutation(mutationLog)
                         .catch(err => {
                         if (self.logMode.error)
-                            logger$f.error(`Failed to persist mutation: ${err.message}`, 'IDBManager.createMutationLogger()');
+                            logger$f.error(`Failed to persist mutation: ${err.message}`, `${thisModule$f} > ${thisMethod}`);
                     });
                 }
                 return success;
@@ -4540,14 +4518,15 @@ class IDBManager {
         });
     }
     createPaletteObject(type, items, paletteID, swatches, enableAlpha, limitDark, limitGray, limitLight) {
-        return utils.palette.createObject(type, items, swatches, paletteID, enableAlpha, limitDark, limitGray, limitLight);
+        return this.utils.palette.createObject(type, items, swatches, paletteID, enableAlpha, limitDark, limitGray, limitLight);
     }
     // *DEV-NOTE* add this method to docs
     async deleteEntry(storeName, key) {
-        return this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'deleteEntry()';
+        return this.utils.errors.handleAsync(async () => {
             if (!(await this.ensureEntryExists(storeName, key))) {
                 if (this.logMode.warn) {
-                    logger$f.warn(`Entry with key ${key} not found.`, 'IDBManager.deleteEntry()');
+                    logger$f.warn(`Entry with key ${key} not found.`, `${thisModule$f} > ${thisMethod}`);
                 }
                 return;
             }
@@ -4557,12 +4536,13 @@ class IDBManager {
                 .objectStore(storeName);
             await store.delete(key);
             if (!this.mode.quiet) {
-                logger$f.info(`Entry with key ${key} deleted successfully.`, 'IDBManager.deleteEntry()');
+                logger$f.info(`Entry with key ${key} deleted successfully.`, `${thisModule$f} > ${thisMethod}`);
             }
         }, 'IDBManager.deleteData(): Error deleting entry');
     }
     async deleteEntries(storeName, keys) {
-        return this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'deleteEntries()';
+        return this.utils.errors.handleAsync(async () => {
             const db = await this.getDB();
             const store = db
                 .transaction(storeName, 'readwrite')
@@ -4572,16 +4552,17 @@ class IDBManager {
                 : null))).filter((key) => key !== null);
             await Promise.all(validKeys.map(key => store.delete(key)));
             if (!this.mode.quiet) {
-                logger$f.info(`Entries deleted successfully. Keys: ${validKeys}`, 'IDBManager.deleteEntries()');
+                logger$f.info(`Entries deleted successfully. Keys: ${validKeys}`, `${thisModule$f} > ${thisMethod}`);
             }
         }, 'IDBManager.deleteEntries(): Error deleting entries');
     }
     async getCurrentPaletteID() {
-        return this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'getCurrentPaletteID()';
+        return this.utils.errors.handleAsync(async () => {
             const db = await this.getDB();
             const settings = await db.get(this.storeNames['SETTINGS'], this.getDefaultKey('APP_SETTINGS'));
             if (this.mode.debug)
-                logger$f.info(`Fetched settings from IndexedDB: ${settings}`, 'IDBManager.getCurrentPaletteID()');
+                logger$f.info(`Fetched settings from IndexedDB: ${settings}`, `${thisModule$f} > ${thisMethod}`);
             return settings?.lastPaletteID ?? 0;
         }, 'IDBManager: getCurrentPaletteID(): Error fetching current palette ID');
     }
@@ -4596,7 +4577,7 @@ class IDBManager {
     async getCustomColor() {
         const key = this.defaultKeys['CUSTOM_COLOR'];
         const storeName = this.storeNames['CUSTOM_COLOR'];
-        return this.errorUtils.handleAsync(async () => {
+        return this.utils.errors.handleAsync(async () => {
             const db = await this.getDB();
             const entry = await db.get(storeName, key);
             if (!entry?.color)
@@ -4615,7 +4596,7 @@ class IDBManager {
         return null;
     }
     async getNextTableID() {
-        return this.errorUtils.handleAsync(async () => {
+        return this.utils.errors.handleAsync(async () => {
             const settings = await this.getSettings();
             const lastTableID = settings.lastTableID ?? 0;
             const nextID = lastTableID + 1;
@@ -4627,7 +4608,7 @@ class IDBManager {
         }, 'IDBManager.getNextTableID(): Error fetching next table ID');
     }
     async getNextPaletteID() {
-        return this.errorUtils.handleAsync(async () => {
+        return this.utils.errors.handleAsync(async () => {
             const currentID = await this.getCurrentPaletteID();
             const newID = currentID + 1;
             await this.updateCurrentPaletteID(newID);
@@ -4635,7 +4616,7 @@ class IDBManager {
         }, 'IDBManager.getNextPaletteID(): Error fetching next palette ID');
     }
     async getSettings() {
-        return this.errorUtils.handleAsync(async () => {
+        return this.utils.errors.handleAsync(async () => {
             const db = await this.getDB();
             const settings = await db.get(this.storeNames['SETTINGS'], this.getDefaultKey('APP_SETTINGS'));
             return settings ?? this.defaultSettings;
@@ -4646,13 +4627,14 @@ class IDBManager {
         return db.transaction(storeName, mode).objectStore(storeName);
     }
     async resetDatabase() {
-        return this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'resetDatabase()';
+        return this.utils.errors.handleAsync(async () => {
             const db = await this.getDB();
             const availableStores = Array.from(db.objectStoreNames);
             const expectedStores = Object.values(this.storeNames);
             for (const storeName of expectedStores) {
                 if (!availableStores.includes(storeName)) {
-                    logger$f.warn(`Object store "${storeName}" not found in IndexedDB.`, 'IDBManager.resetDatabase()');
+                    logger$f.warn(`Object store "${storeName}" not found in IndexedDB.`, `${thisModule$f} > ${thisMethod}`);
                     continue;
                 }
                 const tx = db.transaction(storeName, 'readwrite');
@@ -4664,12 +4646,13 @@ class IDBManager {
                     .objectStore(this.storeNames['SETTINGS']);
                 await settingsStore.put(this.defaultSettings, this.getDefaultKey('APP_SETTINGS'));
                 if (!this.mode.quiet)
-                    logger$f.info(`IndexedDB has been reset to default settings.`, 'IDBManager.resetDatabase()');
+                    logger$f.info(`IndexedDB has been reset to default settings.`, `${thisModule$f} > ${thisMethod}`);
             }
         }, 'IDBManager.resetDatabase(): Error resetting database');
     }
     async deleteDatabase() {
-        await this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'deleteDatabase()';
+        await this.utils.errors.handleAsync(async () => {
             const dbName = 'paletteDB';
             const dbExists = await new Promise(resolve => {
                 const request = indexedDB.open(dbName);
@@ -4683,14 +4666,14 @@ class IDBManager {
                 const deleteRequest = indexedDB.deleteDatabase(dbName);
                 deleteRequest.onsuccess = () => {
                     if (!this.mode.quiet)
-                        logger$f.info(`Database "${dbName}" deleted successfully.`, 'IDBManager.deleteDatabase()');
+                        logger$f.info(`Database "${dbName}" deleted successfully.`, `${thisModule$f} > ${thisMethod}`);
                 };
                 deleteRequest.onerror = event => {
-                    logger$f.error(`Error deleting database "${dbName}":\nEvent: ${event}`, 'IDBManager.deleteDatabase()');
+                    logger$f.error(`Error deleting database "${dbName}":\nEvent: ${event}`, `${thisModule$f} > ${thisMethod}`);
                 };
                 deleteRequest.onblocked = () => {
                     if (this.logMode.warn)
-                        logger$f.warn(`Delete operation blocked. Ensure no open connections to "${dbName}".`, 'IDBManager.deleteDatabase()');
+                        logger$f.warn(`Delete operation blocked. Ensure no open connections to "${dbName}".`, `${thisModule$f} > ${thisMethod}`);
                     if (this.mode.showAlerts)
                         alert(`Unable to delete database "${dbName}" because it is in use. Please close all other tabs or windows accessing this database and try again.`);
                     if (this.mode.stackTrace)
@@ -4699,13 +4682,14 @@ class IDBManager {
             }
             else {
                 if (!this.mode.quiet)
-                    logger$f.warn(`Database "${dbName}" does not exist.`, 'IDBManager.deleteDatabase()');
+                    logger$f.warn(`Database "${dbName}" does not exist.`, `${thisModule$f} > ${thisMethod}`);
             }
         }, 'IDBManager.deleteDatabase(): Error deleting database');
     }
     // *DEV-NOTE* add this method to docs
     async resetPaletteID() {
-        return this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'resetPaletteID()';
+        return this.utils.errors.handleAsync(async () => {
             const db = await this.getDB();
             const storeName = this.storeNames['SETTINGS'];
             const key = this.getDefaultKey('APP_SETTINGS');
@@ -4715,13 +4699,14 @@ class IDBManager {
             settings.lastPaletteID = 0;
             await db.put(storeName, { key, ...this.defaultSettings });
             if (!this.mode.quiet)
-                logger$f.info(`Palette ID has successfully been reset to 0`, 'IDBManager.resetPaletteID()');
+                logger$f.info(`Palette ID has successfully been reset to 0`, `${thisModule$f} > ${thisMethod}`);
         }, 'IDBManager.resetPaletteID(): Error resetting palette ID');
     }
     async saveData(storeName, key, data, oldValue) {
-        return this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'saveData()';
+        return this.utils.errors.handleAsync(async () => {
             const db = await this.getDB();
-            await this.storeUtils.withStore(db, storeName, 'readwrite', async (store) => {
+            await this.dbUtils.store.withStore(db, storeName, 'readwrite', async (store) => {
                 await store.put({ key, ...data });
                 logger$f.mutation({
                     timestamp: new Date().toISOString(),
@@ -4731,13 +4716,14 @@ class IDBManager {
                     oldValue: oldValue || null,
                     origin: 'saveData'
                 }, mutationLog => {
-                    console.log('Mutation log triggered for saveData:', mutationLog, 'IDBManager.saveData()');
-                });
+                    console.log('Mutation log triggered for saveData:', mutationLog);
+                }, `${thisModule$f} > ${thisMethod}`);
             });
         }, 'IDBManager.saveData(): Error saving data');
     }
     async savePalette(id, newPalette) {
-        return this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'savePalette()';
+        return this.utils.errors.handleAsync(async () => {
             const store = await this.getStore('tables', 'readwrite');
             const paletteToSave = {
                 tableID: newPalette.tableID,
@@ -4745,11 +4731,11 @@ class IDBManager {
             };
             await store.put({ key: id, ...paletteToSave });
             if (!this.mode.quiet)
-                logger$f.info(`Palette ${id} saved successfully.`, 'IDBManager.savePalette()');
+                logger$f.info(`Palette ${id} saved successfully.`, `${thisModule$f} > ${thisMethod}`);
         }, 'IDBManager.savePalette(): Error saving palette');
     }
     async savePaletteToDB(type, items, paletteID, numBoxes, enableAlpha, limitDark, limitGray, limitLight) {
-        return this.errorUtils.handleAsync(async () => {
+        return this.utils.errors.handleAsync(async () => {
             const newPalette = this.createPaletteObject(type, items, paletteID, numBoxes, enableAlpha, limitDark, limitGray, limitLight);
             const idParts = newPalette.id.split('_');
             if (idParts.length !== 2 || isNaN(Number(idParts[1]))) {
@@ -4763,14 +4749,16 @@ class IDBManager {
         }, 'IDBManager.savePaletteToDB(): Error saving palette to DB');
     }
     async saveSettings(newSettings) {
-        return this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'saveSettings()';
+        return this.utils.errors.handleAsync(async () => {
             await this.saveData('settings', 'appSettings', newSettings);
             if (!this.mode.quiet && this.logMode.info)
-                logger$f.info('Settings updated', 'IDBManager.saveSettings()');
+                logger$f.info('Settings updated', `${thisModule$f} > ${thisMethod}`);
         }, 'IDBManager.saveSettings(): Error saving settings');
     }
     async updateEntryInPalette(tableID, entryIndex, newEntry) {
-        return this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'updateEntryInPalette()';
+        return this.utils.errors.handleAsync(async () => {
             if (!(await this.ensureEntryExists('tables', tableID))) {
                 throw new Error(`Palette ${tableID} not found.`);
             }
@@ -4782,9 +4770,9 @@ class IDBManager {
                 if (!this.mode.gracefulErrors)
                     throw new Error(`Entry ${entryIndex} not found in palette ${tableID}.`);
                 if (this.logMode.error)
-                    logger$f.error(`Entry ${entryIndex} not found in palette ${tableID}.`, 'IDBManager.updateEntryInPalette()');
+                    logger$f.error(`Entry ${entryIndex} not found in palette ${tableID}.`, `${thisModule$f} > ${thisMethod}`);
                 if (!this.mode.quiet && this.logMode.info)
-                    logger$f.warn('updateEntryInPalette: Entry not found.');
+                    logger$f.warn('updateEntryInPalette: Entry not found.', `${thisModule$f} > ${thisMethod}`);
             }
             const oldEntry = items[entryIndex];
             items[entryIndex] = newEntry;
@@ -4796,7 +4784,7 @@ class IDBManager {
                 newValue: newEntry,
                 oldValue: oldEntry,
                 origin: 'updateEntryInPalette'
-            }, mutationLog => console.log(`Mutation log trigger for updateEntryInPalette:`, mutationLog));
+            }, mutationLog => console.log(`Mutation log trigger for updateEntryInPalette:`, mutationLog), `${thisModule$f} > ${thisMethod}`);
             if (!this.mode.quiet && this.logMode.info)
                 logger$f.info(`Entry ${entryIndex} in palette ${tableID} updated.`);
         }, 'IDBManager.updateEntryInPalette(): Error updating entry in palette');
@@ -4809,17 +4797,18 @@ class IDBManager {
     ///
     //
     async initializeDB() {
+        const thisMethod = 'initializeDB()';
         await this.dbPromise;
         const db = await this.getDB();
         const storeName = this.storeNames['SETTINGS'];
         const key = this.getDefaultKey('APP_SETTINGS');
-        logger$f.info(`Initializing DB with Store Name: ${storeName}, Key: ${key}`, 'IDBManager > (private async) initializeDB()');
+        logger$f.info(`Initializing DB with Store Name: ${storeName}, Key: ${key}`, `${thisModule$f} > ${thisMethod}`);
         if (!storeName || !key)
             throw new Error('Invalid store name or key.');
         const settings = await db.get(storeName, key);
         if (!settings) {
             if (!this.mode.quiet) {
-                logger$f.info(`Initializing default settings...`, 'IDBManager > (private async) initializeDB()');
+                logger$f.info(`Initializing default settings...`, `${thisModule$f} > ${thisMethod}`);
             }
             await db.put(storeName, { key, ...this.defaultSettings });
         }
@@ -4839,32 +4828,34 @@ class IDBManager {
         return defaultKey;
     }
     async getTable(id) {
-        return this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'getTable()';
+        return this.utils.errors.handleAsync(async () => {
             const db = await this.getDB();
             const result = await db.get(this.storeNames.TABLES, id);
             if (!result) {
                 if (this.logMode.warn)
-                    logger$f.warn(`Table with ID ${id} not found.`, 'IDBManager > (private async) getTable()');
+                    logger$f.warn(`Table with ID ${id} not found.`, `${thisModule$f} > ${thisMethod}`);
             }
             return result;
         }, 'IDBManager.getTable(): Error fetching table');
     }
     async updateCurrentPaletteID(newID) {
-        return this.errorUtils.handleAsync(async () => {
+        const thisMethod = 'updateCurrentPaletteID()';
+        return this.utils.errors.handleAsync(async () => {
             const db = await this.getDB();
             const tx = db.transaction('settings', 'readwrite');
             const store = tx.objectStore('settings');
             if (this.mode.debug)
-                logger$f.info(`Updating curent palette ID to ${newID}`, 'IDBManager > (private async) updateCurrentPaletteID()');
+                logger$f.info(`Updating curent palette ID to ${newID}`, `${thisModule$f} > ${thisMethod}`);
             await store.put({ key: 'appSettings', lastPaletteID: newID });
             await tx.done;
             if (!this.mode.quiet)
-                logger$f.info(`Current palette ID updated to ${newID}`, 'IDBManager > (private async) updateCurrentPaletteID()');
+                logger$f.info(`Current palette ID updated to ${newID}`, `${thisModule$f} > ${thisMethod}`);
         }, 'IDBManager.updateCurrentPaletteID(): Error updating current palette ID');
     }
 }
 
-// File: src/db/instance.ts
+// File: db/instance.js
 let idbInstance = null;
 const getIDBInstance = async () => {
     if (!idbInstance) {
@@ -4873,83 +4864,91 @@ const getIDBInstance = async () => {
     return idbInstance;
 };
 
-// File: src/dom/parse.ts
+// File: dom/parse.js
+const ids$1 = domData.ids;
+const logMode$d = modeData.logging;
+const thisModule$e = 'dom/parse.js';
 const logger$e = await createLogger();
-const domIDs$2 = consts.dom.ids;
-const logMode$d = mode.logging;
 function checkbox(id) {
+    const thisFunction = 'checkbox()';
     const checkbox = document.getElementById(id);
     if (!checkbox) {
-        if (logMode$d.error && !mode.quiet) {
-            logger$e.error(`Checkbox element ${id} not found`, 'dom > parse > checkbox()');
+        if (logMode$d.error && !modeData.quiet) {
+            logger$e.error(`Checkbox element ${id} not found`, `${thisModule$e} > ${thisFunction}`);
         }
         return;
     }
     if (!(checkbox instanceof HTMLInputElement)) {
-        if (logMode$d.error && !mode.quiet) {
-            logger$e.error(`Element ${id} is not a checkbox`, 'dom > parse > checkbox()');
+        if (logMode$d.error && !modeData.quiet) {
+            logger$e.error(`Element ${id} is not a checkbox`, `${thisModule$e} > ${thisFunction}`);
         }
         return;
     }
     return checkbox ? checkbox.checked : undefined;
 }
 function paletteExportFormat() {
-    const formatSelectionMenu = document.getElementById(domIDs$2.exportPaletteFormatOptions);
+    const thisFunction = 'paletteExportFormat()';
+    const formatSelectionMenu = document.getElementById(ids$1.exportPaletteFormatOptions);
     if (!formatSelectionMenu) {
-        if (logMode$d.error && !mode.quiet)
-            logger$e.error('Export format selection dropdown not found', 'dom > parse > paletteExportFormat()');
+        if (logMode$d.error && !modeData.quiet)
+            logger$e.error('Export format selection dropdown not found', `${thisModule$e} > ${thisFunction}`);
     }
     const selectedFormat = formatSelectionMenu.value;
     if (selectedFormat !== 'CSS' &&
         selectedFormat !== 'JSON' &&
         selectedFormat !== 'XML') {
-        if (logMode$d.error && !mode.quiet)
-            logger$e.error('Invalid export format selected', 'dom > parse > paletteExportFormat()');
+        if (logMode$d.error && !modeData.quiet)
+            logger$e.error('Invalid export format selected', `${thisModule$e} > ${thisFunction}`);
         return;
     }
     else {
         return selectedFormat;
     }
 }
-const parse$1 = {
+const parse = {
     checkbox,
     paletteExportFormat
 };
 
-// File: src/palette/common/paletteHelpers/limits.js
+// File: palette/common/helpers/limits.js
+const logMode$c = modeData.logging;
+const thisModule$d = 'palette/common/helpers/limits.js';
 const logger$d = await createLogger();
-const logMode$c = mode.logging;
 function isColorInBounds(hsl) {
-    if (!core.validate.colorValues(hsl)) {
+    const thisFunction = 'paletteHelpers > limits > isColorInBounds()';
+    if (!coreUtils.validate.colorValues(hsl)) {
         if (logMode$c.error)
-            logger$d.error(`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`, 'paletteHelpers > limits > isColorInBounds()');
+            logger$d.error(`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$d} > ${thisFunction}`);
         return false;
     }
     return isTooDark$1(hsl) || isTooGray$1(hsl) || isTooLight$1(hsl);
 }
 function isTooDark$1(hsl) {
-    if (!core.validate.colorValues(hsl)) {
+    const thisFunction = 'isTooDark()';
+    if (!coreUtils.validate.colorValues(hsl)) {
         if (logMode$c.error)
-            logger$d.error(`isTooDark: Invalid HSL value ${JSON.stringify(hsl)}`, 'paletteHelpers > limits > isTooDark()');
+            logger$d.error(`isTooDark: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$d} > ${thisFunction}`);
         return false;
     }
-    return core.base.clone(hsl).value.lightness < consts.thresholds.dark;
+    return coreUtils.base.clone(hsl).value.lightness < constsData.thresholds.dark;
 }
 function isTooGray$1(hsl) {
-    if (!core.validate.colorValues(hsl)) {
+    const thisFunction = 'isTooGray()';
+    if (!coreUtils.validate.colorValues(hsl)) {
         if (logMode$c.error)
-            logger$d.error(`isTooGray: Invalid HSL value ${JSON.stringify(hsl)}`, 'paletteHelpers > limits > isTooGray()');
+            logger$d.error(`isTooGray: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$d} > ${thisFunction}`);
         return false;
     }
-    return core.base.clone(hsl).value.saturation < consts.thresholds.gray;
+    return coreUtils.base.clone(hsl).value.saturation < constsData.thresholds.gray;
 }
 function isTooLight$1(hsl) {
-    if (!core.validate.colorValues(hsl)) {
+    const thisFunction = 'isTooLight()';
+    if (!coreUtils.validate.colorValues(hsl)) {
         if (logMode$c.error)
-            logger$d.error(`isTooLight: Invalid HSL value ${JSON.stringify(hsl)}`, 'paletteHelpers > limits > isTooLight()');
+            logger$d.error(`isTooLight: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$d} > ${thisFunction}`);
         return false;
     }
-    return core.base.clone(hsl).value.lightness > consts.thresholds.light;
+    return coreUtils.base.clone(hsl).value.lightness > constsData.thresholds.light;
 }
 const limits$2 = {
     isColorInBounds,
@@ -4958,65 +4957,70 @@ const limits$2 = {
     isTooLight: isTooLight$1
 };
 
-// File: src/palette/common/paletteHelpers/update.js
+// File: palette/common/helpers/update.js
 async function colorBox(color, index) {
     const colorBox = document.getElementById(`color-box-${index + 1}`);
     if (colorBox) {
-        const colorValues = utils.conversion.genAllColorValues(color);
+        const colorValues = utils$1.conversion.genAllColorValues(color);
         const selectedColor = colorValues;
         if (selectedColor) {
             const hslColor = colorValues.hsl;
-            const hslCSSString = await core.convert.colorToCSSColorString(hslColor);
+            const hslCSSString = await coreUtils.convert.colorToCSSColorString(hslColor);
             colorBox.style.backgroundColor = hslCSSString;
-            utils.palette.populateOutputBox(selectedColor, index + 1);
+            utils$1.palette.populateOutputBox(selectedColor, index + 1);
         }
     }
 }
 const update$2 = { colorBox };
 
-// File: src/palette/common/paletteHelpers/index.js
-const paletteHelpers = { limits: limits$2, update: update$2 };
+// File: palette/common/helpers/index.js
+const helpers = {
+    limits: limits$2,
+    update: update$2
+};
 
-// File: src/palette/common/paletteSuperUtils/create.js
-const limits$1 = paletteHelpers.limits;
-const update$1 = paletteHelpers.update;
-const hslTo = convert.hslTo;
+// File: palette/common/superUtils/create.js
+const limits$1 = helpers.limits;
+const update$1 = helpers.update;
+const hslTo = coreConversionUtils.hslTo;
 function baseColor(customColor, enableAlpha) {
-    const color = core.base.clone(customColor ?? utils.random.hsl(enableAlpha));
+    const color = coreUtils.base.clone(customColor ?? utils$1.random.hsl(enableAlpha));
     return color;
 }
 async function paletteItem(color, enableAlpha) {
-    const clonedColor = core.base.clone(color);
+    const clonedColor = coreUtils.base.clone(color);
     clonedColor.value.alpha = enableAlpha
-        ? core.brand.asAlphaRange(Math.random())
-        : core.brand.asAlphaRange(1);
+        ? coreUtils.brand.asAlphaRange(Math.random())
+        : coreUtils.brand.asAlphaRange(1);
     return {
         colors: {
-            cmyk: hslTo(clonedColor, 'cmyk').value,
-            hex: hslTo(clonedColor, 'hex').value,
-            hsl: clonedColor.value,
-            hsv: hslTo(clonedColor, 'hsv').value,
-            lab: hslTo(clonedColor, 'lab').value,
-            rgb: hslTo(clonedColor, 'rgb').value,
-            xyz: hslTo(clonedColor, 'xyz').value
-        },
-        colorStrings: {
-            cmykString: utils.color.colorToColorString(hslTo(clonedColor, 'cmyk')).value,
-            hexString: utils.color.colorToColorString(hslTo(clonedColor, 'hex')).value,
-            hslString: utils.color.colorToColorString(clonedColor).value,
-            hsvString: utils.color.colorToColorString(hslTo(clonedColor, 'hsv')).value,
-            labString: utils.color.colorToColorString(hslTo(clonedColor, 'lab')).value,
-            rgbString: utils.color.colorToColorString(hslTo(clonedColor, 'rgb')).value,
-            xyzString: utils.color.colorToColorString(hslTo(clonedColor, 'xyz')).value
-        },
-        cssStrings: {
-            cmykCSSString: await core.convert.colorToCSSColorString(hslTo(clonedColor, 'cmyk')),
-            hexCSSString: await core.convert.colorToCSSColorString(hslTo(clonedColor, 'hex')),
-            hslCSSString: await core.convert.colorToCSSColorString(clonedColor),
-            hsvCSSString: await core.convert.colorToCSSColorString(hslTo(clonedColor, 'hsv')),
-            labCSSString: await core.convert.colorToCSSColorString(hslTo(clonedColor, 'lab')),
-            rgbCSSString: await core.convert.colorToCSSColorString(hslTo(clonedColor, 'rgb')),
-            xyzCSSString: await core.convert.colorToCSSColorString(hslTo(clonedColor, 'xyz'))
+            main: {
+                cmyk: hslTo(clonedColor, 'cmyk').value,
+                hex: hslTo(clonedColor, 'hex').value,
+                hsl: clonedColor.value,
+                hsv: hslTo(clonedColor, 'hsv').value,
+                lab: hslTo(clonedColor, 'lab').value,
+                rgb: hslTo(clonedColor, 'rgb').value,
+                xyz: hslTo(clonedColor, 'xyz').value
+            },
+            stringProps: {
+                cmyk: utils$1.color.colorToColorString(hslTo(clonedColor, 'cmyk')).value,
+                hex: utils$1.color.colorToColorString(hslTo(clonedColor, 'hex')).value,
+                hsl: utils$1.color.colorToColorString(clonedColor).value,
+                hsv: utils$1.color.colorToColorString(hslTo(clonedColor, 'hsv')).value,
+                lab: utils$1.color.colorToColorString(hslTo(clonedColor, 'lab')).value,
+                rgb: utils$1.color.colorToColorString(hslTo(clonedColor, 'rgb')).value,
+                xyz: utils$1.color.colorToColorString(hslTo(clonedColor, 'xyz')).value
+            },
+            css: {
+                cmyk: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'cmyk')),
+                hex: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'hex')),
+                hsl: await coreUtils.convert.colorToCSSColorString(clonedColor),
+                hsv: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'hsv')),
+                lab: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'lab')),
+                rgb: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'rgb')),
+                xyz: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'xyz'))
+            }
         }
     };
 }
@@ -5027,10 +5031,10 @@ async function paletteItemArray(baseColor, hues, enableAlpha, limitDark, limitGr
     for (const [i, hue] of hues.entries()) {
         let newColor = null;
         do {
-            const sl = utils.random.sl(enableAlpha);
-            newColor = utils.conversion.genAllColorValues({
+            const sl = utils$1.random.sl(enableAlpha);
+            newColor = utils$1.conversion.genAllColorValues({
                 value: {
-                    hue: core.brand.asRadial(hue),
+                    hue: coreUtils.brand.asRadial(hue),
                     ...sl.value
                 },
                 format: 'hsl'
@@ -5053,16 +5057,18 @@ const create$9 = {
     paletteItemArray
 };
 
-// File: src/palette/common/paletteUtils/adjust.js
+// File: palette/common/utils/adjust.js
+const adjustments = constsData.adjustments;
+const logMode$b = modeData.logging;
+const thisModule$c = 'palette/common/utils/adjust.js';
 const logger$c = await createLogger();
-const adjustments = consts.adjustments;
-const logMode$b = mode.logging;
 function sl(color) {
+    const thisFunction = 'sl()';
     try {
-        if (!core.validate.colorValues(color)) {
+        if (!coreUtils.validate.colorValues(color)) {
             if (logMode$b.error)
-                logger$c.error('Invalid color valus for adjustment.', 'palette > common > paletteUtils > adjust > sl()');
-            helpers.dom.showToast('Invalid color values');
+                logger$c.error('Invalid color valus for adjustment.', `${thisModule$c} > ${thisFunction}`);
+            helpers$1.dom.showToast('Invalid color values');
             return color;
         }
         const adjustedSaturation = Math.min(Math.max(color.value.saturation + adjustments.slaValue, 0), 100);
@@ -5070,8 +5076,8 @@ function sl(color) {
         return {
             value: {
                 hue: color.value.hue,
-                saturation: core.brand.asPercentile(adjustedSaturation),
-                lightness: core.brand.asPercentile(adjustedLightness),
+                saturation: coreUtils.brand.asPercentile(adjustedSaturation),
+                lightness: coreUtils.brand.asPercentile(adjustedLightness),
                 alpha: color.value.alpha
             },
             format: 'hsl'
@@ -5079,17 +5085,19 @@ function sl(color) {
     }
     catch (error) {
         if (logMode$b.error)
-            logger$c.error(`Error adjusting saturation and lightness: ${error}`, 'palette > common > paletteUtils > adjust > sl()');
+            logger$c.error(`Error adjusting saturation and lightness: ${error}`, `${thisModule$c} > ${thisFunction}`);
         return color;
     }
 }
 const adjust = { sl };
 
-// File: src/paelette/common/paletteUtils/probability.js
+// File: paelette/common/utils/probability.js
+const logMode$a = modeData.logging;
+const probabilities = constsData.probabilities;
+const thisModule$b = 'common/utils/probabilities.js';
 const logger$b = await createLogger();
-const logMode$a = mode.logging;
-const probabilities = consts.probabilities;
 function getWeightedRandomInterval$1() {
+    const thisFunction = 'getWeightedRandomInterval()';
     try {
         const weights = probabilities.weights;
         const probabilityValues = probabilities.values;
@@ -5106,8 +5114,7 @@ function getWeightedRandomInterval$1() {
     }
     catch (error) {
         if (logMode$a.error)
-            // eslint-disable-next-line prettier/prettier
-            logger$b.error(`Error generating weighted random interval: ${error}`, 'palette > common > paletteUtils > getWeightedRandomInterval()');
+            logger$b.error(`Error generating weighted random interval: ${error}`, `${thisModule$b} > ${thisFunction}`);
         return 50;
     }
 }
@@ -5115,23 +5122,28 @@ const probability = {
     getWeightedRandomInterval: getWeightedRandomInterval$1
 };
 
-// File: src/palette/common/paletteUtils/index.js
-const paletteUtils = { adjust, probability };
+// File: palette/common/utils/index.js
+const utils = {
+    adjust,
+    probability
+};
 
-// File: src/palette/common/paletteSuperUtils/genHues.js
+// File: palette/common/superUtils/genHues.js
+const logMode$9 = modeData.logging;
+const thisModule$a = 'palette/common/superUtils/genHues.js';
 const logger$a = await createLogger();
-const logMode$9 = mode.logging;
-const genAllColorValues = utils.conversion.genAllColorValues;
-const getWeightedRandomInterval = paletteUtils.probability.getWeightedRandomInterval;
-const validateColorValues = core.validate.colorValues;
+const genAllColorValues = utils$1.conversion.genAllColorValues;
+const getWeightedRandomInterval = utils.probability.getWeightedRandomInterval;
+const validateColorValues = coreUtils.validate.colorValues;
 function analogous$1(color, numBoxes) {
+    const thisFunction = 'analogous()';
     try {
         if (!validateColorValues(color)) {
             if (logMode$9.error)
-                logger$a.error(`Invalid color value ${JSON.stringify(color)}`, 'palette > common > paletteSuperUtils > genHues > analogous()');
+                logger$a.error(`Invalid color value ${JSON.stringify(color)}`, `${thisModule$a} > ${thisFunction}`);
             return [];
         }
-        const clonedColor = core.base.clone(color);
+        const clonedColor = coreUtils.base.clone(color);
         const analogousHues = [];
         const baseHue = clonedColor.value.hue;
         const maxTotalDistance = 60;
@@ -5145,13 +5157,14 @@ function analogous$1(color, numBoxes) {
     }
     catch (error) {
         if (logMode$9.error)
-            logger$a.error(`Error generating analogous hues: ${error}`, 'palette > common > paletteSuperUtils > genHues > analogous()');
+            logger$a.error(`Error generating analogous hues: ${error}`, `${thisModule$a} > ${thisFunction}`);
         return [];
     }
 }
 function diadic$1(baseHue) {
+    const thisFunction = 'diadic()';
     try {
-        const clonedBaseHue = core.base.clone(baseHue);
+        const clonedBaseHue = coreUtils.base.clone(baseHue);
         const diadicHues = [];
         const randomDistance = getWeightedRandomInterval();
         const hue1 = clonedBaseHue;
@@ -5161,26 +5174,27 @@ function diadic$1(baseHue) {
     }
     catch (error) {
         if (logMode$9.error)
-            logger$a.error(`Error generating diadic hues: ${error}`, 'palette > common > paletteSuperUtils > genHues > diadic()');
+            logger$a.error(`Error generating diadic hues: ${error}`, `${thisModule$a} > ${thisFunction}`);
         return [];
     }
 }
 function hexadic$1(color) {
+    const thisFunction = 'hexadic()';
     try {
-        const clonedColor = core.base.clone(color);
+        const clonedColor = coreUtils.base.clone(color);
         if (!validateColorValues(clonedColor)) {
             if (logMode$9.error)
-                logger$a.error(`Invalid color value ${JSON.stringify(clonedColor)}`, 'palette > common > paletteSuperUtils > genHues > hexadic()');
+                logger$a.error(`Invalid color value ${JSON.stringify(clonedColor)}`, `${thisModule$a} > ${thisFunction}`);
             return [];
         }
         const clonedBaseHSL = genAllColorValues(clonedColor).hsl;
         if (!clonedBaseHSL) {
-            if (!mode.gracefulErrors)
+            if (!modeData.gracefulErrors)
                 throw new Error('Unable to generate hexadic hues - missing HSL values');
             else if (logMode$9.error)
-                logger$a.error('Unable to generate hexadic hues - missing HSL values', 'palette > common > paletteSuperUtils > genHues > hexadic()');
-            else if (!mode.quiet && logMode$9.verbosity > 0)
-                logger$a.error('Error generating hexadic hues', 'palette > common > paletteSuperUtils > genHues > hexadic()');
+                logger$a.error('Unable to generate hexadic hues - missing HSL values', `${thisModule$a} > ${thisFunction}`);
+            else if (!modeData.quiet && logMode$9.verbosity > 0)
+                logger$a.error('Error generating hexadic hues', `${thisModule$a} > ${thisFunction}`);
             return [];
         }
         const hexadicHues = [];
@@ -5197,13 +5211,14 @@ function hexadic$1(color) {
     }
     catch (error) {
         if (logMode$9.error)
-            logger$a.error(`Error generating hexadic hues: ${error}`, 'palette > common > paletteSuperUtils > genHues > hexadic()');
+            logger$a.error(`Error generating hexadic hues: ${error}`, `${thisModule$a} > ${thisFunction}`);
         return [];
     }
 }
 function splitComplementary$1(baseHue) {
+    const thisFunction = 'splitComplementary()';
     try {
-        const clonedBaseHue = core.base.clone(baseHue);
+        const clonedBaseHue = coreUtils.base.clone(baseHue);
         const modifier = Math.floor(Math.random() * 11) + 20;
         return [
             (clonedBaseHue + 180 + modifier) % 360,
@@ -5212,13 +5227,14 @@ function splitComplementary$1(baseHue) {
     }
     catch (error) {
         if (logMode$9.error)
-            logger$a.error(`Error generating split complementary hues: ${error}`, 'palette > common > paletteSuperUtils > genHues > splitComplementary()');
+            logger$a.error(`Error generating split complementary hues: ${error}`, `${thisModule$a} > ${thisFunction}`);
         return [];
     }
 }
 function tetradic$1(baseHue) {
+    const thisFunction = 'tetradic()';
     try {
-        const clonedBaseHue = core.base.clone(baseHue);
+        const clonedBaseHue = coreUtils.base.clone(baseHue);
         const randomOffset = Math.floor(Math.random() * 46) + 20;
         const distance = 90 + (Math.random() < 0.5 ? -randomOffset : randomOffset);
         return [
@@ -5230,18 +5246,19 @@ function tetradic$1(baseHue) {
     }
     catch (error) {
         if (logMode$9.error)
-            logger$a.error(`Error generating tetradic hues: ${error}`);
+            logger$a.error(`Error generating tetradic hues: ${error}`, `${thisModule$a} > ${thisFunction}`);
         return [];
     }
 }
 function triadic$1(baseHue) {
+    const thisFunction = 'triadic()';
     try {
-        const clonedBaseHue = core.base.clone(baseHue);
+        const clonedBaseHue = coreUtils.base.clone(baseHue);
         return [120, 240].map(increment => (clonedBaseHue + increment) % 360);
     }
     catch (error) {
         if (logMode$9.error)
-            logger$a.error(`Error generating triadic hues: ${error}`);
+            logger$a.error(`Error generating triadic hues: ${error}`, `${thisModule$a} > ${thisFunction}`);
         return [];
     }
 }
@@ -5254,23 +5271,25 @@ const genHues$6 = {
     triadic: triadic$1
 };
 
-// File: src/palette/common/paletteSuperUtils.js
-const paletteSuperUtils = {
+// File: palette/common/superUtils.js
+const superUtils = {
     create: create$9,
     genHues: genHues$6
 };
 
-// File: src/dom/events/palette.js
+// File: dom/events/palette.js
+const domIDs = domData.ids;
+const logMode$8 = modeData.logging;
+const thisModule$9 = 'ui/base.js';
 const logger$9 = await createLogger();
-const domIDs$1 = consts.dom.ids;
-const logMode$8 = mode.logging;
 function enforceSwatchRules(minimumSwatches, maximumSwatches) {
-    const paletteDropdown = document.getElementById(domIDs$1.paletteNumberOptions);
+    const thisFunction = 'enforceSwatchRules()';
+    const paletteDropdown = document.getElementById(domIDs.paletteNumberOptions);
     if (!paletteDropdown) {
         if (logMode$8.error) {
-            logger$9.error('paletteDropdown not found', 'ui > base > enforceSwatchRules()');
+            logger$9.error('paletteDropdown not found', `${thisModule$9} > ${thisFunction}`);
         }
-        if (mode.stackTrace && logMode$8.verbosity > 3) {
+        if (modeData.stackTrace && logMode$8.verbosity > 3) {
             console.trace('enforceMinimumSwatches stack trace');
         }
         return;
@@ -5295,7 +5314,7 @@ function enforceSwatchRules(minimumSwatches, maximumSwatches) {
         }
         catch (error) {
             if (logMode$8.error) {
-                logger$9.error(`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`, 'ui > base > enforceSwatchRules()');
+                logger$9.error(`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`, `${thisModule$9} > ${thisFunction}`);
             }
             throw new Error(`Failed to dispatch change event: ${error}`);
         }
@@ -5305,7 +5324,7 @@ const base$1 = {
     enforceSwatchRules
 };
 
-// File: src/dom/fileUtils.ts
+// File: dom/fileUtils.js
 function download(data, filename, type) {
     const blob = new Blob([data], { type });
     const url = URL.createObjectURL(blob);
@@ -5328,9 +5347,9 @@ const fileUtils = {
     readFile
 };
 
-// File: src/palette/io/parse/color.ts
-const brand$2 = common.core.brand;
-const regex$2 = config.regex;
+// File: io/parse/color.js
+const brand$2 = commonFn.core.brand;
+const regex$2 = configData.regex;
 const colorParsers = {};
 const cmykParser = {
     parse(input) {
@@ -5490,7 +5509,7 @@ function asCSSColorString(format, input) {
     }
 }
 
-// File: src/io/parse/colorValue.ts
+// File: io/parse/colorValue.js
 function asCMYKValue(colorString) {
     const parsed = asColorString('cmyk', colorString);
     if (parsed && parsed.format === 'cmyk') {
@@ -5550,28 +5569,30 @@ const asColorValue = {
     xyz: asXYZValue
 };
 
-// File: src/io/parse/base.ts
-const logger$8 = await createLogger();
-const brand$1 = common.core.brand;
-const logMode$7 = mode.logging;
+// File: io/parse/base.js
+const brand$1 = commonFn.core.brand;
+const logMode$7 = modeData.logging;
 const regex$1 = {
-    cmyk: config.regex.colors.cmyk,
-    hex: config.regex.colors.hex,
-    hsl: config.regex.colors.hsl,
-    hsv: config.regex.colors.hsv,
-    lab: config.regex.colors.lab,
-    rgb: config.regex.colors.rgb,
-    xyz: config.regex.colors.xyz
+    cmyk: configData.regex.colors.cmyk,
+    hex: configData.regex.colors.hex,
+    hsl: configData.regex.colors.hsl,
+    hsv: configData.regex.colors.hsv,
+    lab: configData.regex.colors.lab,
+    rgb: configData.regex.colors.rgb,
+    xyz: configData.regex.colors.xyz
 };
+const thisModule$8 = 'io/parse/base.js';
+const logger$8 = await createLogger();
 function parseCMYKColorValue(rawCMYK) {
+    const caller = 'parseCMYKColorValue()';
     if (!rawCMYK) {
-        if (!mode.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
-            logger$8.warn('A CMYK element could not be found while parsing palette file. Injecting default values.', 'io > parse > base > parseCMYKColorValue()');
+        if (!modeData.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
+            logger$8.warn('A CMYK element could not be found while parsing palette file. Injecting default values.', `${thisModule$8} > ${caller}`);
         }
         else {
-            logger$8.debug('Missing CMYK element in palette file.', 'io > parse > base > parseCMYKColorValue()');
+            logger$8.debug('Missing CMYK element in palette file.', `${thisModule$8} > ${caller}`);
         }
-        if (mode.stackTrace)
+        if (modeData.stackTrace)
             console.trace('Stack Trace:');
         return {
             cyan: brand$1.asPercentile(0),
@@ -5599,14 +5620,15 @@ function parseCMYKColorValue(rawCMYK) {
         };
 }
 function parseHexColorValue(rawHex) {
+    const caller = 'parseHexColorValue()';
     if (!rawHex) {
-        if (!mode.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
-            logger$8.warn('A Hex element could not be found while parsing palette file. Injecting default values.', 'io > parse > base > parseHexColorValue()');
+        if (!modeData.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
+            logger$8.warn('A Hex element could not be found while parsing palette file. Injecting default values.', `${thisModule$8} > ${caller}`);
         }
         else {
-            logger$8.debug('Missing Hex element in palette file.', 'io > parse > base > parseHexColorValue()');
+            logger$8.debug('Missing Hex element in palette file.', `${thisModule$8} > ${caller}`);
         }
-        if (mode.stackTrace)
+        if (modeData.stackTrace)
             console.trace('Stack Trace:');
         return {
             hex: brand$1.asHexSet('#000000'),
@@ -5628,14 +5650,15 @@ function parseHexColorValue(rawHex) {
         };
 }
 function parseHSLColorValue(rawHSL) {
+    const caller = 'parseHSLColorValue()';
     if (!rawHSL) {
-        if (!mode.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
-            logger$8.warn('An HSL element could not be found while parsing palette file. Injecting default values.', 'io > parse > base > parseHSLColorValue()');
+        if (!modeData.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
+            logger$8.warn('An HSL element could not be found while parsing palette file. Injecting default values.', `${thisModule$8} > ${caller}`);
         }
         else {
-            logger$8.debug('Missing HSL element in palette file.', 'io > parse > base > parseHSLColorValue()');
+            logger$8.debug('Missing HSL element in palette file.', `${thisModule$8} > ${caller}`);
         }
-        if (mode.stackTrace)
+        if (modeData.stackTrace)
             console.trace('Stack Trace:');
         return {
             hue: brand$1.asRadial(0),
@@ -5660,14 +5683,15 @@ function parseHSLColorValue(rawHSL) {
         };
 }
 function parseHSVColorValue(rawHSV) {
+    const caller = 'parseHSVColorValue()';
     if (!rawHSV) {
-        if (!mode.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
-            logger$8.warn('An HSV element could not be found while parsing palette file. Injecting default values.', 'io > parse > base > parseHSVColorValue()');
+        if (!modeData.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
+            logger$8.warn('An HSV element could not be found while parsing palette file. Injecting default values.', `${thisModule$8} > ${caller}`);
         }
         else {
-            logger$8.debug('Missing HSV element in palette file.', 'io > parse > base > parseHSVColorValue()');
+            logger$8.debug('Missing HSV element in palette file.', `${thisModule$8} > ${caller}`);
         }
-        if (mode.stackTrace)
+        if (modeData.stackTrace)
             console.trace('Stack Trace:');
         return {
             hue: brand$1.asRadial(0),
@@ -5692,14 +5716,15 @@ function parseHSVColorValue(rawHSV) {
         };
 }
 function parseLABColorValue(rawLAB) {
+    const caller = 'parseLABColorValue()';
     if (!rawLAB) {
-        if (!mode.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
-            logger$8.warn('A LAB element could not be found while parsing palette file. Injecting default values.', 'io > parse > base > parseLABColorValue()');
+        if (!modeData.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
+            logger$8.warn('A LAB element could not be found while parsing palette file. Injecting default values.', `${thisModule$8} > ${caller}`);
         }
         else {
-            logger$8.debug('Missing LAB element in palette file.', 'io > parse > base > parseLABColorValue()');
+            logger$8.debug('Missing LAB element in palette file.', `${thisModule$8} > ${caller}`);
         }
-        if (mode.stackTrace)
+        if (modeData.stackTrace)
             console.trace('Stack Trace:');
         return {
             l: brand$1.asLAB_L(0),
@@ -5724,14 +5749,15 @@ function parseLABColorValue(rawLAB) {
         };
 }
 function parseRGBColorValue(rawRGB) {
+    const caller = 'parseRGBColorValue()';
     if (!rawRGB) {
-        if (!mode.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
-            logger$8.warn('An RGB element could not be found while parsing palette file. Injecting default values.', 'io > parse > base > parseRGBColorValue()');
+        if (!modeData.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
+            logger$8.warn('An RGB element could not be found while parsing palette file. Injecting default values.', `${thisModule$8} > ${caller}`);
         }
         else {
-            logger$8.debug('Missing RGB element in palette file.', 'io > parse > base > parseRGBColorValue()');
+            logger$8.debug('Missing RGB element in palette file.', `${thisModule$8} > ${caller}`);
         }
-        if (mode.stackTrace)
+        if (modeData.stackTrace)
             console.trace('Stack Trace:');
         return {
             red: brand$1.asByteRange(0),
@@ -5756,14 +5782,15 @@ function parseRGBColorValue(rawRGB) {
         };
 }
 function parseXYZColorValue(rawXYZ) {
+    const caller = 'parseXYZColorValue()';
     if (!rawXYZ) {
-        if (!mode.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
-            logger$8.warn('An XYZ element could not be found while parsing palette file. Injecting default values.', 'io > parse > base > parseXYZColorValue()');
+        if (!modeData.quiet && logMode$7.warn && logMode$7.verbosity >= 2) {
+            logger$8.warn('An XYZ element could not be found while parsing palette file. Injecting default values.', `${thisModule$8} > ${caller}`);
         }
         else {
-            logger$8.debug('Missing XYZ element in palette file.', 'io > parse > base > parseXYZColorValue()');
+            logger$8.debug('Missing XYZ element in palette file.', `${thisModule$8} > ${caller}`);
         }
-        if (mode.stackTrace)
+        if (modeData.stackTrace)
             console.trace('Stack Trace:');
         return {
             x: brand$1.asXYZ_X(0),
@@ -5797,10 +5824,13 @@ const color = {
     xyz: parseXYZColorValue
 };
 
-// File: src/io/parse/json.ts
+// File: io/parse/json.js
+const logMode$6 = modeData.logging;
+const mode = modeData;
+const thisModule$7 = 'io/parse/json.ts';
 const logger$7 = await createLogger();
-const logMode$6 = mode.logging;
 function file$1(jsonData) {
+    const caller = 'file()';
     try {
         const parsed = JSON.parse(jsonData);
         // Validate that the parsed object matches the expected structure
@@ -5811,7 +5841,7 @@ function file$1(jsonData) {
     }
     catch (error) {
         if (!mode.quiet && logMode$6.error && logMode$6.verbosity > 1) {
-            logger$7.error(`Error parsing JSON file: ${error}`, 'io > parse > json > file()');
+            logger$7.error(`Error parsing JSON file: ${error}`, `${thisModule$7} > ${caller}`);
             if (mode.showAlerts)
                 alert(`Error parsing JSON file. See console for details.`);
         }
@@ -5822,8 +5852,8 @@ const json = {
     file: file$1
 };
 
-// File: src/io/parse/index.ts
-const parse = {
+// File: io/parse/index.js
+const ioParseUtils = {
     asColorValue,
     asColorString,
     asCSSColorString,
@@ -5831,23 +5861,25 @@ const parse = {
     json
 };
 
-// File: src/io/deserialize.ts
-const logger$6 = await createLogger();
+// File: io/deserialize.js
 const defaultColors = {
-    cmyk: defaults.colors.base.branded.cmyk,
-    hex: defaults.colors.base.branded.hex,
-    hsl: defaults.colors.base.branded.hsl,
-    hsv: defaults.colors.base.branded.hsv,
-    lab: defaults.colors.base.branded.lab,
-    rgb: defaults.colors.base.branded.rgb,
-    xyz: defaults.colors.base.branded.xyz
+    cmyk: defaultData.colors.base.branded.cmyk,
+    hex: defaultData.colors.base.branded.hex,
+    hsl: defaultData.colors.base.branded.hsl,
+    hsv: defaultData.colors.base.branded.hsv,
+    lab: defaultData.colors.base.branded.lab,
+    rgb: defaultData.colors.base.branded.rgb,
+    xyz: defaultData.colors.base.branded.xyz
 };
-const logMode$5 = mode.logging;
-const regex = config.regex;
-const getFormattedTimestamp = common.core.getFormattedTimestamp;
-const convertToColorString = common.utils.color.colorToColorString;
-const convertToCSSColorString = common.core.convert.colorToCSSColorString;
+const logMode$5 = modeData.logging;
+const regex = configData.regex;
+const thisModule$6 = 'io/deserialize.js';
+const logger$6 = await createLogger();
+const getFormattedTimestamp = commonFn.core.getFormattedTimestamp;
+const convertToColorString = commonFn.utils.color.colorToColorString;
+const convertToCSSColorString = commonFn.core.convert.colorToCSSColorString;
 async function fromCSS(data) {
+    const caller = 'fromCSS()';
     try {
         // 1. parse metadata
         const metadataMatch = data.match(regex.file.palette.css.metadata);
@@ -5871,100 +5903,102 @@ async function fromCSS(data) {
         const customColor = rawCustomColor && rawCustomColor.hslColor
             ? {
                 colors: {
-                    cmyk: rawCustomColor.convertedColors?.cmyk ??
-                        defaultColors.cmyk.value,
-                    hex: rawCustomColor.convertedColors?.hex ??
-                        defaultColors.hex.value,
-                    hsl: rawCustomColor.convertedColors?.hsl ??
-                        defaultColors.hsl.value,
-                    hsv: rawCustomColor.convertedColors?.hsv ??
-                        defaultColors.hsv.value,
-                    lab: rawCustomColor.convertedColors?.lab ??
-                        defaultColors.lab.value,
-                    rgb: rawCustomColor.convertedColors?.rgb ??
-                        defaultColors.rgb.value,
-                    xyz: rawCustomColor.convertedColors?.xyz ??
-                        defaultColors.xyz.value
-                },
-                colorStrings: {
-                    cmykString: convertToColorString({
-                        value: rawCustomColor.convertedColors?.cmyk ??
-                            defaultColors.cmyk,
-                        format: 'cmyk'
-                    }).value,
-                    hexString: convertToColorString({
-                        value: rawCustomColor.convertedColors?.hex ??
-                            defaultColors.hex,
-                        format: 'hex'
-                    }).value,
-                    hslString: convertToColorString({
-                        value: rawCustomColor.convertedColors?.hsl ??
-                            defaultColors.hsl,
-                        format: 'hsl'
-                    }).value,
-                    hsvString: convertToColorString({
-                        value: rawCustomColor.convertedColors?.hsv ??
-                            defaultColors.hsv,
-                        format: 'hsv'
-                    }).value,
-                    labString: convertToColorString({
-                        value: rawCustomColor.convertedColors?.lab ??
-                            defaultColors.lab,
-                        format: 'lab'
-                    }).value,
-                    rgbString: convertToColorString({
-                        value: rawCustomColor.convertedColors?.rgb ??
-                            defaultColors.rgb,
-                        format: 'rgb'
-                    }).value,
-                    xyzString: convertToColorString({
-                        value: rawCustomColor.convertedColors?.xyz ??
-                            defaultColors.xyz,
-                        format: 'xyz'
-                    }).value
-                },
-                cssStrings: {
-                    cmykCSSString: await convertToCSSColorString({
-                        value: rawCustomColor.convertedColors?.cmyk ??
-                            defaultColors.cmyk,
-                        format: 'cmyk'
-                    }),
-                    hexCSSString: await convertToCSSColorString({
-                        value: rawCustomColor.convertedColors?.hex ??
-                            defaultColors.hex,
-                        format: 'hex'
-                    }),
-                    hslCSSString: await convertToCSSColorString({
-                        value: rawCustomColor.convertedColors?.hsl ??
-                            defaultColors.hsl,
-                        format: 'hsl'
-                    }),
-                    hsvCSSString: await convertToCSSColorString({
-                        value: rawCustomColor.convertedColors?.hsv ??
-                            defaultColors.hsv,
-                        format: 'hsv'
-                    }),
-                    labCSSString: await convertToCSSColorString({
-                        value: rawCustomColor.convertedColors?.lab ??
-                            defaultColors.lab,
-                        format: 'lab'
-                    }),
-                    rgbCSSString: await convertToCSSColorString({
-                        value: rawCustomColor.convertedColors?.rgb ??
-                            defaultColors.rgb,
-                        format: 'rgb'
-                    }),
-                    xyzCSSString: await convertToCSSColorString({
-                        value: rawCustomColor.convertedColors?.xyz ??
-                            defaultColors.xyz,
-                        format: 'xyz'
-                    })
+                    main: {
+                        cmyk: rawCustomColor.convertedColors?.cmyk ??
+                            defaultColors.cmyk.value,
+                        hex: rawCustomColor.convertedColors?.hex ??
+                            defaultColors.hex.value,
+                        hsl: rawCustomColor.convertedColors?.hsl ??
+                            defaultColors.hsl.value,
+                        hsv: rawCustomColor.convertedColors?.hsv ??
+                            defaultColors.hsv.value,
+                        lab: rawCustomColor.convertedColors?.lab ??
+                            defaultColors.lab.value,
+                        rgb: rawCustomColor.convertedColors?.rgb ??
+                            defaultColors.rgb.value,
+                        xyz: rawCustomColor.convertedColors?.xyz ??
+                            defaultColors.xyz.value
+                    },
+                    stringProps: {
+                        cmyk: convertToColorString({
+                            value: rawCustomColor.convertedColors?.cmyk ??
+                                defaultColors.cmyk,
+                            format: 'cmyk'
+                        }).value,
+                        hex: convertToColorString({
+                            value: rawCustomColor.convertedColors?.hex ??
+                                defaultColors.hex,
+                            format: 'hex'
+                        }).value,
+                        hsl: convertToColorString({
+                            value: rawCustomColor.convertedColors?.hsl ??
+                                defaultColors.hsl,
+                            format: 'hsl'
+                        }).value,
+                        hsv: convertToColorString({
+                            value: rawCustomColor.convertedColors?.hsv ??
+                                defaultColors.hsv,
+                            format: 'hsv'
+                        }).value,
+                        lab: convertToColorString({
+                            value: rawCustomColor.convertedColors?.lab ??
+                                defaultColors.lab,
+                            format: 'lab'
+                        }).value,
+                        rgb: convertToColorString({
+                            value: rawCustomColor.convertedColors?.rgb ??
+                                defaultColors.rgb,
+                            format: 'rgb'
+                        }).value,
+                        xyz: convertToColorString({
+                            value: rawCustomColor.convertedColors?.xyz ??
+                                defaultColors.xyz,
+                            format: 'xyz'
+                        }).value
+                    },
+                    css: {
+                        cmyk: await convertToCSSColorString({
+                            value: rawCustomColor.convertedColors?.cmyk ??
+                                defaultColors.cmyk,
+                            format: 'cmyk'
+                        }),
+                        hex: await convertToCSSColorString({
+                            value: rawCustomColor.convertedColors?.hex ??
+                                defaultColors.hex,
+                            format: 'hex'
+                        }),
+                        hsl: await convertToCSSColorString({
+                            value: rawCustomColor.convertedColors?.hsl ??
+                                defaultColors.hsl,
+                            format: 'hsl'
+                        }),
+                        hsv: await convertToCSSColorString({
+                            value: rawCustomColor.convertedColors?.hsv ??
+                                defaultColors.hsv,
+                            format: 'hsv'
+                        }),
+                        lab: await convertToCSSColorString({
+                            value: rawCustomColor.convertedColors?.lab ??
+                                defaultColors.lab,
+                            format: 'lab'
+                        }),
+                        rgb: await convertToCSSColorString({
+                            value: rawCustomColor.convertedColors?.rgb ??
+                                defaultColors.rgb,
+                            format: 'rgb'
+                        }),
+                        xyz: await convertToCSSColorString({
+                            value: rawCustomColor.convertedColors?.xyz ??
+                                defaultColors.xyz,
+                            format: 'xyz'
+                        })
+                    }
                 }
             }
             : false;
         if (!customColor) {
-            if (!mode.quiet && logMode$5.info && logMode$5.verbosity > 1) {
-                logger$6.info(`No custom color data found in CSS file. Assigning boolean value 'false' for Palette property Palette['metadata']['customColor'].`, 'io > deserialize > fromCSS');
+            if (!modeData.quiet && logMode$5.info && logMode$5.verbosity > 1) {
+                logger$6.info(`No custom color data found in CSS file. Assigning boolean value 'false' for Palette property Palette['metadata']['customColor'].`, `${thisModule$6} > ${caller}`);
             }
         }
         // 5. parse palette items
@@ -5981,94 +6015,94 @@ async function fromCSS(data) {
             // 2.1. create each PaletteItem with required properties
             items.push({
                 colors: {
-                    cmyk: parse.asColorValue.cmyk(properties.cmyk) ??
-                        defaultColors.cmyk.value,
-                    hex: parse.asColorValue.hex(properties.hex) ??
-                        defaultColors.hex.value,
-                    hsl: parse.asColorValue.hsl(properties.hsl) ??
-                        defaultColors.hsl.value,
-                    hsv: parse.asColorValue.hsv(properties.hsv) ??
-                        defaultColors.hsv.value,
-                    lab: parse.asColorValue.lab(properties.lab) ??
-                        defaultColors.lab.value,
-                    rgb: parse.asColorValue.rgb(properties.rgb) ??
-                        defaultColors.rgb.value,
-                    xyz: parse.asColorValue.xyz(properties.xyz) ??
-                        defaultColors.xyz.value
-                },
-                colorStrings: {
-                    cmykString: convertToColorString({
-                        value: parse.asColorValue.cmyk(properties.cmyk) ??
-                            defaultColors.cmyk,
-                        format: 'cmyk'
-                    }).value,
-                    hexString: convertToColorString({
-                        value: parse.asColorValue.hex(properties.hex) ??
-                            defaultColors.hex,
-                        format: 'hex'
-                    }).value,
-                    hslString: convertToColorString({
-                        value: parse.asColorValue.hsl(properties.hsl) ??
-                            defaultColors.hsl,
-                        format: 'hsl'
-                    }).value,
-                    hsvString: convertToColorString({
-                        value: parse.asColorValue.hsv(properties.hsv) ??
-                            defaultColors.hsv,
-                        format: 'hsv'
-                    }).value,
-                    labString: convertToColorString({
-                        value: parse.asColorValue.lab(properties.lab) ??
-                            defaultColors.lab,
-                        format: 'lab'
-                    }).value,
-                    rgbString: convertToColorString({
-                        value: parse.asColorValue.rgb(properties.rgb) ??
-                            defaultColors.rgb,
-                        format: 'rgb'
-                    }).value,
-                    xyzString: convertToColorString({
-                        value: parse.asColorValue.xyz(properties.xyz) ??
-                            defaultColors.xyz,
-                        format: 'xyz'
-                    }).value
-                },
-                cssStrings: {
-                    cmykCSSString: await convertToCSSColorString({
-                        value: parse.asColorValue.cmyk(properties.cmyk) ??
-                            defaultColors.cmyk,
-                        format: 'cmyk'
-                    }),
-                    hexCSSString: await convertToCSSColorString({
-                        value: parse.asColorValue.hex(properties.hex) ??
-                            defaultColors.hex,
-                        format: 'hex'
-                    }),
-                    hslCSSString: await convertToCSSColorString({
-                        value: parse.asColorValue.hsl(properties.hsl) ??
-                            defaultColors.hsl,
-                        format: 'hsl'
-                    }),
-                    hsvCSSString: await convertToCSSColorString({
-                        value: parse.asColorValue.hsv(properties.hsv) ??
-                            defaultColors.hsv,
-                        format: 'hsv'
-                    }),
-                    labCSSString: await convertToCSSColorString({
-                        value: parse.asColorValue.lab(properties.lab) ??
-                            defaultColors.lab,
-                        format: 'lab'
-                    }),
-                    rgbCSSString: await convertToCSSColorString({
-                        value: parse.asColorValue.rgb(properties.rgb) ??
-                            defaultColors.rgb,
-                        format: 'rgb'
-                    }),
-                    xyzCSSString: await convertToCSSColorString({
-                        value: parse.asColorValue.xyz(properties.xyz) ??
-                            defaultColors.xyz,
-                        format: 'xyz'
-                    })
+                    main: {
+                        cmyk: ioParseUtils.asColorValue.cmyk(properties.cmyk) ??
+                            defaultColors.cmyk.value,
+                        hex: ioParseUtils.asColorValue.hex(properties.hex) ??
+                            defaultColors.hex.value,
+                        hsl: ioParseUtils.asColorValue.hsl(properties.hsl) ??
+                            defaultColors.hsl.value,
+                        hsv: ioParseUtils.asColorValue.hsv(properties.hsv) ??
+                            defaultColors.hsv.value,
+                        lab: ioParseUtils.asColorValue.lab(properties.lab) ??
+                            defaultColors.lab.value,
+                        rgb: ioParseUtils.asColorValue.rgb(properties.rgb) ??
+                            defaultColors.rgb.value,
+                        xyz: ioParseUtils.asColorValue.xyz(properties.xyz) ??
+                            defaultColors.xyz.value
+                    },
+                    stringProps: {
+                        cmyk: convertToColorString({
+                            value: ioParseUtils.asColorValue.cmyk(properties.cmyk) ?? defaultColors.cmyk,
+                            format: 'cmyk'
+                        }).value,
+                        hex: convertToColorString({
+                            value: ioParseUtils.asColorValue.hex(properties.hex) ??
+                                defaultColors.hex,
+                            format: 'hex'
+                        }).value,
+                        hsl: convertToColorString({
+                            value: ioParseUtils.asColorValue.hsl(properties.hsl) ??
+                                defaultColors.hsl,
+                            format: 'hsl'
+                        }).value,
+                        hsv: convertToColorString({
+                            value: ioParseUtils.asColorValue.hsv(properties.hsv) ??
+                                defaultColors.hsv,
+                            format: 'hsv'
+                        }).value,
+                        lab: convertToColorString({
+                            value: ioParseUtils.asColorValue.lab(properties.lab) ??
+                                defaultColors.lab,
+                            format: 'lab'
+                        }).value,
+                        rgb: convertToColorString({
+                            value: ioParseUtils.asColorValue.rgb(properties.rgb) ??
+                                defaultColors.rgb,
+                            format: 'rgb'
+                        }).value,
+                        xyz: convertToColorString({
+                            value: ioParseUtils.asColorValue.xyz(properties.xyz) ??
+                                defaultColors.xyz,
+                            format: 'xyz'
+                        }).value
+                    },
+                    css: {
+                        cmyk: await convertToCSSColorString({
+                            value: ioParseUtils.asColorValue.cmyk(properties.cmyk) ?? defaultColors.cmyk,
+                            format: 'cmyk'
+                        }),
+                        hex: await convertToCSSColorString({
+                            value: ioParseUtils.asColorValue.hex(properties.hex) ??
+                                defaultColors.hex,
+                            format: 'hex'
+                        }),
+                        hsl: await convertToCSSColorString({
+                            value: ioParseUtils.asColorValue.hsl(properties.hsl) ??
+                                defaultColors.hsl,
+                            format: 'hsl'
+                        }),
+                        hsv: await convertToCSSColorString({
+                            value: ioParseUtils.asColorValue.hsv(properties.hsv) ??
+                                defaultColors.hsv,
+                            format: 'hsv'
+                        }),
+                        lab: await convertToCSSColorString({
+                            value: ioParseUtils.asColorValue.lab(properties.lab) ??
+                                defaultColors.lab,
+                            format: 'lab'
+                        }),
+                        rgb: await convertToCSSColorString({
+                            value: ioParseUtils.asColorValue.rgb(properties.rgb) ??
+                                defaultColors.rgb,
+                            format: 'rgb'
+                        }),
+                        xyz: await convertToCSSColorString({
+                            value: ioParseUtils.asColorValue.xyz(properties.xyz) ??
+                                defaultColors.xyz,
+                            format: 'xyz'
+                        })
+                    }
                 }
             });
         }
@@ -6088,27 +6122,28 @@ async function fromCSS(data) {
     }
     catch (error) {
         if (logMode$5.error && logMode$5.verbosity > 1)
-            logger$6.error(`Error occurred during CSS deserialization: ${error}`, 'io > deserialize > fromCSS');
+            logger$6.error(`Error occurred during CSS deserialization: ${error}`, `${thisModule$6} > ${caller}`);
         throw new Error('Failed to deserialize CSS Palette.');
     }
 }
 async function fromJSON(data) {
+    const caller = 'fromJSON()';
     try {
-        const parsed = JSON.parse(data);
-        if (!parsed.items || !Array.isArray(parsed.items)) {
+        const parsedData = JSON.parse(data);
+        if (!parsedData.items || !Array.isArray(parsedData.items)) {
             throw new Error('Invalid JSON format: Missing or invalid `items` property.');
         }
-        return parsed;
+        return parsedData;
     }
     catch (error) {
         if (error instanceof Error) {
             if (logMode$5.error)
-                logger$6.error(`Failed to deserialize JSON: ${error.message}`, 'io > deserialize > fromJSON');
+                logger$6.error(`Failed to deserialize JSON: ${error.message}`, `${thisModule$6} > ${caller}`);
             throw new Error('Failed to deserialize palette from JSPM file');
         }
         else {
             if (logMode$5.error)
-                logger$6.error(`Failed to deserialize JSON: ${error}`, 'io > deserialize > fromJSON');
+                logger$6.error(`Failed to deserialize JSON: ${error}`, `${thisModule$6} > ${caller}`);
             throw new Error('Failed to deserialize palette from JSPM file');
         }
     }
@@ -6148,13 +6183,13 @@ async function fromXML(data) {
     const customColorElement = metadataElement.querySelector('CustomColor');
     let customColor = false;
     if (customColorElement && customColorElement.textContent !== 'false') {
-        const customCMYKValue = parse.color.cmyk(customColorElement.querySelector('CMYK')?.textContent || null);
-        const customHexValue = parse.color.hex(customColorElement.querySelector('Hex')?.textContent || null);
-        const customHSLValue = parse.color.hsl(customColorElement.querySelector('HSL')?.textContent || null);
-        const customHSVValue = parse.color.hsv(customColorElement.querySelector('HSV')?.textContent || null);
-        const customLABValue = parse.color.lab(customColorElement.querySelector('LAB')?.textContent || null);
-        const customRGBValue = parse.color.rgb(customColorElement.querySelector('RGB')?.textContent || null);
-        const customXYZValue = parse.color.xyz(customColorElement.querySelector('XYZ')?.textContent || null);
+        const customCMYKValue = ioParseUtils.color.cmyk(customColorElement.querySelector('CMYK')?.textContent || null);
+        const customHexValue = ioParseUtils.color.hex(customColorElement.querySelector('Hex')?.textContent || null);
+        const customHSLValue = ioParseUtils.color.hsl(customColorElement.querySelector('HSL')?.textContent || null);
+        const customHSVValue = ioParseUtils.color.hsv(customColorElement.querySelector('HSV')?.textContent || null);
+        const customLABValue = ioParseUtils.color.lab(customColorElement.querySelector('LAB')?.textContent || null);
+        const customRGBValue = ioParseUtils.color.rgb(customColorElement.querySelector('RGB')?.textContent || null);
+        const customXYZValue = ioParseUtils.color.xyz(customColorElement.querySelector('XYZ')?.textContent || null);
         const customCMYKStringValue = convertToColorString({
             value: customCMYKValue,
             format: 'cmyk'
@@ -6213,94 +6248,112 @@ async function fromXML(data) {
         });
         customColor = {
             colors: {
-                cmyk: customCMYKValue,
-                hex: customHexValue,
-                hsl: customHSLValue,
-                hsv: customHSVValue,
-                lab: customLABValue,
-                rgb: customRGBValue,
-                xyz: customXYZValue
-            },
-            colorStrings: {
-                cmykString: customCMYKStringValue,
-                hexString: customHexStringValue,
-                hslString: customHSLStringValue,
-                hsvString: customHSVStringValue,
-                labString: customLABStringValue,
-                rgbString: customRGBStringValue,
-                xyzString: customXYZStringValue
-            },
-            cssStrings: {
-                cmykCSSString: customCMYKCSSStringValue,
-                hexCSSString: customHexCSSStringValue,
-                hslCSSString: customHSLCSSStringValue,
-                hsvCSSString: customHSVCSSStringValue,
-                labCSSString: customLABCSSStringValue,
-                rgbCSSString: customRGBCSSStringValue,
-                xyzCSSString: customXYZCSSStringValue
+                main: {
+                    cmyk: customCMYKValue,
+                    hex: customHexValue,
+                    hsl: customHSLValue,
+                    hsv: customHSVValue,
+                    lab: customLABValue,
+                    rgb: customRGBValue,
+                    xyz: customXYZValue
+                },
+                stringProps: {
+                    cmyk: customCMYKStringValue,
+                    hex: customHexStringValue,
+                    hsl: customHSLStringValue,
+                    hsv: customHSVStringValue,
+                    lab: customLABStringValue,
+                    rgb: customRGBStringValue,
+                    xyz: customXYZStringValue
+                },
+                css: {
+                    cmyk: customCMYKCSSStringValue,
+                    hex: customHexCSSStringValue,
+                    hsl: customHSLCSSStringValue,
+                    hsv: customHSVCSSStringValue,
+                    lab: customLABCSSStringValue,
+                    rgb: customRGBCSSStringValue,
+                    xyz: customXYZCSSStringValue
+                }
             }
         };
     }
     // 2. parse palette items
     const items = Array.from(paletteElement.querySelectorAll('PaletteItem')).map(itemElement => {
         const id = parseInt(itemElement.getAttribute('id') || '0', 10);
-        const colors = {
-            cmyk: parse.color.cmyk(itemElement.querySelector('Colors > CMYK')?.textContent || null),
-            hex: parse.color.hex(itemElement.querySelector('Colors > Hex')?.textContent || null),
-            hsl: parse.color.hsl(itemElement.querySelector('Colors > HSL')?.textContent || null),
-            hsv: parse.color.hsv(itemElement.querySelector('Colors > HSV')?.textContent || null),
-            lab: parse.color.lab(itemElement.querySelector('Colors > LAB')?.textContent || null),
-            rgb: parse.color.rgb(itemElement.querySelector('Colors > RGB')?.textContent || null),
-            xyz: parse.color.xyz(itemElement.querySelector('Colors > XYZ')?.textContent || null)
+        // 2.1 parse main colors
+        const mainColors = {
+            cmyk: ioParseUtils.color.cmyk(itemElement.querySelector('Colors > Main > CMYK')
+                ?.textContent || null),
+            hex: ioParseUtils.color.hex(itemElement.querySelector('Colors > Main > Hex')?.textContent ||
+                null),
+            hsl: ioParseUtils.color.hsl(itemElement.querySelector('Colors > Main > HSL')?.textContent ||
+                null),
+            hsv: ioParseUtils.color.hsv(itemElement.querySelector('Colors > Main > HSV')?.textContent ||
+                null),
+            lab: ioParseUtils.color.lab(itemElement.querySelector('Colors > Main > LAB')?.textContent ||
+                null),
+            rgb: ioParseUtils.color.rgb(itemElement.querySelector('Colors > Main > RGB')?.textContent ||
+                null),
+            xyz: ioParseUtils.color.xyz(itemElement.querySelector('Colors > Main > XYZ')?.textContent ||
+                null)
         };
-        const cssStrings = {
-            cmykCSSString: itemElement.querySelector('CSS_Colors > CMYK_CSS')
-                ?.textContent || '',
-            hexCSSString: itemElement.querySelector('CSS_Colors > Hex_CSS')
-                ?.textContent || '',
-            hslCSSString: itemElement.querySelector('CSS_Colors > HSL_CSS')
-                ?.textContent || '',
-            hsvCSSString: itemElement.querySelector('CSS_Colors > HSV_CSS')
-                ?.textContent || '',
-            labCSSString: itemElement.querySelector('CSS_Colors > LAB_CSS')
-                ?.textContent || '',
-            rgbCSSString: itemElement.querySelector('CSS_Colors > RGB_CSS')
-                ?.textContent || '',
-            xyzCSSString: itemElement.querySelector('CSS_Colors > XYZ_CSS')
-                ?.textContent || ''
-        };
-        // 2.1 derive color strings from colors
-        const colorStrings = {
-            cmykString: convertToColorString({
-                value: colors.cmyk,
+        // 2.2 derive color strings from colors
+        const stringPropColors = {
+            cmyk: convertToColorString({
+                value: mainColors.cmyk,
                 format: 'cmyk'
             }).value,
-            hexString: convertToColorString({
-                value: colors.hex,
+            hex: convertToColorString({
+                value: mainColors.hex,
                 format: 'hex'
             }).value,
-            hslString: convertToColorString({
-                value: colors.hsl,
+            hsl: convertToColorString({
+                value: mainColors.hsl,
                 format: 'hsl'
             }).value,
-            hsvString: convertToColorString({
-                value: colors.hsv,
+            hsv: convertToColorString({
+                value: mainColors.hsv,
                 format: 'hsv'
             }).value,
-            labString: convertToColorString({
-                value: colors.lab,
+            lab: convertToColorString({
+                value: mainColors.lab,
                 format: 'lab'
             }).value,
-            rgbString: convertToColorString({
-                value: colors.rgb,
+            rgb: convertToColorString({
+                value: mainColors.rgb,
                 format: 'rgb'
             }).value,
-            xyzString: convertToColorString({
-                value: colors.xyz,
+            xyz: convertToColorString({
+                value: mainColors.xyz,
                 format: 'xyz'
             }).value
         };
-        return { id, colors, colorStrings, cssStrings };
+        // 2.3 derive CSS strings from colors
+        const cssColors = {
+            cmyk: itemElement.querySelector('Colors > CSS > CMYK')?.textContent ||
+                '',
+            hex: itemElement.querySelector('Colors > CSS > Hex')?.textContent ||
+                '',
+            hsl: itemElement.querySelector('Colors > CSS > HSL')?.textContent ||
+                '',
+            hsv: itemElement.querySelector('Colors > CSS > HSV')?.textContent ||
+                '',
+            lab: itemElement.querySelector('Colors > CSS > LAB')?.textContent ||
+                '',
+            rgb: itemElement.querySelector('Colors > CSS > RGB')?.textContent ||
+                '',
+            xyz: itemElement.querySelector('Colors > CSS > XYZ')?.textContent ||
+                ''
+        };
+        return {
+            id,
+            colors: {
+                main: mainColors,
+                stringProps: stringPropColors,
+                css: cssColors
+            }
+        };
     });
     // 3. return the constructed Palette
     return {
@@ -6315,10 +6368,12 @@ const deserialize = {
     fromXML
 };
 
-// File: src/io/deserialize.ts
+// File: io/deserialize.js
+const logMode$4 = modeData.logging;
+const thisModule$5 = 'io/serialize.js';
 const logger$5 = await createLogger();
-const logMode$4 = mode.logging;
 async function toCSS(palette) {
+    const thisMethod = 'toCSS()';
     return new Promise((resolve, reject) => {
         try {
             // 1. serialize metadata
@@ -6340,29 +6395,29 @@ async function toCSS(palette) {
                 ? `
 				/* Optional Custom Color */
 				.palette-custom {
-					--custom-cmyk-color: "${palette.metadata.customColor.colors.cmyk}";
-					--custom-hex-color: "${palette.metadata.customColor.colors.hex}";
-					--custom-hsl-color: "${palette.metadata.customColor.colors.hsl}";
-					--custom-hsv-color: "${palette.metadata.customColor.colors.hsv}";
-					--custom-lab-color: "${palette.metadata.customColor.colors.lab}";
-					--custom-rgb-color: "${palette.metadata.customColor.colors.rgb}";
-					--custom-xyz-color: "${palette.metadata.customColor.colors.xyz}";
+					--custom-cmyk-color: "${palette.metadata.customColor.colors.main.cmyk}";
+					--custom-hex-color: "${palette.metadata.customColor.colors.main.hex}";
+					--custom-hsl-color: "${palette.metadata.customColor.colors.main.hsl}";
+					--custom-hsv-color: "${palette.metadata.customColor.colors.main.hsv}";
+					--custom-lab-color: "${palette.metadata.customColor.colors.main.lab}";
+					--custom-rgb-color: "${palette.metadata.customColor.colors.main.rgb}";
+					--custom-xyz-color: "${palette.metadata.customColor.colors.main.xyz}";
 				}`.trim()
                 : '';
             // 3. serialize palette items
             const items = palette.items
                 .map(item => {
-                const backgroundColor = item.cssStrings.hslCSSString;
+                const backgroundColor = item.colors.css.hsl;
                 return `
 					/* Palette Item */
 					.color {
-						--cmyk-color: "${item.cssStrings.cmykCSSString}";
-						--hex-color: "${item.cssStrings.hexCSSString}";
-						--hsl-color: "${item.cssStrings.hslCSSString}";
-						--hsv-color: "${item.cssStrings.hsvCSSString}";
-						--lab-color: "${item.cssStrings.labCSSString}";
-						--rgb-color: "${item.cssStrings.rgbCSSString}";
-						--xyz-color: "${item.cssStrings.xyzCSSString}";
+						--cmyk-color: "${item.colors.css.cmyk}";
+						--hex-color: "${item.colors.css.hex}";
+						--hsl-color: "${item.colors.css.hsl}";
+						--hsv-color: "${item.colors.css.hsv}";
+						--lab-color: "${item.colors.css.lab}";
+						--rgb-color: "${item.colors.css.rgb}";
+						--xyz-color: "${item.colors.css.xyz}";
 						background-color: ${backgroundColor};
 					}`.trim();
             })
@@ -6375,15 +6430,15 @@ async function toCSS(palette) {
             resolve(cssData.trim());
         }
         catch (error) {
-            if (!mode.quiet && logMode$4.error) {
+            if (!modeData.quiet && logMode$4.error) {
                 if (logMode$4.verbosity > 1) {
-                    logger$5.error(`Failed to convert palette to CSS: ${error}`, 'io > serialize > toCSS()');
+                    logger$5.error(`Failed to convert palette to CSS: ${error}`, `${thisModule$5} > ${thisMethod}`);
                 }
                 else {
-                    logger$5.error('Failed to convert palette to CSS', 'io > serialize > toCSS()');
+                    logger$5.error('Failed to convert palette to CSS', `${thisModule$5} > ${thisMethod}`);
                 }
             }
-            if (mode.stackTrace) {
+            if (modeData.stackTrace) {
                 console.trace('Stack Trace:');
             }
             reject(new Error(`Failed to convert palette to CSS: ${error}`));
@@ -6391,21 +6446,22 @@ async function toCSS(palette) {
     });
 }
 async function toJSON(palette) {
+    const thisMethod = 'toJSON()';
     return new Promise((resolve, reject) => {
         try {
             const jsonData = JSON.stringify(palette, null, 2);
             resolve(jsonData);
         }
         catch (error) {
-            if (!mode.quiet && logMode$4.error) {
+            if (!modeData.quiet && logMode$4.error) {
                 if (logMode$4.verbosity > 1) {
-                    logger$5.error(`Failed to convert palette to JSON: ${error}`);
+                    logger$5.error(`Failed to convert palette to JSON: ${error}`, `${thisModule$5} > ${thisMethod}`);
                 }
                 else {
-                    logger$5.error('Failed to convert palette to JSON');
+                    logger$5.error('Failed to convert palette to JSON', `${thisModule$5} > ${thisMethod}`);
                 }
             }
-            if (mode.stackTrace) {
+            if (modeData.stackTrace) {
                 console.trace('Stack Trace:');
             }
             reject(new Error(`Failed to convert palette to JSON: ${error}`));
@@ -6413,19 +6469,20 @@ async function toJSON(palette) {
     });
 }
 async function toXML(palette) {
+    const thisMethod = 'toXML()';
     return new Promise((resolve, reject) => {
         try {
             // 1. serialize palette metadata
             const customColorXML = palette.metadata.customColor
                 ? `
 				<CustomColor>
-					<CMYK>${palette.metadata.customColor.colors.cmyk}</CMYK>
-					<Hex>${palette.metadata.customColor.colors.hex}</Hex>
-					<HSL>${palette.metadata.customColor.colors.hsl}</HSL>
-					<HSV>${palette.metadata.customColor.colors.hsv}</HSV>
-					<LAB>${palette.metadata.customColor.colors.lab}</LAB>
-					<RGB>${palette.metadata.customColor.colors.rgb}</RGB>
-					<XYZ>${palette.metadata.customColor.colors.xyz}</XYZ>
+					<CMYK>${palette.metadata.customColor.colors.main.cmyk}</CMYK>
+					<Hex>${palette.metadata.customColor.colors.main.hex}</Hex>
+					<HSL>${palette.metadata.customColor.colors.main.hsl}</HSL>
+					<HSV>${palette.metadata.customColor.colors.main.hsv}</HSV>
+					<LAB>${palette.metadata.customColor.colors.main.lab}</LAB>
+					<RGB>${palette.metadata.customColor.colors.main.rgb}</RGB>
+					<XYZ>${palette.metadata.customColor.colors.main.xyz}</XYZ>
 				</CustomColor>`.trim()
                 : '<CustomColor>false</CustomColor>';
             const metadata = `
@@ -6447,23 +6504,25 @@ async function toXML(palette) {
                 .map((item, index) => `
 					<PaletteItem id="${index + 1}">
 						<Colors>
-							<CMYK>${item.colors.cmyk}</CMYK>
-							<Hex>${item.colors.hex}</Hex>
-							<HSL>${item.colors.hsl}</HSL>
-							<HSV>${item.colors.hsv}</HSV>
-							<LAB>${item.colors.lab}</LAB>
-							<RGB>${item.colors.rgb}</RGB>
-							<XYZ>${item.colors.xyz}</XYZ>
+							<Main>
+								<CMYK>${item.colors.main.cmyk}</CMYK>
+								<Hex>${item.colors.main.hex}</Hex>
+								<HSL>${item.colors.main.hsl}</HSL>
+								<HSV>${item.colors.main.hsv}</HSV>
+								<LAB>${item.colors.main.lab}</LAB>
+								<RGB>${item.colors.main.rgb}</RGB>
+								<XYZ>${item.colors.main.xyz}</XYZ>
+							</Main>
+							<CSS>
+								<CMYK>${item.colors.css.cmyk}</CMYK>
+								<Hex>${item.colors.css.hex}</Hex>
+								<HSL>${item.colors.css.hsl}</HSL>
+								<HSV>${item.colors.css.hsv}</HSV>
+								<LAB>${item.colors.css.lab}</LAB>
+								<RGB>${item.colors.css.rgb}</RGB>
+								<XYZ>${item.colors.css.xyz}</XYZ>
+							</CSS>
 						</Colors>
-						<CSS_Colors>
-							<CMYK_CSS>${item.cssStrings.cmykCSSString}</CMYK_CSS>
-							<Hex_CSS>${item.cssStrings.hexCSSString}</Hex_CSS>
-							<HSL_CSS>${item.cssStrings.hslCSSString}</HSL_CSS>
-							<HSV_CSS>${item.cssStrings.hsvCSSString}</HSV_CSS>
-							<LAB_CSS>${item.cssStrings.labCSSString}</LAB_CSS>
-							<RGB_CSS>${item.cssStrings.rgbCSSString}</RGB_CSS>
-							<XYZ_CSS>${item.cssStrings.xyzCSSString}</XYZ_CSS>
-						</CSS_Colors>
 					</PaletteItem>`.trim())
                 .join('\n');
             // 3. combine metadata and items into the palette XML
@@ -6477,15 +6536,15 @@ async function toXML(palette) {
             resolve(xmlData.trim());
         }
         catch (error) {
-            if (!mode.quiet && logMode$4.error) {
+            if (!modeData.quiet && logMode$4.error) {
                 if (logMode$4.verbosity > 1) {
-                    logger$5.error(`Failed to convert palette to XML: ${error}`);
+                    logger$5.error(`Failed to convert palette to XML: ${error}`, `${thisModule$5} > ${thisMethod}`);
                 }
                 else {
-                    logger$5.error('Failed to convert palette to XML');
+                    logger$5.error('Failed to convert palette to XML', `${thisModule$5} > ${thisMethod}`);
                 }
             }
-            if (mode.stackTrace) {
+            if (modeData.stackTrace) {
                 console.trace('Stack Trace:');
             }
             reject(new Error(`Failed to convert palette to XML: ${error}`));
@@ -6498,7 +6557,7 @@ const serialize = {
     toXML
 };
 
-// File: src/io/base.ts
+// File: io/base.js
 // *DEV-NOTE* improve error handling and logging throughout
 const file = {
     async importFromFile(file) {
@@ -6559,17 +6618,18 @@ async function importPalette(data) {
     }
 }
 
-// File: src/io/index.ts
-const io = {
+// File: io/index.js
+const ioFn = {
     deserialize,
     exportPalette,
     file,
     importPalette,
-    parse,
+    parse: ioParseUtils,
     serialize
 };
 
 // File: src/ui/UIManager.ts
+const thisModule$4 = 'ui/UIManager.ts';
 const logger$4 = await createLogger();
 class UIManager {
     static instanceCounter = 0; // static instance ID counter
@@ -6577,23 +6637,32 @@ class UIManager {
     id; // unique instance ID
     currentPalette = null;
     paletteHistory = [];
-    errorUtils;
+    consts;
+    domData;
+    logMode;
+    mode;
     conversionUtils;
-    fileUtils = fileUtils;
-    io = io;
-    elements;
-    logMode = mode.logging;
-    mode = mode;
+    coreUtils;
+    helpers;
+    utils;
+    fileUtils;
+    ioFn;
     getCurrentPaletteFn;
     getStoredPalette;
-    constructor(elements) {
+    constructor() {
         this.id = UIManager.instanceCounter++;
         UIManager.instances.set(this.id, this);
         this.paletteHistory = [];
-        this.errorUtils = utils.errors;
-        this.conversionUtils = common.convert;
-        this.elements = elements;
-        this.io = io;
+        this.consts = constsData;
+        this.domData = domData;
+        this.logMode = modeData.logging;
+        this.mode = modeData;
+        this.coreUtils = commonFn.core;
+        this.helpers = commonFn.helpers;
+        this.utils = commonFn.utils;
+        this.conversionUtils = commonFn.convert;
+        this.fileUtils = fileUtils;
+        this.ioFn = ioFn;
     }
     /* PUBLIC METHODS */
     addPaletteToHistory(palette) {
@@ -6602,6 +6671,7 @@ class UIManager {
             this.paletteHistory.pop();
     }
     applyCustomColor() {
+        const thisMethod = 'applyCustomColor()';
         try {
             const colorPicker = document.getElementById('custom-color-picker');
             if (!colorPicker) {
@@ -6610,73 +6680,75 @@ class UIManager {
             const rawValue = colorPicker.value.trim();
             // *DEV-NOTE* Add this to the Data object
             const selectedFormat = document.getElementById('custom-color-format')?.value;
-            if (!utils.color.isColorSpace(selectedFormat)) {
+            if (!this.utils.color.isColorSpace(selectedFormat)) {
                 if (!this.mode.gracefulErrors)
                     throw new Error(`Unsupported color format: ${selectedFormat}`);
             }
-            const parsedColor = utils.color.parseColor(selectedFormat, rawValue);
+            const parsedColor = this.utils.color.parseColor(selectedFormat, rawValue);
             if (!parsedColor) {
                 if (!this.mode.gracefulErrors)
                     throw new Error(`Invalid color value: ${rawValue}`);
             }
-            const hslColor = utils.color.isHSLColor(parsedColor)
+            const hslColor = this.utils.color.isHSLColor(parsedColor)
                 ? parsedColor
                 : this.conversionUtils.toHSL(parsedColor);
             return hslColor;
         }
         catch (error) {
             if (this.logMode.error)
-                logger$4.error(`Failed to apply custom color: ${error}. Returning randomly generated hex color`, 'UIManager.applyCustomColor()');
-            return utils.random.hsl(false);
+                logger$4.error(`Failed to apply custom color: ${error}. Returning randomly generated hex color`, `${thisModule$4} > ${thisMethod}`);
+            return this.utils.random.hsl(false);
         }
     }
     async applyFirstColorToUI(color) {
+        const thisMethod = 'applyFirstColorToUI()';
         try {
-            const colorBox1 = this.elements.divs.colorBox1;
+            const colorBox1 = this.domData.elements.divs.colorBox1;
             if (!colorBox1) {
                 if (this.logMode.error)
-                    logger$4.error('color-box-1 is null', 'UIManager.applyFirstColorToUI()');
+                    logger$4.error('color-box-1 is null', `${thisModule$4} > ${thisMethod}`);
                 return color;
             }
-            const formatColorString = await core.convert.colorToCSSColorString(color);
+            const formatColorString = await this.coreUtils.convert.colorToCSSColorString(color);
             if (!formatColorString) {
                 if (this.logMode.error)
-                    logger$4.error('Unexpected or unsupported color format.', 'UIManager.applyFirstColorToUI()');
+                    logger$4.error('Unexpected or unsupported color format.', `${thisModule$4} > ${thisMethod}`);
                 return color;
             }
             colorBox1.style.backgroundColor = formatColorString;
-            utils.palette.populateOutputBox(color, 1);
+            this.utils.palette.populateOutputBox(color, 1);
             return color;
         }
         catch (error) {
             if (this.logMode.error)
-                logger$4.error(`Failed to apply first color to UI: ${error}`, 'UIManager.applyFirstColorToUI()');
-            return utils.random.hsl(false);
+                logger$4.error(`Failed to apply first color to UI: ${error}`, `${thisModule$4} > ${thisMethod}`);
+            return this.utils.random.hsl(false);
         }
     }
     copyToClipboard(text, tooltipElement) {
+        const thisMethod = 'copyToClipboard()';
         try {
             const colorValue = text.replace('Copied to clipboard!', '').trim();
             navigator.clipboard
                 .writeText(colorValue)
                 .then(() => {
-                helpers.dom.showTooltip(tooltipElement);
+                this.helpers.dom.showTooltip(tooltipElement);
                 if (!this.mode.quiet &&
                     this.mode.debug &&
                     this.logMode.verbosity > 2 &&
                     this.logMode.info) {
-                    logger$4.info(`Copied color value: ${colorValue}`, 'UIManager.copyToClipboard()');
+                    logger$4.info(`Copied color value: ${colorValue}`, `${thisModule$4} > ${thisMethod}`);
                 }
-                setTimeout(() => tooltipElement.classList.remove('show'), consts.timeouts.tooltip || 1000);
+                setTimeout(() => tooltipElement.classList.remove('show'), this.consts.timeouts.tooltip || 1000);
             })
                 .catch(err => {
                 if (this.logMode.error)
-                    logger$4.error(`Error copying to clipboard: ${err}`, 'UIManager.copyToClipboard()');
+                    logger$4.error(`Error copying to clipboard: ${err}`, `${thisModule$4} > ${thisMethod}`);
             });
         }
         catch (error) {
             if (this.logMode.error)
-                logger$4.error(`Failed to copy to clipboard: ${error}`, 'UIManager.copyToClipboard()');
+                logger$4.error(`Failed to copy to clipboard: ${error}`, `${thisModule$4} > ${thisMethod}`);
         }
     }
     createPaletteTable(palette) {
@@ -6689,7 +6761,7 @@ class UIManager {
             const colorBox = document.createElement('div');
             cell.textContent = `Color ${index + 1}`;
             colorBox.classList.add('color-box');
-            colorBox.style.backgroundColor = item.cssStrings.hexCSSString;
+            colorBox.style.backgroundColor = item.colors.css.hex;
             row.appendChild(colorBox);
             row.appendChild(cell);
             table.appendChild(row);
@@ -6698,20 +6770,22 @@ class UIManager {
         return fragment;
     }
     desaturateColor(selectedColor) {
+        const thisMethod = 'desaturateColor()';
         try {
             this.getElementsForSelectedColor(selectedColor);
         }
         catch (error) {
             if (this.logMode.error)
-                logger$4.error(`Failed to desaturate color: ${error}`, 'UIManager.desaturateColor()');
+                logger$4.error(`Failed to desaturate color: ${error}`, `${thisModule$4} > ${thisMethod}`);
         }
     }
     getElementsForSelectedColor(selectedColor) {
+        const thisMethod = 'getElementsForSelectedColor()';
         const selectedColorBox = document.getElementById(`color-box-${selectedColor}`);
         if (!selectedColorBox) {
             if (this.logMode.warn)
-                logger$4.warn(`Element not found for color ${selectedColor}`, 'UIManager.getElementsForSelectedColor()');
-            helpers.dom.showToast('Please select a valid color.');
+                logger$4.warn(`Element not found for color ${selectedColor}`, `${thisModule$4} > ${thisMethod}`);
+            this.helpers.dom.showToast('Please select a valid color.');
             return {
                 selectedColorTextOutputBox: null,
                 selectedColorBox: null,
@@ -6744,21 +6818,22 @@ class UIManager {
         UIManager.instances.delete(id);
     }
     async handleExport(format) {
+        const thisMethod = 'handleExport()';
         try {
             const palette = await this.getCurrentPalette();
             if (!palette) {
-                logger$4.error('No palette available for export');
+                logger$4.error('No palette available for export', `${thisModule$4} > ${thisMethod}`);
                 return;
             }
             switch (format) {
                 case 'css':
-                    this.io.exportPalette(palette, format);
+                    this.ioFn.exportPalette(palette, format);
                     break;
                 case 'json':
-                    this.io.exportPalette(palette, format);
+                    this.ioFn.exportPalette(palette, format);
                     break;
                 case 'xml':
-                    this.io.exportPalette(palette, format);
+                    this.ioFn.exportPalette(palette, format);
                     break;
                 default:
                     throw new Error(`Unsupported export format: ${format}`);
@@ -6766,55 +6841,80 @@ class UIManager {
         }
         catch (error) {
             if (this.logMode.error && this.logMode.verbosity > 1)
-                logger$4.error(`Failed to export palette: ${error}`);
+                logger$4.error(`Failed to export palette: ${error}`, `${thisModule$4} > ${thisMethod}`);
         }
     }
     async handleImport(file, format) {
         try {
+            const thisMethod = 'handleImport()';
             const data = await this.fileUtils.readFile(file);
             let palette = null;
             switch (format) {
                 case 'JSON':
-                    palette = await this.io.deserialize.fromJSON(data);
+                    palette = await this.ioFn.deserialize.fromJSON(data);
                     if (!palette) {
                         if (this.logMode.error && this.logMode.verbosity > 1) {
-                            logger$4.error('Failed to deserialize JSON data');
+                            logger$4.error('Failed to deserialize JSON data', `${thisModule$4} > ${thisMethod}`);
                         }
                         return;
                     }
                     break;
                 case 'XML':
-                    palette = (await this.io.deserialize.fromXML(data)) || null;
+                    palette =
+                        (await this.ioFn.deserialize.fromXML(data)) || null;
                     break;
                 case 'CSS':
-                    palette = (await this.io.deserialize.fromCSS(data)) || null;
+                    palette =
+                        (await this.ioFn.deserialize.fromCSS(data)) || null;
                     break;
                 default:
                     throw new Error(`Unsupported format: ${format}`);
             }
             if (!palette) {
                 if (this.logMode.error && this.logMode.verbosity > 1) {
-                    logger$4.error(`Failed to deserialize ${format} data`);
+                    logger$4.error(`Failed to deserialize ${format} data`, `${thisModule$4} > ${thisMethod}`);
                 }
                 return;
             }
             this.addPaletteToHistory(palette);
             if (this.logMode.info && this.logMode.verbosity > 1) {
-                logger$4.info(`Successfully imported palette in ${format} format.`);
+                logger$4.info(`Successfully imported palette in ${format} format.`, `${thisModule$4} > ${thisMethod}`);
             }
         }
         catch (error) {
-            logger$4.error(`Failed to import file: ${error}`);
+            logger$4.error(`Failed to import file: ${error}`, `${thisModule$4} > handleImport()`);
         }
     }
     pullParamsFromUI() {
+        const thisMethod = 'pullParamsFromUI()';
         try {
-            const paletteTypeOptionsElement = consts.dom.elements.inputs.paletteTypeOptions;
-            const numBoxesElement = consts.dom.elements.inputs.paletteNumberOptions;
-            const enableAlphaCheckbox = consts.dom.elements.inputs.enableAlphaCheckbox;
-            const limitDarknessCheckbox = consts.dom.elements.inputs.limitDarknessCheckbox;
-            const limitGraynessCheckbox = consts.dom.elements.inputs.limitGraynessCheckbox;
-            const limitLightnessCheckbox = consts.dom.elements.inputs.limitLightnessCheckbox;
+            const paletteTypeOptionsElement = domData.elements.inputs.paletteTypeOptions;
+            const numBoxesElement = domData.elements.inputs.paletteNumberOptions;
+            const enableAlphaCheckbox = domData.elements.inputs.enableAlphaCheckbox;
+            const limitDarknessCheckbox = domData.elements.inputs.limitDarknessCheckbox;
+            const limitGraynessCheckbox = domData.elements.inputs.limitGraynessCheckbox;
+            const limitLightnessCheckbox = domData.elements.inputs.limitLightnessCheckbox;
+            if (!paletteTypeOptionsElement &&
+                !this.mode.quiet &&
+                this.logMode.debug &&
+                this.logMode.verbosity >= 2) {
+                logger$4.warn('paletteTypeOptions DOM element not found', `${thisModule$4} > ${thisMethod}`);
+            }
+            if (!numBoxesElement &&
+                !this.mode.quiet &&
+                this.logMode.debug &&
+                this.logMode.verbosity >= 2) {
+                logger$4.warn(`numBoxes DOM element not found`, `${thisModule$4} > ${thisMethod}`);
+            }
+            if ((!enableAlphaCheckbox ||
+                !limitDarknessCheckbox ||
+                !limitGraynessCheckbox ||
+                !limitLightnessCheckbox) &&
+                !this.mode.quiet &&
+                this.logMode.debug &&
+                this.logMode.verbosity >= 2) {
+                logger$4.warn(`One or more checkboxes not found`, `${thisModule$4} > ${thisMethod}`);
+            }
             return {
                 type: paletteTypeOptionsElement
                     ? parseInt(paletteTypeOptionsElement.value, 10)
@@ -6830,7 +6930,7 @@ class UIManager {
         }
         catch (error) {
             if (this.logMode.error)
-                logger$4.error(`Failed to pull parameters from UI: ${error}`);
+                logger$4.error(`Failed to pull parameters from UI: ${error}`, `${thisModule$4} > ${thisMethod}`);
             return {
                 type: 0,
                 swatches: 0,
@@ -6842,10 +6942,11 @@ class UIManager {
         }
     }
     async renderPalette(tableId) {
+        const thisMethod = 'renderPalette()';
         if (!this.getStoredPalette) {
             throw new Error('Palette fetching function has not been set.');
         }
-        return this.errorUtils.handleAsync(async () => {
+        return this.utils.errors.handleAsync(async () => {
             const storedPalette = await this.getStoredPalette(tableId);
             const paletteRow = document.getElementById('palette-row');
             if (!storedPalette)
@@ -6856,17 +6957,18 @@ class UIManager {
             const tableElement = this.createPaletteTable(storedPalette);
             paletteRow.appendChild(tableElement);
             if (!this.mode.quiet)
-                logger$4.info(`Rendered palette ${tableId}.`);
+                logger$4.info(`Rendered palette ${tableId}.`, `${thisModule$4} > ${thisMethod}`);
         }, 'UIManager.renderPalette(): Error rendering palette');
     }
     saturateColor(selectedColor) {
+        const thisMethod = 'saturateColor()';
         try {
             this.getElementsForSelectedColor(selectedColor);
             // *DEV-NOTE* unfinished function
         }
         catch (error) {
             if (this.logMode.error)
-                logger$4.error(`Failed to saturate color: ${error}`);
+                logger$4.error(`Failed to saturate color: ${error}`, `${thisModule$4} > ${thisMethod}`);
         }
     }
     setCurrentPalette(palette) {
@@ -6880,31 +6982,31 @@ class UIManager {
     }
 }
 
-// File: src/ui/index.ts
-const ui = {
+// File: ui/index.js
+const uiFn = {
     ...base$1
 };
 
-// File: src/palette/main/types/analogous.js
-const create$8 = paletteSuperUtils.create;
-const genHues$5 = paletteSuperUtils.genHues;
+// File: palette/main/types/analogous.js
+const create$8 = superUtils.create;
+const genHues$5 = superUtils.genHues;
 async function analogous(args) {
     // ensure at least 2 color swatches
     if (args.swatches < 2)
-        ui.enforceSwatchRules(2);
+        uiFn.enforceSwatchRules(2);
     const baseColor = create$8.baseColor(args.customColor, args.enableAlpha);
     const hues = genHues$5.analogous(baseColor, args.swatches);
     const paletteItems = [];
     for (const [i, hue] of hues.entries()) {
         const newColor = {
             value: {
-                hue: core.brand.asRadial(hue),
-                saturation: core.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation +
+                hue: coreUtils.brand.asRadial(hue),
+                saturation: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation +
                     (Math.random() - 0.5) * 10))),
-                lightness: core.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + (i % 2 === 0 ? 5 : -5)))),
+                lightness: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + (i % 2 === 0 ? 5 : -5)))),
                 alpha: args.enableAlpha
-                    ? core.brand.asAlphaRange(Math.random())
-                    : core.brand.asAlphaRange(1)
+                    ? coreUtils.brand.asAlphaRange(Math.random())
+                    : coreUtils.brand.asAlphaRange(1)
             },
             format: 'hsl'
         };
@@ -6922,13 +7024,13 @@ async function analogous(args) {
         return analogousPalette;
 }
 
-// File: src/palette/main/types/complementary.js
-const brand = common.core.brand;
-const create$7 = paletteSuperUtils.create;
+// File: palette/main/types/complementary.js
+const brand = commonFn.core.brand;
+const create$7 = superUtils.create;
 async function complementary(args) {
     // ensure at least 2 color swatches
     if (args.swatches !== 2)
-        ui.enforceSwatchRules(2);
+        uiFn.enforceSwatchRules(2);
     const swatches = 2;
     const baseColor = create$7.baseColor(args.customColor, args.enableAlpha);
     const complementaryHue = (baseColor.value.hue + 180) % 360;
@@ -6954,14 +7056,14 @@ async function complementary(args) {
     return complementaryPalette;
 }
 
-// File: src/palette/main/types/diadic.js
-const create$6 = paletteSuperUtils.create;
-const genHues$4 = paletteSuperUtils.genHues;
-const paletteRanges$4 = consts.paletteRanges;
+// File: palette/main/types/diadic.js
+const create$6 = superUtils.create;
+const genHues$4 = superUtils.genHues;
+const paletteRanges$4 = constsData.paletteRanges;
 async function diadic(args) {
     // ensure exactly 2 color swatches
     if (args.swatches !== 2)
-        ui.enforceSwatchRules(2, 2);
+        uiFn.enforceSwatchRules(2, 2);
     const baseColor = create$6.baseColor(args.customColor, args.enableAlpha);
     const hues = genHues$4.diadic(baseColor.value.hue);
     const paletteItems = [];
@@ -6972,12 +7074,12 @@ async function diadic(args) {
             paletteRanges$4.diadic.lightShift / 2;
         const newColor = {
             value: {
-                hue: core.brand.asRadial(hues[i % hues.length]),
-                saturation: core.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation + saturationShift))),
-                lightness: core.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + lightnessShift))),
+                hue: coreUtils.brand.asRadial(hues[i % hues.length]),
+                saturation: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation + saturationShift))),
+                lightness: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + lightnessShift))),
                 alpha: args.enableAlpha
-                    ? core.brand.asAlphaRange(Math.random())
-                    : core.brand.asAlphaRange(1)
+                    ? coreUtils.brand.asAlphaRange(Math.random())
+                    : coreUtils.brand.asAlphaRange(1)
             },
             format: 'hsl'
         };
@@ -6995,14 +7097,14 @@ async function diadic(args) {
         return diadicPalette;
 }
 
-// File: src/palette/main/types/hexadic.js
-const create$5 = paletteSuperUtils.create;
-const genHues$3 = paletteSuperUtils.genHues;
-const paletteRanges$3 = consts.paletteRanges;
+// File: palette/main/types/hexadic.js
+const create$5 = superUtils.create;
+const genHues$3 = superUtils.genHues;
+const paletteRanges$3 = constsData.paletteRanges;
 async function hexadic(args) {
     // ensure exactly 6 color swatches
     if (args.swatches !== 6)
-        ui.enforceSwatchRules(6, 6);
+        uiFn.enforceSwatchRules(6, 6);
     const baseColor = create$5.baseColor(args.customColor, args.enableAlpha);
     const hues = genHues$3.hexadic(baseColor);
     const paletteItems = [];
@@ -7013,12 +7115,12 @@ async function hexadic(args) {
             paletteRanges$3.hexad.lightShift / 2;
         const newColor = {
             value: {
-                hue: core.brand.asRadial(hue),
-                saturation: core.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation + saturationShift))),
-                lightness: core.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + lightnessShift))),
+                hue: coreUtils.brand.asRadial(hue),
+                saturation: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation + saturationShift))),
+                lightness: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + lightnessShift))),
                 alpha: args.enableAlpha
-                    ? core.brand.asAlphaRange(Math.random())
-                    : core.brand.asAlphaRange(1)
+                    ? coreUtils.brand.asAlphaRange(Math.random())
+                    : coreUtils.brand.asAlphaRange(1)
             },
             format: 'hsl'
         };
@@ -7038,26 +7140,26 @@ async function hexadic(args) {
     }
 }
 
-// File: src/palette/main/types/monochromatic.js
-const create$4 = paletteSuperUtils.create;
+// File: palette/main/types/monochromatic.js
+const create$4 = superUtils.create;
 async function monochromatic(args) {
     // ensure at least 2 color swatches
     if (args.swatches < 2)
-        ui.enforceSwatchRules(2);
+        uiFn.enforceSwatchRules(2);
     const baseColor = create$4.baseColor(args.customColor, args.enableAlpha);
     const paletteItems = [];
     const basePaletteItem = await create$4.paletteItem(baseColor, args.enableAlpha);
     paletteItems.push(basePaletteItem);
     for (let i = 1; i < args.swatches; i++) {
         const hueShift = Math.random() * 10 - 5;
-        const newColor = utils.conversion.genAllColorValues({
+        const newColor = utils$1.conversion.genAllColorValues({
             value: {
-                hue: core.brand.asRadial((baseColor.value.hue + hueShift + 360) % 360),
-                saturation: core.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation - i * 5))),
-                lightness: core.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + (i * 10 - 20)))),
+                hue: coreUtils.brand.asRadial((baseColor.value.hue + hueShift + 360) % 360),
+                saturation: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation - i * 5))),
+                lightness: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + (i * 10 - 20)))),
                 alpha: args.enableAlpha
-                    ? core.brand.asAlphaRange(Math.random())
-                    : core.brand.asAlphaRange(1)
+                    ? coreUtils.brand.asAlphaRange(Math.random())
+                    : coreUtils.brand.asAlphaRange(1)
             },
             format: 'hsl'
         }).hsl;
@@ -7079,16 +7181,16 @@ async function monochromatic(args) {
     }
 }
 
-// File: src/paletteGen/palettes/types/random.js
-const create$3 = paletteSuperUtils.create;
-const update = paletteHelpers.update;
+// File: paletteGen/palettes/types/random.js
+const create$3 = superUtils.create;
+const update = helpers.update;
 async function random(args) {
     const baseColor = create$3.baseColor(args.customColor, args.enableAlpha);
     const paletteItems = [
         await create$3.paletteItem(baseColor, args.enableAlpha)
     ];
     for (let i = 1; i < args.swatches; i++) {
-        const randomColor = utils.random.hsl(args.enableAlpha);
+        const randomColor = utils$1.random.hsl(args.enableAlpha);
         const nextPaletteItem = await create$3.paletteItem(randomColor, args.enableAlpha);
         paletteItems.push(nextPaletteItem);
         update.colorBox(randomColor, i);
@@ -7104,14 +7206,14 @@ async function random(args) {
         return randomPalette;
 }
 
-// File: src/palette/main/types/splitComplementary.js
-const create$2 = paletteSuperUtils.create;
-const genHues$2 = paletteSuperUtils.genHues;
-const paletteRanges$2 = consts.paletteRanges;
+// File: palette/main/types/splitComplementary.js
+const create$2 = superUtils.create;
+const genHues$2 = superUtils.genHues;
+const paletteRanges$2 = constsData.paletteRanges;
 async function splitComplementary(args) {
     // ensure exactly 3 color swatches
     if (args.swatches !== 3)
-        ui.enforceSwatchRules(3, 3);
+        uiFn.enforceSwatchRules(3, 3);
     // base color setup
     const baseColor = create$2.baseColor(args.customColor, args.enableAlpha);
     // generate split complementary hues
@@ -7124,22 +7226,22 @@ async function splitComplementary(args) {
     for (const [index, hue] of [hue1, hue2].entries()) {
         const adjustedHSL = {
             value: {
-                hue: core.brand.asRadial(hue),
-                saturation: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
+                hue: coreUtils.brand.asRadial(hue),
+                saturation: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
                     (index === 0
-                        ? -30
+                        ? -paletteRanges$2.splitComp.satShift
                         : paletteRanges$2.splitComp.satShift), 100))),
-                lightness: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
+                lightness: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
                     (index === 0
-                        ? -30
+                        ? -paletteRanges$2.splitComp.lightShift
                         : paletteRanges$2.splitComp.lightShift), 100))),
                 alpha: args.enableAlpha
-                    ? core.brand.asAlphaRange(Math.random())
-                    : core.brand.asAlphaRange(1)
+                    ? coreUtils.brand.asAlphaRange(Math.random())
+                    : coreUtils.brand.asAlphaRange(1)
             },
             format: 'hsl'
         };
-        const adjustedColor = utils.conversion.genAllColorValues(adjustedHSL).hsl;
+        const adjustedColor = utils$1.conversion.genAllColorValues(adjustedHSL).hsl;
         if (adjustedColor) {
             const paletteItem = await create$2.paletteItem(adjustedColor, args.enableAlpha);
             paletteItems.push(paletteItem);
@@ -7156,14 +7258,14 @@ async function splitComplementary(args) {
     return splitComplementaryPalette;
 }
 
-// File: src/palette/main/types/tetradic.js
-const create$1 = paletteSuperUtils.create;
-const genHues$1 = paletteSuperUtils.genHues;
-const paletteRanges$1 = consts.paletteRanges;
+// File: palette/main/types/tetradic.js
+const create$1 = superUtils.create;
+const genHues$1 = superUtils.genHues;
+const paletteRanges$1 = constsData.paletteRanges;
 async function tetradic(args) {
     // ensure exactly 4 swatches
     if (args.swatches !== 4)
-        ui.enforceSwatchRules(4, 4);
+        uiFn.enforceSwatchRules(4, 4);
     // base color setup
     const baseColor = create$1.baseColor(args.customColor, args.enableAlpha);
     // generate tetradic hues
@@ -7178,23 +7280,23 @@ async function tetradic(args) {
         const hue = tetradicHues[index];
         const adjustedHSL = {
             value: {
-                hue: core.brand.asRadial(hue),
-                saturation: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
+                hue: coreUtils.brand.asRadial(hue),
+                saturation: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
                     (index % 2 === 0
-                        ? -30
+                        ? -paletteRanges$1.tetra.satShift
                         : paletteRanges$1.tetra.satShift), 100))),
-                lightness: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
+                lightness: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
                     (index % 2 === 0
-                        ? -30
+                        ? -paletteRanges$1.tetra.lightShift
                         : paletteRanges$1.tetra.lightShift), 100))),
                 alpha: args.enableAlpha
-                    ? core.brand.asAlphaRange(Math.random())
-                    : core.brand.asAlphaRange(1)
+                    ? coreUtils.brand.asAlphaRange(Math.random())
+                    : coreUtils.brand.asAlphaRange(1)
             },
             format: 'hsl'
         };
         // generate all color values and create the palette item
-        const adjustedColor = utils.conversion.genAllColorValues(adjustedHSL)
+        const adjustedColor = utils$1.conversion.genAllColorValues(adjustedHSL)
             .hsl;
         const paletteItem = await create$1.paletteItem(adjustedColor, args.enableAlpha);
         paletteItems.push(paletteItem);
@@ -7212,15 +7314,15 @@ async function tetradic(args) {
     return tetradicPalette;
 }
 
-// File: src/palette/main/types/triadic.js
-const conversion = utils.conversion;
-const create = paletteSuperUtils.create;
-const genHues = paletteSuperUtils.genHues;
-const paletteRanges = consts.paletteRanges;
+// File: palette/main/types/triadic.js
+const conversion = utils$1.conversion;
+const create = superUtils.create;
+const genHues = superUtils.genHues;
+const paletteRanges = constsData.paletteRanges;
 async function triadic(args) {
     // ensure exactly 3 swatches
     if (args.swatches !== 3)
-        ui.enforceSwatchRules(3, 3);
+        uiFn.enforceSwatchRules(3, 3);
     // base color setup
     const baseColor = create.baseColor(args.customColor, args.enableAlpha);
     // generate triadic hues
@@ -7235,18 +7337,18 @@ async function triadic(args) {
         const hue = hues[index];
         const adjustedHSL = {
             value: {
-                hue: core.brand.asRadial(hue),
-                saturation: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
+                hue: coreUtils.brand.asRadial(hue),
+                saturation: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
                     (index % 2 === 0
-                        ? -30
+                        ? -paletteRanges.triad.satShift
                         : paletteRanges.triad.satShift), 100))),
-                lightness: core.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
+                lightness: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
                     (index % 2 === 0
-                        ? -30
+                        ? -paletteRanges.triad.lightShift
                         : paletteRanges.triad.lightShift), 100))),
                 alpha: args.enableAlpha
-                    ? core.brand.asAlphaRange(Math.random())
-                    : core.brand.asAlphaRange(1)
+                    ? coreUtils.brand.asAlphaRange(Math.random())
+                    : coreUtils.brand.asAlphaRange(1)
             },
             format: 'hsl'
         };
@@ -7269,7 +7371,7 @@ async function triadic(args) {
     return triadicPalette;
 }
 
-// File: src/palete/main/index.js
+// File: palette/main/index.js
 const genPalette$1 = {
     analogous,
     complementary,
@@ -7282,39 +7384,41 @@ const genPalette$1 = {
     triadic
 };
 
-// File: src/palette/main.js
+// File: palette/main.js
+const defaultPalette = defaultData.palette.unbranded.data;
+const defaultBrandedPalete = transformUtils.brandPalette(defaultPalette);
+const limits = helpers.limits;
+const logMode$3 = modeData.logging;
+const thisModule$3 = 'palette/main.js';
 const logger$3 = await createLogger();
-const defaultPalette = defaults.palette.unbranded.data;
-const defaultBrandedPalete = transform.brandPalette(defaultPalette);
-const limits = paletteHelpers.limits;
-const logMode$3 = mode.logging;
 const isTooDark = limits.isTooDark;
 const isTooGray = limits.isTooGray;
 const isTooLight = limits.isTooLight;
 async function genPalette(options) {
+    const thisFunction = 'genPalette()';
     try {
         let { swatches, customColor } = options;
         if (logMode$3.info && logMode$3.verbosity > 2)
-            logger$3.info('Retrieving existing IDBManager instance.', 'palette > main > genPalette()');
+            logger$3.info('Retrieving existing IDBManager instance.', `${thisModule$3} > ${thisFunction}`);
         const idb = await IDBManager.getInstance();
         if (customColor === null || customColor === undefined) {
             if (logMode$3.error)
-                logger$3.error('Custom color is null or undefined.', 'palette > main > genPalette()');
+                logger$3.error('Custom color is null or undefined.', `${thisModule$3} > ${thisFunction}`);
             return;
         }
-        const validatedCustomColor = (await helpers.dom.validateAndConvertColor(customColor)) ??
-            utils.random.hsl(options.flags.enableAlpha);
-        if (mode.debug && logMode$3.info && logMode$3.verbosity > 2)
-            logger$3.info(`Custom color: ${JSON.stringify(customColor)}`, 'palette > main > genPalette()');
+        const validatedCustomColor = (await helpers$1.dom.validateAndConvertColor(customColor)) ??
+            utils$1.random.hsl(options.flags.enableAlpha);
+        if (modeData.debug && logMode$3.info && logMode$3.verbosity > 2)
+            logger$3.info(`Custom color: ${JSON.stringify(customColor)}`, `${thisModule$3} > ${thisFunction}`);
         options.customColor = validatedCustomColor;
         const palette = await generate.selectedPalette(options);
         if (palette.items.length === 0) {
             if (logMode$3.error)
-                logger$3.error('Colors array is empty or invalid.', 'palette > main > genPalette()');
+                logger$3.error('Colors array is empty or invalid.', `${thisModule$3} > ${thisFunction}`);
             return;
         }
-        if (!mode.quiet && logMode$3.info && logMode$3.verbosity > 0)
-            logger$3.info(`Colors array generated: ${JSON.stringify(palette.items)}`, 'palette > main > genPalette()');
+        if (!modeData.quiet && logMode$3.info && logMode$3.verbosity > 0)
+            logger$3.info(`Colors array generated: ${JSON.stringify(palette.items)}`, `${thisModule$3} > ${thisFunction}`);
         const tableId = await idb.getNextTableID();
         if (!tableId)
             throw new Error('Table ID is null or undefined.');
@@ -7322,35 +7426,36 @@ async function genPalette(options) {
     }
     catch (error) {
         if (logMode$3.error)
-            logger$3.error(`Error starting palette generation: ${error}`, 'palette > main > genPalette()');
+            logger$3.error(`Error starting palette generation: ${error}`, `${thisModule$3} > ${thisFunction}`);
     }
 }
 async function genPaletteDOMBox(items, numBoxes, tableId) {
+    const thisFunction = 'genPaletteDOMBox()';
     try {
         const paletteRow = document.getElementById('palette-row');
         const idbManager = await IDBManager.getInstance();
         if (!paletteRow) {
             if (logMode$3.error)
-                logger$3.error('paletteRow is undefined.', 'palette > main > genPaletteDOMBox()');
+                logger$3.error('paletteRow is undefined.', `${thisModule$3} > ${thisFunction}`);
             return;
         }
         paletteRow.innerHTML = '';
         const fragment = document.createDocumentFragment();
         for (let i = 0; i < Math.min(items.length, numBoxes); i++) {
             const item = items[i];
-            const color = { value: item.colors.hsl, format: 'hsl' };
-            const { colorStripe } = await helpers.dom.makePaletteBox(color, i + 1);
+            const color = { value: item.colors.main.hsl, format: 'hsl' };
+            const { colorStripe } = await helpers$1.dom.makePaletteBox(color, i + 1);
             fragment.appendChild(colorStripe);
-            utils.palette.populateOutputBox(color, i + 1);
+            utils$1.palette.populateOutputBox(color, i + 1);
         }
         paletteRow.appendChild(fragment);
-        if (!mode.quiet && logMode$3.info && logMode$3.verbosity > 1)
-            logger$3.info('Palette boxes generated and rendered.', 'palette > main > genPaletteDOMBox()');
+        if (!modeData.quiet && logMode$3.info && logMode$3.verbosity > 1)
+            logger$3.info('Palette boxes generated and rendered.', `${thisModule$3} > ${thisFunction}`);
         await idbManager.saveData('tables', tableId, { palette: items });
     }
     catch (error) {
         if (logMode$3.error)
-            logger$3.error(`Error generating palette box: ${error}`, 'palette > main > genPaletteDOMBox()');
+            logger$3.error(`Error generating palette box: ${error}`, `${thisModule$3} > ${thisFunction}`);
     }
 }
 const start = {
@@ -7363,12 +7468,12 @@ function limitedHSL(baseHue, limitDark, limitGray, limitLight, alphaValue) {
     do {
         hsl = {
             value: {
-                hue: core.brand.asRadial(baseHue),
-                saturation: core.brand.asPercentile(Math.random() * 100),
-                lightness: core.brand.asPercentile(Math.random() * 100),
+                hue: coreUtils.brand.asRadial(baseHue),
+                saturation: coreUtils.brand.asPercentile(Math.random() * 100),
+                lightness: coreUtils.brand.asPercentile(Math.random() * 100),
                 alpha: alphaValue
-                    ? core.brand.asAlphaRange(alphaValue)
-                    : core.brand.asAlphaRange(1)
+                    ? coreUtils.brand.asAlphaRange(alphaValue)
+                    : coreUtils.brand.asAlphaRange(1)
             },
             format: 'hsl'
         };
@@ -7378,16 +7483,21 @@ function limitedHSL(baseHue, limitDark, limitGray, limitLight, alphaValue) {
     return hsl;
 }
 async function selectedPalette(options) {
+    const thisFunction = 'selectedPalette()';
     try {
         const { customColor, flags, swatches, type } = options;
         const args = {
             swatches,
+            type,
             customColor,
             enableAlpha: flags.enableAlpha,
             limitDark: flags.limitDarkness,
             limitGray: flags.limitGrayness,
             limitLight: flags.limitLightness
         };
+        if (!modeData.quiet && logMode$3.debug && logMode$3.verbosity > 2) {
+            logger$3.debug(`Generating palette with type #: ${type}`, `${thisModule$3} > ${thisFunction}`);
+        }
         switch (type) {
             case 1:
                 return genPalette$1.random(args);
@@ -7409,13 +7519,13 @@ async function selectedPalette(options) {
                 return genPalette$1.monochromatic(args);
             default:
                 if (logMode$3.error)
-                    logger$3.error('Invalid palette type.', 'palette > main > selectedPalette()');
+                    logger$3.error('Invalid palette type.', `${thisModule$3} > ${thisFunction}`);
                 return Promise.resolve(defaultBrandedPalete);
         }
     }
     catch (error) {
         if (logMode$3.error)
-            logger$3.error(`Error generating palette: ${error}`, 'palette > main > selectedPalette()');
+            logger$3.error(`Error generating palette: ${error}`, `${thisModule$3} > ${thisFunction}`);
         return Promise.resolve(defaultBrandedPalete);
     }
 }
@@ -7424,37 +7534,40 @@ const generate = {
     selectedPalette
 };
 
-// File: src/dom/events/base.js
+// File: dom/events/base.js
+const buttonDebounce = constsData.debounce.button || 300;
+const ids = domData.ids;
+const logMode$2 = modeData.logging;
+const uiElements = domData.elements;
+const thisModule$2 = 'dom/events.js';
 const logger$2 = await createLogger();
-const buttonDebounce = consts.debounce.button;
-const domIDs = consts.dom.ids;
-const logMode$2 = mode.logging;
-const uiElements = consts.dom.elements;
 const idb = await IDBManager.getInstance();
-const uiManager = new UIManager(uiElements);
+const uiManager = new UIManager();
 function addEventListener(id, eventType, callback) {
+    const thisFunction = 'addEventListener()';
     const element = document.getElementById(id);
     if (element) {
         element.addEventListener(eventType, callback);
     }
     else if (logMode$2.warn) {
-        if (mode.debug && logMode$2.warn && logMode$2.verbosity > 2)
-            logger$2.warn(`Element with id "${id}" not found.`, 'dom > events > addEventListener()');
+        if (modeData.debug && logMode$2.warn && logMode$2.verbosity > 2)
+            logger$2.warn(`Element with id "${id}" not found.`, `${thisModule$2} > ${thisFunction}`);
     }
 }
-const handlePaletteGen = core.base.debounce(() => {
+const handlePaletteGen = coreUtils.base.debounce(() => {
+    const thisFunction = 'handlePaletteGen';
     try {
-        const params = superUtils.dom.getGenButtonArgs();
+        const params = superUtils$1.dom.getGenButtonArgs();
         if (!params) {
             if (logMode$2.error) {
-                logger$2.error('Failed to retrieve generateButton parameters', 'dom > events > handlePaletteGen()');
+                logger$2.error('Failed to retrieve generateButton parameters', `${thisModule$2} > ${thisFunction}`);
             }
             return;
         }
-        const { swatches, customColor, type, enableAlpha, limitDarkness, limitGrayness, limitLightness } = params;
+        const { swatches, customColor, type, enableAlpha, limitDark, limitGray, limitLight } = params;
         if (!type || !swatches) {
             if (logMode$2.error) {
-                logger$2.error('paletteType and/or swatches are undefined', 'dom > events > handlePaletteGen()');
+                logger$2.error('paletteType and/or swatches are undefined', `${thisModule$2} > ${thisFunction}`);
             }
             return;
         }
@@ -7462,9 +7575,9 @@ const handlePaletteGen = core.base.debounce(() => {
             customColor,
             flags: {
                 enableAlpha,
-                limitDarkness,
-                limitGrayness,
-                limitLightness
+                limitDarkness: limitDark,
+                limitGrayness: limitGray,
+                limitLightness: limitLight
             },
             swatches,
             type
@@ -7473,20 +7586,26 @@ const handlePaletteGen = core.base.debounce(() => {
     }
     catch (error) {
         if (logMode$2.error)
-            logger$2.error(`Failed to handle generate button click: ${error}`, 'dom > events > handlePaletteGen()');
+            logger$2.error(`Failed to handle generate button click: ${error}`, `${thisModule$2} > ${thisFunction}`);
     }
 }, buttonDebounce);
 function initializeEventListeners() {
+    const thisFunction = 'initializeEventListeners()';
     const addConversionListener = (id, colorSpace) => {
         const button = document.getElementById(id);
         if (button) {
-            if (core.guards.isColorSpace(colorSpace)) {
-                button.addEventListener('click', () => superUtils.dom.switchColorSpace(colorSpace));
+            if (coreUtils.guards.isColorSpace(colorSpace)) {
+                button.addEventListener('click', () => superUtils$1.dom.switchColorSpace(colorSpace));
+            }
+            else {
+                if (logMode$2.warn) {
+                    logger$2.warn(`Invalid color space provided: ${colorSpace}`, `${thisModule$2} > ${thisFunction}`);
+                }
             }
         }
         else {
             if (logMode$2.warn)
-                logger$2.warn(`Element with id "${id}" not found.`, 'dom > events > initializeEventListeners()');
+                logger$2.warn(`Element with id "${id}" not found.`, `${thisModule$2} > ${thisFunction}`);
         }
     };
     addConversionListener('show-as-cmyk-button', 'cmyk');
@@ -7495,27 +7614,27 @@ function initializeEventListeners() {
     addConversionListener('show-as-hsv-button', 'hsv');
     addConversionListener('show-as-lab-button', 'lab');
     addConversionListener('show-as-rgb-button', 'rgb');
-    addEventListener(domIDs.advancedMenuButton, 'click', async (e) => {
+    addEventListener(ids.advancedMenuButton, 'click', async (e) => {
         e.preventDefault();
         uiElements.divs.advancedMenu?.classList.remove('hidden');
         uiElements.divs.advancedMenu?.setAttribute('aria-hidden', 'false');
     });
-    addEventListener(domIDs.applyCustomColorButton, 'click', async (e) => {
+    addEventListener(ids.applyCustomColorButton, 'click', async (e) => {
         e.preventDefault();
         const customHSLColor = uiManager.applyCustomColor();
-        const customHSLColorClone = core.base.clone(customHSLColor);
+        const customHSLColorClone = coreUtils.base.clone(customHSLColor);
         await idb.saveData('customColor', 'appSettings', customHSLColorClone);
-        if (!mode.quiet && logMode$2.info)
-            logger$2.info('Custom color saved to IndexedDB', 'dom > events > applyCustomColorButton click event');
+        if (!modeData.quiet && logMode$2.info)
+            logger$2.info('Custom color saved to IndexedDB', `${thisModule$2} > applyCustomColorButton click event`);
         // *DEV-NOTE* unfinished, I think? Double-check this
     });
-    addEventListener(domIDs.clearCustomColorButton, 'click', async (e) => {
+    addEventListener(ids.clearCustomColorButton, 'click', async (e) => {
         e.preventDefault();
         uiElements.inputs.customColorInput.value = '#ff0000';
-        if (!mode.quiet && logMode$2.info)
-            logger$2.info('Custom color cleared', 'dom > events > clearCustomColorButton click event');
+        if (!modeData.quiet && logMode$2.info)
+            logger$2.info('Custom color cleared', `${thisModule$2} > clearCustomColorButton click event`);
     });
-    addEventListener(domIDs.customColorMenuButton, 'click', async (e) => {
+    addEventListener(ids.customColorMenuButton, 'click', async (e) => {
         e.preventDefault();
         uiElements.divs.customColorMenu?.classList.add('hidden');
         uiElements.divs.customColorMenu?.setAttribute('aria-hidden', 'true');
@@ -7528,12 +7647,12 @@ function initializeEventListeners() {
         uiElements.spans.customColorDisplay.textContent =
             uiElements.inputs.customColorInput.value;
     });
-    addEventListener(domIDs.deleteDatabaseButton, 'click', async (e) => {
+    addEventListener(ids.deleteDatabaseButton, 'click', async (e) => {
         e.preventDefault();
         // only allow if application is in development mode
-        if (String(mode.environment) === 'prod') {
+        if (String(modeData.environment) === 'prod') {
             if (logMode$2.warn) {
-                logger$2.warn('Cannot delete database in production mode.', 'dom > events > deleteDatabaseButton click event');
+                logger$2.warn('Cannot delete database in production mode.', `${thisModule$2} > deleteDatabaseButton click event`);
             }
             return;
         }
@@ -7543,45 +7662,45 @@ function initializeEventListeners() {
         try {
             const idbManager = await IDBManager.getInstance();
             await idbManager.deleteDatabase();
-            if (mode.showAlerts)
+            if (modeData.showAlerts)
                 alert('Database deleted successfully!');
             if (logMode$2.info)
-                logger$2.info('Database deleted successfully.', 'dom > events > deleteDatabaseButton click event');
+                logger$2.info('Database deleted successfully.', `${thisModule$2} > deleteDatabaseButton click event`);
         }
         catch (error) {
             if (logMode$2.error)
-                logger$2.error(`Failed to delete database: ${error}`, `common > utils > random > hsl()`);
-            if (mode.showAlerts)
+                logger$2.error(`Failed to delete database: ${error}`, `${thisModule$2} > deleteDatabaseButton click event`);
+            if (modeData.showAlerts)
                 alert('Failed to delete database.');
         }
     });
-    addEventListener(domIDs.desaturateButton, 'click', async (e) => {
+    addEventListener(ids.desaturateButton, 'click', async (e) => {
         e.preventDefault();
         const selectedColor = uiElements.select.selectedColorOption
             ? parseInt(uiElements.select.selectedColorOption.value, 10)
             : 0;
-        if (!mode.quiet && logMode$2.clicks)
-            logger$2.info('desaturateButton clicked', 'dom > events > desaturateButton click event');
+        if (!modeData.quiet && logMode$2.clicks)
+            logger$2.info('desaturateButton clicked', `${thisModule$2} > desaturateButton click event`);
         uiManager.desaturateColor(selectedColor);
     });
-    addEventListener(domIDs.developerMenuButton, 'click', async (e) => {
+    addEventListener(ids.developerMenuButton, 'click', async (e) => {
         e.preventDefault();
-        if (String(mode.environment) === 'prod') {
-            if (!mode.quiet && logMode$2.error)
-                logger$2.error('Cannot access developer menu in production mode.', 'dom > events > developerMenuButton click event');
+        if (String(modeData.environment) === 'prod') {
+            if (!modeData.quiet && logMode$2.error)
+                logger$2.error('Cannot access developer menu in production mode.', `${thisModule$2} > developerMenuButton click event`);
             return;
         }
         uiElements.divs.developerMenu?.classList.remove('hidden');
         uiElements.divs.developerMenu?.setAttribute('aria-hidden', 'false');
     });
-    addEventListener(domIDs.exportPaletteButton, 'click', async (e) => {
+    addEventListener(ids.exportPaletteButton, 'click', async (e) => {
         e.preventDefault();
-        const format = parse$1.paletteExportFormat();
-        if (mode.debug && logMode$2.info && logMode$2.verbosity > 1)
-            logger$2.info(`Export Palette Button click event: Export format selected: ${format}`, 'dom > events > exportPaletteButton click event');
+        const format = parse.paletteExportFormat();
+        if (modeData.debug && logMode$2.info && logMode$2.verbosity > 1)
+            logger$2.info(`Export Palette Button click event: Export format selected: ${format}`, `${thisModule$2} > exportPaletteButton click event`);
         if (!format) {
-            if (logMode$2.error && !mode.quiet && logMode$2.verbosity > 1) {
-                logger$2.error('Export format not selected', 'dom > events > exportPaletteButton click event');
+            if (logMode$2.error && !modeData.quiet && logMode$2.verbosity > 1) {
+                logger$2.error('Export format not selected', `${thisModule$2} > exportPaletteButton click event`);
                 return;
             }
         }
@@ -7589,22 +7708,24 @@ function initializeEventListeners() {
             uiManager.handleExport(format);
         }
     });
-    addEventListener(domIDs.generateButton, 'click', async (e) => {
+    addEventListener(ids.generateButton, 'click', async (e) => {
         e.preventDefault();
         // captures data from UI at the time the Generate Button is clicked
         const { type, swatches, enableAlpha, limitDarkness, limitGrayness, limitLightness } = uiManager.pullParamsFromUI();
         if (logMode$2.info && logMode$2.verbosity > 1)
-            logger$2.info('Generate Button click event: Retrieved parameters from UI.', 'dom > events > generateButton click event');
+            logger$2.info('Generate Button click event: Retrieved parameters from UI.', `${thisModule$2} > generateButton click event`);
+        if (logMode$2.info && modeData.debug && logMode$2.verbosity > 1)
+            logger$2.info(`Type: ${type}\nSwatches: ${swatches}\nEnableAlpha: ${enableAlpha}\nLimit Darkness: ${limitDarkness}\nLimit Grayness: ${limitGrayness}\nLimit Lightness${limitLightness}.`, `${thisModule$2} > generateButton click event`);
         let customColor = (await idb.getCustomColor());
         if (!customColor) {
-            customColor = utils.random.hsl(true);
+            customColor = utils$1.random.hsl(true);
         }
         else {
-            if (mode.debug && logMode$2.info)
-                logger$2.info(`User-generated Custom Color found in IndexedDB: ${JSON.stringify(customColor)}`, 'dom > events > generateButton click event');
+            if (modeData.debug && logMode$2.info)
+                logger$2.info(`User-generated Custom Color found in IndexedDB: ${JSON.stringify(customColor)}`, `${thisModule$2} > generateButton click event`);
         }
         const paletteOptions = {
-            customColor: core.base.clone(customColor),
+            customColor: coreUtils.base.clone(customColor),
             flags: {
                 enableAlpha,
                 limitDarkness,
@@ -7614,34 +7735,34 @@ function initializeEventListeners() {
             swatches,
             type
         };
-        if (mode.debug && logMode$2.info) {
-            logger$2.info(`paletteOptions object data:`, 'dom > events > generateButton click event');
-            logger$2.info(`paletteType: ${paletteOptions.type}`, 'dom > events > generateButton click event');
-            logger$2.info(`swatches: ${paletteOptions.swatches}`, 'dom > events > generateButton click event');
-            logger$2.info(`customColor: ${JSON.stringify(paletteOptions.customColor)}`, 'dom > events > generateButton click event');
-            logger$2.info(`enableAlpha: ${paletteOptions.flags.enableAlpha}`, 'dom > events > generateButton click event');
-            logger$2.info(`limitDarkness: ${paletteOptions.flags.limitDarkness}`, 'dom > events > generateButton click event');
-            logger$2.info(`limitGrayness: ${paletteOptions.flags.limitGrayness}`, 'dom > events > generateButton click event');
-            logger$2.info(`limitLightness: ${paletteOptions.flags.limitLightness}`, 'dom > events > generateButton click event');
+        if (modeData.debug && logMode$2.info) {
+            logger$2.info(`paletteOptions object data:`, `${thisModule$2} > generateButton click event`);
+            logger$2.info(`paletteType: ${paletteOptions.type}`, `${thisModule$2} > generateButton click event`);
+            logger$2.info(`swatches: ${paletteOptions.swatches}`, `${thisModule$2} > generateButton click event`);
+            logger$2.info(`customColor: ${JSON.stringify(paletteOptions.customColor)}`, `${thisModule$2} > generateButton click event`);
+            logger$2.info(`enableAlpha: ${paletteOptions.flags.enableAlpha}`, `${thisModule$2} > generateButton click event`);
+            logger$2.info(`limitDarkness: ${paletteOptions.flags.limitDarkness}`, `${thisModule$2} > generateButton click event`);
+            logger$2.info(`limitGrayness: ${paletteOptions.flags.limitGrayness}`, `${thisModule$2} > generateButton click event`);
+            logger$2.info(`limitLightness: ${paletteOptions.flags.limitLightness}`, `${thisModule$2} > generateButton click event`);
         }
         await start.genPalette(paletteOptions);
     });
-    addEventListener(domIDs.helpMenuButton, 'click', async (e) => {
+    addEventListener(ids.helpMenuButton, 'click', async (e) => {
         e.preventDefault();
         uiElements.divs.helpMenu?.classList.remove('hidden');
         uiElements.divs.helpMenu?.setAttribute('aria-hidden', 'false');
     });
-    addEventListener(domIDs.historyMenuButton, 'click', async (e) => {
+    addEventListener(ids.historyMenuButton, 'click', async (e) => {
         e.preventDefault();
         uiElements.divs.historyMenu?.classList.remove('hidden');
         uiElements.divs.historyMenu?.setAttribute('aria-hidden', 'false');
     });
-    addEventListener(domIDs.importExportMenuButton, 'click', async (e) => {
+    addEventListener(ids.importExportMenuButton, 'click', async (e) => {
         e.preventDefault();
         uiElements.divs.importExportMenu?.classList.remove('hidden');
         uiElements.divs.importExportMenu?.setAttribute('aria-hidden', 'false');
     });
-    addEventListener(domIDs.importPaletteInput, 'change', async (e) => {
+    addEventListener(ids.importPaletteInput, 'change', async (e) => {
         const input = e.target;
         if (input.files && input.files.length > 0) {
             const file = input.files[0];
@@ -7650,11 +7771,11 @@ function initializeEventListeners() {
             await uiManager.handleImport(file, format);
         }
     });
-    addEventListener(domIDs.resetDatabaseButton, 'click', async (e) => {
+    addEventListener(ids.resetDatabaseButton, 'click', async (e) => {
         e.preventDefault();
-        if (String(mode.environment) === 'prod') {
-            if (!mode.quiet && logMode$2.error)
-                logger$2.error('Cannot reset database in production mode.', 'dom > events > resetDatabaseButton click event');
+        if (String(modeData.environment) === 'prod') {
+            if (!modeData.quiet && logMode$2.error)
+                logger$2.error('Cannot reset database in production mode.', `${thisModule$2} > resetDatabaseButton click event`);
             return;
         }
         const confirmReset = confirm('Are you sure you want to reset the database?');
@@ -7663,23 +7784,23 @@ function initializeEventListeners() {
         try {
             const idbManager = await IDBManager.getInstance();
             idbManager.resetDatabase();
-            if (!mode.quiet && logMode$2.info)
-                logger$2.info('Database has been successfully reset.', 'dom > events > resetDatabaseButton click event');
-            if (mode.showAlerts)
+            if (!modeData.quiet && logMode$2.info)
+                logger$2.info('Database has been successfully reset.', `${thisModule$2} > resetDatabaseButton click event`);
+            if (modeData.showAlerts)
                 alert('IndexedDB successfully reset!');
         }
         catch (error) {
             if (logMode$2.error)
-                logger$2.error(`Failed to reset database: ${error}`, 'dom > events > resetDatabaseButton click event');
-            if (mode.showAlerts)
+                logger$2.error(`Failed to reset database: ${error}`, `${thisModule$2} > resetDatabaseButton click event`);
+            if (modeData.showAlerts)
                 alert('Failed to reset database.');
         }
     });
-    addEventListener(domIDs.resetPaletteIDButton, 'click', async (e) => {
+    addEventListener(ids.resetPaletteIDButton, 'click', async (e) => {
         e.preventDefault();
-        if (String(mode.environment) === 'prod') {
-            if (!mode.quiet && logMode$2.error)
-                logger$2.error('Cannot reset palette ID in production mode.', 'dom > events > resetPaletteIDButton click event');
+        if (String(modeData.environment) === 'prod') {
+            if (!modeData.quiet && logMode$2.error)
+                logger$2.error('Cannot reset palette ID in production mode.', `${thisModule$2} > resetPaletteIDButton click event`);
             return;
         }
         const confirmReset = confirm('Are you sure you want to reset the palette ID?');
@@ -7687,19 +7808,19 @@ function initializeEventListeners() {
             return;
         try {
             await idb.resetPaletteID();
-            if (!mode.quiet && logMode$2.info)
-                logger$2.info('Palette ID has been successfully reset.', 'dom > events > resetPaletteIDButton click event');
-            if (mode.showAlerts)
+            if (!modeData.quiet && logMode$2.info)
+                logger$2.info('Palette ID has been successfully reset.', `${thisModule$2} > resetPaletteIDButton click event`);
+            if (modeData.showAlerts)
                 alert('Palette ID reset successfully!');
         }
         catch (error) {
             if (logMode$2.error)
-                logger$2.error(`Failed to reset palette ID: ${error}`);
-            if (mode.showAlerts)
+                logger$2.error(`Failed to reset palette ID: ${error}`, `${thisModule$2} > resetPaletteIDButton click event`);
+            if (modeData.showAlerts)
                 alert('Failed to reset palette ID.');
         }
     });
-    addEventListener(domIDs.saturateButton, 'click', async (e) => {
+    addEventListener(ids.saturateButton, 'click', async (e) => {
         e.preventDefault();
         if (!uiElements.select.selectedColorOption) {
             throw new Error('Selected color option not found');
@@ -7758,39 +7879,45 @@ const base = {
     initializeEventListeners
 };
 
-// File: src/dom/validate.ts
+// File: dom/validate.js
+const logMode$1 = modeData.logging;
+const thisModule$1 = 'dom/validate.js';
 const logger$1 = await createLogger();
-const logMode$1 = mode.logging;
 function validateElements() {
-    const ids = consts.dom.ids;
+    const thisFunction = 'validateElements()';
+    const ids = domData.ids;
+    const allowedMissingElements = new Set([
+        'color-box-1',
+        'export-palette-input'
+    ]);
     const missingElements = [];
     Object.values(ids).forEach(id => {
         const element = document.getElementById(id);
-        if (!element) {
+        if (!element && !allowedMissingElements.has(id)) {
             if (logMode$1.error)
-                logger$1.error(`Element with ID "${id}" not found`, 'dom > validate > validateElements()');
+                logger$1.error(`Element with ID "${id}" not found`, `${thisModule$1} > ${thisFunction}`);
             missingElements.push(id);
         }
     });
     if (missingElements.length) {
         if (logMode$1.warn)
-            logger$1.warn(`Some DOM elements are missing (${missingElements.length}): ${missingElements.join(', ')}`, 'dom > validate > validateElements()');
+            logger$1.warn(`Some DOM elements are missing (${missingElements.length}): ${missingElements.join(', ')}`, `${thisModule$1} > ${thisFunction}`);
     }
     else {
-        if (logMode$1.info && mode.debug && logMode$1.verbosity > 1)
-            logger$1.info('All required DOM elements are present.', 'dom > validate > validateElements()');
+        if (logMode$1.info && modeData.debug && logMode$1.verbosity > 1)
+            logger$1.info('All required DOM elements are present.', `${thisModule$1} > ${thisFunction}`);
     }
 }
 const validate = {
     elements: validateElements
 };
 
-// File: src/dom/index.js
+// File: dom/index.js
 const events = { ...base };
-const dom = {
+const domFn = {
     events,
     fileUtils,
-    parse: parse$1,
+    parse,
     validate
 };
 
@@ -7800,81 +7927,83 @@ const dom = {
 // You may use this code for any purpose EXCEPT for the creation of proprietary derivatives. I encourage you to improve on my code or to include it in other projects if you find it helpful. Please credit me as the original author.
 // This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND.
 // File: src/app.js
+const logMode = modeData.logging;
+const thisModule = 'app.js';
 const logger = await createLogger();
-const logMode = mode.logging;
-if (mode.debug)
-    logger.info('Executing main application script', 'app.js [STEP 1]');
+if (modeData.debug)
+    logger.info('Executing main application script', `${thisModule} > ANONYMOUS`);
 if (document.readyState === 'loading') {
-    if (mode.debug)
-        logger.info('DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...', 'app.js [STEP 2]');
+    if (modeData.debug)
+        logger.info('DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...', `${thisModule} > ANONYMOUS`);
     document.addEventListener('DOMContentLoaded', initializeApp);
 }
 else {
-    if (mode.debug)
-        logger.info('DOM content already loaded. Initializing application immediately.', 'app.js [STEP 2]: ERROR');
+    if (modeData.debug)
+        logger.info('DOM content already loaded. Initializing application immediately.', `${thisModule} > ANONYMOUS`);
     initializeApp();
 }
 async function initializeApp() {
-    logger.info('DOM content loaded - Initializing application', 'app.js');
+    const thisFunction = 'initializeApp()';
+    logger.info('DOM content loaded - Initializing application', `${thisModule} > ${thisFunction}`);
     try {
-        if (mode.logging.verbosity > 1)
-            logger.info('Creating new IDBManager instance. Initializing database and its dependencies.', 'app.js, [');
-        if (mode.expose.idbManager) {
-            if (mode.debug)
-                logger.info('Exposing IDBManager instance to window.', 'app.js');
+        if (modeData.logging.verbosity > 1)
+            logger.info('Creating new IDBManager instance. Initializing database and its dependencies.', `${thisModule} > ${thisFunction}`);
+        if (modeData.expose.idbManager) {
+            if (modeData.debug && modeData.logging.verbosity > 1)
+                logger.info('Exposing IDBManager instance to window.', `${thisModule} > ${thisFunction}`);
             try {
                 (async () => {
                     const idbManager = await getIDBInstance();
-                    logger.info(`IDBManager instance successfully initialized.`, 'app.js > initializeApp()');
+                    logger.info(`IDBManager instance successfully initialized.`, `${thisModule} > ${thisFunction}`);
                     // binds the IDBManager instance to the window object
                     window.idbManager = idbManager;
-                    logger.info('IDBManager instance successfully exposed to window.', 'app.js > initializeApp()');
+                    logger.info('IDBManager instance successfully exposed to window.', `${thisModule} > ${thisFunction}`);
                 })();
             }
             catch (error) {
                 if (logMode.error)
-                    logger.error(`Failed to expose IDBManager instance to window. Error: ${error}`);
-                if (mode.showAlerts)
+                    logger.warn(`Failed to expose IDBManager instance to window. Error: ${error}`, `${thisModule} > ${thisFunction}`);
+                if (modeData.showAlerts)
                     alert('An error occurred. Check console for details.');
             }
         }
     }
     catch (error) {
         if (logMode.error)
-            logger.error(`Failed to create initial IDBManager instance. Error: ${error}`);
-        if (mode.showAlerts)
+            logger.error(`Failed to create initial IDBManager instance. Error: ${error}`, `${thisModule} > ${thisFunction}`);
+        if (modeData.showAlerts)
             alert('An error occurred. Check console for details.');
     }
-    const selectedColorOption = consts.dom.elements.inputs.selectedColorOption;
-    if (mode.debug) {
+    const selectedColorOption = domData.elements.inputs.selectedColorOption;
+    if (modeData.debug) {
         if (logMode.debug)
-            if (!mode.quiet && logMode.verbosity > 1) {
-                logger.debug('Validating DOM elements');
+            if (!modeData.quiet && logMode.verbosity > 1) {
+                logger.debug('Validating DOM elements', `${thisModule} > ${thisFunction}`);
             }
-        dom.validate.elements();
+        domFn.validate.elements();
     }
     else {
-        if (!mode.quiet) {
-            logger.info('Skipping DOM element validation');
+        if (!modeData.quiet) {
+            logger.info('Skipping DOM element validation', `${thisModule} > ${thisFunction}`);
         }
     }
     const selectedColor = selectedColorOption
         ? parseInt(selectedColorOption.value, 10)
         : 0;
-    if (!mode.quiet && mode.debug)
-        logger.debug(`Selected color: ${selectedColor}`);
+    if (!modeData.quiet && modeData.debug)
+        logger.debug(`Selected color: ${selectedColor}`, `${thisModule} > ${thisFunction}`);
     try {
-        dom.events.initializeEventListeners();
-        if (!mode.quiet)
-            logger.info('Event listeners have been successfully initialized');
+        domFn.events.initializeEventListeners();
+        if (!modeData.quiet)
+            logger.info('Event listeners have been successfully initialized', `${thisModule} > ${thisFunction}`);
     }
     catch (error) {
         if (logMode.error)
-            logger.error(`Failed to initialize event listeners.\n${error}`);
-        if (mode.showAlerts)
+            logger.error(`Failed to initialize event listeners.\n${error}`, `${thisModule} > ${thisFunction}`);
+        if (modeData.showAlerts)
             alert('An error occurred. Check console for details.');
     }
-    if (!mode.quiet && logMode.info)
-        logger.info('Application successfully initialized. Awaiting user input.');
+    if (!modeData.quiet && logMode.info)
+        logger.info('Application successfully initialized. Awaiting user input.', `${thisModule} > ${thisFunction}`);
 }
 //# sourceMappingURL=app.js.map

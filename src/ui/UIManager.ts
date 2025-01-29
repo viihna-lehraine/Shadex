@@ -3,52 +3,73 @@
 import {
 	Color,
 	ColorSpace,
-	CommonFunctionsMasterInterface,
+	CommonFn_MasterInterface,
 	ConstsDataInterface,
+	DOMDataInterface,
+	DOMFn_MasterInterface,
 	HSL,
+	IOFn_MasterInterface,
 	ModeDataInterface,
 	Palette,
 	SL,
 	StoredPalette,
 	SV,
-	UIManagerInterface
+	UIManager_ClassInterface
 } from '../types/index.js';
-import { common, core, helpers, utils } from '../common/index.js';
+import { commonFn } from '../common/index.js';
 import { createLogger } from '../logger/index.js';
-import { consts, mode } from '../common/data/base.js';
+import { constsData as consts } from '../data/consts.js';
+import { domData } from '../data/dom.js';
 import { fileUtils } from '../dom/fileUtils.js';
-import { io } from '../io/index.js';
+import { ioFn } from '../io/index.js';
+import { modeData as mode } from '../data/mode.js';
+
+const thisModule = 'ui/UIManager.ts';
 
 const logger = await createLogger();
 
-export class UIManager implements UIManagerInterface {
+export class UIManager implements UIManager_ClassInterface {
 	private static instanceCounter = 0; // static instance ID counter
 	private static instances = new Map<number, UIManager>(); // instance registry
 	private id: number; // unique instance ID
 	private currentPalette: Palette | null = null;
 	private paletteHistory: Palette[] = [];
 
-	private errorUtils: CommonFunctionsMasterInterface['utils']['errors'];
-	private conversionUtils: CommonFunctionsMasterInterface['convert'];
-	private fileUtils = fileUtils;
-	private io = io;
+	private consts: ConstsDataInterface;
+	private domData: DOMDataInterface;
+	private logMode: ModeDataInterface['logging'];
+	private mode: ModeDataInterface;
 
-	private elements: ConstsDataInterface['dom']['elements'];
+	private conversionUtils: CommonFn_MasterInterface['convert'];
+	private coreUtils: CommonFn_MasterInterface['core'];
+	private helpers: CommonFn_MasterInterface['helpers'];
+	private utils: CommonFn_MasterInterface['utils'];
 
-	private logMode: ModeDataInterface['logging'] = mode.logging;
-	private mode: ModeDataInterface = mode;
+	private fileUtils: DOMFn_MasterInterface['fileUtils'];
+	private ioFn: IOFn_MasterInterface;
 
 	private getCurrentPaletteFn?: () => Promise<Palette | null>;
 	private getStoredPalette?: (id: string) => Promise<StoredPalette | null>;
 
-	constructor(elements: ConstsDataInterface['dom']['elements']) {
+	constructor() {
 		this.id = UIManager.instanceCounter++;
+
 		UIManager.instances.set(this.id, this);
+
 		this.paletteHistory = [];
-		this.errorUtils = utils.errors;
-		this.conversionUtils = common.convert;
-		this.elements = elements;
-		this.io = io;
+
+		this.consts = consts;
+		this.domData = domData;
+		this.logMode = mode.logging;
+		this.mode = mode;
+
+		this.coreUtils = commonFn.core;
+		this.helpers = commonFn.helpers;
+		this.utils = commonFn.utils;
+		this.conversionUtils = commonFn.convert;
+
+		this.fileUtils = fileUtils;
+		this.ioFn = ioFn;
 	}
 
 	/* PUBLIC METHODS */
@@ -60,6 +81,8 @@ export class UIManager implements UIManagerInterface {
 	}
 
 	public applyCustomColor(): HSL {
+		const thisMethod = 'applyCustomColor()';
+
 		try {
 			const colorPicker = document.getElementById(
 				'custom-color-picker'
@@ -78,14 +101,14 @@ export class UIManager implements UIManagerInterface {
 				) as HTMLSelectElement | null
 			)?.value as ColorSpace;
 
-			if (!utils.color.isColorSpace(selectedFormat)) {
+			if (!this.utils.color.isColorSpace(selectedFormat)) {
 				if (!this.mode.gracefulErrors)
 					throw new Error(
 						`Unsupported color format: ${selectedFormat}`
 					);
 			}
 
-			const parsedColor = utils.color.parseColor(
+			const parsedColor = this.utils.color.parseColor(
 				selectedFormat,
 				rawValue
 			) as Exclude<Color, SL | SV>;
@@ -95,7 +118,7 @@ export class UIManager implements UIManagerInterface {
 					throw new Error(`Invalid color value: ${rawValue}`);
 			}
 
-			const hslColor = utils.color.isHSLColor(parsedColor)
+			const hslColor = this.utils.color.isHSLColor(parsedColor)
 				? parsedColor
 				: this.conversionUtils.toHSL(parsedColor);
 
@@ -104,35 +127,36 @@ export class UIManager implements UIManagerInterface {
 			if (this.logMode.error)
 				logger.error(
 					`Failed to apply custom color: ${error}. Returning randomly generated hex color`,
-					'UIManager.applyCustomColor()'
+					`${thisModule} > ${thisMethod}`
 				);
 
-			return utils.random.hsl(false) as HSL;
+			return this.utils.random.hsl(false) as HSL;
 		}
 	}
 
 	public async applyFirstColorToUI(color: HSL): Promise<HSL> {
+		const thisMethod = 'applyFirstColorToUI()';
 		try {
-			const colorBox1 = this.elements.divs.colorBox1;
+			const colorBox1 = this.domData.elements.divs.colorBox1;
 
 			if (!colorBox1) {
 				if (this.logMode.error)
 					logger.error(
 						'color-box-1 is null',
-						'UIManager.applyFirstColorToUI()'
+						`${thisModule} > ${thisMethod}`
 					);
 
 				return color;
 			}
 
 			const formatColorString =
-				await core.convert.colorToCSSColorString(color);
+				await this.coreUtils.convert.colorToCSSColorString(color);
 
 			if (!formatColorString) {
 				if (this.logMode.error)
 					logger.error(
 						'Unexpected or unsupported color format.',
-						'UIManager.applyFirstColorToUI()'
+						`${thisModule} > ${thisMethod}`
 					);
 
 				return color;
@@ -140,27 +164,29 @@ export class UIManager implements UIManagerInterface {
 
 			colorBox1.style.backgroundColor = formatColorString;
 
-			utils.palette.populateOutputBox(color, 1);
+			this.utils.palette.populateOutputBox(color, 1);
 
 			return color;
 		} catch (error) {
 			if (this.logMode.error)
 				logger.error(
 					`Failed to apply first color to UI: ${error}`,
-					'UIManager.applyFirstColorToUI()'
+					`${thisModule} > ${thisMethod}`
 				);
-			return utils.random.hsl(false) as HSL;
+			return this.utils.random.hsl(false) as HSL;
 		}
 	}
 
 	public copyToClipboard(text: string, tooltipElement: HTMLElement): void {
+		const thisMethod = 'copyToClipboard()';
+
 		try {
 			const colorValue = text.replace('Copied to clipboard!', '').trim();
 
 			navigator.clipboard
 				.writeText(colorValue)
 				.then(() => {
-					helpers.dom.showTooltip(tooltipElement);
+					this.helpers.dom.showTooltip(tooltipElement);
 
 					if (
 						!this.mode.quiet &&
@@ -170,27 +196,27 @@ export class UIManager implements UIManagerInterface {
 					) {
 						logger.info(
 							`Copied color value: ${colorValue}`,
-							'UIManager.copyToClipboard()'
+							`${thisModule} > ${thisMethod}`
 						);
 					}
 
 					setTimeout(
 						() => tooltipElement.classList.remove('show'),
-						consts.timeouts.tooltip || 1000
+						this.consts.timeouts.tooltip || 1000
 					);
 				})
 				.catch(err => {
 					if (this.logMode.error)
 						logger.error(
 							`Error copying to clipboard: ${err}`,
-							'UIManager.copyToClipboard()'
+							`${thisModule} > ${thisMethod}`
 						);
 				});
 		} catch (error) {
 			if (this.logMode.error)
 				logger.error(
 					`Failed to copy to clipboard: ${error}`,
-					'UIManager.copyToClipboard()'
+					`${thisModule} > ${thisMethod}`
 				);
 		}
 	}
@@ -207,7 +233,7 @@ export class UIManager implements UIManagerInterface {
 
 			cell.textContent = `Color ${index + 1}`;
 			colorBox.classList.add('color-box');
-			colorBox.style.backgroundColor = item.cssStrings.hexCSSString;
+			colorBox.style.backgroundColor = item.colors.css.hex;
 
 			row.appendChild(colorBox);
 			row.appendChild(cell);
@@ -220,13 +246,15 @@ export class UIManager implements UIManagerInterface {
 	}
 
 	public desaturateColor(selectedColor: number): void {
+		const thisMethod = 'desaturateColor()';
+
 		try {
 			this.getElementsForSelectedColor(selectedColor);
 		} catch (error) {
 			if (this.logMode.error)
 				logger.error(
 					`Failed to desaturate color: ${error}`,
-					'UIManager.desaturateColor()'
+					`${thisModule} > ${thisMethod}`
 				);
 		}
 	}
@@ -236,6 +264,7 @@ export class UIManager implements UIManagerInterface {
 		selectedColorBox: HTMLElement | null;
 		selectedColorStripe: HTMLElement | null;
 	} {
+		const thisMethod = 'getElementsForSelectedColor()';
 		const selectedColorBox = document.getElementById(
 			`color-box-${selectedColor}`
 		);
@@ -244,10 +273,10 @@ export class UIManager implements UIManagerInterface {
 			if (this.logMode.warn)
 				logger.warn(
 					`Element not found for color ${selectedColor}`,
-					'UIManager.getElementsForSelectedColor()'
+					`${thisModule} > ${thisMethod}`
 				);
 
-			helpers.dom.showToast('Please select a valid color.');
+			this.helpers.dom.showToast('Please select a valid color.');
 
 			return {
 				selectedColorTextOutputBox: null,
@@ -294,31 +323,39 @@ export class UIManager implements UIManagerInterface {
 	}
 
 	public async handleExport(format: string): Promise<void> {
+		const thisMethod = 'handleExport()';
+
 		try {
 			const palette = await this.getCurrentPalette();
 
 			if (!palette) {
-				logger.error('No palette available for export');
+				logger.error(
+					'No palette available for export',
+					`${thisModule} > ${thisMethod}`
+				);
 
 				return;
 			}
 
 			switch (format) {
 				case 'css':
-					this.io.exportPalette(palette, format);
+					this.ioFn.exportPalette(palette, format);
 					break;
 				case 'json':
-					this.io.exportPalette(palette, format);
+					this.ioFn.exportPalette(palette, format);
 					break;
 				case 'xml':
-					this.io.exportPalette(palette, format);
+					this.ioFn.exportPalette(palette, format);
 					break;
 				default:
 					throw new Error(`Unsupported export format: ${format}`);
 			}
 		} catch (error) {
 			if (this.logMode.error && this.logMode.verbosity > 1)
-				logger.error(`Failed to export palette: ${error}`);
+				logger.error(
+					`Failed to export palette: ${error}`,
+					`${thisModule} > ${thisMethod}`
+				);
 		}
 	}
 
@@ -327,26 +364,32 @@ export class UIManager implements UIManagerInterface {
 		format: 'JSON' | 'XML' | 'CSS'
 	): Promise<void> {
 		try {
+			const thisMethod = 'handleImport()';
 			const data = await this.fileUtils.readFile(file);
 
 			let palette: Palette | null = null;
 
 			switch (format) {
 				case 'JSON':
-					palette = await this.io.deserialize.fromJSON(data);
+					palette = await this.ioFn.deserialize.fromJSON(data);
 					if (!palette) {
 						if (this.logMode.error && this.logMode.verbosity > 1) {
-							logger.error('Failed to deserialize JSON data');
+							logger.error(
+								'Failed to deserialize JSON data',
+								`${thisModule} > ${thisMethod}`
+							);
 						}
 
 						return;
 					}
 					break;
 				case 'XML':
-					palette = (await this.io.deserialize.fromXML(data)) || null;
+					palette =
+						(await this.ioFn.deserialize.fromXML(data)) || null;
 					break;
 				case 'CSS':
-					palette = (await this.io.deserialize.fromCSS(data)) || null;
+					palette =
+						(await this.ioFn.deserialize.fromCSS(data)) || null;
 					break;
 				default:
 					throw new Error(`Unsupported format: ${format}`);
@@ -354,7 +397,10 @@ export class UIManager implements UIManagerInterface {
 
 			if (!palette) {
 				if (this.logMode.error && this.logMode.verbosity > 1) {
-					logger.error(`Failed to deserialize ${format} data`);
+					logger.error(
+						`Failed to deserialize ${format} data`,
+						`${thisModule} > ${thisMethod}`
+					);
 				}
 				return;
 			}
@@ -363,11 +409,15 @@ export class UIManager implements UIManagerInterface {
 
 			if (this.logMode.info && this.logMode.verbosity > 1) {
 				logger.info(
-					`Successfully imported palette in ${format} format.`
+					`Successfully imported palette in ${format} format.`,
+					`${thisModule} > ${thisMethod}`
 				);
 			}
 		} catch (error) {
-			logger.error(`Failed to import file: ${error}`);
+			logger.error(
+				`Failed to import file: ${error}`,
+				`${thisModule} > handleImport()`
+			);
 		}
 	}
 
@@ -379,19 +429,58 @@ export class UIManager implements UIManagerInterface {
 		limitGrayness: boolean;
 		limitLightness: boolean;
 	} {
+		const thisMethod = 'pullParamsFromUI()';
+
 		try {
 			const paletteTypeOptionsElement =
-				consts.dom.elements.inputs.paletteTypeOptions;
+				domData.elements.inputs.paletteTypeOptions;
 			const numBoxesElement =
-				consts.dom.elements.inputs.paletteNumberOptions;
+				domData.elements.inputs.paletteNumberOptions;
 			const enableAlphaCheckbox =
-				consts.dom.elements.inputs.enableAlphaCheckbox;
+				domData.elements.inputs.enableAlphaCheckbox;
 			const limitDarknessCheckbox =
-				consts.dom.elements.inputs.limitDarknessCheckbox;
+				domData.elements.inputs.limitDarknessCheckbox;
 			const limitGraynessCheckbox =
-				consts.dom.elements.inputs.limitGraynessCheckbox;
+				domData.elements.inputs.limitGraynessCheckbox;
 			const limitLightnessCheckbox =
-				consts.dom.elements.inputs.limitLightnessCheckbox;
+				domData.elements.inputs.limitLightnessCheckbox;
+
+			if (
+				!paletteTypeOptionsElement &&
+				!this.mode.quiet &&
+				this.logMode.debug &&
+				this.logMode.verbosity >= 2
+			) {
+				logger.warn(
+					'paletteTypeOptions DOM element not found',
+					`${thisModule} > ${thisMethod}`
+				);
+			}
+			if (
+				!numBoxesElement &&
+				!this.mode.quiet &&
+				this.logMode.debug &&
+				this.logMode.verbosity >= 2
+			) {
+				logger.warn(
+					`numBoxes DOM element not found`,
+					`${thisModule} > ${thisMethod}`
+				);
+			}
+			if (
+				(!enableAlphaCheckbox ||
+					!limitDarknessCheckbox ||
+					!limitGraynessCheckbox ||
+					!limitLightnessCheckbox) &&
+				!this.mode.quiet &&
+				this.logMode.debug &&
+				this.logMode.verbosity >= 2
+			) {
+				logger.warn(
+					`One or more checkboxes not found`,
+					`${thisModule} > ${thisMethod}`
+				);
+			}
 
 			return {
 				type: paletteTypeOptionsElement
@@ -407,7 +496,10 @@ export class UIManager implements UIManagerInterface {
 			};
 		} catch (error) {
 			if (this.logMode.error)
-				logger.error(`Failed to pull parameters from UI: ${error}`);
+				logger.error(
+					`Failed to pull parameters from UI: ${error}`,
+					`${thisModule} > ${thisMethod}`
+				);
 
 			return {
 				type: 0,
@@ -421,11 +513,13 @@ export class UIManager implements UIManagerInterface {
 	}
 
 	public async renderPalette(tableId: string): Promise<void | null> {
+		const thisMethod = 'renderPalette()';
+
 		if (!this.getStoredPalette) {
 			throw new Error('Palette fetching function has not been set.');
 		}
 
-		return this.errorUtils.handleAsync(async () => {
+		return this.utils.errors.handleAsync(async () => {
 			const storedPalette = await this.getStoredPalette!(tableId);
 			const paletteRow = document.getElementById('palette-row');
 
@@ -438,17 +532,26 @@ export class UIManager implements UIManagerInterface {
 			const tableElement = this.createPaletteTable(storedPalette);
 			paletteRow.appendChild(tableElement);
 
-			if (!this.mode.quiet) logger.info(`Rendered palette ${tableId}.`);
+			if (!this.mode.quiet)
+				logger.info(
+					`Rendered palette ${tableId}.`,
+					`${thisModule} > ${thisMethod}`
+				);
 		}, 'UIManager.renderPalette(): Error rendering palette');
 	}
 
 	public saturateColor(selectedColor: number): void {
+		const thisMethod = 'saturateColor()';
+
 		try {
 			this.getElementsForSelectedColor(selectedColor);
 			// *DEV-NOTE* unfinished function
 		} catch (error) {
 			if (this.logMode.error)
-				logger.error(`Failed to saturate color: ${error}`);
+				logger.error(
+					`Failed to saturate color: ${error}`,
+					`${thisModule} > ${thisMethod}`
+				);
 		}
 	}
 
@@ -465,6 +568,4 @@ export class UIManager implements UIManagerInterface {
 	): void {
 		this.getStoredPalette = getter;
 	}
-
-	/* PRIVATE METHODS */
 }

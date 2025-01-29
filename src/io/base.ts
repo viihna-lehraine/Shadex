@@ -1,4 +1,4 @@
-// File: src/io/base.ts
+// File: io/base.js
 
 import { Palette } from '../types/index.js';
 import { deserialize } from './deserialize.js';

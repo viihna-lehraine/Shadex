@@ -1,33 +1,39 @@
-// File: src/dom/events/base.js
+// File: dom/events/base.js
 
 import {
-	DOM_FunctionsMasterInterface,
+	ColorSpace,
+	DOMFn_MasterInterface,
 	HSL,
 	PaletteOptions
 } from '../types/index.js';
-import { core, superUtils, utils } from '../common/index.js';
-import { consts, mode } from '../common/data/base.js';
-import { createLogger } from '../logger/index.js';
-import { parse } from './parse.js';
 import { IDBManager } from '../db/index.js';
+import { coreUtils, superUtils, utils } from '../common/index.js';
+import { constsData as consts } from '../data/consts.js';
+import { createLogger } from '../logger/index.js';
+import { domData } from '../data/dom.js';
+import { parse } from './parse.js';
+import { modeData as mode } from '../data/mode.js';
 import { start } from '../palette/index.js';
 import { UIManager } from '../ui/index.js';
 
+const buttonDebounce = consts.debounce.button || 300;
+const ids = domData.ids;
+const logMode = mode.logging;
+const uiElements = domData.elements;
+
+const thisModule = 'dom/events.js';
+
 const logger = await createLogger();
 
-const buttonDebounce = consts.debounce.button || 300;
-const domIDs = consts.dom.ids;
-const logMode = mode.logging;
-const uiElements = consts.dom.elements;
-
 const idb = await IDBManager.getInstance();
-const uiManager = new UIManager(uiElements);
+const uiManager = new UIManager();
 
 function addEventListener<K extends keyof HTMLElementEventMap>(
 	id: string,
 	eventType: K,
 	callback: (ev: HTMLElementEventMap[K]) => void
 ): void {
+	const thisFunction = 'addEventListener()';
 	const element = document.getElementById(id);
 
 	if (element) {
@@ -36,12 +42,14 @@ function addEventListener<K extends keyof HTMLElementEventMap>(
 		if (mode.debug && logMode.warn && logMode.verbosity > 2)
 			logger.warn(
 				`Element with id "${id}" not found.`,
-				'dom > events > addEventListener()'
+				`${thisModule} > ${thisFunction}`
 			);
 	}
 }
 
-const handlePaletteGen = core.base.debounce(() => {
+const handlePaletteGen = coreUtils.base.debounce(() => {
+	const thisFunction = 'handlePaletteGen';
+
 	try {
 		const params = superUtils.dom.getGenButtonArgs();
 
@@ -49,7 +57,7 @@ const handlePaletteGen = core.base.debounce(() => {
 			if (logMode.error) {
 				logger.error(
 					'Failed to retrieve generateButton parameters',
-					'dom > events > handlePaletteGen()'
+					`${thisModule} > ${thisFunction}`
 				);
 			}
 
@@ -61,16 +69,16 @@ const handlePaletteGen = core.base.debounce(() => {
 			customColor,
 			type,
 			enableAlpha,
-			limitDarkness,
-			limitGrayness,
-			limitLightness
+			limitDark,
+			limitGray,
+			limitLight
 		} = params;
 
 		if (!type || !swatches) {
 			if (logMode.error) {
 				logger.error(
 					'paletteType and/or swatches are undefined',
-					'dom > events > handlePaletteGen()'
+					`${thisModule} > ${thisFunction}`
 				);
 			}
 
@@ -81,9 +89,9 @@ const handlePaletteGen = core.base.debounce(() => {
 			customColor,
 			flags: {
 				enableAlpha,
-				limitDarkness,
-				limitGrayness,
-				limitLightness
+				limitDarkness: limitDark,
+				limitGrayness: limitGray,
+				limitLightness: limitLight
 			},
 			swatches,
 			type
@@ -94,26 +102,35 @@ const handlePaletteGen = core.base.debounce(() => {
 		if (logMode.error)
 			logger.error(
 				`Failed to handle generate button click: ${error}`,
-				'dom > events > handlePaletteGen()'
+				`${thisModule} > ${thisFunction}`
 			);
 	}
 }, buttonDebounce);
 
 function initializeEventListeners(): void {
+	const thisFunction = 'initializeEventListeners()';
+
 	const addConversionListener = (id: string, colorSpace: string) => {
 		const button = document.getElementById(id) as HTMLButtonElement | null;
 
 		if (button) {
-			if (core.guards.isColorSpace(colorSpace)) {
+			if (coreUtils.guards.isColorSpace(colorSpace)) {
 				button.addEventListener('click', () =>
-					superUtils.dom.switchColorSpace(colorSpace)
+					superUtils.dom.switchColorSpace(colorSpace as ColorSpace)
 				);
+			} else {
+				if (logMode.warn) {
+					logger.warn(
+						`Invalid color space provided: ${colorSpace}`,
+						`${thisModule} > ${thisFunction}`
+					);
+				}
 			}
 		} else {
 			if (logMode.warn)
 				logger.warn(
 					`Element with id "${id}" not found.`,
-					'dom > events > initializeEventListeners()'
+					`${thisModule} > ${thisFunction}`
 				);
 		}
 	};
@@ -125,25 +142,21 @@ function initializeEventListeners(): void {
 	addConversionListener('show-as-lab-button', 'lab');
 	addConversionListener('show-as-rgb-button', 'rgb');
 
-	addEventListener(
-		domIDs.advancedMenuButton,
-		'click',
-		async (e: MouseEvent) => {
-			e.preventDefault();
+	addEventListener(ids.advancedMenuButton, 'click', async (e: MouseEvent) => {
+		e.preventDefault();
 
-			uiElements.divs.advancedMenu?.classList.remove('hidden');
-			uiElements.divs.advancedMenu?.setAttribute('aria-hidden', 'false');
-		}
-	);
+		uiElements.divs.advancedMenu?.classList.remove('hidden');
+		uiElements.divs.advancedMenu?.setAttribute('aria-hidden', 'false');
+	});
 
 	addEventListener(
-		domIDs.applyCustomColorButton,
+		ids.applyCustomColorButton,
 		'click',
 		async (e: MouseEvent) => {
 			e.preventDefault();
 
 			const customHSLColor = uiManager.applyCustomColor();
-			const customHSLColorClone = core.base.clone(customHSLColor);
+			const customHSLColorClone = coreUtils.base.clone(customHSLColor);
 
 			await idb.saveData(
 				'customColor',
@@ -154,7 +167,7 @@ function initializeEventListeners(): void {
 			if (!mode.quiet && logMode.info)
 				logger.info(
 					'Custom color saved to IndexedDB',
-					'dom > events > applyCustomColorButton click event'
+					`${thisModule} > applyCustomColorButton click event`
 				);
 
 			// *DEV-NOTE* unfinished, I think? Double-check this
@@ -162,7 +175,7 @@ function initializeEventListeners(): void {
 	);
 
 	addEventListener(
-		domIDs.clearCustomColorButton,
+		ids.clearCustomColorButton,
 		'click',
 		async (e: MouseEvent) => {
 			e.preventDefault();
@@ -172,13 +185,13 @@ function initializeEventListeners(): void {
 			if (!mode.quiet && logMode.info)
 				logger.info(
 					'Custom color cleared',
-					'dom > events > clearCustomColorButton click event'
+					`${thisModule} > clearCustomColorButton click event`
 				);
 		}
 	);
 
 	addEventListener(
-		domIDs.customColorMenuButton,
+		ids.customColorMenuButton,
 		'click',
 		async (e: MouseEvent) => {
 			e.preventDefault();
@@ -203,7 +216,7 @@ function initializeEventListeners(): void {
 	});
 
 	addEventListener(
-		domIDs.deleteDatabaseButton,
+		ids.deleteDatabaseButton,
 		'click',
 		async (e: MouseEvent) => {
 			e.preventDefault();
@@ -213,7 +226,7 @@ function initializeEventListeners(): void {
 				if (logMode.warn) {
 					logger.warn(
 						'Cannot delete database in production mode.',
-						'dom > events > deleteDatabaseButton click event'
+						`${thisModule} > deleteDatabaseButton click event`
 					);
 				}
 
@@ -234,13 +247,13 @@ function initializeEventListeners(): void {
 				if (logMode.info)
 					logger.info(
 						'Database deleted successfully.',
-						'dom > events > deleteDatabaseButton click event'
+						`${thisModule} > deleteDatabaseButton click event`
 					);
 			} catch (error) {
 				if (logMode.error)
 					logger.error(
 						`Failed to delete database: ${error}`,
-						`common > utils > random > hsl()`
+						`${thisModule} > deleteDatabaseButton click event`
 					);
 
 				if (mode.showAlerts) alert('Failed to delete database.');
@@ -248,28 +261,24 @@ function initializeEventListeners(): void {
 		}
 	);
 
-	addEventListener(
-		domIDs.desaturateButton,
-		'click',
-		async (e: MouseEvent) => {
-			e.preventDefault();
+	addEventListener(ids.desaturateButton, 'click', async (e: MouseEvent) => {
+		e.preventDefault();
 
-			const selectedColor = uiElements.select.selectedColorOption
-				? parseInt(uiElements.select.selectedColorOption.value, 10)
-				: 0;
+		const selectedColor = uiElements.select.selectedColorOption
+			? parseInt(uiElements.select.selectedColorOption.value, 10)
+			: 0;
 
-			if (!mode.quiet && logMode.clicks)
-				logger.info(
-					'desaturateButton clicked',
-					'dom > events > desaturateButton click event'
-				);
+		if (!mode.quiet && logMode.clicks)
+			logger.info(
+				'desaturateButton clicked',
+				`${thisModule} > desaturateButton click event`
+			);
 
-			uiManager.desaturateColor(selectedColor);
-		}
-	);
+		uiManager.desaturateColor(selectedColor);
+	});
 
 	addEventListener(
-		domIDs.developerMenuButton,
+		ids.developerMenuButton,
 		'click',
 		async (e: MouseEvent) => {
 			e.preventDefault();
@@ -278,7 +287,7 @@ function initializeEventListeners(): void {
 				if (!mode.quiet && logMode.error)
 					logger.error(
 						'Cannot access developer menu in production mode.',
-						'dom > events > developerMenuButton click event'
+						`${thisModule} > developerMenuButton click event`
 					);
 
 				return;
@@ -290,7 +299,7 @@ function initializeEventListeners(): void {
 	);
 
 	addEventListener(
-		domIDs.exportPaletteButton,
+		ids.exportPaletteButton,
 		'click',
 		async (e: MouseEvent) => {
 			e.preventDefault();
@@ -300,14 +309,14 @@ function initializeEventListeners(): void {
 			if (mode.debug && logMode.info && logMode.verbosity > 1)
 				logger.info(
 					`Export Palette Button click event: Export format selected: ${format}`,
-					'dom > events > exportPaletteButton click event'
+					`${thisModule} > exportPaletteButton click event`
 				);
 
 			if (!format) {
 				if (logMode.error && !mode.quiet && logMode.verbosity > 1) {
 					logger.error(
 						'Export format not selected',
-						'dom > events > exportPaletteButton click event'
+						`${thisModule} > exportPaletteButton click event`
 					);
 
 					return;
@@ -318,7 +327,7 @@ function initializeEventListeners(): void {
 		}
 	);
 
-	addEventListener(domIDs.generateButton, 'click', async (e: MouseEvent) => {
+	addEventListener(ids.generateButton, 'click', async (e: MouseEvent) => {
 		e.preventDefault();
 
 		// captures data from UI at the time the Generate Button is clicked
@@ -334,7 +343,13 @@ function initializeEventListeners(): void {
 		if (logMode.info && logMode.verbosity > 1)
 			logger.info(
 				'Generate Button click event: Retrieved parameters from UI.',
-				'dom > events > generateButton click event'
+				`${thisModule} > generateButton click event`
+			);
+
+		if (logMode.info && mode.debug && logMode.verbosity > 1)
+			logger.info(
+				`Type: ${type}\nSwatches: ${swatches}\nEnableAlpha: ${enableAlpha}\nLimit Darkness: ${limitDarkness}\nLimit Grayness: ${limitGrayness}\nLimit Lightness${limitLightness}.`,
+				`${thisModule} > generateButton click event`
 			);
 
 		let customColor = (await idb.getCustomColor()) as HSL | null;
@@ -347,12 +362,12 @@ function initializeEventListeners(): void {
 					`User-generated Custom Color found in IndexedDB: ${JSON.stringify(
 						customColor
 					)}`,
-					'dom > events > generateButton click event'
+					`${thisModule} > generateButton click event`
 				);
 		}
 
 		const paletteOptions: PaletteOptions = {
-			customColor: core.base.clone(customColor),
+			customColor: coreUtils.base.clone(customColor),
 			flags: {
 				enableAlpha,
 				limitDarkness,
@@ -366,61 +381,57 @@ function initializeEventListeners(): void {
 		if (mode.debug && logMode.info) {
 			logger.info(
 				`paletteOptions object data:`,
-				'dom > events > generateButton click event'
+				`${thisModule} > generateButton click event`
 			);
 			logger.info(
 				`paletteType: ${paletteOptions.type}`,
-				'dom > events > generateButton click event'
+				`${thisModule} > generateButton click event`
 			);
 			logger.info(
 				`swatches: ${paletteOptions.swatches}`,
-				'dom > events > generateButton click event'
+				`${thisModule} > generateButton click event`
 			);
 			logger.info(
 				`customColor: ${JSON.stringify(paletteOptions.customColor)}`,
-				'dom > events > generateButton click event'
+				`${thisModule} > generateButton click event`
 			);
 			logger.info(
 				`enableAlpha: ${paletteOptions.flags.enableAlpha}`,
-				'dom > events > generateButton click event'
+				`${thisModule} > generateButton click event`
 			);
 			logger.info(
 				`limitDarkness: ${paletteOptions.flags.limitDarkness}`,
-				'dom > events > generateButton click event'
+				`${thisModule} > generateButton click event`
 			);
 			logger.info(
 				`limitGrayness: ${paletteOptions.flags.limitGrayness}`,
-				'dom > events > generateButton click event'
+				`${thisModule} > generateButton click event`
 			);
 			logger.info(
 				`limitLightness: ${paletteOptions.flags.limitLightness}`,
-				'dom > events > generateButton click event'
+				`${thisModule} > generateButton click event`
 			);
 		}
 
 		await start.genPalette(paletteOptions);
 	});
 
-	addEventListener(domIDs.helpMenuButton, 'click', async (e: MouseEvent) => {
+	addEventListener(ids.helpMenuButton, 'click', async (e: MouseEvent) => {
 		e.preventDefault();
 
 		uiElements.divs.helpMenu?.classList.remove('hidden');
 		uiElements.divs.helpMenu?.setAttribute('aria-hidden', 'false');
 	});
 
-	addEventListener(
-		domIDs.historyMenuButton,
-		'click',
-		async (e: MouseEvent) => {
-			e.preventDefault();
+	addEventListener(ids.historyMenuButton, 'click', async (e: MouseEvent) => {
+		e.preventDefault();
 
-			uiElements.divs.historyMenu?.classList.remove('hidden');
-			uiElements.divs.historyMenu?.setAttribute('aria-hidden', 'false');
-		}
-	);
+		uiElements.divs.historyMenu?.classList.remove('hidden');
+		uiElements.divs.historyMenu?.setAttribute('aria-hidden', 'false');
+	});
 
 	addEventListener(
-		domIDs.importExportMenuButton,
+		ids.importExportMenuButton,
 		'click',
 		async (e: MouseEvent) => {
 			e.preventDefault();
@@ -433,7 +444,7 @@ function initializeEventListeners(): void {
 		}
 	);
 
-	addEventListener(domIDs.importPaletteInput, 'change', async (e: Event) => {
+	addEventListener(ids.importPaletteInput, 'change', async (e: Event) => {
 		const input = e.target as HTMLInputElement;
 
 		if (input.files && input.files.length > 0) {
@@ -447,7 +458,7 @@ function initializeEventListeners(): void {
 	});
 
 	addEventListener(
-		domIDs.resetDatabaseButton,
+		ids.resetDatabaseButton,
 		'click',
 		async (e: MouseEvent) => {
 			e.preventDefault();
@@ -456,7 +467,7 @@ function initializeEventListeners(): void {
 				if (!mode.quiet && logMode.error)
 					logger.error(
 						'Cannot reset database in production mode.',
-						'dom > events > resetDatabaseButton click event'
+						`${thisModule} > resetDatabaseButton click event`
 					);
 
 				return;
@@ -476,7 +487,7 @@ function initializeEventListeners(): void {
 				if (!mode.quiet && logMode.info)
 					logger.info(
 						'Database has been successfully reset.',
-						'dom > events > resetDatabaseButton click event'
+						`${thisModule} > resetDatabaseButton click event`
 					);
 
 				if (mode.showAlerts) alert('IndexedDB successfully reset!');
@@ -484,7 +495,7 @@ function initializeEventListeners(): void {
 				if (logMode.error)
 					logger.error(
 						`Failed to reset database: ${error}`,
-						'dom > events > resetDatabaseButton click event'
+						`${thisModule} > resetDatabaseButton click event`
 					);
 
 				if (mode.showAlerts) alert('Failed to reset database.');
@@ -493,7 +504,7 @@ function initializeEventListeners(): void {
 	);
 
 	addEventListener(
-		domIDs.resetPaletteIDButton,
+		ids.resetPaletteIDButton,
 		'click',
 		async (e: MouseEvent) => {
 			e.preventDefault();
@@ -502,7 +513,7 @@ function initializeEventListeners(): void {
 				if (!mode.quiet && logMode.error)
 					logger.error(
 						'Cannot reset palette ID in production mode.',
-						'dom > events > resetPaletteIDButton click event'
+						`${thisModule} > resetPaletteIDButton click event`
 					);
 
 				return;
@@ -520,20 +531,23 @@ function initializeEventListeners(): void {
 				if (!mode.quiet && logMode.info)
 					logger.info(
 						'Palette ID has been successfully reset.',
-						'dom > events > resetPaletteIDButton click event'
+						`${thisModule} > resetPaletteIDButton click event`
 					);
 
 				if (mode.showAlerts) alert('Palette ID reset successfully!');
 			} catch (error) {
 				if (logMode.error)
-					logger.error(`Failed to reset palette ID: ${error}`);
+					logger.error(
+						`Failed to reset palette ID: ${error}`,
+						`${thisModule} > resetPaletteIDButton click event`
+					);
 
 				if (mode.showAlerts) alert('Failed to reset palette ID.');
 			}
 		}
 	);
 
-	addEventListener(domIDs.saturateButton, 'click', async (e: MouseEvent) => {
+	addEventListener(ids.saturateButton, 'click', async (e: MouseEvent) => {
 		e.preventDefault();
 
 		if (!uiElements.select.selectedColorOption) {
@@ -608,7 +622,7 @@ function initializeEventListeners(): void {
 	});
 }
 
-export const base: DOM_FunctionsMasterInterface['events'] = {
+export const base: DOMFn_MasterInterface['events'] = {
 	addEventListener,
 	handlePaletteGen,
 	initializeEventListeners

@@ -1,20 +1,27 @@
-// File: src/common/index.js
+// File: common/index.js
 
-import { CommonFunctionsMasterInterface } from '../types/index.js';
-import { convert } from './convert/index.js';
-import { core } from './core/index.js';
+import { CommonFn_MasterInterface } from '../types/index.js';
+import { coreConversionUtils } from './convert.js';
+import { coreUtils } from './core.js';
 import { helpers } from './helpers/index.js';
-import { superUtils } from './superUtils/index.js';
-import { transform } from './transform/index.js';
+import { superUtils } from './superUtils.js';
+import { transformUtils } from './transform.js';
 import { utils } from './utils/index.js';
 
-export { convert, core, helpers, superUtils, transform, utils };
-
-export const common: CommonFunctionsMasterInterface = {
-	convert,
-	core,
+export {
+	coreConversionUtils,
+	coreUtils,
 	helpers,
 	superUtils,
-	transform,
+	transformUtils,
 	utils
 };
+
+export const commonFn: CommonFn_MasterInterface = {
+	convert: coreConversionUtils,
+	core: coreUtils,
+	helpers,
+	superUtils,
+	transform: transformUtils,
+	utils
+} as const;

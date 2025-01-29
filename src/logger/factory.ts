@@ -1,8 +1,8 @@
-// File: src/logger/factory.ts
+// File: logger/factory.js
 
 import { MutationLog } from '../types/index.js';
 import { AppLogger } from './AppLogger.js';
-import { mode } from '../common/data/base.js';
+import { modeData as mode } from '../data/mode.js';
 
 export const createLogger = async () => {
 	const debugLevel = mode.debugLevel;

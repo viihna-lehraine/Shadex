@@ -1,120 +1,87 @@
-// File: src/types/index.js
+// File: types/index.js
 
 export type {
-	ColorParser,
-	CommonDOMBase,
-	CommonDOMFnMasterInterface,
-	CommonFunctionsMasterInterface,
-	ConfigDataInterface,
-	ConstsDataInterface,
-	DefaultsDataInterface,
-	DOM_FunctionsMasterInterface,
+	CommonFn_DOM_BaseInterface,
+	CommonFn_DOM_MasterInterface,
+	CommonFn_MasterInterface
+} from './app/common.js';
+export type { DBFn_MasterInterface } from './app/db.js';
+export type { MakePaletteBox, DOMFn_MasterInterface } from './app/dom.js';
+export type { ColorParser, IOFn_MasterInterface } from './app/io.js';
+export type {
 	GenPaletteArgs,
 	GenPaletteFnInterface,
-	IO_Interface,
-	ModeDataInterface,
-	PaletteFnMasterInterface,
-	SetsDataInterface,
-	UIFnBaseInterface,
-	UIFnMasterInterface
-} from './app/index.js';
-export type {
-	AppLoggerInterface,
-	AsyncLoggerFactory,
-	CacheManagerInterface,
-	IDBManagerInterface,
-	MutationTrackerInterface,
-	SyncLoggerFactory,
-	UIManagerInterface
-} from './classes.js';
+	Palette_CommonFn_MasterInterface,
+	PaletteFn_MasterInterface
+} from './app/palette.js';
+export type { UIFn_BaseInterface, UIFn_MasterInterface } from './app/ui.js';
 export type {
 	CMYK,
-	CMYKUnbranded,
-	CMYKString,
-	CMYKValue,
-	CMYKValueString,
-	CMYKValueUnbranded,
+	CMYK_StringProps,
+	Hex,
+	Hex_StringProps,
+	HSL,
+	HSL_StringProps,
+	HSV,
+	HSV_StringProps,
+	LAB,
+	LAB_StringProps,
+	SL,
+	SL_StringProps,
+	SV,
+	SV_StringProps,
+	RGB,
+	RGB_StringProps,
+	UnbrandedCMYK,
+	UnbrandedHex,
+	UnbrandedHSL,
+	UnbrandedHSV,
+	UnbrandedLAB,
+	UnbrandedRGB,
+	UnbrandedSL,
+	UnbrandedSV,
+	UnbrandedXYZ,
+	XYZ,
+	XYZ_StringProps
+} from './data/colors/main.js';
+export type {
 	Color,
 	ColorData,
 	ColorDataAssertion,
 	ColorDataExtended,
+	ColorFormat,
 	ColorPartial,
 	ColorSpace,
 	ColorSpaceExtended,
-	ColorString,
-	ColorStringExtended,
-	ColorUnbranded,
-	Format,
-	Hex,
-	HexString,
-	HexUnbranded,
-	HexValue,
-	HexValueString,
-	HexValueUnbranded,
-	HSL,
-	HSLString,
-	HSLUnbranded,
-	HSLValue,
-	HSLValueString,
-	HSLValueUnbranded,
-	HSV,
-	HSVUnbranded,
-	HSVString,
-	HSVValue,
-	HSVValueUnbranded,
-	HSVValueString,
-	LAB,
-	LABUnbranded,
-	LABString,
-	LABValue,
-	LABValueUnbranded,
-	LABValueString,
-	RGB,
-	RGBUnbranded,
-	RGBString,
-	RGBValue,
-	RGBValueUnbranded,
-	RGBValueString,
-	SL,
-	SLUnbranded,
-	SLString,
-	SLValue,
-	SLValueUnbranded,
-	SLValueString,
-	SV,
-	SVUnbranded,
-	SVString,
-	SVValue,
-	SVValueUnbranded,
-	SVValueString,
-	XYZ,
-	XYZUnbranded,
-	XYZString,
-	XYZValue,
-	XYZValueUnbranded,
-	XYZValueString
-} from './colors/index.js';
-export type { DBMasterFnInterface } from './db.js';
+	Color_StringProps,
+	Color_StringProps_Extended,
+	UnbrandedColor
+} from './data/colors/sets.js';
 export type {
-	ColorInputElement,
-	GenButtonArgs,
-	MakePaletteBox
-} from './dom.js';
+	AppModeData,
+	ConfigDataInterface,
+	ConstsDataInterface,
+	DataSetsInterface,
+	DefaultDataInterface,
+	DOMDataInterface,
+	ModeDataInterface
+} from './data/core.js';
 export type {
 	MutationLog,
 	PaletteDB,
 	PaletteSchema,
 	Settings,
 	StoredPalette,
-	StoredPaletteUnbranded
-} from './idb.js';
+	UnbrandedStoredPalette
+} from './data/db.js';
+export type { ColorInputElement } from './data/dom.js';
 export type {
 	Palette,
 	PaletteItem,
-	PaletteItemUnbranded,
 	PaletteOptions,
-	PaletteUnbranded
-} from './palette.js';
+	UnbrandedPalette,
+	UnbrandedPaletteItem
+} from './data/palette.js';
 export type {
 	AlphaRange,
 	ByteRange,
@@ -128,7 +95,15 @@ export type {
 	Percentile,
 	Radial,
 	RangeKeyMap,
+	Sets,
 	XYZ_X,
 	XYZ_Y,
 	XYZ_Z
-} from './sets.js';
+} from './data/sets.js';
+export type {
+	AppLogger_ClassInterface,
+	CacheManager_ClassInterface,
+	IDBManager_ClassInterface,
+	MutationTracker_ClassInterface,
+	UIManager_ClassInterface
+} from './classes.js';

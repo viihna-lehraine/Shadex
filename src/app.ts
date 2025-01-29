@@ -9,23 +9,29 @@
 
 // File: src/app.js
 
-import { consts, mode } from './common/data/base.js';
 import { getIDBInstance } from './db/instance.js';
 import { createLogger } from './logger/index.js';
-import { dom } from './dom/index.js';
-
-const logger = await createLogger();
+import { domData } from './data/dom.js';
+import { domFn } from './dom/index.js';
+import { modeData as mode } from './data/mode.js';
 
 const logMode = mode.logging;
 
+const thisModule = 'app.js';
+
+const logger = await createLogger();
+
 if (mode.debug)
-	logger.info('Executing main application script', 'app.js [STEP 1]');
+	logger.info(
+		'Executing main application script',
+		`${thisModule} > ANONYMOUS`
+	);
 
 if (document.readyState === 'loading') {
 	if (mode.debug)
 		logger.info(
 			'DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...',
-			'app.js [STEP 2]'
+			`${thisModule} > ANONYMOUS`
 		);
 
 	document.addEventListener('DOMContentLoaded', initializeApp);
@@ -33,27 +39,32 @@ if (document.readyState === 'loading') {
 	if (mode.debug)
 		logger.info(
 			'DOM content already loaded. Initializing application immediately.',
-			'app.js [STEP 2]: ERROR'
+			`${thisModule} > ANONYMOUS`
 		);
 
 	initializeApp();
 }
 
 async function initializeApp(): Promise<void> {
-	logger.info('DOM content loaded - Initializing application', 'app.js');
+	const thisFunction = 'initializeApp()';
+
+	logger.info(
+		'DOM content loaded - Initializing application',
+		`${thisModule} > ${thisFunction}`
+	);
 
 	try {
 		if (mode.logging.verbosity > 1)
 			logger.info(
 				'Creating new IDBManager instance. Initializing database and its dependencies.',
-				'app.js, ['
+				`${thisModule} > ${thisFunction}`
 			);
 
 		if (mode.expose.idbManager) {
-			if (mode.debug)
+			if (mode.debug && mode.logging.verbosity > 1)
 				logger.info(
 					'Exposing IDBManager instance to window.',
-					'app.js'
+					`${thisModule} > ${thisFunction}`
 				);
 
 			try {
@@ -62,7 +73,7 @@ async function initializeApp(): Promise<void> {
 
 					logger.info(
 						`IDBManager instance successfully initialized.`,
-						'app.js > initializeApp()'
+						`${thisModule} > ${thisFunction}`
 					);
 
 					// binds the IDBManager instance to the window object
@@ -70,13 +81,14 @@ async function initializeApp(): Promise<void> {
 
 					logger.info(
 						'IDBManager instance successfully exposed to window.',
-						'app.js > initializeApp()'
+						`${thisModule} > ${thisFunction}`
 					);
 				})();
 			} catch (error) {
 				if (logMode.error)
-					logger.error(
-						`Failed to expose IDBManager instance to window. Error: ${error}`
+					logger.warn(
+						`Failed to expose IDBManager instance to window. Error: ${error}`,
+						`${thisModule} > ${thisFunction}`
 					);
 
 				if (mode.showAlerts)
@@ -86,25 +98,32 @@ async function initializeApp(): Promise<void> {
 	} catch (error) {
 		if (logMode.error)
 			logger.error(
-				`Failed to create initial IDBManager instance. Error: ${error}`
+				`Failed to create initial IDBManager instance. Error: ${error}`,
+				`${thisModule} > ${thisFunction}`
 			);
 
 		if (mode.showAlerts)
 			alert('An error occurred. Check console for details.');
 	}
 
-	const selectedColorOption = consts.dom.elements.inputs.selectedColorOption;
+	const selectedColorOption = domData.elements.inputs.selectedColorOption;
 
 	if (mode.debug) {
 		if (logMode.debug)
 			if (!mode.quiet && logMode.verbosity > 1) {
-				logger.debug('Validating DOM elements');
+				logger.debug(
+					'Validating DOM elements',
+					`${thisModule} > ${thisFunction}`
+				);
 			}
 
-		dom.validate.elements();
+		domFn.validate.elements();
 	} else {
 		if (!mode.quiet) {
-			logger.info('Skipping DOM element validation');
+			logger.info(
+				'Skipping DOM element validation',
+				`${thisModule} > ${thisFunction}`
+			);
 		}
 	}
 
@@ -113,16 +132,25 @@ async function initializeApp(): Promise<void> {
 		: 0;
 
 	if (!mode.quiet && mode.debug)
-		logger.debug(`Selected color: ${selectedColor}`);
+		logger.debug(
+			`Selected color: ${selectedColor}`,
+			`${thisModule} > ${thisFunction}`
+		);
 
 	try {
-		dom.events.initializeEventListeners();
+		domFn.events.initializeEventListeners();
 
 		if (!mode.quiet)
-			logger.info('Event listeners have been successfully initialized');
+			logger.info(
+				'Event listeners have been successfully initialized',
+				`${thisModule} > ${thisFunction}`
+			);
 	} catch (error) {
 		if (logMode.error)
-			logger.error(`Failed to initialize event listeners.\n${error}`);
+			logger.error(
+				`Failed to initialize event listeners.\n${error}`,
+				`${thisModule} > ${thisFunction}`
+			);
 
 		if (mode.showAlerts)
 			alert('An error occurred. Check console for details.');
@@ -130,6 +158,7 @@ async function initializeApp(): Promise<void> {
 
 	if (!mode.quiet && logMode.info)
 		logger.info(
-			'Application successfully initialized. Awaiting user input.'
+			'Application successfully initialized. Awaiting user input.',
+			`${thisModule} > ${thisFunction}`
 		);
 }

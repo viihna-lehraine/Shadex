@@ -1,10 +1,10 @@
-// File: src/common/utils/conversion.js
+// File: common/utils/conversion.js
 
 import {
 	CMYK,
 	ColorDataAssertion,
 	ColorDataExtended,
-	CommonFunctionsMasterInterface,
+	CommonFn_MasterInterface,
 	Hex,
 	HSL,
 	HSV,
@@ -14,14 +14,16 @@ import {
 	SV,
 	XYZ
 } from '../../types/index.js';
-import { convert } from '../convert/index.js';
+import { coreConversionUtils } from '../convert.js';
 import { createLogger } from '../../logger/index.js';
-import { core } from '../core/index.js';
-import { mode } from '../data/base.js';
-
-const logger = await createLogger();
+import { coreUtils } from '../core.js';
+import { modeData as mode } from '../../data/mode.js';
 
 const logMode = mode.logging;
+
+const thisModule = 'common/utils/conversion.js';
+
+const logger = await createLogger();
 
 function getConversionFn<
 	From extends keyof ColorDataAssertion,
@@ -30,13 +32,15 @@ function getConversionFn<
 	from: From,
 	to: To
 ): ((value: ColorDataAssertion[From]) => ColorDataAssertion[To]) | undefined {
+	const thisMethod = 'getConversionFn()';
+
 	try {
 		const fnName =
-			`${from}To${to[0].toUpperCase() + to.slice(1)}` as keyof typeof convert;
+			`${from}To${to[0].toUpperCase() + to.slice(1)}` as keyof typeof conversionUtils;
 
-		if (!(fnName in convert)) return undefined;
+		if (!(fnName in conversionUtils)) return undefined;
 
-		const conversionFn = convert[fnName] as unknown as (
+		const conversionFn = conversionUtils[fnName] as unknown as (
 			input: ColorDataAssertion[From]
 		) => ColorDataAssertion[To];
 
@@ -46,7 +50,7 @@ function getConversionFn<
 		if (logMode.error)
 			logger.error(
 				`Error getting conversion function: ${error}`,
-				'common > utils > conversion > getConversionFn()'
+				`${thisModule} > ${thisMethod}`
 			);
 
 		return undefined;
@@ -54,44 +58,45 @@ function getConversionFn<
 }
 
 function genAllColorValues(color: HSL): Partial<ColorDataExtended> {
+	const thisMethod = 'genAllColorValues()';
 	const result: Partial<ColorDataExtended> = {};
 
 	try {
-		const clonedColor = core.base.clone(color);
+		const clonedColor = coreUtils.base.clone(color);
 
-		if (!core.validate.colorValues(clonedColor)) {
+		if (!coreUtils.validate.colorValues(clonedColor)) {
 			if (logMode.error)
 				logger.error(
 					`Invalid color: ${JSON.stringify(clonedColor)}`,
-					'common > utils > conversion > genAllColorValues()'
+					`${thisModule} > ${thisMethod}`
 				);
 
 			return {};
 		}
 
-		result.cmyk = convert.hslTo(clonedColor, 'cmyk') as CMYK;
-		result.hex = convert.hslTo(clonedColor, 'hex') as Hex;
+		result.cmyk = coreConversionUtils.hslTo(clonedColor, 'cmyk') as CMYK;
+		result.hex = coreConversionUtils.hslTo(clonedColor, 'hex') as Hex;
 		result.hsl = clonedColor;
-		result.hsv = convert.hslTo(clonedColor, 'hsv') as HSV;
-		result.lab = convert.hslTo(clonedColor, 'lab') as LAB;
-		result.rgb = convert.hslTo(clonedColor, 'rgb') as RGB;
-		result.sl = convert.hslTo(clonedColor, 'sl') as SL;
-		result.sv = convert.hslTo(clonedColor, 'sv') as SV;
-		result.xyz = convert.hslTo(clonedColor, 'xyz') as XYZ;
+		result.hsv = coreConversionUtils.hslTo(clonedColor, 'hsv') as HSV;
+		result.lab = coreConversionUtils.hslTo(clonedColor, 'lab') as LAB;
+		result.rgb = coreConversionUtils.hslTo(clonedColor, 'rgb') as RGB;
+		result.sl = coreConversionUtils.hslTo(clonedColor, 'sl') as SL;
+		result.sv = coreConversionUtils.hslTo(clonedColor, 'sv') as SV;
+		result.xyz = coreConversionUtils.hslTo(clonedColor, 'xyz') as XYZ;
 
 		return result;
 	} catch (error) {
 		if (logMode.error)
 			logger.error(
 				`Error generating all color values: ${error}`,
-				'common > utils > conversion > genAllColorValues()'
+				`${thisModule} > ${thisMethod}`
 			);
 
 		return {};
 	}
 }
 
-export const conversion: CommonFunctionsMasterInterface['utils']['conversion'] =
+export const conversionUtils: CommonFn_MasterInterface['utils']['conversion'] =
 	{
 		genAllColorValues,
 		getConversionFn

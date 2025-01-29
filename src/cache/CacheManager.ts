@@ -1,8 +1,8 @@
-// File: src/cache/CacheManager.ts
+// File: cache/CacheManager.js
 
-import { CacheManagerInterface } from '../types/index.js';
+import { CacheManager_ClassInterface } from '../types/index.js';
 
-export class CacheManager<T> implements CacheManagerInterface<T> {
+export class CacheManager<T> implements CacheManager_ClassInterface<T> {
 	private cache: Map<string, T> = new Map();
 
 	get(key: string): T | undefined {

@@ -1,9 +1,9 @@
-// File: src/types/app/ui.ts
+// File: types/app/ui.js
 
-export interface UIFnBaseInterface {
+export interface UIFn_BaseInterface {
 	enforceSwatchRules(minimumSwatches: number, maximumSwatches?: number): void;
 }
 
-export interface UIFnMasterInterface {
+export interface UIFn_MasterInterface {
 	enforceSwatchRules(minimumSwatches: number, maximumSwatches?: number): void;
 }

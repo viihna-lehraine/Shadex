@@ -1,14 +1,18 @@
-// File: src/io/deserialize.ts
+// File: io/deserialize.js
 
-import { IO_Interface, Palette } from '../types/index.js';
+import { IOFn_MasterInterface, Palette } from '../types/index.js';
 import { createLogger } from '../logger/index.js';
-import { mode } from '../common/data/base.js';
-
-const logger = await createLogger();
+import { modeData as mode } from '../data/mode.js';
 
 const logMode = mode.logging;
 
+const thisModule = 'io/serialize.js';
+
+const logger = await createLogger();
+
 async function toCSS(palette: Palette): Promise<string> {
+	const thisMethod = 'toCSS()';
+
 	return new Promise((resolve, reject) => {
 		try {
 			// 1. serialize metadata
@@ -31,31 +35,31 @@ async function toCSS(palette: Palette): Promise<string> {
 				? `
 				/* Optional Custom Color */
 				.palette-custom {
-					--custom-cmyk-color: "${palette.metadata.customColor.colors.cmyk}";
-					--custom-hex-color: "${palette.metadata.customColor.colors.hex}";
-					--custom-hsl-color: "${palette.metadata.customColor.colors.hsl}";
-					--custom-hsv-color: "${palette.metadata.customColor.colors.hsv}";
-					--custom-lab-color: "${palette.metadata.customColor.colors.lab}";
-					--custom-rgb-color: "${palette.metadata.customColor.colors.rgb}";
-					--custom-xyz-color: "${palette.metadata.customColor.colors.xyz}";
+					--custom-cmyk-color: "${palette.metadata.customColor.colors.main.cmyk}";
+					--custom-hex-color: "${palette.metadata.customColor.colors.main.hex}";
+					--custom-hsl-color: "${palette.metadata.customColor.colors.main.hsl}";
+					--custom-hsv-color: "${palette.metadata.customColor.colors.main.hsv}";
+					--custom-lab-color: "${palette.metadata.customColor.colors.main.lab}";
+					--custom-rgb-color: "${palette.metadata.customColor.colors.main.rgb}";
+					--custom-xyz-color: "${palette.metadata.customColor.colors.main.xyz}";
 				}`.trim()
 				: '';
 
 			// 3. serialize palette items
 			const items = palette.items
 				.map(item => {
-					const backgroundColor = item.cssStrings.hslCSSString;
+					const backgroundColor = item.colors.css.hsl;
 
 					return `
 					/* Palette Item */
 					.color {
-						--cmyk-color: "${item.cssStrings.cmykCSSString}";
-						--hex-color: "${item.cssStrings.hexCSSString}";
-						--hsl-color: "${item.cssStrings.hslCSSString}";
-						--hsv-color: "${item.cssStrings.hsvCSSString}";
-						--lab-color: "${item.cssStrings.labCSSString}";
-						--rgb-color: "${item.cssStrings.rgbCSSString}";
-						--xyz-color: "${item.cssStrings.xyzCSSString}";
+						--cmyk-color: "${item.colors.css.cmyk}";
+						--hex-color: "${item.colors.css.hex}";
+						--hsl-color: "${item.colors.css.hsl}";
+						--hsv-color: "${item.colors.css.hsv}";
+						--lab-color: "${item.colors.css.lab}";
+						--rgb-color: "${item.colors.css.rgb}";
+						--xyz-color: "${item.colors.css.xyz}";
 						background-color: ${backgroundColor};
 					}`.trim();
 				})
@@ -73,12 +77,12 @@ async function toCSS(palette: Palette): Promise<string> {
 				if (logMode.verbosity > 1) {
 					logger.error(
 						`Failed to convert palette to CSS: ${error}`,
-						'io > serialize > toCSS()'
+						`${thisModule} > ${thisMethod}`
 					);
 				} else {
 					logger.error(
 						'Failed to convert palette to CSS',
-						'io > serialize > toCSS()'
+						`${thisModule} > ${thisMethod}`
 					);
 				}
 			}
@@ -93,6 +97,8 @@ async function toCSS(palette: Palette): Promise<string> {
 }
 
 async function toJSON(palette: Palette): Promise<string> {
+	const thisMethod = 'toJSON()';
+
 	return new Promise((resolve, reject) => {
 		try {
 			const jsonData = JSON.stringify(palette, null, 2);
@@ -103,12 +109,12 @@ async function toJSON(palette: Palette): Promise<string> {
 				if (logMode.verbosity > 1) {
 					logger.error(
 						`Failed to convert palette to JSON: ${error}`,
-						'io > serialize > toJSON()'
+						`${thisModule} > ${thisMethod}`
 					);
 				} else {
 					logger.error(
 						'Failed to convert palette to JSON',
-						'io > serialize > toJSON()'
+						`${thisModule} > ${thisMethod}`
 					);
 				}
 			}
@@ -123,19 +129,21 @@ async function toJSON(palette: Palette): Promise<string> {
 }
 
 async function toXML(palette: Palette): Promise<string> {
+	const thisMethod = 'toXML()';
+
 	return new Promise((resolve, reject) => {
 		try {
 			// 1. serialize palette metadata
 			const customColorXML = palette.metadata.customColor
 				? `
 				<CustomColor>
-					<CMYK>${palette.metadata.customColor.colors.cmyk}</CMYK>
-					<Hex>${palette.metadata.customColor.colors.hex}</Hex>
-					<HSL>${palette.metadata.customColor.colors.hsl}</HSL>
-					<HSV>${palette.metadata.customColor.colors.hsv}</HSV>
-					<LAB>${palette.metadata.customColor.colors.lab}</LAB>
-					<RGB>${palette.metadata.customColor.colors.rgb}</RGB>
-					<XYZ>${palette.metadata.customColor.colors.xyz}</XYZ>
+					<CMYK>${palette.metadata.customColor.colors.main.cmyk}</CMYK>
+					<Hex>${palette.metadata.customColor.colors.main.hex}</Hex>
+					<HSL>${palette.metadata.customColor.colors.main.hsl}</HSL>
+					<HSV>${palette.metadata.customColor.colors.main.hsv}</HSV>
+					<LAB>${palette.metadata.customColor.colors.main.lab}</LAB>
+					<RGB>${palette.metadata.customColor.colors.main.rgb}</RGB>
+					<XYZ>${palette.metadata.customColor.colors.main.xyz}</XYZ>
 				</CustomColor>`.trim()
 				: '<CustomColor>false</CustomColor>';
 
@@ -160,23 +168,25 @@ async function toXML(palette: Palette): Promise<string> {
 					`
 					<PaletteItem id="${index + 1}">
 						<Colors>
-							<CMYK>${item.colors.cmyk}</CMYK>
-							<Hex>${item.colors.hex}</Hex>
-							<HSL>${item.colors.hsl}</HSL>
-							<HSV>${item.colors.hsv}</HSV>
-							<LAB>${item.colors.lab}</LAB>
-							<RGB>${item.colors.rgb}</RGB>
-							<XYZ>${item.colors.xyz}</XYZ>
+							<Main>
+								<CMYK>${item.colors.main.cmyk}</CMYK>
+								<Hex>${item.colors.main.hex}</Hex>
+								<HSL>${item.colors.main.hsl}</HSL>
+								<HSV>${item.colors.main.hsv}</HSV>
+								<LAB>${item.colors.main.lab}</LAB>
+								<RGB>${item.colors.main.rgb}</RGB>
+								<XYZ>${item.colors.main.xyz}</XYZ>
+							</Main>
+							<CSS>
+								<CMYK>${item.colors.css.cmyk}</CMYK>
+								<Hex>${item.colors.css.hex}</Hex>
+								<HSL>${item.colors.css.hsl}</HSL>
+								<HSV>${item.colors.css.hsv}</HSV>
+								<LAB>${item.colors.css.lab}</LAB>
+								<RGB>${item.colors.css.rgb}</RGB>
+								<XYZ>${item.colors.css.xyz}</XYZ>
+							</CSS>
 						</Colors>
-						<CSS_Colors>
-							<CMYK_CSS>${item.cssStrings.cmykCSSString}</CMYK_CSS>
-							<Hex_CSS>${item.cssStrings.hexCSSString}</Hex_CSS>
-							<HSL_CSS>${item.cssStrings.hslCSSString}</HSL_CSS>
-							<HSV_CSS>${item.cssStrings.hsvCSSString}</HSV_CSS>
-							<LAB_CSS>${item.cssStrings.labCSSString}</LAB_CSS>
-							<RGB_CSS>${item.cssStrings.rgbCSSString}</RGB_CSS>
-							<XYZ_CSS>${item.cssStrings.xyzCSSString}</XYZ_CSS>
-						</CSS_Colors>
 					</PaletteItem>`.trim()
 				)
 				.join('\n');
@@ -196,12 +206,12 @@ async function toXML(palette: Palette): Promise<string> {
 				if (logMode.verbosity > 1) {
 					logger.error(
 						`Failed to convert palette to XML: ${error}`,
-						'io > serialize > toXML()'
+						`${thisModule} > ${thisMethod}`
 					);
 				} else {
 					logger.error(
 						'Failed to convert palette to XML',
-						'io > serialize > toXML()'
+						`${thisModule} > ${thisMethod}`
 					);
 				}
 			}
@@ -215,7 +225,7 @@ async function toXML(palette: Palette): Promise<string> {
 	});
 }
 
-export const serialize: IO_Interface['serialize'] = {
+export const serialize: IOFn_MasterInterface['serialize'] = {
 	toCSS,
 	toJSON,
 	toXML

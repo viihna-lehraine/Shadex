@@ -1,13 +1,18 @@
-// File: src/io/parse/json.ts
+// File: io/parse/json.js
 
 import { Palette } from '../../types/index.js';
 import { createLogger } from '../../logger/factory.js';
-import { mode } from '../../common/data/base.js';
+import { modeData } from '../../data/mode.js';
+
+const logMode = modeData.logging;
+const mode = modeData;
+const thisModule = 'io/parse/json.ts';
 
 const logger = await createLogger();
-const logMode = mode.logging;
 
 function file(jsonData: string): Promise<Palette | null> {
+	const caller = 'file()';
+
 	try {
 		const parsed = JSON.parse(jsonData);
 
@@ -21,7 +26,7 @@ function file(jsonData: string): Promise<Palette | null> {
 		if (!mode.quiet && logMode.error && logMode.verbosity > 1) {
 			logger.error(
 				`Error parsing JSON file: ${error}`,
-				'io > parse > json > file()'
+				`${thisModule} > ${caller}`
 			);
 
 			if (mode.showAlerts)

@@ -1,12 +1,12 @@
-// File: src/db/storeUtils.ts
+// File: db/storeUtils.js
 
-import { DBMasterFnInterface } from '../types/index.js';
+import { DBFn_MasterInterface } from '../types/index.js';
 import { initializeDB } from './initialize.js';
-import { storeUtils } from '../db/storeUtils.js';
+import { dbUtils } from './utils.js';
 
 export { IDBManager } from './IDBManager.js';
 
-export const dbFn: DBMasterFnInterface = {
+export const dbFn: DBFn_MasterInterface = {
 	initializeDB,
-	storeUtils
+	utils: dbUtils
 };

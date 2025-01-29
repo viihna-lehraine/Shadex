@@ -1,10 +1,12 @@
+// File: logger/AppLogger.js
+
 import {
-	AppLoggerInterface,
+	AppLogger_ClassInterface,
 	ModeDataInterface,
 	MutationLog
 } from '../types/index.js';
 
-export class AppLogger implements AppLoggerInterface {
+export class AppLogger implements AppLogger_ClassInterface {
 	private static instance: AppLogger | null = null;
 	private mode: ModeDataInterface;
 
@@ -34,7 +36,7 @@ export class AppLogger implements AppLoggerInterface {
 		debugLevel: number = 0,
 		caller?: string
 	): Promise<void> {
-		await this.logMessage(message, level, debugLevel, caller);
+		this.logMessage(message, level, debugLevel, caller);
 	}
 
 	public logMutation(

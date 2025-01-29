@@ -1,4 +1,4 @@
-// File: src/palette/main/types/hexadic.js
+// File: palette/main/types/hexadic.js
 
 import {
 	GenPaletteArgs,
@@ -7,10 +7,10 @@ import {
 	PaletteItem
 } from '../../../types/index.js';
 import { IDBManager } from '../../../db/index.js';
-import { core } from '../../../common/index.js';
-import { consts } from '../../../common/data/base.js';
-import { paletteSuperUtils } from '../../common/index.js';
-import { ui } from '../../../ui/index.js';
+import { coreUtils } from '../../../common/index.js';
+import { constsData as consts } from '../../../data/consts.js';
+import { superUtils as paletteSuperUtils } from '../../common/index.js';
+import { uiFn } from '../../../ui/index.js';
 
 const create = paletteSuperUtils.create;
 const genHues = paletteSuperUtils.genHues;
@@ -18,7 +18,7 @@ const paletteRanges = consts.paletteRanges;
 
 export async function hexadic(args: GenPaletteArgs): Promise<Palette> {
 	// ensure exactly 6 color swatches
-	if (args.swatches !== 6) ui.enforceSwatchRules(6, 6);
+	if (args.swatches !== 6) uiFn.enforceSwatchRules(6, 6);
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const hues = genHues.hexadic(baseColor);
@@ -33,8 +33,8 @@ export async function hexadic(args: GenPaletteArgs): Promise<Palette> {
 			paletteRanges.hexad.lightShift / 2;
 		const newColor: HSL = {
 			value: {
-				hue: core.brand.asRadial(hue),
-				saturation: core.brand.asPercentile(
+				hue: coreUtils.brand.asRadial(hue),
+				saturation: coreUtils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
@@ -43,15 +43,15 @@ export async function hexadic(args: GenPaletteArgs): Promise<Palette> {
 						)
 					)
 				),
-				lightness: core.brand.asPercentile(
+				lightness: coreUtils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessShift)
 					)
 				),
 				alpha: args.enableAlpha
-					? core.brand.asAlphaRange(Math.random())
-					: core.brand.asAlphaRange(1)
+					? coreUtils.brand.asAlphaRange(Math.random())
+					: coreUtils.brand.asAlphaRange(1)
 			},
 			format: 'hsl'
 		};

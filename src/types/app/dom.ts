@@ -1,6 +1,6 @@
-// File: src/types/dom.js
+// File: types/dom.js
 
-export interface DOM_FunctionsMasterInterface {
+export interface DOMFn_MasterInterface {
 	events: {
 		addEventListener<K extends keyof HTMLElementEventMap>(
 			id: string,
@@ -21,4 +21,9 @@ export interface DOM_FunctionsMasterInterface {
 	validate: {
 		elements(): void;
 	};
+}
+
+export interface MakePaletteBox {
+	colorStripe: HTMLDivElement;
+	paletteBoxCount: number;
 }

@@ -1,4 +1,4 @@
-// File: src/palette/main/types/diadic.js
+// File: palette/main/types/diadic.js
 
 import {
 	GenPaletteArgs,
@@ -7,10 +7,10 @@ import {
 	PaletteItem
 } from '../../../types/index.js';
 import { IDBManager } from '../../../db/index.js';
-import { core } from '../../../common/index.js';
-import { consts } from '../../../common/data/base.js';
-import { paletteSuperUtils } from '../../common/index.js';
-import { ui } from '../../../ui/index.js';
+import { coreUtils } from '../../../common/index.js';
+import { constsData as consts } from '../../../data/consts.js';
+import { superUtils as paletteSuperUtils } from '../../common/index.js';
+import { uiFn } from '../../../ui/index.js';
 
 const create = paletteSuperUtils.create;
 const genHues = paletteSuperUtils.genHues;
@@ -18,7 +18,7 @@ const paletteRanges = consts.paletteRanges;
 
 export async function diadic(args: GenPaletteArgs): Promise<Palette> {
 	// ensure exactly 2 color swatches
-	if (args.swatches !== 2) ui.enforceSwatchRules(2, 2);
+	if (args.swatches !== 2) uiFn.enforceSwatchRules(2, 2);
 
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
 	const hues = genHues.diadic(baseColor.value.hue);
@@ -33,8 +33,8 @@ export async function diadic(args: GenPaletteArgs): Promise<Palette> {
 			paletteRanges.diadic.lightShift / 2;
 		const newColor: HSL = {
 			value: {
-				hue: core.brand.asRadial(hues[i % hues.length]),
-				saturation: core.brand.asPercentile(
+				hue: coreUtils.brand.asRadial(hues[i % hues.length]),
+				saturation: coreUtils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
@@ -43,15 +43,15 @@ export async function diadic(args: GenPaletteArgs): Promise<Palette> {
 						)
 					)
 				),
-				lightness: core.brand.asPercentile(
+				lightness: coreUtils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessShift)
 					)
 				),
 				alpha: args.enableAlpha
-					? core.brand.asAlphaRange(Math.random())
-					: core.brand.asAlphaRange(1)
+					? coreUtils.brand.asAlphaRange(Math.random())
+					: coreUtils.brand.asAlphaRange(1)
 			},
 			format: 'hsl'
 		};

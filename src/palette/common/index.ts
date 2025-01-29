@@ -1,16 +1,14 @@
-// File: src/palette/common/index.js
+// File: palette/common/index.js
 
-import { paletteHelpers } from './paletteHelpers/index.js';
-import { paletteSuperUtils } from './paletteSuperUtils/index.js';
-import { paletteUtils } from './paletteUtils/index.js';
+import { Palette_CommonFn_MasterInterface } from '../../types/index.js';
 
-export { paletteHelpers, paletteSuperUtils, paletteUtils };
+import { helpers } from './helpers/index.js';
+import { superUtils } from './superUtils/index.js';
+import { utils } from './utils/index.js';
 
-const helpers = paletteHelpers;
-const superUtils = paletteSuperUtils;
-const utils = paletteUtils;
+export { helpers, superUtils, utils };
 
-export const paletteCommon = {
+export const paletteCommonFn: Palette_CommonFn_MasterInterface = {
 	helpers,
 	superUtils,
 	utils

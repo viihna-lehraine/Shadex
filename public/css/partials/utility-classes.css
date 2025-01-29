@@ -15,8 +15,20 @@
 	display: flex;
 }
 
+.flex-center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 .flex-column {
+	display: flex;
 	flex-direction: column;
+}
+
+.flex-row {
+	display: flex;
+	flex-direction: row;
 }
 
 .flex-wrap {
@@ -25,10 +37,6 @@
 
 .justify-center {
 	justify-content: center;
-}
-
-.justify-flex-start {
-	justify-content: flex-start;
 }
 
 .justify-space-between {

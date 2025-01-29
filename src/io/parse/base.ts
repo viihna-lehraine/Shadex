@@ -1,44 +1,49 @@
-// File: src/io/parse/base.ts
+// File: io/parse/base.js
 
 import {
-	CMYKValue,
-	HexValue,
-	HSLValue,
-	HSVValue,
-	IO_Interface,
-	LABValue,
-	RGBValue,
-	XYZValue
+	CMYK,
+	Hex,
+	HSL,
+	HSV,
+	IOFn_MasterInterface,
+	LAB,
+	RGB,
+	XYZ
 } from '../../types/index.js';
-import { common } from '../../common/index.js';
-import { config, mode } from '../../common/data/base.js';
+import { commonFn } from '../../common/index.js';
+import { configData } from '../../data/config.js';
 import { createLogger } from '../../logger/index.js';
+import { modeData as mode } from '../../data/mode.js';
+
+const brand = commonFn.core.brand;
+const logMode = mode.logging;
+const regex = {
+	cmyk: configData.regex.colors.cmyk,
+	hex: configData.regex.colors.hex,
+	hsl: configData.regex.colors.hsl,
+	hsv: configData.regex.colors.hsv,
+	lab: configData.regex.colors.lab,
+	rgb: configData.regex.colors.rgb,
+	xyz: configData.regex.colors.xyz
+};
+
+const thisModule = 'io/parse/base.js';
 
 const logger = await createLogger();
 
-const brand = common.core.brand;
-const logMode = mode.logging;
-const regex = {
-	cmyk: config.regex.colors.cmyk,
-	hex: config.regex.colors.hex,
-	hsl: config.regex.colors.hsl,
-	hsv: config.regex.colors.hsv,
-	lab: config.regex.colors.lab,
-	rgb: config.regex.colors.rgb,
-	xyz: config.regex.colors.xyz
-};
+function parseCMYKColorValue(rawCMYK: string | null): CMYK['value'] {
+	const caller = 'parseCMYKColorValue()';
 
-function parseCMYKColorValue(rawCMYK: string | null): CMYKValue {
 	if (!rawCMYK) {
 		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'A CMYK element could not be found while parsing palette file. Injecting default values.',
-				'io > parse > base > parseCMYKColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		} else {
 			logger.debug(
 				'Missing CMYK element in palette file.',
-				'io > parse > base > parseCMYKColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		}
 
@@ -72,17 +77,19 @@ function parseCMYKColorValue(rawCMYK: string | null): CMYKValue {
 			};
 }
 
-function parseHexColorValue(rawHex: string | null): HexValue {
+function parseHexColorValue(rawHex: string | null): Hex['value'] {
+	const caller = 'parseHexColorValue()';
+
 	if (!rawHex) {
 		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'A Hex element could not be found while parsing palette file. Injecting default values.',
-				'io > parse > base > parseHexColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		} else {
 			logger.debug(
 				'Missing Hex element in palette file.',
-				'io > parse > base > parseHexColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		}
 
@@ -112,17 +119,19 @@ function parseHexColorValue(rawHex: string | null): HexValue {
 			};
 }
 
-function parseHSLColorValue(rawHSL: string | null): HSLValue {
+function parseHSLColorValue(rawHSL: string | null): HSL['value'] {
+	const caller = 'parseHSLColorValue()';
+
 	if (!rawHSL) {
 		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'An HSL element could not be found while parsing palette file. Injecting default values.',
-				'io > parse > base > parseHSLColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		} else {
 			logger.debug(
 				'Missing HSL element in palette file.',
-				'io > parse > base > parseHSLColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		}
 
@@ -153,17 +162,19 @@ function parseHSLColorValue(rawHSL: string | null): HSLValue {
 			};
 }
 
-function parseHSVColorValue(rawHSV: string | null): HSVValue {
+function parseHSVColorValue(rawHSV: string | null): HSV['value'] {
+	const caller = 'parseHSVColorValue()';
+
 	if (!rawHSV) {
 		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'An HSV element could not be found while parsing palette file. Injecting default values.',
-				'io > parse > base > parseHSVColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		} else {
 			logger.debug(
 				'Missing HSV element in palette file.',
-				'io > parse > base > parseHSVColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		}
 
@@ -194,17 +205,19 @@ function parseHSVColorValue(rawHSV: string | null): HSVValue {
 			};
 }
 
-function parseLABColorValue(rawLAB: string | null): LABValue {
+function parseLABColorValue(rawLAB: string | null): LAB['value'] {
+	const caller = 'parseLABColorValue()';
+
 	if (!rawLAB) {
 		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'A LAB element could not be found while parsing palette file. Injecting default values.',
-				'io > parse > base > parseLABColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		} else {
 			logger.debug(
 				'Missing LAB element in palette file.',
-				'io > parse > base > parseLABColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		}
 
@@ -235,17 +248,19 @@ function parseLABColorValue(rawLAB: string | null): LABValue {
 			};
 }
 
-function parseRGBColorValue(rawRGB: string | null): RGBValue {
+function parseRGBColorValue(rawRGB: string | null): RGB['value'] {
+	const caller = 'parseRGBColorValue()';
+
 	if (!rawRGB) {
 		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'An RGB element could not be found while parsing palette file. Injecting default values.',
-				'io > parse > base > parseRGBColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		} else {
 			logger.debug(
 				'Missing RGB element in palette file.',
-				'io > parse > base > parseRGBColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		}
 
@@ -276,17 +291,19 @@ function parseRGBColorValue(rawRGB: string | null): RGBValue {
 			};
 }
 
-function parseXYZColorValue(rawXYZ: string | null): XYZValue {
+function parseXYZColorValue(rawXYZ: string | null): XYZ['value'] {
+	const caller = 'parseXYZColorValue()';
+
 	if (!rawXYZ) {
 		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'An XYZ element could not be found while parsing palette file. Injecting default values.',
-				'io > parse > base > parseXYZColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		} else {
 			logger.debug(
 				'Missing XYZ element in palette file.',
-				'io > parse > base > parseXYZColorValue()'
+				`${thisModule} > ${caller}`
 			);
 		}
 
@@ -317,7 +334,7 @@ function parseXYZColorValue(rawXYZ: string | null): XYZValue {
 			};
 }
 
-export const color: IO_Interface['parse']['color'] = {
+export const color: IOFn_MasterInterface['parse']['color'] = {
 	cmyk: parseCMYKColorValue,
 	hex: parseHexColorValue,
 	hsl: parseHSLColorValue,

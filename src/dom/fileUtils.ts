@@ -1,6 +1,6 @@
-// File: src/dom/fileUtils.ts
+// File: dom/fileUtils.js
 
-import { DOM_FunctionsMasterInterface } from '../types/index.js';
+import { DOMFn_MasterInterface } from '../types/index.js';
 
 function download(data: string, filename: string, type: string): void {
 	const blob = new Blob([data], { type });
@@ -25,7 +25,7 @@ function readFile(file: File): Promise<string> {
 	});
 }
 
-export const fileUtils: DOM_FunctionsMasterInterface['fileUtils'] = {
+export const fileUtils: DOMFn_MasterInterface['fileUtils'] = {
 	download,
 	readFile
 };

@@ -1,22 +1,22 @@
-// File: src/index/app/io.ts
+// File: types/app/io.ts
 
 import {
-	CMYKValue,
+	CMYK,
 	Color,
-	HexValue,
-	HSLValue,
-	HSVValue,
-	LABValue,
+	Hex,
+	HSL,
+	HSV,
+	LAB,
 	Palette,
-	RGBValue,
-	XYZValue
+	RGB,
+	XYZ
 } from '../index.js';
 
 export interface ColorParser {
 	parse(input: string): Color;
 }
 
-export interface IO_Interface {
+export interface IOFn_MasterInterface {
 	deserialize: {
 		fromCSS(data: string): Promise<Palette>;
 		fromJSON(data: string): Promise<Palette>;
@@ -36,24 +36,24 @@ export interface IO_Interface {
 	importPalette(data: string): Promise<Palette>;
 	parse: {
 		asColorValue: {
-			cmyk: (colorString: string) => CMYKValue;
-			hex: (colorValue: string) => HexValue;
-			hsl: (colorValue: string) => HSLValue;
-			hsv: (colorValue: string) => HSVValue;
-			lab: (colorValue: string) => LABValue;
-			rgb: (colorValue: string) => RGBValue;
-			xyz: (colorValue: string) => XYZValue;
+			cmyk: (colorString: string) => CMYK['value'];
+			hex: (colorValue: string) => Hex['value'];
+			hsl: (colorValue: string) => HSL['value'];
+			hsv: (colorValue: string) => HSV['value'];
+			lab: (colorValue: string) => LAB['value'];
+			rgb: (colorValue: string) => RGB['value'];
+			xyz: (colorValue: string) => XYZ['value'];
 		};
 		asColorString(format: string, input: string): Color;
 		asCSSColorString(format: string, input: string): string;
 		color: {
-			cmyk: (rawCMYK: string | null) => CMYKValue;
-			hex: (rawHex: string | null) => HexValue;
-			hsl: (rawHSL: string | null) => HSLValue;
-			hsv: (rawHSV: string | null) => HSVValue;
-			lab: (rawLAB: string | null) => LABValue;
-			rgb: (rawRGB: string | null) => RGBValue;
-			xyz: (rawXYZ: string | null) => XYZValue;
+			cmyk: (rawCMYK: string | null) => CMYK['value'];
+			hex: (rawHex: string | null) => Hex['value'];
+			hsl: (rawHSL: string | null) => HSL['value'];
+			hsv: (rawHSV: string | null) => HSV['value'];
+			lab: (rawLAB: string | null) => LAB['value'];
+			rgb: (rawRGB: string | null) => RGB['value'];
+			xyz: (rawXYZ: string | null) => XYZ['value'];
 		};
 		json: {
 			file(jsonData: string): Promise<Palette | null>;

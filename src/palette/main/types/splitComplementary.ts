@@ -1,4 +1,4 @@
-// File: src/palette/main/types/splitComplementary.js
+// File: palette/main/types/splitComplementary.js
 
 import {
 	GenPaletteArgs,
@@ -6,11 +6,11 @@ import {
 	Palette,
 	PaletteItem
 } from '../../../types/index.js';
-import { core, utils } from '../../../common/index.js';
-import { consts } from '../../../common/data/base.js';
 import { IDBManager } from '../../../db/index.js';
-import { paletteSuperUtils } from '../../common/index.js';
-import { ui } from '../../../ui/index.js';
+import { coreUtils, utils } from '../../../common/index.js';
+import { constsData as consts } from '../../../data/consts.js';
+import { superUtils as paletteSuperUtils } from '../../common/index.js';
+import { uiFn } from '../../../ui/index.js';
 
 const create = paletteSuperUtils.create;
 const genHues = paletteSuperUtils.genHues;
@@ -20,7 +20,7 @@ export async function splitComplementary(
 	args: GenPaletteArgs
 ): Promise<Palette> {
 	// ensure exactly 3 color swatches
-	if (args.swatches !== 3) ui.enforceSwatchRules(3, 3);
+	if (args.swatches !== 3) uiFn.enforceSwatchRules(3, 3);
 
 	// base color setup
 	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
@@ -41,8 +41,8 @@ export async function splitComplementary(
 	for (const [index, hue] of [hue1, hue2].entries()) {
 		const adjustedHSL: HSL = {
 			value: {
-				hue: core.brand.asRadial(hue),
-				saturation: core.brand.asPercentile(
+				hue: coreUtils.brand.asRadial(hue),
+				saturation: coreUtils.brand.asPercentile(
 					Math.max(
 						0,
 						Math.min(
@@ -54,7 +54,7 @@ export async function splitComplementary(
 						)
 					)
 				),
-				lightness: core.brand.asPercentile(
+				lightness: coreUtils.brand.asPercentile(
 					Math.max(
 						0,
 						Math.min(
@@ -67,8 +67,8 @@ export async function splitComplementary(
 					)
 				),
 				alpha: args.enableAlpha
-					? core.brand.asAlphaRange(Math.random())
-					: core.brand.asAlphaRange(1)
+					? coreUtils.brand.asAlphaRange(Math.random())
+					: coreUtils.brand.asAlphaRange(1)
 			},
 			format: 'hsl'
 		};

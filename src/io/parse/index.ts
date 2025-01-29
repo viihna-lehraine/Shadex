@@ -1,12 +1,12 @@
-// File: src/io/parse/index.ts
+// File: io/parse/index.js
 
-import { IO_Interface } from '../../types/index.js';
+import { IOFn_MasterInterface } from '../../types/index.js';
 import { asColorValue } from './colorValue.js';
 import { asColorString, asCSSColorString } from './color.js';
 import { color } from './base.js';
 import { json } from './json.js';
 
-export const parse: IO_Interface['parse'] = {
+export const ioParseUtils: IOFn_MasterInterface['parse'] = {
 	asColorValue,
 	asColorString,
 	asCSSColorString,

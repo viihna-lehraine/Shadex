@@ -1,8 +1,8 @@
-// File: src/types/app/palette.js
+// File: types/app/palette.js
 
 import { HSL, Palette, PaletteItem, PaletteOptions } from '../index.js';
 
-export interface PaletteCommonFnInterface {
+export interface Palette_CommonFn_MasterInterface {
 	helpers: {
 		limits: {
 			isColorInBounds(hsl: HSL): boolean;
@@ -53,6 +53,7 @@ export interface PaletteCommonFnInterface {
 
 export interface GenPaletteArgs {
 	swatches: number;
+	type: number;
 	customColor: HSL | null;
 	enableAlpha: boolean;
 	limitDark: boolean;
@@ -66,7 +67,7 @@ export interface GenPaletteFnInterface {
 
 // ******** TOP-LEVEL BUNDLE INTERFACE ********
 
-export interface PaletteFnMasterInterface {
+export interface PaletteFn_MasterInterface {
 	generate: {
 		limitedHSL(
 			baseHue: number,

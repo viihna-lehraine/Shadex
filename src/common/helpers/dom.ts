@@ -1,15 +1,18 @@
-// File: src/common/helpers/dom.js
+// File: common/helpers/dom.js
 
 import {
 	Color,
 	ColorInputElement,
-	ColorString,
-	CommonFunctionsMasterInterface,
+	Color_StringProps,
+	CommonFn_MasterInterface,
 	MakePaletteBox
 } from '../../types/index.js';
-import { consts, mode } from '../data/base.js';
-import { core } from '../core/index.js';
+import { constsData as consts } from '../../data/consts.js';
+import { coreUtils } from '../core.js';
 import { createLogger } from '../../logger/index.js';
+import { modeData as mode } from '../../data/mode.js';
+
+const thisModule = 'common/helpers/dom.js';
 
 const logger = await createLogger();
 
@@ -19,6 +22,8 @@ const timeouts = consts.timeouts;
 let dragSrcEl: HTMLElement | null = null;
 
 function attachDragAndDropListeners(element: HTMLElement | null): void {
+	const thisMethod = 'attachDragAndDropEventListeners()';
+
 	try {
 		if (element) {
 			element.addEventListener('dragstart', dragStart);
@@ -30,18 +35,20 @@ function attachDragAndDropListeners(element: HTMLElement | null): void {
 		if (!mode.quiet)
 			logger.info(
 				'Drag and drop event listeners successfully attached',
-				'common > helpers > dom > attachDragAndDropEventListeners()'
+				`${thisModule} > ${thisMethod}`
 			);
 	} catch (error) {
 		if (!logMode.error)
 			logger.error(
 				`Failed to execute attachDragAndDropEventListeners: ${error}`,
-				'common > helpers > dom > attachDragAndDropEventListeners()'
+				`${thisModule} > ${thisMethod}`
 			);
 	}
 }
 
 function dragStart(e: DragEvent): void {
+	const thisMethod = 'handleDragStart()';
+
 	try {
 		dragSrcEl = e.currentTarget as HTMLElement;
 
@@ -53,18 +60,20 @@ function dragStart(e: DragEvent): void {
 		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
 			logger.info(
 				'handleDragStart complete',
-				'common > helpers > dom > dragStart()'
+				`${thisModule} > ${thisMethod}`
 			);
 	} catch (error) {
 		if (logMode.error)
 			logger.error(
 				`Error in handleDragStart: ${error}`,
-				'common > helpers > dom > dragStart()'
+				`${thisModule} > ${thisMethod}`
 			);
 	}
 }
 
 function dragOver(e: DragEvent): boolean {
+	const thisMethod = 'handleDragOver()';
+
 	try {
 		e.preventDefault();
 
@@ -75,7 +84,7 @@ function dragOver(e: DragEvent): boolean {
 		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
 			logger.info(
 				'handleDragOver complete',
-				'common > helpers > dom > dragOver()'
+				`${thisModule} > ${thisMethod}`
 			);
 
 		return false;
@@ -83,7 +92,7 @@ function dragOver(e: DragEvent): boolean {
 		if (logMode.error)
 			logger.error(
 				`Error in handleDragOver: ${error}`,
-				'common > helpers > dom > dragOver()'
+				`${thisModule} > ${thisMethod}`
 			);
 
 		return false;
@@ -91,6 +100,8 @@ function dragOver(e: DragEvent): boolean {
 }
 
 function dragEnd(e: DragEvent): void {
+	const thisMethod = 'handleDragEnd()';
+
 	try {
 		const target = e.currentTarget as HTMLElement;
 
@@ -103,18 +114,20 @@ function dragEnd(e: DragEvent): void {
 		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
 			logger.info(
 				'handleDragEnd complete',
-				'common > helpers > dom > dragEnd()'
+				`${thisModule} > ${thisMethod}`
 			);
 	} catch (error) {
 		if (logMode.error)
 			logger.error(
 				`Error in handleDragEnd: ${error}`,
-				'common > helpers > dom > dragEnd()'
+				`${thisModule} > ${thisMethod}`
 			);
 	}
 }
 
 function drop(e: DragEvent): void {
+	const thisMethod = 'drop()';
+
 	try {
 		e.stopPropagation();
 
@@ -163,7 +176,7 @@ function drop(e: DragEvent): void {
 			if (!mode.quiet && mode.debug && logMode.verbosity > 3)
 				logger.info(
 					'calling attachDragAndDropEventListeners for new elements',
-					'common > helpers > dom > drop()'
+					`${thisModule} > ${thisMethod}`
 				);
 
 			attachDragAndDropListeners(newDragSrcEl);
@@ -172,15 +185,12 @@ function drop(e: DragEvent): void {
 		}
 
 		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
-			logger.info(
-				'handleDrop complete',
-				'common > helpers > dom > drop()'
-			);
+			logger.info('handleDrop complete', `${thisModule} > ${thisMethod}`);
 	} catch (error) {
 		if (!logMode.error)
 			logger.error(
 				`Error in handleDrop: ${error}`,
-				'common > helpers > dom > drop()'
+				`${thisModule} > ${thisMethod}`
 			);
 	}
 }
@@ -189,12 +199,14 @@ async function makePaletteBox(
 	color: Color,
 	paletteBoxCount: number
 ): Promise<MakePaletteBox> {
+	const thisMethod = 'makePaletteBox()';
+
 	try {
-		if (!core.validate.colorValues(color)) {
+		if (!coreUtils.validate.colorValues(color)) {
 			if (!logMode.error)
 				logger.error(
 					`Invalid ${color.format} color value ${JSON.stringify(color)}`,
-					'common > helpers > dom > makePaletteBox()'
+					`${thisModule} > ${thisMethod}`
 				);
 
 			return {
@@ -203,7 +215,7 @@ async function makePaletteBox(
 			};
 		}
 
-		const clonedColor = core.base.clone(color);
+		const clonedColor = coreUtils.base.clone(color);
 
 		const paletteBox = document.createElement('div');
 		paletteBox.className = 'palette-box';
@@ -222,7 +234,7 @@ async function makePaletteBox(
 		colorTextOutputBox.setAttribute('data-format', 'hex');
 
 		const colorString =
-			await core.convert.colorToCSSColorString(clonedColor);
+			await coreUtils.convert.colorToCSSColorString(clonedColor);
 
 		colorTextOutputBox.value = colorString || '';
 		colorTextOutputBox.colorValues = clonedColor;
@@ -255,14 +267,14 @@ async function makePaletteBox(
 				if (!logMode.error)
 					logger.error(
 						`Failed to copy: ${error}`,
-						'common > helpers > dom > makePaletteBox()'
+						`${thisModule} > ${thisMethod}`
 					);
 			}
 		});
 
 		colorTextOutputBox.addEventListener(
 			'input',
-			core.base.debounce((e: Event) => {
+			coreUtils.base.debounce((e: Event) => {
 				const target = e.target as HTMLInputElement | null;
 				if (target) {
 					const cssColor = target.value.trim();
@@ -316,7 +328,7 @@ async function makePaletteBox(
 		if (!logMode.error)
 			logger.error(
 				`Failed to execute makePaletteBox: ${error}`,
-				'common > helpers > dom > makePaletteBox()'
+				`${thisModule} > ${thisMethod}`
 			);
 
 		return {
@@ -327,6 +339,7 @@ async function makePaletteBox(
 }
 
 function showToast(message: string): void {
+	const thisMethod = 'showToast()';
 	const toast = document.createElement('div');
 
 	toast.className = 'toast-message';
@@ -336,10 +349,7 @@ function showToast(message: string): void {
 	document.body.appendChild(toast);
 
 	if (!mode.quiet && logMode.verbosity > 3)
-		logger.info(
-			'Toast message added',
-			'common > helpers > dom > showToast()'
-		);
+		logger.info('Toast message added', `${thisModule} > ${thisMethod}`);
 
 	setTimeout(() => {
 		toast.classList.add('fade-out');
@@ -347,7 +357,7 @@ function showToast(message: string): void {
 		if (!mode.quiet && logMode.verbosity > 3)
 			logger.info(
 				'Toast message faded out',
-				'common > helpers > dom > showToast()'
+				`${thisModule} > ${thisMethod}`
 			);
 
 		toast.addEventListener('transitioned', () => toast.remove());
@@ -355,6 +365,8 @@ function showToast(message: string): void {
 }
 
 function showTooltip(tooltipElement: HTMLElement): void {
+	const thisMethod = 'showTooltip()';
+
 	try {
 		const tooltip =
 			tooltipElement.querySelector<HTMLElement>('.tooltiptext');
@@ -369,30 +381,35 @@ function showTooltip(tooltipElement: HTMLElement): void {
 		}
 
 		if (!mode.quiet && logMode.verbosity > 3)
-			logger.info('showTooltip executed', 'showTooltip()');
+			logger.info(
+				'showTooltip executed',
+				`${thisModule} > ${thisMethod}`
+			);
 	} catch (error) {
 		if (logMode.error)
 			logger.error(
 				`Failed to execute showTooltip: ${error}`,
-				'common > helpers > dom > showTooltip()'
+				`${thisModule} > ${thisMethod}`
 			);
 	}
 }
 
 async function validateAndConvertColor(
-	color: Color | ColorString | null
+	color: Color | Color_StringProps | null
 ): Promise<Color | null> {
+	const thisMethod = 'validateAndConvertColor()';
+
 	if (!color) return null;
 
-	const convertedColor = core.guards.isColorString(color)
-		? await core.convert.colorStringToColor(color)
+	const convertedColor = coreUtils.guards.isColorString(color)
+		? await coreUtils.convert.colorStringToColor(color)
 		: color;
 
-	if (!core.validate.colorValues(convertedColor)) {
+	if (!coreUtils.validate.colorValues(convertedColor)) {
 		if (logMode.error)
 			logger.error(
 				`Invalid color: ${JSON.stringify(convertedColor)}`,
-				'common > helpers > dom > validateAndConvertColor()'
+				`${thisModule} > ${thisMethod}`
 			);
 
 		return null;
@@ -401,7 +418,7 @@ async function validateAndConvertColor(
 	return convertedColor;
 }
 
-export const dom: CommonFunctionsMasterInterface['helpers']['dom'] = {
+export const domHelpers: CommonFn_MasterInterface['helpers']['dom'] = {
 	attachDragAndDropListeners,
 	handle: {
 		dragStart,

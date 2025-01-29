@@ -1,10 +1,10 @@
-// File: src/common/helpers/index.js
+// File: common/helpers/index.js
 
-import { CommonFunctionsMasterInterface } from '../../types/index.js';
-import { conversion } from './conversion.js';
-import { dom } from './dom.js';
+import { CommonFn_MasterInterface } from '../../types/index.js';
+import { conversionHelpers as conversion } from './conversion.js';
+import { domHelpers as dom } from './dom.js';
 
-export const helpers: CommonFunctionsMasterInterface['helpers'] = {
+export const helpers: CommonFn_MasterInterface['helpers'] = {
 	conversion,
 	dom
 } as const;

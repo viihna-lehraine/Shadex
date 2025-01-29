@@ -1,18 +1,21 @@
-// File: src/dom/events/palette.js
+// File: dom/events/palette.js
 
-import { UIFnBaseInterface } from '../types/index.js';
-import { consts, mode } from '../common/data/base.js';
+import { UIFn_BaseInterface } from '../types/index.js';
+import { domData } from '../data/dom.js';
 import { createLogger } from '../logger/index.js';
+import { modeData as mode } from '../data/mode.js';
+
+const domIDs = domData.ids;
+const logMode = mode.logging;
+const thisModule = 'ui/base.js';
 
 const logger = await createLogger();
-
-const domIDs = consts.dom.ids;
-const logMode = mode.logging;
 
 function enforceSwatchRules(
 	minimumSwatches: number,
 	maximumSwatches?: number
 ): void {
+	const thisFunction = 'enforceSwatchRules()';
 	const paletteDropdown = document.getElementById(
 		domIDs.paletteNumberOptions
 	) as HTMLSelectElement;
@@ -21,7 +24,7 @@ function enforceSwatchRules(
 		if (logMode.error) {
 			logger.error(
 				'paletteDropdown not found',
-				'ui > base > enforceSwatchRules()'
+				`${thisModule} > ${thisFunction}`
 			);
 		}
 		if (mode.stackTrace && logMode.verbosity > 3) {
@@ -57,7 +60,7 @@ function enforceSwatchRules(
 			if (logMode.error) {
 				logger.error(
 					`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`,
-					'ui > base > enforceSwatchRules()'
+					`${thisModule} > ${thisFunction}`
 				);
 			}
 			throw new Error(`Failed to dispatch change event: ${error}`);
@@ -65,6 +68,6 @@ function enforceSwatchRules(
 	}
 }
 
-export const base: UIFnBaseInterface = {
+export const base: UIFn_BaseInterface = {
 	enforceSwatchRules
 };

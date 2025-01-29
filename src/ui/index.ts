@@ -1,10 +1,10 @@
-// File: src/ui/index.ts
+// File: ui/index.js
 
-import { UIFnMasterInterface } from '../types/index.js';
+import { UIFn_MasterInterface } from '../types/index.js';
 import { base } from './base.js';
 
 export { UIManager } from './UIManager.js';
 
-export const ui: UIFnMasterInterface = {
+export const uiFn: UIFn_MasterInterface = {
 	...base
 };

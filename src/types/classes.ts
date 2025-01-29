@@ -1,4 +1,4 @@
-// File: src/index/classes.js
+// File: types/classes.js
 
 import { IDBPObjectStore } from 'idb';
 import {
@@ -14,7 +14,7 @@ import {
 
 // ******** Class Interfaces ********
 
-export interface AppLoggerInterface {
+export interface AppLogger_ClassInterface {
 	log(
 		message: string,
 		level: 'debug' | 'info' | 'warn' | 'error',
@@ -31,13 +31,13 @@ export interface AppLoggerInterface {
 	): void;
 }
 
-export interface CacheManagerInterface<T> {
+export interface CacheManager_ClassInterface<T> {
 	get(key: string): T | undefined;
 	set(key: string, value: T): void;
 	clear(): void;
 }
 
-export interface IDBManagerInterface {
+export interface IDBManager_ClassInterface {
 	createMutationLogger<T extends object>(obj: T, key: string): T;
 	deleteEntry(
 		storeName: keyof PaletteSchema,
@@ -94,11 +94,11 @@ export interface IDBManagerInterface {
 	saveSettings(newSettings: Settings): Promise<void | null>;
 }
 
-export interface MutationTrackerInterface {
+export interface MutationTracker_ClassInterface {
 	persistMutation(data: MutationLog): Promise<void>;
 }
 
-export interface UIManagerInterface {
+export interface UIManager_ClassInterface {
 	addPaletteToHistory(palette: Palette): void;
 	applyCustomColor(): HSL;
 	applyFirstColorToUI(color: HSL): Promise<HSL>;
@@ -108,25 +108,4 @@ export interface UIManagerInterface {
 	getID(): number;
 	handleExport(format: 'css' | 'json' | 'xml'): Promise<void>;
 	renderPalette(tableId: string): Promise<void | null>;
-}
-
-// ******** Factory Interfaces ********
-
-export interface AsyncLoggerFactory {
-	debug(message: string): Promise<void>;
-	info(message: string): Promise<void>;
-	warning(message: string): Promise<void>;
-	error(message: string): Promise<void>;
-	mutation(
-		data: MutationLog,
-		logCallback: (data: MutationLog) => void
-	): Promise<void>;
-}
-
-export interface SyncLoggerFactory {
-	debug(message: string): void;
-	info(message: string): void;
-	warning(message: string): void;
-	error(message: string): void;
-	mutation(data: MutationLog, logCallback: (data: MutationLog) => void): void;
 }

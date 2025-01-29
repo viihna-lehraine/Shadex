@@ -1,40 +1,44 @@
-// File: src/palette/main.js
+// File: palette/main.js
 
 import {
 	GenPaletteArgs,
 	HSL,
 	Palette,
+	PaletteFn_MasterInterface,
 	PaletteItem,
 	PaletteOptions
 } from '../types/index.js';
 import { IDBManager } from '../db/index.js';
-import { core, helpers, utils } from '../common/index.js';
+import { coreUtils, helpers, transformUtils, utils } from '../common/index.js';
 import { createLogger } from '../logger/index.js';
-import { defaults, mode } from '../common/data/base.js';
+import { defaultData as defaults } from '../data/defaults.js';
 import { genPalette as genPaletteType } from './main/index.js';
-import { paletteHelpers } from './common/index.js';
-import { transform } from '../common/transform/index.js';
-
-const logger = await createLogger();
+import { helpers as paletteHelpers } from './common/index.js';
+import { modeData as mode } from '../data/mode.js';
 
 const defaultPalette = defaults.palette.unbranded.data;
-const defaultBrandedPalete = transform.brandPalette(defaultPalette);
+const defaultBrandedPalete = transformUtils.brandPalette(defaultPalette);
 
 const limits = paletteHelpers.limits;
 const logMode = mode.logging;
+const thisModule = 'palette/main.js';
+
+const logger = await createLogger();
 
 const isTooDark = limits.isTooDark;
 const isTooGray = limits.isTooGray;
 const isTooLight = limits.isTooLight;
 
 async function genPalette(options: PaletteOptions): Promise<void> {
+	const thisFunction = 'genPalette()';
+
 	try {
 		let { swatches, customColor } = options;
 
 		if (logMode.info && logMode.verbosity > 2)
 			logger.info(
 				'Retrieving existing IDBManager instance.',
-				'palette > main > genPalette()'
+				`${thisModule} > ${thisFunction}`
 			);
 
 		const idb = await IDBManager.getInstance();
@@ -43,7 +47,7 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 			if (logMode.error)
 				logger.error(
 					'Custom color is null or undefined.',
-					'palette > main > genPalette()'
+					`${thisModule} > ${thisFunction}`
 				);
 
 			return;
@@ -56,7 +60,7 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 		if (mode.debug && logMode.info && logMode.verbosity > 2)
 			logger.info(
 				`Custom color: ${JSON.stringify(customColor)}`,
-				'palette > main > genPalette()'
+				`${thisModule} > ${thisFunction}`
 			);
 
 		options.customColor = validatedCustomColor;
@@ -67,7 +71,7 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 			if (logMode.error)
 				logger.error(
 					'Colors array is empty or invalid.',
-					'palette > main > genPalette()'
+					`${thisModule} > ${thisFunction}`
 				);
 
 			return;
@@ -76,7 +80,7 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 		if (!mode.quiet && logMode.info && logMode.verbosity > 0)
 			logger.info(
 				`Colors array generated: ${JSON.stringify(palette.items)}`,
-				'palette > main > genPalette()'
+				`${thisModule} > ${thisFunction}`
 			);
 
 		const tableId = await idb.getNextTableID();
@@ -88,7 +92,7 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 		if (logMode.error)
 			logger.error(
 				`Error starting palette generation: ${error}`,
-				'palette > main > genPalette()'
+				`${thisModule} > ${thisFunction}`
 			);
 	}
 }
@@ -98,6 +102,8 @@ async function genPaletteDOMBox(
 	numBoxes: number,
 	tableId: string
 ): Promise<void> {
+	const thisFunction = 'genPaletteDOMBox()';
+
 	try {
 		const paletteRow = document.getElementById('palette-row');
 		const idbManager = await IDBManager.getInstance();
@@ -106,7 +112,7 @@ async function genPaletteDOMBox(
 			if (logMode.error)
 				logger.error(
 					'paletteRow is undefined.',
-					'palette > main > genPaletteDOMBox()'
+					`${thisModule} > ${thisFunction}`
 				);
 
 			return;
@@ -118,7 +124,7 @@ async function genPaletteDOMBox(
 
 		for (let i = 0; i < Math.min(items.length, numBoxes); i++) {
 			const item = items[i];
-			const color: HSL = { value: item.colors.hsl, format: 'hsl' };
+			const color: HSL = { value: item.colors.main.hsl, format: 'hsl' };
 			const { colorStripe } = await helpers.dom.makePaletteBox(
 				color,
 				i + 1
@@ -134,7 +140,7 @@ async function genPaletteDOMBox(
 		if (!mode.quiet && logMode.info && logMode.verbosity > 1)
 			logger.info(
 				'Palette boxes generated and rendered.',
-				'palette > main > genPaletteDOMBox()'
+				`${thisModule} > ${thisFunction}`
 			);
 
 		await idbManager.saveData('tables', tableId, { palette: items });
@@ -142,12 +148,12 @@ async function genPaletteDOMBox(
 		if (logMode.error)
 			logger.error(
 				`Error generating palette box: ${error}`,
-				'palette > main > genPaletteDOMBox()'
+				`${thisModule} > ${thisFunction}`
 			);
 	}
 }
 
-export const start = {
+export const start: PaletteFn_MasterInterface['start'] = {
 	genPalette,
 	genPaletteDOMBox
 } as const;
@@ -166,12 +172,12 @@ function limitedHSL(
 	do {
 		hsl = {
 			value: {
-				hue: core.brand.asRadial(baseHue),
-				saturation: core.brand.asPercentile(Math.random() * 100),
-				lightness: core.brand.asPercentile(Math.random() * 100),
+				hue: coreUtils.brand.asRadial(baseHue),
+				saturation: coreUtils.brand.asPercentile(Math.random() * 100),
+				lightness: coreUtils.brand.asPercentile(Math.random() * 100),
 				alpha: alphaValue
-					? core.brand.asAlphaRange(alphaValue)
-					: core.brand.asAlphaRange(1)
+					? coreUtils.brand.asAlphaRange(alphaValue)
+					: coreUtils.brand.asAlphaRange(1)
 			},
 			format: 'hsl'
 		};
@@ -185,17 +191,27 @@ function limitedHSL(
 }
 
 async function selectedPalette(options: PaletteOptions): Promise<Palette> {
+	const thisFunction = 'selectedPalette()';
+
 	try {
 		const { customColor, flags, swatches, type } = options;
 
 		const args: GenPaletteArgs = {
 			swatches,
+			type,
 			customColor,
 			enableAlpha: flags.enableAlpha,
 			limitDark: flags.limitDarkness,
 			limitGray: flags.limitGrayness,
 			limitLight: flags.limitLightness
 		};
+
+		if (!mode.quiet && logMode.debug && logMode.verbosity > 2) {
+			logger.debug(
+				`Generating palette with type #: ${type}`,
+				`${thisModule} > ${thisFunction}`
+			);
+		}
 
 		switch (type) {
 			case 1:
@@ -220,7 +236,7 @@ async function selectedPalette(options: PaletteOptions): Promise<Palette> {
 				if (logMode.error)
 					logger.error(
 						'Invalid palette type.',
-						'palette > main > selectedPalette()'
+						`${thisModule} > ${thisFunction}`
 					);
 
 				return Promise.resolve(defaultBrandedPalete);
@@ -229,14 +245,14 @@ async function selectedPalette(options: PaletteOptions): Promise<Palette> {
 		if (logMode.error)
 			logger.error(
 				`Error generating palette: ${error}`,
-				'palette > main > selectedPalette()'
+				`${thisModule} > ${thisFunction}`
 			);
 
 		return Promise.resolve(defaultBrandedPalete);
 	}
 }
 
-export const generate = {
+export const generate: PaletteFn_MasterInterface['generate'] = {
 	limitedHSL,
 	selectedPalette
 } as const;

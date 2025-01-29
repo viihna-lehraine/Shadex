@@ -1,26 +1,20 @@
-// File: src/palette/io/parse/color.ts
+// File: io/parse/color.js
 
 import {
 	CMYK,
-	CMYKValue,
 	Color,
 	ColorParser,
 	Hex,
 	HSL,
-	HSLValue,
 	HSV,
-	HSVValue,
 	LAB,
-	LABValue,
 	RGB,
-	RGBValue,
-	XYZ,
-	XYZValue
+	XYZ
 } from '../../types/index.js';
-import { common } from '../../common/index.js';
-import { config } from '../../common/data/base.js';
+import { commonFn } from '../../common/index.js';
+import { configData as config } from '../../data/config.js';
 
-const brand = common.core.brand;
+const brand = commonFn.core.brand;
 const regex = config.regex;
 
 const colorParsers: Record<string, ColorParser> = {};
@@ -35,7 +29,7 @@ const cmykParser: ColorParser = {
 
 		const [_, cyan, magenta, yellow, key, alpha = '1'] = match;
 
-		const value: CMYKValue = {
+		const value: CMYK['value'] = {
 			cyan: brand.asPercentile(parseFloat(cyan) / 100),
 			magenta: brand.asPercentile(parseFloat(magenta) / 100),
 			yellow: brand.asPercentile(parseFloat(yellow) / 100),
@@ -82,7 +76,7 @@ const hslParser: ColorParser = {
 
 		const [_, hue, saturation, lightness, alpha = '1'] = match;
 
-		const value: HSLValue = {
+		const value: HSL['value'] = {
 			hue: brand.asRadial(parseFloat(hue)),
 			saturation: brand.asPercentile(parseFloat(saturation) / 100),
 			lightness: brand.asPercentile(parseFloat(lightness) / 100),
@@ -103,7 +97,7 @@ const hsvParser: ColorParser = {
 
 		const [_, hue, saturation, value, alpha = '1'] = match;
 
-		const hsvValue: HSVValue = {
+		const hsvValue: HSV['value'] = {
 			hue: brand.asRadial(parseFloat(hue)),
 			saturation: brand.asPercentile(parseFloat(saturation) / 100),
 			value: brand.asPercentile(parseFloat(value) / 100),
@@ -124,7 +118,7 @@ const labParser: ColorParser = {
 
 		const [_, l, a, b, alpha = '1'] = match;
 
-		const labValue: LABValue = {
+		const labValue: LAB['value'] = {
 			l: brand.asLAB_L(parseFloat(l)),
 			a: brand.asLAB_A(parseFloat(a)),
 			b: brand.asLAB_B(parseFloat(b)),
@@ -145,7 +139,7 @@ const rgbParser: ColorParser = {
 
 		const [_, red, green, blue, alpha = '1'] = match;
 
-		const rgbValue: RGBValue = {
+		const rgbValue: RGB['value'] = {
 			red: brand.asByteRange(parseFloat(red)),
 			green: brand.asByteRange(parseFloat(green)),
 			blue: brand.asByteRange(parseFloat(blue)),
@@ -166,7 +160,7 @@ const xyzParser: ColorParser = {
 
 		const [_, x, y, z, alpha = '1'] = match;
 
-		const xyzValue: XYZValue = {
+		const xyzValue: XYZ['value'] = {
 			x: brand.asXYZ_X(parseFloat(x)),
 			y: brand.asXYZ_Y(parseFloat(y)),
 			z: brand.asXYZ_Z(parseFloat(z)),

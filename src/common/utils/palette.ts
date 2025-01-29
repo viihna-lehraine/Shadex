@@ -1,20 +1,22 @@
-// File: src/common/utils/palette.js
+// File: common/utils/palette.js
 
 import {
 	Color,
-	ColorString,
-	CommonFunctionsMasterInterface,
+	Color_StringProps,
+	CommonFn_MasterInterface,
 	Palette,
 	PaletteItem
 } from '../../types/index';
-import { core } from '../core/index.js';
+import { coreUtils } from '../core.js';
 import { createLogger } from '../../logger/index.js';
-import { mode } from '../data/base.js';
 import { helpers } from '../helpers/index.js';
-
-const logger = await createLogger();
+import { modeData as mode } from '../../data/mode.js';
 
 const logMode = mode.logging;
+
+const thisModule = 'common/utils/palette.js';
+
+const logger = await createLogger();
 
 function createObject(
 	type: string,
@@ -31,7 +33,7 @@ function createObject(
 		items,
 		metadata: {
 			name: '',
-			timestamp: core.getFormattedTimestamp(),
+			timestamp: coreUtils.getFormattedTimestamp(),
 			swatches,
 			type,
 			flags: {
@@ -41,28 +43,32 @@ function createObject(
 				limitLightness: limitLight
 			},
 			customColor: {
-				colors: items[0]?.colors || {},
-				colorStrings: items[0]?.colorStrings || {},
-				cssStrings: items[0]?.cssStrings || {}
+				colors: {
+					main: items[0]?.colors.main || {},
+					stringProps: items[0]?.colors.stringProps || {},
+					css: items[0]?.colors.css || {}
+				}
 			}
 		}
 	};
 }
 
 export async function populateOutputBox(
-	color: Color | ColorString,
+	color: Color | Color_StringProps,
 	boxNumber: number
 ): Promise<void> {
-	try {
-		const clonedColor: Color = core.guards.isColor(color)
-			? core.base.clone(color)
-			: await core.convert.colorStringToColor(color);
+	const thisMethod = 'populateOutputBox()';
 
-		if (!core.validate.colorValues(clonedColor)) {
+	try {
+		const clonedColor: Color = coreUtils.guards.isColor(color)
+			? coreUtils.base.clone(color)
+			: await coreUtils.convert.colorStringToColor(color);
+
+		if (!coreUtils.validate.colorValues(clonedColor)) {
 			if (logMode.error)
 				logger.error(
 					'Invalid color values.',
-					'common > utils > palette > populateOutputBox()'
+					`${thisModule} > ${thisMethod}`
 				);
 
 			helpers.dom.showToast('Invalid color.');
@@ -77,12 +83,12 @@ export async function populateOutputBox(
 		if (!colorTextOutputBox) return;
 
 		const stringifiedColor =
-			await core.convert.colorToCSSColorString(clonedColor);
+			await coreUtils.convert.colorToCSSColorString(clonedColor);
 
 		if (!mode.quiet && logMode.info && logMode.verbosity > 0)
 			logger.info(
 				`Adding CSS-formatted color to DOM ${stringifiedColor}`,
-				'common > utils > palette > populateOutputBox()'
+				`${thisModule} > ${thisMethod}`
 			);
 
 		colorTextOutputBox.value = stringifiedColor;
@@ -91,14 +97,14 @@ export async function populateOutputBox(
 		if (logMode.error)
 			logger.error(
 				`Failed to populate color text output box: ${error}`,
-				'common > utils > palette > populateOutputBox()'
+				`${thisModule} > ${thisMethod}`
 			);
 
 		return;
 	}
 }
 
-export const palette: CommonFunctionsMasterInterface['utils']['palette'] = {
+export const paletteUtils: CommonFn_MasterInterface['utils']['palette'] = {
 	createObject,
 	populateOutputBox
 } as const;
