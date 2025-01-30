@@ -18,6 +18,8 @@ export default defineConfig({
 	plugins: [
 		commonjs(),
 		resolve({
+			browser: true,
+			preferBuiltins: false,
 			extensions: ['.js', '.ts']
 		}),
 		typescript({

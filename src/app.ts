@@ -106,7 +106,7 @@ async function initializeApp(): Promise<void> {
 			alert('An error occurred. Check console for details.');
 	}
 
-	const selectedColorOption = domData.elements.inputs.selectedColorOption;
+	const selectedSwatch = domData.elements.static.selects.swatch;
 
 	if (mode.debug) {
 		if (logMode.debug)
@@ -117,7 +117,7 @@ async function initializeApp(): Promise<void> {
 				);
 			}
 
-		domFn.validate.elements();
+		domFn.validate.staticElements();
 	} else {
 		if (!mode.quiet) {
 			logger.info(
@@ -127,8 +127,8 @@ async function initializeApp(): Promise<void> {
 		}
 	}
 
-	const selectedColor = selectedColorOption
-		? parseInt(selectedColorOption.value, 10)
+	const selectedColor = selectedSwatch
+		? parseInt(selectedSwatch.value, 10)
 		: 0;
 
 	if (!mode.quiet && mode.debug)

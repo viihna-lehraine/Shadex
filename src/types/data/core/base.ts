@@ -1,4 +1,4 @@
-// File: types/data/core.js
+// File: types/data/core/base.js
 
 import {
 	CMYK,
@@ -33,7 +33,7 @@ import {
 	UnbrandedXYZ,
 	XYZ,
 	XYZ_StringProps
-} from '../index.js';
+} from '../../index.js';
 
 export type AppModeData = 'dev' | 'prod';
 
@@ -74,36 +74,63 @@ export interface ConfigDataInterface {
 	};
 }
 
+interface PaletteRangeShiftProperties {
+	hue: number;
+	sat: number;
+	light: number;
+}
+
 export interface ConstsDataInterface {
-	adjustments: Record<string, number>;
-	debounce: Record<string, number>;
+	adjustments: {
+		slaValue: number;
+	};
+	debounce: {
+		btn: number;
+		input: number;
+	};
 	limits: {
 		xyz: {
-			max: { x: number; y: number; z: number };
-			min: { x: number; y: number; z: number };
+			max: {
+				x: number;
+				y: number;
+				z: number;
+			};
+			min: {
+				x: number;
+				y: number;
+				z: number;
+			};
 		};
 	};
 	paletteRanges: {
-		comp: Record<string, number>;
-		diadic: Record<string, number>;
-		hexad: Record<string, number>;
-		random: Record<string, number>;
-		splitComp: Record<string, number>;
-		tetra: Record<string, number>;
-		triad: Record<string, number>;
+		shift: {
+			comp: PaletteRangeShiftProperties;
+			diadic: PaletteRangeShiftProperties;
+			hexad: PaletteRangeShiftProperties;
+			random: PaletteRangeShiftProperties;
+			splitComp: PaletteRangeShiftProperties;
+			tetra: PaletteRangeShiftProperties;
+			triad: PaletteRangeShiftProperties;
+		};
 	};
 	probabilities: {
 		values: readonly number[];
 		weights: readonly number[];
 	};
-	thresholds: Record<string, number>;
-	timeouts: Record<string, number>;
+	thresholds: {
+		dark: number;
+		gray: number;
+		light: number;
+	};
+	timeouts: {
+		copyButtonText: number;
+		toast: number;
+		tooltip: number;
+	};
 }
 
 export interface DataSetsInterface {
-	AlphaRange: readonly [0, 1];
 	ByteRange: readonly [0, 255];
-	HexComponent: 'HexComponent';
 	HexSet: 'HexSet';
 	LAB_L: readonly [0, 100];
 	LAB_A: readonly [-128, 127];
@@ -174,17 +201,6 @@ export interface DefaultDataInterface {
 			stored: UnbrandedStoredPalette;
 		};
 	};
-}
-
-export interface DOMDataInterface {
-	elements: {
-		buttons: Record<string, HTMLButtonElement | null>;
-		divs: Record<string, HTMLDivElement | null>;
-		spans: Record<string, HTMLSpanElement | null>;
-		inputs: Record<string, HTMLInputElement | null>;
-		select: Record<string, HTMLSelectElement | null>;
-	};
-	ids: Record<string, string>;
 }
 
 export interface ModeDataInterface {

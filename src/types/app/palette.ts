@@ -16,15 +16,11 @@ export interface Palette_CommonFn_MasterInterface {
 	};
 	superUtils: {
 		create: {
-			baseColor: (customColor: HSL | null, enableAlpha: boolean) => HSL;
-			paletteItem: (
-				color: HSL,
-				enableAlpha: boolean
-			) => Promise<PaletteItem>;
+			baseColor: (customColor: HSL | null) => HSL;
+			paletteItem: (color: HSL) => Promise<PaletteItem>;
 			paletteItemArray(
 				baseColor: HSL,
 				hues: number[],
-				enableAlpha: boolean,
 				limitDark: boolean,
 				limitGray: boolean,
 				limitLight: boolean
@@ -51,18 +47,17 @@ export interface Palette_CommonFn_MasterInterface {
 
 // ******** MAIN MODULES ********
 
-export interface GenPaletteArgs {
+export interface PaletteGenerationArgs {
 	swatches: number;
 	type: number;
 	customColor: HSL | null;
-	enableAlpha: boolean;
 	limitDark: boolean;
 	limitGray: boolean;
 	limitLight: boolean;
 }
 
-export interface GenPaletteFnInterface {
-	[key: string]: (args: GenPaletteArgs) => Promise<Palette>;
+export interface PaletteGenerationInterface {
+	[key: string]: (args: PaletteGenerationArgs) => Promise<Palette>;
 }
 
 // ******** TOP-LEVEL BUNDLE INTERFACE ********
@@ -79,11 +74,11 @@ export interface PaletteFn_MasterInterface {
 		selectedPalette(options: PaletteOptions): Promise<Palette>;
 	};
 	start: {
-		genPalette(options: PaletteOptions): Promise<void>;
-		genPaletteDOMBox(
+		paletteDomBoxGeneration(
 			items: PaletteItem[],
 			numBoxes: number,
 			tableId: string
 		): Promise<void>;
+		paletteGeneration(options: PaletteOptions): Promise<void>;
 	};
 }

@@ -1,0 +1,193 @@
+/* File: public/css/partials/main.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f5f7fa;
+    color: #222;
+    margin: 0;
+    padding: 0;
+}
+
+/* Main Container */
+#container {
+    max-width: 1000px;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* * * * Header * * * */
+/* */
+
+header {
+    text-align: center;
+    padding-bottom: 15px;
+}
+
+h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 10px;
+}
+
+/* * * * Layout: Sidebar and Main Content * * * */
+/* */
+
+#main-ui {
+    display: grid;
+    grid-template-columns: 0.6fr 1.6fr;
+    gap: 20px;
+	min-height: 500px;
+}
+
+/* * * * Sidebar (Palette Options) * * * */
+/* */
+
+#left-column {
+    background: #e8f0ff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* * * * Right Column (Color Adjustments + Output) * * * */
+/* */
+
+#right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* * * * Sections * * * */
+/* */
+
+fieldset {
+    border: none;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* * * * Labels * * * */
+/* */
+
+label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+/* * * * Selectors and Inputs * * * */
+/* */
+
+select, input[type="color"] {
+    width: 100%;
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+/* * * * Buttons * * * */
+/* */
+
+.btn-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #4f80e1;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+    background: #3b69c9;
+    transform: scale(1.05);
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+/* * * * Special Buttons * * * */
+/* */
+
+#saturate-btn {
+    background: #f39c12;
+}
+
+#saturate-btn:hover {
+    background: #e67e22;
+}
+
+#desaturate-btn {
+    background: #16a085;
+}
+
+#desaturate-button:hover {
+    background: #1abc9c;
+}
+
+#generate-btn {
+    background: #27ae60;
+}
+
+#generate-btn:hover {
+    background: #2ecc71;
+}
+
+/* * * * Palette Output Section * * * */
+/* */
+
+#palette-row {
+    background: #e8f0ff;
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+/* Generated Palette */
+#palette-output {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* * * * More Options Menu * * * */
+/* */
+
+#menu-btns-section {
+	grid-column: span 2;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#menu-btns-section .btn-group {
+    justify-content: center;
+}
+
+/* * * * Modal Menus * * * */
+/* */
+
+.modal.hidden {
+	display: none;
+}

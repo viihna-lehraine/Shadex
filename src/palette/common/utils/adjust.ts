@@ -39,8 +39,7 @@ function sl(color: HSL): HSL {
 			value: {
 				hue: color.value.hue,
 				saturation: coreUtils.brand.asPercentile(adjustedSaturation),
-				lightness: coreUtils.brand.asPercentile(adjustedLightness),
-				alpha: color.value.alpha
+				lightness: coreUtils.brand.asPercentile(adjustedLightness)
 			},
 			format: 'hsl'
 		};

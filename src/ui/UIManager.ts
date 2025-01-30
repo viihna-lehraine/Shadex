@@ -16,6 +16,7 @@ import {
 	SV,
 	UIManager_ClassInterface
 } from '../types/index.js';
+import { IDBManager } from '../db/IDBManager.js';
 import { commonFn } from '../common/index.js';
 import { createLogger } from '../logger/index.js';
 import { constsData as consts } from '../data/consts.js';
@@ -35,6 +36,8 @@ export class UIManager implements UIManager_ClassInterface {
 	private currentPalette: Palette | null = null;
 	private paletteHistory: Palette[] = [];
 
+	private idbManager: IDBManager | null = null;
+
 	private consts: ConstsDataInterface;
 	private domData: DOMDataInterface;
 	private logMode: ModeDataInterface['logging'];
@@ -52,6 +55,8 @@ export class UIManager implements UIManager_ClassInterface {
 	private getStoredPalette?: (id: string) => Promise<StoredPalette | null>;
 
 	constructor() {
+		this.init();
+
 		this.id = UIManager.instanceCounter++;
 
 		UIManager.instances.set(this.id, this);
@@ -74,10 +79,47 @@ export class UIManager implements UIManager_ClassInterface {
 
 	/* PUBLIC METHODS */
 
-	public addPaletteToHistory(palette: Palette): void {
+	public async addPaletteToHistory(palette: Palette): Promise<void> {
+		const thisMethod = 'addPaletteToHistory()';
+
+		const idbManager = await IDBManager.getInstance();
+		const maxHistory = (await idbManager.getSettings()).maxHistory;
+
+		try {
+			const history = await idbManager.getPaletteHistory();
+			const newID = await idbManager.getNextPaletteID();
+			const idString = `${palette.metadata.type}_${newID}`;
+
+			await idbManager.savePaletteHistory(history);
+
+			if (
+				!this.mode.quiet &&
+				this.mode.debug &&
+				this.logMode.verbosity > 2
+			)
+				logger.info(
+					`Added palette with ID ${idString} to history`,
+					`${thisModule} > ${thisMethod}`
+				);
+		} catch (error) {
+			logger.error(
+				`Error adding palette to history: ${error}`,
+				`${thisModule} > ${thisMethod}`
+			);
+		}
+
 		this.paletteHistory.unshift(palette);
 
-		if (this.paletteHistory.length >= 50) this.paletteHistory.pop();
+		if (this.paletteHistory.length > maxHistory) this.paletteHistory.pop();
+
+		if (this.idbManager) {
+			await this.idbManager.savePaletteHistory(this.paletteHistory);
+		} else {
+			const idbManager = await IDBManager.getInstance();
+			await idbManager.savePaletteHistory(this.paletteHistory);
+		}
+
+		this.updateHistoryUI();
 	}
 
 	public applyCustomColor(): HSL {
@@ -130,14 +172,14 @@ export class UIManager implements UIManager_ClassInterface {
 					`${thisModule} > ${thisMethod}`
 				);
 
-			return this.utils.random.hsl(false) as HSL;
+			return this.utils.random.hsl() as HSL;
 		}
 	}
 
 	public async applyFirstColorToUI(color: HSL): Promise<HSL> {
 		const thisMethod = 'applyFirstColorToUI()';
 		try {
-			const colorBox1 = this.domData.elements.divs.colorBox1;
+			const colorBox1 = this.domData.elements.dynamic.divs.colorBox1;
 
 			if (!colorBox1) {
 				if (this.logMode.error)
@@ -173,7 +215,7 @@ export class UIManager implements UIManager_ClassInterface {
 					`Failed to apply first color to UI: ${error}`,
 					`${thisModule} > ${thisMethod}`
 				);
-			return this.utils.random.hsl(false) as HSL;
+			return this.utils.random.hsl() as HSL;
 		}
 	}
 
@@ -424,29 +466,26 @@ export class UIManager implements UIManager_ClassInterface {
 	public pullParamsFromUI(): {
 		type: number;
 		swatches: number;
-		enableAlpha: boolean;
-		limitDarkness: boolean;
-		limitGrayness: boolean;
-		limitLightness: boolean;
+		limitDark: boolean;
+		limitGray: boolean;
+		limitLight: boolean;
 	} {
 		const thisMethod = 'pullParamsFromUI()';
 
 		try {
-			const paletteTypeOptionsElement =
-				domData.elements.inputs.paletteTypeOptions;
-			const numBoxesElement =
-				domData.elements.inputs.paletteNumberOptions;
-			const enableAlphaCheckbox =
-				domData.elements.inputs.enableAlphaCheckbox;
-			const limitDarknessCheckbox =
-				domData.elements.inputs.limitDarknessCheckbox;
-			const limitGraynessCheckbox =
-				domData.elements.inputs.limitGraynessCheckbox;
-			const limitLightnessCheckbox =
-				domData.elements.inputs.limitLightnessCheckbox;
+			const paletteTypeElement =
+				domData.elements.static.selects.paletteType;
+			const numSwatchesElement =
+				domData.elements.static.selects.swatchGen;
+			const limitDarkChkbx =
+				domData.elements.static.inputs.limitDarkChkbx;
+			const limitGrayChkbx =
+				domData.elements.static.inputs.limitGrayChkbx;
+			const limitLightChkbx =
+				domData.elements.static.inputs.limitLightChkbx;
 
 			if (
-				!paletteTypeOptionsElement &&
+				!paletteTypeElement &&
 				!this.mode.quiet &&
 				this.logMode.debug &&
 				this.logMode.verbosity >= 2
@@ -457,7 +496,7 @@ export class UIManager implements UIManager_ClassInterface {
 				);
 			}
 			if (
-				!numBoxesElement &&
+				!numSwatchesElement &&
 				!this.mode.quiet &&
 				this.logMode.debug &&
 				this.logMode.verbosity >= 2
@@ -468,10 +507,7 @@ export class UIManager implements UIManager_ClassInterface {
 				);
 			}
 			if (
-				(!enableAlphaCheckbox ||
-					!limitDarknessCheckbox ||
-					!limitGraynessCheckbox ||
-					!limitLightnessCheckbox) &&
+				(!limitDarkChkbx || !limitGrayChkbx || !limitLightChkbx) &&
 				!this.mode.quiet &&
 				this.logMode.debug &&
 				this.logMode.verbosity >= 2
@@ -483,16 +519,15 @@ export class UIManager implements UIManager_ClassInterface {
 			}
 
 			return {
-				type: paletteTypeOptionsElement
-					? parseInt(paletteTypeOptionsElement.value, 10)
+				type: paletteTypeElement
+					? parseInt(paletteTypeElement.value, 10)
 					: 0,
-				swatches: numBoxesElement
-					? parseInt(numBoxesElement.value, 10)
+				swatches: numSwatchesElement
+					? parseInt(numSwatchesElement.value, 10)
 					: 0,
-				enableAlpha: enableAlphaCheckbox?.checked || false,
-				limitDarkness: limitDarknessCheckbox?.checked || false,
-				limitGrayness: limitGraynessCheckbox?.checked || false,
-				limitLightness: limitLightnessCheckbox?.checked || false
+				limitDark: limitDarkChkbx?.checked || false,
+				limitGray: limitGrayChkbx?.checked || false,
+				limitLight: limitLightChkbx?.checked || false
 			};
 		} catch (error) {
 			if (this.logMode.error)
@@ -504,11 +539,38 @@ export class UIManager implements UIManager_ClassInterface {
 			return {
 				type: 0,
 				swatches: 0,
-				enableAlpha: false,
-				limitDarkness: false,
-				limitGrayness: false,
-				limitLightness: false
+				limitDark: false,
+				limitGray: false,
+				limitLight: false
 			};
+		}
+	}
+
+	public async removePaletteFromHistory(paletteID: string): Promise<void> {
+		const thisMethod = 'removePaletteFromHistory()';
+
+		try {
+			const entry = document.getElementById(`palette_${paletteID}`);
+
+			if (!entry) return;
+
+			entry.remove();
+
+			const idbManager = await IDBManager.getInstance();
+			this.paletteHistory = this.paletteHistory.filter(
+				p => p.id !== paletteID
+			);
+			await idbManager.savePaletteHistory(this.paletteHistory);
+			if (!this.mode.quiet)
+				logger.info(
+					`Removed palette ${paletteID} from history`,
+					`${thisModule} > ${thisMethod}`
+				);
+		} catch (error) {
+			logger.error(
+				`Error removing palette ${paletteID}: ${error}`,
+				`${thisModule} > ${thisMethod}`
+			);
 		}
 	}
 
@@ -567,5 +629,109 @@ export class UIManager implements UIManager_ClassInterface {
 		getter: (id: string) => Promise<StoredPalette | null>
 	): void {
 		this.getStoredPalette = getter;
+	}
+
+	public async setHistoryLimit(limit: number): Promise<void> {
+		const thisMethod = 'setHistoryLimit()';
+
+		try {
+			if (limit < 1 || limit > 1000) {
+				if (this.logMode.warn)
+					logger.warn(
+						`Invalid history limit: ${limit}. Keeping current limit.`,
+						`${thisModule} > ${thisMethod}`
+					);
+				return;
+			}
+
+			const idbManager = await IDBManager.getInstance();
+			const settings = await idbManager.getSettings();
+
+			settings.maxHistory = limit;
+			await idbManager.saveSettings(settings);
+
+			if (this.paletteHistory.length > limit) {
+				this.paletteHistory = this.paletteHistory.slice(0, limit);
+				await idbManager.savePaletteHistory(this.paletteHistory);
+			}
+
+			this.updateHistoryUI();
+
+			if (!this.mode.quiet)
+				logger.info(
+					`History limit set to ${limit}`,
+					`${thisModule} > ${thisMethod}`
+				);
+		} catch (error) {
+			logger.error(
+				`Error setting history limit: ${error}`,
+				`${thisModule} > ${thisMethod}`
+			);
+		}
+	}
+
+	/* PRIVATE METHODS */
+
+	private async init(): Promise<void> {
+		this.idbManager = await IDBManager.getInstance();
+
+		await this.loadPaletteHistory();
+	}
+
+	private async loadPaletteHistory(): Promise<void> {
+		if (!this.idbManager) return;
+
+		const history = await this.idbManager.getPaletteHistory();
+		const settings = await this.idbManager.getSettings();
+
+		const maxHistory = settings.maxHistory || 50;
+
+		if (history) {
+			this.paletteHistory = history.slice(0, maxHistory);
+			this.updateHistoryUI();
+		}
+	}
+
+	private updateHistoryUI(): void {
+		const historyList = this.domData.elements.static.divs.paletteHistory;
+
+		if (!historyList) return;
+
+		historyList.innerHTML = '';
+
+		this.paletteHistory.forEach(palette => {
+			const entryID = `palette_${palette.id}`;
+			const entry = document.createElement('div');
+			entry.classList.add('history-item');
+			entry.id = entryID;
+
+			const colors = palette.items
+				.map(
+					item =>
+						/*html*/
+						`<span class="color-box" style="background: ${item.colors.css.hex};">
+						</span>`
+				)
+				.join(' ');
+
+			const removeBtn = document.createElement('button');
+
+			removeBtn.textContent = 'Remove';
+			removeBtn.classList.add('remove-history-item');
+			removeBtn.dataset.id = `${palette.id}-history-remove-btn`;
+
+			removeBtn.addEventListener('click', async () => {
+				await this.removePaletteFromHistory(palette.id);
+			});
+
+			entry.innerHTML =
+				/*html*/
+				`
+				<p>Palette #${palette.metadata.name || palette.id}</p>
+				<div class="color-preview">${colors}</div>
+				`;
+
+			historyList.appendChild(entry);
+		});
 	}
 }

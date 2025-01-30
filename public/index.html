@@ -1,383 +1,298 @@
-<!-- File: public/index.html -->
-
 <!DOCTYPE html>
+<html lang="en">
 	<head>
-		<title>ColorGen</title>
-		<meta charset="UTF-8"/>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
-		<meta name="description" content="color palette generator" />
-		<meta name="keywords" content="colors, palettes, color generator, palette generator, art, art tools" />
-		<meta name="author" content="Viihna Lehraine" />
-		<link rel="stylesheet" href="./css/main.css" />
-		<link rel="icon" type="img/svg+xml" href="./assets/favicons/favicon.svg" />
+	    <title>ColorGen</title>
+	    <meta charset="UTF-8"/>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+	    <meta name="description" content="color palette generator" />
+	    <meta name="keywords" content="colors, palettes, color generator, palette generator, art, art tools" />
+	    <meta name="author" content="Viihna Lehraine" />
+	    <link rel="stylesheet" href="./css/styles.css" />
+	    <link rel="icon" type="image/svg+xml" href="./assets/favicons/favicon.svg" />
 		<link rel="shortcut icon" type="image/png" href="./assets/favicons/favicon-android-chrome.png" />
 	</head>
 	<body>
-		<div id="container" class="flex-center flex-column margin-top-sm padding-0">
-			<div id="app" class="bg-color-3 flex-column gap-lg padding-sm">
-				<header>
-					<h1 class="margin-0 padding-top-md padding-right-0 padding-bottom-0 padding-left-md">
-						ColorGen
-					</h1>
-				</header>
-				<main>
+		<div id="app">
+			<header>LOGO GOES HERE!</header>
 
-					<!-- MAIN USER INTERFACE -->
-					<div id="main-ui" class="gap-lg">
+			<main id="main-ui">
+				<!-- Controls -->
+				<div id="controls">
+					<label for="palette-type-selector">Preset:</label>
+					<select id="palette-type-selector">
+						<option value="1">Random</option>
+						<option value="2">Complementary</option>
+						<option value="3">Triadic</option>
+						<option value="4">Tetradic</option>
+						<option value="5">Split Complementary</option>
+						<option value="6">Analogous</option>
+						<option value="7">Hexadic</option>
+						<option value="8">Diadic</option>
+						<option value="9">Monochromatic</option>
+					</select>
+					<button id="generate-btn">🎲 Generate</button>
+				</div>
 
-						<!-- UI LEFT COLUMN -->
-						<div id="left-column" class="flex-column gap-md">
-
-							<!-- PALETTE DETAILS SELECTION MENU -->
-							<section id="main-options-section" class="bg-color-3">
-								<form id="ui-form">
-									<div class="ui-sub-box">
-										<fieldset aria-labelledby="main-options-legend">
-											<div id="main-options-top-half" class="column-half padding-top-xs padding-right-0 padding-bottom-xs padding-left-0">
-												<legend id="color-options-legend" class="sub-menu-title bold">
-													Main Options
-												</legend>
-											</div>
-											<label for="palette-type-options">
-												Palette Type
-											</label>
-											<select id="palette-type-options" aria-label="Select Palette Type">
-												<option value="1">Random</option>
-												<option value="2">Complementary</option>
-												<option value="3">Triadic</option>
-												<option value="4">Tetradic</option>
-												<option value="5">Split Complementary</option>
-												<option value="6">Analogous</option>
-												<option value="7">Hexadic</option>
-												<option value="8">Diadic</option>
-												<option value="9">Monochromatic</option>
-											</select>
-											<label for="palette-number-options"># of Swatches</label>
-											<select id="palette-number-options" aria-label="Select Number of Swatches to Generate">
-												<option value="1">1</option>
-												<option value="2">2</option>
-												<option value="3">3</option>
-												<option value="4">4</option>
-												<option value="5">5</option>
-												<option value="6">6</option>
-											</select>
-										</fieldset>
-									</div>
-								</form>
-							</section>
-
-							<!-- COLOR LIMIT OPTIONS -->
-							<section id="color-limit-options" class="bg-color-3">
-								<div class="ui-sub-box">
-									<fieldset aria-labelledby="color-limit-options-legend">
-										<div class="column-half align-center flex justify-center">
-											<legend id="color-limit-options-legend" class="sub-menu-title bold">
-												Color Limit Options
-											</legend>
-										</div>
-										<div class="ui-sub-box-bottom column-half flex justify-center">
-											<div>
-												<div>
-													<label for="limit-darkness-checkbox" class="checkbox-label">
-														Darkness
-													</label>
-													<input id="limit-darkness-checkbox" type="checkbox" aria-label="Limit Color Darkness"/>
-												</div>
-												<div>
-													<label for="limit-lightness-checkbox" class="checkbox-label">
-														Lightness
-													</label>
-													<input id="limit-lightness-checkbox" type="checkbox" aria-label="Limit Color Lightness"/>
-												</div>
-												<div>
-													<label for="limit-saturation-checkbox" class="checkbox-label">
-														Saturation
-													</label>
-													<input id="limit-saturation-checkbox" type="checkbox" aria-label="Limit Color Saturation"/>
-												</div>
-												<div>
-													<label for="limit-grayness-checkbox" class="checkbox-label">
-														Grayness
-													</label>
-													<input id="limit-grayness-checkbox" type="checkbox" aria-label="Limit Color Grayness"/>
-												</div>
-											</div>
-										</div>
-									</fieldset>
-								</div>
-							</section>
-						</div>
-
-						<!-- UI RIGHT COLUMN -->
-						<div id="right-column" class="flex-column gap-md">
-
-							<!-- COLOR ADJUSTMENT SECTION -->
-							<section id="actions-section" class="bg-color-3">
-								<div class="inside-left-column align-center gap-md flex-column justify-center">
-									<fieldset aria-labelledby="select-color-swatch-number-legend">
-										<label for="selected-color-option">
-											<legend id="select-color-swatch-number-legend" class="sub-menu-title bold">
-												<i>Select Swatch #</i>
-											</legend>
-										</label>
-										<select id="selected-color-option" aria-label="Select Color Swatch Number">
-											<option value="1">1</option>
-											<option value="2">2</option>
-											<option value="3">3</option>
-											<option value="4">4</option>
-											<option value="5">5</option>
-											<option value="6">6</option>
-										</select>
-									</fieldset>
-								</div>
-								<div id="adjust-color-left-column" class="inside-right-column align-center gap-md flex-column justify-center">
-									<fieldset aria-labelledby="adjust-color-legend">
-										<div class="flex-center">
-											<legend id="adjust-color-legend" class="sub-menu-title bold">Adjust Color</legend>
-										</div>
-										<div>
-											<button id="saturate-button" class="saturate-desaturate-buttons" type="button" aria-label="Saturate Selected Color">
-												Saturate
-											</button>
-											<button id="generate-button" type="submit" aria-label="Generate Color Palette">
-												Generate
-											</button>
-											<button id="desaturate-button" class="saturate-desaturate-buttons" type="button" aria-label="Desaturate Selected Color">
-												Desaturate
-											</button>
-										</div>
-									</fieldset>
-								</div>
-							</section>
-
-							<!-- CONVERSION BUTTONS -->
-							<section id="conversion-buttons-section" class="bg-color-3">
-								<fieldset aria-labelledby="conversion-button-legend">
-									<div class="ui-sub-box">
-										<div class="align-center flex justify-center">
-											<legend id="conversion-button-legend" class="sub-menu-title bold">
-												Convert To
-											</legend>
-										</div>
-										<div>
-											<div id="button-row" class="flex flex-wrap gap-md justify-center">
-												<button id="show-as-hex-button" class="button-row-button" type="button" aria-label="Convert Colors to Hex">
-													Hex
-												</button>
-												<button id="show-as-rgb-button" class="button-row-button" type="button" aria-label="Convert Colors to RGB">
-													RGB
-												</button>
-												<button id="show-as-hsv-button" class="button-row-button" type="button">
-													HSV
-												</button>
-												<button id="show-as-hsl-button" class="button-row-button" type="button" aria-label="Convert Colors to HSL">
-													HSL
-												</button>
-												<button id="show-as-cmyk-button" class="button-row-button" type="button" aria-label="Convert Colors to CMYK">
-													CMYK
-												</button>
-												<button id="show-as-lab-button" class="button-row-button" type="button" aria-label="Convert Colors to CIE-LAB">
-													LAB
-												</button>
-											</div>
-										</div>
-									</div>
-								</fieldset>
-							</section>
-						</div>
+				<!-- Palette -->
+				<section id="palette-container">
+					<div class="palette-column">
+						<input type="text" class="color-display" value="#B00B69" />
+						<input type="color" class="color-picker" value="#B00B69" />
+						<button class="lock-btn">🔒</button>
 					</div>
-
-					<!-- MENU BUTTONS -->
-					<section id="menu-buttons-section">
-						<fieldset aria-labelledby="more-options-legend">
-							<div class="ui-sub-box">
-								<div class="align-center flex justify-center">
-									<legend id="more-options-legend" class="sub-menu-title bold">
-										More Options
-									</legend>
-								</div>
-								<div class="ui-sub-box-bottom">
-									<div id="menu-buttons" class="flex gap-lg justify-center margin-top-sm">
-										<button id="advanced-menu-button" class="modal-button" type="button" aria-label="Open Advanced Menu">
-											Advanced Menu
-										</button>
-										<button id="custom-color-menu-button" class="modal-button" type="button" aria-label="Open Custom Color Menu">
-											Use Custom Color
-										</button>
-										<button id="import-export-menu-button" class="modal-button" type="button" aria-label="Open Import/Export Menu">
-											Import/Export
-										</button>
-										<button id="history-menu-button" class="modal-button" type="button" aria-label="Open Palette History Menu">
-											History
-										</button>
-										<button id="help-menu-button" class="modal-button" type="button" aria-label="Open Help Menu">
-											Help
-										</button>
-										<button id="developer-menu-button" class="modal-button" type="button" aria-label="Open Developer Menu">
-											Developer Menu
-										</button>
-									</div>
-								</div>
-							</div>
-						</fieldset>
-					</section>
-
-				</main>
-			</div>
-
-			<!-- PALETTE OUTPUT -->
-			<section id="palette-row" class="bg-color-3 flex">
-				<header>
-					<h2>
-						Generated Palette
-					</h2>
-				</header>
-				<div id="palette-output"></div>
-			</section>
-
-			<!-- ADVANCED MENU -->
-			<div id="advanced-menu" class="modal hidden padding-md" aria-hidden="true">
-				<div id="advanced-menu-content" class="modal-menu-content">
-					<div>
-						<label for="enable-alpha-checkbox">
-							Enable Alpha
-						</label>
-						<input type="checkbox" id="enable-alpha-checkbox"/>
+					<div class="palette-column">
+						<input type="text" class="color-display" value="#420420" />
+						<input type="color" class="color-picker" value="#420420" />
+						<button class="lock-btn">🔒</button>
 					</div>
-				</div>
-			</div>
+					<div class="palette-column">
+						<input type="text" class="color-display" value="#696969" />
+						<input type="color" class="color-picker" value="#696969" />
+						<button class="lock-btn">🔒</button>
+					</div>
+					<div class="palette-column">
+						<input type="text" class="color-display" value="#666420" />
+						<input type="color" class="color-picker" value="#666420" />
+						<button class="lock-btn">🔒</button>
+					</div>
+					<div class="palette-column">
+						<input type="text" class="color-display" value="#69BEE5" />
+						<input type="color" class="color-picker" value="#69BEE5" />
+						<button class="lock-btn">🔒</button>
+					</div>
+				</section>
 
-			<!-- CUSTOM COLOR MENU -->
-			<div id="custom-color-menu" class="modal hidden padding-md" aria-hidden="true">
-				<div id="custom-color-menu-content" class="modal-menu-content">
-					<section class="custom-color-menu-section" class="bg-color-3">
-						<fieldset aria-labelledby="custom-color-menu-legend">
-							<legend id="custom-color-menu-legend" class="sub-menu-title bold">
-								Custom Color Menu
-							</legend>
-							<div class="custom-color-menu-content">
-								<div>
-									<label for="custom-color-input">
-										Pick a Color
-									</label>
-									<input type="color" id="custom-color-input" value="#ff0000"/>
-								</div>
-								<div>
-									<p>Selected Color: <span id="custom-color-display">#ff0000</span></p>
-								</div>
-								<div>
-									<button id="apply-custom-color-button" type="button" aria-label="Apply Custom Color">
-										Apply
-									</button>
-									<button id="clear-custom-color-button" type="button" aria-label="Clear Custom Color">
-										Clear
-									</button>
-								</div>
-							</div>
-						</fieldset>
-					</section>
+				<!-- Adjustments -->
+				<div id="adjustments">
+					<button id="saturate-btn">+</button>
+					<button id="desaturate-btn">-</button>
 				</div>
-			</div>
 
-			<!-- HELP MENU -->
-			<div id="help-menu" class="modal hidden padding-md" aria-hidden="true">
-				<div id="help-menu-content" class="modal-menu-content">
-					<section id="help-menu-section" class="bg-color-3">
-						<fieldset arialabelled-by="help-and-instructions-legend"></fieldset>
-							<h2>Help & Instructions</h2>
-							<p>How to use the ColorGen application:</p>
-							<ul>
-								<li>Explanation of each option and feature...</li>
-								<li>Details on exporting palettes...</li>
-								<li>Any other necessary instructions...</li>
-							</ul>
-						</fieldset>
-					</section>
+				<!-- Convert & Export -->
+				<div id="options">
+					<button id="show-as-hex-btn">Hex</button>
+					<button id="show-as-rgb-btn">RGB</button>
+					<button id="show-as-hsv-btn">HSV</button>
+					<button id="show-as-hsl-btn">HSL</button>
+					<button id="show-as-cmyk-btn">CMYK</button>
+					<button id="show-as-lab-btn">LAB</button>
+					<button id="export-btn">💾</button>
 				</div>
-			</div>
+			</main>
 
-			<!-- HISTORY MENU -->
-			<div id="history-menu" class="modal hidden padding-md" aria-hidden="true">
-				<div id="history-menu-content" class="modal-menu-content">
-					<section id="history-menu-section" class="bg-color-3 border-none">
-						<fieldset aria-labelledby="palette-history-legend">
-							<legend id="palette-history-legend" class="sub-menu-title bold">
-								Palette History
-							</legend>
-							<div id="palette-history-list" class="palette-list hidden" aria-hidden="true">
-							</div>
-						</fieldset>
-					</section>
-				</div>
-			</div>
-
-			<!-- IMPORT/EXPORT MENU -->
-			<div id="import-export-menu" class="modal hidden padding-md" aria-hidden="true">
-				<div id="import-export-menu-content" class="modal-menu-content">
-					<section id="import-export-menu-section" class="bg-color-3 border-none">
-						<fieldset aria-labelledby="import-export-legend">
-							<legend id="import-export-legend" class="sub-menu-title bold">
-								Import/Export
-							</legend>
-							<div id="import-export-content">
-								<div>
-									<legend for="import-palette-sub-menu" class="sub-menu-title bold">
-										Import Palette
-									</legend>
-									<div id="import-palette-sub-menu" aria-labelledby="import-palette-sub-menu">
-										<input type="file" id="import-palette-input" accept=".json"/>
-									</div>
-								</div>
-								<div>
-									<legend for="export-palette-sub-menu">
-										Export Palette
-									</legend>
-									<div id="export-palette-sub-menu" aria-labelledby="export-palette-sub-menu">
-										<label for="export-palette-format-options">
-											Format
-										</label>
-										<select id="export-palette-format-options" aria-label="Select Export Format">
-											<option value="1">JSON</option>
-											<option value="2">CSS</option>
-											<option value="3">XML</option>
-										</select>
-										<button id="export-palette-button" type="button">
-											Export
-										</button>
-									</div>
-								</div>
-							</div>
-						</fieldset>
-					</section>
-				</div>
-			</div>
-
-			<!-- DEVELOPER MENU -->
-			 <div id="developer-menu" class="modal hidden padding-md" aria-hidden="true">
-				<div id="developer-menu-content" class="modal-menu-content">
-					<section id="developer-menu-section" class="bg-color-3 border-none">
-						<fieldset arialabelled-by="developer-menu-legend">
-							<legend id="developer-menu-legend" class="sub-menu-title bold">
-								Developer Menu
-							</legend>
-							<button id="reset-database-button" type="button">
-								Reset IndexedDB
-							</button>
-							<button id="reset-palette-id-button" type="button">
-								Reset Palette ID
-							</button>
-							<button id="delete-database-button" type="button">
-								Delete IndexedDB
-							</button>
-						</fieldset>
-					</section>
-				</div>
-			 </div>
-
+			<footer>
+				<a href="#">About</a> |
+				<a href="#">Help</a> |
+				<a href="#">Other Projects</a>
+			</footer>
 		</div>
 
-		<!-- MAIN APPLICATION SCRIPT -->
-		<script type="module" src="./dist/app.js"></script>
+		<!--
+	    <div id="container">
+	        <header>
+	            <h1>ColorGen</h1>
+	        </header>
 
+	        <main id="main-ui">
+
+				<aside id="left-column">
+					<section id="main-options-section">
+						<fieldset>
+							<legend>Main Options</legend>
+							<label for="palette-type-selector">Palette Type</label>
+							<select id="palette-type-selector">
+								<option value="1">Random</option>
+								<option value="2">Complementary</option>
+								<option value="3">Triadic</option>
+								<option value="4">Tetradic</option>
+								<option value="5">Split Complementary</option>
+								<option value="6">Analogous</option>
+								<option value="7">Hexadic</option>
+								<option value="8">Diadic</option>
+								<option value="9">Monochromatic</option>
+							</select>
+							<label for="swatch-gen-selector"># of Swatches</label>
+							<select id="swatch-gen-selector">
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="5">5</option>
+								<option value="6">6</option>
+							</select>
+						</fieldset>
+					</section>
+
+					<section id="color-limit-options">
+						<fieldset>
+							<legend>Color Limit Options</legend>
+							<label>
+								<input id="limit-dark-chkbx" type="checkbox" />Darkness
+							</label>
+							<label>
+								<input id="limit-light-chkbx" type="checkbox" />Lightness
+							</label>
+							<label>
+								<input id="limit-gray-chkbx" type="checkbox" />Grayness
+							</label>
+						</fieldset>
+					</section>
+				</aside>
+
+				<section id="right-column">
+					<fieldset id="actions-section">
+						<legend>Adjust Colors</legend>
+						<label for="swatch-selector">Select Swatch #</label>
+						<select id="swatch-selector">
+							<option value="1" selected>1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+						</select>
+						<div class="btn-group">
+							<button id="saturate-btn">Saturate</button>
+							<button id="generate-btn">Generate</button>
+							<button id="desaturate-btn">Desaturate</button>
+						</div>
+					</fieldset>
+
+					<fieldset id="conversion-btns-section">
+						<legend>Convert To</legend>
+						<div class="btn-group">
+							<button id="show-as-hex-btn">Hex</button>
+							<button id="show-as-rgb-btn">RGB</button>
+							<button id="show-as-hsv-btn">HSV</button>
+							<button id="show-as-hsl-btn">HSL</button>
+							<button id="show-as-cmyk-btn">CMYK</button>
+							<button id="show-as-lab-btn">LAB</button>
+						</div>
+					</fieldset>
+				</section>
+
+				<section id="menu-btns-section">
+					<legend>More Options</legend>
+					<div class="btn-group">
+						<button id="advanced-menu-btn">Advanced</button>
+						<button id="custom-color-menu-btn">Custom Color</button>
+						<button id="io-menu-btn">Import/Export</button>
+						<button id="history-menu-btn">History</button>
+						<button id="help-menu-btn">Help</button>
+					</div>
+				</section>
+
+			</main>
+
+	        <section id="palette-row">
+	            <h2>Generated Palette</h2>
+	            <div id="palette-output"></div>
+	        </section>
+
+	    </div>
+
+		<div id="custom-color-menu" class="modal hidden">
+			<div id="custom-color-menu-content" class="modal-menu-content">
+				<section class="custom-color-menu-section">
+					<fieldset>
+						<legend id="custom-color-menu-legend">
+							Custom Color Menu
+						</legend>
+						<div class="custom-color-menu-content">
+							<div>
+								<label for="custom-color-input">
+									Pick a Color
+								</label>
+								<input type="color" id="custom-color-input" value="#ff0000"/>
+							</div>
+							<div>
+								<p>Selected Color: <span id="custom-color-display">#ff0000</span></p>
+							</div>
+							<div>
+								<button id="apply-custom-color-btn" type="button">
+									Apply
+								</button>
+								<button id="clear-custom-color-btn" type="button">
+									Clear
+								</button>
+							</div>
+						</div>
+					</fieldset>
+				</section>
+			</div>
+		</div>
+
+		<div id="help-menu" class="modal hidden">
+			<div id="help-menu-content" class="modal-menu-content">
+				<section id="help-menu-section">
+					<fieldset></fieldset>
+						<h2>Help & Instructions</h2>
+						<p>How to use the ColorGen application:</p>
+						<ul>
+							<li>Explanation of each option and feature...</li>
+							<li>Details on exporting palettes...</li>
+							<li>Any other necessary instructions...</li>
+						</ul>
+					</fieldset>
+				</section>
+			</div>
+		</div>
+
+		<div id="history-menu" class="modal hidden">
+			<div id="history-menu-content" class="modal-menu-content">
+				<section id="history-menu-section">
+					<div id="history conrols">
+						<label for="history-limit">
+							Max Palettes:
+						</label>
+						<input id="history-limit-input" type="number" min="1" max="1000" step="1" value="50" /></input>
+					</div>
+					<fieldset>
+						<legend id="palette-history-legend">
+							Palette History
+						</legend>
+						<div id="palette-history" class="palette-history hidden">
+
+
+						</div>
+					</fieldset>
+				</section>
+			</div>
+		</div>
+
+		<div id="io-menu" class="modal hidden">
+			<div id="io-menu-content" class="modal-menu-content">
+				<section id="io-menu-section">
+					<fieldset>
+						<legend>Import/Export</legend>
+						<div id="import-export-content">
+							<div>
+								<legend for="import-sub-menu">Import Palette</legend>
+								<div id="import-palette-sub-menu">
+									<input type="file" id="import-input" accept=".json"/>
+								</div>
+							</div>
+							<div>
+								<legend for="export-sub-menu">Export Palette</legend>
+								<div id="export-sub-menu">
+									<label for="export-format-option-selector">Format</label>
+									<select id="export-format-option-selector">
+										<option value="1" selected>JSON</option>
+										<option value="2">CSS</option>
+										<option value="3">XML</option>
+									</select>
+									<button id="export-btn" type="button">Export</button>
+								</div>
+							</div>
+						</div>
+					</fieldset>
+				</section>
+			</div>
+		</div>
+
+	-->
+
+		<!-- APPLICATION SCRIPT -->
+		<script type="module" src="./dist/app.js"></script>
 	</body>
 </html>

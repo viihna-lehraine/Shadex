@@ -1,8 +1,0 @@
-XYZ
-##########################################
-
-For the purposes of this application, the D65 illuminant is used as the standard reference white point (which corrpesponds to daylight). Accordingly, the expected component ranges for this color space are as follows.
-
-	X: [0, 95.047]
-	Y: [0, 100]
-	Z: [0, 108.883]

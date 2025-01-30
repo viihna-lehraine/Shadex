@@ -2,11 +2,7 @@
 
 import { dataSets } from '../../data/sets.js';
 
-export type AlphaRange = number & { __brand: 'AlphaRange' };
-
 export type ByteRange = number & { __brand: 'ByteRange' };
-
-export type HexComponent = number & { __brand: 'HexComponent' };
 
 export type HexSet = string & { __brand: 'HexSet' };
 
@@ -27,9 +23,7 @@ export type XYZ_Y = number & { __brand: 'XYZ_Y' };
 export type XYZ_Z = number & { __brand: 'XYZ_Z' };
 
 export type RangeKeyMap = {
-	AlphaRange: AlphaRange;
 	ByteRange: ByteRange;
-	HexComponent: HexComponent;
 	HexSet: HexSet;
 	LAB_L: LAB_L;
 	LAB_A: LAB_A;

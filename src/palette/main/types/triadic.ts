@@ -1,12 +1,12 @@
 // File: palette/main/types/triadic.js
 
 import {
-	GenPaletteArgs,
 	HSL,
 	Palette,
+	PaletteGenerationArgs,
 	PaletteItem
 } from '../../../types/index.js';
-import { IDBManager } from '../../../db/index.js';
+import { IDBManager } from '../../../db/IDBManager.js';
 import { coreUtils, utils } from '../../../common/index.js';
 import { constsData as consts } from '../../../data/consts.js';
 import { superUtils as paletteSuperUtils } from '../../common/index.js';
@@ -17,12 +17,12 @@ const create = paletteSuperUtils.create;
 const genHues = paletteSuperUtils.genHues;
 const paletteRanges = consts.paletteRanges;
 
-export async function triadic(args: GenPaletteArgs): Promise<Palette> {
+export async function triadic(args: PaletteGenerationArgs): Promise<Palette> {
 	// ensure exactly 3 swatches
 	if (args.swatches !== 3) uiFn.enforceSwatchRules(3, 3);
 
 	// base color setup
-	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
+	const baseColor = create.baseColor(args.customColor);
 
 	// generate triadic hues
 	const hues = genHues.triadic(baseColor.value.hue);
@@ -31,10 +31,7 @@ export async function triadic(args: GenPaletteArgs): Promise<Palette> {
 	const paletteItems: PaletteItem[] = [];
 
 	// add the base color as the first palette item
-	const basePaletteItem = await create.paletteItem(
-		baseColor,
-		args.enableAlpha
-	);
+	const basePaletteItem = await create.paletteItem(baseColor);
 	paletteItems.push(basePaletteItem);
 
 	// add the triadic colors sequentially
@@ -49,8 +46,8 @@ export async function triadic(args: GenPaletteArgs): Promise<Palette> {
 						Math.min(
 							baseColor.value.saturation +
 								(index % 2 === 0
-									? -paletteRanges.triad.satShift
-									: paletteRanges.triad.satShift),
+									? -paletteRanges.shift.triad.sat
+									: paletteRanges.shift.triad.sat),
 							100
 						)
 					)
@@ -61,15 +58,12 @@ export async function triadic(args: GenPaletteArgs): Promise<Palette> {
 						Math.min(
 							baseColor.value.lightness +
 								(index % 2 === 0
-									? -paletteRanges.triad.lightShift
-									: paletteRanges.triad.lightShift),
+									? -paletteRanges.shift.triad.light
+									: paletteRanges.shift.triad.light),
 							100
 						)
 					)
-				),
-				alpha: args.enableAlpha
-					? coreUtils.brand.asAlphaRange(Math.random())
-					: coreUtils.brand.asAlphaRange(1)
+				)
 			},
 			format: 'hsl'
 		};
@@ -77,10 +71,7 @@ export async function triadic(args: GenPaletteArgs): Promise<Palette> {
 		// generate all color values and create the palette item
 		const adjustedColor = conversion.genAllColorValues(adjustedHSL)
 			.hsl as HSL;
-		const paletteItem = await create.paletteItem(
-			adjustedColor,
-			args.enableAlpha
-		);
+		const paletteItem = await create.paletteItem(adjustedColor);
 		paletteItems.push(paletteItem);
 	}
 
@@ -95,7 +86,6 @@ export async function triadic(args: GenPaletteArgs): Promise<Palette> {
 		paletteItems,
 		paletteID,
 		args.swatches,
-		args.enableAlpha,
 		args.limitDark,
 		args.limitGray,
 		args.limitLight

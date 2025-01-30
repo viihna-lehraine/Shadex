@@ -26,7 +26,7 @@ import {
 
 export interface Palette {
 	id: string;
-	items: PaletteItem[];
+	items: PaletteItem[]; // [ color1, color2, color3, color4 ]
 	metadata: {
 		name?: string;
 		timestamp: string;
@@ -34,7 +34,6 @@ export interface Palette {
 		type: string;
 		customColor: PaletteItem | false;
 		flags: {
-			enableAlpha: boolean;
 			limitDarkness: boolean;
 			limitGrayness: boolean;
 			limitLightness: boolean;
@@ -43,6 +42,7 @@ export interface Palette {
 }
 
 export interface PaletteItem {
+	id?: number;
 	colors: {
 		main: {
 			cmyk: CMYK['value'];
@@ -77,10 +77,9 @@ export interface PaletteItem {
 export interface PaletteOptions {
 	customColor: HSL | null;
 	flags: {
-		enableAlpha: boolean;
-		limitDarkness: boolean;
-		limitGrayness: boolean;
-		limitLightness: boolean;
+		limitDark: boolean;
+		limitGray: boolean;
+		limitLight: boolean;
 	};
 	swatches: number;
 	type: number;

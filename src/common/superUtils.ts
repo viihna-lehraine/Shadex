@@ -4,8 +4,8 @@ import {
 	ColorInputElement,
 	ColorSpace,
 	CommonFn_MasterInterface,
-	GenPaletteArgs,
-	HSL
+	HSL,
+	PaletteGenerationArgs
 } from '../types/index.js';
 import { coreUtils } from './core.js';
 import { createLogger } from '../logger/index.js';
@@ -14,32 +14,30 @@ import { helpers } from './helpers/index.js';
 import { modeData as mode } from '../data/mode.js';
 import { utils } from './utils/index.js';
 
-const domInputElements = domData.elements.inputs;
+const domElements = domData.elements.static;
 const logMode = mode.logging;
 
 const thisModule = 'common/superUtils/dom.js';
 
 const logger = await createLogger();
 
-function getGenButtonArgs(): GenPaletteArgs | null {
+function getPaletteGenerationArgs(): PaletteGenerationArgs | null {
 	const thisMethod = 'getGenButtonArgs()';
 
 	try {
-		const paletteNumberOptions = domInputElements.paletteNumberOptions;
-		const paletteTypeOptions = domInputElements.paletteTypeOptions;
-		const customColorRaw = domInputElements.customColorInput?.value;
-		const enableAlphaCheckbox = domInputElements.enableAlphaCheckbox;
-		const limitDarknessCheckbox = domInputElements.limitDarknessCheckbox;
-		const limitGraynessCheckbox = domInputElements.limitGraynessCheckbox;
-		const limitLightnessCheckbox = domInputElements.limitLightnessCheckbox;
+		const swatchGenNumber = domElements.selects.swatchGen;
+		const paletteType = domElements.selects.paletteType;
+		const customColorRaw = domElements.inputs.customColor?.value;
+		const limitDarkChkbx = domElements.inputs.limitDarkChkbx;
+		const limitGrayChkbx = domElements.inputs.limitGrayChkbx;
+		const limitLightChkbx = domElements.inputs.limitLightChkbx;
 
 		if (
-			paletteNumberOptions === null ||
-			paletteTypeOptions === null ||
-			enableAlphaCheckbox === null ||
-			limitDarknessCheckbox === null ||
-			limitGraynessCheckbox === null ||
-			limitLightnessCheckbox === null
+			swatchGenNumber === null ||
+			paletteType === null ||
+			limitDarkChkbx === null ||
+			limitGrayChkbx === null ||
+			limitLightChkbx === null
 		) {
 			if (logMode.error)
 				logger.error(
@@ -52,22 +50,21 @@ function getGenButtonArgs(): GenPaletteArgs | null {
 
 		if (!mode.quiet && logMode.info && logMode.verbosity >= 2)
 			logger.info(
-				`numBoxes: ${parseInt(paletteNumberOptions.value, 10)}\npaletteType: ${parseInt(paletteTypeOptions.value, 10)}`,
+				`numBoxes: ${parseInt(swatchGenNumber.value, 10)}\npaletteType: ${parseInt(paletteType.value, 10)}`,
 				`${thisModule} > ${thisMethod}`
 			);
 
 		return {
-			swatches: parseInt(paletteNumberOptions.value, 10),
-			type: parseInt(paletteTypeOptions.value, 10),
+			swatches: parseInt(swatchGenNumber.value, 10),
+			type: parseInt(paletteType.value, 10),
 			customColor: customColorRaw
 				? (coreUtils.base.parseCustomColor(
 						customColorRaw
 					) as HSL | null)
 				: null,
-			enableAlpha: enableAlphaCheckbox.checked,
-			limitDark: limitDarknessCheckbox.checked,
-			limitGray: limitGraynessCheckbox.checked,
-			limitLight: limitLightnessCheckbox.checked
+			limitDark: limitDarkChkbx.checked,
+			limitGray: limitGrayChkbx.checked,
+			limitLight: limitLightChkbx.checked
 		};
 	} catch (error) {
 		if (logMode.error)
@@ -210,7 +207,7 @@ async function switchColorSpace(targetFormat: ColorSpace): Promise<void> {
 
 export const superUtils: CommonFn_MasterInterface['superUtils'] = {
 	dom: {
-		getGenButtonArgs,
+		getPaletteGenerationArgs,
 		switchColorSpace
 	}
 } as const;

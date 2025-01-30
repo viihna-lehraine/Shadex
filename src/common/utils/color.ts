@@ -383,7 +383,7 @@ function colorToColorString(color: Color): Color_StringProps {
 
 	if (isColorString(clonedColor)) {
 		if (logMode.error) {
-			logger.error(
+			logger.info(
 				`Already formatted as color string: ${JSON.stringify(color)}`,
 				`${thisModule} > ${thisMethod}`
 			);
@@ -403,21 +403,18 @@ function colorToColorString(color: Color): Color_StringProps {
 				cyan: `${newValue.cyan}%`,
 				magenta: `${newValue.magenta}%`,
 				yellow: `${newValue.yellow}%`,
-				key: `${newValue.key}%`,
-				alpha: `${newValue.alpha}`
+				key: `${newValue.key}%`
 			} as CMYK_StringProps['value']
 		};
 	} else if (isHex(clonedColor)) {
 		const newValue = formatPercentageValues(
-			clonedColor.value
+			(clonedColor as Hex).value
 		) as Hex['value'];
 
 		return {
 			format: 'hex',
 			value: {
-				hex: `${newValue.hex}`,
-				alpha: `${newValue.alpha}`,
-				numAlpha: `${newValue.numAlpha}`
+				hex: `${newValue.hex}`
 			} as Hex_StringProps['value']
 		};
 	} else if (isHSLColor(clonedColor)) {
@@ -430,8 +427,7 @@ function colorToColorString(color: Color): Color_StringProps {
 			value: {
 				hue: `${newValue.hue}`,
 				saturation: `${newValue.saturation}%`,
-				lightness: `${newValue.lightness}%`,
-				alpha: `${newValue.alpha}`
+				lightness: `${newValue.lightness}%`
 			} as HSL_StringProps['value']
 		};
 	} else if (isHSVColor(clonedColor)) {
@@ -444,8 +440,7 @@ function colorToColorString(color: Color): Color_StringProps {
 			value: {
 				hue: `${newValue.hue}`,
 				saturation: `${newValue.saturation}%`,
-				value: `${newValue.value}%`,
-				alpha: `${newValue.alpha}`
+				value: `${newValue.value}%`
 			} as HSV_StringProps['value']
 		};
 	} else if (isLAB(clonedColor)) {
@@ -458,8 +453,7 @@ function colorToColorString(color: Color): Color_StringProps {
 			value: {
 				l: `${newValue.l}`,
 				a: `${newValue.a}`,
-				b: `${newValue.b}`,
-				alpha: `${newValue.alpha}`
+				b: `${newValue.b}`
 			} as LAB_StringProps['value']
 		};
 	} else if (isRGB(clonedColor)) {
@@ -472,8 +466,7 @@ function colorToColorString(color: Color): Color_StringProps {
 			value: {
 				red: `${newValue.red}`,
 				green: `${newValue.green}`,
-				blue: `${newValue.blue}`,
-				alpha: `${newValue.alpha}`
+				blue: `${newValue.blue}`
 			} as RGB_StringProps['value']
 		};
 	} else if (isXYZ(clonedColor)) {
@@ -486,8 +479,7 @@ function colorToColorString(color: Color): Color_StringProps {
 			value: {
 				x: `${newValue.x}`,
 				y: `${newValue.y}`,
-				z: `${newValue.z}`,
-				alpha: `${newValue.alpha}`
+				z: `${newValue.z}`
 			} as XYZ_StringProps['value']
 		};
 	} else {
@@ -531,48 +523,22 @@ function formatPercentageValues<T extends Record<string, unknown>>(
 	) as T;
 }
 
-function getAlphaFromHex(hex: string): number {
-	if (hex.length !== 9 || !hex.startsWith('#')) {
-		if (!mode.gracefulErrors)
-			throw new Error(
-				`Invalid hex color: ${hex}. Expected format #RRGGBBAA`
-			);
-		else if (logMode.error)
-			logger.error(
-				`Invalid hex color: ${hex}. Expected format #RRGGBBAA`,
-				`${thisModule} > getAlphaFromHex()`
-			);
-		else if (!mode.quiet && logMode.warn)
-			logger.warn(
-				'Failed to parse alpha from hex color.',
-				`${thisModule} > getAlphaFromHex()`
-			);
-	}
-
-	const alphaHex = hex.slice(-2);
-	const alphaDecimal = parseInt(alphaHex, 16);
-
-	return alphaDecimal / 255;
-}
-
 function getColorString(color: Color): string | null {
 	const thisMethod = 'getColorString()';
 
 	try {
 		const formatters = {
 			cmyk: (c: CMYK) =>
-				`cmyk(${c.value.cyan}, ${c.value.magenta}, ${c.value.yellow}, ${c.value.key}, ${c.value.alpha})`,
+				`cmyk(${c.value.cyan}, ${c.value.magenta}, ${c.value.yellow}, ${c.value.key})`,
 			hex: (c: Hex) => c.value.hex,
 			hsl: (c: HSL) =>
-				`hsl(${c.value.hue}, ${c.value.saturation}%, ${c.value.lightness}%,${c.value.alpha})`,
+				`hsl(${c.value.hue}, ${c.value.saturation}%, ${c.value.lightness}%)`,
 			hsv: (c: HSV) =>
-				`hsv(${c.value.hue}, ${c.value.saturation}%, ${c.value.value}%,${c.value.alpha})`,
-			lab: (c: LAB) =>
-				`lab(${c.value.l}, ${c.value.a}, ${c.value.b},${c.value.alpha})`,
+				`hsv(${c.value.hue}, ${c.value.saturation}%, ${c.value.value}%)`,
+			lab: (c: LAB) => `lab(${c.value.l}, ${c.value.a}, ${c.value.b})`,
 			rgb: (c: RGB) =>
-				`rgb(${c.value.red}, ${c.value.green}, ${c.value.blue},${c.value.alpha})`,
-			xyz: (c: XYZ) =>
-				`xyz(${c.value.x}, ${c.value.y}, ${c.value.z},${c.value.alpha})`
+				`rgb(${c.value.red}, ${c.value.green}, ${c.value.blue})`,
+			xyz: (c: XYZ) => `xyz(${c.value.x}, ${c.value.y}, ${c.value.z})`
 		};
 
 		switch (color.format) {
@@ -620,66 +586,58 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 	try {
 		switch (colorSpace) {
 			case 'cmyk': {
-				const [c, m, y, k, a] = parseComponents(value, 5);
+				const [c, m, y, k] = parseComponents(value, 5);
 
 				return {
 					value: {
 						cyan: coreUtils.brand.asPercentile(c),
 						magenta: coreUtils.brand.asPercentile(m),
 						yellow: coreUtils.brand.asPercentile(y),
-						key: coreUtils.brand.asPercentile(k),
-						alpha: coreUtils.brand.asAlphaRange(a)
+						key: coreUtils.brand.asPercentile(k)
 					},
 					format: 'cmyk'
 				};
 			}
 			case 'hex':
 				const hexValue = value.startsWith('#') ? value : `#${value}`;
-				const alpha = hexValue.length === 9 ? hexValue.slice(-2) : 'FF';
-				const numAlpha = hexAlphaToNumericAlpha(alpha);
 
 				return {
 					value: {
-						hex: coreUtils.brand.asHexSet(hexValue),
-						alpha: coreUtils.brand.asHexComponent(alpha),
-						numAlpha: coreUtils.brand.asAlphaRange(numAlpha)
+						hex: coreUtils.brand.asHexSet(hexValue)
 					},
 					format: 'hex'
 				};
 			case 'hsl': {
-				const [h, s, l, a] = parseComponents(value, 4);
+				const [h, s, l] = parseComponents(value, 4);
 
 				return {
 					value: {
 						hue: coreUtils.brand.asRadial(h),
 						saturation: coreUtils.brand.asPercentile(s),
-						lightness: coreUtils.brand.asPercentile(l),
-						alpha: coreUtils.brand.asAlphaRange(a)
+						lightness: coreUtils.brand.asPercentile(l)
 					},
 					format: 'hsl'
 				};
 			}
 			case 'hsv': {
-				const [h, s, v, a] = parseComponents(value, 4);
+				const [h, s, v] = parseComponents(value, 4);
 
 				return {
 					value: {
 						hue: coreUtils.brand.asRadial(h),
 						saturation: coreUtils.brand.asPercentile(s),
-						value: coreUtils.brand.asPercentile(v),
-						alpha: coreUtils.brand.asAlphaRange(a)
+						value: coreUtils.brand.asPercentile(v)
 					},
 					format: 'hsv'
 				};
 			}
 			case 'lab': {
-				const [l, a, b, alpha] = parseComponents(value, 4);
+				const [l, a, b] = parseComponents(value, 4);
 				return {
 					value: {
 						l: coreUtils.brand.asLAB_L(l),
 						a: coreUtils.brand.asLAB_A(a),
-						b: coreUtils.brand.asLAB_B(b),
-						alpha: coreUtils.brand.asAlphaRange(alpha)
+						b: coreUtils.brand.asLAB_B(b)
 					},
 					format: 'lab'
 				};
@@ -690,14 +648,13 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 				if (components.some(isNaN))
 					throw new Error('Invalid RGB format');
 
-				const [r, g, b, a] = components;
+				const [r, g, b] = components;
 
 				return {
 					value: {
 						red: coreUtils.brand.asByteRange(r),
 						green: coreUtils.brand.asByteRange(g),
-						blue: coreUtils.brand.asByteRange(b),
-						alpha: coreUtils.brand.asAlphaRange(a)
+						blue: coreUtils.brand.asByteRange(b)
 					},
 					format: 'rgb'
 				};
@@ -766,34 +723,16 @@ function parseComponents(value: string, count: number): number[] {
 	}
 }
 
-function parseHexWithAlpha(hexValue: string): Hex['value'] | null {
-	const hex = hexValue.startsWith('#') ? hexValue : `#${hexValue}`;
-	const alpha = hex.length === 9 ? hex.slice(-2) : 'FF';
-	const numAlpha = hexAlphaToNumericAlpha(alpha);
-
-	return {
-		hex: coreUtils.brand.asHexSet(hex),
-		alpha: coreUtils.brand.asHexComponent(alpha),
-		numAlpha: coreUtils.brand.asAlphaRange(numAlpha)
-	};
-}
-
 function stripHashFromHex(hex: Hex): Hex {
 	const thisMethod = 'stripHashFromHex()';
 
 	try {
-		const hexString = `${hex.value.hex}${hex.value.alpha}`;
+		const hexString = `${hex.value.hex}`;
 
 		return hex.value.hex.startsWith('#')
 			? {
 					value: {
-						hex: coreUtils.brand.asHexSet(hexString.slice(1)),
-						alpha: coreUtils.brand.asHexComponent(
-							String(hex.value.alpha)
-						),
-						numAlpha: coreUtils.brand.asAlphaRange(
-							hexAlphaToNumericAlpha(String(hex.value.alpha))
-						)
+						hex: coreUtils.brand.asHexSet(hexString.slice(1))
 					},
 					format: 'hex' as 'hex'
 				}
@@ -831,26 +770,11 @@ function stripPercentFromValues<T extends Record<string, number | string>>(
 	);
 }
 
-function toHexWithAlpha(rgbValue: RGB['value']): string {
-	const { red, green, blue, alpha } = rgbValue;
-
-	const hex = `#${((1 << 24) + (red << 16) + (green << 8) + blue)
-		.toString(16)
-		.slice(1)}`;
-	const alphaHex = Math.round(alpha * 255)
-		.toString(16)
-		.padStart(2, '0');
-
-	return `${hex}${alphaHex}`;
-}
-
 export const colorUtils: CommonFn_MasterInterface['utils']['color'] = {
 	colorToColorString,
 	ensureHash,
 	formatPercentageValues,
-	getAlphaFromHex,
 	getColorString,
-	hexAlphaToNumericAlpha,
 	isCMYKColor,
 	isCMYKFormat,
 	isCMYKString,
@@ -885,10 +809,8 @@ export const colorUtils: CommonFn_MasterInterface['utils']['color'] = {
 	narrowToColor,
 	parseColor,
 	parseComponents,
-	parseHexWithAlpha,
 	stripHashFromHex,
-	stripPercentFromValues,
-	toHexWithAlpha
+	stripPercentFromValues
 } as const;
 
 export { hexAlphaToNumericAlpha, stripHashFromHex };

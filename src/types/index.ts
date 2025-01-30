@@ -1,18 +1,13 @@
 // File: types/index.js
 
-export type {
-	CommonFn_DOM_BaseInterface,
-	CommonFn_DOM_MasterInterface,
-	CommonFn_MasterInterface
-} from './app/common.js';
-export type { DBFn_MasterInterface } from './app/db.js';
+export type { CommonFn_MasterInterface } from './app/common.js';
 export type { MakePaletteBox, DOMFn_MasterInterface } from './app/dom.js';
 export type { ColorParser, IOFn_MasterInterface } from './app/io.js';
 export type {
-	GenPaletteArgs,
-	GenPaletteFnInterface,
 	Palette_CommonFn_MasterInterface,
-	PaletteFn_MasterInterface
+	PaletteFn_MasterInterface,
+	PaletteGenerationArgs,
+	PaletteGenerationInterface
 } from './app/palette.js';
 export type { UIFn_BaseInterface, UIFn_MasterInterface } from './app/ui.js';
 export type {
@@ -63,9 +58,9 @@ export type {
 	ConstsDataInterface,
 	DataSetsInterface,
 	DefaultDataInterface,
-	DOMDataInterface,
 	ModeDataInterface
-} from './data/core.js';
+} from './data/core/base.js';
+export type { DOMDataInterface } from './data/core/dom.js';
 export type {
 	MutationLog,
 	PaletteDB,
@@ -83,10 +78,8 @@ export type {
 	UnbrandedPaletteItem
 } from './data/palette.js';
 export type {
-	AlphaRange,
 	ByteRange,
 	ColorValueRange,
-	HexComponent,
 	HexSet,
 	LAB_A,
 	LAB_B,
@@ -102,8 +95,6 @@ export type {
 } from './data/sets.js';
 export type {
 	AppLogger_ClassInterface,
-	CacheManager_ClassInterface,
 	IDBManager_ClassInterface,
-	MutationTracker_ClassInterface,
 	UIManager_ClassInterface
 } from './classes.js';

@@ -27,14 +27,13 @@ const cmykParser: ColorParser = {
 			throw new Error(`Invalid CMYK string format: ${input}`);
 		}
 
-		const [_, cyan, magenta, yellow, key, alpha = '1'] = match;
+		const [_, cyan, magenta, yellow, key = '1'] = match;
 
 		const value: CMYK['value'] = {
 			cyan: brand.asPercentile(parseFloat(cyan) / 100),
 			magenta: brand.asPercentile(parseFloat(magenta) / 100),
 			yellow: brand.asPercentile(parseFloat(yellow) / 100),
-			key: brand.asPercentile(parseFloat(key) / 100),
-			alpha: brand.asAlphaRange(parseFloat(alpha))
+			key: brand.asPercentile(parseFloat(key) / 100)
 		};
 
 		return { format: 'cmyk', value };
@@ -50,18 +49,10 @@ const hexParser: ColorParser = {
 		}
 
 		const hex = brand.asHexSet(match[1].substring(0, 6));
-		const alpha = brand.asHexComponent(
-			String(
-				match[1].length === 8
-					? parseInt(match[1].substring(6, 8), 16) / 255
-					: 1
-			)
-		);
-		const numAlpha = brand.asAlphaRange(alpha);
 
 		return {
 			format: 'hex',
-			value: { hex, alpha, numAlpha }
+			value: { hex }
 		};
 	}
 };
@@ -74,13 +65,12 @@ const hslParser: ColorParser = {
 			throw new Error(`Invalid HSL string format: ${input}`);
 		}
 
-		const [_, hue, saturation, lightness, alpha = '1'] = match;
+		const [_, hue, saturation, lightness] = match;
 
 		const value: HSL['value'] = {
 			hue: brand.asRadial(parseFloat(hue)),
 			saturation: brand.asPercentile(parseFloat(saturation) / 100),
-			lightness: brand.asPercentile(parseFloat(lightness) / 100),
-			alpha: brand.asAlphaRange(parseFloat(alpha))
+			lightness: brand.asPercentile(parseFloat(lightness) / 100)
 		};
 
 		return { format: 'hsl', value };
@@ -95,13 +85,12 @@ const hsvParser: ColorParser = {
 			throw new Error(`Invalid HSV string format: ${input}`);
 		}
 
-		const [_, hue, saturation, value, alpha = '1'] = match;
+		const [_, hue, saturation, value] = match;
 
 		const hsvValue: HSV['value'] = {
 			hue: brand.asRadial(parseFloat(hue)),
 			saturation: brand.asPercentile(parseFloat(saturation) / 100),
-			value: brand.asPercentile(parseFloat(value) / 100),
-			alpha: brand.asAlphaRange(parseFloat(alpha))
+			value: brand.asPercentile(parseFloat(value) / 100)
 		};
 
 		return { format: 'hsv', value: hsvValue };
@@ -116,13 +105,12 @@ const labParser: ColorParser = {
 			throw new Error(`Invalid LAB string format: ${input}`);
 		}
 
-		const [_, l, a, b, alpha = '1'] = match;
+		const [_, l, a, b] = match;
 
 		const labValue: LAB['value'] = {
 			l: brand.asLAB_L(parseFloat(l)),
 			a: brand.asLAB_A(parseFloat(a)),
-			b: brand.asLAB_B(parseFloat(b)),
-			alpha: brand.asAlphaRange(parseFloat(alpha))
+			b: brand.asLAB_B(parseFloat(b))
 		};
 
 		return { format: 'lab', value: labValue };
@@ -137,13 +125,12 @@ const rgbParser: ColorParser = {
 			throw new Error(`Invalid RGB string format: ${input}`);
 		}
 
-		const [_, red, green, blue, alpha = '1'] = match;
+		const [_, red, green, blue] = match;
 
 		const rgbValue: RGB['value'] = {
 			red: brand.asByteRange(parseFloat(red)),
 			green: brand.asByteRange(parseFloat(green)),
-			blue: brand.asByteRange(parseFloat(blue)),
-			alpha: brand.asAlphaRange(parseFloat(alpha))
+			blue: brand.asByteRange(parseFloat(blue))
 		};
 
 		return { format: 'rgb', value: rgbValue };
@@ -158,13 +145,12 @@ const xyzParser: ColorParser = {
 			throw new Error(`Invalid XYZ string format: ${input}`);
 		}
 
-		const [_, x, y, z, alpha = '1'] = match;
+		const [_, x, y, z] = match;
 
 		const xyzValue: XYZ['value'] = {
 			x: brand.asXYZ_X(parseFloat(x)),
 			y: brand.asXYZ_Y(parseFloat(y)),
-			z: brand.asXYZ_Z(parseFloat(z)),
-			alpha: brand.asAlphaRange(parseFloat(alpha))
+			z: brand.asXYZ_Z(parseFloat(z))
 		};
 
 		return { format: 'xyz', value: xyzValue };
@@ -197,43 +183,31 @@ export function asCSSColorString(format: string, input: string): string {
 	switch (color.format) {
 		case 'cmyk':
 			const cmyk = color.value as CMYK['value'];
-			return `cmyk(${cmyk.cyan * 100}%, ${cmyk.magenta * 100}%, ${cmyk.yellow * 100}%, ${cmyk.key * 100}${
-				cmyk.alpha !== 1 ? `, ${cmyk.alpha}` : ''
-			})`;
+			return `cmyk(${cmyk.cyan * 100}%, ${cmyk.magenta * 100}%, ${cmyk.yellow * 100}%, ${cmyk.key * 100}`;
 
 		case 'hex':
 			const hex = color.value as Hex['value'];
-			return `#${hex.hex}${String(hex.alpha) !== 'FF' ? hex.alpha : ''}`;
+			return `#${hex.hex}}`;
 
 		case 'hsl':
 			const hsl = color.value as HSL['value'];
-			return `hsl(${hsl.hue}, ${hsl.saturation * 100}%, ${hsl.lightness * 100}%${
-				hsl.alpha !== 1 ? `, ${hsl.alpha}` : ''
-			})`;
+			return `hsl(${hsl.hue}, ${hsl.saturation * 100}%, ${hsl.lightness * 100}%})`;
 
 		case 'hsv':
 			const hsv = color.value as HSV['value'];
-			return `hsv(${hsv.hue}, ${hsv.saturation * 100}%, ${hsv.value * 100}%${
-				hsv.alpha !== 1 ? `, ${hsv.alpha}` : ''
-			})`;
+			return `hsv(${hsv.hue}, ${hsv.saturation * 100}%, ${hsv.value * 100}%})`;
 
 		case 'lab':
 			const lab = color.value as LAB['value'];
-			return `lab(${lab.l}, ${lab.a}, ${lab.b}${
-				lab.alpha !== 1 ? `, ${lab.alpha}` : ''
-			})`;
+			return `lab(${lab.l}, ${lab.a}, ${lab.b}})`;
 
 		case 'rgb':
 			const rgb = color.value as RGB['value'];
-			return `rgb(${rgb.red}, ${rgb.green}, ${rgb.blue}${
-				rgb.alpha !== 1 ? `, ${rgb.alpha}` : ''
-			})`;
+			return `rgb(${rgb.red}, ${rgb.green}, ${rgb.blue})`;
 
 		case 'xyz':
 			const xyz = color.value as XYZ['value'];
-			return `xyz(${xyz.x}, ${xyz.y}, ${xyz.z}${
-				xyz.alpha !== 1 ? `, ${xyz.alpha}` : ''
-			})`;
+			return `xyz(${xyz.x}, ${xyz.y}, ${xyz.z})`;
 
 		default:
 			throw new Error(`Unsupported color format: ${color.format}`);

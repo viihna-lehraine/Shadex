@@ -53,8 +53,7 @@ function parseCMYKColorValue(rawCMYK: string | null): CMYK['value'] {
 			cyan: brand.asPercentile(0),
 			magenta: brand.asPercentile(0),
 			yellow: brand.asPercentile(0),
-			key: brand.asPercentile(0),
-			alpha: brand.asAlphaRange(1)
+			key: brand.asPercentile(0)
 		};
 	}
 
@@ -65,15 +64,13 @@ function parseCMYKColorValue(rawCMYK: string | null): CMYK['value'] {
 				cyan: brand.asPercentile(parseFloat(match[1])),
 				magenta: brand.asPercentile(parseFloat(match[2])),
 				yellow: brand.asPercentile(parseFloat(match[3])),
-				key: brand.asPercentile(parseFloat(match[4])),
-				alpha: brand.asAlphaRange(parseFloat(match[5] ?? '1'))
+				key: brand.asPercentile(parseFloat(match[4]))
 			}
 		: {
 				cyan: brand.asPercentile(0),
 				magenta: brand.asPercentile(0),
 				yellow: brand.asPercentile(0),
-				key: brand.asPercentile(0),
-				alpha: brand.asAlphaRange(1)
+				key: brand.asPercentile(0)
 			};
 }
 
@@ -95,27 +92,17 @@ function parseHexColorValue(rawHex: string | null): Hex['value'] {
 
 		if (mode.stackTrace) console.trace('Stack Trace:');
 
-		return {
-			hex: brand.asHexSet('#000000'),
-			alpha: brand.asHexComponent('FF'),
-			numAlpha: brand.asAlphaRange(1)
-		};
+		return { hex: brand.asHexSet('#000000') };
 	}
 
 	const match = rawHex.match(regex.hex);
 
 	return match
 		? {
-				hex: brand.asHexSet(`#${match[1]}`),
-				alpha: brand.asHexComponent(match[2] || 'FF'),
-				numAlpha: brand.asAlphaRange(
-					parseInt(match[2] || 'FF', 16) / 255
-				)
+				hex: brand.asHexSet(`#${match[1]}`)
 			}
 		: {
-				hex: brand.asHexSet('#000000'),
-				alpha: brand.asHexComponent('FF'),
-				numAlpha: brand.asAlphaRange(1)
+				hex: brand.asHexSet('#000000')
 			};
 }
 
@@ -140,8 +127,7 @@ function parseHSLColorValue(rawHSL: string | null): HSL['value'] {
 		return {
 			hue: brand.asRadial(0),
 			saturation: brand.asPercentile(0),
-			lightness: brand.asPercentile(0),
-			alpha: brand.asAlphaRange(1)
+			lightness: brand.asPercentile(0)
 		};
 	}
 
@@ -151,14 +137,12 @@ function parseHSLColorValue(rawHSL: string | null): HSL['value'] {
 		? {
 				hue: brand.asRadial(parseFloat(match[1])),
 				saturation: brand.asPercentile(parseFloat(match[2])),
-				lightness: brand.asPercentile(parseFloat(match[3])),
-				alpha: brand.asAlphaRange(parseFloat(match[4] ?? '1'))
+				lightness: brand.asPercentile(parseFloat(match[3]))
 			}
 		: {
 				hue: brand.asRadial(0),
 				saturation: brand.asPercentile(0),
-				lightness: brand.asPercentile(0),
-				alpha: brand.asAlphaRange(1)
+				lightness: brand.asPercentile(0)
 			};
 }
 
@@ -183,8 +167,7 @@ function parseHSVColorValue(rawHSV: string | null): HSV['value'] {
 		return {
 			hue: brand.asRadial(0),
 			saturation: brand.asPercentile(0),
-			value: brand.asPercentile(0),
-			alpha: brand.asAlphaRange(1)
+			value: brand.asPercentile(0)
 		};
 	}
 
@@ -194,14 +177,12 @@ function parseHSVColorValue(rawHSV: string | null): HSV['value'] {
 		? {
 				hue: brand.asRadial(parseFloat(match[1])),
 				saturation: brand.asPercentile(parseFloat(match[2])),
-				value: brand.asPercentile(parseFloat(match[3])),
-				alpha: brand.asAlphaRange(parseFloat(match[4] ?? '1'))
+				value: brand.asPercentile(parseFloat(match[3]))
 			}
 		: {
 				hue: brand.asRadial(0),
 				saturation: brand.asPercentile(0),
-				value: brand.asPercentile(0),
-				alpha: brand.asAlphaRange(1)
+				value: brand.asPercentile(0)
 			};
 }
 
@@ -226,8 +207,7 @@ function parseLABColorValue(rawLAB: string | null): LAB['value'] {
 		return {
 			l: brand.asLAB_L(0),
 			a: brand.asLAB_A(0),
-			b: brand.asLAB_B(0),
-			alpha: brand.asAlphaRange(1)
+			b: brand.asLAB_B(0)
 		};
 	}
 
@@ -237,14 +217,12 @@ function parseLABColorValue(rawLAB: string | null): LAB['value'] {
 		? {
 				l: brand.asLAB_L(parseFloat(match[1])),
 				a: brand.asLAB_A(parseFloat(match[2])),
-				b: brand.asLAB_B(parseFloat(match[3])),
-				alpha: brand.asAlphaRange(parseFloat(match[4] ?? '1'))
+				b: brand.asLAB_B(parseFloat(match[3]))
 			}
 		: {
 				l: brand.asLAB_L(0),
 				a: brand.asLAB_A(0),
-				b: brand.asLAB_B(0),
-				alpha: brand.asAlphaRange(1)
+				b: brand.asLAB_B(0)
 			};
 }
 
@@ -269,8 +247,7 @@ function parseRGBColorValue(rawRGB: string | null): RGB['value'] {
 		return {
 			red: brand.asByteRange(0),
 			green: brand.asByteRange(0),
-			blue: brand.asByteRange(0),
-			alpha: brand.asAlphaRange(1)
+			blue: brand.asByteRange(0)
 		};
 	}
 
@@ -280,14 +257,12 @@ function parseRGBColorValue(rawRGB: string | null): RGB['value'] {
 		? {
 				red: brand.asByteRange(parseFloat(match[1])),
 				green: brand.asByteRange(parseFloat(match[2])),
-				blue: brand.asByteRange(parseFloat(match[3])),
-				alpha: brand.asAlphaRange(parseFloat(match[4] ?? '1'))
+				blue: brand.asByteRange(parseFloat(match[3]))
 			}
 		: {
 				red: brand.asByteRange(0),
 				green: brand.asByteRange(0),
-				blue: brand.asByteRange(0),
-				alpha: brand.asAlphaRange(1)
+				blue: brand.asByteRange(0)
 			};
 }
 
@@ -312,8 +287,7 @@ function parseXYZColorValue(rawXYZ: string | null): XYZ['value'] {
 		return {
 			x: brand.asXYZ_X(0),
 			y: brand.asXYZ_Y(0),
-			z: brand.asXYZ_Z(0),
-			alpha: brand.asAlphaRange(1)
+			z: brand.asXYZ_Z(0)
 		};
 	}
 
@@ -323,14 +297,12 @@ function parseXYZColorValue(rawXYZ: string | null): XYZ['value'] {
 		? {
 				x: brand.asXYZ_X(parseFloat(match[1])),
 				y: brand.asXYZ_Y(parseFloat(match[2])),
-				z: brand.asXYZ_Z(parseFloat(match[3])),
-				alpha: brand.asAlphaRange(parseFloat(match[4] ?? '1'))
+				z: brand.asXYZ_Z(parseFloat(match[3]))
 			}
 		: {
 				x: brand.asXYZ_X(0),
 				y: brand.asXYZ_Y(0),
-				z: brand.asXYZ_Z(0),
-				alpha: brand.asAlphaRange(1)
+				z: brand.asXYZ_Z(0)
 			};
 }
 

@@ -1,9 +1,7 @@
 // File: types/colors/main.js
 
 import type {
-	AlphaRange,
 	ByteRange,
-	HexComponent,
 	HexSet,
 	LAB_A,
 	LAB_B,
@@ -23,7 +21,6 @@ export type CMYK = {
 		magenta: Percentile;
 		yellow: Percentile;
 		key: Percentile;
-		alpha: AlphaRange;
 	};
 	format: 'cmyk';
 };
@@ -31,8 +28,6 @@ export type CMYK = {
 export type Hex = {
 	value: {
 		hex: HexSet;
-		alpha: HexComponent;
-		numAlpha: AlphaRange;
 	};
 	format: 'hex';
 };
@@ -42,7 +37,6 @@ export type HSL = {
 		hue: Radial;
 		saturation: Percentile;
 		lightness: Percentile;
-		alpha: AlphaRange;
 	};
 	format: 'hsl';
 };
@@ -52,7 +46,6 @@ export type HSV = {
 		hue: Radial;
 		saturation: Percentile;
 		value: Percentile;
-		alpha: AlphaRange;
 	};
 	format: 'hsv';
 };
@@ -62,7 +55,6 @@ export type LAB = {
 		l: LAB_L;
 		a: LAB_A;
 		b: LAB_B;
-		alpha: AlphaRange;
 	};
 	format: 'lab';
 };
@@ -72,7 +64,6 @@ export type RGB = {
 		red: ByteRange;
 		green: ByteRange;
 		blue: ByteRange;
-		alpha: AlphaRange;
 	};
 	format: 'rgb';
 };
@@ -81,7 +72,6 @@ export type SL = {
 	value: {
 		saturation: Percentile;
 		lightness: Percentile;
-		alpha: AlphaRange;
 	};
 	format: 'sl';
 };
@@ -90,7 +80,6 @@ export type SV = {
 	value: {
 		saturation: Percentile;
 		value: Percentile;
-		alpha: AlphaRange;
 	};
 	format: 'sv';
 };
@@ -100,7 +89,6 @@ export type XYZ = {
 		x: XYZ_X;
 		y: XYZ_Y;
 		z: XYZ_Z;
-		alpha: AlphaRange;
 	};
 	format: 'xyz';
 };
@@ -113,7 +101,6 @@ export type CMYK_StringProps = {
 		magenta: string;
 		yellow: string;
 		key: string;
-		alpha: string;
 	};
 	format: 'cmyk';
 };
@@ -121,8 +108,6 @@ export type CMYK_StringProps = {
 export type Hex_StringProps = {
 	value: {
 		hex: string;
-		alpha: string;
-		numAlpha: string;
 	};
 	format: 'hex';
 };
@@ -132,7 +117,6 @@ export type HSL_StringProps = {
 		hue: string;
 		saturation: string;
 		lightness: string;
-		alpha: string;
 	};
 	format: 'hsl';
 };
@@ -142,7 +126,6 @@ export type HSV_StringProps = {
 		hue: string;
 		saturation: string;
 		value: string;
-		alpha: string;
 	};
 	format: 'hsv';
 };
@@ -152,7 +135,6 @@ export type LAB_StringProps = {
 		l: string;
 		a: string;
 		b: string;
-		alpha: string;
 	};
 	format: 'lab';
 };
@@ -162,7 +144,6 @@ export type RGB_StringProps = {
 		red: string;
 		green: string;
 		blue: string;
-		alpha: string;
 	};
 	format: 'rgb';
 };
@@ -171,7 +152,6 @@ export type SL_StringProps = {
 	value: {
 		saturation: string;
 		lightness: string;
-		alpha: string;
 	};
 	format: 'sl';
 };
@@ -180,7 +160,6 @@ export type SV_StringProps = {
 	value: {
 		saturation: string;
 		value: string;
-		alpha: string;
 	};
 	format: 'sv';
 };
@@ -190,7 +169,6 @@ export type XYZ_StringProps = {
 		x: string;
 		y: string;
 		z: string;
-		alpha: string;
 	};
 	format: 'xyz';
 };
@@ -203,7 +181,6 @@ export type UnbrandedCMYK = {
 		magenta: number;
 		yellow: number;
 		key: number;
-		alpha: number;
 	};
 	format: 'cmyk';
 };
@@ -211,8 +188,6 @@ export type UnbrandedCMYK = {
 export type UnbrandedHex = {
 	value: {
 		hex: string;
-		alpha: string;
-		numAlpha: number;
 	};
 	format: 'hex';
 };
@@ -222,7 +197,6 @@ export type UnbrandedHSL = {
 		hue: number;
 		saturation: number;
 		lightness: number;
-		alpha: number;
 	};
 	format: 'hsl';
 };
@@ -232,7 +206,6 @@ export type UnbrandedHSV = {
 		hue: number;
 		saturation: number;
 		value: number;
-		alpha: number;
 	};
 	format: 'hsv';
 };
@@ -242,7 +215,6 @@ export type UnbrandedLAB = {
 		l: number;
 		a: number;
 		b: number;
-		alpha: number;
 	};
 	format: 'lab';
 };
@@ -252,7 +224,6 @@ export type UnbrandedRGB = {
 		red: number;
 		green: number;
 		blue: number;
-		alpha: number;
 	};
 	format: 'rgb';
 };
@@ -261,7 +232,6 @@ export type UnbrandedSL = {
 	value: {
 		saturation: number;
 		lightness: number;
-		alpha: number;
 	};
 	format: 'sl';
 };
@@ -270,7 +240,6 @@ export type UnbrandedSV = {
 	value: {
 		saturation: number;
 		value: number;
-		alpha: number;
 	};
 	format: 'sv';
 };
@@ -280,7 +249,6 @@ export type UnbrandedXYZ = {
 		x: number;
 		y: number;
 		z: number;
-		alpha: number;
 	};
 	format: 'xyz';
 };

@@ -30,23 +30,14 @@ const update = paletteHelpers.update;
 
 const hslTo = coreConversionUtils.hslTo;
 
-function baseColor(customColor: HSL | null, enableAlpha: boolean): HSL {
-	const color = coreUtils.base.clone(
-		customColor ?? utils.random.hsl(enableAlpha)
-	);
+function baseColor(customColor: HSL | null): HSL {
+	const color = coreUtils.base.clone(customColor);
 
 	return color as HSL;
 }
 
-async function paletteItem(
-	color: HSL,
-	enableAlpha: boolean
-): Promise<PaletteItem> {
+async function paletteItem(color: HSL): Promise<PaletteItem> {
 	const clonedColor = coreUtils.base.clone(color) as HSL;
-
-	clonedColor.value.alpha = enableAlpha
-		? coreUtils.brand.asAlphaRange(Math.random())
-		: coreUtils.brand.asAlphaRange(1);
 
 	return {
 		colors: {
@@ -124,20 +115,17 @@ async function paletteItem(
 async function paletteItemArray(
 	baseColor: HSL,
 	hues: number[],
-	enableAlpha: boolean,
 	limitDark: boolean,
 	limitGray: boolean,
 	limitLight: boolean
 ): Promise<PaletteItem[]> {
-	const paletteItems: PaletteItem[] = [
-		await paletteItem(baseColor, enableAlpha)
-	];
+	const paletteItems: PaletteItem[] = [await paletteItem(baseColor)];
 
 	for (const [i, hue] of hues.entries()) {
 		let newColor: HSL | null = null;
 
 		do {
-			const sl = utils.random.sl(enableAlpha) as SL;
+			const sl = utils.random.sl() as SL;
 
 			newColor = utils.conversion.genAllColorValues({
 				value: {
@@ -154,7 +142,7 @@ async function paletteItemArray(
 		);
 
 		if (newColor) {
-			const newPaletteItem = await paletteItem(newColor, enableAlpha);
+			const newPaletteItem = await paletteItem(newColor);
 
 			paletteItems.push(newPaletteItem);
 

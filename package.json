@@ -8,7 +8,7 @@
 	"main": "./public/dist/bundle.js",
 	"scripts": {
 		"build": "npm run clean && tsc && rollup -c",
-		"clean": "rm -rf ./public/dist && rm -rf ./public/js && mkdir ./public/dist && mkdir ./public/js",
+		"clean": "rm -rf ./public/dist && rm -rf ./public/js && mkdir ./public/dist",
 		"fix": "npm run format && npm run lint:fix",
 		"format": "npx prettier . --write",
 		"lint": "npx eslint",

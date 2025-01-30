@@ -58,11 +58,6 @@ export function clampRGB(rgb: RGB): RGB {
 				),
 				blue: coreUtils.brand.asByteRange(
 					Math.round(Math.min(Math.max(0, rgb.value.blue), 1) * 255)
-				),
-				alpha: coreUtils.brand.asAlphaRange(
-					parseFloat(
-						Math.min(Math.max(0, rgb.value.alpha), 1).toFixed(2)
-					)
 				)
 			},
 			format: 'rgb'

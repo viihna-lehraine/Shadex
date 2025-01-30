@@ -17,16 +17,13 @@ const colors: DefaultDataInterface['colors'] = {
 					cyan: brand.asPercentile(0),
 					magenta: brand.asPercentile(0),
 					yellow: brand.asPercentile(0),
-					key: brand.asPercentile(0),
-					alpha: brand.asAlphaRange(1)
+					key: brand.asPercentile(0)
 				},
 				format: 'cmyk'
 			},
 			hex: {
 				value: {
-					hex: brand.asHexSet('#000000'),
-					alpha: brand.asHexComponent('FF'),
-					numAlpha: brand.asAlphaRange(1)
+					hex: brand.asHexSet('#000000')
 				},
 				format: 'hex'
 			},
@@ -34,8 +31,7 @@ const colors: DefaultDataInterface['colors'] = {
 				value: {
 					hue: brand.asRadial(0),
 					saturation: brand.asPercentile(0),
-					lightness: brand.asPercentile(0),
-					alpha: brand.asAlphaRange(1)
+					lightness: brand.asPercentile(0)
 				},
 				format: 'hsl'
 			},
@@ -43,8 +39,7 @@ const colors: DefaultDataInterface['colors'] = {
 				value: {
 					hue: brand.asRadial(0),
 					saturation: brand.asPercentile(0),
-					value: brand.asPercentile(0),
-					alpha: brand.asAlphaRange(1)
+					value: brand.asPercentile(0)
 				},
 				format: 'hsv'
 			},
@@ -52,8 +47,7 @@ const colors: DefaultDataInterface['colors'] = {
 				value: {
 					l: brand.asLAB_L(0),
 					a: brand.asLAB_A(0),
-					b: brand.asLAB_B(0),
-					alpha: brand.asAlphaRange(1)
+					b: brand.asLAB_B(0)
 				},
 				format: 'lab'
 			},
@@ -61,24 +55,21 @@ const colors: DefaultDataInterface['colors'] = {
 				value: {
 					red: brand.asByteRange(0),
 					green: brand.asByteRange(0),
-					blue: brand.asByteRange(0),
-					alpha: brand.asAlphaRange(1)
+					blue: brand.asByteRange(0)
 				},
 				format: 'rgb'
 			},
 			sl: {
 				value: {
 					saturation: brand.asPercentile(0),
-					lightness: brand.asPercentile(0),
-					alpha: brand.asAlphaRange(1)
+					lightness: brand.asPercentile(0)
 				},
 				format: 'sl'
 			},
 			sv: {
 				value: {
 					saturation: brand.asPercentile(0),
-					value: brand.asPercentile(0),
-					alpha: brand.asAlphaRange(1)
+					value: brand.asPercentile(0)
 				},
 				format: 'sv'
 			},
@@ -86,8 +77,7 @@ const colors: DefaultDataInterface['colors'] = {
 				value: {
 					x: brand.asXYZ_X(0),
 					y: brand.asXYZ_Y(0),
-					z: brand.asXYZ_Z(0),
-					alpha: brand.asAlphaRange(1)
+					z: brand.asXYZ_Z(0)
 				},
 				format: 'xyz'
 			}
@@ -98,16 +88,13 @@ const colors: DefaultDataInterface['colors'] = {
 					cyan: 0,
 					magenta: 0,
 					yellow: 0,
-					key: 0,
-					alpha: 1
+					key: 0
 				},
 				format: 'cmyk'
 			},
 			hex: {
 				value: {
-					hex: '#000000FF',
-					alpha: 'FF',
-					numAlpha: 1
+					hex: '#000000FF'
 				},
 				format: 'hex'
 			},
@@ -115,8 +102,7 @@ const colors: DefaultDataInterface['colors'] = {
 				value: {
 					hue: 0,
 					saturation: 0,
-					lightness: 0,
-					alpha: 1
+					lightness: 0
 				},
 				format: 'hsl'
 			},
@@ -124,8 +110,7 @@ const colors: DefaultDataInterface['colors'] = {
 				value: {
 					hue: 0,
 					saturation: 0,
-					value: 0,
-					alpha: 1
+					value: 0
 				},
 				format: 'hsv'
 			},
@@ -133,16 +118,14 @@ const colors: DefaultDataInterface['colors'] = {
 				value: {
 					l: 0,
 					a: 0,
-					b: 0,
-					alpha: 1
+					b: 0
 				},
 				format: 'lab'
 			},
 			sl: {
 				value: {
 					saturation: 0,
-					lightness: 0,
-					alpha: 1
+					lightness: 0
 				},
 				format: 'sl'
 			},
@@ -150,16 +133,14 @@ const colors: DefaultDataInterface['colors'] = {
 				value: {
 					red: 0,
 					green: 0,
-					blue: 0,
-					alpha: 1
+					blue: 0
 				},
 				format: 'rgb'
 			},
 			sv: {
 				value: {
 					saturation: 0,
-					value: 0,
-					alpha: 1
+					value: 0
 				},
 				format: 'sv'
 			},
@@ -167,23 +148,22 @@ const colors: DefaultDataInterface['colors'] = {
 				value: {
 					x: 0,
 					y: 0,
-					z: 0,
-					alpha: 1
+					z: 0
 				},
 				format: 'xyz'
 			}
 		}
 	},
 	css: {
-		cmyk: 'cmyk(0%, 0%, 0%, 0%, 1)',
-		hex: '#000000FF',
-		hsl: 'hsl(0, 0%, 0%, 1)',
-		hsv: 'hsv(0, 0%, 0%, 1)',
-		lab: 'lab(0, 0, 0, 1)',
-		rgb: 'rgb(0, 0, 0, 1)',
-		sl: 'sl(0%, 0%, 1)',
-		sv: 'sv(0%, 0%, 1)',
-		xyz: 'xyz(0, 0, 0, 1)'
+		cmyk: 'cmyk(0%, 0%, 0%, 0%)',
+		hex: '#000000',
+		hsl: 'hsl(0, 0%, 0%)',
+		hsv: 'hsv(0, 0%, 0%)',
+		lab: 'lab(0, 0, 0)',
+		rgb: 'rgb(0, 0, 0)',
+		sl: 'sl(0%, 0%)',
+		sv: 'sv(0%, 0%)',
+		xyz: 'xyz(0, 0, 0)'
 	},
 	strings: {
 		cmyk: {
@@ -191,16 +171,13 @@ const colors: DefaultDataInterface['colors'] = {
 				cyan: '0',
 				magenta: '0',
 				yellow: '0',
-				key: '0',
-				alpha: '1'
+				key: '0'
 			},
 			format: 'cmyk'
 		},
 		hex: {
 			value: {
-				hex: '#000000',
-				alpha: 'FF',
-				numAlpha: '1'
+				hex: '#000000'
 			},
 			format: 'hex'
 		},
@@ -208,8 +185,7 @@ const colors: DefaultDataInterface['colors'] = {
 			value: {
 				hue: '0',
 				saturation: '0',
-				lightness: '0',
-				alpha: '1'
+				lightness: '0'
 			},
 			format: 'hsl'
 		},
@@ -217,8 +193,7 @@ const colors: DefaultDataInterface['colors'] = {
 			value: {
 				hue: '0',
 				saturation: '0',
-				value: '0',
-				alpha: '1'
+				value: '0'
 			},
 			format: 'hsv'
 		},
@@ -226,8 +201,7 @@ const colors: DefaultDataInterface['colors'] = {
 			value: {
 				l: '0',
 				a: '0',
-				b: '0',
-				alpha: '1'
+				b: '0'
 			},
 			format: 'lab'
 		},
@@ -235,24 +209,21 @@ const colors: DefaultDataInterface['colors'] = {
 			value: {
 				red: '0',
 				green: '0',
-				blue: '0',
-				alpha: '1'
+				blue: '0'
 			},
 			format: 'rgb'
 		},
 		sl: {
 			value: {
 				saturation: '0',
-				lightness: '0',
-				alpha: '1'
+				lightness: '0'
 			},
 			format: 'sl'
 		},
 		sv: {
 			value: {
 				saturation: '0',
-				value: '0',
-				alpha: '1'
+				value: '0'
 			},
 			format: 'sv'
 		},
@@ -260,8 +231,7 @@ const colors: DefaultDataInterface['colors'] = {
 			value: {
 				x: '0',
 				y: '0',
-				z: '0',
-				alpha: '1'
+				z: '0'
 			},
 			format: 'xyz'
 		}
@@ -302,37 +272,36 @@ const unbrandedData: UnbrandedPalette = {
 const unbrandedItem: UnbrandedPaletteItem = {
 	colors: {
 		main: {
-			cmyk: { cyan: 0, magenta: 0, yellow: 0, key: 0, alpha: 1 },
-			hex: { hex: '#000000FF', alpha: 'FF', numAlpha: 1 },
-			hsl: { hue: 0, saturation: 0, lightness: 0, alpha: 1 },
-			hsv: { hue: 0, saturation: 0, value: 0, alpha: 1 },
-			lab: { l: 0, a: 0, b: 0, alpha: 1 },
-			rgb: { red: 0, green: 0, blue: 0, alpha: 1 },
-			xyz: { x: 0, y: 0, z: 0, alpha: 1 }
+			cmyk: { cyan: 0, magenta: 0, yellow: 0, key: 0 },
+			hex: { hex: '#000000' },
+			hsl: { hue: 0, saturation: 0, lightness: 0 },
+			hsv: { hue: 0, saturation: 0, value: 0 },
+			lab: { l: 0, a: 0, b: 0 },
+			rgb: { red: 0, green: 0, blue: 0 },
+			xyz: { x: 0, y: 0, z: 0 }
 		},
 		stringProps: {
 			cmyk: {
 				cyan: '0%',
 				magenta: '0%',
 				yellow: '0%',
-				key: '0%',
-				alpha: '1'
+				key: '0%'
 			},
-			hex: { hex: '#000000FF', alpha: 'FF', numAlpha: '1' },
-			hsl: { hue: '0', saturation: '0%', lightness: '0%', alpha: '1' },
-			hsv: { hue: '0', saturation: '0%', value: '0%', alpha: '1' },
-			lab: { l: '0', a: '0', b: '0', alpha: '1' },
-			rgb: { red: '0', green: '0', blue: '0', alpha: '1' },
-			xyz: { x: '0', y: '0', z: '0', alpha: '1' }
+			hex: { hex: '#000000FF' },
+			hsl: { hue: '0', saturation: '0%', lightness: '0%' },
+			hsv: { hue: '0', saturation: '0%', value: '0%' },
+			lab: { l: '0', a: '0', b: '0' },
+			rgb: { red: '0', green: '0', blue: '0' },
+			xyz: { x: '0', y: '0', z: '0' }
 		},
 		css: {
-			cmyk: 'cmyk(0%, 0%, 0%, 100%, 1)',
-			hex: '#000000FF',
-			hsl: 'hsl(0, 0%, 0%, 0)',
-			hsv: 'hsv(0, 0%, 0%, 0)',
-			lab: 'lab(0, 0, 0, 0)',
-			rgb: 'rgb(0, 0, 0, 1)',
-			xyz: 'xyz(0, 0, 0, 0)'
+			cmyk: 'cmyk(0%, 0%, 0%, 100%)',
+			hex: '#000000',
+			hsl: 'hsl(0, 0%, 0%)',
+			hsv: 'hsv(0, 0%, 0%)',
+			lab: 'lab(0, 0, 0)',
+			rgb: 'rgb(0, 0, 0)',
+			xyz: 'xyz(0, 0, 0)'
 		}
 	}
 };

@@ -1,7 +1,11 @@
 // File: paletteGen/palettes/types/random.js
 
-import { GenPaletteArgs, Palette, PaletteItem } from '../../../types/index.js';
-import { IDBManager } from '../../../db/index.js';
+import {
+	Palette,
+	PaletteGenerationArgs,
+	PaletteItem
+} from '../../../types/index.js';
+import { IDBManager } from '../../../db/IDBManager.js';
 import {
 	helpers as paletteHelpers,
 	superUtils as paletteSuperUtils
@@ -11,18 +15,13 @@ import { utils } from '../../../common/index.js';
 const create = paletteSuperUtils.create;
 const update = paletteHelpers.update;
 
-export async function random(args: GenPaletteArgs): Promise<Palette> {
-	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
-	const paletteItems: PaletteItem[] = [
-		await create.paletteItem(baseColor, args.enableAlpha)
-	];
+export async function random(args: PaletteGenerationArgs): Promise<Palette> {
+	const baseColor = create.baseColor(args.customColor);
+	const paletteItems: PaletteItem[] = [await create.paletteItem(baseColor)];
 
 	for (let i = 1; i < args.swatches; i++) {
-		const randomColor = utils.random.hsl(args.enableAlpha);
-		const nextPaletteItem = await create.paletteItem(
-			randomColor,
-			args.enableAlpha
-		);
+		const randomColor = utils.random.hsl();
+		const nextPaletteItem = await create.paletteItem(randomColor);
 
 		paletteItems.push(nextPaletteItem);
 
@@ -39,7 +38,6 @@ export async function random(args: GenPaletteArgs): Promise<Palette> {
 		paletteItems,
 		paletteID,
 		args.swatches,
-		args.enableAlpha,
 		args.limitDark,
 		args.limitGray,
 		args.limitLight

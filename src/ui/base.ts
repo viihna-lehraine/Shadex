@@ -16,11 +16,11 @@ function enforceSwatchRules(
 	maximumSwatches?: number
 ): void {
 	const thisFunction = 'enforceSwatchRules()';
-	const paletteDropdown = document.getElementById(
-		domIDs.paletteNumberOptions
+	const swatchNumberSelector = document.getElementById(
+		domIDs.static.selects.swatchGen
 	) as HTMLSelectElement;
 
-	if (!paletteDropdown) {
+	if (!swatchNumberSelector) {
 		if (logMode.error) {
 			logger.error(
 				'paletteDropdown not found',
@@ -34,7 +34,7 @@ function enforceSwatchRules(
 		return;
 	}
 
-	const currentValue = parseInt(paletteDropdown.value, 10);
+	const currentValue = parseInt(swatchNumberSelector.value, 10);
 
 	let newValue = currentValue;
 
@@ -50,12 +50,12 @@ function enforceSwatchRules(
 
 	if (newValue !== currentValue) {
 		// update value in the dropdown menu
-		paletteDropdown.value = newValue.toString();
+		swatchNumberSelector.value = newValue.toString();
 
 		// trigger a change event to notify the application
 		const event = new Event('change', { bubbles: true });
 		try {
-			paletteDropdown.dispatchEvent(event);
+			swatchNumberSelector.dispatchEvent(event);
 		} catch (error) {
 			if (logMode.error) {
 				logger.error(

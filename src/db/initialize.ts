@@ -1,3 +1,5 @@
+// db/initialize.js
+
 // File: db/initialize.js
 
 import { openDB, IDBPDatabase } from 'idb';

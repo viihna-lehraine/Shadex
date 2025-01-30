@@ -10,19 +10,20 @@ const thisModule = 'dom/validate.js';
 
 const logger = await createLogger();
 
-function validateElements(): void {
+function validateStaticElements(): void {
 	const thisFunction = 'validateElements()';
-	const ids = domData.ids;
-	const allowedMissingElements = new Set([
-		'color-box-1',
-		'export-palette-input'
-	]);
+	const ids = domData.ids.static;
 	const missingElements: string[] = [];
 
-	Object.values(ids).forEach(id => {
+	// flattens the nested structure into a single array of IDs, then extracts their values
+	const allIDs: string[] = Object.values(ids).flatMap(category =>
+		Object.values(category)
+	);
+
+	allIDs.forEach((id: string) => {
 		const element = document.getElementById(id);
 
-		if (!element && !allowedMissingElements.has(id)) {
+		if (!element) {
 			if (logMode.error)
 				logger.error(
 					`Element with ID "${id}" not found`,
@@ -51,5 +52,5 @@ function validateElements(): void {
 }
 
 export const validate: DOMFn_MasterInterface['validate'] = {
-	elements: validateElements
+	staticElements: validateStaticElements
 };

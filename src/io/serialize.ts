@@ -24,7 +24,6 @@ async function toCSS(palette: Palette): Promise<string> {
 					--swatches: ${palette.metadata.swatches};
 					--type: "${palette.metadata.type}";
 					--timestamp: "${palette.metadata.timestamp}";
-					--enableAlpha: ${palette.metadata.flags.enableAlpha};
 					--limitDarkness: ${palette.metadata.flags.limitDarkness};
 					--limitGrayness: ${palette.metadata.flags.limitGrayness};
 					--limitLightness: ${palette.metadata.flags.limitLightness};
@@ -155,7 +154,6 @@ async function toXML(palette: Palette): Promise<string> {
 					<Type>${palette.metadata.type}</Type>
 					${customColorXML}
 					<Flags>
-						<EnableAlpha>${palette.metadata.flags.enableAlpha}</EnableAlpha>
 						<LimitDarkness>${palette.metadata.flags.limitDarkness}</LimitDarkness>
 						<LimitGrayness>${palette.metadata.flags.limitGrayness}</LimitGrayness>
 						<LimitLightness>${palette.metadata.flags.limitLightness}</LimitLightness>

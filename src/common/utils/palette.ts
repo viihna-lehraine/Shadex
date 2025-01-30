@@ -23,7 +23,6 @@ function createObject(
 	items: PaletteItem[],
 	swatches: number,
 	paletteID: number,
-	enableAlpha: boolean,
 	limitDark: boolean,
 	limitGray: boolean,
 	limitLight: boolean
@@ -37,7 +36,6 @@ function createObject(
 			swatches,
 			type,
 			flags: {
-				enableAlpha: enableAlpha,
 				limitDarkness: limitDark,
 				limitGrayness: limitGray,
 				limitLightness: limitLight

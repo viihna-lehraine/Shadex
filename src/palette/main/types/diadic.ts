@@ -1,12 +1,12 @@
 // File: palette/main/types/diadic.js
 
 import {
-	GenPaletteArgs,
 	HSL,
 	Palette,
+	PaletteGenerationArgs,
 	PaletteItem
 } from '../../../types/index.js';
-import { IDBManager } from '../../../db/index.js';
+import { IDBManager } from '../../../db/IDBManager.js';
 import { coreUtils } from '../../../common/index.js';
 import { constsData as consts } from '../../../data/consts.js';
 import { superUtils as paletteSuperUtils } from '../../common/index.js';
@@ -16,21 +16,21 @@ const create = paletteSuperUtils.create;
 const genHues = paletteSuperUtils.genHues;
 const paletteRanges = consts.paletteRanges;
 
-export async function diadic(args: GenPaletteArgs): Promise<Palette> {
+export async function diadic(args: PaletteGenerationArgs): Promise<Palette> {
 	// ensure exactly 2 color swatches
 	if (args.swatches !== 2) uiFn.enforceSwatchRules(2, 2);
 
-	const baseColor = create.baseColor(args.customColor, args.enableAlpha);
+	const baseColor = create.baseColor(args.customColor);
 	const hues = genHues.diadic(baseColor.value.hue);
 	const paletteItems: PaletteItem[] = [];
 
 	for (let i = 0; i < 2; i++) {
 		const saturationShift =
-			Math.random() * paletteRanges.diadic.satShift -
-			paletteRanges.diadic.satShift / 2;
+			Math.random() * paletteRanges.shift.diadic.sat -
+			paletteRanges.shift.diadic.sat / 2;
 		const lightnessShift =
-			Math.random() * paletteRanges.diadic.lightShift -
-			paletteRanges.diadic.lightShift / 2;
+			Math.random() * paletteRanges.shift.diadic.light -
+			paletteRanges.shift.diadic.light / 2;
 		const newColor: HSL = {
 			value: {
 				hue: coreUtils.brand.asRadial(hues[i % hues.length]),
@@ -48,18 +48,12 @@ export async function diadic(args: GenPaletteArgs): Promise<Palette> {
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessShift)
 					)
-				),
-				alpha: args.enableAlpha
-					? coreUtils.brand.asAlphaRange(Math.random())
-					: coreUtils.brand.asAlphaRange(1)
+				)
 			},
 			format: 'hsl'
 		};
 
-		const paletteItem = await create.paletteItem(
-			newColor,
-			args.enableAlpha
-		);
+		const paletteItem = await create.paletteItem(newColor);
 		paletteItems.push(paletteItem);
 	}
 
@@ -73,7 +67,6 @@ export async function diadic(args: GenPaletteArgs): Promise<Palette> {
 		paletteItems,
 		paletteID,
 		2,
-		args.enableAlpha,
 		args.limitDark,
 		args.limitGray,
 		args.limitLight

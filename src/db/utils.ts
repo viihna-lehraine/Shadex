@@ -1,9 +1,9 @@
 // File: db/utils.js
 
 import { IDBPDatabase, IDBPObjectStore } from 'idb';
-import { DBFn_MasterInterface, PaletteSchema } from '../types/index.js';
+import { PaletteSchema } from '../types/index.js';
 
-async function withStore<
+export async function withStore<
 	StoreName extends keyof PaletteSchema,
 	Mode extends 'readonly' | 'readwrite'
 >(
@@ -22,6 +22,6 @@ async function withStore<
 	await tx.done;
 }
 
-export const dbUtils: DBFn_MasterInterface['utils'] = {
+export const dbUtils = {
 	store: { withStore }
 } as const;

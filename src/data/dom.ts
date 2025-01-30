@@ -2,189 +2,232 @@
 
 import { DOMDataInterface } from '../types/index.js';
 
-const ids: DOMDataInterface['ids'] = {
-	advancedMenu: 'advanced-menu',
-	advancedMenuButton: 'advanced-menu-button',
-	advancedMenuContent: 'advanced-menu-content',
-	applyCustomColorButton: 'apply-custom-color-button',
-	clearCustomColorButton: 'clear-custom-color-button',
-	colorBox1: 'color-box-1',
-	customColorDisplay: 'custom-color-display',
-	customColorInput: 'custom-color-input',
-	customColorMenu: 'custom-color-menu',
-	customColorMenuButton: 'custom-color-menu-button',
-	deleteDatabaseButton: 'delete-database-button',
-	desaturateButton: 'desaturate-button',
-	developerMenu: 'developer-menu',
-	developerMenuButton: 'developer-menu-button',
-	enableAlphaCheckbox: 'enable-alpha-checkbox',
-	exportPaletteButton: 'export-palette-button',
-	exportPaletteFormatOptions: 'export-palette-format-options',
-	exportPaletteInput: 'export-palette-input',
-	generateButton: 'generate-button',
-	helpMenu: 'help-menu',
-	helpMenuButton: 'help-menu-button',
-	helpMenuContent: 'help-menu-content',
-	historyMenu: 'history-menu',
-	historyMenuButton: 'history-menu-button',
-	historyMenuContent: 'history-menu-content',
-	importExportMenu: 'import-export-menu',
-	importExportMenuButton: 'import-export-menu-button',
-	importPaletteInput: 'import-palette-input',
-	limitDarknessCheckbox: 'limit-darkness-checkbox',
-	limitGraynessCheckbox: 'limit-grayness-checkbox',
-	limitLightnessCheckbox: 'limit-lightness-checkbox',
-	paletteNumberOptions: 'palette-number-options',
-	paletteTypeOptions: 'palette-type-options',
-	resetDatabaseButton: 'reset-database-button',
-	resetPaletteIDButton: 'reset-palette-id-button',
-	saturateButton: 'saturate-button',
-	selectedColorOption: 'selected-color-option',
-	showAsCMYKButton: 'show-as-cmyk-button',
-	showAsHexButton: 'show-as-hex-button',
-	showAsHSLButton: 'show-as-hsl-button',
-	showAsHSVButton: 'show-as-hsv-button',
-	showAsLABButton: 'show-as-lab-button',
-	showAsRGBButton: 'show-as-rgb-button'
-} as const;
-
-export const domData: DOMDataInterface = {
-	elements: {
-		buttons: {
-			advancedMenuButton: document.getElementById(
-				ids.advancedMenuButton
-			) as HTMLButtonElement,
-			applyCustomColorButton: document.getElementById(
-				ids.applyCustomColorButton
-			) as HTMLButtonElement,
-			clearCustomColorButton: document.getElementById(
-				ids.clearCustomColorButton
-			) as HTMLButtonElement,
-			customColorMenuButton: document.getElementById(
-				ids.customColorMenuButton
-			) as HTMLButtonElement,
-			deleteDatabaseButton: document.getElementById(
-				ids.deleteDatabaseButton
-			) as HTMLButtonElement,
-			desaturateButton: document.getElementById(
-				ids.desaturateButton
-			) as HTMLButtonElement,
-			developerMenuButton: document.getElementById(
-				ids.developerMenuButton
-			) as HTMLButtonElement,
-			exportPaletteButton: document.getElementById(
-				ids.exportPaletteButton
-			) as HTMLButtonElement,
-			generateButton: document.getElementById(
-				ids.generateButton
-			) as HTMLButtonElement,
-			helpMenuButton: document.getElementById(
-				ids.helpMenuButton
-			) as HTMLButtonElement,
-			historyMenuButton: document.getElementById(
-				ids.historyMenuButton
-			) as HTMLButtonElement,
-			importExportMenuButton: document.getElementById(
-				ids.importExportMenuButton
-			) as HTMLButtonElement,
-			resetDatabaseButton: document.getElementById(
-				ids.resetDatabaseButton
-			) as HTMLButtonElement,
-			resetPaletteIDButton: document.getElementById(
-				ids.resetPaletteIDButton
-			) as HTMLButtonElement,
-			saturateButton: document.getElementById(
-				ids.saturateButton
-			) as HTMLButtonElement,
-			showAsCMYKButton: document.getElementById(
-				ids.showAsCMYKButton
-			) as HTMLButtonElement,
-			showAsHexButton: document.getElementById(
-				ids.showAsHexButton
-			) as HTMLButtonElement,
-			showAsHSLButton: document.getElementById(
-				ids.showAsHSLButton
-			) as HTMLButtonElement,
-			showAsHSVButton: document.getElementById(
-				ids.showAsHSVButton
-			) as HTMLButtonElement,
-			showAsLABButton: document.getElementById(
-				ids.showAsLABButton
-			) as HTMLButtonElement,
-			showAsRGBButton: document.getElementById(
-				ids.showAsRGBButton
-			) as HTMLButtonElement
-		},
-		divs: {
-			advancedMenu: document.getElementById(
-				ids.advancedMenu
-			) as HTMLDivElement,
-			advancedMenuContent: document.getElementById(
-				ids.advancedMenuContent
-			) as HTMLDivElement,
-			colorBox1: document.getElementById(ids.colorBox1) as HTMLDivElement,
-			customColorMenu: document.getElementById(
-				ids.customColorMenu
-			) as HTMLDivElement,
-			developerMenu: document.getElementById(
-				ids.developerMenu
-			) as HTMLDivElement,
-			helpMenu: document.getElementById(ids.helpMenu) as HTMLDivElement,
-			helpMenuContent: document.getElementById(
-				ids.helpMenuContent
-			) as HTMLDivElement,
-			historyMenu: document.getElementById(
-				ids.historyMenu
-			) as HTMLDivElement,
-			historyMenuContent: document.getElementById(
-				ids.historyMenuContent
-			) as HTMLDivElement,
-			importExportMenu: document.getElementById(
-				ids.importExportMenu
-			) as HTMLDivElement
-		},
-		inputs: {
-			customColorInput: document.getElementById(
-				ids.customColorInputID
-			) as HTMLInputElement,
-			enableAlphaCheckbox: document.getElementById(
-				ids.enableAlphaCheckbox
-			) as HTMLInputElement,
-			exportPaletteInput: document.getElementById(
-				ids.exportPaletteInput
-			) as HTMLInputElement,
-			importPaletteInput: document.getElementById(
-				ids.importPaletteInput
-			) as HTMLInputElement,
-			limitDarknessCheckbox: document.getElementById(
-				ids.limitDarknessCheckbox
-			) as HTMLInputElement,
-			limitGraynessCheckbox: document.getElementById(
-				ids.limitGraynessCheckbox
-			) as HTMLInputElement,
-			limitLightnessCheckbox: document.getElementById(
-				ids.limitLightnessCheckbox
-			) as HTMLInputElement,
-			paletteNumberOptions: document.getElementById(
-				ids.paletteNumberOptions
-			) as HTMLInputElement
-		},
-		select: {
-			exportPaletteFormatOptions: document.getElementById(
-				ids.exportPaletteFormatOptions
-			) as HTMLSelectElement,
-			paletteTypeOptions: document.getElementById(
-				ids.paletteTypeOptions
-			) as HTMLSelectElement,
-			selectedColorOption: document.getElementById(
-				ids.selectedColorOption
-			) as HTMLSelectElement
-		},
-		spans: {
-			customColorDisplay: document.getElementById(
-				ids.customColorDisplay
-			) as HTMLSpanElement
+const dynamicIds: DOMDataInterface['ids']['dynamic'] = {
+	btns: {
+		lock: {
+			colorBtn1: 'color-box-1-lock-btn',
+			colorBtn2: 'color-box-2-lock-btn',
+			colorBtn3: 'color-box-3-lock-btn',
+			colorBtn4: 'color-box-4-lock-btn',
+			colorBtn5: 'color-box-5-lock-btn',
+			colorBtn6: 'color-box-6-lock-btn'
 		}
 	},
-	ids
+	divs: {
+		colorBox1: 'color-box-1',
+		dragBar: {
+			colorBox1: 'color-box-1-drag-bar',
+			colorBox2: 'color-box-2-drag-bar',
+			colorBox3: 'color-box-3-drag-bar',
+			colorBox4: 'color-box-4-drag-bar',
+			colorBox5: 'color-box-5-drag-bar',
+			colorBox6: 'color-box-6-drag-bar'
+		}
+	},
+	inputs: {
+		colorPicker1: 'color-picker-1',
+		colorPicker2: 'color-picker-2',
+		colorPicker3: 'color-picker-3',
+		colorPicker4: 'color-picker-4',
+		colorPicker5: 'color-picker-5',
+		colorPicker6: 'color-picker-6',
+		export: 'export-input'
+	},
+	selects: {},
+	spans: {}
+} as const;
+
+const staticIds: DOMDataInterface['ids']['static'] = {
+	btns: {
+		desaturate: 'desaturate-btn',
+		export: 'export-btn',
+		generate: 'generate-btn',
+		helpMenu: 'help-menu-btn',
+		historyMenu: 'history-menu-btn',
+		ioMenu: 'io-menu-btn',
+		saturate: 'saturate-btn',
+		showAsCMYK: 'show-as-cmyk-btn',
+		showAsHex: 'show-as-hex-btn',
+		showAsHSL: 'show-as-hsl-btn',
+		showAsHSV: 'show-as-hsv-btn',
+		showAsLAB: 'show-as-lab-btn',
+		showAsRGB: 'show-as-rgb-btn'
+	},
+	divs: {
+		helpMenu: 'help-menu',
+		historyMenu: 'history-menu',
+		ioMenu: 'io-menu',
+		paletteHistory: 'palette-history'
+	},
+	inputs: {
+		historyLimit: 'history-limit-input',
+		import: 'import-input',
+		limitDarkChkbx: 'limit-dark-chkbx',
+		limitGrayChkbx: 'limit-gray-chkbx',
+		limitLightChkbx: 'limit-light-chkbx'
+	},
+	selects: {
+		exportFormatOption: 'export-format-option-selector',
+		paletteType: 'palette-type-selector',
+		swatch: 'swatch-selector',
+		swatchGen: 'swatch-gen-selector'
+	}
+} as const;
+
+// ******** Helpers ********
+
+function getElement<T extends HTMLElement>(id: string): T | null {
+	return document.getElementById(id) as T | null;
+}
+
+const dynamicDivIds = dynamicIds.divs;
+
+const staticBtnIds = staticIds.btns;
+const staticDivIds = staticIds.divs;
+const staticInputIds = staticIds.inputs;
+const staticSelectIds = staticIds.selects;
+
+// ******** Dynamic DOM Data ********
+
+const dynamicDomElements: DOMDataInterface['elements']['dynamic'] = {
+	get btns() {
+		return {};
+	},
+	get divs() {
+		return {
+			colorBox1: getElement<HTMLDivElement>(dynamicDivIds.colorBox1)
+		};
+	},
+	get inputs() {
+		return {};
+	},
+	get selects() {
+		return {};
+	},
+	get spans() {
+		return {};
+	}
+};
+
+const dynamicDomIds: DOMDataInterface['ids']['dynamic'] = {
+	btns: {},
+	divs: {
+		colorBox1: dynamicDivIds.colorBox1
+	},
+	inputs: {},
+	selects: {},
+	spans: {}
+};
+
+// ******** Static DOM Data ********
+
+const staticDomElements: DOMDataInterface['elements']['static'] = {
+	get btns() {
+		return {
+			desaturate: getElement<HTMLButtonElement>(staticBtnIds.desaturate),
+			export: getElement<HTMLButtonElement>(staticBtnIds.export),
+			generate: getElement<HTMLButtonElement>(staticBtnIds.generate),
+			helpMenu: getElement<HTMLButtonElement>(staticBtnIds.helpMenu),
+			historyMenu: getElement<HTMLButtonElement>(
+				staticBtnIds.historyMenu
+			),
+			ioMenu: getElement<HTMLButtonElement>(staticBtnIds.ioMenu),
+			saturate: getElement<HTMLButtonElement>(staticBtnIds.saturate),
+			showAsCMYK: getElement<HTMLButtonElement>(staticBtnIds.showAsCMYK),
+			showAsHex: getElement<HTMLButtonElement>(staticBtnIds.showAsHex),
+			showAsHSL: getElement<HTMLButtonElement>(staticBtnIds.showAsHSL),
+			showAsHSV: getElement<HTMLButtonElement>(staticBtnIds.showAsHSV),
+			showAsLAB: getElement<HTMLButtonElement>(staticBtnIds.showAsLAB),
+			showAsRGB: getElement<HTMLButtonElement>(staticBtnIds.showAsRGB)
+		};
+	},
+	get divs() {
+		return {
+			helpMenu: getElement<HTMLDivElement>(staticDivIds.helpMenu),
+			historyMenu: getElement<HTMLDivElement>(staticDivIds.historyMenu),
+			ioMenu: getElement<HTMLDivElement>(staticDivIds.ioMenu),
+			paletteHistory: getElement<HTMLDivElement>(
+				staticDivIds.paletteHistory
+			)
+		};
+	},
+	get inputs() {
+		return {
+			historyLimit: getElement<HTMLInputElement>(
+				staticInputIds.historyLimit
+			),
+			import: getElement<HTMLInputElement>(staticInputIds.import),
+			limitDarkChkbx: getElement<HTMLInputElement>(
+				staticInputIds.limitDarkChkbx
+			),
+			limitGrayChkbx: getElement<HTMLInputElement>(
+				staticInputIds.limitGrayChkbx
+			),
+			limitLightChkbx: getElement<HTMLInputElement>(
+				staticInputIds.limitLightChkbx
+			)
+		};
+	},
+	get selects() {
+		return {
+			exportFormatOption: getElement<HTMLSelectElement>(
+				staticSelectIds.exportFormatOption
+			),
+			paletteType: getElement<HTMLSelectElement>(
+				staticSelectIds.paletteType
+			),
+			swatch: getElement<HTMLSelectElement>(staticSelectIds.swatch),
+			swatchGen: getElement<HTMLSelectElement>(staticSelectIds.swatchGen)
+		};
+	}
+};
+
+const staticDomIds: DOMDataInterface['ids']['static'] = {
+	btns: {
+		desaturate: staticBtnIds.desaturate,
+		export: staticBtnIds.export,
+		generate: staticBtnIds.generate,
+		helpMenu: staticBtnIds.helpMenu,
+		historyMenu: staticBtnIds.historyMenu,
+		ioMenu: staticBtnIds.ioMenu,
+		saturate: staticBtnIds.saturate,
+		showAsCMYK: staticBtnIds.showAsCMYK,
+		showAsHex: staticBtnIds.showAsHex,
+		showAsHSL: staticBtnIds.showAsHSL,
+		showAsHSV: staticBtnIds.showAsHSV,
+		showAsLAB: staticBtnIds.showAsLAB,
+		showAsRGB: staticBtnIds.showAsRGB
+	},
+	divs: {
+		helpMenu: staticDivIds.helpMenu,
+		historyMenu: staticDivIds.historyMenu,
+		ioMenu: staticDivIds.ioMenu,
+		paletteHistory: staticDivIds.paletteHistory
+	},
+	inputs: {
+		historyLimit: staticInputIds.historyLimit,
+		import: staticInputIds.import,
+		limitDarkChkbx: staticInputIds.limitDarkChkbx,
+		limitGrayChkbx: staticInputIds.limitGrayChkbx,
+		limitLightChkbx: staticInputIds.limitLightChkbx
+	},
+	selects: {
+		exportFormatOption: staticSelectIds.exportFormatOption,
+		paletteType: staticSelectIds.paletteType,
+		swatch: staticSelectIds.swatch,
+		swatchGen: staticSelectIds.swatchGen
+	}
+};
+
+// ******** Final DOM Data Object ********
+
+export const domData: DOMDataInterface = {
+	ids: {
+		dynamic: dynamicDomIds,
+		static: staticDomIds
+	},
+	elements: {
+		dynamic: dynamicDomElements,
+		static: staticDomElements
+	}
 } as const;

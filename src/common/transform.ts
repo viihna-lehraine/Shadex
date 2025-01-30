@@ -22,9 +22,7 @@ function addHashToHex(hex: Hex): Hex {
 			? hex
 			: {
 					value: {
-						hex: brand.asHexSet(`#${hex.value}}`),
-						alpha: brand.asHexComponent(`#$hex.value.alpha`),
-						numAlpha: brand.asAlphaRange(hex.value.numAlpha)
+						hex: brand.asHexSet(`#${hex.value}}`)
 					},
 					format: 'hex' as 'hex'
 				};
@@ -57,24 +55,12 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									key: brand.asPercentile(
 										data.metadata.customColor.colors.main
 											.cmyk.key ?? 0
-									),
-									alpha: brand.asAlphaRange(
-										data.metadata.customColor.colors.main
-											.cmyk.alpha ?? 1
 									)
 								},
 								hex: {
 									hex: brand.asHexSet(
 										data.metadata.customColor.colors.main
 											.hex.hex ?? '#000000FF'
-									),
-									alpha: brand.asHexComponent(
-										data.metadata.customColor.colors.main
-											.hex.alpha ?? 'FF'
-									),
-									numAlpha: brand.asAlphaRange(
-										data.metadata.customColor.colors.main
-											.hex.numAlpha ?? 1
 									)
 								},
 								hsl: {
@@ -89,10 +75,6 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									lightness: brand.asPercentile(
 										data.metadata.customColor.colors.main
 											.hsl.lightness ?? 0
-									),
-									alpha: brand.asAlphaRange(
-										data.metadata.customColor.colors.main
-											.hsl.alpha ?? 1
 									)
 								},
 								hsv: {
@@ -107,10 +89,6 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									value: brand.asPercentile(
 										data.metadata.customColor.colors.main
 											.hsv.value ?? 0
-									),
-									alpha: brand.asAlphaRange(
-										data.metadata.customColor.colors.main
-											.hsv.alpha ?? 1
 									)
 								},
 								lab: {
@@ -125,10 +103,6 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									b: brand.asLAB_B(
 										data.metadata.customColor.colors.main
 											.lab.b ?? 0
-									),
-									alpha: brand.asAlphaRange(
-										data.metadata.customColor.colors.main
-											.lab.alpha ?? 1
 									)
 								},
 								rgb: {
@@ -143,10 +117,6 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									blue: brand.asByteRange(
 										data.metadata.customColor.colors.main
 											.rgb.blue ?? 0
-									),
-									alpha: brand.asAlphaRange(
-										data.metadata.customColor.colors.main
-											.rgb.alpha ?? 1
 									)
 								},
 								xyz: {
@@ -161,10 +131,6 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									z: brand.asXYZ_Z(
 										data.metadata.customColor.colors.main
 											.xyz.z ?? 0
-									),
-									alpha: brand.asAlphaRange(
-										data.metadata.customColor.colors.main
-											.xyz.alpha ?? 1
 									)
 								}
 							},
@@ -185,24 +151,12 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									key: String(
 										data.metadata.customColor.colors.main
 											.cmyk.key ?? 0
-									),
-									alpha: String(
-										data.metadata.customColor.colors.main
-											.cmyk.alpha ?? 1
 									)
 								},
 								hex: {
 									hex: String(
 										data.metadata.customColor.colors.main
 											.hex.hex ?? '#000000FF'
-									),
-									alpha: String(
-										data.metadata.customColor.colors.main
-											.hex.alpha ?? 'FF'
-									),
-									numAlpha: String(
-										data.metadata.customColor.colors.main
-											.hex.numAlpha ?? 1
 									)
 								},
 								hsl: {
@@ -217,10 +171,6 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									lightness: String(
 										data.metadata.customColor.colors.main
 											.hsl.lightness ?? 0
-									),
-									alpha: String(
-										data.metadata.customColor.colors.main
-											.hsl.alpha ?? 1
 									)
 								},
 								hsv: {
@@ -235,10 +185,6 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									value: String(
 										data.metadata.customColor.colors.main
 											.hsv.value ?? 0
-									),
-									alpha: String(
-										data.metadata.customColor.colors.main
-											.hsv.alpha ?? 1
 									)
 								},
 								lab: {
@@ -253,10 +199,6 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									b: String(
 										data.metadata.customColor.colors.main
 											.lab.b ?? 0
-									),
-									alpha: String(
-										data.metadata.customColor.colors.main
-											.lab.alpha ?? 1
 									)
 								},
 								rgb: {
@@ -271,10 +213,6 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									blue: String(
 										data.metadata.customColor.colors.main
 											.rgb.blue ?? 0
-									),
-									alpha: String(
-										data.metadata.customColor.colors.main
-											.rgb.alpha ?? 1
 									)
 								},
 								xyz: {
@@ -289,16 +227,12 @@ function brandPalette(data: UnbrandedPalette): Palette {
 									z: String(
 										data.metadata.customColor.colors.main
 											.xyz.z ?? 0
-									),
-									alpha: String(
-										data.metadata.customColor.colors.main
-											.xyz.alpha ?? 1
 									)
 								}
 							},
 							css: {
 								cmyk: `cmyk(${data.metadata.customColor.colors.main.cmyk.cyan}%, ${data.metadata.customColor.colors.main.cmyk.magenta}%, ${data.metadata.customColor.colors.main.cmyk.yellow}%, ${data.metadata.customColor.colors.main.cmyk.key}%)`,
-								hex: `${data.metadata.customColor.colors.main.hex.hex}${data.metadata.customColor.colors.main.hex.alpha}`,
+								hex: `${data.metadata.customColor.colors.main.hex.hex}`,
 								hsl: `hsl(${data.metadata.customColor.colors.main.hsl.hue}, ${data.metadata.customColor.colors.main.hsl.saturation}%, ${data.metadata.customColor.colors.main.hsl.lightness}%)`,
 								hsv: `hsv(${data.metadata.customColor.colors.main.hsv.hue}, ${data.metadata.customColor.colors.main.hsv.saturation}%, ${data.metadata.customColor.colors.main.hsv.value}%)`,
 								lab: `lab(${data.metadata.customColor.colors.main.lab.l}, ${data.metadata.customColor.colors.main.lab.a}, ${data.metadata.customColor.colors.main.lab.b})`,
@@ -322,20 +256,11 @@ function brandPalette(data: UnbrandedPalette): Palette {
 						yellow: brand.asPercentile(
 							item.colors.main.cmyk.yellow ?? 0
 						),
-						key: brand.asPercentile(item.colors.main.cmyk.key ?? 0),
-						alpha: brand.asAlphaRange(
-							item.colors.main.cmyk.alpha ?? 1
-						)
+						key: brand.asPercentile(item.colors.main.cmyk.key ?? 0)
 					},
 					hex: {
 						hex: brand.asHexSet(
-							item.colors.main.hex.hex ?? '#000000FF'
-						),
-						alpha: brand.asHexComponent(
-							item.colors.main.hex.alpha ?? 'FF'
-						),
-						numAlpha: brand.asAlphaRange(
-							item.colors.main.hex.numAlpha ?? 1
+							item.colors.main.hex.hex ?? '#000000'
 						)
 					},
 					hsl: {
@@ -345,9 +270,6 @@ function brandPalette(data: UnbrandedPalette): Palette {
 						),
 						lightness: brand.asPercentile(
 							item.colors.main.hsl.lightness ?? 0
-						),
-						alpha: brand.asAlphaRange(
-							item.colors.main.hsl.alpha ?? 1
 						)
 					},
 					hsv: {
@@ -357,36 +279,24 @@ function brandPalette(data: UnbrandedPalette): Palette {
 						),
 						value: brand.asPercentile(
 							item.colors.main.hsv.value ?? 0
-						),
-						alpha: brand.asAlphaRange(
-							item.colors.main.hsv.alpha ?? 1
 						)
 					},
 					lab: {
 						l: brand.asLAB_L(item.colors.main.lab.l ?? 0),
 						a: brand.asLAB_A(item.colors.main.lab.a ?? 0),
-						b: brand.asLAB_B(item.colors.main.lab.b ?? 0),
-						alpha: brand.asAlphaRange(
-							item.colors.main.lab.alpha ?? 1
-						)
+						b: brand.asLAB_B(item.colors.main.lab.b ?? 0)
 					},
 					rgb: {
 						red: brand.asByteRange(item.colors.main.rgb.red ?? 0),
 						green: brand.asByteRange(
 							item.colors.main.rgb.green ?? 0
 						),
-						blue: brand.asByteRange(item.colors.main.rgb.blue ?? 0),
-						alpha: brand.asAlphaRange(
-							item.colors.main.rgb.alpha ?? 1
-						)
+						blue: brand.asByteRange(item.colors.main.rgb.blue ?? 0)
 					},
 					xyz: {
 						x: brand.asXYZ_X(item.colors.main.xyz.x ?? 0),
 						y: brand.asXYZ_Y(item.colors.main.xyz.y ?? 0),
-						z: brand.asXYZ_Z(item.colors.main.xyz.z ?? 0),
-						alpha: brand.asAlphaRange(
-							item.colors.main.xyz.alpha ?? 1
-						)
+						z: brand.asXYZ_Z(item.colors.main.xyz.z ?? 0)
 					}
 				},
 				stringProps: {
@@ -394,57 +304,49 @@ function brandPalette(data: UnbrandedPalette): Palette {
 						cyan: String(item.colors.main.cmyk.cyan ?? 0),
 						magenta: String(item.colors.main.cmyk.magenta ?? 0),
 						yellow: String(item.colors.main.cmyk.yellow ?? 0),
-						key: String(item.colors.main.cmyk.key ?? 0),
-						alpha: String(item.colors.main.cmyk.alpha ?? 1)
+						key: String(item.colors.main.cmyk.key ?? 0)
 					},
 					hex: {
-						hex: String(item.colors.main.hex.hex ?? '#000000FF'),
-						alpha: String(item.colors.main.hex.alpha ?? 'FF'),
-						numAlpha: String(item.colors.main.hex.numAlpha ?? 1)
+						hex: String(item.colors.main.hex.hex ?? '#000000')
 					},
 					hsl: {
 						hue: String(item.colors.main.hsl.hue ?? 0),
 						saturation: String(
 							item.colors.main.hsl.saturation ?? 0
 						),
-						lightness: String(item.colors.main.hsl.lightness ?? 0),
-						alpha: String(item.colors.main.hsl.alpha ?? 1)
+						lightness: String(item.colors.main.hsl.lightness ?? 0)
 					},
 					hsv: {
 						hue: String(item.colors.main.hsv.hue ?? 0),
 						saturation: String(
 							item.colors.main.hsv.saturation ?? 0
 						),
-						value: String(item.colors.main.hsv.value ?? 0),
-						alpha: String(item.colors.main.hsv.alpha ?? 1)
+						value: String(item.colors.main.hsv.value ?? 0)
 					},
 					lab: {
 						l: String(item.colors.main.lab.l ?? 0),
 						a: String(item.colors.main.lab.a ?? 0),
-						b: String(item.colors.main.lab.b ?? 0),
-						alpha: String(item.colors.main.lab.alpha ?? 1)
+						b: String(item.colors.main.lab.b ?? 0)
 					},
 					rgb: {
 						red: String(item.colors.main.rgb.red ?? 0),
 						green: String(item.colors.main.rgb.green ?? 0),
-						blue: String(item.colors.main.rgb.blue ?? 0),
-						alpha: String(item.colors.main.rgb.alpha ?? 1)
+						blue: String(item.colors.main.rgb.blue ?? 0)
 					},
 					xyz: {
 						x: String(item.colors.main.xyz.x ?? 0),
 						y: String(item.colors.main.xyz.y ?? 0),
-						z: String(item.colors.main.xyz.z ?? 0),
-						alpha: String(item.colors.main.xyz.alpha ?? 1)
+						z: String(item.colors.main.xyz.z ?? 0)
 					}
 				},
 				css: {
-					cmyk: `cmyk(${item.colors.main.cmyk.cyan}%, ${item.colors.main.cmyk.magenta}%, ${item.colors.main.cmyk.yellow}%, ${item.colors.main.cmyk.key}%, ${item.colors.main.cmyk.alpha})`,
-					hex: `${item.colors.main.hex.hex}${item.colors.main.hex.alpha}`,
-					hsl: `hsl(${item.colors.main.hsl.hue}, ${item.colors.main.hsl.saturation}%, ${item.colors.main.hsl.lightness}%, ${item.colors.main.hsl.alpha})`,
-					hsv: `hsv(${item.colors.main.hsv.hue}, ${item.colors.main.hsv.saturation}%, ${item.colors.main.hsv.value}%, ${item.colors.main.hsv.alpha})`,
-					lab: `lab(${item.colors.main.lab.l}, ${item.colors.main.lab.a}, ${item.colors.main.lab.b}, ${item.colors.main.lab.alpha})`,
-					rgb: `rgb(${item.colors.main.rgb.red}, ${item.colors.main.rgb.green}, ${item.colors.main.rgb.blue}, ${item.colors.main.rgb.alpha})`,
-					xyz: `xyz(${item.colors.main.xyz.x}, ${item.colors.main.xyz.y}, ${item.colors.main.xyz.z}, ${item.colors.main.xyz.alpha})`
+					cmyk: `cmyk(${item.colors.main.cmyk.cyan}%, ${item.colors.main.cmyk.magenta}%, ${item.colors.main.cmyk.yellow}%, ${item.colors.main.cmyk.key}%)`,
+					hex: `${item.colors.main.hex.hex}}`,
+					hsl: `hsl(${item.colors.main.hsl.hue}, ${item.colors.main.hsl.saturation}%, ${item.colors.main.hsl.lightness}%)`,
+					hsv: `hsv(${item.colors.main.hsv.hue}, ${item.colors.main.hsv.saturation}%, ${item.colors.main.hsv.value}%)`,
+					lab: `lab(${item.colors.main.lab.l}, ${item.colors.main.lab.a}, ${item.colors.main.lab.b})`,
+					rgb: `rgb(${item.colors.main.rgb.red}, ${item.colors.main.rgb.green}, ${item.colors.main.rgb.blue})`,
+					xyz: `xyz(${item.colors.main.xyz.x}, ${item.colors.main.xyz.y}, ${item.colors.main.xyz.z})`
 				}
 			}
 		}))
@@ -477,17 +379,14 @@ function defaultColorValue(color: UnbrandedColor): Color {
 					cyan: brand.asPercentile(0),
 					magenta: brand.asPercentile(0),
 					yellow: brand.asPercentile(0),
-					key: brand.asPercentile(0),
-					alpha: brand.asAlphaRange(1)
+					key: brand.asPercentile(0)
 				},
 				format: 'cmyk'
 			};
 		case 'hex':
 			return {
 				value: {
-					hex: brand.asHexSet('#000000'),
-					alpha: brand.asHexComponent('FF'),
-					numAlpha: brand.asAlphaRange(1)
+					hex: brand.asHexSet('#000000')
 				},
 				format: 'hex'
 			};
@@ -496,8 +395,7 @@ function defaultColorValue(color: UnbrandedColor): Color {
 				value: {
 					hue: brand.asRadial(0),
 					saturation: brand.asPercentile(0),
-					lightness: brand.asPercentile(0),
-					alpha: brand.asAlphaRange(1)
+					lightness: brand.asPercentile(0)
 				},
 				format: 'hsl'
 			};
@@ -506,8 +404,7 @@ function defaultColorValue(color: UnbrandedColor): Color {
 				value: {
 					hue: brand.asRadial(0),
 					saturation: brand.asPercentile(0),
-					value: brand.asPercentile(0),
-					alpha: brand.asAlphaRange(1)
+					value: brand.asPercentile(0)
 				},
 				format: 'hsv'
 			};
@@ -516,8 +413,7 @@ function defaultColorValue(color: UnbrandedColor): Color {
 				value: {
 					l: brand.asLAB_L(0),
 					a: brand.asLAB_A(0),
-					b: brand.asLAB_B(0),
-					alpha: brand.asAlphaRange(1)
+					b: brand.asLAB_B(0)
 				},
 				format: 'lab'
 			};
@@ -526,8 +422,7 @@ function defaultColorValue(color: UnbrandedColor): Color {
 				value: {
 					red: brand.asByteRange(0),
 					green: brand.asByteRange(0),
-					blue: brand.asByteRange(0),
-					alpha: brand.asAlphaRange(1)
+					blue: brand.asByteRange(0)
 				},
 				format: 'rgb'
 			};
@@ -535,8 +430,7 @@ function defaultColorValue(color: UnbrandedColor): Color {
 			return {
 				value: {
 					saturation: brand.asPercentile(0),
-					lightness: brand.asPercentile(0),
-					alpha: brand.asAlphaRange(1)
+					lightness: brand.asPercentile(0)
 				},
 				format: 'sl'
 			};
@@ -544,8 +438,7 @@ function defaultColorValue(color: UnbrandedColor): Color {
 			return {
 				value: {
 					saturation: brand.asPercentile(0),
-					value: brand.asPercentile(0),
-					alpha: brand.asAlphaRange(1)
+					value: brand.asPercentile(0)
 				},
 				format: 'sv'
 			};
@@ -554,8 +447,7 @@ function defaultColorValue(color: UnbrandedColor): Color {
 				value: {
 					x: brand.asXYZ_X(0),
 					y: brand.asXYZ_Y(0),
-					z: brand.asXYZ_Z(0),
-					alpha: brand.asAlphaRange(1)
+					z: brand.asXYZ_Z(0)
 				},
 				format: 'xyz'
 			};

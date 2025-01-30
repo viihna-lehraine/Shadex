@@ -1,14 +1,15 @@
 // File: palette/main.js
 
 import {
-	GenPaletteArgs,
 	HSL,
 	Palette,
 	PaletteFn_MasterInterface,
+	PaletteGenerationArgs,
 	PaletteItem,
 	PaletteOptions
 } from '../types/index.js';
-import { IDBManager } from '../db/index.js';
+import { IDBManager } from '../db/IDBManager.js';
+import { UIManager } from '../ui/UIManager.js';
 import { coreUtils, helpers, transformUtils, utils } from '../common/index.js';
 import { createLogger } from '../logger/index.js';
 import { defaultData as defaults } from '../data/defaults.js';
@@ -29,8 +30,8 @@ const isTooDark = limits.isTooDark;
 const isTooGray = limits.isTooGray;
 const isTooLight = limits.isTooLight;
 
-async function genPalette(options: PaletteOptions): Promise<void> {
-	const thisFunction = 'genPalette()';
+async function paletteGeneration(options: PaletteOptions): Promise<void> {
+	const thisFunction = 'paletteGeneration()';
 
 	try {
 		let { swatches, customColor } = options;
@@ -55,15 +56,23 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 
 		const validatedCustomColor: HSL =
 			((await helpers.dom.validateAndConvertColor(customColor)) as HSL) ??
-			utils.random.hsl(options.flags.enableAlpha);
-
-		if (mode.debug && logMode.info && logMode.verbosity > 2)
-			logger.info(
-				`Custom color: ${JSON.stringify(customColor)}`,
-				`${thisModule} > ${thisFunction}`
-			);
+			utils.random.hsl();
 
 		options.customColor = validatedCustomColor;
+
+		if (!customColor) {
+			logger.error(
+				'Custom color is null or undefined.',
+				`${thisModule} > ${thisFunction}`
+			);
+			return;
+		}
+		if (mode.debug && logMode.info && logMode.verbosity > 2) {
+			logger.info(
+				`Validated custom color: ${JSON.stringify(customColor)}`,
+				`${thisModule} > ${thisFunction}`
+			);
+		}
 
 		const palette = await generate.selectedPalette(options);
 
@@ -87,7 +96,11 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 
 		if (!tableId) throw new Error('Table ID is null or undefined.');
 
-		await genPaletteDOMBox(palette.items, swatches, tableId);
+		const uiManager = new UIManager();
+
+		uiManager.addPaletteToHistory(palette);
+
+		await paletteDomBoxGeneration(palette.items, swatches, tableId);
 	} catch (error) {
 		if (logMode.error)
 			logger.error(
@@ -97,12 +110,12 @@ async function genPalette(options: PaletteOptions): Promise<void> {
 	}
 }
 
-async function genPaletteDOMBox(
+async function paletteDomBoxGeneration(
 	items: PaletteItem[],
 	numBoxes: number,
 	tableId: string
 ): Promise<void> {
-	const thisFunction = 'genPaletteDOMBox()';
+	const thisFunction = 'paletteDomBoxGeneration()';
 
 	try {
 		const paletteRow = document.getElementById('palette-row');
@@ -154,8 +167,8 @@ async function genPaletteDOMBox(
 }
 
 export const start: PaletteFn_MasterInterface['start'] = {
-	genPalette,
-	genPaletteDOMBox
+	paletteDomBoxGeneration,
+	paletteGeneration
 } as const;
 
 // ******** GENERATE ********
@@ -164,8 +177,7 @@ function limitedHSL(
 	baseHue: number,
 	limitDark: boolean,
 	limitGray: boolean,
-	limitLight: boolean,
-	alphaValue: number | null
+	limitLight: boolean
 ): HSL {
 	let hsl: HSL;
 
@@ -174,10 +186,7 @@ function limitedHSL(
 			value: {
 				hue: coreUtils.brand.asRadial(baseHue),
 				saturation: coreUtils.brand.asPercentile(Math.random() * 100),
-				lightness: coreUtils.brand.asPercentile(Math.random() * 100),
-				alpha: alphaValue
-					? coreUtils.brand.asAlphaRange(alphaValue)
-					: coreUtils.brand.asAlphaRange(1)
+				lightness: coreUtils.brand.asPercentile(Math.random() * 100)
 			},
 			format: 'hsl'
 		};
@@ -196,14 +205,13 @@ async function selectedPalette(options: PaletteOptions): Promise<Palette> {
 	try {
 		const { customColor, flags, swatches, type } = options;
 
-		const args: GenPaletteArgs = {
+		const args: PaletteGenerationArgs = {
 			swatches,
 			type,
 			customColor,
-			enableAlpha: flags.enableAlpha,
-			limitDark: flags.limitDarkness,
-			limitGray: flags.limitGrayness,
-			limitLight: flags.limitLightness
+			limitDark: flags.limitDark,
+			limitGray: flags.limitGray,
+			limitLight: flags.limitLight
 		};
 
 		if (!mode.quiet && logMode.debug && logMode.verbosity > 2) {

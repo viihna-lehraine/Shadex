@@ -1,6 +1,6 @@
 // File: palette/main/index.js
 
-import { GenPaletteFnInterface } from '../../types/index.js';
+import { PaletteGenerationInterface } from '../../types/index.js';
 import { analogous } from './types/analogous.js';
 import { complementary } from './types/complementary.js';
 import { diadic } from './types/diadic.js';
@@ -11,7 +11,7 @@ import { splitComplementary } from './types/splitComplementary.js';
 import { tetradic } from './types/tetradic.js';
 import { triadic } from './types/triadic.js';
 
-export const genPalette: GenPaletteFnInterface = {
+export const genPalette: PaletteGenerationInterface = {
 	analogous,
 	complementary,
 	diadic,

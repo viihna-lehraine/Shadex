@@ -31,7 +31,14 @@
 	flex-direction: row;
 }
 
+.flex-start {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+}
+
 .flex-wrap {
+	display: flex;
 	flex-wrap: wrap;
 }
 

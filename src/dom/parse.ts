@@ -5,7 +5,7 @@ import { createLogger } from '../logger/index.js';
 import { domData } from '../data/dom.js';
 import { modeData as mode } from '../data/mode.js';
 
-const ids = domData.ids;
+const ids = domData.ids.static;
 const logMode = mode.logging;
 
 const thisModule = 'dom/parse.js';
@@ -44,7 +44,7 @@ function checkbox(id: string): boolean | void {
 function paletteExportFormat(): string | void {
 	const thisFunction = 'paletteExportFormat()';
 	const formatSelectionMenu = document.getElementById(
-		ids.exportPaletteFormatOptions
+		ids.selects.exportFormatOption
 	) as HTMLSelectElement;
 
 	if (!formatSelectionMenu) {

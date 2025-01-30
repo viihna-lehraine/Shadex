@@ -26,7 +26,7 @@ import { base, brand, brandColor, clone, sanitize, validate } from './core.js';
 import { componentToHex } from './transform.js';
 import { createLogger } from '../logger/index.js';
 import { defaultData as defaults } from '../data/defaults.js';
-import { hexAlphaToNumericAlpha, stripHashFromHex } from './utils/color.js';
+import { stripHashFromHex } from './utils/color.js';
 import { modeData as mode } from '../data/mode.js';
 
 const defaultColors = defaults.colors.base.unbranded;
@@ -109,13 +109,11 @@ function cmykToRGB(cmyk: CMYK): RGB {
 			255 *
 			(1 - clonedCMYK.value.yellow / 100) *
 			(1 - clonedCMYK.value.key / 100);
-		const alpha = cmyk.value.alpha;
 		const rgb: RGB = {
 			value: {
 				red: brand.asByteRange(Math.round(r)),
 				green: brand.asByteRange(Math.round(g)),
-				blue: brand.asByteRange(Math.round(b)),
-				alpha: brand.asAlphaRange(alpha)
+				blue: brand.asByteRange(Math.round(b))
 			},
 			format: 'rgb'
 		};
@@ -167,26 +165,16 @@ function hexToHSLWrapper(input: string | Hex): HSL {
 			typeof clonedInput === 'string'
 				? {
 						value: {
-							hex: brand.asHexSet(clonedInput),
-							alpha: brand.asHexComponent(clonedInput.slice(-2)),
-							numAlpha: brand.asAlphaRange(
-								hexAlphaToNumericAlpha(clonedInput.slice(-2))
-							)
+							hex: brand.asHexSet(clonedInput)
 						},
 						format: 'hex'
 					}
 				: {
-						...clonedInput,
 						value: {
-							...clonedInput.value,
-							numAlpha: brand.asAlphaRange(
-								hexAlphaToNumericAlpha(
-									String(clonedInput.value.alpha)
-								)
-							)
-						}
+							hex: brand.asHexSet(clonedInput.value.hex)
+						},
+						format: 'hex'
 					};
-
 		return hexToHSL(hex);
 	} catch (error) {
 		if (logMode.error) {
@@ -222,8 +210,7 @@ function hexToRGB(hex: Hex): RGB {
 			value: {
 				red: brand.asByteRange(Math.round((bigint >> 16) & 255)),
 				green: brand.asByteRange(Math.round((bigint >> 8) & 255)),
-				blue: brand.asByteRange(Math.round(bigint & 255)),
-				alpha: hex.value.numAlpha
+				blue: brand.asByteRange(Math.round(bigint & 255))
 			},
 			format: 'rgb'
 		};
@@ -314,8 +301,7 @@ function hslToHSV(hsl: HSL): HSV {
 			value: {
 				hue: brand.asRadial(Math.round(clonedHSL.value.hue)),
 				saturation: brand.asPercentile(Math.round(newSaturation * 100)),
-				value: brand.asPercentile(Math.round(value * 100)),
-				alpha: brand.asAlphaRange(hsl.value.alpha)
+				value: brand.asPercentile(Math.round(value * 100))
 			},
 			format: 'hsv'
 		};
@@ -390,8 +376,7 @@ function hslToRGB(hsl: HSL): RGB {
 					Math.round(
 						hueToRGB(p, q, clonedHSL.value.hue - 1 / 3) * 255
 					)
-				),
-				alpha: brand.asAlphaRange(hsl.value.alpha)
+				)
 			},
 			format: 'rgb'
 		};
@@ -423,8 +408,7 @@ function hslToSL(hsl: HSL): SL {
 		return {
 			value: {
 				saturation: hsl.value.saturation,
-				lightness: hsl.value.lightness,
-				alpha: hsl.value.alpha
+				lightness: hsl.value.lightness
 			},
 			format: 'sl' as 'sl'
 		};
@@ -524,8 +508,7 @@ function hsvToHSL(hsv: HSV): HSL {
 			value: {
 				hue: brand.asRadial(Math.round(clonedHSV.value.hue)),
 				saturation: brand.asPercentile(Math.round(newSaturation * 100)),
-				lightness: brand.asPercentile(Math.round(lightness)),
-				alpha: hsv.value.alpha
+				lightness: brand.asPercentile(Math.round(lightness))
 			},
 			format: 'hsl'
 		};
@@ -557,8 +540,7 @@ function hsvToSV(hsv: HSV): SV {
 		return {
 			value: {
 				saturation: hsv.value.saturation,
-				value: hsv.value.value,
-				alpha: hsv.value.alpha
+				value: hsv.value.value
 			},
 			format: 'sv' as 'sv'
 		};
@@ -673,8 +655,7 @@ function labToXYZ(lab: LAB): XYZ {
 								? pow(z, 3)
 								: (z - 16 / 116) / 7.787)
 					)
-				),
-				alpha: brand.asAlphaRange(lab.value.alpha)
+				)
 			},
 			format: 'xyz'
 		};
@@ -721,10 +702,9 @@ function rgbToCMYK(rgb: RGB): CMYK {
 		const yellow = sanitize.percentile(
 			Math.round((1 - bluePrime - key) / (1 - key) || 0)
 		);
-		const alpha = brand.asAlphaRange(rgb.value.alpha);
 		const format: 'cmyk' = 'cmyk';
 
-		const cmyk = { value: { cyan, magenta, yellow, key, alpha }, format };
+		const cmyk = { value: { cyan, magenta, yellow, key }, format };
 
 		if (!mode.quiet)
 			logger.info(
@@ -765,20 +745,17 @@ function rgbToHex(rgb: RGB): Hex {
 				clonedRGB.value.red,
 				clonedRGB.value.green,
 				clonedRGB.value.blue
-			].some(v => isNaN(v) || v < 0 || v > 255) ||
-			[clonedRGB.value.alpha].some(v => isNaN(v) || v < 0 || v > 1)
+			].some(v => isNaN(v) || v < 0 || v > 255)
 		) {
 			if (logMode.warn)
 				logger.warn(
-					`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}\nA=${JSON.stringify(clonedRGB.value.alpha)}`,
+					`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}`,
 					`${thisModule} > ${thisMethod}`
 				);
 
 			return {
 				value: {
-					hex: brand.asHexSet('#000000FF'),
-					alpha: brand.asHexComponent('FF'),
-					numAlpha: brand.asAlphaRange(1)
+					hex: brand.asHexSet('#000000FF')
 				},
 				format: 'hex' as 'hex'
 			};
@@ -788,11 +765,7 @@ function rgbToHex(rgb: RGB): Hex {
 			value: {
 				hex: brand.asHexSet(
 					`#${componentToHex(clonedRGB.value.red)}${componentToHex(clonedRGB.value.green)}${componentToHex(clonedRGB.value.blue)}`
-				),
-				alpha: brand.asHexComponent(
-					componentToHex(clonedRGB.value.alpha)
-				),
-				numAlpha: clonedRGB.value.alpha
+				)
 			},
 			format: 'hex' as 'hex'
 		};
@@ -858,8 +831,7 @@ function rgbToHSL(rgb: RGB): HSL {
 			value: {
 				hue: brand.asRadial(Math.round(hue)),
 				saturation: brand.asPercentile(Math.round(saturation * 100)),
-				lightness: brand.asPercentile(Math.round(lightness * 100)),
-				alpha: brand.asAlphaRange(rgb.value.alpha)
+				lightness: brand.asPercentile(Math.round(lightness * 100))
 			},
 			format: 'hsl'
 		};
@@ -922,8 +894,7 @@ function rgbToHSV(rgb: RGB): HSV {
 			value: {
 				hue: brand.asRadial(Math.round(hue)),
 				saturation: brand.asPercentile(Math.round(saturation * 100)),
-				value: brand.asPercentile(Math.round(value * 100)),
-				alpha: brand.asAlphaRange(rgb.value.alpha)
+				value: brand.asPercentile(Math.round(value * 100))
 			},
 			format: 'hsv'
 		};
@@ -994,8 +965,7 @@ function rgbToXYZ(rgb: RGB): XYZ {
 							scaledGreen * 0.1192 +
 							scaledBlue * 0.9505
 					)
-				),
-				alpha: brand.asAlphaRange(rgb.value.alpha)
+				)
 			},
 			format: 'xyz'
 		};
@@ -1091,8 +1061,7 @@ function xyzToLAB(xyz: XYZ): LAB {
 			value: {
 				l: brand.asLAB_L(Math.round(l)),
 				a: brand.asLAB_A(Math.round(a)),
-				b: brand.asLAB_B(Math.round(b)),
-				alpha: xyz.value.alpha
+				b: brand.asLAB_B(Math.round(b))
 			},
 			format: 'lab'
 		};
@@ -1149,8 +1118,7 @@ function xyzToRGB(xyz: XYZ): RGB {
 			value: {
 				red: brand.asByteRange(Math.round(red)),
 				green: brand.asByteRange(Math.round(green)),
-				blue: brand.asByteRange(Math.round(blue)),
-				alpha: xyz.value.alpha
+				blue: brand.asByteRange(Math.round(blue))
 			},
 			format: 'rgb'
 		});

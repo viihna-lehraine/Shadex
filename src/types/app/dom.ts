@@ -7,8 +7,8 @@ export interface DOMFn_MasterInterface {
 			eventType: K,
 			callback: (ev: HTMLElementEventMap[K]) => void
 		): void;
-		handlePaletteGen: () => void;
 		initializeEventListeners(): void;
+		processPaletteGeneration: () => void;
 	};
 	fileUtils: {
 		download(data: string, filename: string, type: string): void;
@@ -19,7 +19,7 @@ export interface DOMFn_MasterInterface {
 		paletteExportFormat(): string | void;
 	};
 	validate: {
-		elements(): void;
+		staticElements(): void;
 	};
 }
 

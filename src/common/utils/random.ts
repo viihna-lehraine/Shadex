@@ -12,11 +12,10 @@ const thisModule = 'common/utils/random.js';
 
 const logger = await createLogger();
 
-function hsl(enableAlpha: boolean): HSL {
+function hsl(): HSL {
 	const thisMethod = 'hsl()';
 
 	try {
-		const alpha = enableAlpha ? Math.round(Math.random() * 100) / 100 : 1;
 		const hsl: HSL = {
 			value: {
 				hue: coreUtils.sanitize.radial(Math.floor(Math.random() * 360)),
@@ -25,8 +24,7 @@ function hsl(enableAlpha: boolean): HSL {
 				),
 				lightness: coreUtils.sanitize.percentile(
 					Math.floor(Math.random() * 101)
-				),
-				alpha: coreUtils.brand.asAlphaRange(alpha)
+				)
 			},
 			format: 'hsl'
 		};
@@ -67,11 +65,10 @@ function hsl(enableAlpha: boolean): HSL {
 	}
 }
 
-function sl(enableAlpha: boolean): SL {
+function sl(): SL {
 	const thisMethod = 'sl()';
 
 	try {
-		const alpha = enableAlpha ? Math.round(Math.random() * 100) / 100 : 1;
 		const sl: SL = {
 			value: {
 				saturation: coreUtils.sanitize.percentile(
@@ -79,8 +76,7 @@ function sl(enableAlpha: boolean): SL {
 				),
 				lightness: coreUtils.sanitize.percentile(
 					Math.max(0, Math.min(100, Math.random() * 100))
-				),
-				alpha: coreUtils.brand.asAlphaRange(alpha)
+				)
 			},
 			format: 'sl'
 		};

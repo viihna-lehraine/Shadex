@@ -1,7 +1,6 @@
 // File: types/app/common.js
 
 import {
-	AlphaRange,
 	ByteRange,
 	CMYK,
 	CMYK_StringProps,
@@ -12,9 +11,7 @@ import {
 	ColorSpace,
 	ColorSpaceExtended,
 	Color_StringProps,
-	GenPaletteArgs,
 	Hex,
-	HexComponent,
 	HexSet,
 	Hex_StringProps,
 	HSL,
@@ -29,6 +26,7 @@ import {
 	MakePaletteBox,
 	NumericRangeKey,
 	Palette,
+	PaletteGenerationArgs,
 	PaletteItem,
 	Percentile,
 	Radial,
@@ -61,16 +59,6 @@ import { dataSets as sets } from '../../data/sets.js';
 
 const _sets = sets;
 
-export interface CommonFn_DOM_BaseInterface {
-	getElement<T extends HTMLElement>(
-		id: string,
-		mode: { logging: { warn: boolean }; debugLevel: number }
-	): Promise<T | null>;
-}
-
-export interface CommonFn_DOM_MasterInterface
-	extends CommonFn_DOM_BaseInterface {}
-
 export interface CommonFn_MasterInterface {
 	convert: {
 		hslTo(color: HSL, colorSpace: ColorSpaceExtended): Color;
@@ -90,15 +78,11 @@ export interface CommonFn_MasterInterface {
 			parseCustomColor(rawValue: string): HSL | null;
 		};
 		brand: {
-			asAlphaRange(value: number): AlphaRange;
 			asBranded<T extends keyof RangeKeyMap>(
 				value: number,
 				rangeKey: T
 			): RangeKeyMap[T];
-			asHexComponent(value: string): HexComponent;
-			asHexSet(value: string): HexSet;
 			asByteRange(value: number): ByteRange;
-			asHexComponent(value: string): HexComponent;
 			asHexSet(value: string): HexSet;
 			asLAB_L(value: number): LAB_L;
 			asLAB_A(value: number): LAB_A;
@@ -123,7 +107,6 @@ export interface CommonFn_MasterInterface {
 		convert: {
 			colorStringToColor(colorString: Color_StringProps): Promise<Color>;
 			colorToCSSColorString(color: Color): Promise<string>;
-			hexAlphaToNumericAlpha(hexAlpha: string): number;
 			stringToValue: {
 				cmyk(cmyk: CMYK_StringProps['value']): CMYK['value'];
 				hex(hex: Hex_StringProps['value']): Hex['value'];
@@ -202,7 +185,7 @@ export interface CommonFn_MasterInterface {
 	};
 	superUtils: {
 		dom: {
-			getGenButtonArgs(): GenPaletteArgs | null;
+			getPaletteGenerationArgs(): PaletteGenerationArgs | null;
 			switchColorSpace(targetFormat: ColorSpace): Promise<void>;
 		};
 	};
@@ -258,17 +241,13 @@ export interface CommonFn_MasterInterface {
 			formatPercentageValues<T extends Record<string, unknown>>(
 				value: T
 			): T;
-			getAlphaFromHex(hex: string): number;
 			getColorString(color: Color): string | null;
-			hexAlphaToNumericAlpha(hexAlpha: string): number;
 			parseColor(color: ColorSpace, value: string): Color | null;
 			parseComponents(value: string, count: number): number[];
-			parseHexWithAlpha(hexValue: string): Hex['value'] | null;
 			stripHashFromHex(hex: Hex): Hex;
 			stripPercentFromValues<T extends Record<string, number | string>>(
 				value: T
 			): { [K in keyof T]: T[K] extends `${number}%` ? number : T[K] };
-			toHexWithAlpha(rgbValue: RGB['value']): string;
 		};
 		conversion: {
 			getConversionFn<
@@ -295,7 +274,6 @@ export interface CommonFn_MasterInterface {
 				items: PaletteItem[],
 				swatches: number,
 				paletteID: number,
-				enableAlpha: boolean,
 				limitDark: boolean,
 				limitGray: boolean,
 				limitLight: boolean
@@ -306,8 +284,8 @@ export interface CommonFn_MasterInterface {
 			): Promise<void>;
 		};
 		random: {
-			hsl(enableAlpha: boolean): HSL;
-			sl(enableAlpha: boolean): SL;
+			hsl(): HSL;
+			sl(): SL;
 		};
 	};
 }
