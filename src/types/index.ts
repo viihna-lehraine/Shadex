@@ -1,6 +1,7 @@
 // File: types/index.js
 
 export type { CommonFn_MasterInterface } from './app/common.js';
+export type { DBUtilsInterface } from './app/db.js';
 export type {
 	DOMFn_EventListenerFnInterface,
 	DOMFn_MasterInterface,
@@ -98,6 +99,11 @@ export type {
 } from './data/sets.js';
 export type {
 	AppLogger_ClassInterface,
+	DBService_ClassInterface,
+	HistoryService_ClassInterface,
 	IDBManager_ClassInterface,
+	MutationService_ClassInterface,
+	PaletteService_ClassInterface,
+	SettingsService_ClassInterface,
 	UIManager_ClassInterface
 } from './classes.js';

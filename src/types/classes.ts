@@ -6,9 +6,11 @@ import {
 	HSL,
 	MutationLog,
 	Palette,
+	PaletteDB,
 	PaletteItem,
 	PaletteBoxObject,
 	PaletteSchema,
+	Settings,
 	StoredPalette
 } from './index.js';
 
@@ -29,13 +31,27 @@ export interface AppLogger_ClassInterface {
 	): void;
 }
 
+export interface DBService_ClassInterface {
+	deleteDatabase(): Promise<void>;
+	deleteEntries(store: keyof PaletteSchema, keys: string[]): Promise<void>;
+}
+
+export interface HistoryService_ClassInterface {
+	getPaletteHistory(): Promise<Palette[]>;
+	savePaletteHistory(paletteHistory: Palette[]): Promise<void>;
+}
+
 export interface IDBManager_ClassInterface {
-	getLoggedObject<T extends object>(obj: T | null, key: string): T | null;
-	getNextTableID(): Promise<string | null>;
-	ensureEntryExists(
-		storeName: keyof PaletteSchema,
-		key: string
-	): Promise<boolean>;
+	createMutationLogger<T extends object>(obj: T, key: string): Promise<T>;
+	deleteDatabase(): Promise<void>;
+	deleteEntries(store: keyof PaletteSchema, keys: string[]): Promise<void>;
+	getCurrentPaletteID(): Promise<number>;
+	getCachedSettings(): Promise<Settings>;
+	getDB(): Promise<PaletteDB>;
+	getNextTableID(): Promise<string>;
+	getMutations(): Promise<MutationLog[]>;
+	getPaletteHistory(): Promise<Palette[]>;
+	getSettings(): Promise<Settings>;
 	getStore<StoreName extends keyof PaletteSchema>(
 		storeName: StoreName,
 		mode: 'readonly'
@@ -48,14 +64,58 @@ export interface IDBManager_ClassInterface {
 	): Promise<
 		IDBPObjectStore<PaletteSchema, [StoreName], StoreName, 'readwrite'>
 	>;
-	getTable(id: string): Promise<StoredPalette | null>;
-	resetDatabase(): Promise<void | null>;
+	getStore<StoreName extends keyof PaletteSchema>(
+		storeName: StoreName,
+		mode: 'readonly' | 'readwrite'
+	): Promise<
+		IDBPObjectStore<PaletteSchema, [StoreName], StoreName, typeof mode>
+	>;
+	persistMutation(data: MutationLog): Promise<void>;
+	resetDatabase(): Promise<void>;
+	resetPaletteID(): Promise<void>;
+	savePalette(id: string, newPalette: Palette): Promise<void>;
+	savePaletteToDB(
+		type: string,
+		items: PaletteItem[],
+		paletteID: number,
+		numBoxes: number,
+		limitDark: boolean,
+		limitGray: boolean,
+		limitLight: boolean
+	): Promise<Palette>;
 	savePaletteHistory(paletteHistory: Palette[]): Promise<void>;
+	saveSettings(newSettings: Settings): Promise<void>;
 	updateEntryInPalette(
 		tableID: string,
 		entryIndex: number,
 		newEntry: PaletteItem
-	): Promise<void | null>;
+	): Promise<void>;
+}
+
+export interface MutationService_ClassInterface {
+	createMutationLogger<T extends object>(obj: T, key: string): Promise<T>;
+	getMutations(): Promise<MutationLog[]>;
+	persistMutation(data: MutationLog): Promise<void>;
+}
+
+export interface PaletteService_ClassInterface {
+	getCurrentPaletteID(): Promise<number>;
+	getNextTableID(): Promise<string>;
+	getPalette(id: string): Promise<Palette | void | null>;
+	savePalette(id: string, palette: Palette): Promise<void>;
+	updateEntryInPalette(
+		tableID: string,
+		entryIndex: number,
+		newEntry: PaletteItem
+	): Promise<void>;
+}
+
+export interface SettingsService_ClassInterface {
+	get maxHistory(): number;
+	set maxHistory(value: number);
+	getCachedSettings(): Promise<Settings>;
+	getSettings(): Promise<Settings>;
+	saveSettings(newSettings: Settings): Promise<void>;
 }
 
 export interface UIManager_ClassInterface {
@@ -73,5 +133,4 @@ export interface UIManager_ClassInterface {
 	): Promise<PaletteBoxObject>;
 	removePaletteFromHistory(paletteID: string): Promise<void>;
 	renderPalette(tableId: string): Promise<void | null>;
-	setHistoryLimit(limit: number): Promise<void>;
 }

@@ -55,7 +55,7 @@ async function toCSS(palette: Palette): Promise<string> {
 			// 4. resolve serialized CSS data
 			resolve(cssData.trim());
 		} catch (error) {
-			if (!mode.quiet && logMode.error) {
+			if (logMode.error) {
 				if (logMode.verbosity > 1) {
 					logger.error(
 						`Failed to convert palette to CSS: ${error}`,
@@ -87,8 +87,8 @@ async function toJSON(palette: Palette): Promise<string> {
 
 			resolve(jsonData);
 		} catch (error) {
-			if (!mode.quiet && logMode.error) {
-				if (logMode.verbosity > 1) {
+			if (logMode.error) {
+				if (logMode.verbosity > 2) {
 					logger.error(
 						`Failed to convert palette to JSON: ${error}`,
 						`${thisModule} > ${thisMethod}`
@@ -169,8 +169,8 @@ async function toXML(palette: Palette): Promise<string> {
 
 			resolve(xmlData.trim());
 		} catch (error) {
-			if (!mode.quiet && logMode.error) {
-				if (logMode.verbosity > 1) {
+			if (logMode.error) {
+				if (logMode.verbosity > 2) {
 					logger.error(
 						`Failed to convert palette to XML: ${error}`,
 						`${thisModule} > ${thisMethod}`

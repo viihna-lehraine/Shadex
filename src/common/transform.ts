@@ -152,7 +152,7 @@ function componentToHex(component: number): string {
 
 		return hex.length === 1 ? '0' + hex : hex;
 	} catch (error) {
-		if (!mode.quiet && mode.logging.error)
+		if (mode.logging.error)
 			logger.error(
 				`componentToHex error: ${error}`,
 				`${thisModule} > ${thisMethod}`

@@ -1,7 +1,7 @@
 // File: types/db.js
 
 import { IDBPDatabase } from 'idb';
-import { ColorSpace, HSL, Palette, UnbrandedPalette } from '../index.js';
+import { ColorSpace, Palette, UnbrandedPalette } from '../index.js';
 
 export interface MutationLog {
 	timestamp: string;
@@ -15,10 +15,6 @@ export interface MutationLog {
 export type PaletteDB = IDBPDatabase<PaletteSchema>;
 
 export interface PaletteSchema {
-	customColor: {
-		key: string;
-		value: { color: HSL };
-	};
 	mutations: {
 		key: string;
 		timestamp: string;
@@ -36,9 +32,9 @@ export interface PaletteSchema {
 
 export interface Settings {
 	colorSpace: ColorSpace;
+	lastPaletteID: number;
 	lastTableID: number;
 	loggingEnabled: boolean;
-	maxHistory: number;
 	theme: 'light' | 'dark';
 }
 

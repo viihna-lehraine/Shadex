@@ -114,7 +114,6 @@ interface DOM_StaticElement_DataInterface {
 		paletteHistory: HTMLDivElement | null;
 	};
 	inputs: {
-		historyLimit: HTMLInputElement | null;
 		limitDarkChkbx: HTMLInputElement | null;
 		limitGrayChkbx: HTMLInputElement | null;
 		limitLightChkbx: HTMLInputElement | null;
@@ -150,7 +149,6 @@ interface DOM_StaticID_DataInterface {
 		paletteHistory: string;
 	};
 	inputs: {
-		historyLimit: string;
 		limitDarkChkbx: string;
 		limitGrayChkbx: string;
 		limitLightChkbx: string;

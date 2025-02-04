@@ -26,6 +26,8 @@ const limits: ConstsDataInterface['limits'] = {
 	}
 };
 
+const maxHistory: ConstsDataInterface['maxHistory'] = 10;
+
 const paletteRanges: ConstsDataInterface['paletteRanges'] = {
 	shift: {
 		comp: { hue: 10, sat: 0, light: 0 },
@@ -59,6 +61,7 @@ export const constsData: ConstsDataInterface = {
 	adjustments,
 	debounce,
 	limits,
+	maxHistory,
 	paletteRanges,
 	probabilities,
 	thresholds,

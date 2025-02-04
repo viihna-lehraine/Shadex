@@ -110,7 +110,7 @@ function hexadic(color: HSL): number[] {
 					'Unable to generate hexadic hues - missing HSL values',
 					`${thisModule} > ${thisFunction}`
 				);
-			else if (!mode.quiet && logMode.verbosity > 0)
+			else if (logMode.verbosity > 0)
 				logger.error(
 					'Error generating hexadic hues',
 					`${thisModule} > ${thisFunction}`

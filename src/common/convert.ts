@@ -706,8 +706,8 @@ function rgbToCMYK(rgb: RGB): CMYK {
 
 		const cmyk = { value: { cyan, magenta, yellow, key }, format };
 
-		if (!mode.quiet)
-			logger.info(
+		if (logMode.debug && logMode.verbosity > 1)
+			logger.debug(
 				`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(clone(cmyk))}`,
 				`${thisModule} > ${thisMethod}`
 			);

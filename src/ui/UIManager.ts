@@ -18,6 +18,7 @@ import {
 	UIManager_ClassInterface
 } from '../types/index.js';
 import { IDBManager } from '../db/IDBManager.js';
+import { SettingsService } from '../db/services/SettingsService.js';
 import { commonFn } from '../common/index.js';
 import { createLogger } from '../logger/index.js';
 import { constsData as consts } from '../data/consts.js';
@@ -25,6 +26,7 @@ import { domData } from '../data/dom.js';
 import { download, readFile } from '../dom/utils.js';
 import { ioFn } from '../io/index.js';
 import { modeData as mode } from '../data/mode.js';
+import { getIDBInstance } from 'src/db/instance.js';
 
 const thisModule = 'ui/UIManager.ts';
 
@@ -89,21 +91,18 @@ export class UIManager implements UIManager_ClassInterface {
 	public async addPaletteToHistory(palette: Palette): Promise<void> {
 		const thisMethod = 'addPaletteToHistory()';
 
-		const idbManager = await IDBManager.getInstance();
-		const maxHistory = (await idbManager.getSettings()).maxHistory;
+		const idbManager = await getIDBInstance();
+		const settingsManager = await SettingsService.getInstance();
+		const maxHistory = settingsManager.maxHistory;
 
 		try {
 			const history = await idbManager.getPaletteHistory();
-			const newID = await idbManager.getNextPaletteID();
+			const newID = (await idbManager.getCurrentPaletteID()) + 1;
 			const idString = `${palette.metadata.type}_${newID}`;
 
 			await idbManager.savePaletteHistory(history);
 
-			if (
-				!this.mode.quiet &&
-				this.mode.debug &&
-				this.logMode.verbosity > 2
-			)
+			if (this.logMode.verbosity > 2)
 				logger.info(
 					`Added palette with ID ${idString} to history`,
 					`${thisModule} > ${thisMethod}`
@@ -237,12 +236,7 @@ export class UIManager implements UIManager_ClassInterface {
 				.then(() => {
 					this.getEventListenerFn().temp.showTooltip(tooltipElement);
 
-					if (
-						!this.mode.quiet &&
-						this.mode.debug &&
-						this.logMode.verbosity > 2 &&
-						this.logMode.info
-					) {
+					if (this.logMode.verbosity > 2) {
 						logger.info(
 							`Copied color value: ${colorValue}`,
 							`${thisModule} > ${thisMethod}`
@@ -456,7 +450,7 @@ export class UIManager implements UIManager_ClassInterface {
 
 			this.addPaletteToHistory(palette);
 
-			if (this.logMode.info && this.logMode.verbosity > 1) {
+			if (this.logMode.verbosity > 1) {
 				logger.info(
 					`Successfully imported palette in ${format} format.`,
 					`${thisModule} > ${thisMethod}`
@@ -640,23 +634,13 @@ export class UIManager implements UIManager_ClassInterface {
 			const limitLightChkbx =
 				domData.elements.static.inputs.limitLightChkbx;
 
-			if (
-				!paletteTypeElement &&
-				!this.mode.quiet &&
-				this.logMode.debug &&
-				this.logMode.verbosity >= 2
-			) {
+			if (!paletteTypeElement && this.logMode.verbosity >= 2) {
 				logger.warn(
 					'paletteTypeOptions DOM element not found',
 					`${thisModule} > ${thisMethod}`
 				);
 			}
-			if (
-				!numSwatchesElement &&
-				!this.mode.quiet &&
-				this.logMode.debug &&
-				this.logMode.verbosity >= 2
-			) {
+			if (!numSwatchesElement && this.logMode.verbosity >= 2) {
 				logger.warn(
 					`numBoxes DOM element not found`,
 					`${thisModule} > ${thisMethod}`
@@ -664,8 +648,6 @@ export class UIManager implements UIManager_ClassInterface {
 			}
 			if (
 				(!limitDarkChkbx || !limitGrayChkbx || !limitLightChkbx) &&
-				!this.mode.quiet &&
-				this.logMode.debug &&
 				this.logMode.verbosity >= 2
 			) {
 				logger.warn(
@@ -713,11 +695,14 @@ export class UIManager implements UIManager_ClassInterface {
 			entry.remove();
 
 			const idbManager = await IDBManager.getInstance();
+
 			this.paletteHistory = this.paletteHistory.filter(
 				p => p.id !== paletteID
 			);
+
 			await idbManager.savePaletteHistory(this.paletteHistory);
-			if (!this.mode.quiet)
+
+			if (this.logMode.verbosity > 2)
 				logger.info(
 					`Removed palette ${paletteID} from history`,
 					`${thisModule} > ${thisMethod}`
@@ -750,7 +735,7 @@ export class UIManager implements UIManager_ClassInterface {
 			const tableElement = this.createPaletteTable(storedPalette);
 			paletteRow.appendChild(tableElement);
 
-			if (!this.mode.quiet)
+			if (this.logMode.verbosity > 2)
 				logger.info(
 					`Rendered palette ${tableId}.`,
 					`${thisModule} > ${thisMethod}`
@@ -787,45 +772,6 @@ export class UIManager implements UIManager_ClassInterface {
 		this.getStoredPalette = getter;
 	}
 
-	public async setHistoryLimit(limit: number): Promise<void> {
-		const thisMethod = 'setHistoryLimit()';
-
-		try {
-			if (limit < 1 || limit > 1000) {
-				if (this.logMode.warn)
-					logger.warn(
-						`Invalid history limit: ${limit}. Keeping current limit.`,
-						`${thisModule} > ${thisMethod}`
-					);
-				return;
-			}
-
-			const idbManager = await IDBManager.getInstance();
-			const settings = await idbManager.getSettings();
-
-			settings.maxHistory = limit;
-			await idbManager.saveSettings(settings);
-
-			if (this.paletteHistory.length > limit) {
-				this.paletteHistory = this.paletteHistory.slice(0, limit);
-				await idbManager.savePaletteHistory(this.paletteHistory);
-			}
-
-			this.updateHistoryUI();
-
-			if (!this.mode.quiet)
-				logger.info(
-					`History limit set to ${limit}`,
-					`${thisModule} > ${thisMethod}`
-				);
-		} catch (error) {
-			logger.error(
-				`Error setting history limit: ${error}`,
-				`${thisModule} > ${thisMethod}`
-			);
-		}
-	}
-
 	/* PRIVATE METHODS */
 
 	private async init(): Promise<void> {
@@ -846,9 +792,9 @@ export class UIManager implements UIManager_ClassInterface {
 		if (!this.idbManager) return;
 
 		const history = await this.idbManager.getPaletteHistory();
-		const settings = await this.idbManager.getSettings();
+		const settings = await SettingsService.getInstance();
 
-		const maxHistory = settings.maxHistory || 50;
+		const maxHistory = settings.maxHistory;
 
 		if (history) {
 			this.paletteHistory = history.slice(0, maxHistory);

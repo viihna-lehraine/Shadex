@@ -30,7 +30,7 @@ async function initBtnEventListeners(uiManager: UIManager): Promise<void> {
 			? parseInt(selectionElements.swatch.value, 10)
 			: 0;
 
-		if (!mode.quiet && logMode.clicks)
+		if (logMode.clicks)
 			logger.info(
 				'desaturateButton clicked',
 				`${thisModule} > desaturateButton click event`
@@ -45,14 +45,14 @@ async function initBtnEventListeners(uiManager: UIManager): Promise<void> {
 
 		const format = parseDom.paletteExportFormat();
 
-		if (mode.debug && logMode.info && logMode.verbosity > 1)
+		if (mode.debug && logMode.verbosity > 1)
 			logger.info(
 				`Export Button click event: Export format selected: ${format}`,
 				`${thisModule} > exportButton click event`
 			);
 
 		if (!format) {
-			if (logMode.error && !mode.quiet && logMode.verbosity > 1) {
+			if (logMode.error && logMode.verbosity > 1) {
 				logger.error(
 					'Export format not selected',
 					`${thisModule} > exportButton click event`
@@ -72,14 +72,14 @@ async function initBtnEventListeners(uiManager: UIManager): Promise<void> {
 		const { type, swatches, limitDark, limitGray, limitLight } =
 			uiManager!.pullParamsFromUI();
 
-		if (logMode.info && logMode.verbosity > 1)
-			logger.info(
+		if (logMode.debug && logMode.verbosity > 1)
+			logger.debug(
 				'Generate Button click event: Retrieved parameters from UI.',
 				`${thisModule} > generateButton click event`
 			);
 
-		if (logMode.info && mode.debug && logMode.verbosity > 1)
-			logger.info(
+		if (logMode.debug && logMode.verbosity > 1)
+			logger.debug(
 				`Type: ${type}\nSwatches: ${swatches}\nLimit Dark: ${limitDark}\nLimit Gray: ${limitGray}\nLimit Light${limitLight}.`,
 				`${thisModule} > generateButton click event`
 			);

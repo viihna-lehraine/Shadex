@@ -49,6 +49,7 @@ export interface ConfigDataInterface {
 		};
 		DEFAULT_SETTINGS: {
 			colorSpace: ColorSpace;
+			lastPaletteID: number;
 			lastTableID: number;
 			theme: 'light' | 'dark';
 			loggingEnabled: boolean;
@@ -116,6 +117,7 @@ export interface ConstsDataInterface {
 			};
 		};
 	};
+	maxHistory: number;
 	paletteRanges: {
 		shift: {
 			comp: PaletteRangeShiftProperties;
@@ -238,11 +240,9 @@ export interface ModeDataInterface {
 		clicks: boolean;
 		debug: boolean;
 		error: boolean;
-		info: boolean;
 		verbosity: 0 | 1 | 2 | 3 | 4 | 5;
 		warn: boolean;
 	};
-	quiet: boolean;
 	showAlerts: boolean;
 	stackTrace: boolean;
 }

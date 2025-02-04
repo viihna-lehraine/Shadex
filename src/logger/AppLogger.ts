@@ -54,10 +54,7 @@ export class AppLogger implements AppLogger_ClassInterface {
 		debugLevel: number,
 		caller?: string
 	): void {
-		if (
-			(level === 'info' && this.mode.quiet) ||
-			debugLevel < this.getDebugThreshold(level)
-		) {
+		if (level === 'info' || debugLevel < this.getDebugThreshold(level)) {
 			return;
 		}
 

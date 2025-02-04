@@ -59,9 +59,7 @@ export async function analogous(args: PaletteGenerationArgs): Promise<Palette> {
 
 	const idbManager = await IDBManager.getInstance();
 
-	const paletteID = await idbManager.getNextPaletteID();
-
-	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
+	const paletteID = (await idbManager.getCurrentPaletteID()) + 1;
 
 	const analogousPalette = await idbManager.savePaletteToDB(
 		'analogous',

@@ -69,7 +69,7 @@ async function initializeApp(): Promise<void> {
 		const selectedSwatch = domData.elements.static.selects.swatch;
 
 		if (mode.debug) {
-			if (!mode.quiet && logMode.debug && logMode.verbosity > 1) {
+			if (logMode.debug && logMode.verbosity > 1) {
 				logger.debug(
 					'Validating DOM elements',
 					`${thisModule} > ${thisFunction}`
@@ -78,7 +78,7 @@ async function initializeApp(): Promise<void> {
 				validateStaticElements();
 			}
 		} else {
-			if (!mode.quiet) {
+			if (logMode.verbosity > 1) {
 				logger.info(
 					'Skipping DOM element validation',
 					`${thisModule} > ${thisFunction}`
@@ -90,14 +90,14 @@ async function initializeApp(): Promise<void> {
 			? parseInt(selectedSwatch.value, 10)
 			: 0;
 
-		if (!mode.quiet && mode.debug)
+		if (mode.debug && logMode.verbosity > 1)
 			logger.debug(
 				`Selected color: ${selectedColor}`,
 				`${thisModule} > ${thisFunction}`
 			);
 
 		const defaultPaletteOptions = defaults.paletteOptions;
-		if (!mode.quiet && logMode.info && logMode.verbosity > 1) {
+		if (logMode.verbosity > 1) {
 			logger.info(
 				`Generating initial color palette.`,
 				`${thisModule} > ${thisFunction}`
@@ -111,7 +111,7 @@ async function initializeApp(): Promise<void> {
 		try {
 			eventListenerFn.initializeEventListeners(uiManager);
 
-			if (!mode.quiet)
+			if (logMode.verbosity > 2)
 				logger.info(
 					'Event listeners have been successfully initialized',
 					`${thisModule} > ${thisFunction}`
@@ -127,7 +127,7 @@ async function initializeApp(): Promise<void> {
 				alert('An error occurred. Check console for details.');
 		}
 
-		if (!mode.quiet && logMode.info)
+		if (logMode.verbosity > 1)
 			logger.info(
 				'Application successfully initialized. Awaiting user input.',
 				`${thisModule} > ${thisFunction}`

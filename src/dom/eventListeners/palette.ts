@@ -19,7 +19,7 @@ function initLiveColorRender(): void {
 			const parsedColor = parseDom.colorInput(target);
 
 			if (parsedColor) {
-				if (!mode.quiet && logMode.debug && logMode.verbosity > 1) {
+				if (logMode.debug && logMode.verbosity > 1) {
 					logger.debug(
 						`Parsed color: ${JSON.stringify(parsedColor)}`,
 						`${thisModule}`
@@ -41,7 +41,7 @@ function initLiveColorRender(): void {
 								: `hsl(${parsedColor.value.hue}, ${parsedColor.value.saturation}%, ${parsedColor.value.lightness}%)`;
 				}
 			} else {
-				if (!mode.quiet && logMode.warn) {
+				if (logMode.warn) {
 					logger.warn(
 						`Invalid color input: ${target.value}`,
 						`${thisModule}`

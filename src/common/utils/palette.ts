@@ -73,7 +73,7 @@ export async function populateOutputBox(
 		const stringifiedColor =
 			await coreUtils.convert.colorToCSSColorString(clonedColor);
 
-		if (!mode.quiet && logMode.info && logMode.verbosity > 0)
+		if (logMode.verbosity > 1)
 			logger.info(
 				`Adding CSS-formatted color to DOM ${stringifiedColor}`,
 				`${thisModule} > ${thisMethod}`

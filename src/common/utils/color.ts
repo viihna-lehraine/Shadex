@@ -490,7 +490,7 @@ function colorToColorString(color: Color): Color_StringProps {
 				`Unsupported format: ${clonedColor.format}`,
 				`${thisModule} > ${thisMethod}`
 			);
-		} else if (!mode.quiet && logMode.warn) {
+		} else if (logMode.warn) {
 			logger.warn(
 				'Failed to convert to color string.',
 				`${thisModule} > ${thisMethod}`
@@ -664,7 +664,7 @@ const parseColor = (colorSpace: ColorSpace, value: string): Color | null => {
 
 				if (mode.gracefulErrors) {
 					if (logMode.error) logger.error(message);
-					else if (!mode.quiet && logMode.warn)
+					else if (logMode.warn)
 						logger.warn(
 							`Failed to parse color: ${message}`,
 							`${thisModule} > ${thisMethod}`
@@ -702,7 +702,7 @@ function parseComponents(value: string, count: number): number[] {
 			if (!mode.gracefulErrors)
 				throw new Error(`Expected ${count} components.`);
 			else if (logMode.error) {
-				if (!mode.quiet && logMode.warn)
+				if (logMode.warn)
 					logger.warn(
 						`Expected ${count} components.`,
 						`${thisModule} > ${thisMethod}`

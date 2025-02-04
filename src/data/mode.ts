@@ -13,11 +13,9 @@ export const modeData: ModeDataInterface = {
 		clicks: false,
 		debug: true,
 		error: true,
-		info: true,
 		verbosity: 3,
 		warn: true
 	},
-	quiet: false,
 	showAlerts: true,
 	stackTrace: true
 } as const;

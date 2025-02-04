@@ -82,7 +82,7 @@ async function generateSelectedPalette(
 			limitLight: flags.limitLight
 		};
 
-		if (!mode.quiet && logMode.debug && logMode.verbosity > 2) {
+		if (logMode.verbosity > 2) {
 			logger.debug(
 				`Generating palette with type #: ${type}`,
 				`${thisModule} > ${thisFunction}`
@@ -154,7 +154,7 @@ const processPaletteGeneration = core.base.debounce(async () => {
 			return;
 		}
 
-		if (!mode.quiet && logMode.info && logMode.verbosity >= 2)
+		if (logMode.verbosity >= 2)
 			logger.info(
 				`numBoxes: ${parseInt(swatchGenNumber.value, 10)}\npaletteType: ${parseInt(paletteType.value, 10)}`,
 				`${thisModule} > ${thisFunction}`
@@ -207,7 +207,7 @@ async function startPaletteGeneration(options: PaletteOptions): Promise<void> {
 	try {
 		let { swatches } = options;
 
-		if (logMode.info && logMode.verbosity > 2)
+		if (logMode.verbosity > 2)
 			logger.info(
 				'Retrieving existing IDBManager instance.',
 				`${thisModule} > ${thisFunction}`
@@ -227,7 +227,7 @@ async function startPaletteGeneration(options: PaletteOptions): Promise<void> {
 			return;
 		}
 
-		if (!mode.quiet && logMode.info && logMode.verbosity > 0)
+		if (logMode.verbosity > 0)
 			logger.info(
 				`Colors array generated: ${JSON.stringify(palette.items)}`,
 				`${thisModule} > ${thisFunction}`
@@ -294,7 +294,7 @@ async function startPaletteDomBoxGeneration(
 
 		paletteContainer.appendChild(fragment);
 
-		if (!mode.quiet && logMode.info && logMode.verbosity > 1)
+		if (logMode.verbosity > 1)
 			logger.info(
 				'Palette boxes generated and rendered.',
 				`${thisModule} > ${thisFunction}`

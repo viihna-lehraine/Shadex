@@ -22,7 +22,7 @@ function checkbox(id: string): boolean | void {
 	const checkbox = document.getElementById(id) as HTMLInputElement;
 
 	if (!checkbox) {
-		if (logMode.error && !mode.quiet) {
+		if (logMode.error && logMode.verbosity > 2) {
 			logger.error(
 				`Checkbox element ${id} not found`,
 				`${thisModule} > ${thisFunction}`
@@ -33,7 +33,7 @@ function checkbox(id: string): boolean | void {
 	}
 
 	if (!(checkbox instanceof HTMLInputElement)) {
-		if (logMode.error && !mode.quiet) {
+		if (logMode.error && logMode.verbosity > 2) {
 			logger.error(
 				`Element ${id} is not a checkbox`,
 				`${thisModule} > ${thisFunction}`
@@ -117,7 +117,7 @@ function colorInput(input: HTMLInputElement): Hex | HSL | RGB | null {
 		}
 	}
 
-	if (!mode.quiet && logMode.error && logMode.verbosity > 1) {
+	if (logMode.error && logMode.verbosity > 3) {
 		logger.error('Invalid color input', `${thisModule} > ${thisFunction}`);
 	}
 
@@ -131,7 +131,7 @@ function paletteExportFormat(): string | void {
 	) as HTMLSelectElement;
 
 	if (!formatSelectionMenu) {
-		if (logMode.error && !mode.quiet)
+		if (logMode.error && logMode.verbosity > 3)
 			logger.error(
 				'Export format selection dropdown not found',
 				`${thisModule} > ${thisFunction}`
@@ -145,7 +145,7 @@ function paletteExportFormat(): string | void {
 		selectedFormat !== 'JSON' &&
 		selectedFormat !== 'XML'
 	) {
-		if (logMode.error && !mode.quiet)
+		if (logMode.error && logMode.verbosity > 3)
 			logger.error(
 				'Invalid export format selected',
 				`${thisModule} > ${thisFunction}`

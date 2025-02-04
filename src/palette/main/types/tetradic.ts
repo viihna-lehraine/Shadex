@@ -83,7 +83,7 @@ export async function tetradic(args: PaletteGenerationArgs): Promise<Palette> {
 	}
 
 	const idbManager = await IDBManager.getInstance();
-	const paletteID = await idbManager.getNextPaletteID();
+	const paletteID = (await idbManager.getCurrentPaletteID()) + 1;
 
 	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
 

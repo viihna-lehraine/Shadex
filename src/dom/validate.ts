@@ -43,8 +43,8 @@ export function validateStaticElements(): void {
 				`${thisModule} > ${thisFunction}`
 			);
 	} else {
-		if (logMode.info && mode.debug && logMode.verbosity > 1)
-			logger.info(
+		if (mode.debug && logMode.verbosity > 1)
+			logger.debug(
 				'All required DOM elements are present.',
 				`${thisModule} > ${thisFunction}`
 			);

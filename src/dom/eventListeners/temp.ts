@@ -21,14 +21,14 @@ export function showToast(message: string): void {
 
 	document.body.appendChild(toast);
 
-	if (!mode.quiet && logMode.verbosity > 3)
-		logger.info('Toast message added', `${thisModule} > ${thisMethod}`);
+	if (logMode.debug && logMode.verbosity >= 4)
+		logger.debug('Toast message added', `${thisModule} > ${thisMethod}`);
 
 	setTimeout(() => {
 		toast.classList.add('fade-out');
 
-		if (!mode.quiet && logMode.verbosity > 3)
-			logger.info(
+		if (logMode.debug && logMode.verbosity >= 4)
+			logger.debug(
 				'Toast message faded out',
 				`${thisModule} > ${thisMethod}`
 			);
@@ -53,13 +53,13 @@ export function showTooltip(tooltipElement: HTMLElement): void {
 			}, consts.timeouts.tooltip || 1000);
 		}
 
-		if (!mode.quiet && logMode.verbosity > 3)
+		if (logMode.debug && logMode.verbosity >= 4)
 			logger.info(
 				'showTooltip executed',
 				`${thisModule} > ${thisMethod}`
 			);
 	} catch (error) {
-		if (logMode.error)
+		if (logMode.error && logMode.verbosity >= 4)
 			logger.error(
 				`Failed to execute showTooltip: ${error}`,
 				`${thisModule} > ${thisMethod}`

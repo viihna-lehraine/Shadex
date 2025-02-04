@@ -47,8 +47,8 @@ async function switchColorSpace(targetFormat: ColorSpace): Promise<void> {
 				'data-format'
 			) as ColorSpace;
 
-			if (!mode.quiet && logMode.info && logMode.verbosity >= 2)
-				logger.info(
+			if (logMode.debug && logMode.verbosity >= 2)
+				logger.debug(
 					`Converting from ${currentFormat} to ${targetFormat}`,
 					`${thisModule} > ${thisMethod}`
 				);
@@ -122,7 +122,7 @@ async function switchColorSpace(targetFormat: ColorSpace): Promise<void> {
 			inputBox.setAttribute('data-format', targetFormat);
 		}
 	} catch (error) {
-		if (!mode.quiet && logMode.warn)
+		if (logMode.warn)
 			logger.warn(
 				'Failed to convert colors.',
 				`${thisModule} > ${thisMethod}`

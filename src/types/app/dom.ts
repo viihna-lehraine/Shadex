@@ -14,9 +14,6 @@ export interface DOMFn_EventListenerFnInterface {
 	dad: {
 		attach(element: HTMLElement | null): void;
 	};
-	input: {
-		initialize(uiManager: UIManager): void;
-	};
 	palette: {
 		initialize: {
 			liveColorRender(): void;

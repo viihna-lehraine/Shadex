@@ -2,19 +2,20 @@
 
 import { ConfigDataInterface, ColorSpace } from '../types/index.js';
 
-const DEFAULT_KEYS = {
+const DEFAULT_KEYS: ConfigDataInterface['db']['DEFAULT_KEYS'] = {
 	APP_SETTINGS: 'appSettings',
 	CUSTOM_COLOR: 'customColor'
 };
 
-const DEFAULT_SETTINGS = {
+const DEFAULT_SETTINGS: ConfigDataInterface['db']['DEFAULT_SETTINGS'] = {
 	colorSpace: 'hsl' as ColorSpace,
+	lastPaletteID: 0,
 	lastTableID: 0,
 	theme: 'light' as 'light' | 'dark',
 	loggingEnabled: true
 };
 
-const STORE_NAMES = {
+const STORE_NAMES: ConfigDataInterface['db']['STORE_NAMES'] = {
 	APP_SETTINGS: 'appSettings',
 	CUSTOM_COLOR: 'customColor',
 	MUTATIONS: 'mutations',
@@ -23,7 +24,11 @@ const STORE_NAMES = {
 	TABLES: 'tables'
 };
 
-const db = { DEFAULT_KEYS, DEFAULT_SETTINGS, STORE_NAMES };
+const db: ConfigDataInterface['db'] = {
+	DEFAULT_KEYS,
+	DEFAULT_SETTINGS,
+	STORE_NAMES
+};
 
 const regex: ConfigDataInterface['regex'] = {
 	colors: {

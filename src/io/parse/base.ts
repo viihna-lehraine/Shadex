@@ -35,7 +35,7 @@ function parseCMYKColorValue(rawCMYK: string | null): CMYK['value'] {
 	const caller = 'parseCMYKColorValue()';
 
 	if (!rawCMYK) {
-		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
+		if (logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'A CMYK element could not be found while parsing palette file. Injecting default values.',
 				`${thisModule} > ${caller}`
@@ -78,7 +78,7 @@ function parseHexColorValue(rawHex: string | null): Hex['value'] {
 	const caller = 'parseHexColorValue()';
 
 	if (!rawHex) {
-		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
+		if (logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'A Hex element could not be found while parsing palette file. Injecting default values.',
 				`${thisModule} > ${caller}`
@@ -110,7 +110,7 @@ function parseHSLColorValue(rawHSL: string | null): HSL['value'] {
 	const caller = 'parseHSLColorValue()';
 
 	if (!rawHSL) {
-		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
+		if (logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'An HSL element could not be found while parsing palette file. Injecting default values.',
 				`${thisModule} > ${caller}`
@@ -150,7 +150,7 @@ function parseHSVColorValue(rawHSV: string | null): HSV['value'] {
 	const caller = 'parseHSVColorValue()';
 
 	if (!rawHSV) {
-		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
+		if (logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'An HSV element could not be found while parsing palette file. Injecting default values.',
 				`${thisModule} > ${caller}`
@@ -190,7 +190,7 @@ function parseLABColorValue(rawLAB: string | null): LAB['value'] {
 	const caller = 'parseLABColorValue()';
 
 	if (!rawLAB) {
-		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
+		if (logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'A LAB element could not be found while parsing palette file. Injecting default values.',
 				`${thisModule} > ${caller}`
@@ -230,7 +230,7 @@ function parseRGBColorValue(rawRGB: string | null): RGB['value'] {
 	const caller = 'parseRGBColorValue()';
 
 	if (!rawRGB) {
-		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
+		if (logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'An RGB element could not be found while parsing palette file. Injecting default values.',
 				`${thisModule} > ${caller}`
@@ -270,7 +270,7 @@ function parseXYZColorValue(rawXYZ: string | null): XYZ['value'] {
 	const caller = 'parseXYZColorValue()';
 
 	if (!rawXYZ) {
-		if (!mode.quiet && logMode.warn && logMode.verbosity >= 2) {
+		if (logMode.warn && logMode.verbosity >= 2) {
 			logger.warn(
 				'An XYZ element could not be found while parsing palette file. Injecting default values.',
 				`${thisModule} > ${caller}`

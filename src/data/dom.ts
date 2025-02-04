@@ -76,7 +76,6 @@ const staticIds: DOMDataInterface['ids']['static'] = {
 		paletteHistory: 'palette-history'
 	},
 	inputs: {
-		historyLimit: 'history-limit-input',
 		limitDarkChkbx: 'limit-dark-chkbx',
 		limitGrayChkbx: 'limit-gray-chkbx',
 		limitLightChkbx: 'limit-light-chkbx'
@@ -283,9 +282,6 @@ const staticDomElements: DOMDataInterface['elements']['static'] = {
 	},
 	get inputs() {
 		return {
-			historyLimit: getElement<HTMLInputElement>(
-				staticInputIds.historyLimit
-			),
 			limitDarkChkbx: getElement<HTMLInputElement>(
 				staticInputIds.limitDarkChkbx
 			),
@@ -334,7 +330,6 @@ const staticDomIds: DOMDataInterface['ids']['static'] = {
 		paletteContainer: staticDivIds.paletteContainer
 	},
 	inputs: {
-		historyLimit: staticInputIds.historyLimit,
 		limitDarkChkbx: staticInputIds.limitDarkChkbx,
 		limitGrayChkbx: staticInputIds.limitGrayChkbx,
 		limitLightChkbx: staticInputIds.limitLightChkbx

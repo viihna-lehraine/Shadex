@@ -22,8 +22,8 @@ export function attachDADListeners(element: HTMLElement | null): void {
 			element.addEventListener('dragend', dragEnd);
 		}
 
-		if (!mode.quiet)
-			logger.info(
+		if (logMode.debug && logMode.verbosity >= 4)
+			logger.debug(
 				'Drag and drop event listeners successfully attached',
 				`${thisModule} > ${thisFunction}`
 			);
@@ -47,7 +47,7 @@ function dragStart(e: DragEvent): void {
 			e.dataTransfer.setData('text/html', dragSrcEl.outerHTML);
 		}
 
-		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
+		if (logMode.debug && logMode.verbosity === 5)
 			logger.info(
 				'handleDragStart complete',
 				`${thisModule} > ${thisFunction}`
@@ -71,7 +71,7 @@ function dragOver(e: DragEvent): boolean {
 			e.dataTransfer.dropEffect = 'move';
 		}
 
-		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
+		if (mode.debug && logMode.verbosity === 5)
 			logger.info(
 				'handleDragOver complete',
 				`${thisModule} > ${thisMethod}`
@@ -101,7 +101,7 @@ function dragEnd(e: DragEvent): void {
 			el.classList.remove('dragging');
 		});
 
-		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
+		if (mode.debug && logMode.verbosity === 5)
 			logger.info(
 				'handleDragEnd complete',
 				`${thisModule} > ${thisMethod}`
@@ -163,8 +163,8 @@ function drop(e: DragEvent): void {
 				) as HTMLInputElement
 			).value = dragSrcText;
 
-			if (!mode.quiet && mode.debug && logMode.verbosity > 3)
-				logger.info(
+			if (mode.debug && logMode.verbosity >= 4)
+				logger.debug(
 					'calling attachDragAndDropEventListeners for new elements',
 					`${thisModule} > ${thisMethod}`
 				);
@@ -174,7 +174,7 @@ function drop(e: DragEvent): void {
 			attachDADListeners(newDropTargetEl);
 		}
 
-		if (!mode.quiet && mode.debug && logMode.verbosity > 3)
+		if (logMode.debug && logMode.verbosity === 5)
 			logger.info('handleDrop complete', `${thisModule} > ${thisMethod}`);
 	} catch (error) {
 		if (!logMode.error)

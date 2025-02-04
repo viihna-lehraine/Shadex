@@ -43,7 +43,7 @@ function hsl(): HSL {
 			return coreUtils.brandColor.asHSL(unbrandedHSL);
 		}
 
-		if (!mode.quiet && !logMode.info)
+		if (logMode.debug && logMode.verbosity > 1)
 			logger.info(
 				`Generated randomHSL: ${JSON.stringify(hsl)}`,
 				`${thisModule} > ${thisMethod}`
@@ -95,8 +95,8 @@ function sl(): SL {
 			return coreUtils.brandColor.asSL(unbrandedSL);
 		}
 
-		if (!mode.quiet && logMode.info)
-			logger.info(
+		if (logMode.debug && logMode.verbosity > 2)
+			logger.debug(
 				`Generated randomSL: ${JSON.stringify(sl)}`,
 				`${thisModule} > ${thisMethod}`
 			);

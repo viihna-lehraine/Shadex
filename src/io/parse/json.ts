@@ -23,7 +23,7 @@ function file(jsonData: string): Promise<Palette | null> {
 
 		return Promise.resolve(parsed as Palette);
 	} catch (error) {
-		if (!mode.quiet && logMode.error && logMode.verbosity > 1) {
+		if (logMode.error && logMode.verbosity > 1) {
 			logger.error(
 				`Error parsing JSON file: ${error}`,
 				`${thisModule} > ${caller}`
