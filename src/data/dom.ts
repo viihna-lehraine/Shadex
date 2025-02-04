@@ -2,35 +2,51 @@
 
 import { DOMDataInterface } from '../types/index.js';
 
+const domClasses: DOMDataInterface['classes'] = {
+	colorDisplay: 'color-display',
+	colorInput: 'color-input',
+	colorStripe: 'color-stripe',
+	colorSwatch: 'color-swatch',
+	dragBtn: 'drag-btn',
+	lockBtn: 'lock-btn'
+};
+
 const dynamicIds: DOMDataInterface['ids']['dynamic'] = {
 	btns: {
-		lock: {
-			colorBtn1: 'color-box-1-lock-btn',
-			colorBtn2: 'color-box-2-lock-btn',
-			colorBtn3: 'color-box-3-lock-btn',
-			colorBtn4: 'color-box-4-lock-btn',
-			colorBtn5: 'color-box-5-lock-btn',
-			colorBtn6: 'color-box-6-lock-btn'
-		}
+		colorBoxLockBtn1: 'color-box-lock-btn-1',
+		colorBoxLockBtn2: 'color-box-lock-btn-2',
+		colorBoxLockBtn3: 'color-box-lock-btn-3',
+		colorBoxLockBtn4: 'color-box-lock-btn-4',
+		colorBoxLockBtn5: 'color-box-lock-btn-5',
+		colorBoxLockBtn6: 'color-box-lock-btn-6'
 	},
 	divs: {
 		colorBox1: 'color-box-1',
-		dragBar: {
-			colorBox1: 'color-box-1-drag-bar',
-			colorBox2: 'color-box-2-drag-bar',
-			colorBox3: 'color-box-3-drag-bar',
-			colorBox4: 'color-box-4-drag-bar',
-			colorBox5: 'color-box-5-drag-bar',
-			colorBox6: 'color-box-6-drag-bar'
-		}
+		colorBox2: 'color-box-1',
+		colorBox3: 'color-box-1',
+		colorBox4: 'color-box-1',
+		colorBox5: 'color-box-1',
+		colorBox6: 'color-box-1',
+		colorBoxDragBar1: 'color-box-drag-bar-1',
+		colorBoxDragBar2: 'color-box-drag-bar-2',
+		colorBoxDragBar3: 'color-box-drag-bar-3',
+		colorBoxDragBar4: 'color-box-drag-bar-4',
+		colorBoxDragBar5: 'color-box-drag-bar-5',
+		colorBoxDragBar6: 'color-box-drag-bar-6',
+		colorDisplay1: 'color-display-1',
+		colorDisplay2: 'color-display-2',
+		colorDisplay3: 'color-display-3',
+		colorDisplay4: 'color-display-4',
+		colorDisplay5: 'color-display-5',
+		colorDisplay6: 'color-display-6'
 	},
 	inputs: {
-		colorPicker1: 'color-picker-1',
-		colorPicker2: 'color-picker-2',
-		colorPicker3: 'color-picker-3',
-		colorPicker4: 'color-picker-4',
-		colorPicker5: 'color-picker-5',
-		colorPicker6: 'color-picker-6',
+		colorPicker1: 'color-picker-input-1',
+		colorPicker2: 'color-picker-input-2',
+		colorPicker3: 'color-picker-input-3',
+		colorPicker4: 'color-picker-input-4',
+		colorPicker5: 'color-picker-input-5',
+		colorPicker6: 'color-picker-input-6',
 		export: 'export-input'
 	},
 	selects: {},
@@ -44,7 +60,7 @@ const staticIds: DOMDataInterface['ids']['static'] = {
 		generate: 'generate-btn',
 		helpMenu: 'help-menu-btn',
 		historyMenu: 'history-menu-btn',
-		ioMenu: 'io-menu-btn',
+		import: 'import-btn',
 		saturate: 'saturate-btn',
 		showAsCMYK: 'show-as-cmyk-btn',
 		showAsHex: 'show-as-hex-btn',
@@ -56,12 +72,11 @@ const staticIds: DOMDataInterface['ids']['static'] = {
 	divs: {
 		helpMenu: 'help-menu',
 		historyMenu: 'history-menu',
-		ioMenu: 'io-menu',
+		paletteContainer: 'palette-container',
 		paletteHistory: 'palette-history'
 	},
 	inputs: {
 		historyLimit: 'history-limit-input',
-		import: 'import-input',
 		limitDarkChkbx: 'limit-dark-chkbx',
 		limitGrayChkbx: 'limit-gray-chkbx',
 		limitLightChkbx: 'limit-light-chkbx'
@@ -81,6 +96,7 @@ function getElement<T extends HTMLElement>(id: string): T | null {
 }
 
 const dynamicDivIds = dynamicIds.divs;
+const dynamicInputIds = dynamicIds.inputs;
 
 const staticBtnIds = staticIds.btns;
 const staticDivIds = staticIds.divs;
@@ -91,15 +107,95 @@ const staticSelectIds = staticIds.selects;
 
 const dynamicDomElements: DOMDataInterface['elements']['dynamic'] = {
 	get btns() {
-		return {};
+		return {
+			colorBoxLockBtn1: getElement<HTMLButtonElement>(
+				dynamicIds.btns.colorBoxLockBtn1
+			),
+			colorBoxLockBtn2: getElement<HTMLButtonElement>(
+				dynamicIds.btns.colorBoxLockBtn2
+			),
+			colorBoxLockBtn3: getElement<HTMLButtonElement>(
+				dynamicIds.btns.colorBoxLockBtn3
+			),
+			colorBoxLockBtn4: getElement<HTMLButtonElement>(
+				dynamicIds.btns.colorBoxLockBtn4
+			),
+			colorBoxLockBtn5: getElement<HTMLButtonElement>(
+				dynamicIds.btns.colorBoxLockBtn5
+			),
+			colorBoxLockBtn6: getElement<HTMLButtonElement>(
+				dynamicIds.btns.colorBoxLockBtn6
+			)
+		};
 	},
 	get divs() {
 		return {
-			colorBox1: getElement<HTMLDivElement>(dynamicDivIds.colorBox1)
+			colorBox1: getElement<HTMLDivElement>(dynamicDivIds.colorBox1),
+			colorBox2: getElement<HTMLDivElement>(dynamicDivIds.colorBox2),
+			colorBox3: getElement<HTMLDivElement>(dynamicDivIds.colorBox3),
+			colorBox4: getElement<HTMLDivElement>(dynamicDivIds.colorBox4),
+			colorBox5: getElement<HTMLDivElement>(dynamicDivIds.colorBox5),
+			colorBox6: getElement<HTMLDivElement>(dynamicDivIds.colorBox6),
+			colorBoxDragBar1: getElement<HTMLDivElement>(
+				dynamicDivIds.colorBoxDragBar1
+			),
+			colorBoxDragBar2: getElement<HTMLDivElement>(
+				dynamicDivIds.colorBoxDragBar2
+			),
+			colorBoxDragBar3: getElement<HTMLDivElement>(
+				dynamicDivIds.colorBoxDragBar3
+			),
+			colorBoxDragBar4: getElement<HTMLDivElement>(
+				dynamicDivIds.colorBoxDragBar4
+			),
+			colorBoxDragBar5: getElement<HTMLDivElement>(
+				dynamicDivIds.colorBoxDragBar5
+			),
+			colorBoxDragBar6: getElement<HTMLDivElement>(
+				dynamicDivIds.colorBoxDragBar6
+			),
+			colorDisplay1: getElement<HTMLDivElement>(
+				dynamicDivIds.colorDisplay1
+			),
+			colorDisplay2: getElement<HTMLDivElement>(
+				dynamicDivIds.colorDisplay2
+			),
+			colorDisplay3: getElement<HTMLDivElement>(
+				dynamicDivIds.colorDisplay3
+			),
+			colorDisplay4: getElement<HTMLDivElement>(
+				dynamicDivIds.colorDisplay4
+			),
+			colorDisplay5: getElement<HTMLDivElement>(
+				dynamicDivIds.colorDisplay5
+			),
+			colorDisplay6: getElement<HTMLDivElement>(
+				dynamicDivIds.colorDisplay6
+			)
 		};
 	},
 	get inputs() {
-		return {};
+		return {
+			colorPicker1: getElement<HTMLInputElement>(
+				dynamicInputIds.colorPicker1
+			),
+			colorPicker2: getElement<HTMLInputElement>(
+				dynamicInputIds.colorPicker2
+			),
+			colorPicker3: getElement<HTMLInputElement>(
+				dynamicInputIds.colorPicker3
+			),
+			colorPicker4: getElement<HTMLInputElement>(
+				dynamicInputIds.colorPicker4
+			),
+			colorPicker5: getElement<HTMLInputElement>(
+				dynamicInputIds.colorPicker5
+			),
+			colorPicker6: getElement<HTMLInputElement>(
+				dynamicInputIds.colorPicker6
+			),
+			export: getElement<HTMLInputElement>(dynamicInputIds.export)
+		};
 	},
 	get selects() {
 		return {};
@@ -110,11 +206,43 @@ const dynamicDomElements: DOMDataInterface['elements']['dynamic'] = {
 };
 
 const dynamicDomIds: DOMDataInterface['ids']['dynamic'] = {
-	btns: {},
-	divs: {
-		colorBox1: dynamicDivIds.colorBox1
+	btns: {
+		colorBoxLockBtn1: dynamicIds.btns.colorBoxLockBtn1,
+		colorBoxLockBtn2: dynamicIds.btns.colorBoxLockBtn2,
+		colorBoxLockBtn3: dynamicIds.btns.colorBoxLockBtn3,
+		colorBoxLockBtn4: dynamicIds.btns.colorBoxLockBtn4,
+		colorBoxLockBtn5: dynamicIds.btns.colorBoxLockBtn5,
+		colorBoxLockBtn6: dynamicIds.btns.colorBoxLockBtn6
 	},
-	inputs: {},
+	divs: {
+		colorBox1: dynamicDivIds.colorBox1,
+		colorBox2: dynamicDivIds.colorBox2,
+		colorBox3: dynamicDivIds.colorBox3,
+		colorBox4: dynamicDivIds.colorBox4,
+		colorBox5: dynamicDivIds.colorBox5,
+		colorBox6: dynamicDivIds.colorBox6,
+		colorDisplay1: dynamicDivIds.colorDisplay1,
+		colorDisplay2: dynamicDivIds.colorDisplay2,
+		colorDisplay3: dynamicDivIds.colorDisplay3,
+		colorDisplay4: dynamicDivIds.colorDisplay4,
+		colorDisplay5: dynamicDivIds.colorDisplay5,
+		colorDisplay6: dynamicDivIds.colorDisplay6,
+		colorBoxDragBar1: dynamicDivIds.colorBoxDragBar1,
+		colorBoxDragBar2: dynamicDivIds.colorBoxDragBar2,
+		colorBoxDragBar3: dynamicDivIds.colorBoxDragBar3,
+		colorBoxDragBar4: dynamicDivIds.colorBoxDragBar4,
+		colorBoxDragBar5: dynamicDivIds.colorBoxDragBar5,
+		colorBoxDragBar6: dynamicDivIds.colorBoxDragBar6
+	},
+	inputs: {
+		colorPicker1: dynamicInputIds.colorPicker1,
+		colorPicker2: dynamicInputIds.colorPicker2,
+		colorPicker3: dynamicInputIds.colorPicker3,
+		colorPicker4: dynamicInputIds.colorPicker4,
+		colorPicker5: dynamicInputIds.colorPicker5,
+		colorPicker6: dynamicInputIds.colorPicker6,
+		export: dynamicInputIds.export
+	},
 	selects: {},
 	spans: {}
 };
@@ -131,7 +259,7 @@ const staticDomElements: DOMDataInterface['elements']['static'] = {
 			historyMenu: getElement<HTMLButtonElement>(
 				staticBtnIds.historyMenu
 			),
-			ioMenu: getElement<HTMLButtonElement>(staticBtnIds.ioMenu),
+			import: getElement<HTMLButtonElement>(staticBtnIds.import),
 			saturate: getElement<HTMLButtonElement>(staticBtnIds.saturate),
 			showAsCMYK: getElement<HTMLButtonElement>(staticBtnIds.showAsCMYK),
 			showAsHex: getElement<HTMLButtonElement>(staticBtnIds.showAsHex),
@@ -145,7 +273,9 @@ const staticDomElements: DOMDataInterface['elements']['static'] = {
 		return {
 			helpMenu: getElement<HTMLDivElement>(staticDivIds.helpMenu),
 			historyMenu: getElement<HTMLDivElement>(staticDivIds.historyMenu),
-			ioMenu: getElement<HTMLDivElement>(staticDivIds.ioMenu),
+			paletteContainer: getElement<HTMLDivElement>(
+				staticDivIds.paletteContainer
+			),
 			paletteHistory: getElement<HTMLDivElement>(
 				staticDivIds.paletteHistory
 			)
@@ -156,7 +286,6 @@ const staticDomElements: DOMDataInterface['elements']['static'] = {
 			historyLimit: getElement<HTMLInputElement>(
 				staticInputIds.historyLimit
 			),
-			import: getElement<HTMLInputElement>(staticInputIds.import),
 			limitDarkChkbx: getElement<HTMLInputElement>(
 				staticInputIds.limitDarkChkbx
 			),
@@ -189,7 +318,7 @@ const staticDomIds: DOMDataInterface['ids']['static'] = {
 		generate: staticBtnIds.generate,
 		helpMenu: staticBtnIds.helpMenu,
 		historyMenu: staticBtnIds.historyMenu,
-		ioMenu: staticBtnIds.ioMenu,
+		import: staticBtnIds.import,
 		saturate: staticBtnIds.saturate,
 		showAsCMYK: staticBtnIds.showAsCMYK,
 		showAsHex: staticBtnIds.showAsHex,
@@ -201,12 +330,11 @@ const staticDomIds: DOMDataInterface['ids']['static'] = {
 	divs: {
 		helpMenu: staticDivIds.helpMenu,
 		historyMenu: staticDivIds.historyMenu,
-		ioMenu: staticDivIds.ioMenu,
-		paletteHistory: staticDivIds.paletteHistory
+		paletteHistory: staticDivIds.paletteHistory,
+		paletteContainer: staticDivIds.paletteContainer
 	},
 	inputs: {
 		historyLimit: staticInputIds.historyLimit,
-		import: staticInputIds.import,
 		limitDarkChkbx: staticInputIds.limitDarkChkbx,
 		limitGrayChkbx: staticInputIds.limitGrayChkbx,
 		limitLightChkbx: staticInputIds.limitLightChkbx
@@ -222,6 +350,7 @@ const staticDomIds: DOMDataInterface['ids']['static'] = {
 // ******** Final DOM Data Object ********
 
 export const domData: DOMDataInterface = {
+	classes: domClasses,
 	ids: {
 		dynamic: dynamicDomIds,
 		static: staticDomIds

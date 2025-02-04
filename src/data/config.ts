@@ -35,6 +35,11 @@ const regex: ConfigDataInterface['regex'] = {
 		rgb: /rgb\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i,
 		xyz: /xyz\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i
 	},
+	dom: {
+		hex: /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i,
+		hsl: /^hsl\(\s*(\d+),\s*([\d.]+)%,\s*([\d.]+)%\s*\)$/,
+		rgb: /^rgb\(\s*(\d+),\s*(\d+),\s*(\d+)\s*\)$/
+	},
 	file: {
 		palette: {
 			css: {

@@ -7,31 +7,34 @@ import {
 	PaletteItem
 } from '../../../types/index.js';
 import { IDBManager } from '../../../db/IDBManager.js';
-import { coreUtils, utils } from '../../../common/index.js';
+import { commonFn } from '../../../common/index.js';
 import { constsData as consts } from '../../../data/consts.js';
-import { superUtils as paletteSuperUtils } from '../../common/index.js';
-import { uiFn } from '../../../ui/index.js';
+import {
+	helpers as paletteHelpers,
+	superUtils as paletteSuperUtils
+} from '../../common/index.js';
 
-const conversion = utils.conversion;
-const create = paletteSuperUtils.create;
-const genHues = paletteSuperUtils.genHues;
 const paletteRanges = consts.paletteRanges;
+
+const core = commonFn.core;
+const utils = commonFn.utils;
 
 export async function triadic(args: PaletteGenerationArgs): Promise<Palette> {
 	// ensure exactly 3 swatches
-	if (args.swatches !== 3) uiFn.enforceSwatchRules(3, 3);
+	if (args.swatches !== 3) paletteHelpers.enforce.swatchRules(3, 3);
 
 	// base color setup
-	const baseColor = create.baseColor(args.customColor);
+	const baseColor = utils.random.hsl();
 
 	// generate triadic hues
-	const hues = genHues.triadic(baseColor.value.hue);
+	const hues = paletteSuperUtils.genHues.triadic(baseColor.value.hue);
 
 	// initialize palette items array
 	const paletteItems: PaletteItem[] = [];
 
 	// add the base color as the first palette item
-	const basePaletteItem = await create.paletteItem(baseColor);
+	const basePaletteItem =
+		await paletteSuperUtils.create.paletteItem(baseColor);
 	paletteItems.push(basePaletteItem);
 
 	// add the triadic colors sequentially
@@ -39,8 +42,8 @@ export async function triadic(args: PaletteGenerationArgs): Promise<Palette> {
 		const hue = hues[index];
 		const adjustedHSL: HSL = {
 			value: {
-				hue: coreUtils.brand.asRadial(hue),
-				saturation: coreUtils.brand.asPercentile(
+				hue: core.brand.asRadial(hue),
+				saturation: core.brand.asPercentile(
 					Math.max(
 						0,
 						Math.min(
@@ -52,7 +55,7 @@ export async function triadic(args: PaletteGenerationArgs): Promise<Palette> {
 						)
 					)
 				),
-				lightness: coreUtils.brand.asPercentile(
+				lightness: core.brand.asPercentile(
 					Math.max(
 						0,
 						Math.min(
@@ -69,9 +72,10 @@ export async function triadic(args: PaletteGenerationArgs): Promise<Palette> {
 		};
 
 		// generate all color values and create the palette item
-		const adjustedColor = conversion.genAllColorValues(adjustedHSL)
+		const adjustedColor = utils.conversion.genAllColorValues(adjustedHSL)
 			.hsl as HSL;
-		const paletteItem = await create.paletteItem(adjustedColor);
+		const paletteItem =
+			await paletteSuperUtils.create.paletteItem(adjustedColor);
 		paletteItems.push(paletteItem);
 	}
 

@@ -10,7 +10,7 @@ const thisModule = 'dom/validate.js';
 
 const logger = await createLogger();
 
-function validateStaticElements(): void {
+export function validateStaticElements(): void {
 	const thisFunction = 'validateElements()';
 	const ids = domData.ids.static;
 	const missingElements: string[] = [];

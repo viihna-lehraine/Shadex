@@ -1,9 +1,12 @@
 // File: types/app/palette.js
 
-import { HSL, Palette, PaletteItem, PaletteOptions } from '../index.js';
+import { HSL, Palette, PaletteItem } from '../index.js';
 
 export interface Palette_CommonFn_MasterInterface {
 	helpers: {
+		enforce: {
+			swatchRules(minSwatches: number, maxSwatches?: number): void;
+		};
 		limits: {
 			isColorInBounds(hsl: HSL): boolean;
 			isTooDark(hsl: HSL): boolean;
@@ -50,7 +53,6 @@ export interface Palette_CommonFn_MasterInterface {
 export interface PaletteGenerationArgs {
 	swatches: number;
 	type: number;
-	customColor: HSL | null;
 	limitDark: boolean;
 	limitGray: boolean;
 	limitLight: boolean;
@@ -58,27 +60,4 @@ export interface PaletteGenerationArgs {
 
 export interface PaletteGenerationInterface {
 	[key: string]: (args: PaletteGenerationArgs) => Promise<Palette>;
-}
-
-// ******** TOP-LEVEL BUNDLE INTERFACE ********
-
-export interface PaletteFn_MasterInterface {
-	generate: {
-		limitedHSL(
-			baseHue: number,
-			limitDark: boolean,
-			limitGray: boolean,
-			limitLight: boolean,
-			alphaValue: number | null
-		): HSL;
-		selectedPalette(options: PaletteOptions): Promise<Palette>;
-	};
-	start: {
-		paletteDomBoxGeneration(
-			items: PaletteItem[],
-			numBoxes: number,
-			tableId: string
-		): Promise<void>;
-		paletteGeneration(options: PaletteOptions): Promise<void>;
-	};
 }

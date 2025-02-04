@@ -2,7 +2,7 @@
 
 import { HSL } from '../../../types/index.js';
 import { constsData as consts } from '../../../data/consts.js';
-import { coreUtils, helpers } from '../../../common/index.js';
+import { commonFn } from '../../../common/index.js';
 import { createLogger } from '../../../logger/index.js';
 import { modeData as mode } from '../../../data/mode.js';
 
@@ -10,6 +10,8 @@ const adjustments = consts.adjustments;
 const logMode = mode.logging;
 
 const thisModule = 'palette/common/utils/adjust.js';
+
+const coreUtils = commonFn.core;
 
 const logger = await createLogger();
 
@@ -23,8 +25,6 @@ function sl(color: HSL): HSL {
 					'Invalid color valus for adjustment.',
 					`${thisModule} > ${thisFunction}`
 				);
-
-			helpers.dom.showToast('Invalid color values');
 
 			return color;
 		}

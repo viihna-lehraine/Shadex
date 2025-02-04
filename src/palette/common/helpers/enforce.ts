@@ -1,20 +1,17 @@
-// File: dom/events/palette.js
+// File: palette/common/helpers/enforce.js
 
-import { UIFn_BaseInterface } from '../types/index.js';
-import { domData } from '../data/dom.js';
-import { createLogger } from '../logger/index.js';
-import { modeData as mode } from '../data/mode.js';
+import { createLogger } from '../../../logger/factory.js';
+import { domData } from '../../../data/dom.js';
+import { modeData as mode } from '../../../data/mode.js';
 
 const domIDs = domData.ids;
 const logMode = mode.logging;
-const thisModule = 'ui/base.js';
+
+const thisModule = 'palette/common/helpers/enforce.js';
 
 const logger = await createLogger();
 
-function enforceSwatchRules(
-	minimumSwatches: number,
-	maximumSwatches?: number
-): void {
+function swatchRules(minSwatches: number, maxSwatches?: number): void {
 	const thisFunction = 'enforceSwatchRules()';
 	const swatchNumberSelector = document.getElementById(
 		domIDs.static.selects.swatchGen
@@ -39,13 +36,10 @@ function enforceSwatchRules(
 	let newValue = currentValue;
 
 	// ensue the value is within the allowed range
-	if (currentValue < minimumSwatches) {
-		newValue = minimumSwatches;
-	} else if (
-		maximumSwatches !== undefined &&
-		currentValue > maximumSwatches
-	) {
-		newValue = maximumSwatches;
+	if (currentValue < minSwatches) {
+		newValue = minSwatches;
+	} else if (maxSwatches !== undefined && currentValue > maxSwatches) {
+		newValue = maxSwatches;
 	}
 
 	if (newValue !== currentValue) {
@@ -68,6 +62,6 @@ function enforceSwatchRules(
 	}
 }
 
-export const base: UIFn_BaseInterface = {
-	enforceSwatchRules
+export const enforce = {
+	swatchRules
 };

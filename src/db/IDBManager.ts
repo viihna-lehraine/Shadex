@@ -4,7 +4,6 @@ import { IDBPDatabase, IDBPObjectStore } from 'idb';
 import {
 	CommonFn_MasterInterface,
 	ConfigDataInterface,
-	HSL,
 	ModeDataInterface,
 	MutationLog,
 	Palette,
@@ -36,7 +35,6 @@ export class IDBManager {
 
 	private cache: Partial<{
 		settings: Settings;
-		customColor: HSL;
 	}> = {};
 
 	defaultKeys: ConfigDataInterface['db']['DEFAULT_KEYS'] =
@@ -248,22 +246,6 @@ export class IDBManager {
 		if (settings) this.cache.settings = settings;
 
 		return settings;
-	}
-
-	public async getCustomColor(): Promise<HSL | null> {
-		const key = this.defaultKeys['CUSTOM_COLOR'];
-		const storeName = this.storeNames['CUSTOM_COLOR'];
-
-		return this.utils.errors.handleAsync(async () => {
-			const db = await this.getDB();
-			const entry = await db.get(storeName, key);
-
-			if (!entry?.color) return null;
-
-			this.cache.customColor = entry.color;
-
-			return this.createMutationLogger(entry.color, storeName);
-		}, 'IDBManager.getCustomColor(): Error fetching custom color');
 	}
 
 	public async getDB(): Promise<PaletteDB> {
@@ -622,7 +604,11 @@ export class IDBManager {
 		return this.utils.errors.handleAsync(async () => {
 			await this.saveData('settings', 'appSettings', newSettings);
 
-			if (!this.mode.quiet && this.logMode.info)
+			if (
+				!this.mode.quiet &&
+				this.logMode.info &&
+				this.logMode.verbosity > 1
+			)
 				logger.info(
 					'Settings updated',
 					`${thisModule} > ${thisMethod}`
@@ -650,18 +636,13 @@ export class IDBManager {
 			const { items } = storedPalette.palette;
 
 			if (entryIndex >= items.length) {
-				if (!this.mode.gracefulErrors)
-					throw new Error(
-						`Entry ${entryIndex} not found in palette ${tableID}.`
-					);
-				if (this.logMode.error)
+				if (
+					!this.mode.quiet &&
+					this.logMode.error &&
+					this.logMode.verbosity > 1
+				)
 					logger.error(
 						`Entry ${entryIndex} not found in palette ${tableID}.`,
-						`${thisModule} > ${thisMethod}`
-					);
-				if (!this.mode.quiet && this.logMode.info)
-					logger.warn(
-						'updateEntryInPalette: Entry not found.',
 						`${thisModule} > ${thisMethod}`
 					);
 			}
@@ -756,12 +737,6 @@ export class IDBManager {
 			const db = await this.getDB();
 			const tx = db.transaction('settings', 'readwrite');
 			const store = tx.objectStore('settings');
-
-			if (this.mode.debug)
-				logger.info(
-					`Updating curent palette ID to ${newID}`,
-					`${thisModule} > ${thisMethod}`
-				);
 
 			await store.put({ key: 'appSettings', lastPaletteID: newID });
 			await tx.done;

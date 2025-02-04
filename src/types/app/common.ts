@@ -23,10 +23,8 @@ import {
 	LAB_L,
 	LAB_A,
 	LAB_B,
-	MakePaletteBox,
 	NumericRangeKey,
 	Palette,
-	PaletteGenerationArgs,
 	PaletteItem,
 	Percentile,
 	Radial,
@@ -165,28 +163,9 @@ export interface CommonFn_MasterInterface {
 			hueToRGB(p: number, q: number, t: number): number;
 		};
 		dom: {
-			attachDragAndDropListeners(element: HTMLElement | null): void;
-			handle: {
-				dragStart(e: DragEvent): void;
-				dragOver(e: DragEvent): boolean;
-				dragEnd(e: DragEvent): void;
-				drop(e: DragEvent): void;
-			};
-			makePaletteBox(
-				color: Color,
-				paletteBoxCount: number
-			): Promise<MakePaletteBox>;
-			showToast(message: string): void;
-			showTooltip(tooltipElement: HTMLElement): void;
 			validateAndConvertColor(
 				color: Color | Color_StringProps | null
 			): Promise<Color | null>;
-		};
-	};
-	superUtils: {
-		dom: {
-			getPaletteGenerationArgs(): PaletteGenerationArgs | null;
-			switchColorSpace(targetFormat: ColorSpace): Promise<void>;
 		};
 	};
 	transform: {

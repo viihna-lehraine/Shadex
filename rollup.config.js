@@ -14,13 +14,14 @@ export default defineConfig({
 		inlineDynamicImports: true,
 		sourcemap: true
 	},
-	external: ['fs'],
+	external: [],
 	plugins: [
 		commonjs(),
 		resolve({
 			browser: true,
-			preferBuiltins: false,
-			extensions: ['.js', '.ts']
+			extensions: ['.js', '.ts'],
+			moduleDirectories: ['node_modules'],
+			preferBuiltins: false
 		}),
 		typescript({
 			tsconfig: './tsconfig.json'

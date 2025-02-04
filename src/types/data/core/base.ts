@@ -13,12 +13,16 @@ import {
 	LAB,
 	LAB_StringProps,
 	MutationLog,
+	Palette,
+	PaletteItem,
+	PaletteOptions,
 	SL,
 	SL_StringProps,
 	SV,
 	SV_StringProps,
 	RGB,
 	RGB_StringProps,
+	StoredPalette,
 	UnbrandedCMYK,
 	UnbrandedHex,
 	UnbrandedHSL,
@@ -68,8 +72,18 @@ export interface ConfigDataInterface {
 			rgb: RegExp;
 			xyz: RegExp;
 		};
+		dom: {
+			hex: RegExp;
+			hsl: RegExp;
+			rgb: RegExp;
+		};
 		file: {
-			palette: { css: { color: RegExp; metadata: RegExp } };
+			palette: {
+				css: {
+					color: RegExp;
+					metadata: RegExp;
+				};
+			};
 		};
 	};
 }
@@ -195,12 +209,18 @@ export interface DefaultDataInterface {
 		mutation: MutationLog;
 	};
 	palette: {
+		branded: {
+			data: Palette;
+			item: PaletteItem;
+			stored: StoredPalette;
+		};
 		unbranded: {
 			data: UnbrandedPalette;
 			item: UnbrandedPaletteItem;
 			stored: UnbrandedStoredPalette;
 		};
 	};
+	paletteOptions: PaletteOptions;
 }
 
 export interface ModeDataInterface {

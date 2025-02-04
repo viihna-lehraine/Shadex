@@ -32,7 +32,6 @@ export interface Palette {
 		timestamp: string;
 		swatches: number;
 		type: string;
-		customColor: PaletteItem | false;
 		flags: {
 			limitDarkness: boolean;
 			limitGrayness: boolean;
@@ -75,7 +74,6 @@ export interface PaletteItem {
 }
 
 export interface PaletteOptions {
-	customColor: HSL | null;
 	flags: {
 		limitDark: boolean;
 		limitGray: boolean;
@@ -121,9 +119,7 @@ export interface UnbrandedPalette {
 	id: string;
 	items: UnbrandedPaletteItem[];
 	metadata: {
-		customColor?: UnbrandedPaletteItem | false;
 		flags: {
-			enableAlpha: boolean;
 			limitDarkness: boolean;
 			limitGrayness: boolean;
 			limitLightness: boolean;

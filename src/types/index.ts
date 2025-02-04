@@ -1,15 +1,18 @@
 // File: types/index.js
 
 export type { CommonFn_MasterInterface } from './app/common.js';
-export type { MakePaletteBox, DOMFn_MasterInterface } from './app/dom.js';
+export type {
+	DOMFn_EventListenerFnInterface,
+	DOMFn_MasterInterface,
+	PaletteBoxObject
+} from './app/dom.js';
 export type { ColorParser, IOFn_MasterInterface } from './app/io.js';
 export type {
 	Palette_CommonFn_MasterInterface,
-	PaletteFn_MasterInterface,
 	PaletteGenerationArgs,
 	PaletteGenerationInterface
 } from './app/palette.js';
-export type { UIFn_BaseInterface, UIFn_MasterInterface } from './app/ui.js';
+export type { UIFn_MasterInterface } from './app/ui.js';
 export type {
 	CMYK,
 	CMYK_StringProps,

@@ -62,136 +62,7 @@ async function fromCSS(data: string): Promise<Palette> {
 			limitLightness: metadataJSON.flags?.limitLightness || false
 		};
 
-		// 4. parse custom color if provided
-		const { customColor: rawCustomColor } = metadataJSON;
-		const customColor =
-			rawCustomColor && rawCustomColor.hslColor
-				? {
-						colors: {
-							main: {
-								cmyk:
-									rawCustomColor.convertedColors?.cmyk ??
-									defaultColors.cmyk.value,
-								hex:
-									rawCustomColor.convertedColors?.hex ??
-									defaultColors.hex.value,
-								hsl:
-									rawCustomColor.convertedColors?.hsl ??
-									defaultColors.hsl.value,
-								hsv:
-									rawCustomColor.convertedColors?.hsv ??
-									defaultColors.hsv.value,
-								lab:
-									rawCustomColor.convertedColors?.lab ??
-									defaultColors.lab.value,
-								rgb:
-									rawCustomColor.convertedColors?.rgb ??
-									defaultColors.rgb.value,
-								xyz:
-									rawCustomColor.convertedColors?.xyz ??
-									defaultColors.xyz.value
-							},
-							stringProps: {
-								cmyk: convertToColorString({
-									value:
-										rawCustomColor.convertedColors?.cmyk ??
-										defaultColors.cmyk,
-									format: 'cmyk'
-								}).value as CMYK_StringProps['value'],
-								hex: convertToColorString({
-									value:
-										rawCustomColor.convertedColors?.hex ??
-										defaultColors.hex,
-									format: 'hex'
-								}).value as Hex_StringProps['value'],
-								hsl: convertToColorString({
-									value:
-										rawCustomColor.convertedColors?.hsl ??
-										defaultColors.hsl,
-									format: 'hsl'
-								}).value as HSL_StringProps['value'],
-								hsv: convertToColorString({
-									value:
-										rawCustomColor.convertedColors?.hsv ??
-										defaultColors.hsv,
-									format: 'hsv'
-								}).value as HSV_StringProps['value'],
-								lab: convertToColorString({
-									value:
-										rawCustomColor.convertedColors?.lab ??
-										defaultColors.lab,
-									format: 'lab'
-								}).value as LAB_StringProps['value'],
-								rgb: convertToColorString({
-									value:
-										rawCustomColor.convertedColors?.rgb ??
-										defaultColors.rgb,
-									format: 'rgb'
-								}).value as RGB_StringProps['value'],
-								xyz: convertToColorString({
-									value:
-										rawCustomColor.convertedColors?.xyz ??
-										defaultColors.xyz,
-									format: 'xyz'
-								}).value as XYZ_StringProps['value']
-							},
-							css: {
-								cmyk: await convertToCSSColorString({
-									value:
-										rawCustomColor.convertedColors?.cmyk ??
-										defaultColors.cmyk,
-									format: 'cmyk'
-								}),
-								hex: await convertToCSSColorString({
-									value:
-										rawCustomColor.convertedColors?.hex ??
-										defaultColors.hex,
-									format: 'hex'
-								}),
-								hsl: await convertToCSSColorString({
-									value:
-										rawCustomColor.convertedColors?.hsl ??
-										defaultColors.hsl,
-									format: 'hsl'
-								}),
-								hsv: await convertToCSSColorString({
-									value:
-										rawCustomColor.convertedColors?.hsv ??
-										defaultColors.hsv,
-									format: 'hsv'
-								}),
-								lab: await convertToCSSColorString({
-									value:
-										rawCustomColor.convertedColors?.lab ??
-										defaultColors.lab,
-									format: 'lab'
-								}),
-								rgb: await convertToCSSColorString({
-									value:
-										rawCustomColor.convertedColors?.rgb ??
-										defaultColors.rgb,
-									format: 'rgb'
-								}),
-								xyz: await convertToCSSColorString({
-									value:
-										rawCustomColor.convertedColors?.xyz ??
-										defaultColors.xyz,
-									format: 'xyz'
-								})
-							}
-						}
-					}
-				: false;
-		if (!customColor) {
-			if (!mode.quiet && logMode.info && logMode.verbosity > 1) {
-				logger.info(
-					`No custom color data found in CSS file. Assigning boolean value 'false' for Palette property Palette['metadata']['customColor'].`,
-					`${thisModule} > ${caller}`
-				);
-			}
-		}
-
-		// 5. parse palette items
+		// 4. parse palette items
 		const items: PaletteItem[] = [];
 		const itemBlocks = Array.from(
 			data.matchAll(regex.file.palette.css.color)
@@ -211,7 +82,7 @@ async function fromCSS(data: string): Promise<Palette> {
 				{} as Record<string, string>
 			);
 
-			// 2.1. create each PaletteItem with required properties
+			// 4.1. create each PaletteItem with required properties
 			items.push({
 				colors: {
 					main: {
@@ -336,7 +207,6 @@ async function fromCSS(data: string): Promise<Palette> {
 			id,
 			items,
 			metadata: {
-				customColor,
 				flags,
 				name,
 				swatches,
@@ -437,124 +307,6 @@ async function fromXML(data: string): Promise<Palette> {
 			flagsElement?.querySelector('LimitLightness')?.textContent ===
 			'true'
 	};
-
-	const customColorElement = metadataElement.querySelector('CustomColor');
-
-	let customColor: Palette['metadata']['customColor'] = false;
-
-	if (customColorElement && customColorElement.textContent !== 'false') {
-		const customCMYKValue = ioParseUtils.color.cmyk(
-			customColorElement.querySelector('CMYK')?.textContent || null
-		);
-		const customHexValue = ioParseUtils.color.hex(
-			customColorElement.querySelector('Hex')?.textContent || null
-		);
-		const customHSLValue = ioParseUtils.color.hsl(
-			customColorElement.querySelector('HSL')?.textContent || null
-		);
-		const customHSVValue = ioParseUtils.color.hsv(
-			customColorElement.querySelector('HSV')?.textContent || null
-		);
-		const customLABValue = ioParseUtils.color.lab(
-			customColorElement.querySelector('LAB')?.textContent || null
-		);
-		const customRGBValue = ioParseUtils.color.rgb(
-			customColorElement.querySelector('RGB')?.textContent || null
-		);
-		const customXYZValue = ioParseUtils.color.xyz(
-			customColorElement.querySelector('XYZ')?.textContent || null
-		);
-
-		const customCMYKStringValue = convertToColorString({
-			value: customCMYKValue,
-			format: 'cmyk'
-		}).value as CMYK_StringProps['value'];
-		const customHexStringValue = convertToColorString({
-			value: customHexValue,
-			format: 'hex'
-		}).value as Hex_StringProps['value'];
-		const customHSLStringValue = convertToColorString({
-			value: customHSLValue,
-			format: 'hsl'
-		}).value as HSL_StringProps['value'];
-		const customHSVStringValue = convertToColorString({
-			value: customHSVValue,
-			format: 'hsv'
-		}).value as HSV_StringProps['value'];
-		const customLABStringValue = convertToColorString({
-			value: customLABValue,
-			format: 'lab'
-		}).value as LAB_StringProps['value'];
-		const customRGBStringValue = convertToColorString({
-			value: customRGBValue,
-			format: 'rgb'
-		}).value as RGB_StringProps['value'];
-		const customXYZStringValue = convertToColorString({
-			value: customXYZValue,
-			format: 'xyz'
-		}).value as XYZ_StringProps['value'];
-
-		const customCMYKCSSStringValue = await convertToCSSColorString({
-			value: customCMYKValue,
-			format: 'cmyk'
-		});
-		const customHexCSSStringValue = await convertToCSSColorString({
-			value: customHexValue,
-			format: 'hex'
-		});
-		const customHSLCSSStringValue = await convertToCSSColorString({
-			value: customHSLValue,
-			format: 'hsl'
-		});
-		const customHSVCSSStringValue = await convertToCSSColorString({
-			value: customHSVValue,
-			format: 'hsv'
-		});
-		const customLABCSSStringValue = await convertToCSSColorString({
-			value: customLABValue,
-			format: 'lab'
-		});
-		const customRGBCSSStringValue = await convertToCSSColorString({
-			value: customRGBValue,
-			format: 'rgb'
-		});
-		const customXYZCSSStringValue = await convertToCSSColorString({
-			value: customXYZValue,
-			format: 'xyz'
-		});
-
-		customColor = {
-			colors: {
-				main: {
-					cmyk: customCMYKValue,
-					hex: customHexValue,
-					hsl: customHSLValue,
-					hsv: customHSVValue,
-					lab: customLABValue,
-					rgb: customRGBValue,
-					xyz: customXYZValue
-				},
-				stringProps: {
-					cmyk: customCMYKStringValue,
-					hex: customHexStringValue,
-					hsl: customHSLStringValue,
-					hsv: customHSVStringValue,
-					lab: customLABStringValue,
-					rgb: customRGBStringValue,
-					xyz: customXYZStringValue
-				},
-				css: {
-					cmyk: customCMYKCSSStringValue,
-					hex: customHexCSSStringValue,
-					hsl: customHSLCSSStringValue,
-					hsv: customHSVCSSStringValue,
-					lab: customLABCSSStringValue,
-					rgb: customRGBCSSStringValue,
-					xyz: customXYZCSSStringValue
-				}
-			}
-		};
-	}
 
 	// 2. parse palette items
 	const items: PaletteItem[] = Array.from(
@@ -665,7 +417,7 @@ async function fromXML(data: string): Promise<Palette> {
 	return {
 		id,
 		items,
-		metadata: { name, timestamp, swatches, type, flags, customColor }
+		metadata: { name, timestamp, swatches, type, flags }
 	};
 }
 

@@ -9,7 +9,6 @@ import {
 } from '../../types/index';
 import { coreUtils } from '../core.js';
 import { createLogger } from '../../logger/index.js';
-import { helpers } from '../helpers/index.js';
 import { modeData as mode } from '../../data/mode.js';
 
 const logMode = mode.logging;
@@ -39,13 +38,6 @@ function createObject(
 				limitDarkness: limitDark,
 				limitGrayness: limitGray,
 				limitLightness: limitLight
-			},
-			customColor: {
-				colors: {
-					main: items[0]?.colors.main || {},
-					stringProps: items[0]?.colors.stringProps || {},
-					css: items[0]?.colors.css || {}
-				}
 			}
 		}
 	};
@@ -68,8 +60,6 @@ export async function populateOutputBox(
 					'Invalid color values.',
 					`${thisModule} > ${thisMethod}`
 				);
-
-			helpers.dom.showToast('Invalid color.');
 
 			return;
 		}

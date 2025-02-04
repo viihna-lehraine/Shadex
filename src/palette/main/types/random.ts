@@ -10,22 +10,24 @@ import {
 	helpers as paletteHelpers,
 	superUtils as paletteSuperUtils
 } from '../../common/index.js';
-import { utils } from '../../../common/index.js';
+import { commonFn } from '../../../common/index.js';
 
-const create = paletteSuperUtils.create;
-const update = paletteHelpers.update;
+const utils = commonFn.utils;
 
 export async function random(args: PaletteGenerationArgs): Promise<Palette> {
-	const baseColor = create.baseColor(args.customColor);
-	const paletteItems: PaletteItem[] = [await create.paletteItem(baseColor)];
+	const baseColor = utils.random.hsl();
+	const paletteItems: PaletteItem[] = [
+		await paletteSuperUtils.create.paletteItem(baseColor)
+	];
 
 	for (let i = 1; i < args.swatches; i++) {
 		const randomColor = utils.random.hsl();
-		const nextPaletteItem = await create.paletteItem(randomColor);
+		const nextPaletteItem =
+			await paletteSuperUtils.create.paletteItem(randomColor);
 
 		paletteItems.push(nextPaletteItem);
 
-		update.colorBox(randomColor, i);
+		paletteHelpers.update.colorBox(randomColor, i);
 	}
 
 	const idbManager = await IDBManager.getInstance();

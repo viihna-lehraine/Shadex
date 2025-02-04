@@ -7,26 +7,28 @@ import {
 	PaletteItem
 } from '../../../types/index.js';
 import { IDBManager } from '../../../db/IDBManager.js';
-import { coreUtils } from '../../../common/index.js';
-import { superUtils as paletteSuperUtils } from '../../common/index.js';
-import { uiFn } from '../../../ui/index.js';
+import { commonFn } from '../../../common/index.js';
+import {
+	helpers as paletteHelpers,
+	superUtils as paletteSuperUtils
+} from '../../common/index.js';
 
-const create = paletteSuperUtils.create;
-const genHues = paletteSuperUtils.genHues;
+const core = commonFn.core;
+const utils = commonFn.utils;
 
 export async function analogous(args: PaletteGenerationArgs): Promise<Palette> {
 	// ensure at least 2 color swatches
-	if (args.swatches < 2) uiFn.enforceSwatchRules(2);
+	if (args.swatches < 2) paletteHelpers.enforce.swatchRules(2);
 
-	const baseColor = create.baseColor(args.customColor);
-	const hues = genHues.analogous(baseColor, args.swatches);
+	const baseColor = utils.random.hsl();
+	const hues = paletteSuperUtils.genHues.analogous(baseColor, args.swatches);
 	const paletteItems: PaletteItem[] = [];
 
 	for (const [i, hue] of hues.entries()) {
 		const newColor: HSL = {
 			value: {
-				hue: coreUtils.brand.asRadial(hue),
-				saturation: coreUtils.brand.asPercentile(
+				hue: core.brand.asRadial(hue),
+				saturation: core.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
@@ -36,7 +38,7 @@ export async function analogous(args: PaletteGenerationArgs): Promise<Palette> {
 						)
 					)
 				),
-				lightness: coreUtils.brand.asPercentile(
+				lightness: core.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
@@ -49,7 +51,8 @@ export async function analogous(args: PaletteGenerationArgs): Promise<Palette> {
 			format: 'hsl'
 		};
 
-		const paletteItem = await create.paletteItem(newColor);
+		const paletteItem =
+			await paletteSuperUtils.create.paletteItem(newColor);
 
 		paletteItems.push(paletteItem);
 	}

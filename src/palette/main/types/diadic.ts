@@ -7,21 +7,24 @@ import {
 	PaletteItem
 } from '../../../types/index.js';
 import { IDBManager } from '../../../db/IDBManager.js';
-import { coreUtils } from '../../../common/index.js';
+import { commonFn } from '../../../common/index.js';
 import { constsData as consts } from '../../../data/consts.js';
-import { superUtils as paletteSuperUtils } from '../../common/index.js';
-import { uiFn } from '../../../ui/index.js';
+import {
+	helpers as paletteHelpers,
+	superUtils as paletteSuperUtils
+} from '../../common/index.js';
 
-const create = paletteSuperUtils.create;
-const genHues = paletteSuperUtils.genHues;
 const paletteRanges = consts.paletteRanges;
+
+const core = commonFn.core;
+const utils = commonFn.utils;
 
 export async function diadic(args: PaletteGenerationArgs): Promise<Palette> {
 	// ensure exactly 2 color swatches
-	if (args.swatches !== 2) uiFn.enforceSwatchRules(2, 2);
+	if (args.swatches !== 2) paletteHelpers.enforce.swatchRules(2, 2);
 
-	const baseColor = create.baseColor(args.customColor);
-	const hues = genHues.diadic(baseColor.value.hue);
+	const baseColor = utils.random.hsl();
+	const hues = paletteSuperUtils.genHues.diadic(baseColor.value.hue);
 	const paletteItems: PaletteItem[] = [];
 
 	for (let i = 0; i < 2; i++) {
@@ -33,8 +36,8 @@ export async function diadic(args: PaletteGenerationArgs): Promise<Palette> {
 			paletteRanges.shift.diadic.light / 2;
 		const newColor: HSL = {
 			value: {
-				hue: coreUtils.brand.asRadial(hues[i % hues.length]),
-				saturation: coreUtils.brand.asPercentile(
+				hue: core.brand.asRadial(hues[i % hues.length]),
+				saturation: core.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
@@ -43,7 +46,7 @@ export async function diadic(args: PaletteGenerationArgs): Promise<Palette> {
 						)
 					)
 				),
-				lightness: coreUtils.brand.asPercentile(
+				lightness: core.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessShift)
@@ -53,7 +56,8 @@ export async function diadic(args: PaletteGenerationArgs): Promise<Palette> {
 			format: 'hsl'
 		};
 
-		const paletteItem = await create.paletteItem(newColor);
+		const paletteItem =
+			await paletteSuperUtils.create.paletteItem(newColor);
 		paletteItems.push(paletteItem);
 	}
 

@@ -18,7 +18,7 @@ const STORE_NAMES = {
     TABLES: 'tables'
 };
 const db = { DEFAULT_KEYS, DEFAULT_SETTINGS, STORE_NAMES };
-const regex$3 = {
+const regex$4 = {
     colors: {
         cmyk: /cmyk\((\d+)%?,\s*(\d+)%?,\s*(\d+)%?,\s*(\d+)%?(?:,\s*([\d.]+))?\)/i,
         hex: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/,
@@ -27,6 +27,11 @@ const regex$3 = {
         lab: /lab\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i,
         rgb: /rgb\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i,
         xyz: /xyz\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i
+    },
+    dom: {
+        hex: /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i,
+        hsl: /^hsl\(\s*(\d+),\s*([\d.]+)%,\s*([\d.]+)%\s*\)$/,
+        rgb: /^rgb\(\s*(\d+),\s*(\d+),\s*(\d+)\s*\)$/
     },
     file: {
         palette: {
@@ -37,7 +42,7 @@ const regex$3 = {
         }
     }
 };
-const configData = { db, regex: regex$3 };
+const configData = { db, regex: regex$4 };
 
 // File: logger/AppLogger.js
 class AppLogger {
@@ -200,52 +205,52 @@ const dataSets = {
 const _sets = dataSets;
 // ******** SECTION 0 - Brand ********
 function asBranded(value, rangeKey) {
-    validate$1.range(value, rangeKey);
+    validate.range(value, rangeKey);
     return value;
 }
 function asByteRange(value) {
-    validate$1.range(value, 'ByteRange');
+    validate.range(value, 'ByteRange');
     return value;
 }
 function asHexSet(value) {
     if (/^#[0-9a-fA-F]{8}$/.test(value)) {
         value = value.slice(0, 7);
     }
-    if (!validate$1.hexSet(value)) {
+    if (!validate.hexSet(value)) {
         throw new Error(`Invalid HexSet value: ${value}`);
     }
     return value;
 }
 function asLAB_L(value) {
-    validate$1.range(value, 'LAB_L');
+    validate.range(value, 'LAB_L');
     return value;
 }
 function asLAB_A(value) {
-    validate$1.range(value, 'LAB_A');
+    validate.range(value, 'LAB_A');
     return value;
 }
 function asLAB_B(value) {
-    validate$1.range(value, 'LAB_B');
+    validate.range(value, 'LAB_B');
     return value;
 }
 function asPercentile(value) {
-    validate$1.range(value, 'Percentile');
+    validate.range(value, 'Percentile');
     return value;
 }
 function asRadial(value) {
-    validate$1.range(value, 'Radial');
+    validate.range(value, 'Radial');
     return value;
 }
 function asXYZ_X(value) {
-    validate$1.range(value, 'XYZ_X');
+    validate.range(value, 'XYZ_X');
     return value;
 }
 function asXYZ_Y(value) {
-    validate$1.range(value, 'XYZ_Y');
+    validate.range(value, 'XYZ_Y');
     return value;
 }
 function asXYZ_Z(value) {
-    validate$1.range(value, 'XYZ_Z');
+    validate.range(value, 'XYZ_Z');
     return value;
 }
 const brand$3 = {
@@ -377,7 +382,7 @@ function parseCustomColor(rawValue) {
         return null;
     }
 }
-const base$2 = {
+const base = {
     clampToRange,
     clone,
     debounce: debounce$1,
@@ -653,7 +658,7 @@ function rgbStringToValue(rgb) {
     };
 }
 function toColorValueRange(value, rangeKey) {
-    validate$1.range(value, rangeKey);
+    validate.range(value, rangeKey);
     if (rangeKey === 'HexSet') {
         return brand$3.asHexSet(value);
     }
@@ -748,10 +753,10 @@ function isColorString$1(value) {
 }
 function isInRange(value, rangeKey) {
     if (rangeKey === 'HexSet') {
-        return validate$1.hexSet(value);
+        return validate.hexSet(value);
     }
     if (rangeKey === 'HexSet') {
-        return validate$1.hexSet(value);
+        return validate.hexSet(value);
     }
     if (typeof value === 'number' && Array.isArray(_sets[rangeKey])) {
         const [min, max] = _sets[rangeKey];
@@ -921,7 +926,7 @@ function range(value, rangeKey) {
         throw new Error(`Value ${value} is out of range for ${String(rangeKey)} [${min}, ${max}]`);
     }
 }
-const validate$1 = {
+const validate = {
     colorValues,
     hex,
     hexComponent,
@@ -941,18 +946,98 @@ function getFormattedTimestamp$1() {
 }
 const other = { getFormattedTimestamp: getFormattedTimestamp$1 };
 // ******** SECTION 7 - Final Export ********
-const coreUtils = {
-    base: base$2,
+const coreUtils$2 = {
+    base,
     brand: brand$3,
     brandColor,
     convert,
     guards,
     ...other,
     sanitize,
-    validate: validate$1
+    validate
 };
 
 // File: data/defaults.js
+const brandedData = {
+    id: `null-palette-${Date.now()}`,
+    items: [],
+    metadata: {
+        flags: {
+            limitDarkness: false,
+            limitGrayness: false,
+            limitLightness: false
+        },
+        name: 'BRANDED DEFAULT PALETTE',
+        swatches: 1,
+        type: '???',
+        timestamp: '???'
+    }
+};
+const brandedItem = {
+    colors: {
+        main: {
+            cmyk: {
+                cyan: brand$3.asPercentile(0),
+                magenta: brand$3.asPercentile(0),
+                yellow: brand$3.asPercentile(0),
+                key: brand$3.asPercentile(0)
+            },
+            hex: { hex: brand$3.asHexSet('#000000') },
+            hsl: {
+                hue: brand$3.asRadial(0),
+                saturation: brand$3.asPercentile(0),
+                lightness: brand$3.asPercentile(0)
+            },
+            hsv: {
+                hue: brand$3.asRadial(0),
+                saturation: brand$3.asPercentile(0),
+                value: brand$3.asPercentile(0)
+            },
+            lab: {
+                l: brand$3.asLAB_L(0),
+                a: brand$3.asLAB_A(0),
+                b: brand$3.asLAB_B(0)
+            },
+            rgb: {
+                red: brand$3.asByteRange(0),
+                green: brand$3.asByteRange(0),
+                blue: brand$3.asByteRange(0)
+            },
+            xyz: {
+                x: brand$3.asXYZ_X(0),
+                y: brand$3.asXYZ_Y(0),
+                z: brand$3.asXYZ_Z(0)
+            }
+        },
+        stringProps: {
+            cmyk: {
+                cyan: '0%',
+                magenta: '0%',
+                yellow: '0%',
+                key: '0%'
+            },
+            hex: { hex: '#000000FF' },
+            hsl: { hue: '0', saturation: '0%', lightness: '0%' },
+            hsv: { hue: '0', saturation: '0%', value: '0%' },
+            lab: { l: '0', a: '0', b: '0' },
+            rgb: { red: '0', green: '0', blue: '0' },
+            xyz: { x: '0', y: '0', z: '0' }
+        },
+        css: {
+            cmyk: 'cmyk(0%, 0%, 0%, 100%)',
+            hex: '#000000',
+            hsl: 'hsl(0, 0%, 0%)',
+            hsv: 'hsv(0, 0%, 0%)',
+            lab: 'lab(0, 0, 0)',
+            rgb: 'rgb(0, 0, 0)',
+            xyz: 'xyz(0, 0, 0)'
+        }
+    }
+};
+const brandedStoredPalette = {
+    tableID: 1,
+    palette: brandedData
+};
 const colors = {
     base: {
         branded: {
@@ -1189,16 +1274,23 @@ const mutation = {
     oldValue: { value: 'old_value' },
     origin: 'DEFAULT'
 };
-const idb$1 = {
+const idb = {
     mutation
 };
+const paletteOptions = {
+    flags: {
+        limitDark: false,
+        limitGray: false,
+        limitLight: false
+    },
+    swatches: 6,
+    type: 1
+};
 const unbrandedData = {
-    id: `null-palette-${Date.now()}`,
+    id: `null-branded-palette-${Date.now()}`,
     items: [],
     metadata: {
-        customColor: false,
         flags: {
-            enableAlpha: false,
             limitDarkness: false,
             limitGrayness: false,
             limitLightness: false
@@ -1245,27 +1337,33 @@ const unbrandedItem = {
         }
     }
 };
-const unbrandedStored = {
+const unbrandedStoredPalette = {
     tableID: 1,
     palette: unbrandedData
 };
 const palette = {
+    branded: {
+        data: brandedData,
+        item: brandedItem,
+        stored: brandedStoredPalette
+    },
     unbranded: {
         data: unbrandedData,
         item: unbrandedItem,
-        stored: unbrandedStored
+        stored: unbrandedStoredPalette
     }
 };
 const defaultData = {
     colors,
-    idb: idb$1,
-    palette
+    idb,
+    palette,
+    paletteOptions
 };
 
 // File: common/helpers/conversion.js
-const logMode$m = modeData.logging;
-const thisModule$p = 'common/helpers/conversion.js';
-const logger$p = await createLogger();
+const logMode$p = modeData.logging;
+const thisModule$s = 'common/helpers/conversion.js';
+const logger$s = await createLogger();
 function applyGammaCorrection(value) {
     const thisMethod = 'applyGammaCorrection()';
     try {
@@ -1274,42 +1372,42 @@ function applyGammaCorrection(value) {
             : 12.92 * value;
     }
     catch (error) {
-        if (logMode$m.error)
-            logger$p.error(`Error applying gamma correction: ${error}`, `${thisModule$p} > ${thisMethod}`);
+        if (logMode$p.error)
+            logger$s.error(`Error applying gamma correction: ${error}`, `${thisModule$s} > ${thisMethod}`);
         return value;
     }
 }
 function clampRGB(rgb) {
     const thisMethod = 'clampRGB()';
-    const defaultRGBUnbranded = coreUtils.base.clone(defaultData.colors.base.unbranded.rgb);
-    const defaultRGBBranded = coreUtils.brandColor.asRGB(defaultRGBUnbranded);
-    if (!coreUtils.validate.colorValues(rgb)) {
-        if (logMode$m.error)
-            logger$p.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$p} > ${thisMethod}`);
+    const defaultRGBUnbranded = coreUtils$2.base.clone(defaultData.colors.base.unbranded.rgb);
+    const defaultRGBBranded = coreUtils$2.brandColor.asRGB(defaultRGBUnbranded);
+    if (!coreUtils$2.validate.colorValues(rgb)) {
+        if (logMode$p.error)
+            logger$s.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$s} > ${thisMethod}`);
         return defaultRGBBranded;
     }
     try {
         return {
             value: {
-                red: coreUtils.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.red), 1) * 255)),
-                green: coreUtils.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.green), 1) * 255)),
-                blue: coreUtils.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.blue), 1) * 255))
+                red: coreUtils$2.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.red), 1) * 255)),
+                green: coreUtils$2.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.green), 1) * 255)),
+                blue: coreUtils$2.brand.asByteRange(Math.round(Math.min(Math.max(0, rgb.value.blue), 1) * 255))
             },
             format: 'rgb'
         };
     }
     catch (error) {
-        if (logMode$m.error)
-            logger$p.error(`Error clamping RGB values: ${error}`, `${thisModule$p} > ${thisMethod}`);
+        if (logMode$p.error)
+            logger$s.error(`Error clamping RGB values: ${error}`, `${thisModule$s} > ${thisMethod}`);
         return rgb;
     }
 }
 function hueToRGB(p, q, t) {
     const thisMethod = 'hueToRGB()';
     try {
-        const clonedP = coreUtils.base.clone(p);
-        const clonedQ = coreUtils.base.clone(q);
-        let clonedT = coreUtils.base.clone(t);
+        const clonedP = coreUtils$2.base.clone(p);
+        const clonedQ = coreUtils$2.base.clone(q);
+        let clonedT = coreUtils$2.base.clone(t);
         if (clonedT < 0)
             clonedT += 1;
         if (clonedT > 1)
@@ -1323,26 +1421,26 @@ function hueToRGB(p, q, t) {
         return clonedP;
     }
     catch (error) {
-        if (logMode$m.error)
-            logger$p.error(`Error converting hue to RGB: ${error}`, `${thisModule$p} > ${thisMethod}`);
+        if (logMode$p.error)
+            logger$s.error(`Error converting hue to RGB: ${error}`, `${thisModule$s} > ${thisMethod}`);
         return 0;
     }
 }
 function hslAddFormat(value) {
     const thisMethod = 'hslAddFormat()';
-    const defaultHSLUnbranded = coreUtils.base.clone(defaultData.colors.base.unbranded.hsl);
-    const defaultHSLBranded = coreUtils.brandColor.asHSL(defaultHSLUnbranded);
+    const defaultHSLUnbranded = coreUtils$2.base.clone(defaultData.colors.base.unbranded.hsl);
+    const defaultHSLBranded = coreUtils$2.brandColor.asHSL(defaultHSLUnbranded);
     try {
-        if (!coreUtils.validate.colorValues({ value: value, format: 'hsl' })) {
-            if (logMode$m.error)
-                logger$p.error(`Invalid HSL value ${JSON.stringify(value)}`, `${thisModule$p} > ${thisMethod}`);
+        if (!coreUtils$2.validate.colorValues({ value: value, format: 'hsl' })) {
+            if (logMode$p.error)
+                logger$s.error(`Invalid HSL value ${JSON.stringify(value)}`, `${thisModule$s} > ${thisMethod}`);
             return defaultHSLBranded;
         }
         return { value: value, format: 'hsl' };
     }
     catch (error) {
-        if (logMode$m.error)
-            logger$p.error(`Error adding HSL format: ${error}`, `${thisModule$p} > ${thisMethod}`);
+        if (logMode$p.error)
+            logger$s.error(`Error adding HSL format: ${error}`, `${thisModule$s} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
@@ -1354,8 +1452,8 @@ const conversionHelpers = {
 };
 
 // File: common/transform.js
-const thisModule$o = 'common/transform/base.ts';
-const logger$o = await createLogger();
+const thisModule$r = 'common/transform/base.ts';
+const logger$r = await createLogger();
 function addHashToHex(hex) {
     try {
         return hex.value.hex.startsWith('#')
@@ -1374,136 +1472,7 @@ function addHashToHex(hex) {
 function brandPalette(data) {
     return {
         ...data,
-        metadata: {
-            ...data.metadata,
-            customColor: data.metadata.customColor
-                ? {
-                    colors: {
-                        main: {
-                            cmyk: {
-                                cyan: brand$3.asPercentile(data.metadata.customColor.colors.main
-                                    .cmyk.cyan ?? 0),
-                                magenta: brand$3.asPercentile(data.metadata.customColor.colors.main
-                                    .cmyk.magenta ?? 0),
-                                yellow: brand$3.asPercentile(data.metadata.customColor.colors.main
-                                    .cmyk.yellow ?? 0),
-                                key: brand$3.asPercentile(data.metadata.customColor.colors.main
-                                    .cmyk.key ?? 0)
-                            },
-                            hex: {
-                                hex: brand$3.asHexSet(data.metadata.customColor.colors.main
-                                    .hex.hex ?? '#000000FF')
-                            },
-                            hsl: {
-                                hue: brand$3.asRadial(data.metadata.customColor.colors.main
-                                    .hsl.hue ?? 0),
-                                saturation: brand$3.asPercentile(data.metadata.customColor.colors.main
-                                    .hsl.saturation ?? 0),
-                                lightness: brand$3.asPercentile(data.metadata.customColor.colors.main
-                                    .hsl.lightness ?? 0)
-                            },
-                            hsv: {
-                                hue: brand$3.asRadial(data.metadata.customColor.colors.main
-                                    .hsv.hue ?? 0),
-                                saturation: brand$3.asPercentile(data.metadata.customColor.colors.main
-                                    .hsv.saturation ?? 0),
-                                value: brand$3.asPercentile(data.metadata.customColor.colors.main
-                                    .hsv.value ?? 0)
-                            },
-                            lab: {
-                                l: brand$3.asLAB_L(data.metadata.customColor.colors.main
-                                    .lab.l ?? 0),
-                                a: brand$3.asLAB_A(data.metadata.customColor.colors.main
-                                    .lab.a ?? 0),
-                                b: brand$3.asLAB_B(data.metadata.customColor.colors.main
-                                    .lab.b ?? 0)
-                            },
-                            rgb: {
-                                red: brand$3.asByteRange(data.metadata.customColor.colors.main
-                                    .rgb.red ?? 0),
-                                green: brand$3.asByteRange(data.metadata.customColor.colors.main
-                                    .rgb.green ?? 0),
-                                blue: brand$3.asByteRange(data.metadata.customColor.colors.main
-                                    .rgb.blue ?? 0)
-                            },
-                            xyz: {
-                                x: brand$3.asXYZ_X(data.metadata.customColor.colors.main
-                                    .xyz.x ?? 0),
-                                y: brand$3.asXYZ_Y(data.metadata.customColor.colors.main
-                                    .xyz.y ?? 0),
-                                z: brand$3.asXYZ_Z(data.metadata.customColor.colors.main
-                                    .xyz.z ?? 0)
-                            }
-                        },
-                        stringProps: {
-                            cmyk: {
-                                cyan: String(data.metadata.customColor.colors.main
-                                    .cmyk.cyan ?? 0),
-                                magenta: String(data.metadata.customColor.colors.main
-                                    .cmyk.magenta ?? 0),
-                                yellow: String(data.metadata.customColor.colors.main
-                                    .cmyk.yellow ?? 0),
-                                key: String(data.metadata.customColor.colors.main
-                                    .cmyk.key ?? 0)
-                            },
-                            hex: {
-                                hex: String(data.metadata.customColor.colors.main
-                                    .hex.hex ?? '#000000FF')
-                            },
-                            hsl: {
-                                hue: String(data.metadata.customColor.colors.main
-                                    .hsl.hue ?? 0),
-                                saturation: String(data.metadata.customColor.colors.main
-                                    .hsl.saturation ?? 0),
-                                lightness: String(data.metadata.customColor.colors.main
-                                    .hsl.lightness ?? 0)
-                            },
-                            hsv: {
-                                hue: String(data.metadata.customColor.colors.main
-                                    .hsv.hue ?? 0),
-                                saturation: String(data.metadata.customColor.colors.main
-                                    .hsv.saturation ?? 0),
-                                value: String(data.metadata.customColor.colors.main
-                                    .hsv.value ?? 0)
-                            },
-                            lab: {
-                                l: String(data.metadata.customColor.colors.main
-                                    .lab.l ?? 0),
-                                a: String(data.metadata.customColor.colors.main
-                                    .lab.a ?? 0),
-                                b: String(data.metadata.customColor.colors.main
-                                    .lab.b ?? 0)
-                            },
-                            rgb: {
-                                red: String(data.metadata.customColor.colors.main
-                                    .rgb.red ?? 0),
-                                green: String(data.metadata.customColor.colors.main
-                                    .rgb.green ?? 0),
-                                blue: String(data.metadata.customColor.colors.main
-                                    .rgb.blue ?? 0)
-                            },
-                            xyz: {
-                                x: String(data.metadata.customColor.colors.main
-                                    .xyz.x ?? 0),
-                                y: String(data.metadata.customColor.colors.main
-                                    .xyz.y ?? 0),
-                                z: String(data.metadata.customColor.colors.main
-                                    .xyz.z ?? 0)
-                            }
-                        },
-                        css: {
-                            cmyk: `cmyk(${data.metadata.customColor.colors.main.cmyk.cyan}%, ${data.metadata.customColor.colors.main.cmyk.magenta}%, ${data.metadata.customColor.colors.main.cmyk.yellow}%, ${data.metadata.customColor.colors.main.cmyk.key}%)`,
-                            hex: `${data.metadata.customColor.colors.main.hex.hex}`,
-                            hsl: `hsl(${data.metadata.customColor.colors.main.hsl.hue}, ${data.metadata.customColor.colors.main.hsl.saturation}%, ${data.metadata.customColor.colors.main.hsl.lightness}%)`,
-                            hsv: `hsv(${data.metadata.customColor.colors.main.hsv.hue}, ${data.metadata.customColor.colors.main.hsv.saturation}%, ${data.metadata.customColor.colors.main.hsv.value}%)`,
-                            lab: `lab(${data.metadata.customColor.colors.main.lab.l}, ${data.metadata.customColor.colors.main.lab.a}, ${data.metadata.customColor.colors.main.lab.b})`,
-                            rgb: `rgb(${data.metadata.customColor.colors.main.rgb.red}, ${data.metadata.customColor.colors.main.rgb.green}, ${data.metadata.customColor.colors.main.rgb.blue})`,
-                            xyz: `xyz(${data.metadata.customColor.colors.main.xyz.x}, ${data.metadata.customColor.colors.main.xyz.y}, ${data.metadata.customColor.colors.main.xyz.z})`
-                        }
-                    }
-                }
-                : false
-        },
+        metadata: { ...data.metadata },
         items: data.items.map(item => ({
             colors: {
                 main: {
@@ -1599,7 +1568,7 @@ function componentToHex(component) {
     }
     catch (error) {
         if (!modeData.quiet && modeData.logging.error)
-            logger$o.error(`componentToHex error: ${error}`, `${thisModule$o} > ${thisMethod}`);
+            logger$r.error(`componentToHex error: ${error}`, `${thisModule$r} > ${thisMethod}`);
         return '00';
     }
 }
@@ -1696,9 +1665,9 @@ const transformUtils = {
 };
 
 // File: common/utils/color.js
-const logMode$l = modeData.logging;
-const thisModule$n = 'common/utils/color.js';
-const logger$n = await createLogger();
+const logMode$o = modeData.logging;
+const thisModule$q = 'common/utils/color.js';
+const logger$q = await createLogger();
 // ******** SECTION 1: Robust Type Guards ********
 function isColorFormat(color, format) {
     return color.format === format;
@@ -1796,7 +1765,7 @@ function isHSLString(value) {
         typeof value.value.lightness === 'string');
 }
 function isHSVColor(value) {
-    return (coreUtils.guards.isColor(value) &&
+    return (coreUtils$2.guards.isColor(value) &&
         typeof value === 'object' &&
         value !== null &&
         'format' in value &&
@@ -1821,7 +1790,7 @@ function isHSVString(value) {
         typeof value.value.value === 'string');
 }
 function isLAB(value) {
-    return (coreUtils.guards.isColor(value) &&
+    return (coreUtils$2.guards.isColor(value) &&
         typeof value === 'object' &&
         value !== null &&
         'format' in value &&
@@ -1835,7 +1804,7 @@ function isLABFormat(color) {
     return isColorFormat(color, 'lab');
 }
 function isRGB(value) {
-    return (coreUtils.guards.isColor(value) &&
+    return (coreUtils$2.guards.isColor(value) &&
         typeof value === 'object' &&
         value !== null &&
         'format' in value &&
@@ -1929,7 +1898,7 @@ function isStoredPalette(obj) {
 }
 async function narrowToColor(color) {
     if (isColorString(color)) {
-        return coreUtils.convert.colorStringToColor(color);
+        return coreUtils$2.convert.colorStringToColor(color);
     }
     switch (color.format) {
         case 'cmyk':
@@ -1949,10 +1918,10 @@ async function narrowToColor(color) {
 // ******** SECTION 4: TRANSFORM UTILS ********
 function colorToColorString(color) {
     const thisMethod = 'colorToColorString()';
-    const clonedColor = coreUtils.base.clone(color);
+    const clonedColor = coreUtils$2.base.clone(color);
     if (isColorString(clonedColor)) {
-        if (logMode$l.error) {
-            logger$n.info(`Already formatted as color string: ${JSON.stringify(color)}`, `${thisModule$n} > ${thisMethod}`);
+        if (logMode$o.error) {
+            logger$q.info(`Already formatted as color string: ${JSON.stringify(color)}`, `${thisModule$q} > ${thisMethod}`);
         }
         return clonedColor;
     }
@@ -2036,11 +2005,11 @@ function colorToColorString(color) {
         if (!modeData.gracefulErrors) {
             throw new Error(`Unsupported format: ${clonedColor.format}`);
         }
-        else if (logMode$l.error) {
-            logger$n.error(`Unsupported format: ${clonedColor.format}`, `${thisModule$n} > ${thisMethod}`);
+        else if (logMode$o.error) {
+            logger$q.error(`Unsupported format: ${clonedColor.format}`, `${thisModule$q} > ${thisMethod}`);
         }
-        else if (!modeData.quiet && logMode$l.warn) {
-            logger$n.warn('Failed to convert to color string.', `${thisModule$n} > ${thisMethod}`);
+        else if (!modeData.quiet && logMode$o.warn) {
+            logger$q.warn('Failed to convert to color string.', `${thisModule$q} > ${thisMethod}`);
         }
         return defaultData.colors.strings.hsl;
     }
@@ -2089,14 +2058,14 @@ function getColorString(color) {
             case 'xyz':
                 return formatters.xyz(color);
             default:
-                if (!logMode$l.error)
-                    logger$n.error(`Unsupported color format for ${color}`, `${thisModule$n} > ${thisMethod}`);
+                if (!logMode$o.error)
+                    logger$q.error(`Unsupported color format for ${color}`, `${thisModule$q} > ${thisMethod}`);
                 return null;
         }
     }
     catch (error) {
-        if (!logMode$l.error)
-            logger$n.error(`getColorString error: ${error}`, `${thisModule$n} > ${thisMethod}`);
+        if (!logMode$o.error)
+            logger$q.error(`getColorString error: ${error}`, `${thisModule$q} > ${thisMethod}`);
         return null;
     }
 }
@@ -2108,10 +2077,10 @@ const parseColor = (colorSpace, value) => {
                 const [c, m, y, k] = parseComponents(value, 5);
                 return {
                     value: {
-                        cyan: coreUtils.brand.asPercentile(c),
-                        magenta: coreUtils.brand.asPercentile(m),
-                        yellow: coreUtils.brand.asPercentile(y),
-                        key: coreUtils.brand.asPercentile(k)
+                        cyan: coreUtils$2.brand.asPercentile(c),
+                        magenta: coreUtils$2.brand.asPercentile(m),
+                        yellow: coreUtils$2.brand.asPercentile(y),
+                        key: coreUtils$2.brand.asPercentile(k)
                     },
                     format: 'cmyk'
                 };
@@ -2120,7 +2089,7 @@ const parseColor = (colorSpace, value) => {
                 const hexValue = value.startsWith('#') ? value : `#${value}`;
                 return {
                     value: {
-                        hex: coreUtils.brand.asHexSet(hexValue)
+                        hex: coreUtils$2.brand.asHexSet(hexValue)
                     },
                     format: 'hex'
                 };
@@ -2128,9 +2097,9 @@ const parseColor = (colorSpace, value) => {
                 const [h, s, l] = parseComponents(value, 4);
                 return {
                     value: {
-                        hue: coreUtils.brand.asRadial(h),
-                        saturation: coreUtils.brand.asPercentile(s),
-                        lightness: coreUtils.brand.asPercentile(l)
+                        hue: coreUtils$2.brand.asRadial(h),
+                        saturation: coreUtils$2.brand.asPercentile(s),
+                        lightness: coreUtils$2.brand.asPercentile(l)
                     },
                     format: 'hsl'
                 };
@@ -2139,9 +2108,9 @@ const parseColor = (colorSpace, value) => {
                 const [h, s, v] = parseComponents(value, 4);
                 return {
                     value: {
-                        hue: coreUtils.brand.asRadial(h),
-                        saturation: coreUtils.brand.asPercentile(s),
-                        value: coreUtils.brand.asPercentile(v)
+                        hue: coreUtils$2.brand.asRadial(h),
+                        saturation: coreUtils$2.brand.asPercentile(s),
+                        value: coreUtils$2.brand.asPercentile(v)
                     },
                     format: 'hsv'
                 };
@@ -2150,9 +2119,9 @@ const parseColor = (colorSpace, value) => {
                 const [l, a, b] = parseComponents(value, 4);
                 return {
                     value: {
-                        l: coreUtils.brand.asLAB_L(l),
-                        a: coreUtils.brand.asLAB_A(a),
-                        b: coreUtils.brand.asLAB_B(b)
+                        l: coreUtils$2.brand.asLAB_L(l),
+                        a: coreUtils$2.brand.asLAB_A(a),
+                        b: coreUtils$2.brand.asLAB_B(b)
                     },
                     format: 'lab'
                 };
@@ -2164,9 +2133,9 @@ const parseColor = (colorSpace, value) => {
                 const [r, g, b] = components;
                 return {
                     value: {
-                        red: coreUtils.brand.asByteRange(r),
-                        green: coreUtils.brand.asByteRange(g),
-                        blue: coreUtils.brand.asByteRange(b)
+                        red: coreUtils$2.brand.asByteRange(r),
+                        green: coreUtils$2.brand.asByteRange(g),
+                        blue: coreUtils$2.brand.asByteRange(b)
                     },
                     format: 'rgb'
                 };
@@ -2174,10 +2143,10 @@ const parseColor = (colorSpace, value) => {
             default:
                 const message = `Unsupported color format: ${colorSpace}`;
                 if (modeData.gracefulErrors) {
-                    if (logMode$l.error)
-                        logger$n.error(message);
-                    else if (!modeData.quiet && logMode$l.warn)
-                        logger$n.warn(`Failed to parse color: ${message}`, `${thisModule$n} > ${thisMethod}`);
+                    if (logMode$o.error)
+                        logger$q.error(message);
+                    else if (!modeData.quiet && logMode$o.warn)
+                        logger$q.warn(`Failed to parse color: ${message}`, `${thisModule$q} > ${thisMethod}`);
                 }
                 else {
                     throw new Error(message);
@@ -2186,8 +2155,8 @@ const parseColor = (colorSpace, value) => {
         }
     }
     catch (error) {
-        if (logMode$l.error)
-            logger$n.error(`parseColor error: ${error}`, `${thisModule$n} > ${thisMethod}`);
+        if (logMode$o.error)
+            logger$q.error(`parseColor error: ${error}`, `${thisModule$q} > ${thisMethod}`);
         return null;
     }
 };
@@ -2202,16 +2171,16 @@ function parseComponents(value, count) {
         if (components.length !== count)
             if (!modeData.gracefulErrors)
                 throw new Error(`Expected ${count} components.`);
-            else if (logMode$l.error) {
-                if (!modeData.quiet && logMode$l.warn)
-                    logger$n.warn(`Expected ${count} components.`, `${thisModule$n} > ${thisMethod}`);
+            else if (logMode$o.error) {
+                if (!modeData.quiet && logMode$o.warn)
+                    logger$q.warn(`Expected ${count} components.`, `${thisModule$q} > ${thisMethod}`);
                 return [];
             }
         return components;
     }
     catch (error) {
-        if (logMode$l.error)
-            logger$n.error(`Error parsing components: ${error}`, `${thisModule$n} > ${thisMethod}`);
+        if (logMode$o.error)
+            logger$q.error(`Error parsing components: ${error}`, `${thisModule$q} > ${thisMethod}`);
         return [];
     }
 }
@@ -2222,17 +2191,17 @@ function stripHashFromHex(hex) {
         return hex.value.hex.startsWith('#')
             ? {
                 value: {
-                    hex: coreUtils.brand.asHexSet(hexString.slice(1))
+                    hex: coreUtils$2.brand.asHexSet(hexString.slice(1))
                 },
                 format: 'hex'
             }
             : hex;
     }
     catch (error) {
-        if (logMode$l.error)
-            logger$n.error(`stripHashFromHex error: ${error}`, `${thisModule$n} > ${thisMethod}`);
-        const unbrandedHex = coreUtils.base.clone(defaultData.colors.base.unbranded.hex);
-        return coreUtils.brandColor.asHex(unbrandedHex);
+        if (logMode$o.error)
+            logger$q.error(`stripHashFromHex error: ${error}`, `${thisModule$q} > ${thisMethod}`);
+        const unbrandedHex = coreUtils$2.base.clone(defaultData.colors.base.unbranded.hex);
+        return coreUtils$2.brandColor.asHex(unbrandedHex);
     }
 }
 function stripPercentFromValues(value) {
@@ -2289,18 +2258,18 @@ const colorUtils = {
 
 // File: common/convert.js
 const defaultColors$1 = defaultData.colors.base.unbranded;
-const logMode$k = modeData.logging;
-const thisModule$m = 'common/convert/base.js';
-const logger$m = await createLogger();
-const defaultCMYKUnbranded = base$2.clone(defaultColors$1.cmyk);
-const defaultHexUnbranded = base$2.clone(defaultColors$1.hex);
-const defaultHSLUnbranded = base$2.clone(defaultColors$1.hsl);
-const defaultHSVUnbranded = base$2.clone(defaultColors$1.hsv);
-const defaultLABUnbranded = base$2.clone(defaultColors$1.lab);
-const defaultRGBUnbranded = base$2.clone(defaultColors$1.rgb);
-const defaultSLUnbranded = base$2.clone(defaultColors$1.sl);
-const defaultSVUnbranded = base$2.clone(defaultColors$1.sv);
-const defaultXYZUnbranded = base$2.clone(defaultColors$1.xyz);
+const logMode$n = modeData.logging;
+const thisModule$p = 'common/convert/base.js';
+const logger$p = await createLogger();
+const defaultCMYKUnbranded = base.clone(defaultColors$1.cmyk);
+const defaultHexUnbranded = base.clone(defaultColors$1.hex);
+const defaultHSLUnbranded = base.clone(defaultColors$1.hsl);
+const defaultHSVUnbranded = base.clone(defaultColors$1.hsv);
+const defaultLABUnbranded = base.clone(defaultColors$1.lab);
+const defaultRGBUnbranded = base.clone(defaultColors$1.rgb);
+const defaultSLUnbranded = base.clone(defaultColors$1.sl);
+const defaultSVUnbranded = base.clone(defaultColors$1.sv);
+const defaultXYZUnbranded = base.clone(defaultColors$1.xyz);
 const defaultCMYKBranded = brandColor.asCMYK(defaultCMYKUnbranded);
 const defaultHexBranded = brandColor.asHex(defaultHexUnbranded);
 const defaultHSLBranded = brandColor.asHSL(defaultHSLUnbranded);
@@ -2313,28 +2282,28 @@ const defaultXYZBranded = brandColor.asXYZ(defaultXYZUnbranded);
 function cmykToHSL(cmyk) {
     const thisMethod = 'cmykToHSL()';
     try {
-        if (!validate$1.colorValues(cmyk)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(cmyk)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultHSLBranded;
         }
-        return rgbToHSL(cmykToRGB(base$2.clone(cmyk)));
+        return rgbToHSL(cmykToRGB(base.clone(cmyk)));
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`cmykToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`cmykToHSL() error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
 function cmykToRGB(cmyk) {
     const thisMethod = 'cmykToRGB()';
     try {
-        if (!validate$1.colorValues(cmyk)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(cmyk)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid CMYK value ${JSON.stringify(cmyk)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultRGBBranded;
         }
-        const clonedCMYK = base$2.clone(cmyk);
+        const clonedCMYK = base.clone(cmyk);
         const r = 255 *
             (1 - clonedCMYK.value.cyan / 100) *
             (1 - clonedCMYK.value.key / 100);
@@ -2355,31 +2324,31 @@ function cmykToRGB(cmyk) {
         return clampRGB(rgb);
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`cmykToRGB error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`cmykToRGB error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultRGBBranded;
     }
 }
 function hexToHSL(hex) {
     const thisMethod = 'hexToHSL()';
     try {
-        if (!validate$1.colorValues(hex)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid Hex value ${JSON.stringify(hex)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hex)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid Hex value ${JSON.stringify(hex)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultHSLBranded;
         }
-        return rgbToHSL(hexToRGB(base$2.clone(hex)));
+        return rgbToHSL(hexToRGB(base.clone(hex)));
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`hexToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`hexToHSL() error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
 function hexToHSLWrapper(input) {
     const thisMethod = 'hexToHSLWrapper()';
     try {
-        const clonedInput = base$2.clone(input);
+        const clonedInput = base.clone(input);
         const hex = typeof clonedInput === 'string'
             ? {
                 value: {
@@ -2396,8 +2365,8 @@ function hexToHSLWrapper(input) {
         return hexToHSL(hex);
     }
     catch (error) {
-        if (logMode$k.error) {
-            logger$m.error(`Error converting hex to HSL: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error) {
+            logger$p.error(`Error converting hex to HSL: ${error}`, `${thisModule$p} > ${thisMethod}`);
         }
         return defaultHSLBranded;
     }
@@ -2405,9 +2374,9 @@ function hexToHSLWrapper(input) {
 function hexToRGB(hex) {
     const thisMethod = 'hexToRGB()';
     try {
-        if (!validate$1.colorValues(hex)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid Hex value ${JSON.stringify(hex)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hex)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid Hex value ${JSON.stringify(hex)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultRGBBranded;
         }
         const clonedHex = clone(hex);
@@ -2423,49 +2392,49 @@ function hexToRGB(hex) {
         };
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`hexToRGB error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`hexToRGB error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultRGBBranded;
     }
 }
 function hslToCMYK(hsl) {
     const thisMethod = 'hslToCMYK()';
     try {
-        if (!validate$1.colorValues(hsl)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hsl)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultCMYKBranded;
         }
         return rgbToCMYK(hslToRGB(clone(hsl)));
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`Error converting HSL ${JSON.stringify(hsl)} to CMYK: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`Error converting HSL ${JSON.stringify(hsl)} to CMYK: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultCMYKBranded;
     }
 }
 function hslToHex(hsl) {
     const thisMethod = 'hslToHex()';
     try {
-        if (!validate$1.colorValues(hsl)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hsl)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultHexBranded;
         }
         return rgbToHex(hslToRGB(clone(hsl)));
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`hslToHex error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`hslToHex error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultHexBranded;
     }
 }
 function hslToHSV(hsl) {
     const thisMethod = 'hslToHSV()';
     try {
-        if (!validate$1.colorValues(hsl)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hsl)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultHSVBranded;
         }
         const clonedHSL = clone(hsl);
@@ -2483,33 +2452,33 @@ function hslToHSV(hsl) {
         };
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`hslToHSV() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`hslToHSV() error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultHSVBranded;
     }
 }
 function hslToLAB(hsl) {
     const thisMethod = 'hslToLAB()';
     try {
-        if (!validate$1.colorValues(hsl)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hsl)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultLABBranded;
         }
         return xyzToLAB(rgbToXYZ(hslToRGB(clone(hsl))));
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`hslToLab() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`hslToLab() error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultLABBranded;
     }
 }
 function hslToRGB(hsl) {
     const thisMethod = 'hslToRGB()';
     try {
-        if (!validate$1.colorValues(hsl)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hsl)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultRGBBranded;
         }
         const clonedHSL = clone(hsl);
@@ -2527,17 +2496,17 @@ function hslToRGB(hsl) {
         };
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`hslToRGB error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`hslToRGB error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultRGBBranded;
     }
 }
 function hslToSL(hsl) {
     const thisMethod = 'hslToSL()';
     try {
-        if (!validate$1.colorValues(hsl)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hsl)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultSLBranded;
         }
         return {
@@ -2549,49 +2518,49 @@ function hslToSL(hsl) {
         };
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`Error converting HSL to SL: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`Error converting HSL to SL: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultSLBranded;
     }
 }
 function hslToSV(hsl) {
     const thisMethod = 'hslToSV()';
     try {
-        if (!validate$1.colorValues(hsl)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hsl)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultSVBranded;
         }
         return hsvToSV(rgbToHSV(hslToRGB(clone(hsl))));
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`Error converting HSL to SV: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`Error converting HSL to SV: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultSVBranded;
     }
 }
 function hslToXYZ(hsl) {
     const thisMethod = 'hslToXYZ()';
     try {
-        if (!validate$1.colorValues(hsl)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hsl)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultXYZBranded;
         }
         return labToXYZ(hslToLAB(clone(hsl)));
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`hslToXYZ error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`hslToXYZ error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultXYZBranded;
     }
 }
 function hsvToHSL(hsv) {
     const thisMethod = 'hsvToHSL()';
     try {
-        if (!validate$1.colorValues(hsv)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid HSV value ${JSON.stringify(hsv)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hsv)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid HSV value ${JSON.stringify(hsv)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultHSLBranded;
         }
         const clonedHSV = clone(hsv);
@@ -2613,17 +2582,17 @@ function hsvToHSL(hsv) {
         };
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`hsvToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`hsvToHSL() error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
 function hsvToSV(hsv) {
     const thisMethod = 'hsvToSV()';
     try {
-        if (!validate$1.colorValues(hsv)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid HSV value ${JSON.stringify(hsv)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(hsv)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid HSV value ${JSON.stringify(hsv)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultSVBranded;
         }
         return {
@@ -2635,48 +2604,48 @@ function hsvToSV(hsv) {
         };
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`Error converting HSV to SV: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`Error converting HSV to SV: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultSVBranded;
     }
 }
 function labToHSL(lab) {
     const thisMethod = 'labToHSL()';
     try {
-        if (!validate$1.colorValues(lab)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(lab)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultHSLBranded;
         }
         return rgbToHSL(labToRGB(clone(lab)));
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`labToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`labToHSL() error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
 function labToRGB(lab) {
     try {
-        if (!validate$1.colorValues(lab)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$m} > labToRGB()`);
+        if (!validate.colorValues(lab)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$p} > labToRGB()`);
             return defaultRGBBranded;
         }
         return xyzToRGB(labToXYZ(clone(lab)));
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`labToRGB error: ${error}`, `${thisModule$m} > labToRGB()`);
+        if (logMode$n.error)
+            logger$p.error(`labToRGB error: ${error}`, `${thisModule$p} > labToRGB()`);
         return defaultRGBBranded;
     }
 }
 function labToXYZ(lab) {
     const thisMethod = 'labToXYZ()';
     try {
-        if (!validate$1.colorValues(lab)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(lab)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultXYZBranded;
         }
         const clonedLAB = clone(lab);
@@ -2704,17 +2673,17 @@ function labToXYZ(lab) {
         };
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`labToXYZ error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`labToXYZ error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultXYZBranded;
     }
 }
 function rgbToCMYK(rgb) {
     const thisMethod = 'rgbToCMYK()';
     try {
-        if (!validate$1.colorValues(rgb)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(rgb)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultCMYKBranded;
         }
         const clonedRGB = clone(rgb);
@@ -2728,21 +2697,21 @@ function rgbToCMYK(rgb) {
         const format = 'cmyk';
         const cmyk = { value: { cyan, magenta, yellow, key }, format };
         if (!modeData.quiet)
-            logger$m.info(`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(clone(cmyk))}`, `${thisModule$m} > ${thisMethod}`);
+            logger$p.info(`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(clone(cmyk))}`, `${thisModule$p} > ${thisMethod}`);
         return cmyk;
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`Error converting RGB to CMYK: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`Error converting RGB to CMYK: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultCMYKBranded;
     }
 }
 function rgbToHex(rgb) {
     const thisMethod = 'rgbToHex()';
     try {
-        if (!validate$1.colorValues(rgb)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(rgb)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultHexBranded;
         }
         const clonedRGB = clone(rgb);
@@ -2751,8 +2720,8 @@ function rgbToHex(rgb) {
             clonedRGB.value.green,
             clonedRGB.value.blue
         ].some(v => isNaN(v) || v < 0 || v > 255)) {
-            if (logMode$k.warn)
-                logger$m.warn(`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}`, `${thisModule$m} > ${thisMethod}`);
+            if (logMode$n.warn)
+                logger$p.warn(`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}`, `${thisModule$p} > ${thisMethod}`);
             return {
                 value: {
                     hex: brand$3.asHexSet('#000000FF')
@@ -2768,17 +2737,17 @@ function rgbToHex(rgb) {
         };
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.warn(`rgbToHex error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.warn(`rgbToHex error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultHexBranded;
     }
 }
 function rgbToHSL(rgb) {
     const thisMethod = 'rgbToHSL()';
     try {
-        if (!validate$1.colorValues(rgb)) {
-            if (logMode$k.error) {
-                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(rgb)) {
+            if (logMode$n.error) {
+                logger$p.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$p} > ${thisMethod}`);
             }
             return defaultHSLBranded;
         }
@@ -2816,8 +2785,8 @@ function rgbToHSL(rgb) {
         };
     }
     catch (error) {
-        if (logMode$k.error) {
-            logger$m.error(`rgbToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error) {
+            logger$p.error(`rgbToHSL() error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         }
         return defaultHSLBranded;
     }
@@ -2825,9 +2794,9 @@ function rgbToHSL(rgb) {
 function rgbToHSV(rgb) {
     const thisMethod = 'rgbToHSV()';
     try {
-        if (!validate$1.colorValues(rgb)) {
-            if (logMode$k.error) {
-                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(rgb)) {
+            if (logMode$n.error) {
+                logger$p.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$p} > ${thisMethod}`);
             }
             return defaultHSVBranded;
         }
@@ -2864,8 +2833,8 @@ function rgbToHSV(rgb) {
         };
     }
     catch (error) {
-        if (logMode$k.error) {
-            logger$m.error(`rgbToHSV() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error) {
+            logger$p.error(`rgbToHSV() error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         }
         return defaultHSVBranded;
     }
@@ -2873,9 +2842,9 @@ function rgbToHSV(rgb) {
 function rgbToXYZ(rgb) {
     const thisMethod = 'rgbToXYZ()';
     try {
-        if (!validate$1.colorValues(rgb)) {
-            if (logMode$k.error) {
-                logger$m.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(rgb)) {
+            if (logMode$n.error) {
+                logger$p.error(`Invalid RGB value ${JSON.stringify(rgb)}`, `${thisModule$p} > ${thisMethod}`);
             }
             return defaultXYZBranded;
         }
@@ -2908,8 +2877,8 @@ function rgbToXYZ(rgb) {
         };
     }
     catch (error) {
-        if (logMode$k.error) {
-            logger$m.error(`rgbToXYZ error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error) {
+            logger$p.error(`rgbToXYZ error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         }
         return defaultXYZBranded;
     }
@@ -2917,25 +2886,25 @@ function rgbToXYZ(rgb) {
 function xyzToHSL(xyz) {
     const thisMethod = 'xyzToHSL()';
     try {
-        if (!validate$1.colorValues(xyz)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(xyz)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultHSLBranded;
         }
         return rgbToHSL(xyzToRGB(clone(xyz)));
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`xyzToHSL() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`xyzToHSL() error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultHSLBranded;
     }
 }
 function xyzToLAB(xyz) {
     const thisMethod = 'xyzToLAB()';
     try {
-        if (!validate$1.colorValues(xyz)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(xyz)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultLABBranded;
         }
         const clonedXYZ = clone(xyz);
@@ -2966,25 +2935,25 @@ function xyzToLAB(xyz) {
             },
             format: 'lab'
         };
-        if (!validate$1.colorValues(lab)) {
-            if (logMode$k.error)
-                logger$m.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(lab)) {
+            if (logMode$n.error)
+                logger$p.error(`Invalid LAB value ${JSON.stringify(lab)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultLABBranded;
         }
         return lab;
     }
     catch (error) {
-        if (logMode$k.error)
-            logger$m.error(`xyzToLab() error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error)
+            logger$p.error(`xyzToLab() error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         return defaultLABBranded;
     }
 }
 function xyzToRGB(xyz) {
     const thisMethod = 'xyzToRGB()';
     try {
-        if (!validate$1.colorValues(xyz)) {
-            if (logMode$k.error) {
-                logger$m.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(xyz)) {
+            if (logMode$n.error) {
+                logger$p.error(`Invalid XYZ value ${JSON.stringify(xyz)}`, `${thisModule$p} > ${thisMethod}`);
             }
             return defaultRGBBranded;
         }
@@ -3008,8 +2977,8 @@ function xyzToRGB(xyz) {
         return rgb;
     }
     catch (error) {
-        if (logMode$k.error) {
-            logger$m.error(`xyzToRGB error: ${error}`, `${thisModule$m} > ${thisMethod}`);
+        if (logMode$n.error) {
+            logger$p.error(`xyzToRGB error: ${error}`, `${thisModule$p} > ${thisMethod}`);
         }
         return defaultRGBBranded;
     }
@@ -3018,8 +2987,8 @@ function xyzToRGB(xyz) {
 function hslTo$1(color, colorSpace) {
     const thisMethod = 'hslTo()';
     try {
-        if (!validate$1.colorValues(color)) {
-            logger$m.error(`Invalid color value ${JSON.stringify(color)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(color)) {
+            logger$p.error(`Invalid color value ${JSON.stringify(color)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultRGBBranded;
         }
         const clonedColor = clone(color);
@@ -3053,8 +3022,8 @@ function hslTo$1(color, colorSpace) {
 function toHSL(color) {
     const thisMethod = 'toHSL()';
     try {
-        if (!validate$1.colorValues(color)) {
-            logger$m.error(`Invalid color value ${JSON.stringify(color)}`, `${thisModule$m} > ${thisMethod}`);
+        if (!validate.colorValues(color)) {
+            logger$p.error(`Invalid color value ${JSON.stringify(color)}`, `${thisModule$p} > ${thisMethod}`);
             return defaultHSLBranded;
         }
         const clonedColor = clone(color);
@@ -3089,322 +3058,25 @@ const coreConversionUtils = {
     }
 };
 
-// File: data/consts.js
-const adjustments$1 = {
-    slaValue: 10
-};
-const debounce = {
-    btn: 300,
-    input: 200
-};
-const limits$3 = {
-    xyz: {
-        max: {
-            x: 95.047,
-            y: 100,
-            z: 108.883
-        },
-        min: {
-            x: 0,
-            y: 0,
-            z: 0
-        }
-    }
-};
-const paletteRanges$5 = {
-    shift: {
-        comp: { hue: 10, sat: 0, light: 0 },
-        diadic: { hue: 30, sat: 30, light: 30 },
-        hexad: { hue: 0, sat: 30, light: 30 },
-        random: { hue: 0, sat: 0, light: 0 },
-        splitComp: { hue: 30, sat: 30, light: 30 },
-        tetra: { hue: 0, sat: 30, light: 30 },
-        triad: { hue: 0, sat: 30, light: 30 }
-    }
-};
-const probabilities$1 = {
-    values: [40, 45, 50, 55, 60, 65, 70],
-    weights: [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05]
-};
-const thresholds = {
-    dark: 25,
-    gray: 20,
-    light: 75
-};
-const timeouts$1 = {
-    copyButtonText: 1000,
-    toast: 3000,
-    tooltip: 1000
-};
-const constsData = {
-    adjustments: adjustments$1,
-    debounce,
-    limits: limits$3,
-    paletteRanges: paletteRanges$5,
-    probabilities: probabilities$1,
-    thresholds,
-    timeouts: timeouts$1
-};
-
 // File: common/helpers/dom.js
-const thisModule$l = 'common/helpers/dom.js';
-const logger$l = await createLogger();
-const logMode$j = modeData.logging;
-const timeouts = constsData.timeouts;
-let dragSrcEl = null;
-function attachDragAndDropListeners(element) {
-    const thisMethod = 'attachDragAndDropEventListeners()';
-    try {
-        if (element) {
-            element.addEventListener('dragstart', dragStart);
-            element.addEventListener('dragover', dragOver);
-            element.addEventListener('drop', drop);
-            element.addEventListener('dragend', dragEnd);
-        }
-        if (!modeData.quiet)
-            logger$l.info('Drag and drop event listeners successfully attached', `${thisModule$l} > ${thisMethod}`);
-    }
-    catch (error) {
-        if (!logMode$j.error)
-            logger$l.error(`Failed to execute attachDragAndDropEventListeners: ${error}`, `${thisModule$l} > ${thisMethod}`);
-    }
-}
-function dragStart(e) {
-    const thisMethod = 'handleDragStart()';
-    try {
-        dragSrcEl = e.currentTarget;
-        if (e.dataTransfer) {
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', dragSrcEl.outerHTML);
-        }
-        if (!modeData.quiet && modeData.debug && logMode$j.verbosity > 3)
-            logger$l.info('handleDragStart complete', `${thisModule$l} > ${thisMethod}`);
-    }
-    catch (error) {
-        if (logMode$j.error)
-            logger$l.error(`Error in handleDragStart: ${error}`, `${thisModule$l} > ${thisMethod}`);
-    }
-}
-function dragOver(e) {
-    const thisMethod = 'handleDragOver()';
-    try {
-        e.preventDefault();
-        if (e.dataTransfer) {
-            e.dataTransfer.dropEffect = 'move';
-        }
-        if (!modeData.quiet && modeData.debug && logMode$j.verbosity > 3)
-            logger$l.info('handleDragOver complete', `${thisModule$l} > ${thisMethod}`);
-        return false;
-    }
-    catch (error) {
-        if (logMode$j.error)
-            logger$l.error(`Error in handleDragOver: ${error}`, `${thisModule$l} > ${thisMethod}`);
-        return false;
-    }
-}
-function dragEnd(e) {
-    const thisMethod = 'handleDragEnd()';
-    try {
-        const target = e.currentTarget;
-        target.classList.remove('dragging');
-        document.querySelectorAll('.color-stripe').forEach(el => {
-            el.classList.remove('dragging');
-        });
-        if (!modeData.quiet && modeData.debug && logMode$j.verbosity > 3)
-            logger$l.info('handleDragEnd complete', `${thisModule$l} > ${thisMethod}`);
-    }
-    catch (error) {
-        if (logMode$j.error)
-            logger$l.error(`Error in handleDragEnd: ${error}`, `${thisModule$l} > ${thisMethod}`);
-    }
-}
-function drop(e) {
-    const thisMethod = 'drop()';
-    try {
-        e.stopPropagation();
-        const target = e.currentTarget;
-        if (dragSrcEl && dragSrcEl !== target) {
-            const dragSrcId = dragSrcEl.id;
-            const dropTargetId = target.id;
-            const dragSrcText = dragSrcEl.querySelector('.color-text-output-box').value;
-            const dropTargetText = target.querySelector('.color-text-output-box').value;
-            const dragSrcOuterHTML = dragSrcEl.outerHTML;
-            const dropTargetOuterHTML = target.outerHTML;
-            dragSrcEl.outerHTML = dropTargetOuterHTML;
-            target.outerHTML = dragSrcOuterHTML;
-            const newDragSrcEl = document.getElementById(dropTargetId);
-            const newDropTargetEl = document.getElementById(dragSrcId);
-            newDragSrcEl.id = dragSrcId;
-            newDropTargetEl.id = dropTargetId;
-            newDragSrcEl.querySelector('.color-text-output-box').value = dropTargetText;
-            newDropTargetEl.querySelector('.color-text-output-box').value = dragSrcText;
-            if (!modeData.quiet && modeData.debug && logMode$j.verbosity > 3)
-                logger$l.info('calling attachDragAndDropEventListeners for new elements', `${thisModule$l} > ${thisMethod}`);
-            attachDragAndDropListeners(newDragSrcEl);
-            attachDragAndDropListeners(newDropTargetEl);
-        }
-        if (!modeData.quiet && modeData.debug && logMode$j.verbosity > 3)
-            logger$l.info('handleDrop complete', `${thisModule$l} > ${thisMethod}`);
-    }
-    catch (error) {
-        if (!logMode$j.error)
-            logger$l.error(`Error in handleDrop: ${error}`, `${thisModule$l} > ${thisMethod}`);
-    }
-}
-async function makePaletteBox(color, paletteBoxCount) {
-    const thisMethod = 'makePaletteBox()';
-    try {
-        if (!coreUtils.validate.colorValues(color)) {
-            if (!logMode$j.error)
-                logger$l.error(`Invalid ${color.format} color value ${JSON.stringify(color)}`, `${thisModule$l} > ${thisMethod}`);
-            return {
-                colorStripe: document.createElement('div'),
-                paletteBoxCount
-            };
-        }
-        const clonedColor = coreUtils.base.clone(color);
-        const paletteBox = document.createElement('div');
-        paletteBox.className = 'palette-box';
-        paletteBox.id = `palette-box-${paletteBoxCount}`;
-        const paletteBoxTopHalf = document.createElement('div');
-        paletteBoxTopHalf.className = 'palette-box-half palette-box-top-half';
-        paletteBoxTopHalf.id = `palette-box-top-half-${paletteBoxCount}`;
-        const colorTextOutputBox = document.createElement('input');
-        colorTextOutputBox.type = 'text';
-        colorTextOutputBox.className = 'color-text-output-box tooltip';
-        colorTextOutputBox.id = `color-text-output-box-${paletteBoxCount}`;
-        colorTextOutputBox.setAttribute('data-format', 'hex');
-        const colorString = await coreUtils.convert.colorToCSSColorString(clonedColor);
-        colorTextOutputBox.value = colorString || '';
-        colorTextOutputBox.colorValues = clonedColor;
-        colorTextOutputBox.readOnly = false;
-        colorTextOutputBox.style.cursor = 'text';
-        colorTextOutputBox.style.pointerEvents = 'none';
-        const copyButton = document.createElement('button');
-        copyButton.className = 'copy-button';
-        copyButton.textContent = 'Copy';
-        const tooltipText = document.createElement('span');
-        tooltipText.className = 'tooltiptext';
-        tooltipText.textContent = 'Copied to clipboard!';
-        copyButton.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(colorTextOutputBox.value);
-                showTooltip(colorTextOutputBox);
-                clearTimeout(constsData.timeouts.tooltip || 1000);
-                copyButton.textContent = 'Copied!';
-                setTimeout(() => (copyButton.textContent = 'Copy'), constsData.timeouts.copyButtonText || 1000);
-            }
-            catch (error) {
-                if (!logMode$j.error)
-                    logger$l.error(`Failed to copy: ${error}`, `${thisModule$l} > ${thisMethod}`);
-            }
-        });
-        colorTextOutputBox.addEventListener('input', coreUtils.base.debounce((e) => {
-            const target = e.target;
-            if (target) {
-                const cssColor = target.value.trim();
-                const boxElement = document.getElementById(`color-box-${paletteBoxCount}`);
-                const stripeElement = document.getElementById(`color-stripe-${paletteBoxCount}`);
-                if (boxElement)
-                    boxElement.style.backgroundColor = cssColor;
-                if (stripeElement)
-                    stripeElement.style.backgroundColor = cssColor;
-            }
-        }, constsData.debounce.input || 200));
-        paletteBoxTopHalf.appendChild(colorTextOutputBox);
-        paletteBoxTopHalf.appendChild(copyButton);
-        const paletteBoxBottomHalf = document.createElement('div');
-        paletteBoxBottomHalf.className =
-            'palette-box-half palette-box-bottom-half';
-        paletteBoxBottomHalf.id = `palette-box-bottom-half-${paletteBoxCount}`;
-        const colorBox = document.createElement('div');
-        colorBox.className = 'color-box';
-        colorBox.id = `color-box-${paletteBoxCount}`;
-        colorBox.style.backgroundColor = colorString || '#ffffff';
-        paletteBoxBottomHalf.appendChild(colorBox);
-        paletteBox.appendChild(paletteBoxTopHalf);
-        paletteBox.appendChild(paletteBoxBottomHalf);
-        const colorStripe = document.createElement('div');
-        colorStripe.className = 'color-stripe';
-        colorStripe.id = `color-stripe-${paletteBoxCount}`;
-        colorStripe.style.backgroundColor = colorString || '#ffffff';
-        colorStripe.setAttribute('draggable', 'true');
-        attachDragAndDropListeners(colorStripe);
-        colorStripe.appendChild(paletteBox);
-        return {
-            colorStripe,
-            paletteBoxCount: paletteBoxCount + 1
-        };
-    }
-    catch (error) {
-        if (!logMode$j.error)
-            logger$l.error(`Failed to execute makePaletteBox: ${error}`, `${thisModule$l} > ${thisMethod}`);
-        return {
-            colorStripe: document.createElement('div'),
-            paletteBoxCount
-        };
-    }
-}
-function showToast(message) {
-    const thisMethod = 'showToast()';
-    const toast = document.createElement('div');
-    toast.className = 'toast-message';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    if (!modeData.quiet && logMode$j.verbosity > 3)
-        logger$l.info('Toast message added', `${thisModule$l} > ${thisMethod}`);
-    setTimeout(() => {
-        toast.classList.add('fade-out');
-        if (!modeData.quiet && logMode$j.verbosity > 3)
-            logger$l.info('Toast message faded out', `${thisModule$l} > ${thisMethod}`);
-        toast.addEventListener('transitioned', () => toast.remove());
-    }, timeouts.toast || 3000);
-}
-function showTooltip(tooltipElement) {
-    const thisMethod = 'showTooltip()';
-    try {
-        const tooltip = tooltipElement.querySelector('.tooltiptext');
-        if (tooltip) {
-            tooltip.style.visibility = 'visible';
-            tooltip.style.opacity = '1';
-            setTimeout(() => {
-                tooltip.style.visibility = 'hidden';
-                tooltip.style.opacity = '0';
-            }, constsData.timeouts.tooltip || 1000);
-        }
-        if (!modeData.quiet && logMode$j.verbosity > 3)
-            logger$l.info('showTooltip executed', `${thisModule$l} > ${thisMethod}`);
-    }
-    catch (error) {
-        if (logMode$j.error)
-            logger$l.error(`Failed to execute showTooltip: ${error}`, `${thisModule$l} > ${thisMethod}`);
-    }
-}
+const logMode$m = modeData.logging;
+const thisModule$o = 'common/helpers/dom.js';
+const logger$o = await createLogger();
 async function validateAndConvertColor(color) {
     const thisMethod = 'validateAndConvertColor()';
     if (!color)
         return null;
-    const convertedColor = coreUtils.guards.isColorString(color)
-        ? await coreUtils.convert.colorStringToColor(color)
+    const convertedColor = coreUtils$2.guards.isColorString(color)
+        ? await coreUtils$2.convert.colorStringToColor(color)
         : color;
-    if (!coreUtils.validate.colorValues(convertedColor)) {
-        if (logMode$j.error)
-            logger$l.error(`Invalid color: ${JSON.stringify(convertedColor)}`, `${thisModule$l} > ${thisMethod}`);
+    if (!coreUtils$2.validate.colorValues(convertedColor)) {
+        if (logMode$m.error)
+            logger$o.error(`Invalid color: ${JSON.stringify(convertedColor)}`, `${thisModule$o} > ${thisMethod}`);
         return null;
     }
     return convertedColor;
 }
 const domHelpers = {
-    attachDragAndDropListeners,
-    handle: {
-        dragStart,
-        dragOver,
-        dragEnd,
-        drop
-    },
-    makePaletteBox,
-    showToast,
-    showTooltip,
     validateAndConvertColor
 };
 
@@ -3414,222 +3086,10 @@ const helpers$1 = {
     dom: domHelpers
 };
 
-// File: data/dom/dom.js
-const dynamicIds = {
-    btns: {},
-    divs: {
-        colorBox1: 'color-box-1'
-    },
-    inputs: {
-        export: 'export-input'
-    },
-    selects: {},
-    spans: {}
-};
-const staticIds = {
-    btns: {
-        applyCustomColor: 'apply-custom-color-btn',
-        clearCustomColor: 'clear-custom-color-btn',
-        customColorMenu: 'custom-color-menu-btn',
-        desaturate: 'desaturate-btn',
-        export: 'export-btn',
-        generate: 'generate-btn',
-        helpMenu: 'help-menu-btn',
-        historyMenu: 'history-menu-btn',
-        ioMenu: 'io-menu-btn',
-        saturate: 'saturate-btn',
-        showAsCMYK: 'show-as-cmyk-btn',
-        showAsHex: 'show-as-hex-btn',
-        showAsHSL: 'show-as-hsl-btn',
-        showAsHSV: 'show-as-hsv-btn',
-        showAsLAB: 'show-as-lab-btn',
-        showAsRGB: 'show-as-rgb-btn'
-    },
-    divs: {
-        customColorMenu: 'custom-color-menu',
-        helpMenu: 'help-menu',
-        helpMenuContent: 'help-menu-content',
-        historyMenu: 'history-menu',
-        historyMenuContent: 'history-menu-content',
-        ioMenu: 'io-menu',
-        paletteHistory: 'palette-history'
-    },
-    inputs: {
-        customColor: 'custom-color-input',
-        historyLimit: 'history-limit-input',
-        import: 'import-input',
-        limitDarkChkbx: 'limit-dark-chkbx',
-        limitGrayChkbx: 'limit-gray-chkbx',
-        limitLightChkbx: 'limit-light-chkbx'
-    },
-    selects: {
-        exportFormatOption: 'export-format-option-selector',
-        paletteType: 'palette-type-selector',
-        swatch: 'swatch-selector',
-        swatchGen: 'swatch-gen-selector'
-    },
-    spans: {
-        customColorDisplay: 'custom-color-display'
-    }
-};
-// ******** Helpers ********
-function getElement(id) {
-    return document.getElementById(id);
-}
-const dynamicDivIds = dynamicIds.divs;
-const staticBtnIds = staticIds.btns;
-const staticDivIds = staticIds.divs;
-const staticInputIds = staticIds.inputs;
-const staticSelectIds = staticIds.selects;
-const staticSpanIds = staticIds.spans;
-// ******** Dynamic DOM Data ********
-const dynamicDomElements = {
-    get btns() {
-        return {};
-    },
-    get divs() {
-        return {
-            colorBox1: getElement(dynamicDivIds.colorBox1)
-        };
-    },
-    get inputs() {
-        return {};
-    },
-    get selects() {
-        return {};
-    },
-    get spans() {
-        return {};
-    }
-};
-const dynamicDomIds = {
-    btns: {},
-    divs: {
-        colorBox1: dynamicDivIds.colorBox1
-    },
-    inputs: {},
-    selects: {},
-    spans: {}
-};
-// ******** Static DOM Data ********
-const staticDomElements = {
-    get btns() {
-        return {
-            applyCustomColor: getElement(staticBtnIds.applyCustomColor),
-            clearCustomColor: getElement(staticBtnIds.clearCustomColor),
-            customColorMenu: getElement(staticBtnIds.customColorMenu),
-            desaturate: getElement(staticBtnIds.desaturate),
-            export: getElement(staticBtnIds.export),
-            generate: getElement(staticBtnIds.generate),
-            helpMenu: getElement(staticBtnIds.helpMenu),
-            historyMenu: getElement(staticBtnIds.historyMenu),
-            ioMenu: getElement(staticBtnIds.ioMenu),
-            saturate: getElement(staticBtnIds.saturate),
-            showAsCMYK: getElement(staticBtnIds.showAsCMYK),
-            showAsHex: getElement(staticBtnIds.showAsHex),
-            showAsHSL: getElement(staticBtnIds.showAsHSL),
-            showAsHSV: getElement(staticBtnIds.showAsHSV),
-            showAsLAB: getElement(staticBtnIds.showAsLAB),
-            showAsRGB: getElement(staticBtnIds.showAsRGB)
-        };
-    },
-    get divs() {
-        return {
-            customColorMenu: getElement(staticDivIds.customColorMenu),
-            helpMenu: getElement(staticDivIds.helpMenu),
-            helpMenuContent: getElement(staticDivIds.helpMenuContent),
-            historyMenu: getElement(staticDivIds.historyMenu),
-            historyMenuContent: getElement(staticDivIds.historyMenuContent),
-            ioMenu: getElement(staticDivIds.ioMenu),
-            paletteHistory: getElement(staticDivIds.paletteHistory)
-        };
-    },
-    get inputs() {
-        return {
-            customColor: getElement(staticInputIds.customColor),
-            historyLimit: getElement(staticInputIds.historyLimit),
-            import: getElement(staticInputIds.import),
-            limitDarkChkbx: getElement(staticInputIds.limitDarkChkbx),
-            limitGrayChkbx: getElement(staticInputIds.limitGrayChkbx),
-            limitLightChkbx: getElement(staticInputIds.limitLightChkbx)
-        };
-    },
-    get selects() {
-        return {
-            exportFormatOption: getElement(staticSelectIds.exportFormatOption),
-            paletteType: getElement(staticSelectIds.paletteType),
-            swatch: getElement(staticSelectIds.swatch),
-            swatchGen: getElement(staticSelectIds.swatchGen)
-        };
-    },
-    get spans() {
-        return {
-            customColorDisplay: getElement(staticSpanIds.customColorDisplay)
-        };
-    }
-};
-const staticDomIds = {
-    btns: {
-        applyCustomColor: staticBtnIds.applyCustomColor,
-        clearCustomColor: staticBtnIds.clearCustomColor,
-        customColorMenu: staticBtnIds.customColorMenu,
-        desaturate: staticBtnIds.desaturate,
-        export: staticBtnIds.export,
-        generate: staticBtnIds.generate,
-        helpMenu: staticBtnIds.helpMenu,
-        historyMenu: staticBtnIds.historyMenu,
-        ioMenu: staticBtnIds.ioMenu,
-        saturate: staticBtnIds.saturate,
-        showAsCMYK: staticBtnIds.showAsCMYK,
-        showAsHex: staticBtnIds.showAsHex,
-        showAsHSL: staticBtnIds.showAsHSL,
-        showAsHSV: staticBtnIds.showAsHSV,
-        showAsLAB: staticBtnIds.showAsLAB,
-        showAsRGB: staticBtnIds.showAsRGB
-    },
-    divs: {
-        customColorMenu: staticDivIds.customColorMenu,
-        helpMenu: staticDivIds.helpMenu,
-        helpMenuContent: staticDivIds.helpMenuContent,
-        historyMenu: staticDivIds.historyMenu,
-        historyMenuContent: staticDivIds.historyMenuContent,
-        ioMenu: staticDivIds.ioMenu,
-        paletteHistory: staticDivIds.paletteHistory
-    },
-    inputs: {
-        customColor: staticInputIds.customColor,
-        historyLimit: staticInputIds.historyLimit,
-        import: staticInputIds.import,
-        limitDarkChkbx: staticInputIds.limitDarkChkbx,
-        limitGrayChkbx: staticInputIds.limitGrayChkbx,
-        limitLightChkbx: staticInputIds.limitLightChkbx
-    },
-    selects: {
-        exportFormatOption: staticSelectIds.exportFormatOption,
-        paletteType: staticSelectIds.paletteType,
-        swatch: staticSelectIds.swatch,
-        swatchGen: staticSelectIds.swatchGen
-    },
-    spans: {
-        customColorDisplay: staticSpanIds.customColorDisplay
-    }
-};
-// ******** Final DOM Data Object ********
-const domData = {
-    ids: {
-        dynamic: dynamicDomIds,
-        static: staticDomIds
-    },
-    elements: {
-        dynamic: dynamicDomElements,
-        static: staticDomElements
-    }
-};
-
 // File: common/utils/conversion.js
-const logMode$i = modeData.logging;
-const thisModule$k = 'common/utils/conversion.js';
-const logger$k = await createLogger();
+const logMode$l = modeData.logging;
+const thisModule$n = 'common/utils/conversion.js';
+const logger$n = await createLogger();
 function getConversionFn(from, to) {
     const thisMethod = 'getConversionFn()';
     try {
@@ -3640,8 +3100,8 @@ function getConversionFn(from, to) {
         return (value) => structuredClone(conversionFn(value));
     }
     catch (error) {
-        if (logMode$i.error)
-            logger$k.error(`Error getting conversion function: ${error}`, `${thisModule$k} > ${thisMethod}`);
+        if (logMode$l.error)
+            logger$n.error(`Error getting conversion function: ${error}`, `${thisModule$n} > ${thisMethod}`);
         return undefined;
     }
 }
@@ -3649,10 +3109,10 @@ function genAllColorValues$1(color) {
     const thisMethod = 'genAllColorValues()';
     const result = {};
     try {
-        const clonedColor = coreUtils.base.clone(color);
-        if (!coreUtils.validate.colorValues(clonedColor)) {
-            if (logMode$i.error)
-                logger$k.error(`Invalid color: ${JSON.stringify(clonedColor)}`, `${thisModule$k} > ${thisMethod}`);
+        const clonedColor = coreUtils$2.base.clone(color);
+        if (!coreUtils$2.validate.colorValues(clonedColor)) {
+            if (logMode$l.error)
+                logger$n.error(`Invalid color: ${JSON.stringify(clonedColor)}`, `${thisModule$n} > ${thisMethod}`);
             return {};
         }
         result.cmyk = coreConversionUtils.hslTo(clonedColor, 'cmyk');
@@ -3667,8 +3127,8 @@ function genAllColorValues$1(color) {
         return result;
     }
     catch (error) {
-        if (logMode$i.error)
-            logger$k.error(`Error generating all color values: ${error}`, `${thisModule$k} > ${thisMethod}`);
+        if (logMode$l.error)
+            logger$n.error(`Error generating all color values: ${error}`, `${thisModule$n} > ${thisMethod}`);
         return {};
     }
 }
@@ -3678,21 +3138,21 @@ const conversionUtils = {
 };
 
 // File: common/utils/errors.js
-const logMode$h = modeData.logging;
-const thisModule$j = 'common/utils/errors.ts';
-const logger$j = await createLogger();
+const logMode$k = modeData.logging;
+const thisModule$m = 'common/utils/errors.ts';
+const logger$m = await createLogger();
 async function handleAsync(action, errorMessage, context) {
     const thisMethod = 'handleAsync()';
     try {
         return await action();
     }
     catch (error) {
-        if (logMode$h.error)
+        if (logMode$k.error)
             if (error instanceof Error) {
-                logger$j.error(`${errorMessage}: ${error.message}. Context: ${context}`, `${thisModule$j} > ${thisMethod}`);
+                logger$m.error(`${errorMessage}: ${error.message}. Context: ${context}`, `${thisModule$m} > ${thisMethod}`);
             }
             else {
-                logger$j.error(`${errorMessage}: ${error}. Context: ${context}`, `${thisModule$j} > ${thisMethod}`);
+                logger$m.error(`${errorMessage}: ${error}. Context: ${context}`, `${thisModule$m} > ${thisMethod}`);
             }
         return null;
     }
@@ -3702,29 +3162,22 @@ const errorUtils = {
 };
 
 // File: common/utils/palette.js
-const logMode$g = modeData.logging;
-const thisModule$i = 'common/utils/palette.js';
-const logger$i = await createLogger();
+const logMode$j = modeData.logging;
+const thisModule$l = 'common/utils/palette.js';
+const logger$l = await createLogger();
 function createObject(type, items, swatches, paletteID, limitDark, limitGray, limitLight) {
     return {
         id: `${type}_${paletteID}`,
         items,
         metadata: {
             name: '',
-            timestamp: coreUtils.getFormattedTimestamp(),
+            timestamp: coreUtils$2.getFormattedTimestamp(),
             swatches,
             type,
             flags: {
                 limitDarkness: limitDark,
                 limitGrayness: limitGray,
                 limitLightness: limitLight
-            },
-            customColor: {
-                colors: {
-                    main: items[0]?.colors.main || {},
-                    stringProps: items[0]?.colors.stringProps || {},
-                    css: items[0]?.colors.css || {}
-                }
             }
         }
     };
@@ -3732,27 +3185,26 @@ function createObject(type, items, swatches, paletteID, limitDark, limitGray, li
 async function populateOutputBox(color, boxNumber) {
     const thisMethod = 'populateOutputBox()';
     try {
-        const clonedColor = coreUtils.guards.isColor(color)
-            ? coreUtils.base.clone(color)
-            : await coreUtils.convert.colorStringToColor(color);
-        if (!coreUtils.validate.colorValues(clonedColor)) {
-            if (logMode$g.error)
-                logger$i.error('Invalid color values.', `${thisModule$i} > ${thisMethod}`);
-            helpers$1.dom.showToast('Invalid color.');
+        const clonedColor = coreUtils$2.guards.isColor(color)
+            ? coreUtils$2.base.clone(color)
+            : await coreUtils$2.convert.colorStringToColor(color);
+        if (!coreUtils$2.validate.colorValues(clonedColor)) {
+            if (logMode$j.error)
+                logger$l.error('Invalid color values.', `${thisModule$l} > ${thisMethod}`);
             return;
         }
         const colorTextOutputBox = document.getElementById(`color-text-output-box-${boxNumber}`);
         if (!colorTextOutputBox)
             return;
-        const stringifiedColor = await coreUtils.convert.colorToCSSColorString(clonedColor);
-        if (!modeData.quiet && logMode$g.info && logMode$g.verbosity > 0)
-            logger$i.info(`Adding CSS-formatted color to DOM ${stringifiedColor}`, `${thisModule$i} > ${thisMethod}`);
+        const stringifiedColor = await coreUtils$2.convert.colorToCSSColorString(clonedColor);
+        if (!modeData.quiet && logMode$j.info && logMode$j.verbosity > 0)
+            logger$l.info(`Adding CSS-formatted color to DOM ${stringifiedColor}`, `${thisModule$l} > ${thisMethod}`);
         colorTextOutputBox.value = stringifiedColor;
         colorTextOutputBox.setAttribute('data-format', color.format);
     }
     catch (error) {
-        if (logMode$g.error)
-            logger$i.error(`Failed to populate color text output box: ${error}`, `${thisModule$i} > ${thisMethod}`);
+        if (logMode$j.error)
+            logger$l.error(`Failed to populate color text output box: ${error}`, `${thisModule$l} > ${thisMethod}`);
         return;
     }
 }
@@ -3762,35 +3214,35 @@ const paletteUtils = {
 };
 
 // File: common/utils/random.js
-const logMode$f = modeData.logging;
-const thisModule$h = 'common/utils/random.js';
-const logger$h = await createLogger();
+const logMode$i = modeData.logging;
+const thisModule$k = 'common/utils/random.js';
+const logger$k = await createLogger();
 function hsl() {
     const thisMethod = 'hsl()';
     try {
         const hsl = {
             value: {
-                hue: coreUtils.sanitize.radial(Math.floor(Math.random() * 360)),
-                saturation: coreUtils.sanitize.percentile(Math.floor(Math.random() * 101)),
-                lightness: coreUtils.sanitize.percentile(Math.floor(Math.random() * 101))
+                hue: coreUtils$2.sanitize.radial(Math.floor(Math.random() * 360)),
+                saturation: coreUtils$2.sanitize.percentile(Math.floor(Math.random() * 101)),
+                lightness: coreUtils$2.sanitize.percentile(Math.floor(Math.random() * 101))
             },
             format: 'hsl'
         };
-        if (!coreUtils.validate.colorValues(hsl)) {
-            if (logMode$f.error)
-                logger$h.error(`Invalid random HSL color value ${JSON.stringify(hsl)}`, `${thisModule$h} > ${thisMethod}`);
-            const unbrandedHSL = coreUtils.base.clone(defaultData.colors.base.unbranded.hsl);
-            return coreUtils.brandColor.asHSL(unbrandedHSL);
+        if (!coreUtils$2.validate.colorValues(hsl)) {
+            if (logMode$i.error)
+                logger$k.error(`Invalid random HSL color value ${JSON.stringify(hsl)}`, `${thisModule$k} > ${thisMethod}`);
+            const unbrandedHSL = coreUtils$2.base.clone(defaultData.colors.base.unbranded.hsl);
+            return coreUtils$2.brandColor.asHSL(unbrandedHSL);
         }
-        if (!modeData.quiet && !logMode$f.info)
-            logger$h.info(`Generated randomHSL: ${JSON.stringify(hsl)}`, `${thisModule$h} > ${thisMethod}`);
+        if (!modeData.quiet && !logMode$i.info)
+            logger$k.info(`Generated randomHSL: ${JSON.stringify(hsl)}`, `${thisModule$k} > ${thisMethod}`);
         return hsl;
     }
     catch (error) {
-        if (logMode$f.error)
-            logger$h.error(`Error generating random HSL color: ${error}`, `${thisModule$h} > ${thisMethod}`);
-        const unbrandedHSL = coreUtils.base.clone(defaultData.colors.base.unbranded.hsl);
-        return coreUtils.brandColor.asHSL(unbrandedHSL);
+        if (logMode$i.error)
+            logger$k.error(`Error generating random HSL color: ${error}`, `${thisModule$k} > ${thisMethod}`);
+        const unbrandedHSL = coreUtils$2.base.clone(defaultData.colors.base.unbranded.hsl);
+        return coreUtils$2.brandColor.asHSL(unbrandedHSL);
     }
 }
 function sl$1() {
@@ -3798,26 +3250,26 @@ function sl$1() {
     try {
         const sl = {
             value: {
-                saturation: coreUtils.sanitize.percentile(Math.max(0, Math.min(100, Math.random() * 100))),
-                lightness: coreUtils.sanitize.percentile(Math.max(0, Math.min(100, Math.random() * 100)))
+                saturation: coreUtils$2.sanitize.percentile(Math.max(0, Math.min(100, Math.random() * 100))),
+                lightness: coreUtils$2.sanitize.percentile(Math.max(0, Math.min(100, Math.random() * 100)))
             },
             format: 'sl'
         };
-        if (!coreUtils.validate.colorValues(sl)) {
-            if (logMode$f.error)
-                logger$h.error(`Invalid random SV color value ${JSON.stringify(sl)}`, `${thisModule$h} > ${thisMethod}`);
-            const unbrandedSL = coreUtils.base.clone(defaultData.colors.base.unbranded.sl);
-            return coreUtils.brandColor.asSL(unbrandedSL);
+        if (!coreUtils$2.validate.colorValues(sl)) {
+            if (logMode$i.error)
+                logger$k.error(`Invalid random SV color value ${JSON.stringify(sl)}`, `${thisModule$k} > ${thisMethod}`);
+            const unbrandedSL = coreUtils$2.base.clone(defaultData.colors.base.unbranded.sl);
+            return coreUtils$2.brandColor.asSL(unbrandedSL);
         }
-        if (!modeData.quiet && logMode$f.info)
-            logger$h.info(`Generated randomSL: ${JSON.stringify(sl)}`, `${thisModule$h} > ${thisMethod}`);
+        if (!modeData.quiet && logMode$i.info)
+            logger$k.info(`Generated randomSL: ${JSON.stringify(sl)}`, `${thisModule$k} > ${thisMethod}`);
         return sl;
     }
     catch (error) {
-        if (logMode$f.error)
-            logger$h.error(`Error generating random SL color: ${error}`, `${thisModule$h} > ${thisMethod}`);
-        const unbrandedSL = coreUtils.base.clone(defaultData.colors.base.unbranded.sl);
-        return coreUtils.brandColor.asSL(unbrandedSL);
+        if (logMode$i.error)
+            logger$k.error(`Error generating random SL color: ${error}`, `${thisModule$k} > ${thisMethod}`);
+        const unbrandedSL = coreUtils$2.base.clone(defaultData.colors.base.unbranded.sl);
+        return coreUtils$2.brandColor.asSL(unbrandedSL);
     }
 }
 const randomUtils = {
@@ -3826,7 +3278,7 @@ const randomUtils = {
 };
 
 // File common/utils/index.js
-const utils$1 = {
+const utils$c = {
     color: colorUtils,
     conversion: conversionUtils,
     errors: errorUtils,
@@ -3834,129 +3286,13 @@ const utils$1 = {
     random: randomUtils
 };
 
-// File: common/superUtils.js
-const domElements = domData.elements.static;
-const logMode$e = modeData.logging;
-const thisModule$g = 'common/superUtils/dom.js';
-const logger$g = await createLogger();
-function getPaletteGenerationArgs() {
-    const thisMethod = 'getGenButtonArgs()';
-    try {
-        const swatchGenNumber = domElements.selects.swatchGen;
-        const paletteType = domElements.selects.paletteType;
-        const customColorRaw = domElements.inputs.customColor?.value;
-        const limitDarkChkbx = domElements.inputs.limitDarkChkbx;
-        const limitGrayChkbx = domElements.inputs.limitGrayChkbx;
-        const limitLightChkbx = domElements.inputs.limitLightChkbx;
-        if (swatchGenNumber === null ||
-            paletteType === null ||
-            limitDarkChkbx === null ||
-            limitGrayChkbx === null ||
-            limitLightChkbx === null) {
-            if (logMode$e.error)
-                logger$g.error('One or more elements are null', `${thisModule$g} > ${thisMethod}`);
-            return null;
-        }
-        if (!modeData.quiet && logMode$e.info && logMode$e.verbosity >= 2)
-            logger$g.info(`numBoxes: ${parseInt(swatchGenNumber.value, 10)}\npaletteType: ${parseInt(paletteType.value, 10)}`, `${thisModule$g} > ${thisMethod}`);
-        return {
-            swatches: parseInt(swatchGenNumber.value, 10),
-            type: parseInt(paletteType.value, 10),
-            customColor: customColorRaw
-                ? coreUtils.base.parseCustomColor(customColorRaw)
-                : null,
-            limitDark: limitDarkChkbx.checked,
-            limitGray: limitGrayChkbx.checked,
-            limitLight: limitLightChkbx.checked
-        };
-    }
-    catch (error) {
-        if (logMode$e.error)
-            logger$g.error(`Failed to retrieve generateButton parameters: ${error}`, `${thisModule$g} > ${thisMethod}`);
-        return null;
-    }
-}
-async function switchColorSpace(targetFormat) {
-    const thisMethod = 'switchColorSpace()';
-    try {
-        const colorTextOutputBoxes = document.querySelectorAll('.color-text-output-box');
-        for (const box of colorTextOutputBoxes) {
-            const inputBox = box;
-            const colorValues = inputBox.colorValues;
-            if (!colorValues || !coreUtils.validate.colorValues(colorValues)) {
-                if (logMode$e.error)
-                    logger$g.error('Invalid color values. Cannot display toast.', `${thisModule$g} > ${thisMethod}`);
-                helpers$1.dom.showToast('Invalid color.');
-                continue;
-            }
-            const currentFormat = inputBox.getAttribute('data-format');
-            if (!modeData.quiet && logMode$e.info && logMode$e.verbosity >= 2)
-                logger$g.info(`Converting from ${currentFormat} to ${targetFormat}`, `${thisModule$g} > ${thisMethod}`);
-            const convertFn = utils$1.conversion.getConversionFn(currentFormat, targetFormat);
-            if (!convertFn) {
-                if (logMode$e.error)
-                    logger$g.error(`Conversion from ${currentFormat} to ${targetFormat} is not supported.`, `${thisModule$g} > ${thisMethod}`);
-                helpers$1.dom.showToast('Conversion not supported.');
-                continue;
-            }
-            if (colorValues.format === 'xyz') {
-                if (logMode$e.error)
-                    logger$g.error('Cannot convert from XYZ to another color space.', `${thisModule$g} > ${thisMethod}`);
-                helpers$1.dom.showToast('Conversion not supported.');
-                continue;
-            }
-            const clonedColor = await utils$1.color.narrowToColor(colorValues);
-            if (!clonedColor ||
-                utils$1.color.isSLColor(clonedColor) ||
-                utils$1.color.isSVColor(clonedColor) ||
-                utils$1.color.isXYZ(clonedColor)) {
-                if (logMode$e.verbosity >= 3 && logMode$e.error)
-                    logger$g.error('Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.', `${thisModule$g} > ${thisMethod}`);
-                helpers$1.dom.showToast('Conversion not supported.');
-                continue;
-            }
-            if (!clonedColor) {
-                if (logMode$e.error)
-                    logger$g.error(`Conversion to ${targetFormat} failed.`, `${thisModule$g} > ${thisMethod}`);
-                helpers$1.dom.showToast('Conversion failed.');
-                continue;
-            }
-            const newColor = coreUtils.base.clone(convertFn(clonedColor));
-            if (!newColor) {
-                if (logMode$e.error)
-                    logger$g.error(`Conversion to ${targetFormat} failed.`, `${thisModule$g} > ${thisMethod}`);
-                helpers$1.dom.showToast('Conversion failed.');
-                continue;
-            }
-            inputBox.value = String(newColor);
-            inputBox.setAttribute('data-format', targetFormat);
-        }
-    }
-    catch (error) {
-        helpers$1.dom.showToast('Failed to convert colors.');
-        if (!modeData.quiet && logMode$e.warn)
-            logger$g.warn('Failed to convert colors.', `${thisModule$g} > ${thisMethod}`);
-        else if (!modeData.gracefulErrors)
-            throw new Error(`Failed to convert colors: ${error}`);
-        else if (logMode$e.error)
-            logger$g.error(`Failed to convert colors: ${error}`);
-    }
-}
-const superUtils$1 = {
-    dom: {
-        getPaletteGenerationArgs,
-        switchColorSpace
-    }
-};
-
 // File: common/index.js
 const commonFn = {
     convert: coreConversionUtils,
-    core: coreUtils,
+    core: coreUtils$2,
     helpers: helpers$1,
-    superUtils: superUtils$1,
     transform: transformUtils,
-    utils: utils$1
+    utils: utils$c
 };
 
 const instanceOfAny = (object, constructors) => constructors.some((c) => object instanceof c);
@@ -4276,8 +3612,8 @@ const dbUtils = {
 };
 
 // File: db/IDBManager.js
-const thisModule$f = 'db/IDBManager.js';
-const logger$f = await createLogger();
+const thisModule$j = 'db/IDBManager.js';
+const logger$j = await createLogger();
 class IDBManager {
     static instance = null;
     dbPromise;
@@ -4341,10 +3677,10 @@ class IDBManager {
                         origin: 'Proxy'
                     };
                     if (self.logMode.info)
-                        logger$f.info(`Mutation detected: ${JSON.stringify(mutationLog)}`, `${thisModule$f} > ${thisMethod}`);
+                        logger$j.info(`Mutation detected: ${JSON.stringify(mutationLog)}`, `${thisModule$j} > ${thisMethod}`);
                     self.persistMutation(mutationLog).catch(err => {
                         if (self.logMode.error)
-                            logger$f.error(`Failed to persist mutation: ${err.message}`, `${thisModule$f} > ${thisMethod}`);
+                            logger$j.error(`Failed to persist mutation: ${err.message}`, `${thisModule$j} > ${thisMethod}`);
                     });
                 }
                 return success;
@@ -4360,7 +3696,7 @@ class IDBManager {
         return this.utils.errors.handleAsync(async () => {
             if (!(await this.ensureEntryExists(storeName, key))) {
                 if (this.logMode.warn) {
-                    logger$f.warn(`Entry with key ${key} not found.`, `${thisModule$f} > ${thisMethod}`);
+                    logger$j.warn(`Entry with key ${key} not found.`, `${thisModule$j} > ${thisMethod}`);
                 }
                 return;
             }
@@ -4370,7 +3706,7 @@ class IDBManager {
                 .objectStore(storeName);
             await store.delete(key);
             if (!this.mode.quiet) {
-                logger$f.info(`Entry with key ${key} deleted successfully.`, `${thisModule$f} > ${thisMethod}`);
+                logger$j.info(`Entry with key ${key} deleted successfully.`, `${thisModule$j} > ${thisMethod}`);
             }
         }, 'IDBManager.deleteData(): Error deleting entry');
     }
@@ -4386,7 +3722,7 @@ class IDBManager {
                 : null))).filter((key) => key !== null);
             await Promise.all(validKeys.map(key => store.delete(key)));
             if (!this.mode.quiet) {
-                logger$f.info(`Entries deleted successfully. Keys: ${validKeys}`, `${thisModule$f} > ${thisMethod}`);
+                logger$j.info(`Entries deleted successfully. Keys: ${validKeys}`, `${thisModule$j} > ${thisMethod}`);
             }
         }, 'IDBManager.deleteEntries(): Error deleting entries');
     }
@@ -4396,7 +3732,7 @@ class IDBManager {
             const db = await this.getDB();
             const settings = await db.get(this.storeNames['SETTINGS'], this.getDefaultKey('APP_SETTINGS'));
             if (this.mode.debug)
-                logger$f.info(`Fetched settings from IndexedDB: ${settings}`, `${thisModule$f} > ${thisMethod}`);
+                logger$j.info(`Fetched settings from IndexedDB: ${settings}`, `${thisModule$j} > ${thisMethod}`);
             return settings?.lastPaletteID ?? 0;
         }, 'IDBManager: getCurrentPaletteID(): Error fetching current palette ID');
     }
@@ -4407,18 +3743,6 @@ class IDBManager {
         if (settings)
             this.cache.settings = settings;
         return settings;
-    }
-    async getCustomColor() {
-        const key = this.defaultKeys['CUSTOM_COLOR'];
-        const storeName = this.storeNames['CUSTOM_COLOR'];
-        return this.utils.errors.handleAsync(async () => {
-            const db = await this.getDB();
-            const entry = await db.get(storeName, key);
-            if (!entry?.color)
-                return null;
-            this.cache.customColor = entry.color;
-            return this.createMutationLogger(entry.color, storeName);
-        }, 'IDBManager.getCustomColor(): Error fetching custom color');
     }
     async getDB() {
         return this.dbPromise;
@@ -4469,7 +3793,7 @@ class IDBManager {
             return entry.palettes;
         }
         catch (error) {
-            logger$f.error(`Error retrieving palette history: ${error}`, `${thisModule$f} > ${thisMethod}`);
+            logger$j.error(`Error retrieving palette history: ${error}`, `${thisModule$j} > ${thisMethod}`);
             return [];
         }
     }
@@ -4488,7 +3812,7 @@ class IDBManager {
         const caller = 'persistMutation()';
         const db = await this.getDB();
         await db.put('mutations', data);
-        logger$f.info(`Persisted mutation: ${JSON.stringify(data)}`, `${thisModule$f} > ${caller}`);
+        logger$j.info(`Persisted mutation: ${JSON.stringify(data)}`, `${thisModule$j} > ${caller}`);
     }
     async resetDatabase() {
         const thisMethod = 'resetDatabase()';
@@ -4498,7 +3822,7 @@ class IDBManager {
             const expectedStores = Object.values(this.storeNames);
             for (const storeName of expectedStores) {
                 if (!availableStores.includes(storeName)) {
-                    logger$f.warn(`Object store "${storeName}" not found in IndexedDB.`, `${thisModule$f} > ${thisMethod}`);
+                    logger$j.warn(`Object store "${storeName}" not found in IndexedDB.`, `${thisModule$j} > ${thisMethod}`);
                     continue;
                 }
                 const tx = db.transaction(storeName, 'readwrite');
@@ -4510,7 +3834,7 @@ class IDBManager {
                     .objectStore(this.storeNames['SETTINGS']);
                 await settingsStore.put(this.defaultSettings, this.getDefaultKey('APP_SETTINGS'));
                 if (!this.mode.quiet)
-                    logger$f.info(`IndexedDB has been reset to default settings.`, `${thisModule$f} > ${thisMethod}`);
+                    logger$j.info(`IndexedDB has been reset to default settings.`, `${thisModule$j} > ${thisMethod}`);
             }
         }, 'IDBManager.resetDatabase(): Error resetting database');
     }
@@ -4530,14 +3854,14 @@ class IDBManager {
                 const deleteRequest = indexedDB.deleteDatabase(dbName);
                 deleteRequest.onsuccess = () => {
                     if (!this.mode.quiet)
-                        logger$f.info(`Database "${dbName}" deleted successfully.`, `${thisModule$f} > ${thisMethod}`);
+                        logger$j.info(`Database "${dbName}" deleted successfully.`, `${thisModule$j} > ${thisMethod}`);
                 };
                 deleteRequest.onerror = event => {
-                    logger$f.error(`Error deleting database "${dbName}":\nEvent: ${event}`, `${thisModule$f} > ${thisMethod}`);
+                    logger$j.error(`Error deleting database "${dbName}":\nEvent: ${event}`, `${thisModule$j} > ${thisMethod}`);
                 };
                 deleteRequest.onblocked = () => {
                     if (this.logMode.warn)
-                        logger$f.warn(`Delete operation blocked. Ensure no open connections to "${dbName}".`, `${thisModule$f} > ${thisMethod}`);
+                        logger$j.warn(`Delete operation blocked. Ensure no open connections to "${dbName}".`, `${thisModule$j} > ${thisMethod}`);
                     if (this.mode.showAlerts)
                         alert(`Unable to delete database "${dbName}" because it is in use. Please close all other tabs or windows accessing this database and try again.`);
                     if (this.mode.stackTrace)
@@ -4546,7 +3870,7 @@ class IDBManager {
             }
             else {
                 if (!this.mode.quiet)
-                    logger$f.warn(`Database "${dbName}" does not exist.`, `${thisModule$f} > ${thisMethod}`);
+                    logger$j.warn(`Database "${dbName}" does not exist.`, `${thisModule$j} > ${thisMethod}`);
             }
         }, 'IDBManager.deleteDatabase(): Error deleting database');
     }
@@ -4563,7 +3887,7 @@ class IDBManager {
             settings.lastPaletteID = 0;
             await db.put(storeName, { key, ...this.defaultSettings });
             if (!this.mode.quiet)
-                logger$f.info(`Palette ID has successfully been reset to 0`, `${thisModule$f} > ${thisMethod}`);
+                logger$j.info(`Palette ID has successfully been reset to 0`, `${thisModule$j} > ${thisMethod}`);
         }, 'IDBManager.resetPaletteID(): Error resetting palette ID');
     }
     async saveData(storeName, key, data, oldValue) {
@@ -4572,7 +3896,7 @@ class IDBManager {
             const db = await this.getDB();
             await this.dbUtils.store.withStore(db, storeName, 'readwrite', async (store) => {
                 await store.put({ key, ...data });
-                logger$f.mutation({
+                logger$j.mutation({
                     timestamp: new Date().toISOString(),
                     key,
                     action: 'update',
@@ -4581,7 +3905,7 @@ class IDBManager {
                     origin: 'saveData'
                 }, mutationLog => {
                     console.log('Mutation log triggered for saveData:', mutationLog);
-                }, `${thisModule$f} > ${thisMethod}`);
+                }, `${thisModule$j} > ${thisMethod}`);
             });
         }, 'IDBManager.saveData(): Error saving data');
     }
@@ -4609,7 +3933,7 @@ class IDBManager {
             };
             await store.put({ key: id, ...paletteToSave });
             if (!this.mode.quiet && this.logMode.info)
-                logger$f.info(`Palette ${id} saved successfully.`, `${thisModule$f} > ${thisMethod}`);
+                logger$j.info(`Palette ${id} saved successfully.`, `${thisModule$j} > ${thisMethod}`);
         }, 'IDBManager.savePalette(): Error saving palette');
     }
     async savePaletteHistory(paletteHistory) {
@@ -4624,7 +3948,7 @@ class IDBManager {
         return this.utils.errors.handleAsync(async () => {
             await this.saveData('settings', 'appSettings', newSettings);
             if (!this.mode.quiet && this.logMode.info)
-                logger$f.info('Settings updated', `${thisModule$f} > ${thisMethod}`);
+                logger$j.info('Settings updated', `${thisModule$j} > ${thisMethod}`);
         }, 'IDBManager.saveSettings(): Error saving settings');
     }
     async updateEntryInPalette(tableID, entryIndex, newEntry) {
@@ -4641,23 +3965,23 @@ class IDBManager {
                 if (!this.mode.gracefulErrors)
                     throw new Error(`Entry ${entryIndex} not found in palette ${tableID}.`);
                 if (this.logMode.error)
-                    logger$f.error(`Entry ${entryIndex} not found in palette ${tableID}.`, `${thisModule$f} > ${thisMethod}`);
+                    logger$j.error(`Entry ${entryIndex} not found in palette ${tableID}.`, `${thisModule$j} > ${thisMethod}`);
                 if (!this.mode.quiet && this.logMode.info)
-                    logger$f.warn('updateEntryInPalette: Entry not found.', `${thisModule$f} > ${thisMethod}`);
+                    logger$j.warn('updateEntryInPalette: Entry not found.', `${thisModule$j} > ${thisMethod}`);
             }
             const oldEntry = items[entryIndex];
             items[entryIndex] = newEntry;
             await this.saveData('tables', tableID, storedPalette);
-            logger$f.mutation({
+            logger$j.mutation({
                 timestamp: new Date().toISOString(),
                 key: `${tableID}-${entryIndex}]`,
                 action: 'update',
                 newValue: newEntry,
                 oldValue: oldEntry,
                 origin: 'updateEntryInPalette'
-            }, mutationLog => console.log(`Mutation log trigger for updateEntryInPalette:`, mutationLog), `${thisModule$f} > ${thisMethod}`);
+            }, mutationLog => console.log(`Mutation log trigger for updateEntryInPalette:`, mutationLog), `${thisModule$j} > ${thisMethod}`);
             if (!this.mode.quiet && this.logMode.info)
-                logger$f.info(`Entry ${entryIndex} in palette ${tableID} updated.`);
+                logger$j.info(`Entry ${entryIndex} in palette ${tableID} updated.`);
         }, 'IDBManager.updateEntryInPalette(): Error updating entry in palette');
     }
     //
@@ -4688,7 +4012,7 @@ class IDBManager {
             const result = await db.get(this.storeNames.TABLES, id);
             if (!result) {
                 if (this.logMode.warn)
-                    logger$f.warn(`Table with ID ${id} not found.`, `${thisModule$f} > ${thisMethod}`);
+                    logger$j.warn(`Table with ID ${id} not found.`, `${thisModule$j} > ${thisMethod}`);
             }
             return result;
         }, 'IDBManager.getTable(): Error fetching table');
@@ -4699,72 +4023,452 @@ class IDBManager {
             const db = await this.getDB();
             const tx = db.transaction('settings', 'readwrite');
             const store = tx.objectStore('settings');
-            if (this.mode.debug)
-                logger$f.info(`Updating curent palette ID to ${newID}`, `${thisModule$f} > ${thisMethod}`);
             await store.put({ key: 'appSettings', lastPaletteID: newID });
             await tx.done;
             if (!this.mode.quiet)
-                logger$f.info(`Current palette ID updated to ${newID}`, `${thisModule$f} > ${thisMethod}`);
+                logger$j.info(`Current palette ID updated to ${newID}`, `${thisModule$j} > ${thisMethod}`);
         }, 'IDBManager.updateCurrentPaletteID(): Error updating current palette ID');
     }
 }
 
-// File: db/instance.js
-let idbInstance = null;
-const getIDBInstance = async () => {
-    if (!idbInstance) {
-        idbInstance = await IDBManager.getInstance();
+// File: data/consts.js
+const adjustments$1 = {
+    slaValue: 10
+};
+const debounce = {
+    btn: 300,
+    input: 200
+};
+const limits$3 = {
+    xyz: {
+        max: {
+            x: 95.047,
+            y: 100,
+            z: 108.883
+        },
+        min: {
+            x: 0,
+            y: 0,
+            z: 0
+        }
     }
-    return idbInstance;
+};
+const paletteRanges$5 = {
+    shift: {
+        comp: { hue: 10, sat: 0, light: 0 },
+        diadic: { hue: 30, sat: 30, light: 30 },
+        hexad: { hue: 0, sat: 30, light: 30 },
+        random: { hue: 0, sat: 0, light: 0 },
+        splitComp: { hue: 30, sat: 30, light: 30 },
+        tetra: { hue: 0, sat: 30, light: 30 },
+        triad: { hue: 0, sat: 30, light: 30 }
+    }
+};
+const probabilities$1 = {
+    values: [40, 45, 50, 55, 60, 65, 70],
+    weights: [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05]
+};
+const thresholds = {
+    dark: 25,
+    gray: 20,
+    light: 75
+};
+const timeouts$1 = {
+    copyButtonText: 1000,
+    toast: 3000,
+    tooltip: 1000
+};
+const constsData = {
+    adjustments: adjustments$1,
+    debounce,
+    limits: limits$3,
+    paletteRanges: paletteRanges$5,
+    probabilities: probabilities$1,
+    thresholds,
+    timeouts: timeouts$1
 };
 
-// File: dom/parse.js
-const ids = domData.ids.static;
-const logMode$d = modeData.logging;
-const thisModule$e = 'dom/parse.js';
-const logger$e = await createLogger();
-function checkbox(id) {
-    const thisFunction = 'checkbox()';
-    const checkbox = document.getElementById(id);
-    if (!checkbox) {
-        if (logMode$d.error && !modeData.quiet) {
-            logger$e.error(`Checkbox element ${id} not found`, `${thisModule$e} > ${thisFunction}`);
-        }
-        return;
+// File: data/dom/dom.js
+const domClasses$1 = {
+    colorDisplay: 'color-display',
+    colorInput: 'color-input',
+    colorStripe: 'color-stripe',
+    colorSwatch: 'color-swatch',
+    dragBtn: 'drag-btn',
+    lockBtn: 'lock-btn'
+};
+const dynamicIds = {
+    btns: {
+        colorBoxLockBtn1: 'color-box-lock-btn-1',
+        colorBoxLockBtn2: 'color-box-lock-btn-2',
+        colorBoxLockBtn3: 'color-box-lock-btn-3',
+        colorBoxLockBtn4: 'color-box-lock-btn-4',
+        colorBoxLockBtn5: 'color-box-lock-btn-5',
+        colorBoxLockBtn6: 'color-box-lock-btn-6'
+    },
+    divs: {
+        colorBox1: 'color-box-1',
+        colorBox2: 'color-box-1',
+        colorBox3: 'color-box-1',
+        colorBox4: 'color-box-1',
+        colorBox5: 'color-box-1',
+        colorBox6: 'color-box-1',
+        colorBoxDragBar1: 'color-box-drag-bar-1',
+        colorBoxDragBar2: 'color-box-drag-bar-2',
+        colorBoxDragBar3: 'color-box-drag-bar-3',
+        colorBoxDragBar4: 'color-box-drag-bar-4',
+        colorBoxDragBar5: 'color-box-drag-bar-5',
+        colorBoxDragBar6: 'color-box-drag-bar-6',
+        colorDisplay1: 'color-display-1',
+        colorDisplay2: 'color-display-2',
+        colorDisplay3: 'color-display-3',
+        colorDisplay4: 'color-display-4',
+        colorDisplay5: 'color-display-5',
+        colorDisplay6: 'color-display-6'
+    },
+    inputs: {
+        colorPicker1: 'color-picker-input-1',
+        colorPicker2: 'color-picker-input-2',
+        colorPicker3: 'color-picker-input-3',
+        colorPicker4: 'color-picker-input-4',
+        colorPicker5: 'color-picker-input-5',
+        colorPicker6: 'color-picker-input-6',
+        export: 'export-input'
+    },
+    selects: {},
+    spans: {}
+};
+const staticIds = {
+    btns: {
+        desaturate: 'desaturate-btn',
+        export: 'export-btn',
+        generate: 'generate-btn',
+        helpMenu: 'help-menu-btn',
+        historyMenu: 'history-menu-btn',
+        import: 'import-btn',
+        saturate: 'saturate-btn',
+        showAsCMYK: 'show-as-cmyk-btn',
+        showAsHex: 'show-as-hex-btn',
+        showAsHSL: 'show-as-hsl-btn',
+        showAsHSV: 'show-as-hsv-btn',
+        showAsLAB: 'show-as-lab-btn',
+        showAsRGB: 'show-as-rgb-btn'
+    },
+    divs: {
+        helpMenu: 'help-menu',
+        historyMenu: 'history-menu',
+        paletteContainer: 'palette-container',
+        paletteHistory: 'palette-history'
+    },
+    inputs: {
+        historyLimit: 'history-limit-input',
+        limitDarkChkbx: 'limit-dark-chkbx',
+        limitGrayChkbx: 'limit-gray-chkbx',
+        limitLightChkbx: 'limit-light-chkbx'
+    },
+    selects: {
+        exportFormatOption: 'export-format-option-selector',
+        paletteType: 'palette-type-selector',
+        swatch: 'swatch-selector',
+        swatchGen: 'swatch-gen-selector'
     }
-    if (!(checkbox instanceof HTMLInputElement)) {
-        if (logMode$d.error && !modeData.quiet) {
-            logger$e.error(`Element ${id} is not a checkbox`, `${thisModule$e} > ${thisFunction}`);
-        }
-        return;
-    }
-    return checkbox ? checkbox.checked : undefined;
+};
+// ******** Helpers ********
+function getElement(id) {
+    return document.getElementById(id);
 }
-function paletteExportFormat() {
-    const thisFunction = 'paletteExportFormat()';
-    const formatSelectionMenu = document.getElementById(ids.selects.exportFormatOption);
-    if (!formatSelectionMenu) {
-        if (logMode$d.error && !modeData.quiet)
-            logger$e.error('Export format selection dropdown not found', `${thisModule$e} > ${thisFunction}`);
+const dynamicDivIds = dynamicIds.divs;
+const dynamicInputIds = dynamicIds.inputs;
+const staticBtnIds = staticIds.btns;
+const staticDivIds = staticIds.divs;
+const staticInputIds = staticIds.inputs;
+const staticSelectIds = staticIds.selects;
+// ******** Dynamic DOM Data ********
+const dynamicDomElements = {
+    get btns() {
+        return {
+            colorBoxLockBtn1: getElement(dynamicIds.btns.colorBoxLockBtn1),
+            colorBoxLockBtn2: getElement(dynamicIds.btns.colorBoxLockBtn2),
+            colorBoxLockBtn3: getElement(dynamicIds.btns.colorBoxLockBtn3),
+            colorBoxLockBtn4: getElement(dynamicIds.btns.colorBoxLockBtn4),
+            colorBoxLockBtn5: getElement(dynamicIds.btns.colorBoxLockBtn5),
+            colorBoxLockBtn6: getElement(dynamicIds.btns.colorBoxLockBtn6)
+        };
+    },
+    get divs() {
+        return {
+            colorBox1: getElement(dynamicDivIds.colorBox1),
+            colorBox2: getElement(dynamicDivIds.colorBox2),
+            colorBox3: getElement(dynamicDivIds.colorBox3),
+            colorBox4: getElement(dynamicDivIds.colorBox4),
+            colorBox5: getElement(dynamicDivIds.colorBox5),
+            colorBox6: getElement(dynamicDivIds.colorBox6),
+            colorBoxDragBar1: getElement(dynamicDivIds.colorBoxDragBar1),
+            colorBoxDragBar2: getElement(dynamicDivIds.colorBoxDragBar2),
+            colorBoxDragBar3: getElement(dynamicDivIds.colorBoxDragBar3),
+            colorBoxDragBar4: getElement(dynamicDivIds.colorBoxDragBar4),
+            colorBoxDragBar5: getElement(dynamicDivIds.colorBoxDragBar5),
+            colorBoxDragBar6: getElement(dynamicDivIds.colorBoxDragBar6),
+            colorDisplay1: getElement(dynamicDivIds.colorDisplay1),
+            colorDisplay2: getElement(dynamicDivIds.colorDisplay2),
+            colorDisplay3: getElement(dynamicDivIds.colorDisplay3),
+            colorDisplay4: getElement(dynamicDivIds.colorDisplay4),
+            colorDisplay5: getElement(dynamicDivIds.colorDisplay5),
+            colorDisplay6: getElement(dynamicDivIds.colorDisplay6)
+        };
+    },
+    get inputs() {
+        return {
+            colorPicker1: getElement(dynamicInputIds.colorPicker1),
+            colorPicker2: getElement(dynamicInputIds.colorPicker2),
+            colorPicker3: getElement(dynamicInputIds.colorPicker3),
+            colorPicker4: getElement(dynamicInputIds.colorPicker4),
+            colorPicker5: getElement(dynamicInputIds.colorPicker5),
+            colorPicker6: getElement(dynamicInputIds.colorPicker6),
+            export: getElement(dynamicInputIds.export)
+        };
+    },
+    get selects() {
+        return {};
+    },
+    get spans() {
+        return {};
     }
-    const selectedFormat = formatSelectionMenu.value;
-    if (selectedFormat !== 'CSS' &&
-        selectedFormat !== 'JSON' &&
-        selectedFormat !== 'XML') {
-        if (logMode$d.error && !modeData.quiet)
-            logger$e.error('Invalid export format selected', `${thisModule$e} > ${thisFunction}`);
-        return;
+};
+const dynamicDomIds = {
+    btns: {
+        colorBoxLockBtn1: dynamicIds.btns.colorBoxLockBtn1,
+        colorBoxLockBtn2: dynamicIds.btns.colorBoxLockBtn2,
+        colorBoxLockBtn3: dynamicIds.btns.colorBoxLockBtn3,
+        colorBoxLockBtn4: dynamicIds.btns.colorBoxLockBtn4,
+        colorBoxLockBtn5: dynamicIds.btns.colorBoxLockBtn5,
+        colorBoxLockBtn6: dynamicIds.btns.colorBoxLockBtn6
+    },
+    divs: {
+        colorBox1: dynamicDivIds.colorBox1,
+        colorBox2: dynamicDivIds.colorBox2,
+        colorBox3: dynamicDivIds.colorBox3,
+        colorBox4: dynamicDivIds.colorBox4,
+        colorBox5: dynamicDivIds.colorBox5,
+        colorBox6: dynamicDivIds.colorBox6,
+        colorDisplay1: dynamicDivIds.colorDisplay1,
+        colorDisplay2: dynamicDivIds.colorDisplay2,
+        colorDisplay3: dynamicDivIds.colorDisplay3,
+        colorDisplay4: dynamicDivIds.colorDisplay4,
+        colorDisplay5: dynamicDivIds.colorDisplay5,
+        colorDisplay6: dynamicDivIds.colorDisplay6,
+        colorBoxDragBar1: dynamicDivIds.colorBoxDragBar1,
+        colorBoxDragBar2: dynamicDivIds.colorBoxDragBar2,
+        colorBoxDragBar3: dynamicDivIds.colorBoxDragBar3,
+        colorBoxDragBar4: dynamicDivIds.colorBoxDragBar4,
+        colorBoxDragBar5: dynamicDivIds.colorBoxDragBar5,
+        colorBoxDragBar6: dynamicDivIds.colorBoxDragBar6
+    },
+    inputs: {
+        colorPicker1: dynamicInputIds.colorPicker1,
+        colorPicker2: dynamicInputIds.colorPicker2,
+        colorPicker3: dynamicInputIds.colorPicker3,
+        colorPicker4: dynamicInputIds.colorPicker4,
+        colorPicker5: dynamicInputIds.colorPicker5,
+        colorPicker6: dynamicInputIds.colorPicker6,
+        export: dynamicInputIds.export
+    },
+    selects: {},
+    spans: {}
+};
+// ******** Static DOM Data ********
+const staticDomElements = {
+    get btns() {
+        return {
+            desaturate: getElement(staticBtnIds.desaturate),
+            export: getElement(staticBtnIds.export),
+            generate: getElement(staticBtnIds.generate),
+            helpMenu: getElement(staticBtnIds.helpMenu),
+            historyMenu: getElement(staticBtnIds.historyMenu),
+            import: getElement(staticBtnIds.import),
+            saturate: getElement(staticBtnIds.saturate),
+            showAsCMYK: getElement(staticBtnIds.showAsCMYK),
+            showAsHex: getElement(staticBtnIds.showAsHex),
+            showAsHSL: getElement(staticBtnIds.showAsHSL),
+            showAsHSV: getElement(staticBtnIds.showAsHSV),
+            showAsLAB: getElement(staticBtnIds.showAsLAB),
+            showAsRGB: getElement(staticBtnIds.showAsRGB)
+        };
+    },
+    get divs() {
+        return {
+            helpMenu: getElement(staticDivIds.helpMenu),
+            historyMenu: getElement(staticDivIds.historyMenu),
+            paletteContainer: getElement(staticDivIds.paletteContainer),
+            paletteHistory: getElement(staticDivIds.paletteHistory)
+        };
+    },
+    get inputs() {
+        return {
+            historyLimit: getElement(staticInputIds.historyLimit),
+            limitDarkChkbx: getElement(staticInputIds.limitDarkChkbx),
+            limitGrayChkbx: getElement(staticInputIds.limitGrayChkbx),
+            limitLightChkbx: getElement(staticInputIds.limitLightChkbx)
+        };
+    },
+    get selects() {
+        return {
+            exportFormatOption: getElement(staticSelectIds.exportFormatOption),
+            paletteType: getElement(staticSelectIds.paletteType),
+            swatch: getElement(staticSelectIds.swatch),
+            swatchGen: getElement(staticSelectIds.swatchGen)
+        };
+    }
+};
+const staticDomIds = {
+    btns: {
+        desaturate: staticBtnIds.desaturate,
+        export: staticBtnIds.export,
+        generate: staticBtnIds.generate,
+        helpMenu: staticBtnIds.helpMenu,
+        historyMenu: staticBtnIds.historyMenu,
+        import: staticBtnIds.import,
+        saturate: staticBtnIds.saturate,
+        showAsCMYK: staticBtnIds.showAsCMYK,
+        showAsHex: staticBtnIds.showAsHex,
+        showAsHSL: staticBtnIds.showAsHSL,
+        showAsHSV: staticBtnIds.showAsHSV,
+        showAsLAB: staticBtnIds.showAsLAB,
+        showAsRGB: staticBtnIds.showAsRGB
+    },
+    divs: {
+        helpMenu: staticDivIds.helpMenu,
+        historyMenu: staticDivIds.historyMenu,
+        paletteHistory: staticDivIds.paletteHistory,
+        paletteContainer: staticDivIds.paletteContainer
+    },
+    inputs: {
+        historyLimit: staticInputIds.historyLimit,
+        limitDarkChkbx: staticInputIds.limitDarkChkbx,
+        limitGrayChkbx: staticInputIds.limitGrayChkbx,
+        limitLightChkbx: staticInputIds.limitLightChkbx
+    },
+    selects: {
+        exportFormatOption: staticSelectIds.exportFormatOption,
+        paletteType: staticSelectIds.paletteType,
+        swatch: staticSelectIds.swatch,
+        swatchGen: staticSelectIds.swatchGen
+    }
+};
+// ******** Final DOM Data Object ********
+const domData = {
+    classes: domClasses$1,
+    ids: {
+        dynamic: dynamicDomIds,
+        static: staticDomIds
+    },
+    elements: {
+        dynamic: dynamicDomElements,
+        static: staticDomElements
+    }
+};
+
+// File: dom/eventListeners/utils.js
+const logMode$h = modeData.logging;
+const thisModule$i = 'dom/eventListeners/utils.js';
+const appUtils = commonFn.utils;
+const coreUtils$1 = commonFn.core;
+const logger$i = await createLogger();
+// 1. BASE DOM UTILITIES
+async function switchColorSpace(targetFormat) {
+    const thisMethod = 'switchColorSpace()';
+    try {
+        const colorTextOutputBoxes = document.querySelectorAll('.color-text-output-box');
+        for (const box of colorTextOutputBoxes) {
+            const inputBox = box;
+            const colorValues = inputBox.colorValues;
+            if (!colorValues || !coreUtils$1.validate.colorValues(colorValues)) {
+                if (logMode$h.error)
+                    logger$i.error('Invalid color values. Cannot display toast.', `${thisModule$i} > ${thisMethod}`);
+                continue;
+            }
+            const currentFormat = inputBox.getAttribute('data-format');
+            if (!modeData.quiet && logMode$h.info && logMode$h.verbosity >= 2)
+                logger$i.info(`Converting from ${currentFormat} to ${targetFormat}`, `${thisModule$i} > ${thisMethod}`);
+            const convertFn = appUtils.conversion.getConversionFn(currentFormat, targetFormat);
+            if (!convertFn) {
+                if (logMode$h.error)
+                    logger$i.error(`Conversion from ${currentFormat} to ${targetFormat} is not supported.`, `${thisModule$i} > ${thisMethod}`);
+                continue;
+            }
+            if (colorValues.format === 'xyz') {
+                if (logMode$h.error)
+                    logger$i.error('Cannot convert from XYZ to another color space.', `${thisModule$i} > ${thisMethod}`);
+                continue;
+            }
+            const clonedColor = await appUtils.color.narrowToColor(colorValues);
+            if (!clonedColor ||
+                appUtils.color.isSLColor(clonedColor) ||
+                appUtils.color.isSVColor(clonedColor) ||
+                appUtils.color.isXYZ(clonedColor)) {
+                if (logMode$h.verbosity >= 3 && logMode$h.error)
+                    logger$i.error('Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.', `${thisModule$i} > ${thisMethod}`);
+                continue;
+            }
+            if (!clonedColor) {
+                if (logMode$h.error)
+                    logger$i.error(`Conversion to ${targetFormat} failed.`, `${thisModule$i} > ${thisMethod}`);
+                continue;
+            }
+            const newColor = coreUtils$1.base.clone(convertFn(clonedColor));
+            if (!newColor) {
+                if (logMode$h.error)
+                    logger$i.error(`Conversion to ${targetFormat} failed.`, `${thisModule$i} > ${thisMethod}`);
+                continue;
+            }
+            inputBox.value = String(newColor);
+            inputBox.setAttribute('data-format', targetFormat);
+        }
+    }
+    catch (error) {
+        if (!modeData.quiet && logMode$h.warn)
+            logger$i.warn('Failed to convert colors.', `${thisModule$i} > ${thisMethod}`);
+        else if (!modeData.gracefulErrors)
+            throw new Error(`Failed to convert colors: ${error}`);
+        else if (logMode$h.error)
+            logger$i.error(`Failed to convert colors: ${error}`);
+    }
+}
+// 2. EVENT UTILITIES
+function addEventListener$1(id, eventType, callback) {
+    const thisFunction = 'addEventListener()';
+    const element = document.getElementById(id);
+    if (element) {
+        element.addEventListener(eventType, callback);
+    }
+    else if (logMode$h.warn) {
+        if (modeData.debug && logMode$h.warn && logMode$h.verbosity > 2)
+            logger$i.warn(`Element with id "${id}" not found.`, `${thisModule$i} > ${thisFunction}`);
+    }
+}
+const addConversionListener$1 = (id, colorSpace) => {
+    const thisFunction = 'addConversionListener()';
+    const btn = document.getElementById(id);
+    if (btn) {
+        if (coreUtils$1.guards.isColorSpace(colorSpace)) {
+            btn.addEventListener('click', () => switchColorSpace(colorSpace));
+        }
+        else {
+            if (logMode$h.warn) {
+                logger$i.warn(`Invalid color space provided: ${colorSpace}`, `${thisModule$i} > ${thisFunction}`);
+            }
+        }
     }
     else {
-        return selectedFormat;
+        if (logMode$h.warn)
+            logger$i.warn(`Element with id "${id}" not found.`, `${thisModule$i} > ${thisFunction}`);
     }
-}
-const parse = {
-    checkbox,
-    paletteExportFormat
 };
-
-// File: dom/fileUtils.js
+const event = {
+    addEventListener: addEventListener$1,
+    addConversionListener: addConversionListener$1
+};
+// 3. FILE UTILS
 function download(data, filename, type) {
     const blob = new Blob([data], { type });
     const url = URL.createObjectURL(blob);
@@ -4782,18 +4486,23 @@ function readFile(file) {
         reader.readAsText(file);
     });
 }
-const fileUtils = {
+const file$2 = {
     download,
     readFile
+};
+const utils$b = {
+    switchColorSpace,
+    event,
+    file: file$2
 };
 
 // File: io/parse/color.js
 const brand$2 = commonFn.core.brand;
-const regex$2 = configData.regex;
+const regex$3 = configData.regex;
 const colorParsers = {};
 const cmykParser = {
     parse(input) {
-        const match = input.match(regex$2.colors.cmyk);
+        const match = input.match(regex$3.colors.cmyk);
         if (!match) {
             throw new Error(`Invalid CMYK string format: ${input}`);
         }
@@ -4809,7 +4518,7 @@ const cmykParser = {
 };
 const hexParser = {
     parse(input) {
-        const match = input.match(regex$2.colors.hex);
+        const match = input.match(regex$3.colors.hex);
         if (!match) {
             throw new Error(`Invalid Hex string format: ${input}`);
         }
@@ -4822,7 +4531,7 @@ const hexParser = {
 };
 const hslParser = {
     parse(input) {
-        const match = input.match(regex$2.colors.hsl);
+        const match = input.match(regex$3.colors.hsl);
         if (!match) {
             throw new Error(`Invalid HSL string format: ${input}`);
         }
@@ -4837,7 +4546,7 @@ const hslParser = {
 };
 const hsvParser = {
     parse(input) {
-        const match = input.match(regex$2.colors.hsv);
+        const match = input.match(regex$3.colors.hsv);
         if (!match) {
             throw new Error(`Invalid HSV string format: ${input}`);
         }
@@ -4852,7 +4561,7 @@ const hsvParser = {
 };
 const labParser = {
     parse(input) {
-        const match = input.match(regex$2.colors.lab);
+        const match = input.match(regex$3.colors.lab);
         if (!match) {
             throw new Error(`Invalid LAB string format: ${input}`);
         }
@@ -4867,7 +4576,7 @@ const labParser = {
 };
 const rgbParser = {
     parse(input) {
-        const match = input.match(regex$2.colors.rgb);
+        const match = input.match(regex$3.colors.rgb);
         if (!match) {
             throw new Error(`Invalid RGB string format: ${input}`);
         }
@@ -4882,7 +4591,7 @@ const rgbParser = {
 };
 const xyzParser = {
     parse(input) {
-        const match = input.match(regex$2.colors.xyz);
+        const match = input.match(regex$3.colors.xyz);
         if (!match) {
             throw new Error(`Invalid XYZ string format: ${input}`);
         }
@@ -5001,8 +4710,8 @@ const asColorValue = {
 
 // File: io/parse/base.js
 const brand$1 = commonFn.core.brand;
-const logMode$c = modeData.logging;
-const regex$1 = {
+const logMode$g = modeData.logging;
+const regex$2 = {
     cmyk: configData.regex.colors.cmyk,
     hex: configData.regex.colors.hex,
     hsl: configData.regex.colors.hsl,
@@ -5011,16 +4720,16 @@ const regex$1 = {
     rgb: configData.regex.colors.rgb,
     xyz: configData.regex.colors.xyz
 };
-const thisModule$d = 'io/parse/base.js';
-const logger$d = await createLogger();
+const thisModule$h = 'io/parse/base.js';
+const logger$h = await createLogger();
 function parseCMYKColorValue(rawCMYK) {
     const caller = 'parseCMYKColorValue()';
     if (!rawCMYK) {
-        if (!modeData.quiet && logMode$c.warn && logMode$c.verbosity >= 2) {
-            logger$d.warn('A CMYK element could not be found while parsing palette file. Injecting default values.', `${thisModule$d} > ${caller}`);
+        if (!modeData.quiet && logMode$g.warn && logMode$g.verbosity >= 2) {
+            logger$h.warn('A CMYK element could not be found while parsing palette file. Injecting default values.', `${thisModule$h} > ${caller}`);
         }
         else {
-            logger$d.debug('Missing CMYK element in palette file.', `${thisModule$d} > ${caller}`);
+            logger$h.debug('Missing CMYK element in palette file.', `${thisModule$h} > ${caller}`);
         }
         if (modeData.stackTrace)
             console.trace('Stack Trace:');
@@ -5031,7 +4740,7 @@ function parseCMYKColorValue(rawCMYK) {
             key: brand$1.asPercentile(0)
         };
     }
-    const match = rawCMYK.match(regex$1.cmyk);
+    const match = rawCMYK.match(regex$2.cmyk);
     return match
         ? {
             cyan: brand$1.asPercentile(parseFloat(match[1])),
@@ -5049,17 +4758,17 @@ function parseCMYKColorValue(rawCMYK) {
 function parseHexColorValue(rawHex) {
     const caller = 'parseHexColorValue()';
     if (!rawHex) {
-        if (!modeData.quiet && logMode$c.warn && logMode$c.verbosity >= 2) {
-            logger$d.warn('A Hex element could not be found while parsing palette file. Injecting default values.', `${thisModule$d} > ${caller}`);
+        if (!modeData.quiet && logMode$g.warn && logMode$g.verbosity >= 2) {
+            logger$h.warn('A Hex element could not be found while parsing palette file. Injecting default values.', `${thisModule$h} > ${caller}`);
         }
         else {
-            logger$d.debug('Missing Hex element in palette file.', `${thisModule$d} > ${caller}`);
+            logger$h.debug('Missing Hex element in palette file.', `${thisModule$h} > ${caller}`);
         }
         if (modeData.stackTrace)
             console.trace('Stack Trace:');
         return { hex: brand$1.asHexSet('#000000') };
     }
-    const match = rawHex.match(regex$1.hex);
+    const match = rawHex.match(regex$2.hex);
     return match
         ? {
             hex: brand$1.asHexSet(`#${match[1]}`)
@@ -5071,11 +4780,11 @@ function parseHexColorValue(rawHex) {
 function parseHSLColorValue(rawHSL) {
     const caller = 'parseHSLColorValue()';
     if (!rawHSL) {
-        if (!modeData.quiet && logMode$c.warn && logMode$c.verbosity >= 2) {
-            logger$d.warn('An HSL element could not be found while parsing palette file. Injecting default values.', `${thisModule$d} > ${caller}`);
+        if (!modeData.quiet && logMode$g.warn && logMode$g.verbosity >= 2) {
+            logger$h.warn('An HSL element could not be found while parsing palette file. Injecting default values.', `${thisModule$h} > ${caller}`);
         }
         else {
-            logger$d.debug('Missing HSL element in palette file.', `${thisModule$d} > ${caller}`);
+            logger$h.debug('Missing HSL element in palette file.', `${thisModule$h} > ${caller}`);
         }
         if (modeData.stackTrace)
             console.trace('Stack Trace:');
@@ -5085,7 +4794,7 @@ function parseHSLColorValue(rawHSL) {
             lightness: brand$1.asPercentile(0)
         };
     }
-    const match = rawHSL.match(regex$1.hsl);
+    const match = rawHSL.match(regex$2.hsl);
     return match
         ? {
             hue: brand$1.asRadial(parseFloat(match[1])),
@@ -5101,11 +4810,11 @@ function parseHSLColorValue(rawHSL) {
 function parseHSVColorValue(rawHSV) {
     const caller = 'parseHSVColorValue()';
     if (!rawHSV) {
-        if (!modeData.quiet && logMode$c.warn && logMode$c.verbosity >= 2) {
-            logger$d.warn('An HSV element could not be found while parsing palette file. Injecting default values.', `${thisModule$d} > ${caller}`);
+        if (!modeData.quiet && logMode$g.warn && logMode$g.verbosity >= 2) {
+            logger$h.warn('An HSV element could not be found while parsing palette file. Injecting default values.', `${thisModule$h} > ${caller}`);
         }
         else {
-            logger$d.debug('Missing HSV element in palette file.', `${thisModule$d} > ${caller}`);
+            logger$h.debug('Missing HSV element in palette file.', `${thisModule$h} > ${caller}`);
         }
         if (modeData.stackTrace)
             console.trace('Stack Trace:');
@@ -5115,7 +4824,7 @@ function parseHSVColorValue(rawHSV) {
             value: brand$1.asPercentile(0)
         };
     }
-    const match = rawHSV.match(regex$1.hsv);
+    const match = rawHSV.match(regex$2.hsv);
     return match
         ? {
             hue: brand$1.asRadial(parseFloat(match[1])),
@@ -5131,11 +4840,11 @@ function parseHSVColorValue(rawHSV) {
 function parseLABColorValue(rawLAB) {
     const caller = 'parseLABColorValue()';
     if (!rawLAB) {
-        if (!modeData.quiet && logMode$c.warn && logMode$c.verbosity >= 2) {
-            logger$d.warn('A LAB element could not be found while parsing palette file. Injecting default values.', `${thisModule$d} > ${caller}`);
+        if (!modeData.quiet && logMode$g.warn && logMode$g.verbosity >= 2) {
+            logger$h.warn('A LAB element could not be found while parsing palette file. Injecting default values.', `${thisModule$h} > ${caller}`);
         }
         else {
-            logger$d.debug('Missing LAB element in palette file.', `${thisModule$d} > ${caller}`);
+            logger$h.debug('Missing LAB element in palette file.', `${thisModule$h} > ${caller}`);
         }
         if (modeData.stackTrace)
             console.trace('Stack Trace:');
@@ -5145,7 +4854,7 @@ function parseLABColorValue(rawLAB) {
             b: brand$1.asLAB_B(0)
         };
     }
-    const match = rawLAB.match(regex$1.lab);
+    const match = rawLAB.match(regex$2.lab);
     return match
         ? {
             l: brand$1.asLAB_L(parseFloat(match[1])),
@@ -5161,11 +4870,11 @@ function parseLABColorValue(rawLAB) {
 function parseRGBColorValue(rawRGB) {
     const caller = 'parseRGBColorValue()';
     if (!rawRGB) {
-        if (!modeData.quiet && logMode$c.warn && logMode$c.verbosity >= 2) {
-            logger$d.warn('An RGB element could not be found while parsing palette file. Injecting default values.', `${thisModule$d} > ${caller}`);
+        if (!modeData.quiet && logMode$g.warn && logMode$g.verbosity >= 2) {
+            logger$h.warn('An RGB element could not be found while parsing palette file. Injecting default values.', `${thisModule$h} > ${caller}`);
         }
         else {
-            logger$d.debug('Missing RGB element in palette file.', `${thisModule$d} > ${caller}`);
+            logger$h.debug('Missing RGB element in palette file.', `${thisModule$h} > ${caller}`);
         }
         if (modeData.stackTrace)
             console.trace('Stack Trace:');
@@ -5175,7 +4884,7 @@ function parseRGBColorValue(rawRGB) {
             blue: brand$1.asByteRange(0)
         };
     }
-    const match = rawRGB.match(regex$1.rgb);
+    const match = rawRGB.match(regex$2.rgb);
     return match
         ? {
             red: brand$1.asByteRange(parseFloat(match[1])),
@@ -5191,11 +4900,11 @@ function parseRGBColorValue(rawRGB) {
 function parseXYZColorValue(rawXYZ) {
     const caller = 'parseXYZColorValue()';
     if (!rawXYZ) {
-        if (!modeData.quiet && logMode$c.warn && logMode$c.verbosity >= 2) {
-            logger$d.warn('An XYZ element could not be found while parsing palette file. Injecting default values.', `${thisModule$d} > ${caller}`);
+        if (!modeData.quiet && logMode$g.warn && logMode$g.verbosity >= 2) {
+            logger$h.warn('An XYZ element could not be found while parsing palette file. Injecting default values.', `${thisModule$h} > ${caller}`);
         }
         else {
-            logger$d.debug('Missing XYZ element in palette file.', `${thisModule$d} > ${caller}`);
+            logger$h.debug('Missing XYZ element in palette file.', `${thisModule$h} > ${caller}`);
         }
         if (modeData.stackTrace)
             console.trace('Stack Trace:');
@@ -5205,7 +4914,7 @@ function parseXYZColorValue(rawXYZ) {
             z: brand$1.asXYZ_Z(0)
         };
     }
-    const match = rawXYZ.match(regex$1.xyz);
+    const match = rawXYZ.match(regex$2.xyz);
     return match
         ? {
             x: brand$1.asXYZ_X(parseFloat(match[1])),
@@ -5229,10 +4938,10 @@ const color = {
 };
 
 // File: io/parse/json.js
-const logMode$b = modeData.logging;
+const logMode$f = modeData.logging;
 const mode = modeData;
-const thisModule$c = 'io/parse/json.ts';
-const logger$c = await createLogger();
+const thisModule$g = 'io/parse/json.ts';
+const logger$g = await createLogger();
 function file$1(jsonData) {
     const caller = 'file()';
     try {
@@ -5244,8 +4953,8 @@ function file$1(jsonData) {
         return Promise.resolve(parsed);
     }
     catch (error) {
-        if (!mode.quiet && logMode$b.error && logMode$b.verbosity > 1) {
-            logger$c.error(`Error parsing JSON file: ${error}`, `${thisModule$c} > ${caller}`);
+        if (!mode.quiet && logMode$f.error && logMode$f.verbosity > 1) {
+            logger$g.error(`Error parsing JSON file: ${error}`, `${thisModule$g} > ${caller}`);
             if (mode.showAlerts)
                 alert(`Error parsing JSON file. See console for details.`);
         }
@@ -5275,10 +4984,10 @@ const defaultColors = {
     rgb: defaultData.colors.base.branded.rgb,
     xyz: defaultData.colors.base.branded.xyz
 };
-const logMode$a = modeData.logging;
-const regex = configData.regex;
-const thisModule$b = 'io/deserialize.js';
-const logger$b = await createLogger();
+const logMode$e = modeData.logging;
+const regex$1 = configData.regex;
+const thisModule$f = 'io/deserialize.js';
+const logger$f = await createLogger();
 const getFormattedTimestamp = commonFn.core.getFormattedTimestamp;
 const convertToColorString = commonFn.utils.color.colorToColorString;
 const convertToCSSColorString = commonFn.core.convert.colorToCSSColorString;
@@ -5286,7 +4995,7 @@ async function fromCSS(data) {
     const caller = 'fromCSS()';
     try {
         // 1. parse metadata
-        const metadataMatch = data.match(regex.file.palette.css.metadata);
+        const metadataMatch = data.match(regex$1.file.palette.css.metadata);
         const metadataRaw = metadataMatch ? metadataMatch[1] : '{}';
         const metadataJSON = JSON.parse(metadataRaw);
         // 2. extract individual metadata properties
@@ -5302,112 +5011,9 @@ async function fromCSS(data) {
             limitGrayness: metadataJSON.flags?.limitGrayness || false,
             limitLightness: metadataJSON.flags?.limitLightness || false
         };
-        // 4. parse custom color if provided
-        const { customColor: rawCustomColor } = metadataJSON;
-        const customColor = rawCustomColor && rawCustomColor.hslColor
-            ? {
-                colors: {
-                    main: {
-                        cmyk: rawCustomColor.convertedColors?.cmyk ??
-                            defaultColors.cmyk.value,
-                        hex: rawCustomColor.convertedColors?.hex ??
-                            defaultColors.hex.value,
-                        hsl: rawCustomColor.convertedColors?.hsl ??
-                            defaultColors.hsl.value,
-                        hsv: rawCustomColor.convertedColors?.hsv ??
-                            defaultColors.hsv.value,
-                        lab: rawCustomColor.convertedColors?.lab ??
-                            defaultColors.lab.value,
-                        rgb: rawCustomColor.convertedColors?.rgb ??
-                            defaultColors.rgb.value,
-                        xyz: rawCustomColor.convertedColors?.xyz ??
-                            defaultColors.xyz.value
-                    },
-                    stringProps: {
-                        cmyk: convertToColorString({
-                            value: rawCustomColor.convertedColors?.cmyk ??
-                                defaultColors.cmyk,
-                            format: 'cmyk'
-                        }).value,
-                        hex: convertToColorString({
-                            value: rawCustomColor.convertedColors?.hex ??
-                                defaultColors.hex,
-                            format: 'hex'
-                        }).value,
-                        hsl: convertToColorString({
-                            value: rawCustomColor.convertedColors?.hsl ??
-                                defaultColors.hsl,
-                            format: 'hsl'
-                        }).value,
-                        hsv: convertToColorString({
-                            value: rawCustomColor.convertedColors?.hsv ??
-                                defaultColors.hsv,
-                            format: 'hsv'
-                        }).value,
-                        lab: convertToColorString({
-                            value: rawCustomColor.convertedColors?.lab ??
-                                defaultColors.lab,
-                            format: 'lab'
-                        }).value,
-                        rgb: convertToColorString({
-                            value: rawCustomColor.convertedColors?.rgb ??
-                                defaultColors.rgb,
-                            format: 'rgb'
-                        }).value,
-                        xyz: convertToColorString({
-                            value: rawCustomColor.convertedColors?.xyz ??
-                                defaultColors.xyz,
-                            format: 'xyz'
-                        }).value
-                    },
-                    css: {
-                        cmyk: await convertToCSSColorString({
-                            value: rawCustomColor.convertedColors?.cmyk ??
-                                defaultColors.cmyk,
-                            format: 'cmyk'
-                        }),
-                        hex: await convertToCSSColorString({
-                            value: rawCustomColor.convertedColors?.hex ??
-                                defaultColors.hex,
-                            format: 'hex'
-                        }),
-                        hsl: await convertToCSSColorString({
-                            value: rawCustomColor.convertedColors?.hsl ??
-                                defaultColors.hsl,
-                            format: 'hsl'
-                        }),
-                        hsv: await convertToCSSColorString({
-                            value: rawCustomColor.convertedColors?.hsv ??
-                                defaultColors.hsv,
-                            format: 'hsv'
-                        }),
-                        lab: await convertToCSSColorString({
-                            value: rawCustomColor.convertedColors?.lab ??
-                                defaultColors.lab,
-                            format: 'lab'
-                        }),
-                        rgb: await convertToCSSColorString({
-                            value: rawCustomColor.convertedColors?.rgb ??
-                                defaultColors.rgb,
-                            format: 'rgb'
-                        }),
-                        xyz: await convertToCSSColorString({
-                            value: rawCustomColor.convertedColors?.xyz ??
-                                defaultColors.xyz,
-                            format: 'xyz'
-                        })
-                    }
-                }
-            }
-            : false;
-        if (!customColor) {
-            if (!modeData.quiet && logMode$a.info && logMode$a.verbosity > 1) {
-                logger$b.info(`No custom color data found in CSS file. Assigning boolean value 'false' for Palette property Palette['metadata']['customColor'].`, `${thisModule$b} > ${caller}`);
-            }
-        }
-        // 5. parse palette items
+        // 4. parse palette items
         const items = [];
-        const itemBlocks = Array.from(data.matchAll(regex.file.palette.css.color));
+        const itemBlocks = Array.from(data.matchAll(regex$1.file.palette.css.color));
         for (const match of itemBlocks) {
             const properties = match[2].split(';').reduce((acc, line) => {
                 const [key, value] = line.split(':').map(s => s.trim());
@@ -5416,7 +5022,7 @@ async function fromCSS(data) {
                 }
                 return acc;
             }, {});
-            // 2.1. create each PaletteItem with required properties
+            // 4.1. create each PaletteItem with required properties
             items.push({
                 colors: {
                     main: {
@@ -5515,7 +5121,6 @@ async function fromCSS(data) {
             id,
             items,
             metadata: {
-                customColor,
                 flags,
                 name,
                 swatches,
@@ -5525,8 +5130,8 @@ async function fromCSS(data) {
         };
     }
     catch (error) {
-        if (logMode$a.error && logMode$a.verbosity > 1)
-            logger$b.error(`Error occurred during CSS deserialization: ${error}`, `${thisModule$b} > ${caller}`);
+        if (logMode$e.error && logMode$e.verbosity > 1)
+            logger$f.error(`Error occurred during CSS deserialization: ${error}`, `${thisModule$f} > ${caller}`);
         throw new Error('Failed to deserialize CSS Palette.');
     }
 }
@@ -5541,13 +5146,13 @@ async function fromJSON(data) {
     }
     catch (error) {
         if (error instanceof Error) {
-            if (logMode$a.error)
-                logger$b.error(`Failed to deserialize JSON: ${error.message}`, `${thisModule$b} > ${caller}`);
+            if (logMode$e.error)
+                logger$f.error(`Failed to deserialize JSON: ${error.message}`, `${thisModule$f} > ${caller}`);
             throw new Error('Failed to deserialize palette from JSPM file');
         }
         else {
-            if (logMode$a.error)
-                logger$b.error(`Failed to deserialize JSON: ${error}`, `${thisModule$b} > ${caller}`);
+            if (logMode$e.error)
+                logger$f.error(`Failed to deserialize JSON: ${error}`, `${thisModule$f} > ${caller}`);
             throw new Error('Failed to deserialize palette from JSPM file');
         }
     }
@@ -5584,104 +5189,6 @@ async function fromXML(data) {
         limitLightness: flagsElement?.querySelector('LimitLightness')?.textContent ===
             'true'
     };
-    const customColorElement = metadataElement.querySelector('CustomColor');
-    let customColor = false;
-    if (customColorElement && customColorElement.textContent !== 'false') {
-        const customCMYKValue = ioParseUtils.color.cmyk(customColorElement.querySelector('CMYK')?.textContent || null);
-        const customHexValue = ioParseUtils.color.hex(customColorElement.querySelector('Hex')?.textContent || null);
-        const customHSLValue = ioParseUtils.color.hsl(customColorElement.querySelector('HSL')?.textContent || null);
-        const customHSVValue = ioParseUtils.color.hsv(customColorElement.querySelector('HSV')?.textContent || null);
-        const customLABValue = ioParseUtils.color.lab(customColorElement.querySelector('LAB')?.textContent || null);
-        const customRGBValue = ioParseUtils.color.rgb(customColorElement.querySelector('RGB')?.textContent || null);
-        const customXYZValue = ioParseUtils.color.xyz(customColorElement.querySelector('XYZ')?.textContent || null);
-        const customCMYKStringValue = convertToColorString({
-            value: customCMYKValue,
-            format: 'cmyk'
-        }).value;
-        const customHexStringValue = convertToColorString({
-            value: customHexValue,
-            format: 'hex'
-        }).value;
-        const customHSLStringValue = convertToColorString({
-            value: customHSLValue,
-            format: 'hsl'
-        }).value;
-        const customHSVStringValue = convertToColorString({
-            value: customHSVValue,
-            format: 'hsv'
-        }).value;
-        const customLABStringValue = convertToColorString({
-            value: customLABValue,
-            format: 'lab'
-        }).value;
-        const customRGBStringValue = convertToColorString({
-            value: customRGBValue,
-            format: 'rgb'
-        }).value;
-        const customXYZStringValue = convertToColorString({
-            value: customXYZValue,
-            format: 'xyz'
-        }).value;
-        const customCMYKCSSStringValue = await convertToCSSColorString({
-            value: customCMYKValue,
-            format: 'cmyk'
-        });
-        const customHexCSSStringValue = await convertToCSSColorString({
-            value: customHexValue,
-            format: 'hex'
-        });
-        const customHSLCSSStringValue = await convertToCSSColorString({
-            value: customHSLValue,
-            format: 'hsl'
-        });
-        const customHSVCSSStringValue = await convertToCSSColorString({
-            value: customHSVValue,
-            format: 'hsv'
-        });
-        const customLABCSSStringValue = await convertToCSSColorString({
-            value: customLABValue,
-            format: 'lab'
-        });
-        const customRGBCSSStringValue = await convertToCSSColorString({
-            value: customRGBValue,
-            format: 'rgb'
-        });
-        const customXYZCSSStringValue = await convertToCSSColorString({
-            value: customXYZValue,
-            format: 'xyz'
-        });
-        customColor = {
-            colors: {
-                main: {
-                    cmyk: customCMYKValue,
-                    hex: customHexValue,
-                    hsl: customHSLValue,
-                    hsv: customHSVValue,
-                    lab: customLABValue,
-                    rgb: customRGBValue,
-                    xyz: customXYZValue
-                },
-                stringProps: {
-                    cmyk: customCMYKStringValue,
-                    hex: customHexStringValue,
-                    hsl: customHSLStringValue,
-                    hsv: customHSVStringValue,
-                    lab: customLABStringValue,
-                    rgb: customRGBStringValue,
-                    xyz: customXYZStringValue
-                },
-                css: {
-                    cmyk: customCMYKCSSStringValue,
-                    hex: customHexCSSStringValue,
-                    hsl: customHSLCSSStringValue,
-                    hsv: customHSVCSSStringValue,
-                    lab: customLABCSSStringValue,
-                    rgb: customRGBCSSStringValue,
-                    xyz: customXYZCSSStringValue
-                }
-            }
-        };
-    }
     // 2. parse palette items
     const items = Array.from(paletteElement.querySelectorAll('PaletteItem')).map(itemElement => {
         const id = parseInt(itemElement.getAttribute('id') || '0', 10);
@@ -5763,7 +5270,7 @@ async function fromXML(data) {
     return {
         id,
         items,
-        metadata: { name, timestamp, swatches, type, flags, customColor }
+        metadata: { name, timestamp, swatches, type, flags }
     };
 }
 const deserialize = {
@@ -5773,9 +5280,9 @@ const deserialize = {
 };
 
 // File: io/deserialize.js
-const logMode$9 = modeData.logging;
-const thisModule$a = 'io/serialize.js';
-const logger$a = await createLogger();
+const logMode$d = modeData.logging;
+const thisModule$e = 'io/serialize.js';
+const logger$e = await createLogger();
 async function toCSS(palette) {
     const thisMethod = 'toCSS()';
     return new Promise((resolve, reject) => {
@@ -5793,21 +5300,7 @@ async function toCSS(palette) {
 					--limitGrayness: ${palette.metadata.flags.limitGrayness};
 					--limitLightness: ${palette.metadata.flags.limitLightness};
 				}`.trim();
-            // 2. serialize custom color if present
-            const customColor = palette.metadata.customColor
-                ? `
-				/* Optional Custom Color */
-				.palette-custom {
-					--custom-cmyk-color: "${palette.metadata.customColor.colors.main.cmyk}";
-					--custom-hex-color: "${palette.metadata.customColor.colors.main.hex}";
-					--custom-hsl-color: "${palette.metadata.customColor.colors.main.hsl}";
-					--custom-hsv-color: "${palette.metadata.customColor.colors.main.hsv}";
-					--custom-lab-color: "${palette.metadata.customColor.colors.main.lab}";
-					--custom-rgb-color: "${palette.metadata.customColor.colors.main.rgb}";
-					--custom-xyz-color: "${palette.metadata.customColor.colors.main.xyz}";
-				}`.trim()
-                : '';
-            // 3. serialize palette items
+            // 2. serialize palette items
             const items = palette.items
                 .map(item => {
                 const backgroundColor = item.colors.css.hsl;
@@ -5825,20 +5318,18 @@ async function toCSS(palette) {
 					}`.trim();
             })
                 .join('\n\n');
-            // 4. combine CSS data
-            const cssData = [metadata, customColor, items]
-                .filter(Boolean)
-                .join('\n\n');
-            // 5. resolve serialized CSS data
+            // 3. combine CSS data
+            const cssData = [metadata, items].filter(Boolean).join('\n\n');
+            // 4. resolve serialized CSS data
             resolve(cssData.trim());
         }
         catch (error) {
-            if (!modeData.quiet && logMode$9.error) {
-                if (logMode$9.verbosity > 1) {
-                    logger$a.error(`Failed to convert palette to CSS: ${error}`, `${thisModule$a} > ${thisMethod}`);
+            if (!modeData.quiet && logMode$d.error) {
+                if (logMode$d.verbosity > 1) {
+                    logger$e.error(`Failed to convert palette to CSS: ${error}`, `${thisModule$e} > ${thisMethod}`);
                 }
                 else {
-                    logger$a.error('Failed to convert palette to CSS', `${thisModule$a} > ${thisMethod}`);
+                    logger$e.error('Failed to convert palette to CSS', `${thisModule$e} > ${thisMethod}`);
                 }
             }
             if (modeData.stackTrace) {
@@ -5856,12 +5347,12 @@ async function toJSON(palette) {
             resolve(jsonData);
         }
         catch (error) {
-            if (!modeData.quiet && logMode$9.error) {
-                if (logMode$9.verbosity > 1) {
-                    logger$a.error(`Failed to convert palette to JSON: ${error}`, `${thisModule$a} > ${thisMethod}`);
+            if (!modeData.quiet && logMode$d.error) {
+                if (logMode$d.verbosity > 1) {
+                    logger$e.error(`Failed to convert palette to JSON: ${error}`, `${thisModule$e} > ${thisMethod}`);
                 }
                 else {
-                    logger$a.error('Failed to convert palette to JSON', `${thisModule$a} > ${thisMethod}`);
+                    logger$e.error('Failed to convert palette to JSON', `${thisModule$e} > ${thisMethod}`);
                 }
             }
             if (modeData.stackTrace) {
@@ -5876,25 +5367,12 @@ async function toXML(palette) {
     return new Promise((resolve, reject) => {
         try {
             // 1. serialize palette metadata
-            const customColorXML = palette.metadata.customColor
-                ? `
-				<CustomColor>
-					<CMYK>${palette.metadata.customColor.colors.main.cmyk}</CMYK>
-					<Hex>${palette.metadata.customColor.colors.main.hex}</Hex>
-					<HSL>${palette.metadata.customColor.colors.main.hsl}</HSL>
-					<HSV>${palette.metadata.customColor.colors.main.hsv}</HSV>
-					<LAB>${palette.metadata.customColor.colors.main.lab}</LAB>
-					<RGB>${palette.metadata.customColor.colors.main.rgb}</RGB>
-					<XYZ>${palette.metadata.customColor.colors.main.xyz}</XYZ>
-				</CustomColor>`.trim()
-                : '<CustomColor>false</CustomColor>';
             const metadata = `
 				<Metadata>
 					<Name>${palette.metadata.name ?? 'Unnamed Palette'}</Name>
 					<Timestamp>${palette.metadata.timestamp}</Timestamp>
 					<Swatches>${palette.metadata.swatches}</Swatches>
 					<Type>${palette.metadata.type}</Type>
-					${customColorXML}
 					<Flags>
 						<LimitDarkness>${palette.metadata.flags.limitDarkness}</LimitDarkness>
 						<LimitGrayness>${palette.metadata.flags.limitGrayness}</LimitGrayness>
@@ -5938,12 +5416,12 @@ async function toXML(palette) {
             resolve(xmlData.trim());
         }
         catch (error) {
-            if (!modeData.quiet && logMode$9.error) {
-                if (logMode$9.verbosity > 1) {
-                    logger$a.error(`Failed to convert palette to XML: ${error}`, `${thisModule$a} > ${thisMethod}`);
+            if (!modeData.quiet && logMode$d.error) {
+                if (logMode$d.verbosity > 1) {
+                    logger$e.error(`Failed to convert palette to XML: ${error}`, `${thisModule$e} > ${thisMethod}`);
                 }
                 else {
-                    logger$a.error('Failed to convert palette to XML', `${thisModule$a} > ${thisMethod}`);
+                    logger$e.error('Failed to convert palette to XML', `${thisModule$e} > ${thisMethod}`);
                 }
             }
             if (modeData.stackTrace) {
@@ -5972,7 +5450,7 @@ const file = {
             json: 'application/json',
             xml: 'application/xml'
         }[format];
-        fileUtils.download(data, `palette_${palette.id}.${format}`, mimeType);
+        utils$b.file.download(data, `palette_${palette.id}.${format}`, mimeType);
     }
 };
 function detectFileType(data) {
@@ -6031,42 +5509,43 @@ const ioFn = {
 };
 
 // File: src/ui/UIManager.ts
-const thisModule$9 = 'ui/UIManager.ts';
-const logger$9 = await createLogger();
+const thisModule$d = 'ui/UIManager.ts';
+const fileUtils = {
+    download,
+    readFile
+};
+const logger$d = await createLogger();
 class UIManager {
     static instanceCounter = 0; // static instance ID counter
     static instances = new Map(); // instance registry
     id; // unique instance ID
     currentPalette = null;
     paletteHistory = [];
-    idbManager = null;
+    idbManager;
     consts;
     domData;
     logMode;
     mode;
     conversionUtils;
     coreUtils;
-    helpers;
     utils;
-    fileUtils;
-    ioFn;
     getCurrentPaletteFn;
     getStoredPalette;
-    constructor() {
+    eventListenerFn;
+    constructor(eventListenerFn, idbManager) {
         this.init();
         this.id = UIManager.instanceCounter++;
         UIManager.instances.set(this.id, this);
+        this.idbManager = idbManager || null;
         this.paletteHistory = [];
         this.consts = constsData;
         this.domData = domData;
         this.logMode = modeData.logging;
         this.mode = modeData;
         this.coreUtils = commonFn.core;
-        this.helpers = commonFn.helpers;
         this.utils = commonFn.utils;
         this.conversionUtils = commonFn.convert;
-        this.fileUtils = fileUtils;
-        this.ioFn = ioFn;
+        this.eventListenerFn = eventListenerFn;
     }
     /* PUBLIC METHODS */
     async addPaletteToHistory(palette) {
@@ -6081,10 +5560,10 @@ class UIManager {
             if (!this.mode.quiet &&
                 this.mode.debug &&
                 this.logMode.verbosity > 2)
-                logger$9.info(`Added palette with ID ${idString} to history`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.info(`Added palette with ID ${idString} to history`, `${thisModule$d} > ${thisMethod}`);
         }
         catch (error) {
-            logger$9.error(`Error adding palette to history: ${error}`, `${thisModule$9} > ${thisMethod}`);
+            logger$d.error(`Error adding palette to history: ${error}`, `${thisModule$d} > ${thisMethod}`);
         }
         this.paletteHistory.unshift(palette);
         if (this.paletteHistory.length > maxHistory)
@@ -6124,7 +5603,7 @@ class UIManager {
         }
         catch (error) {
             if (this.logMode.error)
-                logger$9.error(`Failed to apply custom color: ${error}. Returning randomly generated hex color`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.error(`Failed to apply custom color: ${error}. Returning randomly generated hex color`, `${thisModule$d} > ${thisMethod}`);
             return this.utils.random.hsl();
         }
     }
@@ -6134,13 +5613,13 @@ class UIManager {
             const colorBox1 = this.domData.elements.dynamic.divs.colorBox1;
             if (!colorBox1) {
                 if (this.logMode.error)
-                    logger$9.error('color-box-1 is null', `${thisModule$9} > ${thisMethod}`);
+                    logger$d.error('color-box-1 is null', `${thisModule$d} > ${thisMethod}`);
                 return color;
             }
             const formatColorString = await this.coreUtils.convert.colorToCSSColorString(color);
             if (!formatColorString) {
                 if (this.logMode.error)
-                    logger$9.error('Unexpected or unsupported color format.', `${thisModule$9} > ${thisMethod}`);
+                    logger$d.error('Unexpected or unsupported color format.', `${thisModule$d} > ${thisMethod}`);
                 return color;
             }
             colorBox1.style.backgroundColor = formatColorString;
@@ -6149,7 +5628,7 @@ class UIManager {
         }
         catch (error) {
             if (this.logMode.error)
-                logger$9.error(`Failed to apply first color to UI: ${error}`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.error(`Failed to apply first color to UI: ${error}`, `${thisModule$d} > ${thisMethod}`);
             return this.utils.random.hsl();
         }
     }
@@ -6160,23 +5639,23 @@ class UIManager {
             navigator.clipboard
                 .writeText(colorValue)
                 .then(() => {
-                this.helpers.dom.showTooltip(tooltipElement);
+                this.getEventListenerFn().temp.showTooltip(tooltipElement);
                 if (!this.mode.quiet &&
                     this.mode.debug &&
                     this.logMode.verbosity > 2 &&
                     this.logMode.info) {
-                    logger$9.info(`Copied color value: ${colorValue}`, `${thisModule$9} > ${thisMethod}`);
+                    logger$d.info(`Copied color value: ${colorValue}`, `${thisModule$d} > ${thisMethod}`);
                 }
                 setTimeout(() => tooltipElement.classList.remove('show'), this.consts.timeouts.tooltip || 1000);
             })
                 .catch(err => {
                 if (this.logMode.error)
-                    logger$9.error(`Error copying to clipboard: ${err}`, `${thisModule$9} > ${thisMethod}`);
+                    logger$d.error(`Error copying to clipboard: ${err}`, `${thisModule$d} > ${thisMethod}`);
             });
         }
         catch (error) {
             if (this.logMode.error)
-                logger$9.error(`Failed to copy to clipboard: ${error}`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.error(`Failed to copy to clipboard: ${error}`, `${thisModule$d} > ${thisMethod}`);
         }
     }
     createPaletteTable(palette) {
@@ -6204,7 +5683,7 @@ class UIManager {
         }
         catch (error) {
             if (this.logMode.error)
-                logger$9.error(`Failed to desaturate color: ${error}`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.error(`Failed to desaturate color: ${error}`, `${thisModule$d} > ${thisMethod}`);
         }
     }
     getElementsForSelectedColor(selectedColor) {
@@ -6212,8 +5691,8 @@ class UIManager {
         const selectedColorBox = document.getElementById(`color-box-${selectedColor}`);
         if (!selectedColorBox) {
             if (this.logMode.warn)
-                logger$9.warn(`Element not found for color ${selectedColor}`, `${thisModule$9} > ${thisMethod}`);
-            this.helpers.dom.showToast('Please select a valid color.');
+                logger$d.warn(`Element not found for color ${selectedColor}`, `${thisModule$d} > ${thisMethod}`);
+            this.getEventListenerFn().temp.showToast('Please select a valid color.');
             return {
                 selectedColorTextOutputBox: null,
                 selectedColorBox: null,
@@ -6250,18 +5729,18 @@ class UIManager {
         try {
             const palette = await this.getCurrentPalette();
             if (!palette) {
-                logger$9.error('No palette available for export', `${thisModule$9} > ${thisMethod}`);
+                logger$d.error('No palette available for export', `${thisModule$d} > ${thisMethod}`);
                 return;
             }
             switch (format) {
                 case 'css':
-                    this.ioFn.exportPalette(palette, format);
+                    ioFn.exportPalette(palette, format);
                     break;
                 case 'json':
-                    this.ioFn.exportPalette(palette, format);
+                    ioFn.exportPalette(palette, format);
                     break;
                 case 'xml':
-                    this.ioFn.exportPalette(palette, format);
+                    ioFn.exportPalette(palette, format);
                     break;
                 default:
                     throw new Error(`Unsupported export format: ${format}`);
@@ -6269,48 +5748,141 @@ class UIManager {
         }
         catch (error) {
             if (this.logMode.error && this.logMode.verbosity > 1)
-                logger$9.error(`Failed to export palette: ${error}`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.error(`Failed to export palette: ${error}`, `${thisModule$d} > ${thisMethod}`);
         }
     }
     async handleImport(file, format) {
         try {
             const thisMethod = 'handleImport()';
-            const data = await this.fileUtils.readFile(file);
+            const data = await fileUtils.readFile(file);
             let palette = null;
             switch (format) {
                 case 'JSON':
-                    palette = await this.ioFn.deserialize.fromJSON(data);
+                    palette = await ioFn.deserialize.fromJSON(data);
                     if (!palette) {
                         if (this.logMode.error && this.logMode.verbosity > 1) {
-                            logger$9.error('Failed to deserialize JSON data', `${thisModule$9} > ${thisMethod}`);
+                            logger$d.error('Failed to deserialize JSON data', `${thisModule$d} > ${thisMethod}`);
                         }
                         return;
                     }
                     break;
                 case 'XML':
-                    palette =
-                        (await this.ioFn.deserialize.fromXML(data)) || null;
+                    palette = (await ioFn.deserialize.fromXML(data)) || null;
                     break;
                 case 'CSS':
-                    palette =
-                        (await this.ioFn.deserialize.fromCSS(data)) || null;
+                    palette = (await ioFn.deserialize.fromCSS(data)) || null;
                     break;
                 default:
                     throw new Error(`Unsupported format: ${format}`);
             }
             if (!palette) {
                 if (this.logMode.error && this.logMode.verbosity > 1) {
-                    logger$9.error(`Failed to deserialize ${format} data`, `${thisModule$9} > ${thisMethod}`);
+                    logger$d.error(`Failed to deserialize ${format} data`, `${thisModule$d} > ${thisMethod}`);
                 }
                 return;
             }
             this.addPaletteToHistory(palette);
             if (this.logMode.info && this.logMode.verbosity > 1) {
-                logger$9.info(`Successfully imported palette in ${format} format.`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.info(`Successfully imported palette in ${format} format.`, `${thisModule$d} > ${thisMethod}`);
             }
         }
         catch (error) {
-            logger$9.error(`Failed to import file: ${error}`, `${thisModule$9} > handleImport()`);
+            logger$d.error(`Failed to import file: ${error}`, `${thisModule$d} > handleImport()`);
+        }
+    }
+    async makePaletteBox(color, swatchCount) {
+        const thisMethod = 'makePaletteBox()';
+        try {
+            if (!this.coreUtils.validate.colorValues(color)) {
+                if (!this.logMode.error)
+                    logger$d.error(`Invalid ${color.format} color value ${JSON.stringify(color)}`, `${thisModule$d} > ${thisMethod}`);
+                return {
+                    colorStripe: document.createElement('div'),
+                    swatchCount
+                };
+            }
+            const clonedColor = this.coreUtils.base.clone(color);
+            const paletteBox = document.createElement('div');
+            paletteBox.className = 'palette-box';
+            paletteBox.id = `palette-box-${swatchCount}`;
+            const paletteBoxTopHalf = document.createElement('div');
+            paletteBoxTopHalf.className =
+                'palette-box-half palette-box-top-half';
+            paletteBoxTopHalf.id = `palette-box-top-half-${swatchCount}`;
+            const colorTextOutputBox = document.createElement('input');
+            colorTextOutputBox.type = 'text';
+            colorTextOutputBox.className = 'color-text-output-box tooltip';
+            colorTextOutputBox.id = `color-text-output-box-${swatchCount}`;
+            colorTextOutputBox.setAttribute('data-format', 'hex');
+            const colorString = await this.coreUtils.convert.colorToCSSColorString(clonedColor);
+            colorTextOutputBox.value = colorString || '';
+            colorTextOutputBox.colorValues = clonedColor;
+            colorTextOutputBox.readOnly = false;
+            colorTextOutputBox.style.cursor = 'text';
+            colorTextOutputBox.style.pointerEvents = 'none';
+            const copyButton = document.createElement('button');
+            copyButton.className = 'copy-button';
+            copyButton.textContent = 'Copy';
+            const tooltipText = document.createElement('span');
+            tooltipText.className = 'tooltiptext';
+            tooltipText.textContent = 'Copied to clipboard!';
+            copyButton.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(colorTextOutputBox.value);
+                    this.getEventListenerFn().temp.showTooltip(colorTextOutputBox);
+                    clearTimeout(constsData.timeouts.tooltip || 1000);
+                    copyButton.textContent = 'Copied!';
+                    setTimeout(() => (copyButton.textContent = 'Copy'), constsData.timeouts.copyButtonText || 1000);
+                }
+                catch (error) {
+                    if (!this.logMode.error)
+                        logger$d.error(`Failed to copy: ${error}`, `${thisModule$d} > ${thisMethod}`);
+                }
+            });
+            colorTextOutputBox.addEventListener('input', this.coreUtils.base.debounce((e) => {
+                const target = e.target;
+                if (target) {
+                    const cssColor = target.value.trim();
+                    const boxElement = document.getElementById(`color-box-${swatchCount}`);
+                    const stripeElement = document.getElementById(`color-stripe-${swatchCount}`);
+                    if (boxElement)
+                        boxElement.style.backgroundColor = cssColor;
+                    if (stripeElement)
+                        stripeElement.style.backgroundColor = cssColor;
+                }
+            }, constsData.debounce.input || 200));
+            paletteBoxTopHalf.appendChild(colorTextOutputBox);
+            paletteBoxTopHalf.appendChild(copyButton);
+            const paletteBoxBottomHalf = document.createElement('div');
+            paletteBoxBottomHalf.className =
+                'palette-box-half palette-box-bottom-half';
+            paletteBoxBottomHalf.id = `palette-box-bottom-half-${swatchCount}`;
+            const colorBox = document.createElement('div');
+            colorBox.className = 'color-box';
+            colorBox.id = `color-box-${swatchCount}`;
+            colorBox.style.backgroundColor = colorString || '#ffffff';
+            paletteBoxBottomHalf.appendChild(colorBox);
+            paletteBox.appendChild(paletteBoxTopHalf);
+            paletteBox.appendChild(paletteBoxBottomHalf);
+            const colorStripe = document.createElement('div');
+            colorStripe.className = 'color-stripe';
+            colorStripe.id = `color-stripe-${swatchCount}`;
+            colorStripe.style.backgroundColor = colorString || '#ffffff';
+            colorStripe.setAttribute('draggable', 'true');
+            this.getEventListenerFn().dad.attach(colorStripe);
+            colorStripe.appendChild(paletteBox);
+            return {
+                colorStripe,
+                swatchCount: swatchCount + 1
+            };
+        }
+        catch (error) {
+            if (!this.logMode.error)
+                logger$d.error(`Failed to execute makePaletteBox: ${error}`, `${thisModule$d} > ${thisMethod}`);
+            return {
+                colorStripe: document.createElement('div'),
+                swatchCount
+            };
         }
     }
     pullParamsFromUI() {
@@ -6325,19 +5897,19 @@ class UIManager {
                 !this.mode.quiet &&
                 this.logMode.debug &&
                 this.logMode.verbosity >= 2) {
-                logger$9.warn('paletteTypeOptions DOM element not found', `${thisModule$9} > ${thisMethod}`);
+                logger$d.warn('paletteTypeOptions DOM element not found', `${thisModule$d} > ${thisMethod}`);
             }
             if (!numSwatchesElement &&
                 !this.mode.quiet &&
                 this.logMode.debug &&
                 this.logMode.verbosity >= 2) {
-                logger$9.warn(`numBoxes DOM element not found`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.warn(`numBoxes DOM element not found`, `${thisModule$d} > ${thisMethod}`);
             }
             if ((!limitDarkChkbx || !limitGrayChkbx || !limitLightChkbx) &&
                 !this.mode.quiet &&
                 this.logMode.debug &&
                 this.logMode.verbosity >= 2) {
-                logger$9.warn(`One or more checkboxes not found`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.warn(`One or more checkboxes not found`, `${thisModule$d} > ${thisMethod}`);
             }
             return {
                 type: paletteTypeElement
@@ -6353,7 +5925,7 @@ class UIManager {
         }
         catch (error) {
             if (this.logMode.error)
-                logger$9.error(`Failed to pull parameters from UI: ${error}`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.error(`Failed to pull parameters from UI: ${error}`, `${thisModule$d} > ${thisMethod}`);
             return {
                 type: 0,
                 swatches: 0,
@@ -6374,10 +5946,10 @@ class UIManager {
             this.paletteHistory = this.paletteHistory.filter(p => p.id !== paletteID);
             await idbManager.savePaletteHistory(this.paletteHistory);
             if (!this.mode.quiet)
-                logger$9.info(`Removed palette ${paletteID} from history`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.info(`Removed palette ${paletteID} from history`, `${thisModule$d} > ${thisMethod}`);
         }
         catch (error) {
-            logger$9.error(`Error removing palette ${paletteID}: ${error}`, `${thisModule$9} > ${thisMethod}`);
+            logger$d.error(`Error removing palette ${paletteID}: ${error}`, `${thisModule$d} > ${thisMethod}`);
         }
     }
     async renderPalette(tableId) {
@@ -6396,7 +5968,7 @@ class UIManager {
             const tableElement = this.createPaletteTable(storedPalette);
             paletteRow.appendChild(tableElement);
             if (!this.mode.quiet)
-                logger$9.info(`Rendered palette ${tableId}.`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.info(`Rendered palette ${tableId}.`, `${thisModule$d} > ${thisMethod}`);
         }, 'UIManager.renderPalette(): Error rendering palette');
     }
     saturateColor(selectedColor) {
@@ -6407,7 +5979,7 @@ class UIManager {
         }
         catch (error) {
             if (this.logMode.error)
-                logger$9.error(`Failed to saturate color: ${error}`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.error(`Failed to saturate color: ${error}`, `${thisModule$d} > ${thisMethod}`);
         }
     }
     setCurrentPalette(palette) {
@@ -6424,7 +5996,7 @@ class UIManager {
         try {
             if (limit < 1 || limit > 1000) {
                 if (this.logMode.warn)
-                    logger$9.warn(`Invalid history limit: ${limit}. Keeping current limit.`, `${thisModule$9} > ${thisMethod}`);
+                    logger$d.warn(`Invalid history limit: ${limit}. Keeping current limit.`, `${thisModule$d} > ${thisMethod}`);
                 return;
             }
             const idbManager = await IDBManager.getInstance();
@@ -6437,16 +6009,22 @@ class UIManager {
             }
             this.updateHistoryUI();
             if (!this.mode.quiet)
-                logger$9.info(`History limit set to ${limit}`, `${thisModule$9} > ${thisMethod}`);
+                logger$d.info(`History limit set to ${limit}`, `${thisModule$d} > ${thisMethod}`);
         }
         catch (error) {
-            logger$9.error(`Error setting history limit: ${error}`, `${thisModule$9} > ${thisMethod}`);
+            logger$d.error(`Error setting history limit: ${error}`, `${thisModule$d} > ${thisMethod}`);
         }
     }
     /* PRIVATE METHODS */
     async init() {
         this.idbManager = await IDBManager.getInstance();
         await this.loadPaletteHistory();
+    }
+    getEventListenerFn() {
+        if (!this.eventListenerFn) {
+            throw new Error('Event listeners have not been initialized yet.');
+        }
+        return this.eventListenerFn;
     }
     async loadPaletteHistory() {
         if (!this.idbManager)
@@ -6493,45 +6071,232 @@ class UIManager {
     }
 }
 
+var UIManager$1 = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    UIManager: UIManager
+});
+
+// File: db/instance.js
+let idbInstance = null;
+const getIDBInstance = async () => {
+    if (!idbInstance) {
+        idbInstance = await IDBManager.getInstance();
+    }
+    return idbInstance;
+};
+
+var instance = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    getIDBInstance: getIDBInstance
+});
+
+// File: dom/parse.js
+const ids = domData.ids.static;
+const logMode$c = modeData.logging;
+const regex = configData.regex.dom;
+const thisModule$c = 'dom/parse.js';
+const brand = commonFn.core.brand;
+const logger$c = await createLogger();
+function checkbox(id) {
+    const thisFunction = 'checkbox()';
+    const checkbox = document.getElementById(id);
+    if (!checkbox) {
+        if (logMode$c.error && !modeData.quiet) {
+            logger$c.error(`Checkbox element ${id} not found`, `${thisModule$c} > ${thisFunction}`);
+        }
+        return;
+    }
+    if (!(checkbox instanceof HTMLInputElement)) {
+        if (logMode$c.error && !modeData.quiet) {
+            logger$c.error(`Element ${id} is not a checkbox`, `${thisModule$c} > ${thisFunction}`);
+        }
+        return;
+    }
+    return checkbox ? checkbox.checked : undefined;
+}
+function colorInput(input) {
+    const thisFunction = 'colorInput()';
+    const colorStr = input.value.trim().toLowerCase();
+    const hexMatch = colorStr.match(regex.hex);
+    const hslMatch = colorStr.match(regex.hsl);
+    const rgbMatch = colorStr.match(regex.rgb);
+    if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3) {
+            hex = hex
+                .split('')
+                .map(c => c + c)
+                .join('');
+        }
+        return {
+            format: 'hex',
+            value: { hex: brand.asHexSet(`#${hex}`) }
+        };
+    }
+    if (hslMatch) {
+        return {
+            format: 'hsl',
+            value: {
+                hue: brand.asRadial(parseInt(hslMatch[1], 10)),
+                saturation: brand.asPercentile(parseFloat(hslMatch[2])),
+                lightness: brand.asPercentile(parseFloat(hslMatch[3]))
+            }
+        };
+    }
+    if (rgbMatch) {
+        return {
+            format: 'rgb',
+            value: {
+                red: brand.asByteRange(parseInt(rgbMatch[1], 10)),
+                green: brand.asByteRange(parseInt(rgbMatch[2], 10)),
+                blue: brand.asByteRange(parseInt(rgbMatch[3], 10))
+            }
+        };
+    }
+    // for Named Colors (convert to RGB using CSS canvas)
+    const testElement = document.createElement('div');
+    testElement.style.color = colorStr;
+    if (testElement.style.color !== '') {
+        const ctx = document.createElement('canvas').getContext('2d');
+        if (ctx) {
+            ctx.fillStyle = colorStr;
+            const rgb = ctx.fillStyle.match(/\d+/g)?.map(Number);
+            if (rgb && rgb.length === 3) {
+                return {
+                    format: 'rgb',
+                    value: {
+                        red: brand.asByteRange(rgb[0]),
+                        green: brand.asByteRange(rgb[1]),
+                        blue: brand.asByteRange(rgb[2])
+                    }
+                };
+            }
+        }
+    }
+    if (!modeData.quiet && logMode$c.error && logMode$c.verbosity > 1) {
+        logger$c.error('Invalid color input', `${thisModule$c} > ${thisFunction}`);
+    }
+    return null;
+}
+function paletteExportFormat() {
+    const thisFunction = 'paletteExportFormat()';
+    const formatSelectionMenu = document.getElementById(ids.selects.exportFormatOption);
+    if (!formatSelectionMenu) {
+        if (logMode$c.error && !modeData.quiet)
+            logger$c.error('Export format selection dropdown not found', `${thisModule$c} > ${thisFunction}`);
+    }
+    const selectedFormat = formatSelectionMenu.value;
+    if (selectedFormat !== 'CSS' &&
+        selectedFormat !== 'JSON' &&
+        selectedFormat !== 'XML') {
+        if (logMode$c.error && !modeData.quiet)
+            logger$c.error('Invalid export format selected', `${thisModule$c} > ${thisFunction}`);
+        return;
+    }
+    else {
+        return selectedFormat;
+    }
+}
+const parse = {
+    checkbox,
+    colorInput,
+    paletteExportFormat
+};
+
+// File: ui/instance.ts
+async function getUIManager() {
+    const { UIManager } = await Promise.resolve().then(function () { return UIManager$1; });
+    const { getIDBInstance } = await Promise.resolve().then(function () { return instance; });
+    const { eventListenerFn } = await Promise.resolve().then(function () { return index; });
+    const idbManager = await getIDBInstance();
+    return new UIManager(eventListenerFn, idbManager);
+}
+
+// File: palette/common/helpers/enforce.js
+const domIDs$1 = domData.ids;
+const logMode$b = modeData.logging;
+const thisModule$b = 'palette/common/helpers/enforce.js';
+const logger$b = await createLogger();
+function swatchRules(minSwatches, maxSwatches) {
+    const thisFunction = 'enforceSwatchRules()';
+    const swatchNumberSelector = document.getElementById(domIDs$1.static.selects.swatchGen);
+    if (!swatchNumberSelector) {
+        if (logMode$b.error) {
+            logger$b.error('paletteDropdown not found', `${thisModule$b} > ${thisFunction}`);
+        }
+        if (modeData.stackTrace && logMode$b.verbosity > 3) {
+            console.trace('enforceMinimumSwatches stack trace');
+        }
+        return;
+    }
+    const currentValue = parseInt(swatchNumberSelector.value, 10);
+    let newValue = currentValue;
+    // ensue the value is within the allowed range
+    if (currentValue < minSwatches) {
+        newValue = minSwatches;
+    }
+    else if (maxSwatches !== undefined && currentValue > maxSwatches) {
+        newValue = maxSwatches;
+    }
+    if (newValue !== currentValue) {
+        // update value in the dropdown menu
+        swatchNumberSelector.value = newValue.toString();
+        // trigger a change event to notify the application
+        const event = new Event('change', { bubbles: true });
+        try {
+            swatchNumberSelector.dispatchEvent(event);
+        }
+        catch (error) {
+            if (logMode$b.error) {
+                logger$b.error(`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`, `${thisModule$b} > ${thisFunction}`);
+            }
+            throw new Error(`Failed to dispatch change event: ${error}`);
+        }
+    }
+}
+const enforce = {
+    swatchRules
+};
+
 // File: palette/common/helpers/limits.js
-const logMode$8 = modeData.logging;
-const thisModule$8 = 'palette/common/helpers/limits.js';
-const logger$8 = await createLogger();
+const logMode$a = modeData.logging;
+const thisModule$a = 'palette/common/helpers/limits.js';
+const logger$a = await createLogger();
 function isColorInBounds(hsl) {
     const thisFunction = 'paletteHelpers > limits > isColorInBounds()';
-    if (!coreUtils.validate.colorValues(hsl)) {
-        if (logMode$8.error)
-            logger$8.error(`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$8} > ${thisFunction}`);
+    if (!coreUtils$2.validate.colorValues(hsl)) {
+        if (logMode$a.error)
+            logger$a.error(`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$a} > ${thisFunction}`);
         return false;
     }
     return isTooDark$1(hsl) || isTooGray$1(hsl) || isTooLight$1(hsl);
 }
 function isTooDark$1(hsl) {
     const thisFunction = 'isTooDark()';
-    if (!coreUtils.validate.colorValues(hsl)) {
-        if (logMode$8.error)
-            logger$8.error(`isTooDark: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$8} > ${thisFunction}`);
+    if (!coreUtils$2.validate.colorValues(hsl)) {
+        if (logMode$a.error)
+            logger$a.error(`isTooDark: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$a} > ${thisFunction}`);
         return false;
     }
-    return coreUtils.base.clone(hsl).value.lightness < constsData.thresholds.dark;
+    return coreUtils$2.base.clone(hsl).value.lightness < constsData.thresholds.dark;
 }
 function isTooGray$1(hsl) {
     const thisFunction = 'isTooGray()';
-    if (!coreUtils.validate.colorValues(hsl)) {
-        if (logMode$8.error)
-            logger$8.error(`isTooGray: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$8} > ${thisFunction}`);
+    if (!coreUtils$2.validate.colorValues(hsl)) {
+        if (logMode$a.error)
+            logger$a.error(`isTooGray: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$a} > ${thisFunction}`);
         return false;
     }
-    return coreUtils.base.clone(hsl).value.saturation < constsData.thresholds.gray;
+    return coreUtils$2.base.clone(hsl).value.saturation < constsData.thresholds.gray;
 }
 function isTooLight$1(hsl) {
     const thisFunction = 'isTooLight()';
-    if (!coreUtils.validate.colorValues(hsl)) {
-        if (logMode$8.error)
-            logger$8.error(`isTooLight: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$8} > ${thisFunction}`);
+    if (!coreUtils$2.validate.colorValues(hsl)) {
+        if (logMode$a.error)
+            logger$a.error(`isTooLight: Invalid HSL value ${JSON.stringify(hsl)}`, `${thisModule$a} > ${thisFunction}`);
         return false;
     }
-    return coreUtils.base.clone(hsl).value.lightness > constsData.thresholds.light;
+    return coreUtils$2.base.clone(hsl).value.lightness > constsData.thresholds.light;
 }
 const limits$2 = {
     isColorInBounds,
@@ -6544,34 +6309,35 @@ const limits$2 = {
 async function colorBox(color, index) {
     const colorBox = document.getElementById(`color-box-${index + 1}`);
     if (colorBox) {
-        const colorValues = utils$1.conversion.genAllColorValues(color);
+        const colorValues = utils$c.conversion.genAllColorValues(color);
         const selectedColor = colorValues;
         if (selectedColor) {
             const hslColor = colorValues.hsl;
-            const hslCSSString = await coreUtils.convert.colorToCSSColorString(hslColor);
+            const hslCSSString = await coreUtils$2.convert.colorToCSSColorString(hslColor);
             colorBox.style.backgroundColor = hslCSSString;
-            utils$1.palette.populateOutputBox(selectedColor, index + 1);
+            utils$c.palette.populateOutputBox(selectedColor, index + 1);
         }
     }
 }
-const update$2 = { colorBox };
+const update$1 = { colorBox };
 
 // File: palette/common/helpers/index.js
 const helpers = {
+    enforce,
     limits: limits$2,
-    update: update$2
+    update: update$1
 };
 
 // File: palette/common/superUtils/create.js
 const limits$1 = helpers.limits;
-const update$1 = helpers.update;
+const update = helpers.update;
 const hslTo = coreConversionUtils.hslTo;
 function baseColor(customColor) {
-    const color = coreUtils.base.clone(customColor);
+    const color = coreUtils$2.base.clone(customColor);
     return color;
 }
 async function paletteItem(color) {
-    const clonedColor = coreUtils.base.clone(color);
+    const clonedColor = coreUtils$2.base.clone(color);
     return {
         colors: {
             main: {
@@ -6584,22 +6350,22 @@ async function paletteItem(color) {
                 xyz: hslTo(clonedColor, 'xyz').value
             },
             stringProps: {
-                cmyk: utils$1.color.colorToColorString(hslTo(clonedColor, 'cmyk')).value,
-                hex: utils$1.color.colorToColorString(hslTo(clonedColor, 'hex')).value,
-                hsl: utils$1.color.colorToColorString(clonedColor).value,
-                hsv: utils$1.color.colorToColorString(hslTo(clonedColor, 'hsv')).value,
-                lab: utils$1.color.colorToColorString(hslTo(clonedColor, 'lab')).value,
-                rgb: utils$1.color.colorToColorString(hslTo(clonedColor, 'rgb')).value,
-                xyz: utils$1.color.colorToColorString(hslTo(clonedColor, 'xyz')).value
+                cmyk: utils$c.color.colorToColorString(hslTo(clonedColor, 'cmyk')).value,
+                hex: utils$c.color.colorToColorString(hslTo(clonedColor, 'hex')).value,
+                hsl: utils$c.color.colorToColorString(clonedColor).value,
+                hsv: utils$c.color.colorToColorString(hslTo(clonedColor, 'hsv')).value,
+                lab: utils$c.color.colorToColorString(hslTo(clonedColor, 'lab')).value,
+                rgb: utils$c.color.colorToColorString(hslTo(clonedColor, 'rgb')).value,
+                xyz: utils$c.color.colorToColorString(hslTo(clonedColor, 'xyz')).value
             },
             css: {
-                cmyk: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'cmyk')),
-                hex: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'hex')),
-                hsl: await coreUtils.convert.colorToCSSColorString(clonedColor),
-                hsv: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'hsv')),
-                lab: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'lab')),
-                rgb: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'rgb')),
-                xyz: await coreUtils.convert.colorToCSSColorString(hslTo(clonedColor, 'xyz'))
+                cmyk: await coreUtils$2.convert.colorToCSSColorString(hslTo(clonedColor, 'cmyk')),
+                hex: await coreUtils$2.convert.colorToCSSColorString(hslTo(clonedColor, 'hex')),
+                hsl: await coreUtils$2.convert.colorToCSSColorString(clonedColor),
+                hsv: await coreUtils$2.convert.colorToCSSColorString(hslTo(clonedColor, 'hsv')),
+                lab: await coreUtils$2.convert.colorToCSSColorString(hslTo(clonedColor, 'lab')),
+                rgb: await coreUtils$2.convert.colorToCSSColorString(hslTo(clonedColor, 'rgb')),
+                xyz: await coreUtils$2.convert.colorToCSSColorString(hslTo(clonedColor, 'xyz'))
             }
         }
     };
@@ -6609,10 +6375,10 @@ async function paletteItemArray(baseColor, hues, limitDark, limitGray, limitLigh
     for (const [i, hue] of hues.entries()) {
         let newColor = null;
         do {
-            const sl = utils$1.random.sl();
-            newColor = utils$1.conversion.genAllColorValues({
+            const sl = utils$c.random.sl();
+            newColor = utils$c.conversion.genAllColorValues({
                 value: {
-                    hue: coreUtils.brand.asRadial(hue),
+                    hue: coreUtils$2.brand.asRadial(hue),
                     ...sl.value
                 },
                 format: 'hsl'
@@ -6624,12 +6390,12 @@ async function paletteItemArray(baseColor, hues, limitDark, limitGray, limitLigh
         if (newColor) {
             const newPaletteItem = await paletteItem(newColor);
             paletteItems.push(newPaletteItem);
-            update$1.colorBox(newColor, i + 1);
+            update.colorBox(newColor, i + 1);
         }
     }
     return paletteItems;
 }
-const create$9 = {
+const create = {
     baseColor,
     paletteItem,
     paletteItemArray
@@ -6637,16 +6403,16 @@ const create$9 = {
 
 // File: palette/common/utils/adjust.js
 const adjustments = constsData.adjustments;
-const logMode$7 = modeData.logging;
-const thisModule$7 = 'palette/common/utils/adjust.js';
-const logger$7 = await createLogger();
+const logMode$9 = modeData.logging;
+const thisModule$9 = 'palette/common/utils/adjust.js';
+const coreUtils = commonFn.core;
+const logger$9 = await createLogger();
 function sl(color) {
     const thisFunction = 'sl()';
     try {
         if (!coreUtils.validate.colorValues(color)) {
-            if (logMode$7.error)
-                logger$7.error('Invalid color valus for adjustment.', `${thisModule$7} > ${thisFunction}`);
-            helpers$1.dom.showToast('Invalid color values');
+            if (logMode$9.error)
+                logger$9.error('Invalid color valus for adjustment.', `${thisModule$9} > ${thisFunction}`);
             return color;
         }
         const adjustedSaturation = Math.min(Math.max(color.value.saturation + adjustments.slaValue, 0), 100);
@@ -6661,18 +6427,18 @@ function sl(color) {
         };
     }
     catch (error) {
-        if (logMode$7.error)
-            logger$7.error(`Error adjusting saturation and lightness: ${error}`, `${thisModule$7} > ${thisFunction}`);
+        if (logMode$9.error)
+            logger$9.error(`Error adjusting saturation and lightness: ${error}`, `${thisModule$9} > ${thisFunction}`);
         return color;
     }
 }
 const adjust = { sl };
 
 // File: paelette/common/utils/probability.js
-const logMode$6 = modeData.logging;
+const logMode$8 = modeData.logging;
 const probabilities = constsData.probabilities;
-const thisModule$6 = 'common/utils/probabilities.js';
-const logger$6 = await createLogger();
+const thisModule$8 = 'common/utils/probabilities.js';
+const logger$8 = await createLogger();
 function getWeightedRandomInterval$1() {
     const thisFunction = 'getWeightedRandomInterval()';
     try {
@@ -6690,8 +6456,8 @@ function getWeightedRandomInterval$1() {
         return weights[weights.length - 1];
     }
     catch (error) {
-        if (logMode$6.error)
-            logger$6.error(`Error generating weighted random interval: ${error}`, `${thisModule$6} > ${thisFunction}`);
+        if (logMode$8.error)
+            logger$8.error(`Error generating weighted random interval: ${error}`, `${thisModule$8} > ${thisFunction}`);
         return 50;
     }
 }
@@ -6700,27 +6466,27 @@ const probability = {
 };
 
 // File: palette/common/utils/index.js
-const utils = {
+const utils$a = {
     adjust,
     probability
 };
 
 // File: palette/common/superUtils/genHues.js
-const logMode$5 = modeData.logging;
-const thisModule$5 = 'palette/common/superUtils/genHues.js';
-const logger$5 = await createLogger();
-const genAllColorValues = utils$1.conversion.genAllColorValues;
-const getWeightedRandomInterval = utils.probability.getWeightedRandomInterval;
-const validateColorValues = coreUtils.validate.colorValues;
+const logMode$7 = modeData.logging;
+const thisModule$7 = 'palette/common/superUtils/genHues.js';
+const logger$7 = await createLogger();
+const genAllColorValues = utils$c.conversion.genAllColorValues;
+const getWeightedRandomInterval = utils$a.probability.getWeightedRandomInterval;
+const validateColorValues = coreUtils$2.validate.colorValues;
 function analogous$1(color, numBoxes) {
     const thisFunction = 'analogous()';
     try {
         if (!validateColorValues(color)) {
-            if (logMode$5.error)
-                logger$5.error(`Invalid color value ${JSON.stringify(color)}`, `${thisModule$5} > ${thisFunction}`);
+            if (logMode$7.error)
+                logger$7.error(`Invalid color value ${JSON.stringify(color)}`, `${thisModule$7} > ${thisFunction}`);
             return [];
         }
-        const clonedColor = coreUtils.base.clone(color);
+        const clonedColor = coreUtils$2.base.clone(color);
         const analogousHues = [];
         const baseHue = clonedColor.value.hue;
         const maxTotalDistance = 60;
@@ -6733,15 +6499,15 @@ function analogous$1(color, numBoxes) {
         return analogousHues;
     }
     catch (error) {
-        if (logMode$5.error)
-            logger$5.error(`Error generating analogous hues: ${error}`, `${thisModule$5} > ${thisFunction}`);
+        if (logMode$7.error)
+            logger$7.error(`Error generating analogous hues: ${error}`, `${thisModule$7} > ${thisFunction}`);
         return [];
     }
 }
 function diadic$1(baseHue) {
     const thisFunction = 'diadic()';
     try {
-        const clonedBaseHue = coreUtils.base.clone(baseHue);
+        const clonedBaseHue = coreUtils$2.base.clone(baseHue);
         const diadicHues = [];
         const randomDistance = getWeightedRandomInterval();
         const hue1 = clonedBaseHue;
@@ -6750,28 +6516,28 @@ function diadic$1(baseHue) {
         return diadicHues;
     }
     catch (error) {
-        if (logMode$5.error)
-            logger$5.error(`Error generating diadic hues: ${error}`, `${thisModule$5} > ${thisFunction}`);
+        if (logMode$7.error)
+            logger$7.error(`Error generating diadic hues: ${error}`, `${thisModule$7} > ${thisFunction}`);
         return [];
     }
 }
 function hexadic$1(color) {
     const thisFunction = 'hexadic()';
     try {
-        const clonedColor = coreUtils.base.clone(color);
+        const clonedColor = coreUtils$2.base.clone(color);
         if (!validateColorValues(clonedColor)) {
-            if (logMode$5.error)
-                logger$5.error(`Invalid color value ${JSON.stringify(clonedColor)}`, `${thisModule$5} > ${thisFunction}`);
+            if (logMode$7.error)
+                logger$7.error(`Invalid color value ${JSON.stringify(clonedColor)}`, `${thisModule$7} > ${thisFunction}`);
             return [];
         }
         const clonedBaseHSL = genAllColorValues(clonedColor).hsl;
         if (!clonedBaseHSL) {
             if (!modeData.gracefulErrors)
                 throw new Error('Unable to generate hexadic hues - missing HSL values');
-            else if (logMode$5.error)
-                logger$5.error('Unable to generate hexadic hues - missing HSL values', `${thisModule$5} > ${thisFunction}`);
-            else if (!modeData.quiet && logMode$5.verbosity > 0)
-                logger$5.error('Error generating hexadic hues', `${thisModule$5} > ${thisFunction}`);
+            else if (logMode$7.error)
+                logger$7.error('Unable to generate hexadic hues - missing HSL values', `${thisModule$7} > ${thisFunction}`);
+            else if (!modeData.quiet && logMode$7.verbosity > 0)
+                logger$7.error('Error generating hexadic hues', `${thisModule$7} > ${thisFunction}`);
             return [];
         }
         const hexadicHues = [];
@@ -6787,15 +6553,15 @@ function hexadic$1(color) {
         return hexadicHues;
     }
     catch (error) {
-        if (logMode$5.error)
-            logger$5.error(`Error generating hexadic hues: ${error}`, `${thisModule$5} > ${thisFunction}`);
+        if (logMode$7.error)
+            logger$7.error(`Error generating hexadic hues: ${error}`, `${thisModule$7} > ${thisFunction}`);
         return [];
     }
 }
 function splitComplementary$1(baseHue) {
     const thisFunction = 'splitComplementary()';
     try {
-        const clonedBaseHue = coreUtils.base.clone(baseHue);
+        const clonedBaseHue = coreUtils$2.base.clone(baseHue);
         const modifier = Math.floor(Math.random() * 11) + 20;
         return [
             (clonedBaseHue + 180 + modifier) % 360,
@@ -6803,15 +6569,15 @@ function splitComplementary$1(baseHue) {
         ];
     }
     catch (error) {
-        if (logMode$5.error)
-            logger$5.error(`Error generating split complementary hues: ${error}`, `${thisModule$5} > ${thisFunction}`);
+        if (logMode$7.error)
+            logger$7.error(`Error generating split complementary hues: ${error}`, `${thisModule$7} > ${thisFunction}`);
         return [];
     }
 }
 function tetradic$1(baseHue) {
     const thisFunction = 'tetradic()';
     try {
-        const clonedBaseHue = coreUtils.base.clone(baseHue);
+        const clonedBaseHue = coreUtils$2.base.clone(baseHue);
         const randomOffset = Math.floor(Math.random() * 46) + 20;
         const distance = 90 + (Math.random() < 0.5 ? -randomOffset : randomOffset);
         return [
@@ -6822,24 +6588,24 @@ function tetradic$1(baseHue) {
         ];
     }
     catch (error) {
-        if (logMode$5.error)
-            logger$5.error(`Error generating tetradic hues: ${error}`, `${thisModule$5} > ${thisFunction}`);
+        if (logMode$7.error)
+            logger$7.error(`Error generating tetradic hues: ${error}`, `${thisModule$7} > ${thisFunction}`);
         return [];
     }
 }
 function triadic$1(baseHue) {
     const thisFunction = 'triadic()';
     try {
-        const clonedBaseHue = coreUtils.base.clone(baseHue);
+        const clonedBaseHue = coreUtils$2.base.clone(baseHue);
         return [120, 240].map(increment => (clonedBaseHue + increment) % 360);
     }
     catch (error) {
-        if (logMode$5.error)
-            logger$5.error(`Error generating triadic hues: ${error}`, `${thisModule$5} > ${thisFunction}`);
+        if (logMode$7.error)
+            logger$7.error(`Error generating triadic hues: ${error}`, `${thisModule$7} > ${thisFunction}`);
         return [];
     }
 }
-const genHues$6 = {
+const genHues = {
     analogous: analogous$1,
     diadic: diadic$1,
     hexadic: hexadic$1,
@@ -6850,83 +6616,31 @@ const genHues$6 = {
 
 // File: palette/common/superUtils.js
 const superUtils = {
-    create: create$9,
-    genHues: genHues$6
-};
-
-// File: dom/events/palette.js
-const domIDs = domData.ids;
-const logMode$4 = modeData.logging;
-const thisModule$4 = 'ui/base.js';
-const logger$4 = await createLogger();
-function enforceSwatchRules(minimumSwatches, maximumSwatches) {
-    const thisFunction = 'enforceSwatchRules()';
-    const swatchNumberSelector = document.getElementById(domIDs.static.selects.swatchGen);
-    if (!swatchNumberSelector) {
-        if (logMode$4.error) {
-            logger$4.error('paletteDropdown not found', `${thisModule$4} > ${thisFunction}`);
-        }
-        if (modeData.stackTrace && logMode$4.verbosity > 3) {
-            console.trace('enforceMinimumSwatches stack trace');
-        }
-        return;
-    }
-    const currentValue = parseInt(swatchNumberSelector.value, 10);
-    let newValue = currentValue;
-    // ensue the value is within the allowed range
-    if (currentValue < minimumSwatches) {
-        newValue = minimumSwatches;
-    }
-    else if (maximumSwatches !== undefined &&
-        currentValue > maximumSwatches) {
-        newValue = maximumSwatches;
-    }
-    if (newValue !== currentValue) {
-        // update value in the dropdown menu
-        swatchNumberSelector.value = newValue.toString();
-        // trigger a change event to notify the application
-        const event = new Event('change', { bubbles: true });
-        try {
-            swatchNumberSelector.dispatchEvent(event);
-        }
-        catch (error) {
-            if (logMode$4.error) {
-                logger$4.error(`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`, `${thisModule$4} > ${thisFunction}`);
-            }
-            throw new Error(`Failed to dispatch change event: ${error}`);
-        }
-    }
-}
-const base$1 = {
-    enforceSwatchRules
-};
-
-// File: ui/index.js
-const uiFn = {
-    ...base$1
+    create,
+    genHues
 };
 
 // File: palette/main/types/analogous.js
-const create$8 = superUtils.create;
-const genHues$5 = superUtils.genHues;
+const core$8 = commonFn.core;
+const utils$9 = commonFn.utils;
 async function analogous(args) {
     // ensure at least 2 color swatches
     if (args.swatches < 2)
-        uiFn.enforceSwatchRules(2);
-    const baseColor = create$8.baseColor(args.customColor);
-    const hues = genHues$5.analogous(baseColor, args.swatches);
+        helpers.enforce.swatchRules(2);
+    const baseColor = utils$9.random.hsl();
+    const hues = superUtils.genHues.analogous(baseColor, args.swatches);
     const paletteItems = [];
     for (const [i, hue] of hues.entries()) {
         const newColor = {
             value: {
-                hue: coreUtils.brand.asRadial(hue),
-                saturation: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation +
+                hue: core$8.brand.asRadial(hue),
+                saturation: core$8.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation +
                     (Math.random() - 0.5) * 10))),
-                lightness: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + (i % 2 === 0 ? 5 : -5))))
+                lightness: core$8.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + (i % 2 === 0 ? 5 : -5))))
             },
             format: 'hsl'
         };
-        const paletteItem = await create$8.paletteItem(newColor);
+        const paletteItem = await superUtils.create.paletteItem(newColor);
         paletteItems.push(paletteItem);
     }
     const idbManager = await IDBManager.getInstance();
@@ -6941,25 +6655,25 @@ async function analogous(args) {
 }
 
 // File: palette/main/types/complementary.js
-const brand = commonFn.core.brand;
-const create$7 = superUtils.create;
+const core$7 = commonFn.core;
+const utils$8 = commonFn.utils;
 async function complementary(args) {
     // ensure at least 2 color swatches
     if (args.swatches !== 2)
-        uiFn.enforceSwatchRules(2);
+        helpers.enforce.swatchRules(2);
     const swatches = 2;
-    const baseColor = create$7.baseColor(args.customColor);
+    const baseColor = utils$8.random.hsl();
     const complementaryHue = (baseColor.value.hue + 180) % 360;
     const complementaryColor = {
         value: {
-            hue: brand.asRadial(complementaryHue),
+            hue: core$7.brand.asRadial(complementaryHue),
             saturation: baseColor.value.saturation,
             lightness: baseColor.value.lightness
         },
         format: 'hsl'
     };
-    const basePaletteItem = await create$7.paletteItem(baseColor);
-    const complementaryPaletteItem = await create$7.paletteItem(complementaryColor);
+    const basePaletteItem = await superUtils.create.paletteItem(baseColor);
+    const complementaryPaletteItem = await superUtils.create.paletteItem(complementaryColor);
     const idbManager = await IDBManager.getInstance();
     const paletteID = await idbManager.getNextPaletteID();
     if (!paletteID)
@@ -6972,15 +6686,15 @@ async function complementary(args) {
 }
 
 // File: palette/main/types/diadic.js
-const create$6 = superUtils.create;
-const genHues$4 = superUtils.genHues;
 const paletteRanges$4 = constsData.paletteRanges;
+const core$6 = commonFn.core;
+const utils$7 = commonFn.utils;
 async function diadic(args) {
     // ensure exactly 2 color swatches
     if (args.swatches !== 2)
-        uiFn.enforceSwatchRules(2, 2);
-    const baseColor = create$6.baseColor(args.customColor);
-    const hues = genHues$4.diadic(baseColor.value.hue);
+        helpers.enforce.swatchRules(2, 2);
+    const baseColor = utils$7.random.hsl();
+    const hues = superUtils.genHues.diadic(baseColor.value.hue);
     const paletteItems = [];
     for (let i = 0; i < 2; i++) {
         const saturationShift = Math.random() * paletteRanges$4.shift.diadic.sat -
@@ -6989,13 +6703,13 @@ async function diadic(args) {
             paletteRanges$4.shift.diadic.light / 2;
         const newColor = {
             value: {
-                hue: coreUtils.brand.asRadial(hues[i % hues.length]),
-                saturation: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation + saturationShift))),
-                lightness: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + lightnessShift)))
+                hue: core$6.brand.asRadial(hues[i % hues.length]),
+                saturation: core$6.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation + saturationShift))),
+                lightness: core$6.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + lightnessShift)))
             },
             format: 'hsl'
         };
-        const paletteItem = await create$6.paletteItem(newColor);
+        const paletteItem = await superUtils.create.paletteItem(newColor);
         paletteItems.push(paletteItem);
     }
     const idbManager = await IDBManager.getInstance();
@@ -7010,15 +6724,15 @@ async function diadic(args) {
 }
 
 // File: palette/main/types/hexadic.js
-const create$5 = superUtils.create;
-const genHues$3 = superUtils.genHues;
 const paletteRanges$3 = constsData.paletteRanges;
+const core$5 = commonFn.core;
+const utils$6 = commonFn.utils;
 async function hexadic(args) {
     // ensure exactly 6 color swatches
     if (args.swatches !== 6)
-        uiFn.enforceSwatchRules(6, 6);
-    const baseColor = create$5.baseColor(args.customColor);
-    const hues = genHues$3.hexadic(baseColor);
+        helpers.enforce.swatchRules(6, 6);
+    const baseColor = utils$6.random.hsl();
+    const hues = superUtils.genHues.hexadic(baseColor);
     const paletteItems = [];
     for (const hue of hues) {
         const saturationShift = Math.random() * paletteRanges$3.shift.hexad.sat -
@@ -7027,13 +6741,13 @@ async function hexadic(args) {
             paletteRanges$3.shift.hexad.light / 2;
         const newColor = {
             value: {
-                hue: coreUtils.brand.asRadial(hue),
-                saturation: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation + saturationShift))),
-                lightness: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + lightnessShift)))
+                hue: core$5.brand.asRadial(hue),
+                saturation: core$5.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation + saturationShift))),
+                lightness: core$5.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + lightnessShift)))
             },
             format: 'hsl'
         };
-        const paletteItem = await create$5.paletteItem(newColor);
+        const paletteItem = await superUtils.create.paletteItem(newColor);
         paletteItems.push(paletteItem);
     }
     const idbManager = await IDBManager.getInstance();
@@ -7050,27 +6764,28 @@ async function hexadic(args) {
 }
 
 // File: palette/main/types/monochromatic.js
-const create$4 = superUtils.create;
+const core$4 = commonFn.core;
+const utils$5 = commonFn.utils;
 async function monochromatic(args) {
     // ensure at least 2 color swatches
     if (args.swatches < 2)
-        uiFn.enforceSwatchRules(2);
-    const baseColor = create$4.baseColor(args.customColor);
+        helpers.enforce.swatchRules(2);
+    const baseColor = utils$5.random.hsl();
     const paletteItems = [];
-    const basePaletteItem = await create$4.paletteItem(baseColor);
+    const basePaletteItem = await superUtils.create.paletteItem(baseColor);
     paletteItems.push(basePaletteItem);
     for (let i = 1; i < args.swatches; i++) {
         const hueShift = Math.random() * 10 - 5;
-        const newColor = utils$1.conversion.genAllColorValues({
+        const newColor = utils$5.conversion.genAllColorValues({
             value: {
-                hue: coreUtils.brand.asRadial((baseColor.value.hue + hueShift + 360) % 360),
-                saturation: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation - i * 5))),
-                lightness: coreUtils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + (i * 10 - 20))))
+                hue: core$4.brand.asRadial((baseColor.value.hue + hueShift + 360) % 360),
+                saturation: core$4.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation - i * 5))),
+                lightness: core$4.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + (i * 10 - 20))))
             },
             format: 'hsl'
         }).hsl;
         if (newColor) {
-            const paletteItem = await create$4.paletteItem(newColor);
+            const paletteItem = await superUtils.create.paletteItem(newColor);
             paletteItems.push(paletteItem);
         }
     }
@@ -7088,16 +6803,17 @@ async function monochromatic(args) {
 }
 
 // File: paletteGen/palettes/types/random.js
-const create$3 = superUtils.create;
-const update = helpers.update;
+const utils$4 = commonFn.utils;
 async function random(args) {
-    const baseColor = create$3.baseColor(args.customColor);
-    const paletteItems = [await create$3.paletteItem(baseColor)];
+    const baseColor = utils$4.random.hsl();
+    const paletteItems = [
+        await superUtils.create.paletteItem(baseColor)
+    ];
     for (let i = 1; i < args.swatches; i++) {
-        const randomColor = utils$1.random.hsl();
-        const nextPaletteItem = await create$3.paletteItem(randomColor);
+        const randomColor = utils$4.random.hsl();
+        const nextPaletteItem = await superUtils.create.paletteItem(randomColor);
         paletteItems.push(nextPaletteItem);
-        update.colorBox(randomColor, i);
+        helpers.update.colorBox(randomColor, i);
     }
     const idbManager = await IDBManager.getInstance();
     const paletteID = await idbManager.getNextPaletteID();
@@ -7111,40 +6827,40 @@ async function random(args) {
 }
 
 // File: palette/main/types/splitComplementary.js
-const create$2 = superUtils.create;
-const genHues$2 = superUtils.genHues;
 const paletteRanges$2 = constsData.paletteRanges;
+const core$3 = commonFn.core;
+const utils$3 = commonFn.utils;
 async function splitComplementary(args) {
     // ensure exactly 3 color swatches
     if (args.swatches !== 3)
-        uiFn.enforceSwatchRules(3, 3);
+        helpers.enforce.swatchRules(3, 3);
     // base color setup
-    const baseColor = create$2.baseColor(args.customColor);
+    const baseColor = utils$3.random.hsl();
     // generate split complementary hues
-    const [hue1, hue2] = genHues$2.splitComplementary(baseColor.value.hue);
+    const [hue1, hue2] = superUtils.genHues.splitComplementary(baseColor.value.hue);
     // initialize palette items array
     const paletteItems = [];
     // add base color as the first item in the array
-    const basePaletteItem = await create$2.paletteItem(baseColor);
+    const basePaletteItem = await superUtils.create.paletteItem(baseColor);
     paletteItems.push(basePaletteItem);
     for (const [index, hue] of [hue1, hue2].entries()) {
         const adjustedHSL = {
             value: {
-                hue: coreUtils.brand.asRadial(hue),
-                saturation: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
+                hue: core$3.brand.asRadial(hue),
+                saturation: core$3.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
                     (index === 0
                         ? -paletteRanges$2.shift.splitComp.sat
                         : paletteRanges$2.shift.splitComp.sat), 100))),
-                lightness: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
+                lightness: core$3.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
                     (index === 0
                         ? -paletteRanges$2.shift.splitComp.light
                         : paletteRanges$2.shift.splitComp.light), 100)))
             },
             format: 'hsl'
         };
-        const adjustedColor = utils$1.conversion.genAllColorValues(adjustedHSL).hsl;
+        const adjustedColor = utils$3.conversion.genAllColorValues(adjustedHSL).hsl;
         if (adjustedColor) {
-            const paletteItem = await create$2.paletteItem(adjustedColor);
+            const paletteItem = await superUtils.create.paletteItem(adjustedColor);
             paletteItems.push(paletteItem);
         }
     }
@@ -7160,33 +6876,33 @@ async function splitComplementary(args) {
 }
 
 // File: palette/main/types/tetradic.js
-const create$1 = superUtils.create;
-const genHues$1 = superUtils.genHues;
 const paletteRanges$1 = constsData.paletteRanges;
+const core$2 = commonFn.core;
+const utils$2 = commonFn.utils;
 async function tetradic(args) {
     // ensure exactly 4 swatches
     if (args.swatches !== 4)
-        uiFn.enforceSwatchRules(4, 4);
+        helpers.enforce.swatchRules(4, 4);
     // base color setup
-    const baseColor = create$1.baseColor(args.customColor);
+    const baseColor = utils$2.random.hsl();
     // generate tetradic hues
-    const tetradicHues = genHues$1.tetradic(baseColor.value.hue);
+    const tetradicHues = superUtils.genHues.tetradic(baseColor.value.hue);
     // initialize palette items array
     const paletteItems = [];
     // add the base color as the first palette item
-    const basePaletteItem = await create$1.paletteItem(baseColor);
+    const basePaletteItem = await superUtils.create.paletteItem(baseColor);
     paletteItems.push(basePaletteItem);
     // add the tetradic colors sequentially
     for (let index = 0; index < tetradicHues.length; index++) {
         const hue = tetradicHues[index];
         const adjustedHSL = {
             value: {
-                hue: coreUtils.brand.asRadial(hue),
-                saturation: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
+                hue: core$2.brand.asRadial(hue),
+                saturation: core$2.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
                     (index % 2 === 0
                         ? -paletteRanges$1.shift.tetra.sat
                         : paletteRanges$1.shift.tetra.sat), 100))),
-                lightness: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
+                lightness: core$2.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
                     (index % 2 === 0
                         ? -paletteRanges$1.shift.tetra.light
                         : paletteRanges$1.shift.tetra.light), 100)))
@@ -7194,9 +6910,9 @@ async function tetradic(args) {
             format: 'hsl'
         };
         // generate all color values and create the palette item
-        const adjustedColor = utils$1.conversion.genAllColorValues(adjustedHSL)
+        const adjustedColor = utils$2.conversion.genAllColorValues(adjustedHSL)
             .hsl;
-        const paletteItem = await create$1.paletteItem(adjustedColor);
+        const paletteItem = await superUtils.create.paletteItem(adjustedColor);
         paletteItems.push(paletteItem);
     }
     const idbManager = await IDBManager.getInstance();
@@ -7213,34 +6929,33 @@ async function tetradic(args) {
 }
 
 // File: palette/main/types/triadic.js
-const conversion = utils$1.conversion;
-const create = superUtils.create;
-const genHues = superUtils.genHues;
 const paletteRanges = constsData.paletteRanges;
+const core$1 = commonFn.core;
+const utils$1 = commonFn.utils;
 async function triadic(args) {
     // ensure exactly 3 swatches
     if (args.swatches !== 3)
-        uiFn.enforceSwatchRules(3, 3);
+        helpers.enforce.swatchRules(3, 3);
     // base color setup
-    const baseColor = create.baseColor(args.customColor);
+    const baseColor = utils$1.random.hsl();
     // generate triadic hues
-    const hues = genHues.triadic(baseColor.value.hue);
+    const hues = superUtils.genHues.triadic(baseColor.value.hue);
     // initialize palette items array
     const paletteItems = [];
     // add the base color as the first palette item
-    const basePaletteItem = await create.paletteItem(baseColor);
+    const basePaletteItem = await superUtils.create.paletteItem(baseColor);
     paletteItems.push(basePaletteItem);
     // add the triadic colors sequentially
     for (let index = 0; index < hues.length; index++) {
         const hue = hues[index];
         const adjustedHSL = {
             value: {
-                hue: coreUtils.brand.asRadial(hue),
-                saturation: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
+                hue: core$1.brand.asRadial(hue),
+                saturation: core$1.brand.asPercentile(Math.max(0, Math.min(baseColor.value.saturation +
                     (index % 2 === 0
                         ? -paletteRanges.shift.triad.sat
                         : paletteRanges.shift.triad.sat), 100))),
-                lightness: coreUtils.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
+                lightness: core$1.brand.asPercentile(Math.max(0, Math.min(baseColor.value.lightness +
                     (index % 2 === 0
                         ? -paletteRanges.shift.triad.light
                         : paletteRanges.shift.triad.light), 100)))
@@ -7248,9 +6963,9 @@ async function triadic(args) {
             format: 'hsl'
         };
         // generate all color values and create the palette item
-        const adjustedColor = conversion.genAllColorValues(adjustedHSL)
+        const adjustedColor = utils$1.conversion.genAllColorValues(adjustedHSL)
             .hsl;
-        const paletteItem = await create.paletteItem(adjustedColor);
+        const paletteItem = await superUtils.create.paletteItem(adjustedColor);
         paletteItems.push(paletteItem);
     }
     const idbManager = await IDBManager.getInstance();
@@ -7279,100 +6994,28 @@ const genPalette = {
     triadic
 };
 
-// File: palette/main.js
-const defaultPalette = defaultData.palette.unbranded.data;
-const defaultBrandedPalete = transformUtils.brandPalette(defaultPalette);
+// File: dom/ui/main.js
+const btnDebounce = constsData.debounce.btn || 300;
+const defaultBrandedPalette = commonFn.transform.brandPalette(defaultData.palette.unbranded.data);
+const domIDs = domData.ids.static;
+const domElements = domData.elements.static;
+const logMode$6 = modeData.logging;
+const thisModule$6 = 'dom/ui/main.js';
 const limits = helpers.limits;
-const logMode$3 = modeData.logging;
-const thisModule$3 = 'palette/main.js';
-const logger$3 = await createLogger();
 const isTooDark = limits.isTooDark;
 const isTooGray = limits.isTooGray;
 const isTooLight = limits.isTooLight;
-async function paletteGeneration(options) {
-    const thisFunction = 'paletteGeneration()';
-    try {
-        let { swatches, customColor } = options;
-        if (logMode$3.info && logMode$3.verbosity > 2)
-            logger$3.info('Retrieving existing IDBManager instance.', `${thisModule$3} > ${thisFunction}`);
-        const idb = await IDBManager.getInstance();
-        if (customColor === null || customColor === undefined) {
-            if (logMode$3.error)
-                logger$3.error('Custom color is null or undefined.', `${thisModule$3} > ${thisFunction}`);
-            return;
-        }
-        const validatedCustomColor = (await helpers$1.dom.validateAndConvertColor(customColor)) ??
-            utils$1.random.hsl();
-        options.customColor = validatedCustomColor;
-        if (!customColor) {
-            logger$3.error('Custom color is null or undefined.', `${thisModule$3} > ${thisFunction}`);
-            return;
-        }
-        if (modeData.debug && logMode$3.info && logMode$3.verbosity > 2) {
-            logger$3.info(`Validated custom color: ${JSON.stringify(customColor)}`, `${thisModule$3} > ${thisFunction}`);
-        }
-        const palette = await generate.selectedPalette(options);
-        if (palette.items.length === 0) {
-            if (logMode$3.error)
-                logger$3.error('Colors array is empty or invalid.', `${thisModule$3} > ${thisFunction}`);
-            return;
-        }
-        if (!modeData.quiet && logMode$3.info && logMode$3.verbosity > 0)
-            logger$3.info(`Colors array generated: ${JSON.stringify(palette.items)}`, `${thisModule$3} > ${thisFunction}`);
-        const tableId = await idb.getNextTableID();
-        if (!tableId)
-            throw new Error('Table ID is null or undefined.');
-        const uiManager = new UIManager();
-        uiManager.addPaletteToHistory(palette);
-        await paletteDomBoxGeneration(palette.items, swatches, tableId);
-    }
-    catch (error) {
-        if (logMode$3.error)
-            logger$3.error(`Error starting palette generation: ${error}`, `${thisModule$3} > ${thisFunction}`);
-    }
-}
-async function paletteDomBoxGeneration(items, numBoxes, tableId) {
-    const thisFunction = 'paletteDomBoxGeneration()';
-    try {
-        const paletteRow = document.getElementById('palette-row');
-        const idbManager = await IDBManager.getInstance();
-        if (!paletteRow) {
-            if (logMode$3.error)
-                logger$3.error('paletteRow is undefined.', `${thisModule$3} > ${thisFunction}`);
-            return;
-        }
-        paletteRow.innerHTML = '';
-        const fragment = document.createDocumentFragment();
-        for (let i = 0; i < Math.min(items.length, numBoxes); i++) {
-            const item = items[i];
-            const color = { value: item.colors.main.hsl, format: 'hsl' };
-            const { colorStripe } = await helpers$1.dom.makePaletteBox(color, i + 1);
-            fragment.appendChild(colorStripe);
-            utils$1.palette.populateOutputBox(color, i + 1);
-        }
-        paletteRow.appendChild(fragment);
-        if (!modeData.quiet && logMode$3.info && logMode$3.verbosity > 1)
-            logger$3.info('Palette boxes generated and rendered.', `${thisModule$3} > ${thisFunction}`);
-        await idbManager.saveData('tables', tableId, { palette: items });
-    }
-    catch (error) {
-        if (logMode$3.error)
-            logger$3.error(`Error generating palette box: ${error}`, `${thisModule$3} > ${thisFunction}`);
-    }
-}
-const start = {
-    paletteDomBoxGeneration,
-    paletteGeneration
-};
-// ******** GENERATE ********
-function limitedHSL(baseHue, limitDark, limitGray, limitLight) {
+const core = commonFn.core;
+const utils = commonFn.utils;
+const logger$6 = await createLogger();
+function generateLimitedHSL(baseHue, limitDark, limitGray, limitLight) {
     let hsl;
     do {
         hsl = {
             value: {
-                hue: coreUtils.brand.asRadial(baseHue),
-                saturation: coreUtils.brand.asPercentile(Math.random() * 100),
-                lightness: coreUtils.brand.asPercentile(Math.random() * 100)
+                hue: core.brand.asRadial(baseHue),
+                saturation: core.brand.asPercentile(Math.random() * 100),
+                lightness: core.brand.asPercentile(Math.random() * 100)
             },
             format: 'hsl'
         };
@@ -7381,147 +7024,194 @@ function limitedHSL(baseHue, limitDark, limitGray, limitLight) {
         (limitLight && isTooLight(hsl)));
     return hsl;
 }
-async function selectedPalette(options) {
+async function generateSelectedPalette(options) {
     const thisFunction = 'selectedPalette()';
     try {
-        const { customColor, flags, swatches, type } = options;
+        const { flags, swatches, type } = options;
         const args = {
             swatches,
             type,
-            customColor,
             limitDark: flags.limitDark,
             limitGray: flags.limitGray,
             limitLight: flags.limitLight
         };
-        if (!modeData.quiet && logMode$3.debug && logMode$3.verbosity > 2) {
-            logger$3.debug(`Generating palette with type #: ${type}`, `${thisModule$3} > ${thisFunction}`);
+        if (!modeData.quiet && logMode$6.debug && logMode$6.verbosity > 2) {
+            logger$6.debug(`Generating palette with type #: ${type}`, `${thisModule$6} > ${thisFunction}`);
         }
         switch (type) {
             case 1:
-                return genPalette.random(args);
-            case 2:
                 return genPalette.complementary(args);
-            case 3:
-                return genPalette.triadic(args);
-            case 4:
-                return genPalette.tetradic(args);
-            case 5:
+            case 2:
                 return genPalette.splitComplementary(args);
-            case 6:
+            case 3:
                 return genPalette.analogous(args);
+            case 4:
+                return genPalette.diadic(args);
+            case 5:
+                return genPalette.triadic(args);
+            case 6:
+                return genPalette.tetradic(args);
             case 7:
                 return genPalette.hexadic(args);
             case 8:
-                return genPalette.diadic(args);
-            case 9:
                 return genPalette.monochromatic(args);
+            case 9:
+                return genPalette.random(args);
             default:
-                if (logMode$3.error)
-                    logger$3.error('Invalid palette type.', `${thisModule$3} > ${thisFunction}`);
-                return Promise.resolve(defaultBrandedPalete);
+                if (logMode$6.error)
+                    logger$6.error('Invalid palette type.', `${thisModule$6} > ${thisFunction}`);
+                return Promise.resolve(defaultBrandedPalette);
         }
     }
     catch (error) {
-        if (logMode$3.error)
-            logger$3.error(`Error generating palette: ${error}`, `${thisModule$3} > ${thisFunction}`);
-        return Promise.resolve(defaultBrandedPalete);
+        if (logMode$6.error)
+            logger$6.error(`Error generating palette: ${error}`, `${thisModule$6} > ${thisFunction}`);
+        return Promise.resolve(defaultBrandedPalette);
     }
 }
-const generate = {
-    limitedHSL,
-    selectedPalette
+const processPaletteGeneration = core.base.debounce(async () => {
+    const thisFunction = 'processPaletteGeneration';
+    try {
+        const swatchGenNumber = domElements.selects.swatchGen;
+        const paletteType = domElements.selects.paletteType;
+        const limitDarkChkbx = domElements.inputs.limitDarkChkbx;
+        const limitGrayChkbx = domElements.inputs.limitGrayChkbx;
+        const limitLightChkbx = domElements.inputs.limitLightChkbx;
+        if (swatchGenNumber === null ||
+            paletteType === null ||
+            limitDarkChkbx === null ||
+            limitGrayChkbx === null ||
+            limitLightChkbx === null) {
+            if (logMode$6.error)
+                logger$6.error('One or more elements are null', `${thisModule$6} > ${thisFunction}`);
+            return;
+        }
+        if (!modeData.quiet && logMode$6.info && logMode$6.verbosity >= 2)
+            logger$6.info(`numBoxes: ${parseInt(swatchGenNumber.value, 10)}\npaletteType: ${parseInt(paletteType.value, 10)}`, `${thisModule$6} > ${thisFunction}`);
+        const params = {
+            swatches: parseInt(swatchGenNumber.value, 10),
+            type: parseInt(paletteType.value, 10),
+            limitDark: limitDarkChkbx.checked,
+            limitGray: limitGrayChkbx.checked,
+            limitLight: limitLightChkbx.checked
+        };
+        const { swatches, type, limitDark, limitGray, limitLight } = params;
+        if (!type || !swatches) {
+            if (logMode$6.error) {
+                logger$6.error('paletteType and/or swatches are undefined', `${thisModule$6} > ${thisFunction}`);
+            }
+            return;
+        }
+        const options = {
+            flags: {
+                limitDark,
+                limitGray,
+                limitLight
+            },
+            swatches,
+            type
+        };
+        await startPaletteGeneration(options);
+    }
+    catch (error) {
+        if (logMode$6.error)
+            logger$6.error(`Failed to handle generate button click: ${error}`, `${thisModule$6} > ${thisFunction}`);
+    }
+}, btnDebounce);
+async function startPaletteGeneration(options) {
+    const thisFunction = 'paletteGeneration()';
+    try {
+        let { swatches } = options;
+        if (logMode$6.info && logMode$6.verbosity > 2)
+            logger$6.info('Retrieving existing IDBManager instance.', `${thisModule$6} > ${thisFunction}`);
+        const idb = await getIDBInstance();
+        const palette = await generateSelectedPalette(options);
+        if (palette.items.length === 0) {
+            if (logMode$6.error)
+                logger$6.error('Colors array is empty or invalid.', `${thisModule$6} > ${thisFunction}`);
+            return;
+        }
+        if (!modeData.quiet && logMode$6.info && logMode$6.verbosity > 0)
+            logger$6.info(`Colors array generated: ${JSON.stringify(palette.items)}`, `${thisModule$6} > ${thisFunction}`);
+        const tableId = await idb.getNextTableID();
+        if (!tableId)
+            throw new Error('Table ID is null or undefined.');
+        const uiManager = await getUIManager();
+        uiManager.addPaletteToHistory(palette);
+        await startPaletteDomBoxGeneration(palette.items, swatches, tableId);
+    }
+    catch (error) {
+        if (logMode$6.error)
+            logger$6.error(`Error starting palette generation: ${error}`, `${thisModule$6} > ${thisFunction}`);
+    }
+}
+async function startPaletteDomBoxGeneration(items, numBoxes, tableId) {
+    const thisFunction = 'paletteDomBoxGeneration()';
+    try {
+        const paletteContainer = document.getElementById(domIDs.divs.paletteContainer);
+        const idbManager = await getIDBInstance();
+        if (!paletteContainer) {
+            if (logMode$6.error)
+                logger$6.error('paletteContainer is undefined.', `${thisModule$6} > ${thisFunction}`);
+            return;
+        }
+        paletteContainer.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        const uiManager = await getUIManager();
+        for (let i = 0; i < Math.min(items.length, numBoxes); i++) {
+            const item = items[i];
+            const color = { value: item.colors.main.hsl, format: 'hsl' };
+            const { colorStripe } = await uiManager.makePaletteBox(color, i + 1);
+            fragment.appendChild(colorStripe);
+            utils.palette.populateOutputBox(color, i + 1);
+        }
+        paletteContainer.appendChild(fragment);
+        if (!modeData.quiet && logMode$6.info && logMode$6.verbosity > 1)
+            logger$6.info('Palette boxes generated and rendered.', `${thisModule$6} > ${thisFunction}`);
+        await idbManager.saveData('tables', tableId, { palette: items });
+    }
+    catch (error) {
+        if (logMode$6.error)
+            logger$6.error(`Error generating palette box: ${error}`, `${thisModule$6} > ${thisFunction}`);
+    }
+}
+const uiFn = {
+    generateLimitedHSL,
+    generateSelectedPalette,
+    processPaletteGeneration,
+    startPaletteGeneration,
+    startPaletteDomBoxGeneration
 };
 
-// File: dom/eventListeners.js
-const btnDebounce = constsData.debounce.btn || 300;
-const logMode$2 = modeData.logging;
-const uiElements = domData.elements.static;
-const uiElementIDs = domData.ids.static;
-const thisModule$2 = 'dom/eventListeners.js';
-const logger$2 = await createLogger();
-const idb = await IDBManager.getInstance();
-const uiManager = new UIManager();
-function addEventListener(id, eventType, callback) {
-    const thisFunction = 'addEventListener()';
-    const element = document.getElementById(id);
-    if (element) {
-        element.addEventListener(eventType, callback);
-    }
-    else if (logMode$2.warn) {
-        if (modeData.debug && logMode$2.warn && logMode$2.verbosity > 2)
-            logger$2.warn(`Element with id "${id}" not found.`, `${thisModule$2} > ${thisFunction}`);
-    }
-}
-function initializeEventListeners() {
-    const thisFunction = 'initializeEventListeners()';
-    const addConversionListener = (id, colorSpace) => {
-        const btn = document.getElementById(id);
-        if (btn) {
-            if (coreUtils.guards.isColorSpace(colorSpace)) {
-                btn.addEventListener('click', () => superUtils$1.dom.switchColorSpace(colorSpace));
-            }
-            else {
-                if (logMode$2.warn) {
-                    logger$2.warn(`Invalid color space provided: ${colorSpace}`, `${thisModule$2} > ${thisFunction}`);
-                }
-            }
-        }
-        else {
-            if (logMode$2.warn)
-                logger$2.warn(`Element with id "${id}" not found.`, `${thisModule$2} > ${thisFunction}`);
-        }
-    };
-    addConversionListener(String(uiElementIDs.btns.showAsCMYK), 'cmyk');
-    addConversionListener(String(uiElementIDs.btns.showAsHex), 'hex');
-    addConversionListener(String(uiElementIDs.btns.showAsHSL), 'hsl');
-    addConversionListener(String(uiElementIDs.btns.showAsHSV), 'hsv');
-    addConversionListener(String(uiElementIDs.btns.showAsLAB), 'lab');
-    addConversionListener(String(uiElementIDs.btns.showAsRGB), 'rgb');
-    addEventListener(uiElementIDs.btns.applyCustomColor, 'click', async (e) => {
+// File: dom/eventListeners/btns.js
+const btnIds = domData.ids.static.btns;
+const divElements$1 = domData.elements.static.divs;
+const logMode$5 = modeData.logging;
+const selectionElements = domData.elements.static.selects;
+const thisModule$5 = 'dom/eventListeners/groups/btns.js';
+const addConversionListener = utils$b.event.addConversionListener;
+const addEventListener = utils$b.event.addEventListener;
+const logger$5 = await createLogger();
+async function initBtnEventListeners(uiManager) {
+    // 1. DESATURATE BUTTON
+    addEventListener(btnIds.desaturate, 'click', async (e) => {
         e.preventDefault();
-        const customHSLColor = uiManager.applyCustomColor();
-        const customHSLColorClone = coreUtils.base.clone(customHSLColor);
-        await idb.saveData('customColor', 'appSettings', customHSLColorClone);
-        if (!modeData.quiet && logMode$2.info)
-            logger$2.info('Custom color saved to IndexedDB', `${thisModule$2} > applyCustomColorButton click event`);
-        // *DEV-NOTE* unfinished, I think? Double-check this
-    });
-    addEventListener(uiElementIDs.btns.clearCustomColor, 'click', async (e) => {
-        e.preventDefault();
-        uiElements.inputs.customColor.value = '#ff0000';
-        if (!modeData.quiet && logMode$2.info)
-            logger$2.info('Custom color cleared', `${thisModule$2} > clearCustomColorButton click event`);
-    });
-    addEventListener(uiElementIDs.btns.customColorMenu, 'click', async (e) => {
-        e.preventDefault();
-        uiElements.divs.customColorMenu?.classList.add('hidden');
-        uiElements.divs.customColorMenu?.setAttribute('aria-hidden', 'true');
-    });
-    if (!uiElements.inputs.customColor)
-        throw new Error('Custom color input element not found');
-    uiElements.inputs.customColor.addEventListener('input', () => {
-        if (!uiElements.spans.customColorDisplay)
-            throw new Error('Custom color display element not found');
-        uiElements.spans.customColorDisplay.textContent =
-            uiElements.inputs.customColor.value;
-    });
-    addEventListener(uiElementIDs.btns.desaturate, 'click', async (e) => {
-        e.preventDefault();
-        const selectedColor = uiElements.selects.swatch
-            ? parseInt(uiElements.selects.swatch.value, 10)
+        const selectedColor = selectionElements.swatch
+            ? parseInt(selectionElements.swatch.value, 10)
             : 0;
-        if (!modeData.quiet && logMode$2.clicks)
-            logger$2.info('desaturateButton clicked', `${thisModule$2} > desaturateButton click event`);
+        if (!modeData.quiet && logMode$5.clicks)
+            logger$5.info('desaturateButton clicked', `${thisModule$5} > desaturateButton click event`);
         uiManager.desaturateColor(selectedColor);
     });
-    addEventListener(uiElementIDs.btns.export, 'click', async (e) => {
+    // 2. EXPORT BUTTON
+    addEventListener(btnIds.export, 'click', async (e) => {
         e.preventDefault();
         const format = parse.paletteExportFormat();
-        if (modeData.debug && logMode$2.info && logMode$2.verbosity > 1)
-            logger$2.info(`Export Button click event: Export format selected: ${format}`, `${thisModule$2} > exportButton click event`);
+        if (modeData.debug && logMode$5.info && logMode$5.verbosity > 1)
+            logger$5.info(`Export Button click event: Export format selected: ${format}`, `${thisModule$5} > exportButton click event`);
         if (!format) {
-            if (logMode$2.error && !modeData.quiet && logMode$2.verbosity > 1) {
-                logger$2.error('Export format not selected', `${thisModule$2} > exportButton click event`);
+            if (logMode$5.error && !modeData.quiet && logMode$5.verbosity > 1) {
+                logger$5.error('Export format not selected', `${thisModule$5} > exportButton click event`);
                 return;
             }
         }
@@ -7529,23 +7219,15 @@ function initializeEventListeners() {
             uiManager.handleExport(format);
         }
     });
-    addEventListener(uiElementIDs.btns.generate, 'click', async (e) => {
+    // 3. GENERATE BUTTON
+    addEventListener(btnIds.generate, 'click', async (e) => {
         e.preventDefault();
         const { type, swatches, limitDark, limitGray, limitLight } = uiManager.pullParamsFromUI();
-        if (logMode$2.info && logMode$2.verbosity > 1)
-            logger$2.info('Generate Button click event: Retrieved parameters from UI.', `${thisModule$2} > generateButton click event`);
-        if (logMode$2.info && modeData.debug && logMode$2.verbosity > 1)
-            logger$2.info(`Type: ${type}\nSwatches: ${swatches}\nLimit Dark: ${limitDark}\nLimit Gray: ${limitGray}\nLimit Light${limitLight}.`, `${thisModule$2} > generateButton click event`);
-        let customColor = (await idb.getCustomColor());
-        if (!customColor) {
-            customColor = utils$1.random.hsl();
-        }
-        else {
-            if (modeData.debug && logMode$2.info)
-                logger$2.info(`User-generated Custom Color found in IndexedDB: ${JSON.stringify(customColor)}`, `${thisModule$2} > generateButton click event`);
-        }
+        if (logMode$5.info && logMode$5.verbosity > 1)
+            logger$5.info('Generate Button click event: Retrieved parameters from UI.', `${thisModule$5} > generateButton click event`);
+        if (logMode$5.info && modeData.debug && logMode$5.verbosity > 1)
+            logger$5.info(`Type: ${type}\nSwatches: ${swatches}\nLimit Dark: ${limitDark}\nLimit Gray: ${limitGray}\nLimit Light${limitLight}.`, `${thisModule$5} > generateButton click event`);
         const paletteOptions = {
-            customColor: coreUtils.base.clone(customColor),
             flags: {
                 limitDark,
                 limitGray,
@@ -7554,113 +7236,300 @@ function initializeEventListeners() {
             swatches,
             type
         };
-        await start.paletteGeneration(paletteOptions);
+        await uiFn.startPaletteGeneration(paletteOptions);
     });
-    addEventListener(uiElementIDs.btns.helpMenu, 'click', async (e) => {
+    // 4. HELP MENU BUTTON
+    addEventListener(btnIds.helpMenu, 'click', async (e) => {
         e.preventDefault();
-        uiElements.divs.helpMenu?.classList.remove('hidden');
+        divElements$1.helpMenu?.classList.remove('hidden');
     });
-    addEventListener(uiElementIDs.btns.historyMenu, 'click', async (e) => {
+    // 5. HISTORY MENU BUTTON
+    addEventListener(btnIds.historyMenu, 'click', async (e) => {
         e.preventDefault();
-        uiElements.divs.historyMenu?.classList.remove('hidden');
+        divElements$1.historyMenu?.classList.remove('hidden');
     });
-    addEventListener(uiElementIDs.inputs.historyLimit, 'input', async (e) => {
+    // 6. SATURATE BUTTON
+    addEventListener(btnIds.saturate, 'click', async (e) => {
+        e.preventDefault();
+        if (!selectionElements.swatch) {
+            throw new Error('Selected color option not found');
+        }
+        const selectedColor = selectionElements.swatch
+            ? parseInt(selectionElements.swatch.value, 10)
+            : 0;
+        uiManager.saturateColor(selectedColor);
+    });
+}
+function initConversionBtnEventListeners() {
+    addConversionListener(String(btnIds.showAsCMYK), 'cmyk');
+    addConversionListener(String(btnIds.showAsHex), 'hex');
+    addConversionListener(String(btnIds.showAsHSL), 'hsl');
+    addConversionListener(String(btnIds.showAsHSV), 'hsv');
+    addConversionListener(String(btnIds.showAsLAB), 'lab');
+    addConversionListener(String(btnIds.showAsRGB), 'rgb');
+}
+const btnListeners = {
+    initialize: {
+        conversionBtns: initConversionBtnEventListeners,
+        main: initBtnEventListeners
+    }
+};
+
+// File: dom/eventListeners/dad.js
+const logMode$4 = modeData.logging;
+const thisModule$4 = 'dom/eventListeners/groups/dad.js';
+const logger$4 = await createLogger();
+let dragSrcEl = null;
+function attachDADListeners(element) {
+    const thisFunction = 'attach()';
+    try {
+        if (element) {
+            element.addEventListener('dragstart', dragStart);
+            element.addEventListener('dragover', dragOver);
+            element.addEventListener('drop', drop);
+            element.addEventListener('dragend', dragEnd);
+        }
+        if (!modeData.quiet)
+            logger$4.info('Drag and drop event listeners successfully attached', `${thisModule$4} > ${thisFunction}`);
+    }
+    catch (error) {
+        if (!logMode$4.error)
+            logger$4.error(`Failed to execute attachDragAndDropEventListeners: ${error}`, `${thisModule$4} > ${thisFunction}`);
+    }
+}
+function dragStart(e) {
+    const thisFunction = 'handleDragStart()';
+    try {
+        dragSrcEl = e.currentTarget;
+        if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', dragSrcEl.outerHTML);
+        }
+        if (!modeData.quiet && modeData.debug && logMode$4.verbosity > 3)
+            logger$4.info('handleDragStart complete', `${thisModule$4} > ${thisFunction}`);
+    }
+    catch (error) {
+        if (logMode$4.error)
+            logger$4.error(`Error in handleDragStart: ${error}`, `${thisModule$4} > ${thisFunction}`);
+    }
+}
+function dragOver(e) {
+    const thisMethod = 'handleDragOver()';
+    try {
+        e.preventDefault();
+        if (e.dataTransfer) {
+            e.dataTransfer.dropEffect = 'move';
+        }
+        if (!modeData.quiet && modeData.debug && logMode$4.verbosity > 3)
+            logger$4.info('handleDragOver complete', `${thisModule$4} > ${thisMethod}`);
+        return false;
+    }
+    catch (error) {
+        if (logMode$4.error)
+            logger$4.error(`Error in handleDragOver: ${error}`, `${thisModule$4} > ${thisMethod}`);
+        return false;
+    }
+}
+function dragEnd(e) {
+    const thisMethod = 'handleDragEnd()';
+    try {
+        const target = e.currentTarget;
+        target.classList.remove('dragging');
+        document.querySelectorAll('.color-stripe').forEach(el => {
+            el.classList.remove('dragging');
+        });
+        if (!modeData.quiet && modeData.debug && logMode$4.verbosity > 3)
+            logger$4.info('handleDragEnd complete', `${thisModule$4} > ${thisMethod}`);
+    }
+    catch (error) {
+        if (logMode$4.error)
+            logger$4.error(`Error in handleDragEnd: ${error}`, `${thisModule$4} > ${thisMethod}`);
+    }
+}
+function drop(e) {
+    const thisMethod = 'drop()';
+    try {
+        e.stopPropagation();
+        const target = e.currentTarget;
+        if (dragSrcEl && dragSrcEl !== target) {
+            const dragSrcId = dragSrcEl.id;
+            const dropTargetId = target.id;
+            const dragSrcText = dragSrcEl.querySelector('.color-text-output-box').value;
+            const dropTargetText = target.querySelector('.color-text-output-box').value;
+            const dragSrcOuterHTML = dragSrcEl.outerHTML;
+            const dropTargetOuterHTML = target.outerHTML;
+            dragSrcEl.outerHTML = dropTargetOuterHTML;
+            target.outerHTML = dragSrcOuterHTML;
+            const newDragSrcEl = document.getElementById(dropTargetId);
+            const newDropTargetEl = document.getElementById(dragSrcId);
+            newDragSrcEl.id = dragSrcId;
+            newDropTargetEl.id = dropTargetId;
+            newDragSrcEl.querySelector('.color-text-output-box').value = dropTargetText;
+            newDropTargetEl.querySelector('.color-text-output-box').value = dragSrcText;
+            if (!modeData.quiet && modeData.debug && logMode$4.verbosity > 3)
+                logger$4.info('calling attachDragAndDropEventListeners for new elements', `${thisModule$4} > ${thisMethod}`);
+            attachDADListeners(newDragSrcEl);
+            attachDADListeners(newDropTargetEl);
+        }
+        if (!modeData.quiet && modeData.debug && logMode$4.verbosity > 3)
+            logger$4.info('handleDrop complete', `${thisModule$4} > ${thisMethod}`);
+    }
+    catch (error) {
+        if (!logMode$4.error)
+            logger$4.error(`Error in handleDrop: ${error}`, `${thisModule$4} > ${thisMethod}`);
+    }
+}
+const dadListeners = {
+    attach: attachDADListeners
+};
+
+// File: dom/eventListeners/inputs.js
+const inputIds = domData.ids.static.inputs;
+function initInputListeners(uiManager) {
+    addEventListener$1(inputIds.historyLimit, 'input', async (e) => {
         const input = e.target;
         const newLimit = parseInt(input.value, 10);
         if (isNaN(newLimit) || newLimit < 1 || newLimit > 1000) {
             input.value = '50';
             return;
         }
-        const uiManager = new UIManager();
         await uiManager.setHistoryLimit(newLimit);
     });
-    addEventListener(uiElementIDs.btns.ioMenu, 'click', async (e) => {
-        e.preventDefault();
-        uiElements.divs.ioMenu?.classList.remove('hidden');
-    });
-    addEventListener(uiElementIDs.inputs.import, 'change', async (e) => {
-        const input = e.target;
-        if (input.files && input.files.length > 0) {
-            const file = input.files[0];
-            // *DEV-NOTE* implement a way to determine whether file describes CSS, JSON, or XML import
-            const format = 'JSON';
-            await uiManager.handleImport(file, format);
-        }
-    });
-    addEventListener(uiElementIDs.btns.saturate, 'click', async (e) => {
-        e.preventDefault();
-        if (!uiElements.selects.swatch) {
-            throw new Error('Selected color option not found');
-        }
-        const selectedColor = uiElements.selects.swatch
-            ? parseInt(uiElements.selects.swatch.value, 10)
-            : 0;
-        uiManager.saturateColor(selectedColor);
-    });
-    window.addEventListener('click', async (e) => {
-        if (uiElements.divs.customColorMenu)
-            if (e.target === uiElements.divs.customColorMenu) {
-                uiElements.divs.customColorMenu.classList.add('hidden');
+}
+const inputListeners = {
+    initialize: initInputListeners
+};
+
+// File: dom/eventListeners/palette.js
+const domClasses = domData.classes;
+const logMode$3 = modeData.logging;
+const thisModule$3 = 'dom/eventListeners/groups/palette.js';
+const logger$3 = await createLogger();
+function initLiveColorRender() {
+    document.querySelectorAll(domClasses.colorInput).forEach(input => {
+        input.addEventListener('input', (e) => {
+            const target = e.target;
+            const parsedColor = parse.colorInput(target);
+            if (parsedColor) {
+                if (!modeData.quiet && logMode$3.debug && logMode$3.verbosity > 1) {
+                    logger$3.debug(`Parsed color: ${JSON.stringify(parsedColor)}`, `${thisModule$3}`);
+                }
+                const swatch = target
+                    .closest(domClasses.colorStripe)
+                    ?.querySelector(domClasses.colorSwatch);
+                if (swatch) {
+                    swatch.style.backgroundColor =
+                        parsedColor.format === 'hex'
+                            ? parsedColor.value.hex
+                            : parsedColor.format === 'rgb'
+                                ? `rgb(${parsedColor.value.red}, ${parsedColor.value.green}, ${parsedColor.value.blue})`
+                                : `hsl(${parsedColor.value.hue}, ${parsedColor.value.saturation}%, ${parsedColor.value.lightness}%)`;
+                }
             }
-    });
-    window.addEventListener('click', async (e) => {
-        if (uiElements.divs.helpMenu)
-            if (e.target === uiElements.divs.helpMenu) {
-                uiElements.divs.helpMenu.classList.add('hidden');
+            else {
+                if (!modeData.quiet && logMode$3.warn) {
+                    logger$3.warn(`Invalid color input: ${target.value}`, `${thisModule$3}`);
+                }
             }
-    });
-    window.addEventListener('click', async (e) => {
-        if (uiElements.divs.historyMenu)
-            if (e.target === uiElements.divs.historyMenu) {
-                uiElements.divs.historyMenu.classList.add('hidden');
-            }
-    });
-    window.addEventListener('click', async (e) => {
-        if (uiElements.divs.ioMenu)
-            if (e.target === uiElements.divs.ioMenu) {
-                uiElements.divs.ioMenu.classList.add('hidden');
-            }
+        });
     });
 }
-const processPaletteGeneration = coreUtils.base.debounce(async () => {
-    const thisFunction = 'processPaletteGeneration';
+const paletteListeners = {
+    initialize: {
+        liveColorRender: initLiveColorRender
+    }
+};
+
+// File: dom/eventListeners/temp.js
+const logMode$2 = modeData.logging;
+const timeouts = constsData.timeouts;
+const thisModule$2 = 'dom/eventListeners/groups/temp.js';
+const logger$2 = await createLogger();
+function showToast(message) {
+    const thisMethod = 'showToast()';
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    if (!modeData.quiet && logMode$2.verbosity > 3)
+        logger$2.info('Toast message added', `${thisModule$2} > ${thisMethod}`);
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        if (!modeData.quiet && logMode$2.verbosity > 3)
+            logger$2.info('Toast message faded out', `${thisModule$2} > ${thisMethod}`);
+        toast.addEventListener('transitioned', () => toast.remove());
+    }, timeouts.toast || 3000);
+}
+function showTooltip(tooltipElement) {
+    const thisMethod = 'showTooltip()';
     try {
-        const params = superUtils$1.dom.getPaletteGenerationArgs();
-        if (!params) {
-            if (logMode$2.error) {
-                logger$2.error('Failed to retrieve generateButton parameters', `${thisModule$2} > ${thisFunction}`);
-            }
-            return;
+        const tooltip = tooltipElement.querySelector('.tooltiptext');
+        if (tooltip) {
+            tooltip.style.visibility = 'visible';
+            tooltip.style.opacity = '1';
+            setTimeout(() => {
+                tooltip.style.visibility = 'hidden';
+                tooltip.style.opacity = '0';
+            }, constsData.timeouts.tooltip || 1000);
         }
-        const { swatches, customColor, type, limitDark, limitGray, limitLight } = params;
-        if (!type || !swatches) {
-            if (logMode$2.error) {
-                logger$2.error('paletteType and/or swatches are undefined', `${thisModule$2} > ${thisFunction}`);
-            }
-            return;
-        }
-        const options = {
-            customColor,
-            flags: {
-                limitDark,
-                limitGray,
-                limitLight
-            },
-            swatches,
-            type
-        };
-        start.paletteGeneration(options);
+        if (!modeData.quiet && logMode$2.verbosity > 3)
+            logger$2.info('showTooltip executed', `${thisModule$2} > ${thisMethod}`);
     }
     catch (error) {
         if (logMode$2.error)
-            logger$2.error(`Failed to handle generate button click: ${error}`, `${thisModule$2} > ${thisFunction}`);
+            logger$2.error(`Failed to execute showTooltip: ${error}`, `${thisModule$2} > ${thisMethod}`);
     }
-}, btnDebounce);
-const base = {
-    addEventListener,
-    initializeEventListeners,
-    processPaletteGeneration
+}
+const tempListeners = {
+    showToast,
+    showTooltip
 };
+
+// File: dom/eventListeners/windows.js
+const divElements = domData.elements.static.divs;
+function initWindowListeners() {
+    window.addEventListener('click', async (e) => {
+        if (divElements.helpMenu)
+            if (e.target === divElements.helpMenu) {
+                divElements.helpMenu.classList.add('hidden');
+            }
+    });
+    window.addEventListener('click', async (e) => {
+        if (divElements.historyMenu)
+            if (e.target === divElements.historyMenu) {
+                divElements.historyMenu.classList.add('hidden');
+            }
+    });
+}
+const windowListeners = {
+    initialize: initWindowListeners
+};
+
+// File: dom/eventListeners/index.js
+const btns = btnListeners;
+const inputs = inputListeners;
+const windows = windowListeners;
+function initializeEventListeners(uiManager) {
+    btns.initialize.conversionBtns();
+    btns.initialize.main(uiManager);
+    inputs.initialize(uiManager);
+    windows.initialize();
+}
+const eventListenerFn = {
+    initializeEventListeners,
+    btn: btnListeners,
+    dad: dadListeners,
+    input: inputListeners,
+    palette: paletteListeners,
+    temp: tempListeners,
+    window: windowListeners
+};
+
+var index = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    eventListenerFn: eventListenerFn,
+    initializeEventListeners: initializeEventListeners
+});
 
 // File: dom/validate.js
 const logMode$1 = modeData.logging;
@@ -7689,18 +7558,6 @@ function validateStaticElements() {
             logger$1.info('All required DOM elements are present.', `${thisModule$1} > ${thisFunction}`);
     }
 }
-const validate = {
-    staticElements: validateStaticElements
-};
-
-// File: dom/index.js
-const events = { ...base };
-const domFn = {
-    events,
-    fileUtils,
-    parse,
-    validate
-};
 
 // ColorGen - version 0.6.0-dev
 // Author: Viihna Leraine (viihna@ViihnaTech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))
@@ -7729,62 +7586,49 @@ async function initializeApp() {
     try {
         if (modeData.logging.verbosity > 1)
             logger.info('Creating new IDBManager instance. Initializing database and its dependencies.', `${thisModule} > ${thisFunction}`);
-        if (modeData.expose.idbManager) {
-            if (modeData.debug && modeData.logging.verbosity > 1)
-                logger.info('Exposing IDBManager instance to window.', `${thisModule} > ${thisFunction}`);
-            try {
-                (async () => {
-                    const idbManager = await getIDBInstance();
-                    logger.info(`IDBManager instance successfully initialized.`, `${thisModule} > ${thisFunction}`);
-                    // binds the IDBManager instance to the window object
-                    window.idbManager = idbManager;
-                    logger.info('IDBManager instance successfully exposed to window.', `${thisModule} > ${thisFunction}`);
-                })();
-            }
-            catch (error) {
-                if (logMode.error)
-                    logger.warn(`Failed to expose IDBManager instance to window. Error: ${error}`, `${thisModule} > ${thisFunction}`);
-                if (modeData.showAlerts)
-                    alert('An error occurred. Check console for details.');
-            }
-        }
-    }
-    catch (error) {
-        if (logMode.error)
-            logger.error(`Failed to create initial IDBManager instance. Error: ${error}`, `${thisModule} > ${thisFunction}`);
-        if (modeData.showAlerts)
-            alert('An error occurred. Check console for details.');
-    }
-    const selectedSwatch = domData.elements.static.selects.swatch;
-    if (modeData.debug) {
-        if (logMode.debug)
-            if (!modeData.quiet && logMode.verbosity > 1) {
+        const idbManager = await getIDBInstance();
+        const selectedSwatch = domData.elements.static.selects.swatch;
+        if (modeData.debug) {
+            if (!modeData.quiet && logMode.debug && logMode.verbosity > 1) {
                 logger.debug('Validating DOM elements', `${thisModule} > ${thisFunction}`);
+                validateStaticElements();
             }
-        domFn.validate.staticElements();
-    }
-    else {
-        if (!modeData.quiet) {
-            logger.info('Skipping DOM element validation', `${thisModule} > ${thisFunction}`);
         }
-    }
-    const selectedColor = selectedSwatch
-        ? parseInt(selectedSwatch.value, 10)
-        : 0;
-    if (!modeData.quiet && modeData.debug)
-        logger.debug(`Selected color: ${selectedColor}`, `${thisModule} > ${thisFunction}`);
-    try {
-        domFn.events.initializeEventListeners();
-        if (!modeData.quiet)
-            logger.info('Event listeners have been successfully initialized', `${thisModule} > ${thisFunction}`);
+        else {
+            if (!modeData.quiet) {
+                logger.info('Skipping DOM element validation', `${thisModule} > ${thisFunction}`);
+            }
+        }
+        const selectedColor = selectedSwatch
+            ? parseInt(selectedSwatch.value, 10)
+            : 0;
+        if (!modeData.quiet && modeData.debug)
+            logger.debug(`Selected color: ${selectedColor}`, `${thisModule} > ${thisFunction}`);
+        const defaultPaletteOptions = defaultData.paletteOptions;
+        if (!modeData.quiet && logMode.info && logMode.verbosity > 1) {
+            logger.info(`Generating initial color palette.`, `${thisModule} > ${thisFunction}`);
+        }
+        await uiFn.startPaletteGeneration(defaultPaletteOptions);
+        const uiManager = new UIManager(eventListenerFn, idbManager);
+        try {
+            eventListenerFn.initializeEventListeners(uiManager);
+            if (!modeData.quiet)
+                logger.info('Event listeners have been successfully initialized', `${thisModule} > ${thisFunction}`);
+        }
+        catch (error) {
+            if (logMode.error)
+                logger.error(`Failed to initialize event listeners.\n${error}`, `${thisModule} > ${thisFunction}`);
+            if (modeData.showAlerts)
+                alert('An error occurred. Check console for details.');
+        }
+        if (!modeData.quiet && logMode.info)
+            logger.info('Application successfully initialized. Awaiting user input.', `${thisModule} > ${thisFunction}`);
     }
     catch (error) {
         if (logMode.error)
-            logger.error(`Failed to initialize event listeners.\n${error}`, `${thisModule} > ${thisFunction}`);
+            logger.error(`Failed to initialize application: ${error}`, `${thisModule} > ${thisFunction}`);
         if (modeData.showAlerts)
             alert('An error occurred. Check console for details.');
     }
-    if (!modeData.quiet && logMode.info)
-        logger.info('Application successfully initialized. Awaiting user input.', `${thisModule} > ${thisFunction}`);
 }
 //# sourceMappingURL=app.js.map

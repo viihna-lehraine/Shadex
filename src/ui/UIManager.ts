@@ -3,14 +3,15 @@
 import {
 	Color,
 	ColorSpace,
+	ColorInputElement,
 	CommonFn_MasterInterface,
 	ConstsDataInterface,
 	DOMDataInterface,
-	DOMFn_MasterInterface,
+	DOMFn_EventListenerFnInterface,
 	HSL,
-	IOFn_MasterInterface,
 	ModeDataInterface,
 	Palette,
+	PaletteBoxObject,
 	SL,
 	StoredPalette,
 	SV,
@@ -21,11 +22,16 @@ import { commonFn } from '../common/index.js';
 import { createLogger } from '../logger/index.js';
 import { constsData as consts } from '../data/consts.js';
 import { domData } from '../data/dom.js';
-import { fileUtils } from '../dom/fileUtils.js';
+import { download, readFile } from '../dom/utils.js';
 import { ioFn } from '../io/index.js';
 import { modeData as mode } from '../data/mode.js';
 
 const thisModule = 'ui/UIManager.ts';
+
+const fileUtils = {
+	download,
+	readFile
+};
 
 const logger = await createLogger();
 
@@ -36,7 +42,7 @@ export class UIManager implements UIManager_ClassInterface {
 	private currentPalette: Palette | null = null;
 	private paletteHistory: Palette[] = [];
 
-	private idbManager: IDBManager | null = null;
+	private idbManager: IDBManager | null;
 
 	private consts: ConstsDataInterface;
 	private domData: DOMDataInterface;
@@ -45,21 +51,24 @@ export class UIManager implements UIManager_ClassInterface {
 
 	private conversionUtils: CommonFn_MasterInterface['convert'];
 	private coreUtils: CommonFn_MasterInterface['core'];
-	private helpers: CommonFn_MasterInterface['helpers'];
 	private utils: CommonFn_MasterInterface['utils'];
-
-	private fileUtils: DOMFn_MasterInterface['fileUtils'];
-	private ioFn: IOFn_MasterInterface;
 
 	private getCurrentPaletteFn?: () => Promise<Palette | null>;
 	private getStoredPalette?: (id: string) => Promise<StoredPalette | null>;
 
-	constructor() {
+	private eventListenerFn: DOMFn_EventListenerFnInterface;
+
+	constructor(
+		eventListenerFn: DOMFn_EventListenerFnInterface,
+		idbManager?: IDBManager
+	) {
 		this.init();
 
 		this.id = UIManager.instanceCounter++;
 
 		UIManager.instances.set(this.id, this);
+
+		this.idbManager = idbManager || null;
 
 		this.paletteHistory = [];
 
@@ -69,12 +78,10 @@ export class UIManager implements UIManager_ClassInterface {
 		this.mode = mode;
 
 		this.coreUtils = commonFn.core;
-		this.helpers = commonFn.helpers;
 		this.utils = commonFn.utils;
 		this.conversionUtils = commonFn.convert;
 
-		this.fileUtils = fileUtils;
-		this.ioFn = ioFn;
+		this.eventListenerFn = eventListenerFn;
 	}
 
 	/* PUBLIC METHODS */
@@ -228,7 +235,7 @@ export class UIManager implements UIManager_ClassInterface {
 			navigator.clipboard
 				.writeText(colorValue)
 				.then(() => {
-					this.helpers.dom.showTooltip(tooltipElement);
+					this.getEventListenerFn().temp.showTooltip(tooltipElement);
 
 					if (
 						!this.mode.quiet &&
@@ -318,7 +325,9 @@ export class UIManager implements UIManager_ClassInterface {
 					`${thisModule} > ${thisMethod}`
 				);
 
-			this.helpers.dom.showToast('Please select a valid color.');
+			this.getEventListenerFn().temp.showToast(
+				'Please select a valid color.'
+			);
 
 			return {
 				selectedColorTextOutputBox: null,
@@ -381,13 +390,13 @@ export class UIManager implements UIManager_ClassInterface {
 
 			switch (format) {
 				case 'css':
-					this.ioFn.exportPalette(palette, format);
+					ioFn.exportPalette(palette, format);
 					break;
 				case 'json':
-					this.ioFn.exportPalette(palette, format);
+					ioFn.exportPalette(palette, format);
 					break;
 				case 'xml':
-					this.ioFn.exportPalette(palette, format);
+					ioFn.exportPalette(palette, format);
 					break;
 				default:
 					throw new Error(`Unsupported export format: ${format}`);
@@ -407,13 +416,13 @@ export class UIManager implements UIManager_ClassInterface {
 	): Promise<void> {
 		try {
 			const thisMethod = 'handleImport()';
-			const data = await this.fileUtils.readFile(file);
+			const data = await fileUtils.readFile(file);
 
 			let palette: Palette | null = null;
 
 			switch (format) {
 				case 'JSON':
-					palette = await this.ioFn.deserialize.fromJSON(data);
+					palette = await ioFn.deserialize.fromJSON(data);
 					if (!palette) {
 						if (this.logMode.error && this.logMode.verbosity > 1) {
 							logger.error(
@@ -426,12 +435,10 @@ export class UIManager implements UIManager_ClassInterface {
 					}
 					break;
 				case 'XML':
-					palette =
-						(await this.ioFn.deserialize.fromXML(data)) || null;
+					palette = (await ioFn.deserialize.fromXML(data)) || null;
 					break;
 				case 'CSS':
-					palette =
-						(await this.ioFn.deserialize.fromCSS(data)) || null;
+					palette = (await ioFn.deserialize.fromCSS(data)) || null;
 					break;
 				default:
 					throw new Error(`Unsupported format: ${format}`);
@@ -460,6 +467,155 @@ export class UIManager implements UIManager_ClassInterface {
 				`Failed to import file: ${error}`,
 				`${thisModule} > handleImport()`
 			);
+		}
+	}
+
+	public async makePaletteBox(
+		color: Color,
+		swatchCount: number
+	): Promise<PaletteBoxObject> {
+		const thisMethod = 'makePaletteBox()';
+
+		try {
+			if (!this.coreUtils.validate.colorValues(color)) {
+				if (!this.logMode.error)
+					logger.error(
+						`Invalid ${color.format} color value ${JSON.stringify(color)}`,
+						`${thisModule} > ${thisMethod}`
+					);
+
+				return {
+					colorStripe: document.createElement('div'),
+					swatchCount
+				};
+			}
+
+			const clonedColor = this.coreUtils.base.clone(color);
+
+			const paletteBox = document.createElement('div');
+			paletteBox.className = 'palette-box';
+			paletteBox.id = `palette-box-${swatchCount}`;
+
+			const paletteBoxTopHalf = document.createElement('div');
+			paletteBoxTopHalf.className =
+				'palette-box-half palette-box-top-half';
+			paletteBoxTopHalf.id = `palette-box-top-half-${swatchCount}`;
+
+			const colorTextOutputBox = document.createElement(
+				'input'
+			) as ColorInputElement;
+			colorTextOutputBox.type = 'text';
+			colorTextOutputBox.className = 'color-text-output-box tooltip';
+			colorTextOutputBox.id = `color-text-output-box-${swatchCount}`;
+			colorTextOutputBox.setAttribute('data-format', 'hex');
+
+			const colorString =
+				await this.coreUtils.convert.colorToCSSColorString(clonedColor);
+
+			colorTextOutputBox.value = colorString || '';
+			colorTextOutputBox.colorValues = clonedColor;
+			colorTextOutputBox.readOnly = false;
+			colorTextOutputBox.style.cursor = 'text';
+			colorTextOutputBox.style.pointerEvents = 'none';
+
+			const copyButton = document.createElement('button');
+			copyButton.className = 'copy-button';
+			copyButton.textContent = 'Copy';
+
+			const tooltipText = document.createElement('span');
+			tooltipText.className = 'tooltiptext';
+			tooltipText.textContent = 'Copied to clipboard!';
+
+			copyButton.addEventListener('click', async () => {
+				try {
+					await navigator.clipboard.writeText(
+						colorTextOutputBox.value
+					);
+
+					this.getEventListenerFn().temp.showTooltip(
+						colorTextOutputBox
+					);
+
+					clearTimeout(consts.timeouts.tooltip || 1000);
+
+					copyButton.textContent = 'Copied!';
+					setTimeout(
+						() => (copyButton.textContent = 'Copy'),
+						consts.timeouts.copyButtonText || 1000
+					);
+				} catch (error) {
+					if (!this.logMode.error)
+						logger.error(
+							`Failed to copy: ${error}`,
+							`${thisModule} > ${thisMethod}`
+						);
+				}
+			});
+
+			colorTextOutputBox.addEventListener(
+				'input',
+				this.coreUtils.base.debounce((e: Event) => {
+					const target = e.target as HTMLInputElement | null;
+					if (target) {
+						const cssColor = target.value.trim();
+						const boxElement = document.getElementById(
+							`color-box-${swatchCount}`
+						);
+						const stripeElement = document.getElementById(
+							`color-stripe-${swatchCount}`
+						);
+
+						if (boxElement)
+							boxElement.style.backgroundColor = cssColor;
+						if (stripeElement)
+							stripeElement.style.backgroundColor = cssColor;
+					}
+				}, consts.debounce.input || 200)
+			);
+
+			paletteBoxTopHalf.appendChild(colorTextOutputBox);
+			paletteBoxTopHalf.appendChild(copyButton);
+
+			const paletteBoxBottomHalf = document.createElement('div');
+			paletteBoxBottomHalf.className =
+				'palette-box-half palette-box-bottom-half';
+			paletteBoxBottomHalf.id = `palette-box-bottom-half-${swatchCount}`;
+
+			const colorBox = document.createElement('div');
+			colorBox.className = 'color-box';
+			colorBox.id = `color-box-${swatchCount}`;
+			colorBox.style.backgroundColor = colorString || '#ffffff';
+
+			paletteBoxBottomHalf.appendChild(colorBox);
+			paletteBox.appendChild(paletteBoxTopHalf);
+			paletteBox.appendChild(paletteBoxBottomHalf);
+
+			const colorStripe = document.createElement('div');
+			colorStripe.className = 'color-stripe';
+			colorStripe.id = `color-stripe-${swatchCount}`;
+			colorStripe.style.backgroundColor = colorString || '#ffffff';
+
+			colorStripe.setAttribute('draggable', 'true');
+
+			this.getEventListenerFn().dad.attach(colorStripe);
+
+			colorStripe.appendChild(paletteBox);
+
+			return {
+				colorStripe,
+				swatchCount: swatchCount + 1
+			};
+		} catch (error) {
+			if (!this.logMode.error)
+				logger.error(
+					`Failed to execute makePaletteBox: ${error}`,
+					`${thisModule} > ${thisMethod}`
+				);
+
+			return {
+				colorStripe: document.createElement('div'),
+				swatchCount
+			};
 		}
 	}
 
@@ -676,6 +832,14 @@ export class UIManager implements UIManager_ClassInterface {
 		this.idbManager = await IDBManager.getInstance();
 
 		await this.loadPaletteHistory();
+	}
+
+	private getEventListenerFn(): DOMFn_EventListenerFnInterface {
+		if (!this.eventListenerFn) {
+			throw new Error('Event listeners have not been initialized yet.');
+		}
+
+		return this.eventListenerFn;
 	}
 
 	private async loadPaletteHistory(): Promise<void> {

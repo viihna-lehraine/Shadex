@@ -3,11 +3,98 @@
 import {
 	DefaultDataInterface,
 	MutationLog,
+	Palette,
+	PaletteItem,
+	PaletteOptions,
+	StoredPalette,
 	UnbrandedPalette,
 	UnbrandedPaletteItem,
 	UnbrandedStoredPalette
 } from '../types/index.js';
 import { brand } from '../common/core.js';
+
+const brandedData: Palette = {
+	id: `null-palette-${Date.now()}`,
+	items: [],
+	metadata: {
+		flags: {
+			limitDarkness: false,
+			limitGrayness: false,
+			limitLightness: false
+		},
+		name: 'BRANDED DEFAULT PALETTE',
+		swatches: 1,
+		type: '???',
+		timestamp: '???'
+	}
+};
+
+const brandedItem: PaletteItem = {
+	colors: {
+		main: {
+			cmyk: {
+				cyan: brand.asPercentile(0),
+				magenta: brand.asPercentile(0),
+				yellow: brand.asPercentile(0),
+				key: brand.asPercentile(0)
+			},
+			hex: { hex: brand.asHexSet('#000000') },
+			hsl: {
+				hue: brand.asRadial(0),
+				saturation: brand.asPercentile(0),
+				lightness: brand.asPercentile(0)
+			},
+			hsv: {
+				hue: brand.asRadial(0),
+				saturation: brand.asPercentile(0),
+				value: brand.asPercentile(0)
+			},
+			lab: {
+				l: brand.asLAB_L(0),
+				a: brand.asLAB_A(0),
+				b: brand.asLAB_B(0)
+			},
+			rgb: {
+				red: brand.asByteRange(0),
+				green: brand.asByteRange(0),
+				blue: brand.asByteRange(0)
+			},
+			xyz: {
+				x: brand.asXYZ_X(0),
+				y: brand.asXYZ_Y(0),
+				z: brand.asXYZ_Z(0)
+			}
+		},
+		stringProps: {
+			cmyk: {
+				cyan: '0%',
+				magenta: '0%',
+				yellow: '0%',
+				key: '0%'
+			},
+			hex: { hex: '#000000FF' },
+			hsl: { hue: '0', saturation: '0%', lightness: '0%' },
+			hsv: { hue: '0', saturation: '0%', value: '0%' },
+			lab: { l: '0', a: '0', b: '0' },
+			rgb: { red: '0', green: '0', blue: '0' },
+			xyz: { x: '0', y: '0', z: '0' }
+		},
+		css: {
+			cmyk: 'cmyk(0%, 0%, 0%, 100%)',
+			hex: '#000000',
+			hsl: 'hsl(0, 0%, 0%)',
+			hsv: 'hsv(0, 0%, 0%)',
+			lab: 'lab(0, 0, 0)',
+			rgb: 'rgb(0, 0, 0)',
+			xyz: 'xyz(0, 0, 0)'
+		}
+	}
+};
+
+const brandedStoredPalette: StoredPalette = {
+	tableID: 1,
+	palette: brandedData
+};
 
 const colors: DefaultDataInterface['colors'] = {
 	base: {
@@ -251,13 +338,21 @@ const idb: DefaultDataInterface['idb'] = {
 	mutation
 };
 
+const paletteOptions: PaletteOptions = {
+	flags: {
+		limitDark: false,
+		limitGray: false,
+		limitLight: false
+	},
+	swatches: 6,
+	type: 1
+};
+
 const unbrandedData: UnbrandedPalette = {
-	id: `null-palette-${Date.now()}`,
+	id: `null-branded-palette-${Date.now()}`,
 	items: [],
 	metadata: {
-		customColor: false,
 		flags: {
-			enableAlpha: false,
 			limitDarkness: false,
 			limitGrayness: false,
 			limitLightness: false
@@ -306,21 +401,27 @@ const unbrandedItem: UnbrandedPaletteItem = {
 	}
 };
 
-const unbrandedStored: UnbrandedStoredPalette = {
+const unbrandedStoredPalette: UnbrandedStoredPalette = {
 	tableID: 1,
 	palette: unbrandedData
 };
 
 const palette: DefaultDataInterface['palette'] = {
+	branded: {
+		data: brandedData,
+		item: brandedItem,
+		stored: brandedStoredPalette
+	},
 	unbranded: {
 		data: unbrandedData,
 		item: unbrandedItem,
-		stored: unbrandedStored
+		stored: unbrandedStoredPalette
 	}
 } as const;
 
 export const defaultData: DefaultDataInterface = {
 	colors,
 	idb,
-	palette
+	palette,
+	paletteOptions
 } as const;

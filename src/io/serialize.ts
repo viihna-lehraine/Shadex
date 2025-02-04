@@ -29,22 +29,7 @@ async function toCSS(palette: Palette): Promise<string> {
 					--limitLightness: ${palette.metadata.flags.limitLightness};
 				}`.trim();
 
-			// 2. serialize custom color if present
-			const customColor = palette.metadata.customColor
-				? `
-				/* Optional Custom Color */
-				.palette-custom {
-					--custom-cmyk-color: "${palette.metadata.customColor.colors.main.cmyk}";
-					--custom-hex-color: "${palette.metadata.customColor.colors.main.hex}";
-					--custom-hsl-color: "${palette.metadata.customColor.colors.main.hsl}";
-					--custom-hsv-color: "${palette.metadata.customColor.colors.main.hsv}";
-					--custom-lab-color: "${palette.metadata.customColor.colors.main.lab}";
-					--custom-rgb-color: "${palette.metadata.customColor.colors.main.rgb}";
-					--custom-xyz-color: "${palette.metadata.customColor.colors.main.xyz}";
-				}`.trim()
-				: '';
-
-			// 3. serialize palette items
+			// 2. serialize palette items
 			const items = palette.items
 				.map(item => {
 					const backgroundColor = item.colors.css.hsl;
@@ -64,12 +49,10 @@ async function toCSS(palette: Palette): Promise<string> {
 				})
 				.join('\n\n');
 
-			// 4. combine CSS data
-			const cssData = [metadata, customColor, items]
-				.filter(Boolean)
-				.join('\n\n');
+			// 3. combine CSS data
+			const cssData = [metadata, items].filter(Boolean).join('\n\n');
 
-			// 5. resolve serialized CSS data
+			// 4. resolve serialized CSS data
 			resolve(cssData.trim());
 		} catch (error) {
 			if (!mode.quiet && logMode.error) {
@@ -133,26 +116,12 @@ async function toXML(palette: Palette): Promise<string> {
 	return new Promise((resolve, reject) => {
 		try {
 			// 1. serialize palette metadata
-			const customColorXML = palette.metadata.customColor
-				? `
-				<CustomColor>
-					<CMYK>${palette.metadata.customColor.colors.main.cmyk}</CMYK>
-					<Hex>${palette.metadata.customColor.colors.main.hex}</Hex>
-					<HSL>${palette.metadata.customColor.colors.main.hsl}</HSL>
-					<HSV>${palette.metadata.customColor.colors.main.hsv}</HSV>
-					<LAB>${palette.metadata.customColor.colors.main.lab}</LAB>
-					<RGB>${palette.metadata.customColor.colors.main.rgb}</RGB>
-					<XYZ>${palette.metadata.customColor.colors.main.xyz}</XYZ>
-				</CustomColor>`.trim()
-				: '<CustomColor>false</CustomColor>';
-
 			const metadata = `
 				<Metadata>
 					<Name>${palette.metadata.name ?? 'Unnamed Palette'}</Name>
 					<Timestamp>${palette.metadata.timestamp}</Timestamp>
 					<Swatches>${palette.metadata.swatches}</Swatches>
 					<Type>${palette.metadata.type}</Type>
-					${customColorXML}
 					<Flags>
 						<LimitDarkness>${palette.metadata.flags.limitDarkness}</LimitDarkness>
 						<LimitGrayness>${palette.metadata.flags.limitGrayness}</LimitGrayness>

@@ -2,10 +2,12 @@
 
 import { IDBPObjectStore } from 'idb';
 import {
+	Color,
 	HSL,
 	MutationLog,
 	Palette,
 	PaletteItem,
+	PaletteBoxObject,
 	PaletteSchema,
 	StoredPalette
 } from './index.js';
@@ -65,6 +67,10 @@ export interface UIManager_ClassInterface {
 	getCurrentPalette(): Promise<Palette | null>;
 	getID(): number;
 	handleExport(format: 'css' | 'json' | 'xml'): Promise<void>;
+	makePaletteBox(
+		color: Color,
+		swatchCount: number
+	): Promise<PaletteBoxObject>;
 	removePaletteFromHistory(paletteID: string): Promise<void>;
 	renderPalette(tableId: string): Promise<void | null>;
 	setHistoryLimit(limit: number): Promise<void>;

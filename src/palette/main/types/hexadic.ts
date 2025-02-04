@@ -7,21 +7,24 @@ import {
 	PaletteItem
 } from '../../../types/index.js';
 import { IDBManager } from '../../../db/IDBManager.js';
-import { coreUtils } from '../../../common/index.js';
+import { commonFn } from '../../../common/index.js';
 import { constsData as consts } from '../../../data/consts.js';
-import { superUtils as paletteSuperUtils } from '../../common/index.js';
-import { uiFn } from '../../../ui/index.js';
+import {
+	helpers as paletteHelpers,
+	superUtils as paletteSuperUtils
+} from '../../common/index.js';
 
-const create = paletteSuperUtils.create;
-const genHues = paletteSuperUtils.genHues;
 const paletteRanges = consts.paletteRanges;
+
+const core = commonFn.core;
+const utils = commonFn.utils;
 
 export async function hexadic(args: PaletteGenerationArgs): Promise<Palette> {
 	// ensure exactly 6 color swatches
-	if (args.swatches !== 6) uiFn.enforceSwatchRules(6, 6);
+	if (args.swatches !== 6) paletteHelpers.enforce.swatchRules(6, 6);
 
-	const baseColor = create.baseColor(args.customColor);
-	const hues = genHues.hexadic(baseColor);
+	const baseColor = utils.random.hsl();
+	const hues = paletteSuperUtils.genHues.hexadic(baseColor);
 
 	const paletteItems: PaletteItem[] = [];
 	for (const hue of hues) {
@@ -33,8 +36,8 @@ export async function hexadic(args: PaletteGenerationArgs): Promise<Palette> {
 			paletteRanges.shift.hexad.light / 2;
 		const newColor: HSL = {
 			value: {
-				hue: coreUtils.brand.asRadial(hue),
-				saturation: coreUtils.brand.asPercentile(
+				hue: core.brand.asRadial(hue),
+				saturation: core.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
@@ -43,7 +46,7 @@ export async function hexadic(args: PaletteGenerationArgs): Promise<Palette> {
 						)
 					)
 				),
-				lightness: coreUtils.brand.asPercentile(
+				lightness: core.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessShift)
@@ -53,7 +56,8 @@ export async function hexadic(args: PaletteGenerationArgs): Promise<Palette> {
 			format: 'hsl'
 		};
 
-		const paletteItem = await create.paletteItem(newColor);
+		const paletteItem =
+			await paletteSuperUtils.create.paletteItem(newColor);
 
 		paletteItems.push(paletteItem);
 	}

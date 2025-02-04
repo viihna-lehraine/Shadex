@@ -1,16 +1,14 @@
 // File: dom/index.js
 
 import { DOMFn_MasterInterface } from '../types/index.js';
-import { base } from './eventListeners.js';
-import { fileUtils } from './fileUtils.js';
+import { initializeEventListeners } from './eventListeners/index.js';
 import { parse } from './parse.js';
+import { utils } from './utils.js';
 import { validate } from './validate.js';
 
-const events = { ...base };
-
 export const domFn: DOMFn_MasterInterface = {
-	events,
-	fileUtils,
+	initializeEventListeners,
 	parse,
+	utils,
 	validate
 };

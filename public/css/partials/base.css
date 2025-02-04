@@ -110,3 +110,7 @@ footer {
     padding: 3px;
     text-align: center;
 }
+
+#palette-history {
+	display: none;
+}
