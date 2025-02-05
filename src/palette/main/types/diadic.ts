@@ -3,10 +3,11 @@
 import {
 	HSL,
 	Palette,
+	PaletteArgs,
 	PaletteGenerationArgs,
 	PaletteItem
 } from '../../../types/index.js';
-import { IDBManager } from '../../../db/IDBManager.js';
+import { IDBManager } from '../../../app/db/IDBManager.js';
 import { commonFn } from '../../../common/index.js';
 import { constsData as consts } from '../../../data/consts.js';
 import {
@@ -66,15 +67,17 @@ export async function diadic(args: PaletteGenerationArgs): Promise<Palette> {
 
 	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
 
-	const diadicPalette = await idbManager.savePaletteToDB(
-		'diadic',
-		paletteItems,
+	const paletteArgs: PaletteArgs = {
+		type: 'diadic',
+		items: paletteItems,
 		paletteID,
-		2,
-		args.limitDark,
-		args.limitGray,
-		args.limitLight
-	);
+		swatches: args.swatches,
+		limitDark: args.limitDark,
+		limitGray: args.limitGray,
+		limitLight: args.limitLight
+	};
+
+	const diadicPalette = await idbManager.savePaletteToDB(paletteArgs);
 
 	if (!diadicPalette)
 		throw new Error(`Diadic palette is either null or undefined.`);

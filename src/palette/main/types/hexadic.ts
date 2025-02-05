@@ -3,10 +3,11 @@
 import {
 	HSL,
 	Palette,
+	PaletteArgs,
 	PaletteGenerationArgs,
 	PaletteItem
 } from '../../../types/index.js';
-import { IDBManager } from '../../../db/IDBManager.js';
+import { IDBManager } from '../../../app/db/IDBManager.js';
 import { commonFn } from '../../../common/index.js';
 import { constsData as consts } from '../../../data/consts.js';
 import {
@@ -67,15 +68,17 @@ export async function hexadic(args: PaletteGenerationArgs): Promise<Palette> {
 
 	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
 
-	const hexadicPalette = await idbManager.savePaletteToDB(
-		'hexadic',
-		paletteItems,
+	const paletteArgs: PaletteArgs = {
+		type: 'hexadic',
+		items: paletteItems,
 		paletteID,
-		args.swatches,
-		args.limitDark,
-		args.limitGray,
-		args.limitLight
-	);
+		swatches: args.swatches,
+		limitDark: args.limitDark,
+		limitGray: args.limitGray,
+		limitLight: args.limitLight
+	};
+
+	const hexadicPalette = await idbManager.savePaletteToDB(paletteArgs);
 
 	if (!hexadicPalette) {
 		throw new Error('Hexadic palette is either null or undefined.');

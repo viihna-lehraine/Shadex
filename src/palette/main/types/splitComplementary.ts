@@ -3,10 +3,11 @@
 import {
 	HSL,
 	Palette,
+	PaletteArgs,
 	PaletteGenerationArgs,
 	PaletteItem
 } from '../../../types/index.js';
-import { IDBManager } from '../../../db/IDBManager.js';
+import { IDBManager } from '../../../app/db/IDBManager.js';
 import { commonFn } from '../../../common/index.js';
 import { constsData as consts } from '../../../data/consts.js';
 import {
@@ -89,15 +90,18 @@ export async function splitComplementary(
 
 	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
 
-	const splitComplementaryPalette = await idbManager.savePaletteToDB(
-		'splitComplementary',
-		paletteItems,
+	const paletteArgs: PaletteArgs = {
+		type: 'splitComplementary',
+		items: paletteItems,
 		paletteID,
-		args.swatches,
-		args.limitDark,
-		args.limitGray,
-		args.limitLight
-	);
+		swatches: args.swatches,
+		limitDark: args.limitDark,
+		limitGray: args.limitGray,
+		limitLight: args.limitLight
+	};
+
+	const splitComplementaryPalette =
+		await idbManager.savePaletteToDB(paletteArgs);
 
 	if (!splitComplementaryPalette) {
 		throw new Error(

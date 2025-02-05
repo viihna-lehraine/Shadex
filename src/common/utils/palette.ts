@@ -5,7 +5,7 @@ import {
 	Color_StringProps,
 	CommonFn_MasterInterface,
 	Palette,
-	PaletteItem
+	PaletteArgs
 } from '../../types/index';
 import { coreUtils } from '../core.js';
 import { createLogger } from '../../logger/index.js';
@@ -17,27 +17,19 @@ const thisModule = 'common/utils/palette.js';
 
 const logger = await createLogger();
 
-function createObject(
-	type: string,
-	items: PaletteItem[],
-	swatches: number,
-	paletteID: number,
-	limitDark: boolean,
-	limitGray: boolean,
-	limitLight: boolean
-): Palette {
+function createObject(args: PaletteArgs): Palette {
 	return {
-		id: `${type}_${paletteID}`,
-		items,
+		id: `${args.type}_${args.paletteID}`,
+		items: args.items,
 		metadata: {
 			name: '',
 			timestamp: coreUtils.getFormattedTimestamp(),
-			swatches,
-			type,
+			swatches: args.swatches,
+			type: args.type,
 			flags: {
-				limitDarkness: limitDark,
-				limitGrayness: limitGray,
-				limitLightness: limitLight
+				limitDark: args.limitDark,
+				limitGray: args.limitGray,
+				limitLight: args.limitLight
 			}
 		}
 	};

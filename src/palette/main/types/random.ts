@@ -2,10 +2,11 @@
 
 import {
 	Palette,
+	PaletteArgs,
 	PaletteGenerationArgs,
 	PaletteItem
 } from '../../../types/index.js';
-import { IDBManager } from '../../../db/IDBManager.js';
+import { IDBManager } from '../../../app/db/IDBManager.js';
 import {
 	helpers as paletteHelpers,
 	superUtils as paletteSuperUtils
@@ -35,15 +36,17 @@ export async function random(args: PaletteGenerationArgs): Promise<Palette> {
 
 	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
 
-	const randomPalette = await idbManager.savePaletteToDB(
-		'random',
-		paletteItems,
+	const paletteArgs: PaletteArgs = {
+		type: 'triadic',
+		items: paletteItems,
 		paletteID,
-		args.swatches,
-		args.limitDark,
-		args.limitGray,
-		args.limitLight
-	);
+		swatches: args.swatches,
+		limitDark: args.limitDark,
+		limitGray: args.limitGray,
+		limitLight: args.limitLight
+	};
+
+	const randomPalette = await idbManager.savePaletteToDB(paletteArgs);
 
 	if (!randomPalette)
 		throw new Error('Random palette is either null or undefined.');

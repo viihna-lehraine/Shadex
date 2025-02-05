@@ -33,9 +33,9 @@ export interface Palette {
 		swatches: number;
 		type: string;
 		flags: {
-			limitDarkness: boolean;
-			limitGrayness: boolean;
-			limitLightness: boolean;
+			limitDark: boolean;
+			limitGray: boolean;
+			limitLight: boolean;
 		};
 	};
 }
@@ -120,9 +120,9 @@ export interface UnbrandedPalette {
 	items: UnbrandedPaletteItem[];
 	metadata: {
 		flags: {
-			limitDarkness: boolean;
-			limitGrayness: boolean;
-			limitLightness: boolean;
+			limitDark: boolean;
+			limitGray: boolean;
+			limitLight: boolean;
 		};
 		name?: string;
 		swatches: number;

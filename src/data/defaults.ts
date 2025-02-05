@@ -18,9 +18,9 @@ const brandedData: Palette = {
 	items: [],
 	metadata: {
 		flags: {
-			limitDarkness: false,
-			limitGrayness: false,
-			limitLightness: false
+			limitDark: false,
+			limitGray: false,
+			limitLight: false
 		},
 		name: 'BRANDED DEFAULT PALETTE',
 		swatches: 1,
@@ -353,9 +353,9 @@ const unbrandedData: UnbrandedPalette = {
 	items: [],
 	metadata: {
 		flags: {
-			limitDarkness: false,
-			limitGrayness: false,
-			limitLightness: false
+			limitDark: false,
+			limitGray: false,
+			limitLight: false
 		},
 		name: 'UNBRANDED DEFAULT PALETTE',
 		swatches: 1,

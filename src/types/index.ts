@@ -1,7 +1,8 @@
 // File: types/index.js
 
 export type { CommonFn_MasterInterface } from './app/common.js';
-export type { DBUtilsInterface } from './app/db.js';
+export type { AppUtilsInterface } from './app/core.js';
+export type { DBUtilsInterface, PaletteArgs } from './app/db.js';
 export type {
 	DOMFn_EventListenerFnInterface,
 	DOMFn_MasterInterface,

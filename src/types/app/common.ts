@@ -25,7 +25,7 @@ import {
 	LAB_B,
 	NumericRangeKey,
 	Palette,
-	PaletteItem,
+	PaletteArgs,
 	Percentile,
 	Radial,
 	RangeKeyMap,
@@ -240,23 +240,8 @@ export interface CommonFn_MasterInterface {
 				| undefined;
 			genAllColorValues(color: HSL): Partial<ColorDataExtended>;
 		};
-		errors: {
-			handleAsync<T>(
-				action: () => Promise<T>,
-				errorMessage: string,
-				context?: Record<string, unknown>
-			): Promise<T | null>;
-		};
 		palette: {
-			createObject(
-				type: string,
-				items: PaletteItem[],
-				swatches: number,
-				paletteID: number,
-				limitDark: boolean,
-				limitGray: boolean,
-				limitLight: boolean
-			): Palette;
+			createObject(args: PaletteArgs): Palette;
 			populateOutputBox(
 				color: Color | Color_StringProps,
 				boxNumber: number

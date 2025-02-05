@@ -3,10 +3,11 @@
 import {
 	HSL,
 	Palette,
+	PaletteArgs,
 	PaletteGenerationArgs,
 	PaletteItem
 } from '../../../types/index.js';
-import { IDBManager } from '../../../db/IDBManager.js';
+import { IDBManager } from '../../../app/db/IDBManager.js';
 import { commonFn } from '../../../common/index.js';
 import {
 	helpers as paletteHelpers,
@@ -61,15 +62,17 @@ export async function analogous(args: PaletteGenerationArgs): Promise<Palette> {
 
 	const paletteID = (await idbManager.getCurrentPaletteID()) + 1;
 
-	const analogousPalette = await idbManager.savePaletteToDB(
-		'analogous',
-		paletteItems,
+	const paletteArgs: PaletteArgs = {
+		type: 'analogous',
+		items: paletteItems,
 		paletteID,
-		args.swatches,
-		args.limitDark,
-		args.limitGray,
-		args.limitLight
-	);
+		swatches: args.swatches,
+		limitDark: args.limitDark,
+		limitGray: args.limitGray,
+		limitLight: args.limitLight
+	};
+
+	const analogousPalette = await idbManager.savePaletteToDB(paletteArgs);
 
 	if (!analogousPalette)
 		throw new Error('Analogous palette is null or undefined.');

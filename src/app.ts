@@ -7,17 +7,17 @@
 
 // This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND.
 
-// File: src/app.js
+// File: app.js
 
-import { UIManager } from './ui/UIManager.js';
-import { getIDBInstance } from './db/instance.js';
+import { UIManager } from './app/ui/UIManager.js';
+import { getIDBInstance } from './app/db/instance.js';
 import { createLogger } from './logger/index.js';
 import { defaultData as defaults } from './data/defaults.js';
 import { domData } from './data/dom.js';
-import { eventListenerFn } from './dom/eventListeners/index.js';
+import { eventListenerFn } from './app/dom/eventListeners/index.js';
 import { modeData as mode } from './data/mode.js';
-import { uiFn } from './ui/main.js';
-import { validateStaticElements } from './dom/validate.js';
+import { uiFn } from './app/ui/main.js';
+import { validateStaticElements } from './app/dom/validate.js';
 
 const logMode = mode.logging;
 
@@ -66,6 +66,16 @@ async function initializeApp(): Promise<void> {
 
 		const idbManager = await getIDBInstance();
 
+		if (mode.expose) {
+			if (logMode.verbosity > 1)
+				logger.info(
+					'Exposing IDBManager instance to global scope',
+					`${thisModule} > ${thisFunction}`
+				);
+
+			window.idbManager = idbManager;
+		}
+
 		const selectedSwatch = domData.elements.static.selects.swatch;
 
 		if (mode.debug) {
@@ -106,7 +116,7 @@ async function initializeApp(): Promise<void> {
 
 		await uiFn.startPaletteGeneration(defaultPaletteOptions);
 
-		const uiManager = new UIManager(eventListenerFn, idbManager);
+		const uiManager = new UIManager(eventListenerFn);
 
 		try {
 			eventListenerFn.initializeEventListeners(uiManager);

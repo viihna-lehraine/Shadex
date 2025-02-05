@@ -2,10 +2,11 @@
 
 import {
 	Palette,
+	PaletteArgs,
 	PaletteGenerationArgs,
 	PaletteItem
 } from '../../../types/index.js';
-import { IDBManager } from '../../../db/IDBManager.js';
+import { IDBManager } from '../../../app/db/IDBManager.js';
 import { commonFn } from '../../../common/index.js';
 import {
 	helpers as paletteHelpers,
@@ -64,15 +65,17 @@ export async function monochromatic(
 
 	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
 
-	const monochromaticPalette = await idbManager.savePaletteToDB(
-		'monochromatic',
-		paletteItems,
+	const paletteArgs: PaletteArgs = {
+		type: 'monochromatic',
+		items: paletteItems,
 		paletteID,
-		args.swatches,
-		args.limitDark,
-		args.limitGray,
-		args.limitLight
-	);
+		swatches: args.swatches,
+		limitDark: args.limitDark,
+		limitGray: args.limitGray,
+		limitLight: args.limitLight
+	};
+
+	const monochromaticPalette = await idbManager.savePaletteToDB(paletteArgs);
 
 	if (!monochromaticPalette) {
 		throw new Error('Monochromatic palette is either null or undefined.');

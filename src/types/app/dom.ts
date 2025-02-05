@@ -1,7 +1,7 @@
 // File: types/dom.js
 
 import { ColorSpace, Hex, HSL, RGB } from '../index.js';
-import type { UIManager } from '../../ui/UIManager.js';
+import type { UIManager } from '../../app/ui/UIManager.js';
 
 export interface DOMFn_EventListenerFnInterface {
 	initializeEventListeners(uiManager: UIManager): void;

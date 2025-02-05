@@ -3,10 +3,11 @@
 import {
 	HSL,
 	Palette,
+	PaletteArgs,
 	PaletteGenerationArgs,
 	PaletteItem
 } from '../../../types/index.js';
-import { IDBManager } from '../../../db/IDBManager.js';
+import { IDBManager } from '../../../app/db/IDBManager.js';
 import { commonFn } from '../../../common/index.js';
 import { constsData as consts } from '../../../data/consts.js';
 import {
@@ -71,7 +72,6 @@ export async function triadic(args: PaletteGenerationArgs): Promise<Palette> {
 			format: 'hsl'
 		};
 
-		// generate all color values and create the palette item
 		const adjustedColor = utils.conversion.genAllColorValues(adjustedHSL)
 			.hsl as HSL;
 		const paletteItem =
@@ -80,22 +80,22 @@ export async function triadic(args: PaletteGenerationArgs): Promise<Palette> {
 	}
 
 	const idbManager = await IDBManager.getInstance();
-	const paletteID = await idbManager.getNextPaletteID();
+	const paletteID = (await idbManager.getCurrentPaletteID()) + 1;
 
 	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
 
-	// save the palette to the database
-	const triadicPalette = await idbManager.savePaletteToDB(
-		'triadic',
-		paletteItems,
+	const paletteArgs: PaletteArgs = {
+		type: 'triadic',
+		items: paletteItems,
 		paletteID,
-		args.swatches,
-		args.limitDark,
-		args.limitGray,
-		args.limitLight
-	);
+		swatches: args.swatches,
+		limitDark: args.limitDark,
+		limitGray: args.limitGray,
+		limitLight: args.limitLight
+	};
 
-	// handle null or undefined palette
+	const triadicPalette = await idbManager.savePaletteToDB(paletteArgs);
+
 	if (!triadicPalette) {
 		throw new Error('Triadic palette is either null or undefined.');
 	}

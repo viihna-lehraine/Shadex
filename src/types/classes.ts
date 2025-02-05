@@ -10,6 +10,7 @@ import {
 	PaletteItem,
 	PaletteBoxObject,
 	PaletteSchema,
+	PaletteArgs,
 	Settings,
 	StoredPalette
 } from './index.js';
@@ -34,14 +35,17 @@ export interface AppLogger_ClassInterface {
 export interface DBService_ClassInterface {
 	deleteDatabase(): Promise<void>;
 	deleteEntries(store: keyof PaletteSchema, keys: string[]): Promise<void>;
+	resetDatabase(): Promise<void>;
 }
 
 export interface HistoryService_ClassInterface {
+	addPaletteToHistory(palette: Palette): Promise<void>;
 	getPaletteHistory(): Promise<Palette[]>;
 	savePaletteHistory(paletteHistory: Palette[]): Promise<void>;
 }
 
 export interface IDBManager_ClassInterface {
+	addPaletteToHistory(palette: Palette): Promise<void>;
 	createMutationLogger<T extends object>(obj: T, key: string): Promise<T>;
 	deleteDatabase(): Promise<void>;
 	deleteEntries(store: keyof PaletteSchema, keys: string[]): Promise<void>;
@@ -74,15 +78,7 @@ export interface IDBManager_ClassInterface {
 	resetDatabase(): Promise<void>;
 	resetPaletteID(): Promise<void>;
 	savePalette(id: string, newPalette: Palette): Promise<void>;
-	savePaletteToDB(
-		type: string,
-		items: PaletteItem[],
-		paletteID: number,
-		numBoxes: number,
-		limitDark: boolean,
-		limitGray: boolean,
-		limitLight: boolean
-	): Promise<Palette>;
+	savePaletteToDB(args: PaletteArgs): Promise<Palette>;
 	savePaletteHistory(paletteHistory: Palette[]): Promise<void>;
 	saveSettings(newSettings: Settings): Promise<void>;
 	updateEntryInPalette(
@@ -103,6 +99,7 @@ export interface PaletteService_ClassInterface {
 	getNextTableID(): Promise<string>;
 	getPalette(id: string): Promise<Palette | void | null>;
 	savePalette(id: string, palette: Palette): Promise<void>;
+	savePaletteToDB(args: PaletteArgs): Promise<Palette>;
 	updateEntryInPalette(
 		tableID: string,
 		entryIndex: number,
@@ -125,7 +122,7 @@ export interface UIManager_ClassInterface {
 	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
 	createPaletteTable(palette: StoredPalette): HTMLElement;
 	getCurrentPalette(): Promise<Palette | null>;
-	getID(): number;
+	getInstanceID(): number;
 	handleExport(format: 'css' | 'json' | 'xml'): Promise<void>;
 	makePaletteBox(
 		color: Color,

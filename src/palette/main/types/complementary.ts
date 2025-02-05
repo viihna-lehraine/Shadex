@@ -1,7 +1,12 @@
 // File: palette/main/types/complementary.js
 
-import { HSL, Palette, PaletteGenerationArgs } from '../../../types/index.js';
-import { IDBManager } from '../../../db/IDBManager.js';
+import {
+	HSL,
+	Palette,
+	PaletteArgs,
+	PaletteGenerationArgs
+} from '../../../types/index.js';
+import { IDBManager } from '../../../app/db/IDBManager.js';
 import { commonFn } from '../../../common/index.js';
 import {
 	helpers as paletteHelpers,
@@ -40,15 +45,17 @@ export async function complementary(
 
 	if (!paletteID) throw new Error('Palette ID is either null or undefined.');
 
-	const complementaryPalette = await idbManager.savePaletteToDB(
-		'complementary',
-		[basePaletteItem, complementaryPaletteItem],
+	const paletteArgs: PaletteArgs = {
+		type: 'complementary',
+		items: [basePaletteItem, complementaryPaletteItem],
 		paletteID,
 		swatches,
-		args.limitDark,
-		args.limitGray,
-		args.limitLight
-	);
+		limitDark: args.limitDark,
+		limitGray: args.limitGray,
+		limitLight: args.limitLight
+	};
+
+	const complementaryPalette = await idbManager.savePaletteToDB(paletteArgs);
 
 	if (!complementaryPalette) {
 		throw new Error('Complementary palette is null or undefined.');

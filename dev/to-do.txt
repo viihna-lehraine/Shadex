@@ -1,9 +1,0 @@
-1. get live color reload working on color inputs
-
-2. HTML/CSS styling round 2 - get it closer to Beck's design concept
-
-3. create and attach event listeners for locking color swatches
-
-4. create event listeners to change color swatch width
-
-5. remove the adjustable history-limit function for now
