@@ -10,13 +10,12 @@ import {
 	RGB,
 	XYZ
 } from '../../../../types/index.js';
+import { appUtils } from '../../../appUtils.js';
 import { commonFn } from '../../../../common/index.js';
 import { configData } from '../../../../data/config.js';
-import { createLogger } from '../../../../logger/index.js';
 import { modeData as mode } from '../../../../data/mode.js';
 
 const brand = commonFn.core.brand;
-const logMode = mode.logging;
 const regex = {
 	cmyk: configData.regex.colors.cmyk,
 	hex: configData.regex.colors.hex,
@@ -29,23 +28,18 @@ const regex = {
 
 const thisModule = 'io/parse/base.js';
 
-const logger = await createLogger();
+const log = appUtils.log;
 
 function parseCMYKColorValue(rawCMYK: string | null): CMYK['value'] {
 	const caller = 'parseCMYKColorValue()';
 
 	if (!rawCMYK) {
-		if (logMode.warn && logMode.verbosity >= 2) {
-			logger.warn(
-				'A CMYK element could not be found while parsing palette file. Injecting default values.',
-				`${thisModule} > ${caller}`
-			);
-		} else {
-			logger.debug(
-				'Missing CMYK element in palette file.',
-				`${thisModule} > ${caller}`
-			);
-		}
+		log(
+			'warn',
+			'A CMYK element could not be found while parsing palette file. Injecting default values.',
+			`${thisModule} > ${caller}`,
+			2
+		);
 
 		if (mode.stackTrace) console.trace('Stack Trace:');
 
@@ -78,17 +72,12 @@ function parseHexColorValue(rawHex: string | null): Hex['value'] {
 	const caller = 'parseHexColorValue()';
 
 	if (!rawHex) {
-		if (logMode.warn && logMode.verbosity >= 2) {
-			logger.warn(
-				'A Hex element could not be found while parsing palette file. Injecting default values.',
-				`${thisModule} > ${caller}`
-			);
-		} else {
-			logger.debug(
-				'Missing Hex element in palette file.',
-				`${thisModule} > ${caller}`
-			);
-		}
+		log(
+			'warn',
+			'A Hex element could not be found while parsing palette file. Injecting default values.',
+			`${thisModule} > ${caller}`,
+			2
+		);
 
 		if (mode.stackTrace) console.trace('Stack Trace:');
 
@@ -110,17 +99,12 @@ function parseHSLColorValue(rawHSL: string | null): HSL['value'] {
 	const caller = 'parseHSLColorValue()';
 
 	if (!rawHSL) {
-		if (logMode.warn && logMode.verbosity >= 2) {
-			logger.warn(
-				'An HSL element could not be found while parsing palette file. Injecting default values.',
-				`${thisModule} > ${caller}`
-			);
-		} else {
-			logger.debug(
-				'Missing HSL element in palette file.',
-				`${thisModule} > ${caller}`
-			);
-		}
+		log(
+			'warn',
+			'An HSL element could not be found while parsing palette file. Injecting default values.',
+			`${thisModule} > ${caller}`,
+			2
+		);
 
 		if (mode.stackTrace) console.trace('Stack Trace:');
 
@@ -150,17 +134,12 @@ function parseHSVColorValue(rawHSV: string | null): HSV['value'] {
 	const caller = 'parseHSVColorValue()';
 
 	if (!rawHSV) {
-		if (logMode.warn && logMode.verbosity >= 2) {
-			logger.warn(
-				'An HSV element could not be found while parsing palette file. Injecting default values.',
-				`${thisModule} > ${caller}`
-			);
-		} else {
-			logger.debug(
-				'Missing HSV element in palette file.',
-				`${thisModule} > ${caller}`
-			);
-		}
+		log(
+			'warn',
+			'An HSV element could not be found while parsing palette file. Injecting default values.',
+			`${thisModule} > ${caller}`,
+			2
+		);
 
 		if (mode.stackTrace) console.trace('Stack Trace:');
 
@@ -190,17 +169,12 @@ function parseLABColorValue(rawLAB: string | null): LAB['value'] {
 	const caller = 'parseLABColorValue()';
 
 	if (!rawLAB) {
-		if (logMode.warn && logMode.verbosity >= 2) {
-			logger.warn(
-				'A LAB element could not be found while parsing palette file. Injecting default values.',
-				`${thisModule} > ${caller}`
-			);
-		} else {
-			logger.debug(
-				'Missing LAB element in palette file.',
-				`${thisModule} > ${caller}`
-			);
-		}
+		log(
+			'warn',
+			'A LAB element could not be found while parsing palette file. Injecting default values.',
+			`${thisModule} > ${caller}`,
+			2
+		);
 
 		if (mode.stackTrace) console.trace('Stack Trace:');
 
@@ -230,17 +204,12 @@ function parseRGBColorValue(rawRGB: string | null): RGB['value'] {
 	const caller = 'parseRGBColorValue()';
 
 	if (!rawRGB) {
-		if (logMode.warn && logMode.verbosity >= 2) {
-			logger.warn(
-				'An RGB element could not be found while parsing palette file. Injecting default values.',
-				`${thisModule} > ${caller}`
-			);
-		} else {
-			logger.debug(
-				'Missing RGB element in palette file.',
-				`${thisModule} > ${caller}`
-			);
-		}
+		log(
+			'warn',
+			'An RGB element could not be found while parsing palette file. Injecting default values.',
+			`${thisModule} > ${caller}`,
+			2
+		);
 
 		if (mode.stackTrace) console.trace('Stack Trace:');
 
@@ -270,17 +239,12 @@ function parseXYZColorValue(rawXYZ: string | null): XYZ['value'] {
 	const caller = 'parseXYZColorValue()';
 
 	if (!rawXYZ) {
-		if (logMode.warn && logMode.verbosity >= 2) {
-			logger.warn(
-				'An XYZ element could not be found while parsing palette file. Injecting default values.',
-				`${thisModule} > ${caller}`
-			);
-		} else {
-			logger.debug(
-				'Missing XYZ element in palette file.',
-				`${thisModule} > ${caller}`
-			);
-		}
+		log(
+			'warn',
+			'An XYZ element could not be found while parsing palette file. Injecting default values.',
+			`${thisModule} > ${caller}`,
+			2
+		);
 
 		if (mode.stackTrace) console.trace('Stack Trace:');
 

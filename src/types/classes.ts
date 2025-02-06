@@ -3,14 +3,16 @@
 import { IDBPObjectStore } from 'idb';
 import {
 	Color,
+	Hex,
 	HSL,
 	MutationLog,
 	Palette,
+	PaletteArgs,
+	PaletteBoxObject,
 	PaletteDB,
 	PaletteItem,
-	PaletteBoxObject,
 	PaletteSchema,
-	PaletteArgs,
+	RGB,
 	Settings,
 	StoredPalette
 } from './index.js';
@@ -38,10 +40,30 @@ export interface DBService_ClassInterface {
 	resetDatabase(): Promise<void>;
 }
 
+export interface DOMSubService_ClassInterface {
+	getCheckboxState(id: string): boolean | void;
+	getElement<T extends HTMLElement>(id: string): T | null;
+	getSelectedExportFormat(): string | void;
+	updateColorBox(color: HSL, boxId: string): Promise<void>;
+	updateHistory(history: Palette[]): void;
+}
+
+export interface EventService_ClassInterface {
+	initialize(): void;
+	showTooltip(tooltipElement: HTMLElement): void;
+	saturateColor(): void;
+	showToast(message: string): void;
+}
+
 export interface HistoryService_ClassInterface {
 	addPaletteToHistory(palette: Palette): Promise<void>;
 	getPaletteHistory(): Promise<Palette[]>;
 	savePaletteHistory(paletteHistory: Palette[]): Promise<void>;
+}
+
+export interface IOService_ClassInterface {
+	exportPalette(palette: Palette, format: string): Promise<string>;
+	importPalette(file: File, format: 'json' | 'xml' | 'css'): Promise<void>;
 }
 
 export interface IDBManager_ClassInterface {
@@ -107,6 +129,24 @@ export interface PaletteService_ClassInterface {
 	): Promise<void>;
 }
 
+export interface PaletteEventSubService_ClassInterface {
+	initialize(): void;
+	saturateColor(): void;
+}
+
+export interface ParseService_ClassInterface {
+	parseCheckbox(id: string): boolean | void;
+	parseColorInput(input: HTMLInputElement): Hex | HSL | RGB | null;
+	parseDropdownSelection(id: string, validOptions: string[]): string | void;
+	parseNumberInput(
+		input: HTMLInputElement,
+		min?: number,
+		max?: number
+	): number | null;
+	parsePaletteExportFormat(): string | void;
+	parseTextInput(input: HTMLInputElement, regex?: RegExp): string | null;
+}
+
 export interface SettingsService_ClassInterface {
 	get maxHistory(): number;
 	set maxHistory(value: number);
@@ -117,11 +157,16 @@ export interface SettingsService_ClassInterface {
 
 export interface UIManager_ClassInterface {
 	addPaletteToHistory(palette: Palette): Promise<void>;
-	applyCustomColor(): HSL;
+	applyCustomColor(swatch: number): HSL;
 	applyFirstColorToUI(color: HSL): Promise<HSL>;
 	copyToClipboard(text: string, tooltipElement: HTMLElement): void;
 	createPaletteTable(palette: StoredPalette): HTMLElement;
 	getCurrentPalette(): Promise<Palette | null>;
+	getElementsForSelectedColorSwatch(swatch: number): {
+		selectedColorTextOutputBox: HTMLElement | null;
+		selectedColorBox: HTMLElement | null;
+		selectedColorStripe: HTMLElement | null;
+	};
 	getInstanceID(): number;
 	handleExport(format: 'css' | 'json' | 'xml'): Promise<void>;
 	makePaletteBox(
@@ -130,4 +175,11 @@ export interface UIManager_ClassInterface {
 	): Promise<PaletteBoxObject>;
 	removePaletteFromHistory(paletteID: string): Promise<void>;
 	renderPalette(tableId: string): Promise<void | null>;
+	saturateColor(swatch: number): void;
+	showToast(message: string): void;
+	updateHistory(history?: Palette[]): void;
+}
+
+export interface ValidationService_ClassInterface {
+	validateStaticElements(): void;
 }

@@ -1,6 +1,6 @@
-// File: types/dom.js
+// File: types/app/dom.js
 
-import { ColorSpace, Hex, HSL, RGB } from '../index.js';
+import { ColorSpace } from '../index.js';
 import type { UIManager } from '../../app/ui/UIManager.js';
 
 export interface DOMFn_EventListenerFnInterface {
@@ -11,7 +11,7 @@ export interface DOMFn_EventListenerFnInterface {
 			main: (uiManager: UIManager) => void;
 		};
 	};
-	dad: {
+	dragAndDrop: {
 		attach(element: HTMLElement | null): void;
 	};
 	palette: {
@@ -28,31 +28,16 @@ export interface DOMFn_EventListenerFnInterface {
 	};
 }
 
-export interface DOMFn_MasterInterface {
-	initializeEventListeners(uiManager: UIManager): void;
-	parse: {
-		checkbox(id: string): boolean | void;
-		colorInput(input: HTMLInputElement): Hex | HSL | RGB | null;
-		paletteExportFormat(): string | void;
-	};
-	utils: {
-		switchColorSpace(targetFormat: ColorSpace): Promise<void>;
-		file: {
-			download(data: string, filename: string, type: string): void;
-			readFile(file: File): Promise<string>;
-		};
-		event: {
-			addEventListener<K extends keyof HTMLElementEventMap>(
-				id: string,
-				eventType: K,
-				callback: (ev: HTMLElementEventMap[K]) => void
-			): void;
-			addConversionListener: (id: string, colorSpace: string) => void;
-		};
-	};
-	validate: {
-		staticElements(): void;
-	};
+export interface DOMUtilsInterface {
+	addConversionListener: (id: string, colorSpace: string) => void;
+	addEventListener<K extends keyof HTMLElementEventMap>(
+		id: string,
+		eventType: K,
+		callback: (ev: HTMLElementEventMap[K]) => void
+	): void;
+	downloadFile(data: string, filename: string, type: string): void;
+	readFile(file: File): Promise<string>;
+	switchColorSpace(targetFormat: ColorSpace): Promise<void>;
 }
 
 export interface PaletteBoxObject {

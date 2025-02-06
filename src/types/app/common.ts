@@ -104,7 +104,7 @@ export interface CommonFn_MasterInterface {
 		};
 		convert: {
 			colorStringToColor(colorString: Color_StringProps): Promise<Color>;
-			colorToCSSColorString(color: Color): Promise<string>;
+			colorToCSS(color: Color): Promise<string>;
 			stringToValue: {
 				cmyk(cmyk: CMYK_StringProps['value']): CMYK['value'];
 				hex(hex: Hex_StringProps['value']): Hex['value'];

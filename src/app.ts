@@ -5,7 +5,7 @@
 
 // You may use this code for any purpose EXCEPT for the creation of proprietary derivatives. I encourage you to improve on my code or to include it in other projects if you find it helpful. Please credit me as the original author.
 
-// This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE OF ANY KIND.
+// This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE.
 
 // File: app.js
 
@@ -14,10 +14,10 @@ import { getIDBInstance } from './app/db/instance.js';
 import { createLogger } from './logger/index.js';
 import { defaultData as defaults } from './data/defaults.js';
 import { domData } from './data/dom.js';
-import { eventListenerFn } from './app/dom/eventListeners/index.js';
+import { eventListenerFn } from './app/ui/dom/eventListeners/index.js';
 import { modeData as mode } from './data/mode.js';
 import { uiFn } from './app/ui/main.js';
-import { validateStaticElements } from './app/dom/validate.js';
+import { validateStaticElements } from './app/ui/dom/validate.js';
 
 const logMode = mode.logging;
 

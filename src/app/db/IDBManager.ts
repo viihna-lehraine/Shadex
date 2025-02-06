@@ -152,12 +152,12 @@ export class IDBManager implements IDBManager_ClassInterface {
 		await this.paletteService.savePalette(id, newPalette);
 	}
 
-	public async savePaletteToDB(args: PaletteArgs): Promise<Palette> {
-		return await this.paletteService.savePaletteToDB(args);
-	}
-
 	public async savePaletteHistory(paletteHistory: Palette[]): Promise<void> {
 		await this.historyService.savePaletteHistory(paletteHistory);
+	}
+
+	public async savePaletteToDB(args: PaletteArgs): Promise<Palette> {
+		return await this.paletteService.savePaletteToDB(args);
 	}
 
 	public async saveSettings(newSettings: Settings): Promise<void> {

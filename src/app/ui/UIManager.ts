@@ -8,8 +8,11 @@ import {
 	CommonFn_MasterInterface,
 	ConstsDataInterface,
 	DOMDataInterface,
-	DOMFn_EventListenerFnInterface,
+	DOMSubService_ClassInterface,
+	DOMUtilsInterface,
+	EventService_ClassInterface,
 	HSL,
+	IOService_ClassInterface,
 	ModeDataInterface,
 	Palette,
 	PaletteBoxObject,
@@ -19,20 +22,18 @@ import {
 	UIManager_ClassInterface
 } from '../../types/index.js';
 import { IDBManager } from '../db/IDBManager.js';
+import { DOMSubService } from './services/subServices/DOM.js';
+import { EventService } from './services/event/Event.js';
+import { IOService } from './services/io/IO.js';
 import { appUtils } from '../appUtils.js';
 import { commonFn } from '../../common/index.js';
 import { constsData as consts } from '../../data/consts.js';
 import { domData } from '../../data/dom.js';
-import { download, readFile } from './dom/utils.js';
+import { domUtils } from './domUtils.js';
 import { ioFn } from './io/index.js';
 import { modeData as mode } from '../../data/mode.js';
 
-const thisModule = 'ui/UIManager.ts';
-
-const fileUtils = {
-	download,
-	readFile
-};
+const thisModule = 'app/ui/UIManager.ts';
 
 export class UIManager implements UIManager_ClassInterface {
 	private static instanceCounter = 0; // static instance ID counter
@@ -49,17 +50,20 @@ export class UIManager implements UIManager_ClassInterface {
 	private logMode: ModeDataInterface['logging'];
 	private mode: ModeDataInterface;
 
+	private appUtils: AppUtilsInterface;
+	private domUtils: DOMUtilsInterface;
 	private conversionUtils: CommonFn_MasterInterface['convert'];
 	private coreUtils: CommonFn_MasterInterface['core'];
-	private appUtils: AppUtilsInterface;
 	private utils: CommonFn_MasterInterface['utils'];
+
+	private domSubService!: DOMSubService_ClassInterface;
+	private eventService!: EventService_ClassInterface;
+	private ioService!: IOService_ClassInterface;
 
 	private getCurrentPaletteFn?: () => Promise<Palette | null>;
 	private getStoredPalette?: (id: string) => Promise<StoredPalette | null>;
 
-	private eventListenerFn: DOMFn_EventListenerFnInterface;
-
-	constructor(eventListenerFn: DOMFn_EventListenerFnInterface) {
+	constructor() {
 		this.init();
 
 		this.id = UIManager.instanceCounter++;
@@ -73,12 +77,13 @@ export class UIManager implements UIManager_ClassInterface {
 		this.logMode = mode.logging;
 		this.mode = mode;
 
-		this.coreUtils = commonFn.core;
 		this.appUtils = appUtils;
+		this.coreUtils = commonFn.core;
+		this.domUtils = domUtils;
 		this.utils = commonFn.utils;
 		this.conversionUtils = commonFn.convert;
 
-		this.eventListenerFn = eventListenerFn;
+		this.initializeServices();
 	}
 
 	/// * * * * * * PUBLIC METHODS * * * * * * *
@@ -87,26 +92,27 @@ export class UIManager implements UIManager_ClassInterface {
 	public async addPaletteToHistory(palette: Palette): Promise<void> {
 		await this.idbManager.addPaletteToHistory(palette);
 
-		this.updateHistoryUI();
+		this.updateHistory();
 	}
 
-	public applyCustomColor(): HSL {
+	public applyCustomColor(swatch: number): HSL {
 		try {
-			const colorPicker = document.getElementById(
-				'custom-color-picker'
-			) as HTMLInputElement | null;
+			const colorPicker = this.domSubService.getElement<HTMLInputElement>(
+				`custom-color-${swatch}`
+			);
 
 			if (!colorPicker) {
-				throw new Error('Color picker element not found');
+				throw new Error(`Color picker for swatch ${swatch} not found`);
 			}
 
 			const rawValue = colorPicker.value.trim();
 
-			const selectedFormat = (
-				document.getElementById(
+			const formatElement =
+				this.domSubService.getElement<HTMLSelectElement>(
 					'custom-color-format'
-				) as HTMLSelectElement | null
-			)?.value as ColorSpace;
+				);
+
+			const selectedFormat = formatElement?.value as ColorSpace;
 
 			if (!this.utils.color.isColorSpace(selectedFormat)) {
 				if (!this.mode.gracefulErrors)
@@ -157,7 +163,7 @@ export class UIManager implements UIManager_ClassInterface {
 			}
 
 			const formatColorString =
-				await this.coreUtils.convert.colorToCSSColorString(color);
+				await this.coreUtils.convert.colorToCSS(color);
 
 			if (!formatColorString) {
 				this.appUtils.log(
@@ -192,7 +198,7 @@ export class UIManager implements UIManager_ClassInterface {
 			navigator.clipboard
 				.writeText(colorValue)
 				.then(() => {
-					this.getEventListenerFn().temp.showTooltip(tooltipElement);
+					this.eventService.showTooltip(tooltipElement);
 
 					this.appUtils.log(
 						'debug',
@@ -247,9 +253,9 @@ export class UIManager implements UIManager_ClassInterface {
 		return fragment as unknown as HTMLElement;
 	}
 
-	public desaturateColor(selectedColor: number): void {
+	public desaturateColor(swatch: number): void {
 		try {
-			this.getElementsForSelectedColor(selectedColor);
+			this.getElementsForSelectedColorSwatch(swatch);
 		} catch (error) {
 			this.appUtils.log(
 				'error',
@@ -260,27 +266,23 @@ export class UIManager implements UIManager_ClassInterface {
 		}
 	}
 
-	public getElementsForSelectedColor(selectedColor: number): {
+	public getElementsForSelectedColorSwatch(swatch: number): {
 		selectedColorTextOutputBox: HTMLElement | null;
 		selectedColorBox: HTMLElement | null;
 		selectedColorStripe: HTMLElement | null;
 	} {
 		const thisMethod = 'getElementsForSelectedColor()';
-		const selectedColorBox = document.getElementById(
-			`color-box-${selectedColor}`
-		);
+		const selectedColorBox = document.getElementById(`color-box-${swatch}`);
 
 		if (!selectedColorBox) {
 			this.appUtils.log(
 				'warn',
-				`Element not found for color ${selectedColor}`,
+				`Element not found for color ${swatch}`,
 				`${thisModule} > ${thisMethod}`,
 				2
 			);
 
-			this.getEventListenerFn().temp.showToast(
-				'Please select a valid color.'
-			);
+			this.eventService.showToast('Please select a valid color.');
 
 			return {
 				selectedColorTextOutputBox: null,
@@ -291,11 +293,11 @@ export class UIManager implements UIManager_ClassInterface {
 
 		return {
 			selectedColorTextOutputBox: document.getElementById(
-				`color-text-output-box-${selectedColor}`
+				`color-text-output-box-${swatch}`
 			),
 			selectedColorBox,
 			selectedColorStripe: document.getElementById(
-				`color-stripe-${selectedColor}`
+				`color-stripe-${swatch}`
 			)
 		};
 	}
@@ -369,7 +371,7 @@ export class UIManager implements UIManager_ClassInterface {
 		format: 'JSON' | 'XML' | 'CSS'
 	): Promise<void> {
 		try {
-			const data = await fileUtils.readFile(file);
+			const data = await this.domUtils.readFile(file);
 
 			let palette: Palette | null = null;
 
@@ -428,7 +430,7 @@ export class UIManager implements UIManager_ClassInterface {
 	public async loadPaletteHistory(): Promise<void> {
 		const history = await this.idbManager.getPaletteHistory();
 
-		this.updateHistoryUI(history);
+		this.updateHistory(history);
 	}
 
 	public async makePaletteBox(
@@ -469,7 +471,7 @@ export class UIManager implements UIManager_ClassInterface {
 			colorTextOutputBox.setAttribute('data-format', 'hex');
 
 			const colorString =
-				await this.coreUtils.convert.colorToCSSColorString(clonedColor);
+				await this.coreUtils.convert.colorToCSS(clonedColor);
 
 			colorTextOutputBox.value = colorString || '';
 			colorTextOutputBox.colorValues = clonedColor;
@@ -491,9 +493,7 @@ export class UIManager implements UIManager_ClassInterface {
 						colorTextOutputBox.value
 					);
 
-					this.getEventListenerFn().temp.showTooltip(
-						colorTextOutputBox
-					);
+					this.eventService.showTooltip(colorTextOutputBox);
 
 					clearTimeout(consts.timeouts.tooltip || 1000);
 
@@ -556,7 +556,7 @@ export class UIManager implements UIManager_ClassInterface {
 
 			colorStripe.setAttribute('draggable', 'true');
 
-			this.getEventListenerFn().dad.attach(colorStripe);
+			this.getEventListenerFn().dragAndDrop.attach(colorStripe);
 
 			colorStripe.appendChild(paletteBox);
 
@@ -657,7 +657,8 @@ export class UIManager implements UIManager_ClassInterface {
 		const updatedHistory = history.filter(p => p.id !== paletteID);
 
 		await this.idbManager.savePaletteHistory(updatedHistory);
-		this.updateHistoryUI();
+
+		this.updateHistory();
 	}
 
 	public async renderPalette(tableId: string): Promise<void | null> {
@@ -692,10 +693,11 @@ export class UIManager implements UIManager_ClassInterface {
 		);
 	}
 
-	public saturateColor(selectedColor: number): void {
+	public saturateColor(swatch: number): void {
 		try {
-			this.getElementsForSelectedColor(selectedColor);
-			// *DEV-NOTE* unfinished function
+			this.getElementsForSelectedColorSwatch(swatch);
+
+			this.eventService.saturateColor();
 		} catch (error) {
 			this.appUtils.log(
 				'error',
@@ -723,49 +725,27 @@ export class UIManager implements UIManager_ClassInterface {
 		this.idbManager = idbManager;
 	}
 
+	public showToast(message: string): void {
+		this.eventService.showToast(message);
+	}
+
+	public updateHistory(history?: Palette[]): void {
+		this.domSubService.updateHistory(history || this.paletteHistory);
+	}
+
 	/// * * * * * * PRIVATE METHODS * * * * * * *
 	// * * * * * * * * * * * * * * * * * * * * * *
 
 	private async init(): Promise<void> {
 		this.idbManager = await IDBManager.getInstance();
 
+		await this.initializeServices();
 		await this.loadPaletteHistory();
 	}
 
-	private getEventListenerFn(): DOMFn_EventListenerFnInterface {
-		if (!this.eventListenerFn) {
-			throw new Error('Event listeners have not been initialized yet.');
-		}
-
-		return this.eventListenerFn;
-	}
-
-	private updateHistoryUI(history: Palette[] = []): void {
-		const historyList = this.domData.elements.static.divs.paletteHistory;
-		if (!historyList) return;
-
-		historyList.innerHTML = '';
-
-		history.forEach(palette => {
-			const entry = document.createElement('div');
-			entry.classList.add('history-item');
-			entry.id = `palette_${palette.id}`;
-
-			entry.innerHTML = `
-				<p>Palette #${palette.metadata.name || palette.id}</p>
-				<div class="color-preview">
-					${palette.items.map(item => `<span class="color-box" style="background: ${item.colors.css.hex};"></span>`).join(' ')}
-				</div>
-				<button class="remove-history-item" data-id="${palette.id}-history-remove-btn">Remove</button>
-			`;
-
-			entry
-				.querySelector('.remove-history-item')
-				?.addEventListener('click', async () => {
-					await this.removePaletteFromHistory(palette.id);
-				});
-
-			historyList.appendChild(entry);
-		});
+	private async initializeServices(): Promise<void> {
+		this.domSubService = await DOMSubService.getInstance();
+		this.eventService = await EventService.getInstance();
+		this.ioService = await IOService.getInstance();
 	}
 }

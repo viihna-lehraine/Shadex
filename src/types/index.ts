@@ -3,11 +3,7 @@
 export type { CommonFn_MasterInterface } from './app/common.js';
 export type { AppUtilsInterface } from './app/core.js';
 export type { DBUtilsInterface, PaletteArgs } from './app/db.js';
-export type {
-	DOMFn_EventListenerFnInterface,
-	DOMFn_MasterInterface,
-	PaletteBoxObject
-} from './app/dom.js';
+export type { DOMUtilsInterface, PaletteBoxObject } from './app/dom.js';
 export type { ColorParser, IOFn_MasterInterface } from './app/io.js';
 export type {
 	Palette_CommonFn_MasterInterface,
@@ -101,10 +97,15 @@ export type {
 export type {
 	AppLogger_ClassInterface,
 	DBService_ClassInterface,
+	DOMSubService_ClassInterface,
+	EventService_ClassInterface,
 	HistoryService_ClassInterface,
 	IDBManager_ClassInterface,
+	IOService_ClassInterface,
 	MutationService_ClassInterface,
 	PaletteService_ClassInterface,
+	ParseService_ClassInterface,
 	SettingsService_ClassInterface,
-	UIManager_ClassInterface
+	UIManager_ClassInterface,
+	ValidationService_ClassInterface
 } from './classes.js';

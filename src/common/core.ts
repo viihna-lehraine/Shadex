@@ -504,7 +504,7 @@ async function colorStringToColor(
 	}
 }
 
-async function colorToCSSColorString(color: Color): Promise<string> {
+async function colorToCSS(color: Color): Promise<string> {
 	try {
 		switch (color.format) {
 			case 'cmyk':
@@ -659,7 +659,7 @@ export const convert: CommonFn_MasterInterface['core']['convert'] = {
 	colorStringToColor,
 	stringToValue,
 	toColorValueRange,
-	colorToCSSColorString,
+	colorToCSS,
 	valueToString
 };
 
