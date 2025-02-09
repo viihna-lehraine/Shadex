@@ -1,7 +1,7 @@
 // File: common/utils/random.js
 
 import { CommonFn_MasterInterface, HSL, SL } from '../../types/index.js';
-import { coreUtils } from '../core.js';
+import { coreUtils } from '../core/core.js';
 import { createLogger } from '../../logger/index.js';
 import { defaultData as defaults } from '../../data/defaults.js';
 import { modeData as mode } from '../../data/mode.js';

@@ -5,7 +5,7 @@ import {
 	Color_StringProps,
 	CommonFn_MasterInterface
 } from '../../types/index.js';
-import { coreUtils } from '../core.js';
+import { coreUtils } from '../core/core.js';
 import { createLogger } from '../../logger/index.js';
 import { modeData as mode } from '../../data/mode.js';
 

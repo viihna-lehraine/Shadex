@@ -24,7 +24,7 @@ import {
 	XYZ,
 	XYZ_StringProps
 } from '../../../../types/index.js';
-import { IDBManager } from '../../../db/IDBManager.js';
+import { IDBManager } from '../../../IDB/IDBManager.js';
 import { appUtils } from '../../../appUtils.js';
 import { commonFn } from '../../../../common/index.js';
 import { configData as config } from '../../../../data/config.js';

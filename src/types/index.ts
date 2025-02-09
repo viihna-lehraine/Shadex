@@ -1,6 +1,5 @@
 // File: types/index.js
 
-export type { CommonFn_MasterInterface } from './app/common.js';
 export type { AppUtilsInterface } from './app/core.js';
 export type { DBUtilsInterface, PaletteArgs } from './app/db.js';
 export type { DOMUtilsInterface, PaletteBoxObject } from './app/dom.js';
@@ -11,6 +10,19 @@ export type {
 	PaletteGenerationInterface
 } from './app/palette.js';
 export type { UIFn_MasterInterface } from './app/ui.js';
+export type {
+	AdjustmentUtilsInterface,
+	BrandingUtilsInterface,
+	ColorUtilsInterface,
+	CoreUtilsInterface,
+	DOMutilsInterface,
+	FormattingUtilsInterface,
+	PaletteUtilsInterface,
+	SanitationUtilsInterface,
+	TypeGuardUtilsInteface,
+	ValidationUtilsInterface
+} from './app/utils/partials.js';
+export type { UtilitiesInterface } from './app/utils/main.js';
 export type {
 	CMYK,
 	CMYK_StringProps,
@@ -59,7 +71,8 @@ export type {
 	ConstsDataInterface,
 	DataSetsInterface,
 	DefaultDataInterface,
-	ModeDataInterface
+	ModeDataInterface,
+	StorageDataInterface
 } from './data/core/base.js';
 export type { DOMDataInterface } from './data/core/dom.js';
 export type {
@@ -94,18 +107,27 @@ export type {
 	XYZ_Y,
 	XYZ_Z
 } from './data/sets.js';
+export type { AppLoggerServiceInterface } from './services/other.js';
 export type {
-	AppLogger_ClassInterface,
-	DBService_ClassInterface,
-	DOMSubService_ClassInterface,
-	EventService_ClassInterface,
-	HistoryService_ClassInterface,
-	IDBManager_ClassInterface,
-	IOService_ClassInterface,
-	MutationService_ClassInterface,
-	PaletteService_ClassInterface,
-	ParseService_ClassInterface,
-	SettingsService_ClassInterface,
-	UIManager_ClassInterface,
-	ValidationService_ClassInterface
-} from './classes.js';
+	HistoryServiceInterface,
+	LocalStorageServiceInterface,
+	MutationServiceInterface,
+	PaletteStorageServiceInterface,
+	SettingsServiceInterface,
+	StorageManagerInterface
+} from './services/storage.js';
+export type {
+	DOMSubServiceInterface,
+	EventServiceInterface,
+	IOServiceInterface,
+	PaletteEventSubServiceInterface,
+	ParseServiceInterface,
+	UIManagerInterface,
+	ValidationServiceInterface
+} from './services/ui.js';
+export type { IDBManager_ClassInterface } from './classes.js';
+export type {
+	BrandFunctions,
+	ValidateFn,
+	ValidateFunctions
+} from './functions.js';

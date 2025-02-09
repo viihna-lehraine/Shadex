@@ -42,27 +42,6 @@ import {
 export type AppModeData = 'dev' | 'prod';
 
 export interface ConfigDataInterface {
-	db: {
-		DEFAULT_KEYS: {
-			APP_SETTINGS: string;
-			CUSTOM_COLOR: string;
-		};
-		DEFAULT_SETTINGS: {
-			colorSpace: ColorSpace;
-			lastPaletteID: number;
-			lastTableID: number;
-			theme: 'light' | 'dark';
-			loggingEnabled: boolean;
-		};
-		STORE_NAMES: {
-			APP_SETTINGS: string;
-			CUSTOM_COLOR: string;
-			MUTATIONS: string;
-			PALLETES: string;
-			SETTINGS: string;
-			TABLES: string;
-		};
-	};
 	regex: {
 		colors: {
 			cmyk: RegExp;
@@ -85,6 +64,17 @@ export interface ConfigDataInterface {
 					metadata: RegExp;
 				};
 			};
+		};
+	};
+	storage: {
+		DEFAULT_KEYS: {
+			SETTINGS: string;
+		};
+		DEFAULT_SETTINGS: {
+			colorSpace: ColorSpace;
+			lastPaletteID: number;
+			theme: 'light' | 'dark';
+			loggingEnabled: boolean;
 		};
 	};
 }
@@ -245,4 +235,9 @@ export interface ModeDataInterface {
 	};
 	showAlerts: boolean;
 	stackTrace: boolean;
+}
+
+export interface StorageDataInterface {
+	HISTORY_KEY: string;
+	MUTATIONS_KEY: string;
 }

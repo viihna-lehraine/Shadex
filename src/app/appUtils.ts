@@ -8,7 +8,7 @@ const logMode = mode.logging;
 
 const logger = await createLogger();
 
-async function handleAsync<T>(
+async function handleAsyncErrors<T>(
 	action: () => Promise<T>,
 	errorMessage: string,
 	caller: string = 'unknown caller',
@@ -46,6 +46,6 @@ function log(
 }
 
 export const appUtils: AppUtilsInterface = {
-	handleAsync,
+	handleAsyncErrors,
 	log
 };

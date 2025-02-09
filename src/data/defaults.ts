@@ -11,7 +11,7 @@ import {
 	UnbrandedPaletteItem,
 	UnbrandedStoredPalette
 } from '../types/index.js';
-import { brand } from '../common/core.js';
+import { brand } from '../common/core/core.js';
 
 const brandedData: Palette = {
 	id: `null-palette-${Date.now()}`,

@@ -7,7 +7,7 @@ import {
 	Palette,
 	PaletteArgs
 } from '../../types/index';
-import { coreUtils } from '../core.js';
+import { coreUtils } from '../core/core.js';
 import { createLogger } from '../../logger/index.js';
 import { modeData as mode } from '../../data/mode.js';
 

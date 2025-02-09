@@ -7,7 +7,7 @@ import {
 	HSL,
 	Palette
 } from '../../../../types/index.js';
-import { IDBManager } from '../../../db/IDBManager.js';
+import { IDBManager } from '../../../IDB/IDBManager.js';
 import { commonFn } from '../../../../common/index.js';
 import { domData } from '../../../../data/dom.js';
 

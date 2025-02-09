@@ -5,7 +5,7 @@ import {
 	PaletteSchema,
 	Palette
 } from '../../../../../types/index.js';
-import { dbUtils } from '../../../../db/dbUtils.js';
+import { dbUtils } from '../../../../IDB/dbUtils.js';
 
 const PALETTE_STORE = 'palettes' as keyof PaletteSchema;
 

@@ -6,7 +6,7 @@ import {
 	PaletteGenerationArgs,
 	PaletteItem
 } from '../../../types/index.js';
-import { IDBManager } from '../../../app/db/IDBManager.js';
+import { IDBManager } from '../../../app/IDB/IDBManager.js';
 import {
 	helpers as paletteHelpers,
 	superUtils as paletteSuperUtils

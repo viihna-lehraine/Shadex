@@ -8,20 +8,19 @@ import {
 	CommonFn_MasterInterface,
 	ConstsDataInterface,
 	DOMDataInterface,
-	DOMSubService_ClassInterface,
+	DOMSubServiceInterface,
 	DOMUtilsInterface,
-	EventService_ClassInterface,
+	EventServiceInterface,
 	HSL,
-	IOService_ClassInterface,
+	IOServiceInterface,
 	ModeDataInterface,
 	Palette,
 	PaletteBoxObject,
 	SL,
 	StoredPalette,
 	SV,
-	UIManager_ClassInterface
+	UIManagerInterface
 } from '../../types/index.js';
-import { IDBManager } from '../db/IDBManager.js';
 import { DOMSubService } from './services/subServices/DOM.js';
 import { EventService } from './services/event/Event.js';
 import { IOService } from './services/io/IO.js';
@@ -35,7 +34,7 @@ import { modeData as mode } from '../../data/mode.js';
 
 const thisModule = 'app/ui/UIManager.ts';
 
-export class UIManager implements UIManager_ClassInterface {
+export class UIManager implements UIManagerInterface {
 	private static instanceCounter = 0; // static instance ID counter
 	private static instances = new Map<number, UIManager>(); // instance registry
 	private id: number; // unique instance ID
@@ -56,9 +55,9 @@ export class UIManager implements UIManager_ClassInterface {
 	private coreUtils: CommonFn_MasterInterface['core'];
 	private utils: CommonFn_MasterInterface['utils'];
 
-	private domSubService!: DOMSubService_ClassInterface;
-	private eventService!: EventService_ClassInterface;
-	private ioService!: IOService_ClassInterface;
+	private domSubService!: DOMSubServiceInterface;
+	private eventService!: EventServiceInterface;
+	private ioService!: IOServiceInterface;
 
 	private getCurrentPaletteFn?: () => Promise<Palette | null>;
 	private getStoredPalette?: (id: string) => Promise<StoredPalette | null>;

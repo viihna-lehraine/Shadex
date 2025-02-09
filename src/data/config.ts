@@ -2,32 +2,20 @@
 
 import { ConfigDataInterface, ColorSpace } from '../types/index.js';
 
-const DEFAULT_KEYS: ConfigDataInterface['db']['DEFAULT_KEYS'] = {
-	APP_SETTINGS: 'appSettings',
-	CUSTOM_COLOR: 'customColor'
+const DEFAULT_KEYS: ConfigDataInterface['storage']['DEFAULT_KEYS'] = {
+	SETTINGS: 'settings'
 };
 
-const DEFAULT_SETTINGS: ConfigDataInterface['db']['DEFAULT_SETTINGS'] = {
+const DEFAULT_SETTINGS: ConfigDataInterface['storage']['DEFAULT_SETTINGS'] = {
 	colorSpace: 'hsl' as ColorSpace,
 	lastPaletteID: 0,
-	lastTableID: 0,
 	theme: 'light' as 'light' | 'dark',
 	loggingEnabled: true
 };
 
-const STORE_NAMES: ConfigDataInterface['db']['STORE_NAMES'] = {
-	APP_SETTINGS: 'appSettings',
-	CUSTOM_COLOR: 'customColor',
-	MUTATIONS: 'mutations',
-	PALLETES: 'palettes',
-	SETTINGS: 'settings',
-	TABLES: 'tables'
-};
-
-const db: ConfigDataInterface['db'] = {
+const storage: ConfigDataInterface['storage'] = {
 	DEFAULT_KEYS,
-	DEFAULT_SETTINGS,
-	STORE_NAMES
+	DEFAULT_SETTINGS
 };
 
 const regex: ConfigDataInterface['regex'] = {
@@ -55,4 +43,4 @@ const regex: ConfigDataInterface['regex'] = {
 	}
 };
 
-export const configData: ConfigDataInterface = { db, regex } as const;
+export const configData: ConfigDataInterface = { regex, storage } as const;

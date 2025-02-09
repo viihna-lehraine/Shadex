@@ -8,7 +8,7 @@ import {
 	UnbrandedColor,
 	UnbrandedPalette
 } from '../types/index.js';
-import { brand } from './core.js';
+import { brand } from './core/core.js';
 import { createLogger } from '../logger/index.js';
 import { modeData as mode } from '../data/mode.js';
 
@@ -162,7 +162,7 @@ function componentToHex(component: number): string {
 	}
 }
 
-function defaultColorValue(color: UnbrandedColor): Color {
+function brandColor(color: UnbrandedColor): Color {
 	switch (color.format) {
 		case 'cmyk':
 			return {

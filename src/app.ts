@@ -10,7 +10,7 @@
 // File: app.js
 
 import { UIManager } from './app/ui/UIManager.js';
-import { getIDBInstance } from './app/db/instance.js';
+import { getIDBInstance } from './app/IDB/instance.js';
 import { createLogger } from './logger/index.js';
 import { defaultData as defaults } from './data/defaults.js';
 import { domData } from './data/dom.js';

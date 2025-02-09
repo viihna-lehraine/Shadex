@@ -8,7 +8,7 @@ import {
 	PaletteOptions,
 	UIFn_MasterInterface
 } from '../../types/index.js';
-import { getIDBInstance } from '../db/instance.js';
+import { getIDBInstance } from '../IDB/instance.js';
 import { getUIManager } from './instance.js';
 import { commonFn } from '../../common/index.js';
 import { constsData as consts } from '../../data/consts.js';

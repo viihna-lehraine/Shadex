@@ -2,7 +2,7 @@
 
 import { CommonFn_MasterInterface, HSL, RGB } from '../../types/index.js';
 import { createLogger } from '../../logger/index.js';
-import { coreUtils } from '../core.js';
+import { coreUtils } from '../core/core.js';
 import { defaultData as defaults } from '../../data/defaults.js';
 import { modeData as mode } from '../../data/mode.js';
 
