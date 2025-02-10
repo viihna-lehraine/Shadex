@@ -1,7 +1,7 @@
-// File: types/app/core.ts
+// File: types/app/services.js
 
-export interface AppUtilsInterface {
-	handleAsync<T>(
+export interface AppServicesInterface {
+	handleAsyncErrors<T>(
 		action: () => Promise<T>,
 		errorMessage: string,
 		caller: string,

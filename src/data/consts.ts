@@ -41,8 +41,31 @@ const paletteRanges: ConstsDataInterface['paletteRanges'] = {
 };
 
 const probabilities: ConstsDataInterface['probabilities'] = {
-	values: [40, 45, 50, 55, 60, 65, 70],
-	weights: [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05]
+	base: {
+		values: [40, 45, 50, 55, 60, 65, 70],
+		weights: [0.1, 0.15, 0.2, 0.3, 0.15, 0.05, 0.05]
+	},
+	chaotic: {
+		values: [20, 25, 30, 35, 40],
+		weights: [0.1, 0.15, 0.3, 0.25, 0.2]
+		// big gaps possible, but favoring mid-range (45°-60°)
+		// occasional extreme shifts (120°-150°)
+		// useful for abstract or experimental palettes.
+	},
+	soft: {
+		values: [20, 25, 30, 35, 40],
+		weights: [0.2, 0.25, 0.3, 0.15, 0.1]
+		// most common variations: 30°
+		// rare to see anything above 40°
+		// creates gentle color differences.
+	},
+	strong: {
+		values: [20, 25, 30, 35, 40],
+		weights: [0.1, 0.15, 0.3, 0.25, 0.2]
+		// most common variation: 60°
+		// rare to see shifts beyond 80°
+		// feels bolder but still maintains balance.
+	}
 };
 
 const thresholds: ConstsDataInterface['thresholds'] = {

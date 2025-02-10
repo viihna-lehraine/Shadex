@@ -26,7 +26,7 @@ export interface DBUtilsInterface {
 export interface PaletteArgs {
 	type: string;
 	items: PaletteItem[];
-	paletteID: number;
+	paletteID: string;
 	swatches: number;
 	limitDark: boolean;
 	limitGray: boolean;

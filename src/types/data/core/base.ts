@@ -43,6 +43,9 @@ export type AppModeData = 'dev' | 'prod';
 
 export interface ConfigDataInterface {
 	regex: {
+		brand: {
+			hex: RegExp;
+		};
 		colors: {
 			cmyk: RegExp;
 			hex: RegExp;
@@ -64,6 +67,9 @@ export interface ConfigDataInterface {
 					metadata: RegExp;
 				};
 			};
+		};
+		validation: {
+			hex: RegExp;
 		};
 	};
 	storage: {
@@ -120,8 +126,22 @@ export interface ConstsDataInterface {
 		};
 	};
 	probabilities: {
-		values: readonly number[];
-		weights: readonly number[];
+		base: {
+			values: readonly number[];
+			weights: readonly number[];
+		};
+		chaotic: {
+			values: readonly number[];
+			weights: readonly number[];
+		};
+		soft: {
+			values: readonly number[];
+			weights: readonly number[];
+		};
+		strong: {
+			values: readonly number[];
+			weights: readonly number[];
+		};
 	};
 	thresholds: {
 		dark: number;

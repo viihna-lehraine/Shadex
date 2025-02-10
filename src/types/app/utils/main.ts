@@ -1,7 +1,6 @@
 // File: types/app/common/main.js
 
 import {
-	AdjustmentUtilsInterface,
 	BrandingUtilsInterface,
 	ByteRange,
 	CMYK,
@@ -47,7 +46,6 @@ import {
 	UnbrandedSL,
 	UnbrandedSV,
 	UnbrandedXYZ,
-	ValidateFn,
 	ValidationUtilsInterface,
 	XYZ,
 	XYZ_X,
@@ -70,7 +68,7 @@ export interface UtilitiesInterface {
 		asBranded<T extends keyof RangeKeyMap>(
 			value: number,
 			rangeKey: T,
-			validate: ValidateFn
+			validate: ValidationUtilsInterface
 		): RangeKeyMap[T];
 		asByteRange(value: number, validate: ValidateFn): ByteRange;
 		asCMYK(color: UnbrandedCMYK, validate: ValidateFn): CMYK;

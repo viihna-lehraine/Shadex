@@ -1,11 +1,12 @@
 // File: utils/branding.js
 
 import {
-	BrandFunctions,
 	BrandingUtilsInterface,
 	ByteRange,
 	CMYK,
 	Color,
+	ConfigDataInterface,
+	DataSetsInterface,
 	Hex,
 	HexSet,
 	HSL,
@@ -32,7 +33,6 @@ import {
 	UnbrandedSL,
 	UnbrandedSV,
 	UnbrandedXYZ,
-	ValidateFn,
 	ValidationUtilsInterface,
 	XYZ,
 	XYZ_X,
@@ -43,24 +43,33 @@ import {
 function asBranded<T extends keyof RangeKeyMap>(
 	value: number,
 	rangeKey: T,
-	validate: ValidateFn
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
 ): RangeKeyMap[T] {
-	validate(value, rangeKey);
+	validate.range(value, rangeKey, sets);
 
 	return value as RangeKeyMap[T];
 }
 
-function asByteRange(value: number, validate: ValidateFn): ByteRange {
-	validate(value, 'ByteRange');
+function asByteRange(
+	value: number,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): ByteRange {
+	validate.range(value, 'ByteRange', sets);
 
 	return value as ByteRange;
 }
 
-function asCMYK(color: UnbrandedCMYK, validate: ValidateFn): CMYK {
-	const brandedCyan = asPercentile(color.value.cyan, validate);
-	const brandedMagenta = asPercentile(color.value.magenta, validate);
-	const brandedYellow = asPercentile(color.value.yellow, validate);
-	const brandedKey = asPercentile(color.value.key, validate);
+function asCMYK(
+	color: UnbrandedCMYK,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): CMYK {
+	const brandedCyan = asPercentile(color.value.cyan, sets, validate);
+	const brandedMagenta = asPercentile(color.value.magenta, sets, validate);
+	const brandedYellow = asPercentile(color.value.yellow, sets, validate);
+	const brandedKey = asPercentile(color.value.key, sets, validate);
 
 	return {
 		value: {
@@ -73,17 +82,22 @@ function asCMYK(color: UnbrandedCMYK, validate: ValidateFn): CMYK {
 	};
 }
 
-function asHex(color: UnbrandedHex, brand: BrandFunctions): Hex {
+function asHex(
+	color: UnbrandedHex,
+	brand: BrandingUtilsInterface,
+	regex: ConfigDataInterface['regex'],
+	validate: ValidationUtilsInterface
+): Hex {
 	let hex = color.value.hex;
 
 	if (!hex.startsWith('#')) hex = `#${hex}`;
 
-	if (!/^#[0-9A-Fa-f]{8}$/.test(hex))
+	if (!regex.brand.hex.test(hex))
 		throw new Error(`Invalid Hex color format: ${hex}`);
 
 	const hexRaw = hex.slice(0, 7);
 
-	const brandedHex = brand.asHexSet(hexRaw) as HexSet;
+	const brandedHex = brand.asHexSet(hexRaw, regex, validate) as HexSet;
 
 	return {
 		value: { hex: brandedHex },
@@ -93,23 +107,36 @@ function asHex(color: UnbrandedHex, brand: BrandFunctions): Hex {
 
 function asHexSet(
 	value: string,
-	validateHexSet: (value: string) => boolean
+	regex: ConfigDataInterface['regex'],
+	validate: ValidationUtilsInterface
 ): HexSet {
-	if (/^#[0-9a-fA-F]{8}$/.test(value)) {
+	if (regex.brand.hex.test(value)) {
 		value = value.slice(0, 7);
 	}
 
-	if (!validateHexSet(value)) {
+	if (!validate.hexSet(value)) {
 		throw new Error(`Invalid HexSet value: ${value}`);
 	}
 
 	return value as HexSet;
 }
 
-function asHSL(color: UnbrandedHSL, validate: ValidateFn): HSL {
-	const brandedHue = asRadial(color.value.hue, validate);
-	const brandedSaturation = asPercentile(color.value.saturation, validate);
-	const brandedLightness = asPercentile(color.value.lightness, validate);
+function asHSL(
+	color: UnbrandedHSL,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): HSL {
+	const brandedHue = asRadial(color.value.hue, sets, validate);
+	const brandedSaturation = asPercentile(
+		color.value.saturation,
+		sets,
+		validate
+	);
+	const brandedLightness = asPercentile(
+		color.value.lightness,
+		sets,
+		validate
+	);
 
 	return {
 		value: {
@@ -121,10 +148,18 @@ function asHSL(color: UnbrandedHSL, validate: ValidateFn): HSL {
 	};
 }
 
-function asHSV(color: UnbrandedHSV, validate: ValidateFn): HSV {
-	const brandedHue = asRadial(color.value.hue, validate);
-	const brandedSaturation = asPercentile(color.value.saturation, validate);
-	const brandedValue = asPercentile(color.value.value, validate);
+function asHSV(
+	color: UnbrandedHSV,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): HSV {
+	const brandedHue = asRadial(color.value.hue, sets, validate);
+	const brandedSaturation = asPercentile(
+		color.value.saturation,
+		sets,
+		validate
+	);
+	const brandedValue = asPercentile(color.value.value, sets, validate);
 
 	return {
 		value: {
@@ -136,10 +171,14 @@ function asHSV(color: UnbrandedHSV, validate: ValidateFn): HSV {
 	};
 }
 
-function asLAB(color: UnbrandedLAB, validate: ValidateFn): LAB {
-	const brandedL = asLAB_L(color.value.l, validate);
-	const brandedA = asLAB_A(color.value.a, validate);
-	const brandedB = asLAB_B(color.value.b, validate);
+function asLAB(
+	color: UnbrandedLAB,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): LAB {
+	const brandedL = asLAB_L(color.value.l, sets, validate);
+	const brandedA = asLAB_A(color.value.a, sets, validate);
+	const brandedB = asLAB_B(color.value.b, sets, validate);
 
 	return {
 		value: {
@@ -151,39 +190,63 @@ function asLAB(color: UnbrandedLAB, validate: ValidateFn): LAB {
 	};
 }
 
-function asLAB_L(value: number, validate: ValidateFn): LAB_L {
-	validate(value, 'LAB_L');
-
-	return value as LAB_L;
-}
-
-function asLAB_A(value: number, validate: ValidateFn): LAB_A {
-	validate(value, 'LAB_A');
+function asLAB_A(
+	value: number,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): LAB_A {
+	validate.range(value, 'LAB_A', sets);
 
 	return value as LAB_A;
 }
 
-function asLAB_B(value: number, validate: ValidateFn): LAB_B {
-	validate(value, 'LAB_B');
+function asLAB_B(
+	value: number,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): LAB_B {
+	validate.range(value, 'LAB_B', sets);
 	return value as LAB_B;
 }
 
-function asPercentile(value: number, validate: ValidateFn): Percentile {
-	validate(value, 'Percentile');
+function asLAB_L(
+	value: number,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): LAB_L {
+	validate.range(value, 'LAB_L', sets);
+
+	return value as LAB_L;
+}
+
+function asPercentile(
+	value: number,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): Percentile {
+	validate.range(value, 'Percentile', sets);
 
 	return value as Percentile;
 }
 
-function asRadial(value: number, validate: ValidateFn): Radial {
-	validate(value, 'Radial');
+function asRadial(
+	value: number,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): Radial {
+	validate.range(value, 'Radial', sets);
 
 	return value as Radial;
 }
 
-function asRGB(color: UnbrandedRGB, validate: ValidateFn): RGB {
-	const brandedRed = asByteRange(color.value.red, validate);
-	const brandedGreen = asByteRange(color.value.green, validate);
-	const brandedBlue = asByteRange(color.value.blue, validate);
+function asRGB(
+	color: UnbrandedRGB,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): RGB {
+	const brandedRed = asByteRange(color.value.red, sets, validate);
+	const brandedGreen = asByteRange(color.value.green, sets, validate);
+	const brandedBlue = asByteRange(color.value.blue, sets, validate);
 
 	return {
 		value: {
@@ -195,9 +258,21 @@ function asRGB(color: UnbrandedRGB, validate: ValidateFn): RGB {
 	};
 }
 
-function asSL(color: UnbrandedSL, validate: ValidateFn): SL {
-	const brandedSaturation = asPercentile(color.value.saturation, validate);
-	const brandedLightness = asPercentile(color.value.lightness, validate);
+function asSL(
+	color: UnbrandedSL,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): SL {
+	const brandedSaturation = asPercentile(
+		color.value.saturation,
+		sets,
+		validate
+	);
+	const brandedLightness = asPercentile(
+		color.value.lightness,
+		sets,
+		validate
+	);
 
 	return {
 		value: {
@@ -208,9 +283,17 @@ function asSL(color: UnbrandedSL, validate: ValidateFn): SL {
 	};
 }
 
-function asSV(color: UnbrandedSV, validate: ValidateFn): SV {
-	const brandedSaturation = asPercentile(color.value.saturation, validate);
-	const brandedValue = asPercentile(color.value.value, validate);
+function asSV(
+	color: UnbrandedSV,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): SV {
+	const brandedSaturation = asPercentile(
+		color.value.saturation,
+		sets,
+		validate
+	);
+	const brandedValue = asPercentile(color.value.value, sets, validate);
 
 	return {
 		value: {
@@ -221,10 +304,14 @@ function asSV(color: UnbrandedSV, validate: ValidateFn): SV {
 	};
 }
 
-function asXYZ(color: UnbrandedXYZ, validate: ValidateFn): XYZ {
-	const brandedX = asXYZ_X(color.value.x, validate);
-	const brandedY = asXYZ_Y(color.value.y, validate);
-	const brandedZ = asXYZ_Z(color.value.z, validate);
+function asXYZ(
+	color: UnbrandedXYZ,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): XYZ {
+	const brandedX = asXYZ_X(color.value.x, sets, validate);
+	const brandedY = asXYZ_Y(color.value.y, sets, validate);
+	const brandedZ = asXYZ_Z(color.value.z, sets, validate);
 
 	return {
 		value: {
@@ -236,104 +323,118 @@ function asXYZ(color: UnbrandedXYZ, validate: ValidateFn): XYZ {
 	};
 }
 
-function asXYZ_X(value: number, validate: ValidateFn): XYZ_X {
-	validate(value, 'XYZ_X');
+function asXYZ_X(
+	value: number,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): XYZ_X {
+	validate.range(value, 'XYZ_X', sets);
 
 	return value as XYZ_X;
 }
 
-function asXYZ_Y(value: number, validate: ValidateFn): XYZ_Y {
-	validate(value, 'XYZ_Y');
+function asXYZ_Y(
+	value: number,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): XYZ_Y {
+	validate.range(value, 'XYZ_Y', sets);
 
 	return value as XYZ_Y;
 }
 
-function asXYZ_Z(value: number, validate: ValidateFn): XYZ_Z {
-	validate(value, 'XYZ_Z');
+function asXYZ_Z(
+	value: number,
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): XYZ_Z {
+	validate.range(value, 'XYZ_Z', sets);
 
 	return value as XYZ_Z;
 }
 
 function brandColor(
 	color: UnbrandedColor,
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): Color {
 	switch (color.format) {
 		case 'cmyk':
 			return {
 				value: {
-					cyan: asPercentile(0, validate.range),
-					magenta: asPercentile(0, validate.range),
-					yellow: asPercentile(0, validate.range),
-					key: asPercentile(0, validate.range)
+					cyan: asPercentile(0, sets, validate),
+					magenta: asPercentile(0, sets, validate),
+					yellow: asPercentile(0, sets, validate),
+					key: asPercentile(0, sets, validate)
 				},
 				format: 'cmyk'
 			};
 		case 'hex':
 			return {
 				value: {
-					hex: asHexSet('#000000', validate.hexSet)
+					hex: asHexSet('#000000', regex, validate)
 				},
 				format: 'hex'
 			};
 		case 'hsl':
 			return {
 				value: {
-					hue: asRadial(0, validate.range),
-					saturation: asPercentile(0, validate.range),
-					lightness: asPercentile(0, validate.range)
+					hue: asRadial(0, sets, validate),
+					saturation: asPercentile(0, sets, validate),
+					lightness: asPercentile(0, sets, validate)
 				},
 				format: 'hsl'
 			};
 		case 'hsv':
 			return {
 				value: {
-					hue: asRadial(0, validate.range),
-					saturation: asPercentile(0, validate.range),
-					value: asPercentile(0, validate.range)
+					hue: asRadial(0, sets, validate),
+					saturation: asPercentile(0, sets, validate),
+					value: asPercentile(0, sets, validate)
 				},
 				format: 'hsv'
 			};
 		case 'lab':
 			return {
 				value: {
-					l: asLAB_L(0, validate.range),
-					a: asLAB_A(0, validate.range),
-					b: asLAB_B(0, validate.range)
+					l: asLAB_L(0, sets, validate),
+					a: asLAB_A(0, sets, validate),
+					b: asLAB_B(0, sets, validate)
 				},
 				format: 'lab'
 			};
 		case 'rgb':
 			return {
 				value: {
-					red: asByteRange(0, validate.range),
-					green: asByteRange(0, validate.range),
-					blue: asByteRange(0, validate.range)
+					red: asByteRange(0, sets, validate),
+					green: asByteRange(0, sets, validate),
+					blue: asByteRange(0, sets, validate)
 				},
 				format: 'rgb'
 			};
 		case 'sl':
 			return {
 				value: {
-					saturation: asPercentile(0, validate.range),
-					lightness: asPercentile(0, validate.range)
+					saturation: asPercentile(0, sets, validate),
+					lightness: asPercentile(0, sets, validate)
 				},
 				format: 'sl'
 			};
 		case 'sv':
 			return {
 				value: {
-					saturation: asPercentile(0, validate.range),
-					value: asPercentile(0, validate.range)
+					saturation: asPercentile(0, sets, validate),
+					value: asPercentile(0, sets, validate)
 				},
 				format: 'sv'
 			};
 		case 'xyz':
 			return {
 				value: {
-					x: asXYZ_X(0, validate.range),
-					y: asXYZ_Y(0, validate.range),
-					z: asXYZ_Z(0, validate.range)
+					x: asXYZ_X(0, sets, validate),
+					y: asXYZ_Y(0, sets, validate),
+					z: asXYZ_Z(0, sets, validate)
 				},
 				format: 'xyz'
 			};
@@ -345,89 +446,106 @@ function brandColor(
 
 function brandPalette(
 	data: UnbrandedPalette,
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): Palette {
 	return {
 		...data,
 		metadata: { ...data.metadata },
-		items: data.items.map(item => ({
+		items: data.items.map((item, index) => ({
+			itemID: index + 1,
 			colors: {
 				main: {
 					cmyk: {
 						cyan: asPercentile(
 							item.colors.main.cmyk.cyan ?? 0,
-							validate.range
+							sets,
+							validate
 						),
 						magenta: asPercentile(
 							item.colors.main.cmyk.magenta ?? 0,
-							validate.range
+							sets,
+							validate
 						),
 						yellow: asPercentile(
 							item.colors.main.cmyk.yellow ?? 0,
-							validate.range
+							sets,
+							validate
 						),
 						key: asPercentile(
 							item.colors.main.cmyk.key ?? 0,
-							validate.range
+							sets,
+							validate
 						)
 					},
 					hex: {
 						hex: asHexSet(
 							item.colors.main.hex.hex ?? '#000000',
-							validate.hexSet
+							regex,
+							validate
 						)
 					},
 					hsl: {
 						hue: asRadial(
 							item.colors.main.hsl.hue ?? 0,
-							validate.range
+							sets,
+							validate
 						),
 						saturation: asPercentile(
 							item.colors.main.hsl.saturation ?? 0,
-							validate.range
+							sets,
+							validate
 						),
 						lightness: asPercentile(
 							item.colors.main.hsl.lightness ?? 0,
-							validate.range
+							sets,
+							validate
 						)
 					},
 					hsv: {
 						hue: asRadial(
 							item.colors.main.hsv.hue ?? 0,
-							validate.range
+							sets,
+							validate
 						),
 						saturation: asPercentile(
 							item.colors.main.hsv.saturation ?? 0,
-							validate.range
+							sets,
+							validate
 						),
 						value: asPercentile(
 							item.colors.main.hsv.value ?? 0,
-							validate.range
+							sets,
+							validate
 						)
 					},
 					lab: {
-						l: asLAB_L(item.colors.main.lab.l ?? 0, validate.range),
-						a: asLAB_A(item.colors.main.lab.a ?? 0, validate.range),
-						b: asLAB_B(item.colors.main.lab.b ?? 0, validate.range)
+						l: asLAB_L(item.colors.main.lab.l ?? 0, sets, validate),
+						a: asLAB_A(item.colors.main.lab.a ?? 0, sets, validate),
+						b: asLAB_B(item.colors.main.lab.b ?? 0, sets, validate)
 					},
 					rgb: {
 						red: asByteRange(
 							item.colors.main.rgb.red ?? 0,
-							validate.range
+							sets,
+							validate
 						),
 						green: asByteRange(
 							item.colors.main.rgb.green ?? 0,
-							validate.range
+							sets,
+							validate
 						),
 						blue: asByteRange(
 							item.colors.main.rgb.blue ?? 0,
-							validate.range
+							sets,
+							validate
 						)
 					},
 					xyz: {
-						x: asXYZ_X(item.colors.main.xyz.x ?? 0, validate.range),
-						y: asXYZ_Y(item.colors.main.xyz.y ?? 0, validate.range),
-						z: asXYZ_Z(item.colors.main.xyz.z ?? 0, validate.range)
+						x: asXYZ_X(item.colors.main.xyz.x ?? 0, sets, validate),
+						y: asXYZ_Y(item.colors.main.xyz.y ?? 0, sets, validate),
+						z: asXYZ_Z(item.colors.main.xyz.z ?? 0, sets, validate)
 					}
 				},
 				stringProps: {

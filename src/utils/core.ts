@@ -1,9 +1,16 @@
 // File: utils/core.js
 
-import { CoreUtilsInterface, NumericRangeKey } from '../types/index.js';
-import { dataSets as sets } from '../data/sets.js';
+import {
+	CoreUtilsInterface,
+	DataSetsInterface,
+	NumericRangeKey
+} from '../types/index.js';
 
-function clampToRange(value: number, rangeKey: NumericRangeKey): number {
+function clampToRange(
+	value: number,
+	rangeKey: NumericRangeKey,
+	sets: DataSetsInterface
+): number {
 	const [min, max] = sets[rangeKey];
 
 	return Math.min(Math.max(value, min), max);

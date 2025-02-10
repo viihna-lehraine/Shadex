@@ -1,14 +1,21 @@
-// File: common/core/validate.js
+// File: utils/validation.js
 
-import { Color, CommonFunctionsInterface, SL, SV } from '../../types/index.js';
-import { dataSets as sets } from '../../data/sets.js';
+import {
+	Color,
+	ConfigDataInterface,
+	CoreUtilsInterface,
+	DataSetsInterface,
+	SL,
+	SV,
+	ValidationUtilsInterface
+} from '../types/index.js';
 
-const _sets = sets;
-
-async function colorValue(color: Color | SL | SV): Promise<boolean> {
-	const clonedColor = (
-		await import('./base.js').then(module => module.base)
-	).clone(color);
+function colorValue(
+	color: Color | SL | SV,
+	coreUtils: CoreUtilsInterface,
+	regex: ConfigDataInterface['regex']
+): boolean {
+	const clonedColor = coreUtils.clone(color);
 
 	const isNumericValid = (value: unknown): boolean =>
 		typeof value === 'number' && !isNaN(value);
@@ -39,7 +46,7 @@ async function colorValue(color: Color | SL | SV): Promise<boolean> {
 				clonedColor.value.key <= 100
 			);
 		case 'hex':
-			return /^#[0-9A-Fa-f]{6}$/.test(clonedColor.value.hex);
+			return regex.validation.hex.test(clonedColor.value.hex);
 		case 'hsl':
 			const isValidHSLHue =
 				isNumericValid(clonedColor.value.hue) &&
@@ -138,6 +145,10 @@ async function colorValue(color: Color | SL | SV): Promise<boolean> {
 	}
 }
 
+function ensureHash(value: string): string {
+	return value.startsWith('#') ? value : `#${value}`;
+}
+
 function hex(value: string, pattern: RegExp): boolean {
 	return pattern.test(value);
 }
@@ -150,19 +161,20 @@ function hexSet(value: string): boolean {
 	return /^#[0-9a-fA-F]{6}$/.test(value);
 }
 
-function range<T extends keyof typeof _sets>(
+function range<T extends keyof DataSetsInterface>(
 	value: number | string,
-	rangeKey: T
+	rangeKey: T,
+	sets: DataSetsInterface
 ): void {
 	if (rangeKey === 'HexSet') {
-		if (!validate.hexSet(value as string)) {
+		if (!hexSet(value as string)) {
 			throw new Error(`Invalid value for ${String(rangeKey)}: ${value}`);
 		}
 		return;
 	}
 
-	if (typeof value === 'number' && Array.isArray(_sets[rangeKey])) {
-		const [min, max] = _sets[rangeKey] as [number, number];
+	if (typeof value === 'number' && Array.isArray(sets[rangeKey])) {
+		const [min, max] = sets[rangeKey] as [number, number];
 
 		if (value < min || value > max) {
 			throw new Error(
@@ -175,8 +187,9 @@ function range<T extends keyof typeof _sets>(
 	throw new Error(`Invalid range or value for ${String(rangeKey)}`);
 }
 
-export const validate: CommonFunctionsInterface['core']['validate'] = {
+export const validationUtils: ValidationUtilsInterface = {
 	colorValue,
+	ensureHash,
 	hex,
 	hexComponent,
 	hexSet,

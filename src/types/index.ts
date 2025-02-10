@@ -1,21 +1,27 @@
 // File: types/index.js
 
-export type { AppUtilsInterface } from './app/core.js';
 export type { DBUtilsInterface, PaletteArgs } from './app/db.js';
-export type { DOMUtilsInterface, PaletteBoxObject } from './app/dom.js';
+export type { PaletteBoxObject } from './app/dom.js';
 export type { ColorParser, IOFn_MasterInterface } from './app/io.js';
 export type {
 	Palette_CommonFn_MasterInterface,
 	PaletteGenerationArgs,
 	PaletteGenerationInterface
 } from './app/palette.js';
+export type { AppServicesInterface } from './app/services.js';
 export type { UIFn_MasterInterface } from './app/ui.js';
 export type {
+	ColorConversionHelpersInterface,
+	ColorUtilHelpersInterface,
+	PaletteUtilHelpersInterface
+} from './app/utils/helpers.js';
+export type {
 	AdjustmentUtilsInterface,
+	AppUtilsInterface,
 	BrandingUtilsInterface,
 	ColorUtilsInterface,
 	CoreUtilsInterface,
-	DOMutilsInterface,
+	DOMUtilsInterface,
 	FormattingUtilsInterface,
 	PaletteUtilsInterface,
 	SanitationUtilsInterface,
@@ -126,8 +132,3 @@ export type {
 	ValidationServiceInterface
 } from './services/ui.js';
 export type { IDBManager_ClassInterface } from './classes.js';
-export type {
-	BrandFunctions,
-	ValidateFn,
-	ValidateFunctions
-} from './functions.js';

@@ -1,6 +1,5 @@
 // File: types/app/dom.js
 
-import { ColorSpace } from '../index.js';
 import type { UIManager } from '../../app/ui/UIManager.js';
 
 export interface DOMFn_EventListenerFnInterface {
@@ -26,18 +25,6 @@ export interface DOMFn_EventListenerFnInterface {
 	window: {
 		initialize(): void;
 	};
-}
-
-export interface DOMUtilsInterface {
-	addConversionListener: (id: string, colorSpace: string) => void;
-	addEventListener<K extends keyof HTMLElementEventMap>(
-		id: string,
-		eventType: K,
-		callback: (ev: HTMLElementEventMap[K]) => void
-	): void;
-	downloadFile(data: string, filename: string, type: string): void;
-	readFile(file: File): Promise<string>;
-	switchColorSpace(targetFormat: ColorSpace): Promise<void>;
 }
 
 export interface PaletteBoxObject {

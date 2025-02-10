@@ -1,5 +1,6 @@
 // File: services/app.js
 
+import { AppServicesInterface } from '../types/index.js';
 import { createLogger } from '../logger/factory.js';
 import { modeData as mode } from '../data/mode.js';
 
@@ -8,7 +9,7 @@ const logger = await createLogger();
 async function handleAsyncErrors<T>(
 	action: () => Promise<T>,
 	errorMessage: string,
-	caller: string = 'unknown caller',
+	caller: string,
 	context?: Record<string, unknown>
 ): Promise<T | null> {
 	try {
@@ -45,7 +46,7 @@ function log(
 	}
 }
 
-export const appServices = {
+export const appServices: AppServicesInterface = {
 	handleAsyncErrors,
 	log
 };

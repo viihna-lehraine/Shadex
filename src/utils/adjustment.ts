@@ -2,28 +2,30 @@
 
 import {
 	AdjustmentUtilsInterface,
+	AppServicesInterface,
 	BrandingUtilsInterface,
+	ConfigDataInterface,
+	ConstsDataInterface,
 	CoreUtilsInterface,
-	ValidationUtilsInterface,
+	DataSetsInterface,
+	DefaultDataInterface,
 	HSL,
-	RGB
+	RGB,
+	ValidationUtilsInterface
 } from '../types/index.js';
-import { appServices } from '../services/app.js';
-import { brandingUtils } from './branding.js';
-import { constsData as consts } from '../data/consts.js';
-import { defaultData as defaults } from '../data/defaults.js';
-import { validationUtils } from './validation.js';
 
 function adjustSL(
 	color: HSL,
+	adjustments: ConstsDataInterface['adjustments'],
 	brandingUtils: BrandingUtilsInterface,
-	validationUtils: ValidationUtilsInterface
+	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
 ): HSL {
-	const adjustments = consts.adjustments;
-	const log = appServices.log;
-
 	try {
-		if (!validationUtils.colorValue(color)) {
+		if (!validate.colorValue(color, coreUtils, regex)) {
 			log(
 				'error',
 				'Invalid color valus for adjustment.',
@@ -44,11 +46,13 @@ function adjustSL(
 				hue: color.value.hue,
 				saturation: brandingUtils.asPercentile(
 					adjustedSaturation,
-					validationUtils.range
+					sets,
+					validate
 				),
 				lightness: brandingUtils.asPercentile(
 					adjustedLightness,
-					validationUtils.range
+					sets,
+					validate
 				)
 			},
 			format: 'hsl'
@@ -64,9 +68,10 @@ function adjustSL(
 	}
 }
 
-function applyGammaCorrection(value: number): number {
-	const log = appServices.log;
-
+function applyGammaCorrection(
+	value: number,
+	log: AppServicesInterface['log']
+): number {
 	try {
 		return value > 0.0031308
 			? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
@@ -85,13 +90,16 @@ function applyGammaCorrection(value: number): number {
 function clampRGB(
 	rgb: RGB,
 	brand: BrandingUtilsInterface,
-	validationUtils: ValidationUtilsInterface
+	coreUtils: CoreUtilsInterface,
+	defaultColors: DefaultDataInterface['colors']['base']['branded'],
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
 ): RGB {
-	const defaultRGB = defaults.colors.base.branded.rgb;
+	const defaultRGB = defaultColors.rgb;
 
-	const log = appServices.log;
-
-	if (!validationUtils.colorValue(rgb)) {
+	if (!validate.colorValue(rgb, coreUtils, regex)) {
 		log(
 			'error',
 			`Invalid RGB value ${JSON.stringify(rgb)}`,
@@ -106,15 +114,18 @@ function clampRGB(
 			value: {
 				red: brand.asByteRange(
 					Math.round(Math.min(Math.max(0, rgb.value.red), 1) * 255),
-					validationUtils.range
+					sets,
+					validate
 				),
 				green: brand.asByteRange(
 					Math.round(Math.min(Math.max(0, rgb.value.green), 1) * 255),
-					validationUtils.range
+					sets,
+					validate
 				),
 				blue: brand.asByteRange(
 					Math.round(Math.min(Math.max(0, rgb.value.blue), 1) * 255),
-					validationUtils.range
+					sets,
+					validate
 				)
 			},
 			format: 'rgb'

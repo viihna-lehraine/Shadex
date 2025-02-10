@@ -19,6 +19,9 @@ const storage: ConfigDataInterface['storage'] = {
 };
 
 const regex: ConfigDataInterface['regex'] = {
+	brand: {
+		hex: /^#[0-9A-Fa-f]{8}$/
+	},
 	colors: {
 		cmyk: /cmyk\((\d+)%?,\s*(\d+)%?,\s*(\d+)%?,\s*(\d+)%?(?:,\s*([\d.]+))?\)/i,
 		hex: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/,
@@ -40,6 +43,9 @@ const regex: ConfigDataInterface['regex'] = {
 				metadata: /\.palette\s*{\s*([\s\S]*?)\s*}/i
 			}
 		}
+	},
+	validation: {
+		hex: /^#[0-9A-Fa-f]{6}$/
 	}
 };
 

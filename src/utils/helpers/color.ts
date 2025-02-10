@@ -1,11 +1,15 @@
-// File: utils/helpers/colors.js
+// File: utils/helpers/color.js
 
 import {
 	AdjustmentUtilsInterface,
+	AppServicesInterface,
 	BrandingUtilsInterface,
 	CMYK,
 	ColorUtilsInterface,
+	ColorUtilHelpersInterface,
+	ConfigDataInterface,
 	CoreUtilsInterface,
+	DefaultDataInterface,
 	FormattingUtilsInterface,
 	Hex,
 	HSL,
@@ -19,9 +23,9 @@ import {
 	XYZ,
 	XYZ_X,
 	XYZ_Y,
-	XYZ_Z
+	XYZ_Z,
+	DataSetsInterface
 } from '../../types/index.js';
-import { appServices } from '../../services/app.js';
 import { defaultData as defaults } from '../../data/defaults.js';
 
 const defaultCMYK = defaults.colors.base.branded.cmyk;
@@ -34,17 +38,19 @@ const defaultSL = defaults.colors.base.branded.sl;
 const defaultSV = defaults.colors.base.branded.sv;
 const defaultXYZ = defaults.colors.base.branded.xyz;
 
-const log = appServices.log;
-
 function cmykToHSL(
 	cmyk: CMYK,
 	adjust: AdjustmentUtilsInterface,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	defaultColors: DefaultDataInterface['colors']['base']['branded'],
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSL {
 	try {
-		if (!validate.colorValue(cmyk)) {
+		if (!validate.colorValue(cmyk, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid CMYK value ${JSON.stringify(cmyk)}`,
@@ -60,10 +66,17 @@ function cmykToHSL(
 				adjust,
 				brand,
 				coreUtils,
+				defaultColors,
+				log,
+				regex,
+				sets,
 				validate
 			),
 			brand,
 			coreUtils,
+			log,
+			regex,
+			sets,
 			validate
 		);
 	} catch (error) {
@@ -82,11 +95,15 @@ function cmykToRGB(
 	adjust: AdjustmentUtilsInterface,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	defaultColors: DefaultDataInterface['colors']['base']['branded'],
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): RGB {
 	try {
-		if (!validate.colorValue(cmyk)) {
-			appServices.log(
+		if (!validate.colorValue(cmyk, coreUtils, regex)) {
+			log(
 				'error',
 				`Invalid CMYK value ${JSON.stringify(cmyk)}`,
 				'colorUtils > helpers.cmykToRGB()'
@@ -110,14 +127,23 @@ function cmykToRGB(
 			(1 - clonedCMYK.value.key / 100);
 		const rgb: RGB = {
 			value: {
-				red: brand.asByteRange(Math.round(r), validate.range),
-				green: brand.asByteRange(Math.round(g), validate.range),
-				blue: brand.asByteRange(Math.round(b), validate.range)
+				red: brand.asByteRange(Math.round(r), sets, validate),
+				green: brand.asByteRange(Math.round(g), sets, validate),
+				blue: brand.asByteRange(Math.round(b), sets, validate)
 			},
 			format: 'rgb'
 		};
 
-		return adjust.clampRGB(rgb, brand, validate);
+		return adjust.clampRGB(
+			rgb,
+			brand,
+			coreUtils,
+			defaultColors,
+			log,
+			regex,
+			sets,
+			validate
+		);
 	} catch (error) {
 		log(
 			'error',
@@ -129,54 +155,19 @@ function cmykToRGB(
 	}
 }
 
-function hexToHSLWrapper(
-	input: string | Hex,
-	brand: BrandingUtilsInterface,
-	coreUtils: CoreUtilsInterface,
-	format: FormattingUtilsInterface,
-	validate: ValidationUtilsInterface
-): HSL {
-	try {
-		const clonedInput = coreUtils.clone(input);
-
-		const hex: Hex =
-			typeof clonedInput === 'string'
-				? {
-						value: {
-							hex: brand.asHexSet(clonedInput, validate.hexSet)
-						},
-						format: 'hex'
-					}
-				: {
-						value: {
-							hex: brand.asHexSet(
-								clonedInput.value.hex,
-								validate.hexSet
-							)
-						},
-						format: 'hex'
-					};
-		return hexToHSL(hex, brand, coreUtils, format, validate);
-	} catch (error) {
-		log(
-			'error',
-			`Error converting hex to HSL: ${error}`,
-			'colorUtils > helpers.hexToHSLWrapper()'
-		);
-
-		return defaultHSL;
-	}
-}
-
 function hexToHSL(
 	hex: Hex,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	defaultColors: DefaultDataInterface['colors']['base']['branded'],
 	format: FormattingUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSL {
 	try {
-		if (!validate.colorValue(hex)) {
+		if (!validate.colorValue(hex, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid Hex value ${JSON.stringify(hex)}`,
@@ -187,9 +178,22 @@ function hexToHSL(
 		}
 
 		return rgbToHSL(
-			hexToRGB(coreUtils.clone(hex), brand, coreUtils, format, validate),
+			hexToRGB(
+				coreUtils.clone(hex),
+				brand,
+				coreUtils,
+				defaultColors,
+				format,
+				log,
+				regex,
+				sets,
+				validate
+			),
 			brand,
 			coreUtils,
+			log,
+			regex,
+			sets,
 			validate
 		);
 	} catch (error) {
@@ -203,15 +207,73 @@ function hexToHSL(
 	}
 }
 
+function hexToHSLWrapper(
+	input: string | Hex,
+	brand: BrandingUtilsInterface,
+	coreUtils: CoreUtilsInterface,
+	defaultColors: DefaultDataInterface['colors']['base']['branded'],
+	format: FormattingUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
+	validate: ValidationUtilsInterface
+): HSL {
+	try {
+		const clonedInput = coreUtils.clone(input);
+
+		const hex: Hex =
+			typeof clonedInput === 'string'
+				? {
+						value: {
+							hex: brand.asHexSet(clonedInput, regex, validate)
+						},
+						format: 'hex'
+					}
+				: {
+						value: {
+							hex: brand.asHexSet(
+								clonedInput.value.hex,
+								regex,
+								validate
+							)
+						},
+						format: 'hex'
+					};
+		return hexToHSL(
+			hex,
+			brand,
+			coreUtils,
+			defaultColors,
+			format,
+			log,
+			regex,
+			sets,
+			validate
+		);
+	} catch (error) {
+		log(
+			'error',
+			`Error converting hex to HSL: ${error}`,
+			'colorUtils > helpers.hexToHSLWrapper()'
+		);
+
+		return defaultHSL;
+	}
+}
+
 function hexToRGB(
 	hex: Hex,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	defaultColors: DefaultDataInterface['colors']['base']['branded'],
 	format: FormattingUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): RGB {
 	try {
-		if (!validate.colorValue(hex)) {
+		if (!validate.colorValue(hex, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid Hex value ${JSON.stringify(hex)}`,
@@ -222,22 +284,32 @@ function hexToRGB(
 		}
 
 		const clonedHex = coreUtils.clone(hex);
-		const strippedHex = format.stripHashFromHex(clonedHex).value.hex;
+		const strippedHex = format.stripHashFromHex(
+			clonedHex,
+			brand,
+			defaultColors,
+			log,
+			regex,
+			validate
+		).value.hex;
 		const bigint = parseInt(strippedHex, 16);
 
 		return {
 			value: {
 				red: brand.asByteRange(
 					Math.round((bigint >> 16) & 255),
-					validate.range
+					sets,
+					validate
 				),
 				green: brand.asByteRange(
 					Math.round((bigint >> 8) & 255),
-					validate.range
+					sets,
+					validate
 				),
 				blue: brand.asByteRange(
 					Math.round(bigint & 255),
-					validate.range
+					sets,
+					validate
 				)
 			},
 			format: 'rgb'
@@ -258,11 +330,14 @@ function hslToCMYK(
 	brand: BrandingUtilsInterface,
 	colorUtils: ColorUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
 	sanitize: SanitationUtilsInterface,
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): CMYK {
 	try {
-		if (!validate.colorValue(hsl)) {
+		if (!validate.colorValue(hsl, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -278,10 +353,17 @@ function hslToCMYK(
 				brand,
 				colorUtils,
 				coreUtils,
+				log,
+				regex,
+				sets,
 				validate
 			),
+			brand,
 			coreUtils,
+			log,
+			regex,
 			sanitize,
+			sets,
 			validate
 		);
 	} catch (error) {
@@ -301,10 +383,13 @@ function hslToHex(
 	colorUtils: ColorUtilsInterface,
 	coreUtils: CoreUtilsInterface,
 	format: FormattingUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): Hex {
 	try {
-		if (!validate.colorValue(hsl)) {
+		if (!validate.colorValue(hsl, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -320,11 +405,16 @@ function hslToHex(
 				brand,
 				colorUtils,
 				coreUtils,
+				log,
+				regex,
+				sets,
 				validate
 			),
 			brand,
 			coreUtils,
 			format,
+			log,
+			regex,
 			validate
 		);
 	} catch (error) {
@@ -342,10 +432,13 @@ function hslToHSV(
 	hsl: HSL,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSV {
 	try {
-		if (!validate.colorValue(hsl)) {
+		if (!validate.colorValue(hsl, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -365,15 +458,18 @@ function hslToHSV(
 			value: {
 				hue: brand.asRadial(
 					Math.round(clonedHSL.value.hue),
-					validate.range
+					sets,
+					validate
 				),
 				saturation: brand.asPercentile(
 					Math.round(newSaturation * 100),
-					validate.range
+					sets,
+					validate
 				),
 				value: brand.asPercentile(
 					Math.round(value * 100),
-					validate.range
+					sets,
+					validate
 				)
 			},
 			format: 'hsv'
@@ -394,11 +490,14 @@ function hslToLAB(
 	brand: BrandingUtilsInterface,
 	colorUtils: ColorUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
 	sanitize: SanitationUtilsInterface,
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): LAB {
 	try {
-		if (!validate.colorValue(hsl)) {
+		if (!validate.colorValue(hsl, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -415,14 +514,24 @@ function hslToLAB(
 					brand,
 					colorUtils,
 					coreUtils,
+					log,
+					regex,
+					sets,
 					validate
 				),
 				brand,
+				coreUtils,
+				log,
+				regex,
+				sets,
 				validate
 			),
 			brand,
 			coreUtils,
+			log,
+			regex,
 			sanitize,
+			sets,
 			validate
 		);
 	} catch (error) {
@@ -441,10 +550,13 @@ function hslToRGB(
 	brand: BrandingUtilsInterface,
 	colorUtils: ColorUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): RGB {
 	try {
-		if (!validate.colorValue(hsl)) {
+		if (!validate.colorValue(hsl, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -464,23 +576,42 @@ function hslToRGB(
 			value: {
 				red: brand.asByteRange(
 					Math.round(
-						colorUtils.hueToRGB(p, q, clonedHSL.value.hue + 1 / 3) *
-							255
+						colorUtils.hueToRGB(
+							p,
+							q,
+							clonedHSL.value.hue + 1 / 3,
+							coreUtils,
+							log
+						) * 255
 					),
-					validate.range
+					sets,
+					validate
 				),
 				green: brand.asByteRange(
 					Math.round(
-						colorUtils.hueToRGB(p, q, clonedHSL.value.hue) * 255
+						colorUtils.hueToRGB(
+							p,
+							q,
+							clonedHSL.value.hue,
+							coreUtils,
+							log
+						) * 255
 					),
-					validate.range
+					sets,
+					validate
 				),
 				blue: brand.asByteRange(
 					Math.round(
-						colorUtils.hueToRGB(p, q, clonedHSL.value.hue - 1 / 3) *
-							255
+						colorUtils.hueToRGB(
+							p,
+							q,
+							clonedHSL.value.hue - 1 / 3,
+							coreUtils,
+							log
+						) * 255
 					),
-					validate.range
+					sets,
+					validate
 				)
 			},
 			format: 'rgb'
@@ -496,9 +627,15 @@ function hslToRGB(
 	}
 }
 
-function hslToSL(hsl: HSL, validate: ValidationUtilsInterface): SL {
+function hslToSL(
+	hsl: HSL,
+	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	validate: ValidationUtilsInterface
+): SL {
 	try {
-		if (!validate.colorValue(hsl)) {
+		if (!validate.colorValue(hsl, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -531,10 +668,13 @@ function hslToSV(
 	brand: BrandingUtilsInterface,
 	colorUtils: ColorUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): SV {
 	try {
-		if (!validate.colorValue(hsl)) {
+		if (!validate.colorValue(hsl, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -551,11 +691,21 @@ function hslToSV(
 					brand,
 					colorUtils,
 					coreUtils,
+					log,
+					regex,
+					sets,
 					validate
 				),
 				brand,
+				coreUtils,
+				log,
+				regex,
+				sets,
 				validate
 			),
+			coreUtils,
+			log,
+			regex,
 			validate
 		);
 	} catch (error) {
@@ -574,11 +724,14 @@ function hslToXYZ(
 	brand: BrandingUtilsInterface,
 	colorUtils: ColorUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
 	sanitize: SanitationUtilsInterface,
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): XYZ {
 	try {
-		if (!validate.colorValue(hsl)) {
+		if (!validate.colorValue(hsl, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -594,11 +747,17 @@ function hslToXYZ(
 				brand,
 				colorUtils,
 				coreUtils,
+				log,
+				regex,
 				sanitize,
+				sets,
 				validate
 			),
 			brand,
 			coreUtils,
+			log,
+			regex,
+			sets,
 			validate
 		);
 	} catch (error) {
@@ -616,10 +775,13 @@ function hsvToHSL(
 	hsv: HSV,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSL {
 	try {
-		if (!validate.colorValue(hsv)) {
+		if (!validate.colorValue(hsv, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid HSV value ${JSON.stringify(hsv)}`,
@@ -648,15 +810,18 @@ function hsvToHSL(
 			value: {
 				hue: brand.asRadial(
 					Math.round(clonedHSV.value.hue),
-					validate.range
+					sets,
+					validate
 				),
 				saturation: brand.asPercentile(
 					Math.round(newSaturation * 100),
-					validate.range
+					sets,
+					validate
 				),
 				lightness: brand.asPercentile(
 					Math.round(lightness),
-					validate.range
+					sets,
+					validate
 				)
 			},
 			format: 'hsl'
@@ -672,9 +837,15 @@ function hsvToHSL(
 	}
 }
 
-function hsvToSV(hsv: HSV, validate: ValidationUtilsInterface): SV {
+function hsvToSV(
+	hsv: HSV,
+	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	validate: ValidationUtilsInterface
+): SV {
 	try {
-		if (!validate.colorValue(hsv)) {
+		if (!validate.colorValue(hsv, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid HSV value ${JSON.stringify(hsv)}`,
@@ -707,10 +878,14 @@ function labToHSL(
 	adjust: AdjustmentUtilsInterface,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	defaultColors: DefaultDataInterface['colors']['base']['branded'],
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSL {
 	try {
-		if (!validate.colorValue(lab)) {
+		if (!validate.colorValue(lab, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid LAB value ${JSON.stringify(lab)}`,
@@ -721,9 +896,22 @@ function labToHSL(
 		}
 
 		return rgbToHSL(
-			labToRGB(coreUtils.clone(lab), adjust, brand, coreUtils, validate),
+			labToRGB(
+				coreUtils.clone(lab),
+				adjust,
+				brand,
+				coreUtils,
+				defaultColors,
+				log,
+				regex,
+				sets,
+				validate
+			),
 			brand,
 			coreUtils,
+			log,
+			regex,
+			sets,
 			validate
 		);
 	} catch (error) {
@@ -742,10 +930,14 @@ function labToRGB(
 	adjust: AdjustmentUtilsInterface,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	defaultColors: DefaultDataInterface['colors']['base']['branded'],
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): RGB {
 	try {
-		if (!validate.colorValue(lab)) {
+		if (!validate.colorValue(lab, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid LAB value ${JSON.stringify(lab)}`,
@@ -756,9 +948,22 @@ function labToRGB(
 		}
 
 		return xyzToRGB(
-			labToXYZ(coreUtils.clone(lab), brand, coreUtils, validate),
+			labToXYZ(
+				coreUtils.clone(lab),
+				brand,
+				coreUtils,
+				log,
+				regex,
+				sets,
+				validate
+			),
 			adjust,
 			brand,
+			coreUtils,
+			defaultColors,
+			log,
+			regex,
+			sets,
 			validate
 		);
 	} catch (error) {
@@ -776,10 +981,13 @@ function labToXYZ(
 	lab: LAB,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): XYZ {
 	try {
-		if (!validate.colorValue(lab)) {
+		if (!validate.colorValue(lab, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid LAB value ${JSON.stringify(lab)}`,
@@ -809,7 +1017,8 @@ function labToXYZ(
 								? pow(x, 3)
 								: (x - 16 / 116) / 7.787)
 					),
-					validate.range
+					sets,
+					validate
 				),
 				y: brand.asXYZ_Y(
 					Math.round(
@@ -818,7 +1027,8 @@ function labToXYZ(
 								? pow(y, 3)
 								: (y - 16 / 116) / 7.787)
 					),
-					validate.range
+					sets,
+					validate
 				),
 				z: brand.asXYZ_Z(
 					Math.round(
@@ -827,7 +1037,8 @@ function labToXYZ(
 								? pow(z, 3)
 								: (z - 16 / 116) / 7.787)
 					),
-					validate.range
+					sets,
+					validate
 				)
 			},
 			format: 'xyz'
@@ -845,12 +1056,16 @@ function labToXYZ(
 
 function rgbToCMYK(
 	rgb: RGB,
+	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
 	sanitize: SanitationUtilsInterface,
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): CMYK {
 	try {
-		if (!validate.colorValue(rgb)) {
+		if (!validate.colorValue(rgb, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid RGB value ${JSON.stringify(rgb)}`,
@@ -867,16 +1082,28 @@ function rgbToCMYK(
 		const bluePrime = clonedRGB.value.blue / 255;
 
 		const key = sanitize.percentile(
-			Math.round(1 - Math.max(redPrime, greenPrime, bluePrime))
+			Math.round(1 - Math.max(redPrime, greenPrime, bluePrime)),
+			brand,
+			sets,
+			validate
 		);
 		const cyan = sanitize.percentile(
-			Math.round((1 - redPrime - key) / (1 - key) || 0)
+			Math.round((1 - redPrime - key) / (1 - key) || 0),
+			brand,
+			sets,
+			validate
 		);
 		const magenta = sanitize.percentile(
-			Math.round((1 - greenPrime - key) / (1 - key) || 0)
+			Math.round((1 - greenPrime - key) / (1 - key) || 0),
+			brand,
+			sets,
+			validate
 		);
 		const yellow = sanitize.percentile(
-			Math.round((1 - bluePrime - key) / (1 - key) || 0)
+			Math.round((1 - bluePrime - key) / (1 - key) || 0),
+			brand,
+			sets,
+			validate
 		);
 		const format: 'cmyk' = 'cmyk';
 
@@ -906,10 +1133,12 @@ function rgbToHex(
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
 	format: FormattingUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
 	validate: ValidationUtilsInterface
 ): Hex {
 	try {
-		if (!validate.colorValue(rgb)) {
+		if (!validate.colorValue(rgb, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid RGB value ${JSON.stringify(rgb)}`,
@@ -936,7 +1165,7 @@ function rgbToHex(
 
 			return {
 				value: {
-					hex: brand.asHexSet('#000000FF', validate.hexSet)
+					hex: brand.asHexSet('#000000FF', regex, validate)
 				},
 				format: 'hex' as 'hex'
 			};
@@ -945,8 +1174,9 @@ function rgbToHex(
 		return {
 			value: {
 				hex: brand.asHexSet(
-					`#${format.componentToHex(clonedRGB.value.red)}${format.componentToHex(clonedRGB.value.green)}${format.componentToHex(clonedRGB.value.blue)}`,
-					validate.hexSet
+					`#${format.componentToHex(clonedRGB.value.red, log)}${format.componentToHex(clonedRGB.value.green, log)}${format.componentToHex(clonedRGB.value.blue, log)}`,
+					regex,
+					validate
 				)
 			},
 			format: 'hex' as 'hex'
@@ -966,10 +1196,13 @@ function rgbToHSL(
 	rgb: RGB,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSL {
 	try {
-		if (!validate.colorValue(rgb)) {
+		if (!validate.colorValue(rgb, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid RGB value ${JSON.stringify(rgb)}`,
@@ -1014,14 +1247,16 @@ function rgbToHSL(
 
 		return {
 			value: {
-				hue: brand.asRadial(Math.round(hue), validate.range),
+				hue: brand.asRadial(Math.round(hue), sets, validate),
 				saturation: brand.asPercentile(
 					Math.round(saturation * 100),
-					validate.range
+					sets,
+					validate
 				),
 				lightness: brand.asPercentile(
 					Math.round(lightness * 100),
-					validate.range
+					sets,
+					validate
 				)
 			},
 			format: 'hsl'
@@ -1040,10 +1275,14 @@ function rgbToHSL(
 function rgbToHSV(
 	rgb: RGB,
 	brand: BrandingUtilsInterface,
+	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSV {
 	try {
-		if (!validate.colorValue(rgb)) {
+		if (!validate.colorValue(rgb, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid RGB value ${JSON.stringify(rgb)}`,
@@ -1084,14 +1323,16 @@ function rgbToHSV(
 
 		return {
 			value: {
-				hue: brand.asRadial(Math.round(hue), validate.range),
+				hue: brand.asRadial(Math.round(hue), sets, validate),
 				saturation: brand.asPercentile(
 					Math.round(saturation * 100),
-					validate.range
+					sets,
+					validate
 				),
 				value: brand.asPercentile(
 					Math.round(value * 100),
-					validate.range
+					sets,
+					validate
 				)
 			},
 			format: 'hsv'
@@ -1110,10 +1351,14 @@ function rgbToHSV(
 function rgbToXYZ(
 	rgb: RGB,
 	brand: BrandingUtilsInterface,
+	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): XYZ {
 	try {
-		if (!validate.colorValue(rgb)) {
+		if (!validate.colorValue(rgb, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid RGB value ${JSON.stringify(rgb)}`,
@@ -1150,7 +1395,8 @@ function rgbToXYZ(
 							scaledGreen * 0.3576 +
 							scaledBlue * 0.1805
 					),
-					validate.range
+					sets,
+					validate
 				),
 				y: brand.asXYZ_Y(
 					Math.round(
@@ -1158,7 +1404,8 @@ function rgbToXYZ(
 							scaledGreen * 0.7152 +
 							scaledBlue * 0.0722
 					),
-					validate.range
+					sets,
+					validate
 				),
 				z: brand.asXYZ_Z(
 					Math.round(
@@ -1166,7 +1413,8 @@ function rgbToXYZ(
 							scaledGreen * 0.1192 +
 							scaledBlue * 0.9505
 					),
-					validate.range
+					sets,
+					validate
 				)
 			},
 			format: 'xyz'
@@ -1187,10 +1435,14 @@ function xyzToHSL(
 	adjust: AdjustmentUtilsInterface,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	defaultColors: DefaultDataInterface['colors']['base']['branded'],
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSL {
 	try {
-		if (!validate.colorValue(xyz)) {
+		if (!validate.colorValue(xyz, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid XYZ value ${JSON.stringify(xyz)}`,
@@ -1201,9 +1453,22 @@ function xyzToHSL(
 		}
 
 		return rgbToHSL(
-			xyzToRGB(coreUtils.clone(xyz), adjust, brand, validate),
+			xyzToRGB(
+				coreUtils.clone(xyz),
+				adjust,
+				brand,
+				coreUtils,
+				defaultColors,
+				log,
+				regex,
+				sets,
+				validate
+			),
 			brand,
 			coreUtils,
+			log,
+			regex,
+			sets,
 			validate
 		);
 	} catch (error) {
@@ -1221,11 +1486,14 @@ function xyzToLAB(
 	xyz: XYZ,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
 	sanitize: SanitationUtilsInterface,
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): LAB {
 	try {
-		if (!validate.colorValue(xyz)) {
+		if (!validate.colorValue(xyz, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid XYZ value ${JSON.stringify(xyz)}`,
@@ -1258,31 +1526,40 @@ function xyzToLAB(
 				: ((7.787 * clonedXYZ.value.z + 16 / 116) as XYZ_Z);
 
 		const l = sanitize.percentile(
-			parseFloat((116 * clonedXYZ.value.y - 16).toFixed(2))
+			parseFloat((116 * clonedXYZ.value.y - 16).toFixed(2)),
+			brand,
+			sets,
+			validate
 		);
 		const a = sanitize.lab(
 			parseFloat(
 				(500 * (clonedXYZ.value.x - clonedXYZ.value.y)).toFixed(2)
 			),
-			'a'
+			'a',
+			brand,
+			sets,
+			validate
 		);
 		const b = sanitize.lab(
 			parseFloat(
 				(200 * (clonedXYZ.value.y - clonedXYZ.value.z)).toFixed(2)
 			),
-			'b'
+			'b',
+			brand,
+			sets,
+			validate
 		);
 
 		const lab: LAB = {
 			value: {
-				l: brand.asLAB_L(Math.round(l), validate.range),
-				a: brand.asLAB_A(Math.round(a), validate.range),
-				b: brand.asLAB_B(Math.round(b), validate.range)
+				l: brand.asLAB_L(Math.round(l), sets, validate),
+				a: brand.asLAB_A(Math.round(a), sets, validate),
+				b: brand.asLAB_B(Math.round(b), sets, validate)
 			},
 			format: 'lab'
 		};
 
-		if (!validate.colorValue(lab)) {
+		if (!validate.colorValue(lab, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid LAB value ${JSON.stringify(lab)}`,
@@ -1308,10 +1585,15 @@ function xyzToRGB(
 	xyz: XYZ,
 	adjust: AdjustmentUtilsInterface,
 	brand: BrandingUtilsInterface,
+	coreUtils: CoreUtilsInterface,
+	defaultColors: DefaultDataInterface['colors']['base']['branded'],
+	log: AppServicesInterface['log'],
+	regex: ConfigDataInterface['regex'],
+	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): RGB {
 	try {
-		if (!validate.colorValue(xyz)) {
+		if (!validate.colorValue(xyz, coreUtils, regex)) {
 			log(
 				'error',
 				`Invalid XYZ value ${JSON.stringify(xyz)}`,
@@ -1329,20 +1611,25 @@ function xyzToRGB(
 		let green = x * -0.9689 + y * 1.8758 + z * 0.0415;
 		let blue = x * 0.0557 + y * -0.204 + z * 1.057;
 
-		red = adjust.applyGammaCorrection(red);
-		green = adjust.applyGammaCorrection(green);
-		blue = adjust.applyGammaCorrection(blue);
+		red = adjust.applyGammaCorrection(red, log);
+		green = adjust.applyGammaCorrection(green, log);
+		blue = adjust.applyGammaCorrection(blue, log);
 
 		const rgb: RGB = adjust.clampRGB(
 			{
 				value: {
-					red: brand.asByteRange(Math.round(red), validate.range),
-					green: brand.asByteRange(Math.round(green), validate.range),
-					blue: brand.asByteRange(Math.round(blue), validate.range)
+					red: brand.asByteRange(Math.round(red), sets, validate),
+					green: brand.asByteRange(Math.round(green), sets, validate),
+					blue: brand.asByteRange(Math.round(blue), sets, validate)
 				},
 				format: 'rgb'
 			},
 			brand,
+			coreUtils,
+			defaultColors,
+			log,
+			regex,
+			sets,
 			validate
 		);
 
@@ -1358,7 +1645,7 @@ function xyzToRGB(
 	}
 }
 
-export const colorHelpers = {
+export const colorHelpers: ColorUtilHelpersInterface = {
 	cmykToHSL,
 	cmykToRGB,
 	hexToHSL,

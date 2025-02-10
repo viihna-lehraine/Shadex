@@ -41,7 +41,7 @@ export interface Palette {
 }
 
 export interface PaletteItem {
-	id?: number;
+	itemID: number;
 	colors: {
 		main: {
 			cmyk: CMYK['value'];
