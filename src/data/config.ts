@@ -45,7 +45,8 @@ const regex: ConfigDataInterface['regex'] = {
 		}
 	},
 	validation: {
-		hex: /^#[0-9A-Fa-f]{6}$/
+		hex: /^#[0-9A-Fa-f]{6}$/,
+		hexComponent: /^#[0-9a-fA-F]{2}$/
 	}
 };
 

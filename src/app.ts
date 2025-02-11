@@ -9,147 +9,97 @@
 
 // File: app.js
 
-import { UIManager } from './app/ui/UIManager.js';
-import { getIDBInstance } from './app/IDB/instance.js';
-import { createLogger } from './logger/index.js';
 import { defaultData as defaults } from './data/defaults.js';
 import { domData } from './data/dom.js';
-import { eventListenerFn } from './app/ui/dom/eventListeners/index.js';
+import { domUtils } from './utils/dom.js';
 import { modeData as mode } from './data/mode.js';
-import { uiFn } from './app/ui/main.js';
-import { validateStaticElements } from './app/ui/dom/validate.js';
 
+const appServices = await import('./services/app.js').then(
+	module => module.appServices
+);
+const log = appServices.log;
 const logMode = mode.logging;
 
-const thisModule = 'app.js';
-
-const logger = await createLogger();
-
 if (mode.debug)
-	logger.info(
-		'Executing main application script',
-		`${thisModule} > ANONYMOUS`
-	);
+	log('debug', 'Executing main application script', 'app.js > ANONYMOUS', 2);
 
 if (document.readyState === 'loading') {
-	if (mode.debug)
-		logger.info(
-			'DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...',
-			`${thisModule} > ANONYMOUS`
-		);
+	log(
+		'debug',
+		'DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...',
+		'app.js > ANONYMOUS',
+		2
+	);
 
 	document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
-	if (mode.debug)
-		logger.info(
-			'DOM content already loaded. Initializing application immediately.',
-			`${thisModule} > ANONYMOUS`
-		);
+	log(
+		'debug',
+		'DOM content already loaded. Initializing application immediately.',
+		'app.js > ANONYMOUS',
+		2
+	);
 
 	initializeApp();
 }
 
 async function initializeApp(): Promise<void> {
-	const thisFunction = 'initializeApp()';
-
-	logger.info(
+	log(
+		'debug',
 		'DOM content loaded - Initializing application',
-		`${thisModule} > ${thisFunction}`
+		'app.js > initializeApp()',
+		1
 	);
 
+	log(
+		'debug',
+		'Validating static DOM elements',
+		'app.js > initializeApp()',
+		2
+	);
+
+	domUtils.validateStaticElements(domData, log);
+
+	const selectedSwatch = domData.elements.static.selects.swatch;
+
+	const selectedColor = selectedSwatch
+		? parseInt(selectedSwatch.value, 10)
+		: 0;
+
+	const defaultPaletteOptions = defaults.paletteOptions;
+
+	if (logMode.verbosity > 1) {
+		log(
+			'debug',
+			`Generating initial color palette.`,
+			'app.js > initializeApp()',
+			2
+		);
+	}
+
+	await uiFn.startPaletteGeneration(defaultPaletteOptions);
+
+	const uiManager = new UIManager(eventListenerFn);
 	try {
-		if (mode.logging.verbosity > 1)
+		eventListenerFn.initializeEventListeners(uiManager);
+		if (logMode.verbosity > 2)
 			logger.info(
-				'Creating new IDBManager instance. Initializing database and its dependencies.',
-				`${thisModule} > ${thisFunction}`
-			);
-
-		const idbManager = await getIDBInstance();
-
-		if (mode.expose) {
-			if (logMode.verbosity > 1)
-				logger.info(
-					'Exposing IDBManager instance to global scope',
-					`${thisModule} > ${thisFunction}`
-				);
-
-			window.idbManager = idbManager;
-		}
-
-		const selectedSwatch = domData.elements.static.selects.swatch;
-
-		if (mode.debug) {
-			if (logMode.debug && logMode.verbosity > 1) {
-				logger.debug(
-					'Validating DOM elements',
-					`${thisModule} > ${thisFunction}`
-				);
-
-				validateStaticElements();
-			}
-		} else {
-			if (logMode.verbosity > 1) {
-				logger.info(
-					'Skipping DOM element validation',
-					`${thisModule} > ${thisFunction}`
-				);
-			}
-		}
-
-		const selectedColor = selectedSwatch
-			? parseInt(selectedSwatch.value, 10)
-			: 0;
-
-		if (mode.debug && logMode.verbosity > 1)
-			logger.debug(
-				`Selected color: ${selectedColor}`,
-				`${thisModule} > ${thisFunction}`
-			);
-
-		const defaultPaletteOptions = defaults.paletteOptions;
-		if (logMode.verbosity > 1) {
-			logger.info(
-				`Generating initial color palette.`,
-				`${thisModule} > ${thisFunction}`
-			);
-		}
-
-		await uiFn.startPaletteGeneration(defaultPaletteOptions);
-
-		const uiManager = new UIManager(eventListenerFn);
-
-		try {
-			eventListenerFn.initializeEventListeners(uiManager);
-
-			if (logMode.verbosity > 2)
-				logger.info(
-					'Event listeners have been successfully initialized',
-					`${thisModule} > ${thisFunction}`
-				);
-		} catch (error) {
-			if (logMode.error)
-				logger.error(
-					`Failed to initialize event listeners.\n${error}`,
-					`${thisModule} > ${thisFunction}`
-				);
-
-			if (mode.showAlerts)
-				alert('An error occurred. Check console for details.');
-		}
-
-		if (logMode.verbosity > 1)
-			logger.info(
-				'Application successfully initialized. Awaiting user input.',
+				'Event listeners have been successfully initialized',
 				`${thisModule} > ${thisFunction}`
 			);
 	} catch (error) {
 		if (logMode.error)
 			logger.error(
-				`Failed to initialize application: ${error}`,
+				`Failed to initialize event listeners.\n${error}`,
 				`${thisModule} > ${thisFunction}`
 			);
-
 		if (mode.showAlerts)
 			alert('An error occurred. Check console for details.');
 	}
+
+	if (logMode.verbosity > 1)
+		logger.info(
+			'Application successfully initialized. Awaiting user input.',
+			`${thisModule} > ${thisFunction}`
+		);
 }

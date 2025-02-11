@@ -20,7 +20,7 @@ import {
 	StoredPalette,
 	SV,
 	SV_StringProps,
-	TypeGuardUtilsInteface,
+	TypeGuardUtilsInterface,
 	XYZ
 } from '../types/index.js';
 
@@ -365,7 +365,7 @@ function isXYZFormat(color: Color): color is XYZ {
 	return isColorFormat(color, 'xyz');
 }
 
-export const typeGuards: TypeGuardUtilsInteface = {
+export const typeGuards: TypeGuardUtilsInterface = {
 	isCMYKColor,
 	isCMYKFormat,
 	isCMYKString,

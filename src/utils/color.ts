@@ -13,8 +13,6 @@ import {
 	ColorUtilsInterface,
 	ColorUtilHelpersInterface,
 	CoreUtilsInterface,
-	DataSetsInterface,
-	DefaultDataInterface,
 	FormattingUtilsInterface,
 	Hex,
 	Hex_StringProps,
@@ -30,32 +28,26 @@ import {
 	SanitationUtilsInterface,
 	SL,
 	SV,
-	TypeGuardUtilsInteface,
+	TypeGuardUtilsInterface,
 	ValidationUtilsInterface,
 	XYZ,
-	XYZ_StringProps,
-	ConfigDataInterface
+	XYZ_StringProps
 } from '../types/index.js';
+import { defaultData as defaults } from '../data/defaults.js';
+
+const defaultColors = defaults.colors.base.branded;
+const defaultColorStrings = defaults.colors.strings;
 
 function convertCMYKStringToValue(
 	cmyk: CMYK_StringProps['value'],
 	brand: BrandingUtilsInterface,
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): CMYK['value'] {
 	return {
-		cyan: brand.asPercentile(parseFloat(cmyk.cyan) / 100, sets, validate),
-		magenta: brand.asPercentile(
-			parseFloat(cmyk.magenta) / 100,
-			sets,
-			validate
-		),
-		yellow: brand.asPercentile(
-			parseFloat(cmyk.yellow) / 100,
-			sets,
-			validate
-		),
-		key: brand.asPercentile(parseFloat(cmyk.key) / 100, sets, validate)
+		cyan: brand.asPercentile(parseFloat(cmyk.cyan) / 100, validate),
+		magenta: brand.asPercentile(parseFloat(cmyk.magenta) / 100, validate),
+		yellow: brand.asPercentile(parseFloat(cmyk.yellow) / 100, validate),
+		key: brand.asPercentile(parseFloat(cmyk.key) / 100, validate)
 	};
 }
 
@@ -74,8 +66,6 @@ function convertColorStringToColor(
 	colorString: Color_StringProps,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
-	defaultColors: DefaultDataInterface['colors']['base']['branded'],
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): Color {
 	const clonedColor = coreUtils.clone(colorString);
@@ -112,19 +102,13 @@ function convertColorStringToColor(
 
 			const unbrandedHSL = defaultColors.hsl;
 
-			const brandedHue = brand.asRadial(
-				unbrandedHSL.value.hue,
-				sets,
-				validate
-			);
+			const brandedHue = brand.asRadial(unbrandedHSL.value.hue, validate);
 			const brandedSaturation = brand.asPercentile(
 				unbrandedHSL.value.saturation,
-				sets,
 				validate
 			);
 			const brandedLightness = brand.asPercentile(
 				unbrandedHSL.value.lightness,
-				sets,
 				validate
 			);
 
@@ -141,12 +125,12 @@ function convertColorStringToColor(
 
 function convertColorToColorString(
 	color: Color,
+	appServices: AppServicesInterface,
 	coreUtils: CoreUtilsInterface,
-	defaultColorStrings: DefaultDataInterface['colors']['strings'],
 	formattingUtils: FormattingUtilsInterface,
-	log: AppServicesInterface['log'],
-	typeGuards: TypeGuardUtilsInteface
+	typeGuards: TypeGuardUtilsInterface
 ): Color_StringProps {
+	const log = appServices.log;
 	const clonedColor = coreUtils.clone(color);
 
 	if (typeGuards.isColorString(clonedColor)) {
@@ -290,10 +274,9 @@ function convertColorToCSS(color: Color): string {
 function convertHexStringToValue(
 	hex: Hex_StringProps['value'],
 	brand: BrandingUtilsInterface,
-	regex: ConfigDataInterface['regex'],
 	validate: ValidationUtilsInterface
 ): Hex['value'] {
-	return { hex: brand.asHexSet(hex.hex, regex, validate) };
+	return { hex: brand.asHexSet(hex.hex, validate) };
 }
 
 function convertHexValueToString(hex: Hex['value']): Hex_StringProps['value'] {
@@ -303,20 +286,19 @@ function convertHexValueToString(hex: Hex['value']): Hex_StringProps['value'] {
 function convertHSL(
 	color: HSL,
 	colorSpace: ColorSpaceExtended,
+	appServices: AppServicesInterface,
 	brand: BrandingUtilsInterface,
 	colorHelpers: ColorUtilHelpersInterface,
 	colorUtils: ColorUtilsInterface,
 	coreUtils: CoreUtilsInterface,
-	defaultColors: DefaultDataInterface['colors']['base']['branded'],
 	format: FormattingUtilsInterface,
-	log: AppServicesInterface['log'],
-	regex: ConfigDataInterface['regex'],
 	sanitize: SanitationUtilsInterface,
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): Color {
+	const log = appServices.log;
+
 	try {
-		if (!validate.colorValue(color, coreUtils, regex)) {
+		if (!validate.colorValue(color, coreUtils)) {
 			log(
 				'error',
 				`Invalid color value ${JSON.stringify(color)}`,
@@ -332,25 +314,21 @@ function convertHSL(
 			case 'cmyk':
 				return colorHelpers.hslToCMYK(
 					clonedColor,
+					appServices,
 					brand,
 					colorUtils,
 					coreUtils,
-					log,
-					regex,
 					sanitize,
-					sets,
 					validate
 				);
 			case 'hex':
 				return colorHelpers.hslToHex(
 					clonedColor,
+					appServices,
 					brand,
 					colorUtils,
 					coreUtils,
 					format,
-					log,
-					regex,
-					sets,
 					validate
 				);
 			case 'hsl':
@@ -358,65 +336,54 @@ function convertHSL(
 			case 'hsv':
 				return colorHelpers.hslToHSV(
 					clonedColor,
+					appServices,
 					brand,
 					coreUtils,
-					log,
-					regex,
-					sets,
 					validate
 				);
 			case 'lab':
 				return colorHelpers.hslToLAB(
 					clonedColor,
+					appServices,
 					brand,
 					colorUtils,
 					coreUtils,
-					log,
-					regex,
 					sanitize,
-					sets,
 					validate
 				);
 			case 'rgb':
 				return colorHelpers.hslToRGB(
 					clonedColor,
+					appServices,
 					brand,
 					colorUtils,
 					coreUtils,
-					log,
-					regex,
-					sets,
 					validate
 				);
 			case 'sl':
 				return colorHelpers.hslToSL(
 					clonedColor,
+					appServices,
 					coreUtils,
-					log,
-					regex,
 					validate
 				);
 			case 'sv':
 				return colorHelpers.hslToSV(
 					clonedColor,
+					appServices,
 					brand,
 					colorUtils,
 					coreUtils,
-					log,
-					regex,
-					sets,
 					validate
 				);
 			case 'xyz':
 				return colorHelpers.hslToXYZ(
 					clonedColor,
+					appServices,
 					brand,
 					colorUtils,
 					coreUtils,
-					log,
-					regex,
 					sanitize,
-					sets,
 					validate
 				);
 			default:
@@ -430,21 +397,15 @@ function convertHSL(
 function convertHSLStringToValue(
 	hsl: HSL_StringProps['value'],
 	brand: BrandingUtilsInterface,
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSL['value'] {
 	return {
-		hue: brand.asRadial(parseFloat(hsl.hue), sets, validate),
+		hue: brand.asRadial(parseFloat(hsl.hue), validate),
 		saturation: brand.asPercentile(
 			parseFloat(hsl.saturation) / 100,
-			sets,
 			validate
 		),
-		lightness: brand.asPercentile(
-			parseFloat(hsl.lightness) / 100,
-			sets,
-			validate
-		)
+		lightness: brand.asPercentile(parseFloat(hsl.lightness) / 100, validate)
 	};
 }
 
@@ -459,17 +420,15 @@ function convertHSLValueToString(hsl: HSL['value']): HSL_StringProps['value'] {
 function convertHSVStringToValue(
 	hsv: HSV_StringProps['value'],
 	brand: BrandingUtilsInterface,
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSV['value'] {
 	return {
-		hue: brand.asRadial(parseFloat(hsv.hue), sets, validate),
+		hue: brand.asRadial(parseFloat(hsv.hue), validate),
 		saturation: brand.asPercentile(
 			parseFloat(hsv.saturation) / 100,
-			sets,
 			validate
 		),
-		value: brand.asPercentile(parseFloat(hsv.value) / 100, sets, validate)
+		value: brand.asPercentile(parseFloat(hsv.value) / 100, validate)
 	};
 }
 
@@ -484,13 +443,12 @@ function convertHSVValueToString(hsv: HSV['value']): HSV_StringProps['value'] {
 function convertLABStringToValue(
 	lab: LAB_StringProps['value'],
 	brand: BrandingUtilsInterface,
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): LAB['value'] {
 	return {
-		l: brand.asLAB_L(parseFloat(lab.l), sets, validate),
-		a: brand.asLAB_A(parseFloat(lab.a), sets, validate),
-		b: brand.asLAB_B(parseFloat(lab.b), sets, validate)
+		l: brand.asLAB_L(parseFloat(lab.l), validate),
+		a: brand.asLAB_A(parseFloat(lab.a), validate),
+		b: brand.asLAB_B(parseFloat(lab.b), validate)
 	};
 }
 
@@ -505,13 +463,12 @@ function convertLABValueToString(lab: LAB['value']): LAB_StringProps['value'] {
 function convertRGBStringToValue(
 	rgb: RGB_StringProps['value'],
 	brand: BrandingUtilsInterface,
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): RGB['value'] {
 	return {
-		red: brand.asByteRange(parseFloat(rgb.red), sets, validate),
-		green: brand.asByteRange(parseFloat(rgb.green), sets, validate),
-		blue: brand.asByteRange(parseFloat(rgb.blue), sets, validate)
+		red: brand.asByteRange(parseFloat(rgb.red), validate),
+		green: brand.asByteRange(parseFloat(rgb.green), validate),
+		blue: brand.asByteRange(parseFloat(rgb.blue), validate)
 	};
 }
 
@@ -526,18 +483,17 @@ function convertRGBValueToString(rgb: RGB['value']): RGB_StringProps['value'] {
 function convertToHSL(
 	color: Exclude<Color, SL | SV>,
 	adjust: AdjustmentUtilsInterface,
+	appServices: AppServicesInterface,
 	brand: BrandingUtilsInterface,
 	colorHelpers: ColorUtilHelpersInterface,
 	coreUtils: CoreUtilsInterface,
-	defaultColors: DefaultDataInterface['colors']['base']['branded'],
 	format: FormattingUtilsInterface,
-	log: AppServicesInterface['log'],
-	regex: ConfigDataInterface['regex'],
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSL {
+	const log = appServices.log;
+
 	try {
-		if (!validate.colorValue(color, coreUtils, regex)) {
+		if (!validate.colorValue(color, coreUtils)) {
 			log(
 				'error',
 				`Invalid color value ${JSON.stringify(color)}`,
@@ -554,24 +510,18 @@ function convertToHSL(
 				return colorHelpers.cmykToHSL(
 					clonedColor as CMYK,
 					adjust,
+					appServices,
 					brand,
 					coreUtils,
-					defaultColors,
-					log,
-					regex,
-					sets,
 					validate
 				);
 			case 'hex':
 				return colorHelpers.hexToHSL(
 					clonedColor as Hex,
+					appServices,
 					brand,
 					coreUtils,
-					defaultColors,
 					format,
-					log,
-					regex,
-					sets,
 					validate
 				);
 			case 'hsl':
@@ -579,45 +529,35 @@ function convertToHSL(
 			case 'hsv':
 				return colorHelpers.hsvToHSL(
 					clonedColor as HSV,
+					appServices,
 					brand,
 					coreUtils,
-					log,
-					regex,
-					sets,
 					validate
 				);
 			case 'lab':
 				return colorHelpers.labToHSL(
 					clonedColor as LAB,
 					adjust,
+					appServices,
 					brand,
 					coreUtils,
-					defaultColors,
-					log,
-					regex,
-					sets,
 					validate
 				);
 			case 'rgb':
 				return colorHelpers.rgbToHSL(
 					clonedColor as RGB,
+					appServices,
 					brand,
 					coreUtils,
-					log,
-					regex,
-					sets,
 					validate
 				);
 			case 'xyz':
 				return colorHelpers.xyzToHSL(
 					clonedColor as XYZ,
 					adjust,
+					appServices,
 					brand,
 					coreUtils,
-					defaultColors,
-					log,
-					regex,
-					sets,
 					validate
 				);
 			default:
@@ -631,13 +571,12 @@ function convertToHSL(
 function convertXYZStringToValue(
 	xyz: XYZ_StringProps['value'],
 	brand: BrandingUtilsInterface,
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): XYZ['value'] {
 	return {
-		x: brand.asXYZ_X(parseFloat(xyz.x), sets, validate),
-		y: brand.asXYZ_Y(parseFloat(xyz.y), sets, validate),
-		z: brand.asXYZ_Z(parseFloat(xyz.z), sets, validate)
+		x: brand.asXYZ_X(parseFloat(xyz.x), validate),
+		y: brand.asXYZ_Y(parseFloat(xyz.y), validate),
+		z: brand.asXYZ_Z(parseFloat(xyz.z), validate)
 	};
 }
 
@@ -771,21 +710,11 @@ function narrowToColor(
 	color: Color | Color_StringProps,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
-	defaultColors: DefaultDataInterface['colors']['base']['branded'],
-	sets: DataSetsInterface,
-	typeGuards: TypeGuardUtilsInteface,
+	typeGuards: TypeGuardUtilsInterface,
 	validate: ValidationUtilsInterface
 ): Color | null {
-	if (typeGuards.isColorString(color)) {
-		return convertColorStringToColor(
-			color,
-			brand,
-			coreUtils,
-			defaultColors,
-			sets,
-			validate
-		);
-	}
+	if (typeGuards.isColorString(color))
+		return convertColorStringToColor(color, brand, coreUtils, validate);
 
 	switch (color.format as ColorSpaceExtended) {
 		case 'cmyk':
@@ -807,48 +736,37 @@ function toColorValueRange<T extends keyof RangeKeyMap>(
 	value: string | number,
 	rangeKey: T,
 	brand: BrandingUtilsInterface,
-	regex: ConfigDataInterface['regex'],
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): RangeKeyMap[T] {
-	validate.range(value, rangeKey, sets);
+	validate.range(value, rangeKey);
 
 	if (rangeKey === 'HexSet') {
 		return brand.asHexSet(
 			value as string,
-			regex,
 			validate
 		) as unknown as RangeKeyMap[T];
 	}
 
-	return brand.asBranded(value as number, rangeKey, sets, validate);
+	return brand.asBranded(value as number, rangeKey, validate);
 }
 
 function validateAndConvertColor(
 	color: Color | Color_StringProps | null,
+	appServices: AppServicesInterface,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
-	defaultColors: DefaultDataInterface['colors']['base']['branded'],
-	log: AppServicesInterface['log'],
-	regex: ConfigDataInterface['regex'],
-	sets: DataSetsInterface,
-	typeGuards: TypeGuardUtilsInteface,
+	typeGuards: TypeGuardUtilsInterface,
 	validate: ValidationUtilsInterface
 ): Color | null {
+	const log = appServices.log;
+
 	if (!color) return null;
 
 	const convertedColor = typeGuards.isColorString(color)
-		? convertColorStringToColor(
-				color,
-				brand,
-				coreUtils,
-				defaultColors,
-				sets,
-				validate
-			)
+		? convertColorStringToColor(color, brand, coreUtils, validate)
 		: color;
 
-	if (!validate.colorValue(convertedColor, coreUtils, regex)) {
+	if (!validate.colorValue(convertedColor, coreUtils)) {
 		log(
 			'error',
 			`Invalid color: ${JSON.stringify(convertedColor)}`,

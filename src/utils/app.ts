@@ -4,52 +4,48 @@ import {
 	AppUtilsInterface,
 	AppServicesInterface,
 	BrandingUtilsInterface,
-	ConfigDataInterface,
 	CoreUtilsInterface,
-	DataSetsInterface,
-	DefaultDataInterface,
 	HSL,
 	SanitationUtilsInterface,
 	SL,
 	ValidationUtilsInterface
 } from '../types/index.js';
+import { defaultData as defaults } from '../data/defaults.js';
+
+const defaultColors = defaults.colors.base.branded;
 
 function generateRandomHSL(
+	appServices: AppServicesInterface,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
-	defaultColors: DefaultDataInterface['colors']['base']['branded'],
-	log: AppServicesInterface['log'],
-	regex: ConfigDataInterface['regex'],
 	sanitize: SanitationUtilsInterface,
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSL {
+	const log = appServices.log;
+
 	try {
 		const hsl: HSL = {
 			value: {
 				hue: sanitize.radial(
 					Math.floor(Math.random() * 360),
 					brand,
-					sets,
 					validate
 				),
 				saturation: sanitize.percentile(
 					Math.floor(Math.random() * 101),
 					brand,
-					sets,
 					validate
 				),
 				lightness: sanitize.percentile(
 					Math.floor(Math.random() * 101),
 					brand,
-					sets,
 					validate
 				)
 			},
 			format: 'hsl'
 		};
 
-		if (!validate.colorValue(hsl, coreUtils, regex)) {
+		if (!validate.colorValue(hsl, coreUtils)) {
 			log(
 				'error',
 				`Invalid random HSL color value ${JSON.stringify(hsl)}`,
@@ -79,35 +75,32 @@ function generateRandomHSL(
 }
 
 function generateRandomSL(
+	appServices: AppServicesInterface,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
-	defaultColors: DefaultDataInterface['colors']['base']['branded'],
-	log: AppServicesInterface['log'],
-	regex: ConfigDataInterface['regex'],
 	sanitize: SanitationUtilsInterface,
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): SL {
+	const log = appServices.log;
+
 	try {
 		const sl: SL = {
 			value: {
 				saturation: sanitize.percentile(
 					Math.max(0, Math.min(100, Math.random() * 100)),
 					brand,
-					sets,
 					validate
 				),
 				lightness: sanitize.percentile(
 					Math.max(0, Math.min(100, Math.random() * 100)),
 					brand,
-					sets,
 					validate
 				)
 			},
 			format: 'sl'
 		};
 
-		if (!validate.colorValue(sl as SL, coreUtils, regex)) {
+		if (!validate.colorValue(sl as SL, coreUtils)) {
 			log(
 				'error',
 				`Invalid random SV color value ${JSON.stringify(sl)}`,

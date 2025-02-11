@@ -4,28 +4,28 @@ import {
 	AdjustmentUtilsInterface,
 	AppServicesInterface,
 	BrandingUtilsInterface,
-	ConfigDataInterface,
-	ConstsDataInterface,
 	CoreUtilsInterface,
-	DataSetsInterface,
-	DefaultDataInterface,
 	HSL,
 	RGB,
 	ValidationUtilsInterface
 } from '../types/index.js';
+import { constsData as consts } from '../data/consts.js';
+import { defaultData as defaults } from '../data/defaults.js';
+
+const adjustments = consts.adjustments;
+const defaultColors = defaults.colors.base.branded;
 
 function adjustSL(
 	color: HSL,
-	adjustments: ConstsDataInterface['adjustments'],
+	appServices: AppServicesInterface,
 	brandingUtils: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
-	log: AppServicesInterface['log'],
-	regex: ConfigDataInterface['regex'],
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): HSL {
+	const log = appServices.log;
+
 	try {
-		if (!validate.colorValue(color, coreUtils, regex)) {
+		if (!validate.colorValue(color, coreUtils)) {
 			log(
 				'error',
 				'Invalid color valus for adjustment.',
@@ -46,12 +46,10 @@ function adjustSL(
 				hue: color.value.hue,
 				saturation: brandingUtils.asPercentile(
 					adjustedSaturation,
-					sets,
 					validate
 				),
 				lightness: brandingUtils.asPercentile(
 					adjustedLightness,
-					sets,
 					validate
 				)
 			},
@@ -70,8 +68,10 @@ function adjustSL(
 
 function applyGammaCorrection(
 	value: number,
-	log: AppServicesInterface['log']
+	appServices: AppServicesInterface
 ): number {
+	const log = appServices.log;
+
 	try {
 		return value > 0.0031308
 			? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
@@ -89,17 +89,15 @@ function applyGammaCorrection(
 
 function clampRGB(
 	rgb: RGB,
+	appServices: AppServicesInterface,
 	brand: BrandingUtilsInterface,
 	coreUtils: CoreUtilsInterface,
-	defaultColors: DefaultDataInterface['colors']['base']['branded'],
-	log: AppServicesInterface['log'],
-	regex: ConfigDataInterface['regex'],
-	sets: DataSetsInterface,
 	validate: ValidationUtilsInterface
 ): RGB {
+	const log = appServices.log;
 	const defaultRGB = defaultColors.rgb;
 
-	if (!validate.colorValue(rgb, coreUtils, regex)) {
+	if (!validate.colorValue(rgb, coreUtils)) {
 		log(
 			'error',
 			`Invalid RGB value ${JSON.stringify(rgb)}`,
@@ -114,17 +112,14 @@ function clampRGB(
 			value: {
 				red: brand.asByteRange(
 					Math.round(Math.min(Math.max(0, rgb.value.red), 1) * 255),
-					sets,
 					validate
 				),
 				green: brand.asByteRange(
 					Math.round(Math.min(Math.max(0, rgb.value.green), 1) * 255),
-					sets,
 					validate
 				),
 				blue: brand.asByteRange(
 					Math.round(Math.min(Math.max(0, rgb.value.blue), 1) * 255),
-					sets,
 					validate
 				)
 			},

@@ -51,6 +51,7 @@ export interface Palette_CommonFn_MasterInterface {
 // ******** MAIN MODULES ********
 
 export interface PaletteGenerationArgs {
+	distributionType: 'base' | 'chaotic' | 'soft' | 'strong';
 	swatches: number;
 	type: number;
 	limitDark: boolean;

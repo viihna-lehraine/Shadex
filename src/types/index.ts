@@ -11,6 +11,7 @@ export type {
 export type { AppServicesInterface } from './app/services.js';
 export type { UIFn_MasterInterface } from './app/ui.js';
 export type {
+	ArgsHelpersInterface,
 	ColorConversionHelpersInterface,
 	ColorUtilHelpersInterface,
 	PaletteUtilHelpersInterface
@@ -25,7 +26,7 @@ export type {
 	FormattingUtilsInterface,
 	PaletteUtilsInterface,
 	SanitationUtilsInterface,
-	TypeGuardUtilsInteface,
+	TypeGuardUtilsInterface,
 	ValidationUtilsInterface
 } from './app/utils/partials.js';
 export type { UtilitiesInterface } from './app/utils/main.js';
@@ -132,3 +133,12 @@ export type {
 	ValidationServiceInterface
 } from './services/ui.js';
 export type { IDBManager_ClassInterface } from './classes.js';
+export type {
+	GenerateHuesFnArgs,
+	GenerateHuesFnInterface,
+	GeneratePaletteFnArgs,
+	GeneratePaletteFnInterface,
+	HueGenFunctions,
+	PaletteGenFunctions,
+	RandomColorArgs
+} from './functions.js';

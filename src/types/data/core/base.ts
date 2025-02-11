@@ -70,6 +70,7 @@ export interface ConfigDataInterface {
 		};
 		validation: {
 			hex: RegExp;
+			hexComponent: RegExp;
 		};
 	};
 	storage: {

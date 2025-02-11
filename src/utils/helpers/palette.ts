@@ -2,22 +2,25 @@
 
 import {
 	AppServicesInterface,
-	ConfigDataInterface,
 	ConstsDataInterface,
 	CoreUtilsInterface,
 	HSL,
 	PaletteUtilHelpersInterface,
 	ValidationUtilsInterface
 } from '../../types/index.js';
+import { constsData as consts } from '../../data/consts.js';
+
+const probabilityConsts = consts.probabilities;
 
 function getWeightedRandomInterval(
-	type: keyof ConstsDataInterface['probabilities'],
-	log: AppServicesInterface['log'],
-	probabilityConsts: ConstsDataInterface['probabilities']
+	distributionType: keyof ConstsDataInterface['probabilities'],
+	appServices: AppServicesInterface
 ): number {
+	const log = appServices.log;
+
 	try {
 		// select appropriate type
-		const { weights, values } = probabilityConsts[type];
+		const { weights, values } = probabilityConsts[distributionType];
 
 		// compute cumulative probabilities
 		const cumulativeProbabilities: number[] = values.reduce(
@@ -50,13 +53,13 @@ function getWeightedRandomInterval(
 
 function isHSLInBounds(
 	hsl: HSL,
-	consts: ConstsDataInterface,
+	appServices: AppServicesInterface,
 	coreUtils: CoreUtilsInterface,
-	log: AppServicesInterface['log'],
-	regex: ConfigDataInterface['regex'],
 	validate: ValidationUtilsInterface
 ): boolean {
-	if (!validate.colorValue(hsl, coreUtils, regex)) {
+	const log = appServices.log;
+
+	if (!validate.colorValue(hsl, coreUtils)) {
 		log(
 			'error',
 			`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -67,21 +70,21 @@ function isHSLInBounds(
 	}
 
 	return (
-		isHSLTooDark(hsl, consts, coreUtils, log, regex, validate) ||
-		isHSLTooGray(hsl, consts, coreUtils, log, regex, validate) ||
-		isHSLTooLight(hsl, consts, coreUtils, log, regex, validate)
+		isHSLTooDark(hsl, appServices, coreUtils, validate) ||
+		isHSLTooGray(hsl, appServices, coreUtils, validate) ||
+		isHSLTooLight(hsl, appServices, coreUtils, validate)
 	);
 }
 
 function isHSLTooDark(
 	hsl: HSL,
-	consts: ConstsDataInterface,
+	appServices: AppServicesInterface,
 	coreUtils: CoreUtilsInterface,
-	log: AppServicesInterface['log'],
-	regex: ConfigDataInterface['regex'],
 	validate: ValidationUtilsInterface
 ): boolean {
-	if (!validate.colorValue(hsl, coreUtils, regex)) {
+	const log = appServices.log;
+
+	if (!validate.colorValue(hsl, coreUtils)) {
 		log(
 			'error',
 			`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -96,13 +99,13 @@ function isHSLTooDark(
 
 function isHSLTooGray(
 	hsl: HSL,
-	consts: ConstsDataInterface,
+	appServices: AppServicesInterface,
 	coreUtils: CoreUtilsInterface,
-	log: AppServicesInterface['log'],
-	regex: ConfigDataInterface['regex'],
 	validate: ValidationUtilsInterface
 ): boolean {
-	if (!validate.colorValue(hsl, coreUtils, regex)) {
+	const log = appServices.log;
+
+	if (!validate.colorValue(hsl, coreUtils)) {
 		log(
 			'error',
 			`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -117,13 +120,13 @@ function isHSLTooGray(
 
 function isHSLTooLight(
 	hsl: HSL,
-	consts: ConstsDataInterface,
+	appServices: AppServicesInterface,
 	coreUtils: CoreUtilsInterface,
-	log: AppServicesInterface['log'],
-	regex: ConfigDataInterface['regex'],
 	validate: ValidationUtilsInterface
 ): boolean {
-	if (!validate.colorValue(hsl, coreUtils, regex)) {
+	const log = appServices.log;
+
+	if (!validate.colorValue(hsl, coreUtils)) {
 		log(
 			'error',
 			'Invalid HSL value ${JSON.stringify(hsl)}',

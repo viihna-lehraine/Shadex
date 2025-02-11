@@ -6,272 +6,292 @@ import {
 	BrandingUtilsInterface,
 	CMYK,
 	ColorUtilsInterface,
-	ConfigDataInterface,
 	ConstsDataInterface,
 	CoreUtilsInterface,
-	DataSetsInterface,
-	DefaultDataInterface,
+	DOMUtilsInterface,
 	FormattingUtilsInterface,
+	GenerateHuesFnArgs,
+	GeneratePaletteFnArgs,
 	Hex,
 	HSL,
 	HSV,
 	LAB,
+	PaletteItem,
 	RGB,
 	SanitationUtilsInterface,
 	SL,
 	SV,
+	TypeGuardUtilsInterface,
 	ValidationUtilsInterface,
 	XYZ
 } from '../../index.js';
+
+export interface ArgsHelpersInterface {
+	getCreatePaletteItemArgs(
+		baseColor: HSL,
+		itemID: number,
+		params: GeneratePaletteFnArgs
+	): [
+		HSL,
+		number,
+		AppServicesInterface,
+		BrandingUtilsInterface,
+		ColorUtilHelpersInterface,
+		ColorUtilsInterface,
+		CoreUtilsInterface,
+		FormattingUtilsInterface,
+		SanitationUtilsInterface,
+		TypeGuardUtilsInterface,
+		ValidationUtilsInterface
+	];
+	getCreatePaletteItemArrayArgs(
+		baseColor: HSL,
+		hues: number[],
+		paletteArgs: GeneratePaletteFnArgs
+	): [
+		HSL,
+		number[],
+		AppServicesInterface,
+		BrandingUtilsInterface,
+		ColorUtilHelpersInterface,
+		ColorUtilsInterface,
+		CoreUtilsInterface,
+		DOMUtilsInterface,
+		FormattingUtilsInterface,
+		SanitationUtilsInterface,
+		TypeGuardUtilsInterface,
+		ValidationUtilsInterface
+	];
+	getCreatePaletteObjectArgs(
+		type: string,
+		paletteID: string,
+		paletteItems: PaletteItem[],
+		swatchCount: number,
+		paletteArgs: GeneratePaletteFnArgs
+	): {
+		type: string;
+		items: PaletteItem[];
+		paletteID: string;
+		swatches: number;
+		limitDark: boolean;
+		limitGray: boolean;
+		limitLight: boolean;
+	};
+	getGenerateRandomColorArgs(
+		paletteArgs: GeneratePaletteFnArgs
+	): [
+		AppServicesInterface,
+		BrandingUtilsInterface,
+		CoreUtilsInterface,
+		SanitationUtilsInterface,
+		ValidationUtilsInterface
+	];
+	getHueGenerationArgs(
+		baseColor: HSL,
+		type:
+			| 'analogous'
+			| 'diadic'
+			| 'hexadic'
+			| 'split-complementary'
+			| 'tetradic'
+			| 'triadic',
+		paletteArgs: GeneratePaletteFnArgs
+	): GenerateHuesFnArgs;
+}
 
 export interface ColorConversionHelpersInterface {
 	cmykToHSL(
 		cmyk: CMYK,
 		adjust: AdjustmentUtilsInterface,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		defaultColors: DefaultDataInterface['colors']['base']['branded'],
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): HSL;
 	cmykToRGB(
 		cmyk: CMYK,
 		adjust: AdjustmentUtilsInterface,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		defaultColors: DefaultDataInterface['colors']['base']['branded'],
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): RGB;
 	hexToHSL(
 		hex: Hex,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		defaultColors: DefaultDataInterface['colors']['base']['branded'],
 		format: FormattingUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): HSL;
 	hexToRGB(
 		hex: Hex,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		defaultColors: DefaultDataInterface['colors']['base']['branded'],
 		format: FormattingUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): RGB;
 	hslToCMYK(
 		hsl: HSL,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		colorUtils: ColorUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		sanitize: SanitationUtilsInterface,
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): CMYK;
 	hslToHex(
 		hsl: HSL,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		colorUtils: ColorUtilsInterface,
 		coreUtils: CoreUtilsInterface,
 		format: FormattingUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): Hex;
 	hslToHSV(
 		hsl: HSL,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): HSV;
 	hslToLAB(
 		hsl: HSL,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		colorUtils: ColorUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		sanitize: SanitationUtilsInterface,
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): LAB;
 	hslToRGB(
 		hsl: HSL,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		colorUtils: ColorUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): RGB;
 	hslToSL(
 		hsl: HSL,
+		appServices: AppServicesInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		validate: ValidationUtilsInterface
 	): SL;
 	hslToSV(
 		hsl: HSL,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		colorUtils: ColorUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): SV;
 	hslToXYZ(
 		hsl: HSL,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		colorUtils: ColorUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		sanitize: SanitationUtilsInterface,
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): XYZ;
 	hsvToHSL(
 		hsv: HSV,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): HSL;
 	hsvToSV(
 		hsv: HSV,
+		appServices: AppServicesInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		validate: ValidationUtilsInterface
 	): SV;
 	labToHSL(
 		lab: LAB,
 		adjust: AdjustmentUtilsInterface,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		defaultColors: DefaultDataInterface['colors']['base']['branded'],
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): HSL;
 	labToRGB(
 		lab: LAB,
 		adjust: AdjustmentUtilsInterface,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		defaultColors: DefaultDataInterface['colors']['base']['branded'],
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): RGB;
 	labToXYZ(
 		lab: LAB,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): XYZ;
 	rgbToCMYK(
 		rgb: RGB,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		sanitize: SanitationUtilsInterface,
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): CMYK;
 	rgbToHex(
 		rgb: RGB,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
 		format: FormattingUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		validate: ValidationUtilsInterface
 	): Hex;
 	rgbToHSL(
 		rgb: RGB,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): HSL;
 	rgbToHSV(
 		rgb: RGB,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): HSV;
 	rgbToXYZ(
 		rgb: RGB,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): XYZ;
 	xyzToHSL(
 		xyz: XYZ,
 		adjust: AdjustmentUtilsInterface,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		defaultColors: DefaultDataInterface['colors']['base']['branded'],
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): HSL;
 	xyzToLAB(
 		xyz: XYZ,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		sanitize: SanitationUtilsInterface,
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): LAB;
 	xyzToRGB(
 		xyz: XYZ,
 		adjust: AdjustmentUtilsInterface,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		defaultColors: DefaultDataInterface['colors']['base']['branded'],
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): RGB;
 }
@@ -280,13 +300,10 @@ export interface ColorUtilHelpersInterface
 	extends ColorConversionHelpersInterface {
 	hexToHSLWrapper(
 		input: string | Hex,
+		appServices: AppServicesInterface,
 		brand: BrandingUtilsInterface,
 		coreUtils: CoreUtilsInterface,
-		defaultColors: DefaultDataInterface['colors']['base']['branded'],
 		format: FormattingUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
-		sets: DataSetsInterface,
 		validate: ValidationUtilsInterface
 	): HSL;
 }
@@ -294,39 +311,30 @@ export interface ColorUtilHelpersInterface
 export interface PaletteUtilHelpersInterface {
 	getWeightedRandomInterval(
 		type: keyof ConstsDataInterface['probabilities'],
-		log: AppServicesInterface['log'],
-		probabilityConsts: ConstsDataInterface['probabilities']
+		appServices: AppServicesInterface
 	): number;
 	isHSLInBounds(
 		hsl: HSL,
-		consts: ConstsDataInterface,
+		appServices: AppServicesInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		validate: ValidationUtilsInterface
 	): boolean;
 	isHSLTooDark(
 		hsl: HSL,
-		consts: ConstsDataInterface,
+		appServices: AppServicesInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		validate: ValidationUtilsInterface
 	): boolean;
 	isHSLTooGray(
 		hsl: HSL,
-		consts: ConstsDataInterface,
+		appServices: AppServicesInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		validate: ValidationUtilsInterface
 	): boolean;
 	isHSLTooLight(
 		hsl: HSL,
-		consts: ConstsDataInterface,
+		appServices: AppServicesInterface,
 		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log'],
-		regex: ConfigDataInterface['regex'],
 		validate: ValidationUtilsInterface
 	): boolean;
 }
