@@ -8,20 +8,23 @@ import {
 	ColorUtilsInterface,
 	ConstsDataInterface,
 	CoreUtilsInterface,
-	DOMUtilsInterface,
+	CreatePaletteItemArrayArgs_Tuple,
+	CreatePaletteItemArgs_Tuple,
+	CreatePaletteObjectArgs,
 	FormattingUtilsInterface,
-	GenerateHuesFnArgs,
-	GeneratePaletteFnArgs,
+	GenerateHuesArgs,
+	GeneratePaletteArgs,
+	GenerateRandomColorArgs_Tuple,
 	Hex,
 	HSL,
 	HSV,
 	LAB,
 	PaletteItem,
+	PaletteType,
 	RGB,
 	SanitationUtilsInterface,
 	SL,
 	SV,
-	TypeGuardUtilsInterface,
 	ValidationUtilsInterface,
 	XYZ
 } from '../../index.js';
@@ -30,73 +33,27 @@ export interface ArgsHelpersInterface {
 	getCreatePaletteItemArgs(
 		baseColor: HSL,
 		itemID: number,
-		params: GeneratePaletteFnArgs
-	): [
-		HSL,
-		number,
-		AppServicesInterface,
-		BrandingUtilsInterface,
-		ColorUtilHelpersInterface,
-		ColorUtilsInterface,
-		CoreUtilsInterface,
-		FormattingUtilsInterface,
-		SanitationUtilsInterface,
-		TypeGuardUtilsInterface,
-		ValidationUtilsInterface
-	];
+		params: GeneratePaletteArgs
+	): CreatePaletteItemArgs_Tuple;
 	getCreatePaletteItemArrayArgs(
 		baseColor: HSL,
 		hues: number[],
-		paletteArgs: GeneratePaletteFnArgs
-	): [
-		HSL,
-		number[],
-		AppServicesInterface,
-		BrandingUtilsInterface,
-		ColorUtilHelpersInterface,
-		ColorUtilsInterface,
-		CoreUtilsInterface,
-		DOMUtilsInterface,
-		FormattingUtilsInterface,
-		SanitationUtilsInterface,
-		TypeGuardUtilsInterface,
-		ValidationUtilsInterface
-	];
+		paletteArgs: GeneratePaletteArgs
+	): CreatePaletteItemArrayArgs_Tuple;
 	getCreatePaletteObjectArgs(
-		type: string,
+		type: PaletteType,
 		paletteID: string,
 		paletteItems: PaletteItem[],
 		swatchCount: number,
-		paletteArgs: GeneratePaletteFnArgs
-	): {
-		type: string;
-		items: PaletteItem[];
-		paletteID: string;
-		swatches: number;
-		limitDark: boolean;
-		limitGray: boolean;
-		limitLight: boolean;
-	};
+		paletteArgs: GeneratePaletteArgs
+	): CreatePaletteObjectArgs;
 	getGenerateRandomColorArgs(
-		paletteArgs: GeneratePaletteFnArgs
-	): [
-		AppServicesInterface,
-		BrandingUtilsInterface,
-		CoreUtilsInterface,
-		SanitationUtilsInterface,
-		ValidationUtilsInterface
-	];
+		paletteArgs: GeneratePaletteArgs
+	): GenerateRandomColorArgs_Tuple;
 	getHueGenerationArgs(
 		baseColor: HSL,
-		type:
-			| 'analogous'
-			| 'diadic'
-			| 'hexadic'
-			| 'split-complementary'
-			| 'tetradic'
-			| 'triadic',
-		paletteArgs: GeneratePaletteFnArgs
-	): GenerateHuesFnArgs;
+		paletteArgs: GeneratePaletteArgs
+	): GenerateHuesArgs;
 }
 
 export interface ColorConversionHelpersInterface {
@@ -309,6 +266,7 @@ export interface ColorUtilHelpersInterface
 }
 
 export interface PaletteUtilHelpersInterface {
+	getSelectedPaletteType(type: number): PaletteType;
 	getWeightedRandomInterval(
 		type: keyof ConstsDataInterface['probabilities'],
 		appServices: AppServicesInterface

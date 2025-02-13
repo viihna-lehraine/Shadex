@@ -33,7 +33,7 @@ async function handleAsyncErrors<T>(
 }
 
 function log(
-	level: 'debug' | 'warn' | 'error',
+	level: 'debug' | 'info' | 'warn' | 'error',
 	message: string,
 	method: string,
 	verbosityRequirement?: number
@@ -43,6 +43,10 @@ function log(
 		mode.logging.verbosity >= (verbosityRequirement ?? 0)
 	) {
 		logger[level](`${message}`, `${method}`);
+	}
+
+	if (level === 'error' && mode.showAlerts) {
+		alert(message);
 	}
 }
 

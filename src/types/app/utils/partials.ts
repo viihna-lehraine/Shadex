@@ -30,6 +30,7 @@ import {
 	Palette,
 	PaletteArgs,
 	PaletteItem,
+	PaletteType,
 	Percentile,
 	Radial,
 	RangeKeyMap,
@@ -37,7 +38,6 @@ import {
 	RGB_StringProps,
 	SL,
 	SL_StringProps,
-	StoredPalette,
 	SV,
 	SV_StringProps,
 	UnbrandedCMYK,
@@ -157,6 +157,10 @@ export interface ColorUtilsInterface {
 		typeGuards: TypeGuardUtilsInterface
 	): Color_StringProps;
 	convertColorToCSS(color: Color): string;
+	convertCSSToColor(
+		color: string,
+		format: FormattingUtilsInterface
+	): Exclude<Color, SL | SV> | null;
 	convertHexStringToValue(
 		hex: Hex_StringProps['value'],
 		brand: BrandingUtilsInterface,
@@ -267,6 +271,8 @@ export interface CoreUtilsInterface {
 		func: T,
 		delay: number
 	): (...args: Parameters<T>) => void;
+	getAllElements<T extends HTMLElement>(selector: string): NodeListOf<T>;
+	getElement<T extends HTMLElement>(id: string): T | null;
 }
 
 export interface DOMUtilsInterface {
@@ -293,16 +299,7 @@ export interface DOMUtilsInterface {
 		maxSwatches: number,
 		appServices: AppServicesInterface
 	): void;
-	populateOutputBox(
-		color: Color | Color_StringProps,
-		boxNumber: number,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorUtils: ColorUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		typeGuards: TypeGuardUtilsInterface,
-		validate: ValidationUtilsInterface
-	): void;
+	getCheckboxState(id: string): boolean | void;
 	readFile(file: File): Promise<string>;
 	switchColorSpaceInDOM(
 		targetFormat: ColorSpace,
@@ -319,6 +316,7 @@ export interface DOMUtilsInterface {
 		boxId: string,
 		colorUtils: ColorUtilsInterface
 	): void;
+	updateHistory(history: Palette[]): void;
 	validateStaticElements(appServices: AppServicesInterface): void;
 }
 
@@ -332,6 +330,7 @@ export interface FormattingUtilsInterface {
 		component: number,
 		appServices: AppServicesInterface
 	): string;
+	convertShortHexToLong(hex: string): string;
 	formatPercentageValues<T extends Record<string, unknown>>(value: T): T;
 	hslAddFormat(
 		value: HSL['value'],
@@ -459,12 +458,12 @@ export interface TypeGuardUtilsInterface {
 	isInputElement(element: HTMLElement | null): element is HTMLElement;
 	isLAB(value: unknown): value is LAB;
 	isLABFormat(color: Color): color is LAB;
+	isPaletteType(value: string): value is PaletteType;
 	isRGB(value: unknown): value is RGB;
 	isRGBFormat(color: Color): color is RGB;
 	isSLColor(value: unknown): value is SL;
 	isSLFormat(color: Color): color is SL;
 	isSLString(value: unknown): value is SL_StringProps;
-	isStoredPalette(obj: unknown): obj is StoredPalette;
 	isSVColor(value: unknown): value is SV;
 	isSVFormat(color: Color): color is SV;
 	isSVString(value: unknown): value is SV_StringProps;
@@ -482,4 +481,5 @@ export interface ValidationUtilsInterface {
 		value: number | string,
 		rangeKey: T
 	): void;
+	userColorInput(color: string): boolean;
 }

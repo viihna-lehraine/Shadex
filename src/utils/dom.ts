@@ -4,21 +4,20 @@ import {
 	AppServicesInterface,
 	BrandingUtilsInterface,
 	ColorInputElement,
-	Color,
 	ColorSpace,
-	Color_StringProps,
 	ColorUtilHelpersInterface,
 	ColorUtilsInterface,
 	CoreUtilsInterface,
 	DOMUtilsInterface,
 	HSL,
+	Palette,
 	TypeGuardUtilsInterface,
 	ValidationUtilsInterface
 } from '../types/index.js';
-import { domData } from '../types/data/dom.js';
+import { domData } from '../data/dom.js';
 import { modeData } from '../data/mode.js';
 
-const domIDs = domData.ids.static;
+const domIDs = domData.ids;
 const mode = modeData;
 
 const addConversionListener = (
@@ -153,64 +152,10 @@ function enforceSwatchRules(
 	}
 }
 
-function populateOutputBox(
-	color: Color | Color_StringProps,
-	boxNumber: number,
-	appServices: AppServicesInterface,
-	brand: BrandingUtilsInterface,
-	colorUtils: ColorUtilsInterface,
-	coreUtils: CoreUtilsInterface,
-	typeGuards: TypeGuardUtilsInterface,
-	validate: ValidationUtilsInterface
-): void {
-	const log = appServices.log;
+function getCheckboxState(id: string): boolean | void {
+	const checkbox = document.getElementById(id) as HTMLInputElement | null;
 
-	try {
-		const clonedColor: Color = typeGuards.isColor(color)
-			? coreUtils.clone(color)
-			: colorUtils.convertColorStringToColor(
-					color,
-					brand,
-					coreUtils,
-					validate
-				);
-
-		if (!validate.colorValue(clonedColor, coreUtils)) {
-			log(
-				'error',
-				'Invalid color values.',
-				'domUtils.populateOutputBox()'
-			);
-
-			return;
-		}
-
-		const colorTextOutputBox = document.getElementById(
-			`color-text-output-box-${boxNumber}`
-		) as HTMLInputElement | null;
-
-		if (!colorTextOutputBox) return;
-
-		const stringifiedColor = colorUtils.convertColorToCSS(clonedColor);
-
-		log(
-			'debug',
-			`Adding CSS-formatted color to DOM ${stringifiedColor}`,
-			'domUtils.populateOutputBox()',
-			2
-		);
-
-		colorTextOutputBox.value = stringifiedColor;
-		colorTextOutputBox.setAttribute('data-format', color.format);
-	} catch (error) {
-		log(
-			'error',
-			`Failed to populate color text output box: ${error}`,
-			'domUtils.populateOutputBox()'
-		);
-
-		return;
-	}
+	return checkbox ? checkbox.checked : undefined;
 }
 
 function readFile(file: File): Promise<string> {
@@ -367,6 +312,34 @@ function updateColorBox(
 	}
 }
 
+function updateHistory(history: Palette[]): void {
+	const historyList = domData.elements.divs.paletteHistory;
+
+	if (!historyList) return;
+
+	historyList.innerHTML = '';
+
+	history.forEach(palette => {
+		const entry = document.createElement('div');
+
+		entry.classList.add('history-item');
+		entry.id = `palette_${palette.id}`;
+		entry.innerHTML = `
+			<p>Palette #${palette.metadata.name || palette.id}</p>
+			<div class="color-preview">
+				${palette.items.map(item => `<span class="color-box" style="background: ${item.colors.css.hex};"></span>`).join(' ')}
+			</div>
+			<button class="remove-history-item" data-id="${palette.id}-history-remove-btn">Remove</button>
+		`;
+		entry
+			.querySelector('.remove-history-item')
+			?.addEventListener('click', async () => {
+				// *DEV-NOTE* save to history somehow
+			});
+		historyList.appendChild(entry);
+	});
+}
+
 function validateStaticElements(appServices: AppServicesInterface): void {
 	const log = appServices.log;
 	const missingElements: string[] = [];
@@ -409,9 +382,10 @@ export const domUtils: DOMUtilsInterface = {
 	addEventListener,
 	downloadFile,
 	enforceSwatchRules,
-	populateOutputBox,
+	getCheckboxState,
 	readFile,
 	switchColorSpaceInDOM,
 	updateColorBox,
+	updateHistory,
 	validateStaticElements
 };

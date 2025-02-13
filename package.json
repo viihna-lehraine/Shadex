@@ -39,7 +39,6 @@
 		"@rollup/plugin-commonjs": "^28.0.2",
 		"@rollup/plugin-node-resolve": "^16.0.0",
 		"@rollup/plugin-typescript": "^12.1.2",
-		"idb": "^8.0.2",
 		"rollup": "^4.30.1",
 		"source-map-support": "^0.5.21"
 	}

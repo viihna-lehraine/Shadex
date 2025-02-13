@@ -9,9 +9,9 @@
 
 // File: app.js
 
-import { defaultData as defaults } from './data/defaults.js';
-import { domData } from './data/dom.js';
+import { AppServicesInterface } from './types/index.js';
 import { domUtils } from './utils/dom.js';
+import { initializeEventListeners } from './dom/events/initialize/main.js';
 import { modeData as mode } from './data/mode.js';
 
 const appServices = await import('./services/app.js').then(
@@ -40,10 +40,10 @@ if (document.readyState === 'loading') {
 		2
 	);
 
-	initializeApp();
+	initializeApp(appServices);
 }
 
-async function initializeApp(): Promise<void> {
+async function initializeApp(appServices: AppServicesInterface): Promise<void> {
 	log(
 		'debug',
 		'DOM content loaded - Initializing application',
@@ -58,15 +58,7 @@ async function initializeApp(): Promise<void> {
 		2
 	);
 
-	domUtils.validateStaticElements(domData, log);
-
-	const selectedSwatch = domData.elements.static.selects.swatch;
-
-	const selectedColor = selectedSwatch
-		? parseInt(selectedSwatch.value, 10)
-		: 0;
-
-	const defaultPaletteOptions = defaults.paletteOptions;
+	domUtils.validateStaticElements(appServices);
 
 	if (logMode.verbosity > 1) {
 		log(
@@ -77,29 +69,27 @@ async function initializeApp(): Promise<void> {
 		);
 	}
 
-	await uiFn.startPaletteGeneration(defaultPaletteOptions);
-
-	const uiManager = new UIManager(eventListenerFn);
 	try {
-		eventListenerFn.initializeEventListeners(uiManager);
-		if (logMode.verbosity > 2)
-			logger.info(
-				'Event listeners have been successfully initialized',
-				`${thisModule} > ${thisFunction}`
-			);
+		initializeEventListeners(appServices, domUtils);
+
+		log(
+			'info',
+			'Event listeners have been successfully initialized',
+			'app.js > initializeApp()',
+			2
+		);
 	} catch (error) {
-		if (logMode.error)
-			logger.error(
-				`Failed to initialize event listeners.\n${error}`,
-				`${thisModule} > ${thisFunction}`
-			);
-		if (mode.showAlerts)
-			alert('An error occurred. Check console for details.');
+		log(
+			'error',
+			`Failed to initialize event listeners.\n${error}`,
+			'app.js > initializeApp()'
+		);
 	}
 
-	if (logMode.verbosity > 1)
-		logger.info(
-			'Application successfully initialized. Awaiting user input.',
-			`${thisModule} > ${thisFunction}`
-		);
+	log(
+		'info',
+		'Application successfully initialized. Awaiting user input.',
+		'app.js > initializeApp()',
+		1
+	);
 }

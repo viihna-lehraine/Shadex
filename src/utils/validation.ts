@@ -9,7 +9,7 @@ import {
 	ValidationUtilsInterface
 } from '../types/index.js';
 import { configData as config } from '../data/config.js';
-import { dataSets } from '../types/data/sets.js';
+import { dataSets } from '../data/sets.js';
 
 const regex = config.regex;
 const sets = dataSets;
@@ -189,11 +189,20 @@ function range<T extends keyof DataSetsInterface>(
 	throw new Error(`Invalid range or value for ${String(rangeKey)}`);
 }
 
+function userColorInput(color: string): boolean {
+	return (
+		regex.userInput.hex.test(color) ||
+		regex.userInput.hsl.test(color) ||
+		regex.userInput.rgb.test(color)
+	);
+}
+
 export const validationUtils: ValidationUtilsInterface = {
 	colorValue,
 	ensureHash,
 	hex,
 	hexComponent,
 	hexSet,
-	range
+	range,
+	userColorInput
 };

@@ -6,12 +6,17 @@ const adjustments: ConstsDataInterface['adjustments'] = {
 	slaValue: 10
 };
 
+const appLimits: ConstsDataInterface['appLimits'] = {
+	history: 100,
+	paletteHistory: 20
+};
+
 const debounce: ConstsDataInterface['debounce'] = {
 	btn: 300,
 	input: 200
 };
 
-const limits: ConstsDataInterface['limits'] = {
+const colorLimits: ConstsDataInterface['colorLimits'] = {
 	xyz: {
 		max: {
 			x: 95.047,
@@ -25,8 +30,6 @@ const limits: ConstsDataInterface['limits'] = {
 		}
 	}
 };
-
-const maxHistory: ConstsDataInterface['maxHistory'] = 10;
 
 const paletteRanges: ConstsDataInterface['paletteRanges'] = {
 	shift: {
@@ -82,9 +85,9 @@ const timeouts: ConstsDataInterface['timeouts'] = {
 
 export const constsData: ConstsDataInterface = {
 	adjustments,
+	appLimits,
+	colorLimits,
 	debounce,
-	limits,
-	maxHistory,
 	paletteRanges,
 	probabilities,
 	thresholds,

@@ -31,6 +31,14 @@ const regex: ConfigDataInterface['regex'] = {
 		rgb: /rgb\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i,
 		xyz: /xyz\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i
 	},
+	css: {
+		cmyk: /^cmyk\((\d+)%?,\s*(\d+)%?,\s*(\d+)%?,\s*(\d+)%?\)$/,
+		hsl: /^hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)$/,
+		hsv: /^hsv\((\d+),\s*(\d+)%?,\s*(\d+)%?\)$/,
+		lab: /^lab\(([\d.]+),\s*([\d.]+),\s*([\d.]+)\)$/,
+		rgb: /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/,
+		xyz: /^xyz\(([\d.]+),\s*([\d.]+),\s*([\d.]+)\)$/
+	},
 	dom: {
 		hex: /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i,
 		hsl: /^hsl\(\s*(\d+),\s*([\d.]+)%,\s*([\d.]+)%\s*\)$/,
@@ -43,6 +51,11 @@ const regex: ConfigDataInterface['regex'] = {
 				metadata: /\.palette\s*{\s*([\s\S]*?)\s*}/i
 			}
 		}
+	},
+	userInput: {
+		hex: /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/i,
+		hsl: /^hsl\(\s*(\d{1,3})\s*,\s*([0-9]{1,3})%\s*,\s*([0-9]{1,3})%\s*\)$/i,
+		rgb: /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i
 	},
 	validation: {
 		hex: /^#[0-9A-Fa-f]{6}$/,

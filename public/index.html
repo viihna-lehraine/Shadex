@@ -13,58 +13,138 @@
 	</head>
 	<body>
 		<div id="app">
-			<header>LOGO GOES HERE!</header>
 
 			<main id="main-ui">
-				<!-- Controls -->
-				<div id="controls">
-					<label for="palette-type-selector">Preset:</label>
-					<select id="palette-type-selector">
-						<option value="1" selected>Complementary</option>
-						<option value="2">Split Complementary</option>
-						<option value="3">Analogous</option>
-						<option value="4">Diadic</option>
-						<option value="5">Triadic</option>
-						<option value="6">Tetradic</option>
-						<option value="7">Hexadic</option>
-						<option value="8">Monochromatic</option>
-						<option value="9">Random</option>
-					</select>
-					<button id="generate-btn">🎲 Generate</button>
+
+				<div id="top-bar">
+
+					<!-- Logo -->
+					<div id="logo-field">LOGO GOES HERE!</div>
+
+					<!-- Controls -->
+					<div id="controls">
+						<label for="palette-type-selector">Preset:</label>
+						<select id="palette-type-selector">
+							<option value="complementary" selected>
+								Complementary
+							</option>
+							<option value="split-complementary">
+								Split Complementary
+							</option>
+							<option value="analogous">
+								Analogous
+							</option>
+							<option value="diadic">
+								Diadic
+							</option>
+							<option value="tetradic">
+								Triadic
+							</option>
+							<option value="tetradic">
+								Tetradic
+							</option>
+							<option value="hexadic">
+								Hexadic
+							</option>
+							<option value="monochromatic">
+								Monochromatic
+							</option>
+							<option value="random">
+								Random
+							</option>
+						</select>
+						<button id="generate-btn">🎲 Generate</button>
+					</div>
 				</div>
 
 				<!-- Palette -->
 				<section id="palette-container">
-					<div id="color-box-1" class="palette-column">
+
+					<div id="palette-column-1" class="palette-column" draggable="true">
 						<input id="color-display-1" class="color-display" type="text" value="#B00B69" />
-						<input id="color-picker-input-1" class="color-picker" type="color" value="#B00B69" />
-						<button id="color-box-lock-btn-1" class="lock-btn">🔒</button>
-						<button id="color-box-drag-btn-1" class="drag-btn">☰</button>
+						<button id="color-input-btn-1" class="color-input-btn">
+							Change Color
+						</button>
+						<button id="lock-btn-1" class="lock-btn">
+							Lock 🔒
+						</button>
+						<button id="drag-handle-1" class="drag-handle">
+							Move ☰
+						</button>
+						<div id="resize-handle-1" class="resize-handle"></div>
+						<div id="color-input-modal-1" class="color-input-modal hidden">
+							<input id="color-input-1" class="color-input" type="color" value="#B00B69" />
+						</div>
 					</div>
-					<div id="color-box-2" class="palette-column">
+
+					<div id="palette-column-2" class="palette-column">
 						<input id="color-display-2" class="color-display" type="text" value="#420420" />
-						<input id="color-picker-input-2" class="color-picker" type="color" value="#420420" />
-						<button id="color-box-drag-btn-2" class="lock-btn">🔒</button>
-						<button id="color-box-drag-btn-2" class="drag-btn">☰</button>
+						<button id="color-input-btn-2" class="color-input-btn">
+							Change Color
+						</button>
+						<button id="lock-btn-2" class="lock-btn">
+							Lock 🔒
+						</button>
+						<button id="drag-handle-2" class="drag-handle">
+							Move ☰
+						</button>
+						<div id="resize-handle-2" class="resize-handle"></div>
+						<div id="color-input-modal-2" class="color-input-modal hidden">
+							<input id="color-input-2" class="color-input" type="color" value="#420420" />
+						</div>
 					</div>
-					<div class="palette-column">
+
+					<div id="palette-column-3" class="palette-column" draggable="true">
 						<input id="color-display-3" class="color-display" type="text"  value="#696969" />
-						<input id="color-picker-input-3" class="color-picker" type="color" value="#696969" />
-						<button id="color-box-drag-btn-3" class="lock-btn">🔒</button>
-						<button id="color-box-drag-btn-3" class="drag-btn">☰</button>
+						<button id="color-input-btn-3" class="color-input-btn">
+							Change Color
+						</button>
+						<button id="lock-btn-3" class="lock-btn">
+							Lock 🔒
+						</button>
+						<button id="drag-handle-3" class="drag-handle">
+							Move ☰
+						</button>
+						<div id="resize-handle-3" class="resize-handle"></div>
+						<div id="color-input-modal-3" class="color-input-modal hidden">
+							<input id="color-input-3" class="color-input" type="color" value="#696969" />
+						</div>
 					</div>
-					<div class="palette-column">
+
+					<div id="palette-column-4" class="palette-column" draggable="true">
 						<input id="color-display-4" class="color-display" type="text" value="#666420" />
-						<input id="color-picker-input-4" class="color-picker" type="color" value="#666420" />
-						<button id="color-box-drag-btn-4" class="lock-btn">🔒</button>
-						<button id="color-box-drag-btn-4" class="drag-btn">☰</button>
+						<button id="color-input-btn-4" class="color-input-btn">
+							Change Color
+						</button>
+						<button id="lock-btn-4" class="lock-btn">
+							Lock 🔒
+						</button>
+						<button id="drag-handle-4" class="drag-handle">
+							Move ☰
+						</button>
+						<div id="resize-handle-4" class="resize-handle"></div>
+						<div id="color-input-modal-4" class="color-input-modal hidden">
+							<input id="color-input-4" class="color-input" type="color" value="#666420" />
+						</div>
 					</div>
-					<div class="palette-column">
+
+					<div id="palette-column-5" class="palette-column" draggable="true">
 						<input id="color-display-5" class="color-display" type="text" value="#69BEE5" />
-						<input id="color-picker-input-5" class="color-picker" type="color" value="#69BEE5" />
-						<button id="color-box-drag-btn-5" class="lock-btn">🔒</button>
-						<button id="color-box-drag-btn-5" class="drag-btn">☰</button>
+						<button id="color-input-btn-5" class="color-input-btn">
+							Change Color
+						</button>
+						<button id="lock-btn-5" class="lock-btn">
+							Lock 🔒
+						</button>
+						<button id="drag-handle-5" class="drag-handle">
+							Move ☰
+						</button>
+						<div id="resize-handle-5" class="resize-handle"></div>
+						<div id="color-input-modal-5" class="color-input-modal hidden">
+							<input id="color-input-5" class="color-input" type="color" value="#69BEE5" />
+						</div>
 					</div>
+
 				</section>
 
 				<!-- Adjustments -->
@@ -86,18 +166,13 @@
 				<!-- Reposition Me! -->
 				 <div id="temp-spot">
 					<button id="export-btn" type="button">💾</button>
-					<select id="export-format-option-selector">
-						<option value="1" selected>JSON</option>
-						<option value="2">CSV</option>
-						<option value="3">XML</option>
-					</select>
 					<button id="import-btn" type="button">📤</button>
 					<button id="help-menu-btn" type="button">❓</button>
 					<button id="history-menu-btn" type="button">📜</button>
 					<input type="checkbox" id="limit-dark-chkbx" />
 					<input type="checkbox" id="limit-gray-chkbx" />
 					<input type="checkbox" id="limit-light-chkbx" />
-					<select type="number" id="swatch-selector">
+					<select type="number" id="palette-column-selector">
 						<option value="1" selected>1</option>
 						<option value="2">2</option>
 						<option value="3">3</option>
@@ -105,7 +180,7 @@
 						<option value="5">5</option>
 						<option value="6">6</option>
 					</select>
-					<select type="number" id="swatch-gen-selector">
+					<select type="number" id="palette-column-count-selector">
 						<option value="1" selected>1</option>
 						<option value="2">2</option>
 						<option value="3">3</option>
@@ -127,7 +202,7 @@
 		</div>
 
 		<!-- APPLICATION SCRIPT -->
-		<script type="module" src="./dist/app.js"></script>
+		<!-- <script type="module" src="./dist/app.js"></script> -->
 
 	</body>
 </html>

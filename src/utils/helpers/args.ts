@@ -1,40 +1,23 @@
 // File: utils/helpers/args.js
 
 import {
-	AppServicesInterface,
 	ArgsHelpersInterface,
-	BrandingUtilsInterface,
-	ColorUtilsInterface,
-	ColorUtilHelpersInterface,
-	CoreUtilsInterface,
-	DOMUtilsInterface,
-	FormattingUtilsInterface,
-	GeneratePaletteFnArgs,
-	GenerateHuesFnArgs,
+	CreatePaletteItemArrayArgs_Tuple,
+	CreatePaletteItemArgs_Tuple,
+	CreatePaletteObjectArgs,
+	GeneratePaletteArgs,
+	GenerateHuesArgs,
+	GenerateRandomColorArgs_Tuple,
 	HSL,
 	PaletteItem,
-	SanitationUtilsInterface,
-	TypeGuardUtilsInterface,
-	ValidationUtilsInterface
+	PaletteType
 } from '../../types/index.js';
 
 function getCreatePaletteItemArgs(
 	baseColor: HSL,
 	itemID: number,
-	params: GeneratePaletteFnArgs
-): [
-	HSL,
-	number,
-	AppServicesInterface,
-	BrandingUtilsInterface,
-	ColorUtilHelpersInterface,
-	ColorUtilsInterface,
-	CoreUtilsInterface,
-	FormattingUtilsInterface,
-	SanitationUtilsInterface,
-	TypeGuardUtilsInterface,
-	ValidationUtilsInterface
-] {
+	params: GeneratePaletteArgs
+): CreatePaletteItemArgs_Tuple {
 	return [
 		baseColor,
 		itemID,
@@ -53,21 +36,8 @@ function getCreatePaletteItemArgs(
 function getCreatePaletteItemArrayArgs(
 	baseColor: HSL,
 	hues: number[],
-	paletteArgs: GeneratePaletteFnArgs
-): [
-	HSL,
-	number[],
-	AppServicesInterface,
-	BrandingUtilsInterface,
-	ColorUtilHelpersInterface,
-	ColorUtilsInterface,
-	CoreUtilsInterface,
-	DOMUtilsInterface,
-	FormattingUtilsInterface,
-	SanitationUtilsInterface,
-	TypeGuardUtilsInterface,
-	ValidationUtilsInterface
-] {
+	paletteArgs: GeneratePaletteArgs
+): CreatePaletteItemArrayArgs_Tuple {
 	return [
 		baseColor,
 		hues,
@@ -85,40 +55,26 @@ function getCreatePaletteItemArrayArgs(
 }
 
 function getCreatePaletteObjectArgs(
-	type: string,
+	type: PaletteType,
 	paletteID: string,
 	paletteItems: PaletteItem[],
 	swatchCount: number,
-	paletteArgs: GeneratePaletteFnArgs
-): {
-	type: string;
-	items: PaletteItem[];
-	paletteID: string;
-	swatches: number;
-	limitDark: boolean;
-	limitGray: boolean;
-	limitLight: boolean;
-} {
+	paletteArgs: GeneratePaletteArgs
+): CreatePaletteObjectArgs {
 	return {
 		type,
 		items: paletteItems,
 		paletteID,
 		swatches: swatchCount,
-		limitDark: paletteArgs.args.limitDark,
-		limitGray: paletteArgs.args.limitGray,
-		limitLight: paletteArgs.args.limitLight
+		limitDark: paletteArgs.options.limitDark,
+		limitGray: paletteArgs.options.limitGray,
+		limitLight: paletteArgs.options.limitLight
 	};
 }
 
 function getGenerateRandomColorArgs(
-	paletteArgs: GeneratePaletteFnArgs
-): [
-	AppServicesInterface,
-	BrandingUtilsInterface,
-	CoreUtilsInterface,
-	SanitationUtilsInterface,
-	ValidationUtilsInterface
-] {
+	paletteArgs: GeneratePaletteArgs
+): GenerateRandomColorArgs_Tuple {
 	return [
 		paletteArgs.appServices,
 		paletteArgs.brand,
@@ -130,22 +86,13 @@ function getGenerateRandomColorArgs(
 
 function getHueGenerationArgs(
 	baseColor: HSL,
-	type:
-		| 'analogous'
-		| 'diadic'
-		| 'hexadic'
-		| 'split-complementary'
-		| 'tetradic'
-		| 'triadic',
-	paletteArgs: GeneratePaletteFnArgs
-): GenerateHuesFnArgs {
-	if (!type) throw new Error('Type is required');
-
+	paletteArgs: GeneratePaletteArgs
+): GenerateHuesArgs {
 	return {
 		color: baseColor,
-		distributionType: paletteArgs.args.distributionType,
-		swatches: paletteArgs.args.swatches,
-		type,
+		columnCount: paletteArgs.options.columnCount,
+		distributionType: paletteArgs.options.distributionType,
+		paletteType: paletteArgs.options.paletteType,
 		adjust: paletteArgs.adjust,
 		appServices: paletteArgs.appServices,
 		argsHelpers: paletteArgs.argsHelpers,

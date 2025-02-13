@@ -1,12 +1,12 @@
 // File: logger/AppLogger.js
 
 import {
-	AppLogger_ClassInterface,
+	AppLoggerClassInterface,
 	ModeDataInterface,
 	MutationLog
 } from '../types/index.js';
 
-export class AppLogger implements AppLogger_ClassInterface {
+export class AppLogger implements AppLoggerClassInterface {
 	private static instance: AppLogger | null = null;
 	private mode: ModeDataInterface;
 

@@ -8,7 +8,7 @@ export interface AppServicesInterface {
 		context?: Record<string, unknown>
 	): Promise<T | null>;
 	log(
-		level: 'debug' | 'warn' | 'error',
+		level: 'debug' | 'info' | 'warn' | 'error',
 		message: string,
 		method: string,
 		verbosityRequirement?: number

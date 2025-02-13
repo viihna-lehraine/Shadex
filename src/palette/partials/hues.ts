@@ -1,8 +1,8 @@
-// File: app/palette/partials/hues.js
+// File: palette/partials/hues.js
 
-import { GenerateHuesFnArgs } from '../../../types/index.js';
+import { GenerateHuesArgs } from '../../types/index.js';
 
-export function generateAnalogousHues(params: GenerateHuesFnArgs): number[] {
+export function generateAnalogousHues(params: GenerateHuesArgs): number[] {
 	const log = params.appServices.log;
 
 	try {
@@ -10,7 +10,7 @@ export function generateAnalogousHues(params: GenerateHuesFnArgs): number[] {
 			log(
 				'error',
 				`Invalid color value ${JSON.stringify(params.color)}`,
-				'paletteUtils.generateAnalogousHues()'
+				'palette/partials/hues > generateAnalogousHues()'
 			);
 
 			return [];
@@ -19,14 +19,17 @@ export function generateAnalogousHues(params: GenerateHuesFnArgs): number[] {
 		const analogousHues: number[] = [];
 		const baseHue = params.color.value.hue;
 		const maxTotalDistance = 60;
-		const minTotalDistance = Math.max(20, 10 + (params.swatches - 2) * 12);
+		const minTotalDistance = Math.max(
+			20,
+			10 + (params.columnCount - 2) * 12
+		);
 		const totalIncrement =
 			Math.floor(
 				Math.random() * (maxTotalDistance - minTotalDistance + 1)
 			) + minTotalDistance;
-		const increment = Math.floor(totalIncrement / (params.swatches - 1));
+		const increment = Math.floor(totalIncrement / (params.columnCount - 1));
 
-		for (let i = 1; i < params.swatches; i++) {
+		for (let i = 1; i < params.columnCount; i++) {
 			analogousHues.push((baseHue + increment * i) % 360);
 		}
 
@@ -35,14 +38,14 @@ export function generateAnalogousHues(params: GenerateHuesFnArgs): number[] {
 		log(
 			'error',
 			`Error generating analogous hues: ${error}`,
-			'paletteUtils.generateAnalogousHues()'
+			'palette/partials/hues > generateAnalogousHues()'
 		);
 
 		return [];
 	}
 }
 
-export function generateDiadicHues(params: GenerateHuesFnArgs): number[] {
+export function generateDiadicHues(params: GenerateHuesArgs): number[] {
 	const log = params.appServices.log;
 
 	try {
@@ -62,14 +65,14 @@ export function generateDiadicHues(params: GenerateHuesFnArgs): number[] {
 		log(
 			'error',
 			`Error generating diadic hues: ${error}`,
-			'paletteUtils.generateDiadicHues()'
+			'palette/partials/hues > generateDiadicHues()'
 		);
 
 		return [];
 	}
 }
 
-export function generateHexadicHues(params: GenerateHuesFnArgs): number[] {
+export function generateHexadicHues(params: GenerateHuesArgs): number[] {
 	const log = params.appServices.log;
 
 	try {
@@ -101,7 +104,7 @@ export function generateHexadicHues(params: GenerateHuesFnArgs): number[] {
 		log(
 			'error',
 			`Error generating hexadic hues: ${error}`,
-			'paletteUtils.generateHexadicHues()'
+			'palette/partials/hues > generateHexadicHues()'
 		);
 
 		return [];
@@ -109,7 +112,7 @@ export function generateHexadicHues(params: GenerateHuesFnArgs): number[] {
 }
 
 export function generateSplitComplementaryHues(
-	params: GenerateHuesFnArgs
+	params: GenerateHuesArgs
 ): number[] {
 	const log = params.appServices.log;
 
@@ -125,14 +128,14 @@ export function generateSplitComplementaryHues(
 		log(
 			'error',
 			`Error generating split complementary hues: ${error}`,
-			'paletteUtils.generateSplitComplementaryHues()'
+			'palette/partials/hues > generateSplitComplementaryHues()'
 		);
 
 		return [];
 	}
 }
 
-export function generateTetradicHues(params: GenerateHuesFnArgs): number[] {
+export function generateTetradicHues(params: GenerateHuesArgs): number[] {
 	const log = params.appServices.log;
 
 	try {
@@ -151,14 +154,14 @@ export function generateTetradicHues(params: GenerateHuesFnArgs): number[] {
 		log(
 			'error',
 			`Error generating tetradic hues: ${error}`,
-			'paletteUtils.generateTetradicHues()'
+			'palette/partials/hues > generateTetradicHues()'
 		);
 
 		return [];
 	}
 }
 
-export function generateTriadicHues(params: GenerateHuesFnArgs): number[] {
+export function generateTriadicHues(params: GenerateHuesArgs): number[] {
 	const log = params.appServices.log;
 
 	try {
@@ -169,7 +172,7 @@ export function generateTriadicHues(params: GenerateHuesFnArgs): number[] {
 		log(
 			'error',
 			`Error generating triadic hues: ${error}`,
-			'paletteUtils.generateTriadicHues()'
+			'palette/partials/hues > generateTriadicHues()'
 		);
 
 		return [];

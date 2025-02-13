@@ -1,19 +1,19 @@
-// File: app/palette/generate.js
+// File: palette/generate.js
 
 import {
-	GenerateHuesFnArgs,
-	GeneratePaletteFnArgs,
+	GenerateHuesArgs,
+	GeneratePaletteArgs,
 	HSL,
 	HueGenFunctions,
 	Palette,
 	PaletteGenFunctions
-} from '../../types/index.js';
-import { defaultData as defaults } from '../../data/defaults.js';
+} from '../types/index.js';
+import { defaultData as defaults } from '../data/defaults.js';
 
-const defaultPalette = defaults.palette.branded.data;
+const defaultPalette = defaults.palette;
 
 export function generatePalette(
-	params: GeneratePaletteFnArgs,
+	params: GeneratePaletteArgs,
 	functions: PaletteGenFunctions
 ): Palette {
 	const log = params.appServices.log;
@@ -21,12 +21,12 @@ export function generatePalette(
 	try {
 		log(
 			'debug',
-			`Generating ${params.type} palette with args ${JSON.stringify(params.args)}`,
-			'app/palette/generate > generatePalette()',
+			`Generating ${params.options.paletteType} palette with args ${JSON.stringify(params.options)}`,
+			'palette/generate > generatePalette()',
 			2
 		);
 
-		switch (params.type) {
+		switch (params.options.paletteType) {
 			case 'analogous':
 				return functions.generateAnalogousPalette(params);
 			case 'complementary':
@@ -48,8 +48,8 @@ export function generatePalette(
 			default:
 				log(
 					'error',
-					`Invalid palette type ${params.type}`,
-					'app/palette/generate > generatePalette()'
+					`Invalid palette type ${params.options.paletteType}`,
+					'generatePalette()'
 				);
 
 				return defaultPalette;
@@ -60,7 +60,7 @@ export function generatePalette(
 }
 
 export function generateHues(
-	params: GenerateHuesFnArgs,
+	params: GenerateHuesArgs,
 	functions: HueGenFunctions
 ): number[] {
 	const log = params.appServices.log;
@@ -70,7 +70,7 @@ export function generateHues(
 			log(
 				'error',
 				`Invalid color value ${JSON.stringify(params.color)}`,
-				'paletteUtils.generateHues()'
+				'generateHues()'
 			);
 
 			return [];
@@ -78,9 +78,9 @@ export function generateHues(
 
 		const clonedColor = params.coreUtils.clone(params.color) as HSL;
 
-		const newParams: GenerateHuesFnArgs = { ...params, color: clonedColor };
+		const newParams: GenerateHuesArgs = { ...params, color: clonedColor };
 
-		switch (params.type) {
+		switch (params.paletteType) {
 			case 'analogous':
 				return functions.generateAnalogousHues(newParams);
 			case 'diadic':
@@ -96,18 +96,14 @@ export function generateHues(
 			default:
 				log(
 					'error',
-					`Invalid hue type ${newParams.type}`,
-					'paletteUtils.generateHues()'
+					`Invalid hue type ${newParams.paletteType}`,
+					'generateHues()'
 				);
 
 				return [];
 		}
 	} catch (error) {
-		log(
-			'error',
-			`Error generating hues: ${error}`,
-			'paletteUtils.generateHues()'
-		);
+		log('error', `Error generating hues: ${error}`, 'generateHues()');
 
 		return [];
 	}

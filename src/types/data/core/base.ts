@@ -15,14 +15,14 @@ import {
 	MutationLog,
 	Palette,
 	PaletteItem,
-	PaletteOptions,
 	SL,
 	SL_StringProps,
 	SV,
 	SV_StringProps,
 	RGB,
 	RGB_StringProps,
-	StoredPalette,
+	SelectedPaletteOptions,
+	State,
 	UnbrandedCMYK,
 	UnbrandedHex,
 	UnbrandedHSL,
@@ -33,7 +33,6 @@ import {
 	UnbrandedRGB,
 	UnbrandedPalette,
 	UnbrandedPaletteItem,
-	UnbrandedStoredPalette,
 	UnbrandedXYZ,
 	XYZ,
 	XYZ_StringProps
@@ -55,6 +54,14 @@ export interface ConfigDataInterface {
 			rgb: RegExp;
 			xyz: RegExp;
 		};
+		css: {
+			cmyk: RegExp;
+			hsl: RegExp;
+			hsv: RegExp;
+			lab: RegExp;
+			rgb: RegExp;
+			xyz: RegExp;
+		};
 		dom: {
 			hex: RegExp;
 			hsl: RegExp;
@@ -67,6 +74,11 @@ export interface ConfigDataInterface {
 					metadata: RegExp;
 				};
 			};
+		};
+		userInput: {
+			hex: RegExp;
+			hsl: RegExp;
+			rgb: RegExp;
 		};
 		validation: {
 			hex: RegExp;
@@ -96,11 +108,11 @@ export interface ConstsDataInterface {
 	adjustments: {
 		slaValue: number;
 	};
-	debounce: {
-		btn: number;
-		input: number;
+	appLimits: {
+		history: number;
+		paletteHistory: number;
 	};
-	limits: {
+	colorLimits: {
 		xyz: {
 			max: {
 				x: number;
@@ -114,7 +126,10 @@ export interface ConstsDataInterface {
 			};
 		};
 	};
-	maxHistory: number;
+	debounce: {
+		btn: number;
+		input: number;
+	};
 	paletteRanges: {
 		shift: {
 			comp: PaletteRangeShiftProperties;
@@ -171,29 +186,25 @@ export interface DataSetsInterface {
 
 export interface DefaultDataInterface {
 	colors: {
-		base: {
-			branded: {
-				cmyk: CMYK;
-				hex: Hex;
-				hsl: HSL;
-				hsv: HSV;
-				lab: LAB;
-				rgb: RGB;
-				sl: SL;
-				sv: SV;
-				xyz: XYZ;
-			};
-			unbranded: {
-				cmyk: UnbrandedCMYK;
-				hex: UnbrandedHex;
-				hsl: UnbrandedHSL;
-				hsv: UnbrandedHSV;
-				lab: UnbrandedLAB;
-				rgb: UnbrandedRGB;
-				sl: UnbrandedSL;
-				sv: UnbrandedSV;
-				xyz: UnbrandedXYZ;
-			};
+		cmyk: CMYK;
+		hex: Hex;
+		hsl: HSL;
+		hsv: HSV;
+		lab: LAB;
+		rgb: RGB;
+		sl: SL;
+		sv: SV;
+		xyz: XYZ;
+		unbranded: {
+			cmyk: UnbrandedCMYK;
+			hex: UnbrandedHex;
+			hsl: UnbrandedHSL;
+			hsv: UnbrandedHSV;
+			lab: UnbrandedLAB;
+			rgb: UnbrandedRGB;
+			sl: UnbrandedSL;
+			sv: UnbrandedSV;
+			xyz: UnbrandedXYZ;
 		};
 		strings: {
 			cmyk: CMYK_StringProps;
@@ -218,39 +229,25 @@ export interface DefaultDataInterface {
 			xyz: string;
 		};
 	};
-	idb: {
-		mutation: MutationLog;
-	};
-	palette: {
-		branded: {
-			data: Palette;
-			item: PaletteItem;
-			stored: StoredPalette;
-		};
-		unbranded: {
-			data: UnbrandedPalette;
-			item: UnbrandedPaletteItem;
-			stored: UnbrandedStoredPalette;
-		};
-	};
-	paletteOptions: PaletteOptions;
+	mutation: MutationLog;
+	palette: Palette;
+	paletteItem: PaletteItem;
+	paletteOptions: SelectedPaletteOptions;
+	state: State;
+	unbrandedPalette: UnbrandedPalette;
+	unbrandedPaletteItem: UnbrandedPaletteItem;
 }
 
 export interface ModeDataInterface {
 	debug: boolean;
 	debugLevel: 0 | 1 | 2 | 3 | 4 | 5;
-	environment: 'dev' | 'prod' | 'test';
-	expose: {
-		idbManager: boolean;
-		logger: boolean;
-		uiManager: boolean;
-	};
-	gracefulErrors: boolean;
+	env: 'dev' | 'prod' | 'test';
 	logging: {
 		args: boolean;
 		clicks: boolean;
 		debug: boolean;
 		error: boolean;
+		info: boolean;
 		verbosity: 0 | 1 | 2 | 3 | 4 | 5;
 		warn: boolean;
 	};

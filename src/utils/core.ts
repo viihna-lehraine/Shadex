@@ -1,7 +1,7 @@
 // File: utils/core.js
 
 import { CoreUtilsInterface, NumericRangeKey } from '../types/index.js';
-import { dataSets } from '../types/data/sets.js';
+import { dataSets } from '../data/sets.js';
 
 const sets = dataSets;
 
@@ -30,8 +30,20 @@ function debounce<T extends (...args: Parameters<T>) => void>(
 	};
 }
 
+function getAllElements<T extends HTMLElement>(
+	selector: string
+): NodeListOf<T> {
+	return document.querySelectorAll(selector) as NodeListOf<T>;
+}
+
+function getElement<T extends HTMLElement>(id: string): T | null {
+	return document.getElementById(id) as T | null;
+}
+
 export const coreUtils: CoreUtilsInterface = {
 	clampToRange,
 	clone,
-	debounce
+	debounce,
+	getAllElements,
+	getElement
 } as const;

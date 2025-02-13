@@ -6,11 +6,47 @@ import {
 	CoreUtilsInterface,
 	HSL,
 	PaletteUtilHelpersInterface,
+	PaletteType,
 	ValidationUtilsInterface
 } from '../../types/index.js';
 import { constsData as consts } from '../../data/consts.js';
 
 const probabilityConsts = consts.probabilities;
+
+function getSelectedPaletteType(type: number): PaletteType {
+	switch (type) {
+		case 1: {
+			return 'analogous' as PaletteType;
+		}
+		case 2: {
+			return 'complementary' as PaletteType;
+		}
+		case 3: {
+			return 'diadic' as PaletteType;
+		}
+		case 4: {
+			return 'hexadic' as PaletteType;
+		}
+		case 5: {
+			return 'monochromatic' as PaletteType;
+		}
+		case 6: {
+			return 'random' as PaletteType;
+		}
+		case 7: {
+			return 'split-complementary' as PaletteType;
+		}
+		case 8: {
+			return 'tetradic' as PaletteType;
+		}
+		case 9: {
+			return 'triadic' as PaletteType;
+		}
+		default: {
+			throw new Error('Invalid palette type');
+		}
+	}
+}
 
 function getWeightedRandomInterval(
 	distributionType: keyof ConstsDataInterface['probabilities'],
@@ -140,6 +176,7 @@ function isHSLTooLight(
 }
 
 export const paletteHelpers: PaletteUtilHelpersInterface = {
+	getSelectedPaletteType,
 	getWeightedRandomInterval,
 	isHSLInBounds,
 	isHSLTooDark,

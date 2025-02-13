@@ -13,7 +13,7 @@ import {
 } from '../types/index.js';
 import { defaultData as defaults } from '../data/defaults.js';
 
-const defaultColors = defaults.colors.base.branded;
+const defaultColors = defaults.colors;
 
 function addHashToHex(
 	hex: Hex,
@@ -53,6 +53,12 @@ function componentToHex(
 
 		return '00';
 	}
+}
+
+function convertShortHexToLong(hex: string): string {
+	if (hex.length !== 4) return hex;
+
+	return `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
 }
 
 function formatPercentageValues<T extends Record<string, unknown>>(
@@ -304,6 +310,7 @@ function stripPercentFromValues<T extends Record<string, number | string>>(
 export const formattingUtils: FormattingUtilsInterface = {
 	addHashToHex,
 	componentToHex,
+	convertShortHexToLong,
 	formatPercentageValues,
 	hslAddFormat,
 	parseColor,

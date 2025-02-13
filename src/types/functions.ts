@@ -1,121 +1,109 @@
 // File: types/functions.js
 
 import {
-	AdjustmentUtilsInterface,
 	AppServicesInterface,
-	AppUtilsInterface,
-	ArgsHelpersInterface,
-	BrandingUtilsInterface,
-	ColorUtilHelpersInterface,
-	ColorUtilsInterface,
-	ConstsDataInterface,
 	CoreUtilsInterface,
 	DOMUtilsInterface,
-	FormattingUtilsInterface,
-	HSL,
+	GenerateHuesArgs,
+	GeneratePaletteArgs,
 	Palette,
-	PaletteGenerationArgs,
-	PaletteUtilHelpersInterface,
-	PaletteUtilsInterface,
-	SanitationUtilsInterface,
+	SelectedPaletteOptions,
 	TypeGuardUtilsInterface,
 	ValidationUtilsInterface
 } from './index.js';
+import { StateManager } from '../state/StateManager.js';
 
-// ******** SECTION 1: ARGUMENT INTERFACES ********
+// ******** SECTION 1: GENERIC FUNCTION INTERFACES ********
 
-export interface GenerateHuesFnArgs {
-	color: HSL;
-	distributionType: keyof ConstsDataInterface['probabilities'];
-	swatches: number;
-	type:
-		| 'analogous'
-		| 'diadic'
-		| 'hexadic'
-		| 'split-complementary'
-		| 'tetradic'
-		| 'triadic';
-	adjust: AdjustmentUtilsInterface;
-	appServices: AppServicesInterface;
-	argsHelpers: ArgsHelpersInterface;
-	brand: BrandingUtilsInterface;
-	colorHelpers: ColorUtilHelpersInterface;
-	colorUtils: ColorUtilsInterface;
-	coreUtils: CoreUtilsInterface;
-	format: FormattingUtilsInterface;
-	paletteHelpers: PaletteUtilHelpersInterface;
-	validate: ValidationUtilsInterface;
+export interface NoArgVoidFn {
+	(): void;
 }
 
-export interface GeneratePaletteFnArgs {
-	args: PaletteGenerationArgs;
-	type:
-		| 'analogous'
-		| 'complementary'
-		| 'diadic'
-		| 'hexadic'
-		| 'monochromatic'
-		| 'random'
-		| 'split-complementary'
-		| 'tetradic'
-		| 'triadic';
-	adjust: AdjustmentUtilsInterface;
-	appServices: AppServicesInterface;
-	appUtils: AppUtilsInterface;
-	argsHelpers: ArgsHelpersInterface;
-	brand: BrandingUtilsInterface;
-	colorHelpers: ColorUtilHelpersInterface;
-	colorUtils: ColorUtilsInterface;
-	coreUtils: CoreUtilsInterface;
-	domUtils: DOMUtilsInterface;
-	format: FormattingUtilsInterface;
-	generateHues: GenerateHuesFnInterface;
-	paletteHelpers: PaletteUtilHelpersInterface;
-	paletteUtils: PaletteUtilsInterface;
-	sanitize: SanitationUtilsInterface;
-	typeGuards: TypeGuardUtilsInterface;
-	validate: ValidationUtilsInterface;
+// ******** SECTION 1: FUNCTION INTERFACES ********
+
+export interface AttachPaletteListenersFn {
+	(
+		appServices: AppServicesInterface,
+		attachTooltipListener: AttachToolTipListenerFn,
+		coreUtils: CoreUtilsInterface,
+		createTooltipElement: CreateTooltipElementFn,
+		domUtils: DOMUtilsInterface,
+		stateManager: StateManager,
+		typeGuards: TypeGuardUtilsInterface,
+		updatePaletteItemColor: UpdatePaletteItemColorFn,
+		validate: ValidationUtilsInterface
+	): void;
 }
 
-// ******** SECTION 2: FUNCTION INTERFACES ********
-
-export interface GenerateHuesFnInterface {
-	(params: GenerateHuesFnArgs): number[];
+export interface AttachToolTipListenerFn {
+	(
+		id: string,
+		tooltipText: string,
+		coreUtils: CoreUtilsInterface,
+		createTooltipElement: CreateTooltipElementFn
+	): void;
 }
 
-export interface GeneratePaletteFnInterface {
-	(params: GeneratePaletteFnArgs): Palette;
+export interface CreatePaletteObserverFn {
+	(
+		appServices: AppServicesInterface,
+		attachTooltipListener: AttachToolTipListenerFn,
+		coreUtils: CoreUtilsInterface,
+		createTooltipElement: CreateTooltipElementFn,
+		domUtils: DOMUtilsInterface,
+		stateManager: StateManager,
+		typeGuards: TypeGuardUtilsInterface,
+		updatePaletteItemColor: UpdatePaletteItemColorFn,
+		validate: ValidationUtilsInterface
+	): MutationObserver;
 }
 
-// ******** SECTION 3: FUNCTION GROUPS ********
+export interface CreateTooltipElementFn {
+	(): HTMLDivElement;
+}
+
+export interface GenerateHuesFn {
+	(params: GenerateHuesArgs): number[];
+}
+
+export interface GeneratePaletteFn {
+	(params: GeneratePaletteArgs): Palette;
+}
+
+export interface InitializeColumnPositionsFn {
+	(coreUtils: CoreUtilsInterface, stateManager: StateManager): void;
+}
+
+export interface PullParamsFromUIFn {
+	(
+		appServices: AppServicesInterface,
+		typeGuards: TypeGuardUtilsInterface
+	): SelectedPaletteOptions;
+}
+
+export interface UpdatePaletteItemColorFn {
+	(columnID: number, newColor: string, stateManager: StateManager): void;
+}
+
+// ******** SECTION 2: FUNCTION GROUPS ********
 
 export interface HueGenFunctions {
-	generateAnalogousHues: GenerateHuesFnInterface;
-	generateDiadicHues: GenerateHuesFnInterface;
-	generateHexadicHues: GenerateHuesFnInterface;
-	generateSplitComplementaryHues: GenerateHuesFnInterface;
-	generateTetradicHues: GenerateHuesFnInterface;
-	generateTriadicHues: GenerateHuesFnInterface;
+	generateAnalogousHues: GenerateHuesFn;
+	generateDiadicHues: GenerateHuesFn;
+	generateHexadicHues: GenerateHuesFn;
+	generateSplitComplementaryHues: GenerateHuesFn;
+	generateTetradicHues: GenerateHuesFn;
+	generateTriadicHues: GenerateHuesFn;
 }
 
 export interface PaletteGenFunctions {
-	generateAnalogousPalette: GeneratePaletteFnInterface;
-	generateComplementaryPalette: GeneratePaletteFnInterface;
-	generateDiadicPalette: GeneratePaletteFnInterface;
-	generateHexadicPalette: GeneratePaletteFnInterface;
-	generateMonochromaticPalette: GeneratePaletteFnInterface;
-	generateRandomPalette: GeneratePaletteFnInterface;
-	generateSplitComplementaryPalette: GeneratePaletteFnInterface;
-	generateTetradicPalette: GeneratePaletteFnInterface;
-	generateTriadicPalette: GeneratePaletteFnInterface;
+	generateAnalogousPalette: GeneratePaletteFn;
+	generateComplementaryPalette: GeneratePaletteFn;
+	generateDiadicPalette: GeneratePaletteFn;
+	generateHexadicPalette: GeneratePaletteFn;
+	generateMonochromaticPalette: GeneratePaletteFn;
+	generateRandomPalette: GeneratePaletteFn;
+	generateSplitComplementaryPalette: GeneratePaletteFn;
+	generateTetradicPalette: GeneratePaletteFn;
+	generateTriadicPalette: GeneratePaletteFn;
 }
-
-// ******** SECTION 3: OTHER ********
-
-export type RandomColorArgs = [
-	AppServicesInterface,
-	BrandingUtilsInterface,
-	CoreUtilsInterface,
-	SanitationUtilsInterface,
-	ValidationUtilsInterface
-];

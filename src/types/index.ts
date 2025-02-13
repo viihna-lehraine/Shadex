@@ -1,15 +1,15 @@
 // File: types/index.js
 
-export type { DBUtilsInterface, PaletteArgs } from './app/db.js';
-export type { PaletteBoxObject } from './app/dom.js';
-export type { ColorParser, IOFn_MasterInterface } from './app/io.js';
 export type {
-	Palette_CommonFn_MasterInterface,
-	PaletteGenerationArgs,
-	PaletteGenerationInterface
+	AppLoggerClassInterface,
+	StateManagerClassInterface
+} from './app/classes.js';
+export type {
+	PaletteGenerationInterface,
+	SelectedPaletteOptions
 } from './app/palette.js';
 export type { AppServicesInterface } from './app/services.js';
-export type { UIFn_MasterInterface } from './app/ui.js';
+export type { History, State } from './app/state.js';
 export type {
 	ArgsHelpersInterface,
 	ColorConversionHelpersInterface,
@@ -84,20 +84,13 @@ export type {
 export type { DOMDataInterface } from './data/core/dom.js';
 export type {
 	MutationLog,
-	PaletteDB,
-	PaletteSchema,
-	Settings,
-	StoredPalette,
-	UnbrandedStoredPalette
-} from './data/db.js';
-export type { ColorInputElement } from './data/dom.js';
-export type {
 	Palette,
 	PaletteItem,
-	PaletteOptions,
+	PaletteType,
 	UnbrandedPalette,
 	UnbrandedPaletteItem
-} from './data/palette.js';
+} from './data/app.js';
+export type { ColorInputElement } from './data/dom.js';
 export type {
 	ByteRange,
 	ColorValueRange,
@@ -114,31 +107,27 @@ export type {
 	XYZ_Y,
 	XYZ_Z
 } from './data/sets.js';
-export type { AppLoggerServiceInterface } from './services/other.js';
 export type {
-	HistoryServiceInterface,
-	LocalStorageServiceInterface,
-	MutationServiceInterface,
-	PaletteStorageServiceInterface,
-	SettingsServiceInterface,
-	StorageManagerInterface
-} from './services/storage.js';
+	CreatePaletteItemArrayArgs_Tuple,
+	CreatePaletteItemArgs_Tuple,
+	CreatePaletteObjectArgs,
+	GenerateHuesArgs,
+	GeneratePaletteArgs,
+	GenerateRandomColorArgs_Tuple,
+	PaletteArgs,
+	RenderNewPaletteArgs
+} from './args.js';
 export type {
-	DOMSubServiceInterface,
-	EventServiceInterface,
-	IOServiceInterface,
-	PaletteEventSubServiceInterface,
-	ParseServiceInterface,
-	UIManagerInterface,
-	ValidationServiceInterface
-} from './services/ui.js';
-export type { IDBManager_ClassInterface } from './classes.js';
-export type {
-	GenerateHuesFnArgs,
-	GenerateHuesFnInterface,
-	GeneratePaletteFnArgs,
-	GeneratePaletteFnInterface,
+	AttachPaletteListenersFn,
+	AttachToolTipListenerFn,
+	CreatePaletteObserverFn,
+	CreateTooltipElementFn,
+	GenerateHuesFn,
+	GeneratePaletteFn,
 	HueGenFunctions,
+	InitializeColumnPositionsFn,
+	NoArgVoidFn,
 	PaletteGenFunctions,
-	RandomColorArgs
+	PullParamsFromUIFn,
+	UpdatePaletteItemColorFn
 } from './functions.js';

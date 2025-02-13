@@ -22,10 +22,9 @@
         "skipLibCheck": true,
         "strict": true,
         "target": "ES2022",
-		"types": ["./types/global"],
         "useDefineForClassFields": true,
         "useUnknownInCatchVariables": true
     },
-    "include": ["src/**/*.ts", "types/global.d.ts"],
+    "include": ["src/**/*.ts"],
     "exclude": ["node_modules", "public/js"]
 }

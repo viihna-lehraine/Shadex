@@ -1,26 +1,25 @@
-// File: app/palette/partials/types.js
+// File: palette/partials/types.js
 
 import {
-	GeneratePaletteFnArgs,
+	GeneratePaletteArgs,
 	HSL,
 	Palette,
-	PaletteItem
-} from '../../../types/index.js';
-import { constsData as consts } from '../../../data/consts.js';
+	PaletteItem,
+	PaletteType
+} from '../../types/index.js';
+import { constsData as consts } from '../../data/consts.js';
 
 const paletteRanges = consts.paletteRanges;
 
-export function generateAnalogousPalette(
-	params: GeneratePaletteFnArgs
-): Palette {
-	if (params.args.swatches < 2)
+export function generateAnalogousPalette(params: GeneratePaletteArgs): Palette {
+	if (params.options.columnCount < 2)
 		params.domUtils.enforceSwatchRules(2, 6, params.appServices);
 
 	const baseColor = params.appUtils.generateRandomHSL(
 		...params.argsHelpers.getGenerateRandomColorArgs(params)
 	);
 	const hues = params.generateHues(
-		params.argsHelpers.getHueGenerationArgs(baseColor, 'analogous', params)
+		params.argsHelpers.getHueGenerationArgs(baseColor, params)
 	);
 	const paletteItems = params.paletteUtils.createPaletteItemArray(
 		...params.argsHelpers.getCreatePaletteItemArrayArgs(
@@ -34,7 +33,7 @@ export function generateAnalogousPalette(
 			'analogous',
 			`analogous_${Date.now()}`,
 			paletteItems,
-			params.args.swatches,
+			params.options.columnCount,
 			params
 		),
 		params.appUtils
@@ -44,9 +43,9 @@ export function generateAnalogousPalette(
 }
 
 export function generateComplementaryPalette(
-	params: GeneratePaletteFnArgs
+	params: GeneratePaletteArgs
 ): Palette {
-	const swatchCount = Math.max(2, Math.min(6, params.args.swatches));
+	const swatchCount = Math.max(2, Math.min(6, params.options.columnCount));
 
 	params.domUtils.enforceSwatchRules(swatchCount, 6, params.appServices);
 
@@ -66,7 +65,7 @@ export function generateComplementaryPalette(
 		for (let i = 0; i < extraColorsNeeded; i++) {
 			const variationOffset =
 				params.paletteHelpers.getWeightedRandomInterval(
-					params.args.distributionType,
+					params.options.distributionType,
 					params.appServices
 				);
 			const direction = Math.random() < 0.5 ? 1 : -1; // randomize direction
@@ -131,8 +130,8 @@ export function generateComplementaryPalette(
 	);
 }
 
-export function generateDiadicPalette(params: GeneratePaletteFnArgs): Palette {
-	const swatchCount = Math.max(2, Math.min(6, params.args.swatches));
+export function generateDiadicPalette(params: GeneratePaletteArgs): Palette {
+	const swatchCount = Math.max(2, Math.min(6, params.options.columnCount));
 
 	params.domUtils.enforceSwatchRules(swatchCount, 6, params.appServices);
 
@@ -140,7 +139,7 @@ export function generateDiadicPalette(params: GeneratePaletteFnArgs): Palette {
 		...params.argsHelpers.getGenerateRandomColorArgs(params)
 	);
 	const hues = params.generateHues(
-		params.argsHelpers.getHueGenerationArgs(baseColor, 'diadic', params)
+		params.argsHelpers.getHueGenerationArgs(baseColor, params)
 	);
 
 	// if more swatches are needed, create slight variations
@@ -149,7 +148,7 @@ export function generateDiadicPalette(params: GeneratePaletteFnArgs): Palette {
 		for (let i = 0; i < extraColorsNeeded; i++) {
 			const variationOffset =
 				params.paletteHelpers.getWeightedRandomInterval(
-					params.args.distributionType,
+					params.options.distributionType,
 					params.appServices
 				);
 			const direction = i % 2 === 0 ? 1 : -1;
@@ -212,7 +211,7 @@ export function generateDiadicPalette(params: GeneratePaletteFnArgs): Palette {
 	);
 }
 
-export function generateHexadicPalette(params: GeneratePaletteFnArgs): Palette {
+export function generateHexadicPalette(params: GeneratePaletteArgs): Palette {
 	// hexadic palettes always have 6 swatches
 	const swatchCount = 6;
 
@@ -222,7 +221,7 @@ export function generateHexadicPalette(params: GeneratePaletteFnArgs): Palette {
 		...params.argsHelpers.getGenerateRandomColorArgs(params)
 	);
 	const hues = params.generateHues(
-		params.argsHelpers.getHueGenerationArgs(baseColor, 'hexadic', params)
+		params.argsHelpers.getHueGenerationArgs(baseColor, params)
 	);
 
 	// create PaletteItem array with assigned itemIDs
@@ -279,11 +278,11 @@ export function generateHexadicPalette(params: GeneratePaletteFnArgs): Palette {
 }
 
 export function generateMonochromaticPalette(
-	params: GeneratePaletteFnArgs
+	params: GeneratePaletteArgs
 ): Palette {
-	const swatchCount = Math.max(2, Math.min(6, params.args.swatches));
+	const columnCount = Math.max(2, Math.min(6, params.options.columnCount));
 
-	params.domUtils.enforceSwatchRules(swatchCount, 6, params.appServices);
+	params.domUtils.enforceSwatchRules(columnCount, 6, params.appServices);
 
 	const baseColor = params.appUtils.generateRandomHSL(
 		...params.argsHelpers.getGenerateRandomColorArgs(params)
@@ -296,7 +295,7 @@ export function generateMonochromaticPalette(
 	paletteItems.push(basePaletteItem);
 
 	// generate monochromatic variations
-	for (let i = 1; i < swatchCount; i++) {
+	for (let i = 1; i < columnCount; i++) {
 		const hueShift = Math.random() * 10 - 5; // small hue variation
 		const saturationShift = Math.random() * 15 - 7.5; // slight saturation shift
 		const lightnessShift = (i - 2) * 10; // creates a gradient effect
@@ -343,16 +342,16 @@ export function generateMonochromaticPalette(
 			'monochromatic',
 			`monochromatic_${params.appUtils.getFormattedTimestamp()}`,
 			paletteItems,
-			swatchCount,
+			columnCount,
 			params
 		),
 		params.appUtils
 	);
 }
 
-export function generateRandomPalette(params: GeneratePaletteFnArgs): Palette {
-	// ensure swatch count is between 2 and 6
-	const swatchCount = Math.max(2, Math.min(6, params.args.swatches));
+export function generateRandomPalette(params: GeneratePaletteArgs): Palette {
+	// ensure column count is between 2 and 6
+	const swatchCount = Math.max(2, Math.min(6, params.options.columnCount));
 
 	params.domUtils.enforceSwatchRules(swatchCount, 6, params.appServices);
 
@@ -401,11 +400,11 @@ export function generateRandomPalette(params: GeneratePaletteFnArgs): Palette {
 }
 
 export function generateSplitComplementaryPalette(
-	params: GeneratePaletteFnArgs
+	params: GeneratePaletteArgs
 ): Palette {
-	// ensure swatch count is at least 3 and at most 6
-	const swatchCount = Math.max(3, Math.min(6, params.args.swatches));
-	params.domUtils.enforceSwatchRules(swatchCount, 6, params.appServices);
+	// ensure column count is at least 3 and at most 6
+	const columnCount = Math.max(3, Math.min(6, params.options.columnCount));
+	params.domUtils.enforceSwatchRules(columnCount, 6, params.appServices);
 
 	const randomColorArgs =
 		params.argsHelpers.getGenerateRandomColorArgs(params);
@@ -420,7 +419,7 @@ export function generateSplitComplementaryPalette(
 	];
 
 	// if swatchCount > 3, introduce additional variations
-	for (let i = 3; i < swatchCount; i++) {
+	for (let i = 3; i < columnCount; i++) {
 		const variationOffset = params.paletteHelpers.getWeightedRandomInterval(
 			'soft',
 			params.appServices
@@ -473,19 +472,17 @@ export function generateSplitComplementaryPalette(
 
 	return params.paletteUtils.createPaletteObject(
 		params.argsHelpers.getCreatePaletteObjectArgs(
-			'splitComplementary',
+			'splitComplementary' as PaletteType,
 			`splitComplementary_${params.appUtils.getFormattedTimestamp()}`,
 			paletteItems,
-			swatchCount,
+			columnCount,
 			params
 		),
 		params.appUtils
 	);
 }
 
-export function generateTetradicPalette(
-	params: GeneratePaletteFnArgs
-): Palette {
+export function generateTetradicPalette(params: GeneratePaletteArgs): Palette {
 	// tetradic palettes always have 4 swatches
 	const swatchCount = 4;
 	params.domUtils.enforceSwatchRules(swatchCount, 4, params.appServices);
@@ -496,7 +493,7 @@ export function generateTetradicPalette(
 
 	// generate the 4 hues
 	const hues = params.generateHues(
-		params.argsHelpers.getHueGenerationArgs(baseColor, 'tetradic', params)
+		params.argsHelpers.getHueGenerationArgs(baseColor, params)
 	);
 
 	// create PaletteItem array with assigned itemIDs
@@ -553,10 +550,10 @@ export function generateTetradicPalette(
 	);
 }
 
-export function generateTriadicPalette(params: GeneratePaletteFnArgs): Palette {
+export function generateTriadicPalette(params: GeneratePaletteArgs): Palette {
 	// triadic palettes always have exactly 3 colors
-	const swatchCount = 3;
-	params.domUtils.enforceSwatchRules(swatchCount, 3, params.appServices);
+	const columnCount = 3;
+	params.domUtils.enforceSwatchRules(columnCount, 3, params.appServices);
 
 	// generate the base color
 	const baseColor = params.appUtils.generateRandomHSL(
@@ -565,7 +562,7 @@ export function generateTriadicPalette(params: GeneratePaletteFnArgs): Palette {
 
 	// generate the 3 hues needed
 	const hues = params.generateHues(
-		params.argsHelpers.getHueGenerationArgs(baseColor, 'triadic', params)
+		params.argsHelpers.getHueGenerationArgs(baseColor, params)
 	);
 
 	// create PaletteItem array with assigned itemIDs
@@ -615,7 +612,7 @@ export function generateTriadicPalette(params: GeneratePaletteFnArgs): Palette {
 			'tetradic',
 			`triadic_${Date.now()}`,
 			paletteItems,
-			swatchCount,
+			columnCount,
 			params
 		),
 		params.appUtils

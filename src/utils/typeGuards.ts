@@ -14,10 +14,10 @@ import {
 	HSV,
 	HSV_StringProps,
 	LAB,
+	PaletteType,
 	RGB,
 	SL,
 	SL_StringProps,
-	StoredPalette,
 	SV,
 	SV_StringProps,
 	TypeGuardUtilsInterface,
@@ -261,6 +261,20 @@ function isLABFormat(color: Color): color is LAB {
 	return isColorFormat(color, 'lab');
 }
 
+function isPaletteType(value: string): value is PaletteType {
+	return [
+		'analogous',
+		'complementary',
+		'diadic',
+		'hexadic',
+		'monochromatic',
+		'random',
+		'split-complementary',
+		'tetradic',
+		'triadic'
+	].includes(value);
+}
+
 function isRGB(value: unknown): value is RGB {
 	return (
 		isColor(value) &&
@@ -304,19 +318,6 @@ function isSLString(value: unknown): value is SL_StringProps {
 		'value' in value &&
 		typeof (value as SL_StringProps).value.saturation === 'string' &&
 		typeof (value as SL_StringProps).value.lightness === 'string'
-	);
-}
-
-function isStoredPalette(obj: unknown): obj is StoredPalette {
-	if (typeof obj !== 'object' || obj === null) return false;
-
-	const candidate = obj as Partial<StoredPalette>;
-
-	return (
-		typeof candidate.tableID === 'number' &&
-		typeof candidate.palette === 'object' &&
-		Array.isArray(candidate.palette.items) &&
-		typeof candidate.palette.id === 'string'
 	);
 }
 
@@ -387,12 +388,12 @@ export const typeGuards: TypeGuardUtilsInterface = {
 	isInputElement,
 	isLAB,
 	isLABFormat,
+	isPaletteType,
 	isRGB,
 	isRGBFormat,
 	isSLColor,
 	isSLFormat,
 	isSLString,
-	isStoredPalette,
 	isSVColor,
 	isSVFormat,
 	isSVString,

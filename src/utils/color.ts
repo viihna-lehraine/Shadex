@@ -33,9 +33,10 @@ import {
 	XYZ,
 	XYZ_StringProps
 } from '../types/index.js';
+import { configData as config } from '../data/config.js';
 import { defaultData as defaults } from '../data/defaults.js';
 
-const defaultColors = defaults.colors.base.branded;
+const defaultColors = defaults.colors;
 const defaultColorStrings = defaults.colors.strings;
 
 function convertCMYKStringToValue(
@@ -269,6 +270,98 @@ function convertColorToCSS(color: Color): string {
 	} catch (error) {
 		throw new Error(`getCSSColorString error: ${error}`);
 	}
+}
+
+function convertCSSToColor(
+	color: string,
+	format: FormattingUtilsInterface
+): Exclude<Color, SL | SV> | null {
+	color = color.trim().toLowerCase();
+
+	const cmykMatch = color.match(config.regex.css.cmyk);
+	const hslMatch = color.match(config.regex.css.hsl);
+	const hsvMatch = color.match(config.regex.css.hsv);
+	const labMatch = color.match(config.regex.css.lab);
+	const rgbMatch = color.match(config.regex.css.rgb);
+	const xyzMatch = color.match(config.regex.css.xyz);
+
+	if (cmykMatch) {
+		return {
+			value: {
+				cyan: parseInt(cmykMatch[1], 10),
+				magenta: parseInt(cmykMatch[2], 10),
+				yellow: parseInt(cmykMatch[3], 10),
+				key: parseInt(cmykMatch[4], 10)
+			},
+			format: 'cmyk'
+		} as CMYK;
+	}
+
+	if (color.startsWith('#')) {
+		const hexValue =
+			color.length === 7 ? color : format.convertShortHexToLong(color);
+		return {
+			value: { hex: hexValue },
+			format: 'hex'
+		} as Hex;
+	}
+
+	if (hslMatch) {
+		return {
+			value: {
+				hue: parseInt(hslMatch[1], 10),
+				saturation: parseInt(hslMatch[2], 10),
+				lightness: parseInt(hslMatch[3], 10)
+			},
+			format: 'hsl'
+		} as HSL;
+	}
+
+	if (hsvMatch) {
+		return {
+			value: {
+				hue: parseInt(hsvMatch[1], 10),
+				saturation: parseInt(hsvMatch[2], 10),
+				value: parseInt(hsvMatch[3], 10)
+			},
+			format: 'hsv'
+		} as HSV;
+	}
+
+	if (labMatch) {
+		return {
+			value: {
+				l: parseFloat(labMatch[1]),
+				a: parseFloat(labMatch[2]),
+				b: parseFloat(labMatch[3])
+			},
+			format: 'lab'
+		} as LAB;
+	}
+
+	if (rgbMatch) {
+		return {
+			value: {
+				red: parseInt(rgbMatch[1], 10),
+				green: parseInt(rgbMatch[2], 10),
+				blue: parseInt(rgbMatch[3], 10)
+			},
+			format: 'rgb'
+		} as RGB;
+	}
+
+	if (xyzMatch) {
+		return {
+			value: {
+				x: parseFloat(xyzMatch[1]),
+				y: parseFloat(xyzMatch[2]),
+				z: parseFloat(xyzMatch[3])
+			},
+			format: 'xyz'
+		} as XYZ;
+	}
+
+	return null;
 }
 
 function convertHexStringToValue(
@@ -785,6 +878,7 @@ export const colorUtils: ColorUtilsInterface = {
 	convertColorStringToColor,
 	convertColorToColorString,
 	convertColorToCSS,
+	convertCSSToColor,
 	convertHexStringToValue,
 	convertHexValueToString,
 	convertHSL,
