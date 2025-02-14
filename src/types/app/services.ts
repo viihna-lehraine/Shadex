@@ -14,3 +14,7 @@ export interface AppServicesInterface {
 		verbosityRequirement?: number
 	): void;
 }
+
+export interface ServicesInterface {
+	app: AppServicesInterface;
+}

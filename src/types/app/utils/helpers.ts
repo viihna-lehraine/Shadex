@@ -1,255 +1,146 @@
 // File: types/app/utils/helpers.js
 
 import {
-	AdjustmentUtilsInterface,
-	AppServicesInterface,
-	BrandingUtilsInterface,
 	CMYK,
-	ColorUtilsInterface,
 	ConstsDataInterface,
-	CoreUtilsInterface,
-	CreatePaletteItemArrayArgs_Tuple,
-	CreatePaletteItemArgs_Tuple,
-	CreatePaletteObjectArgs,
-	FormattingUtilsInterface,
-	GenerateHuesArgs,
-	GeneratePaletteArgs,
-	GenerateRandomColorArgs_Tuple,
 	Hex,
 	HSL,
 	HSV,
 	LAB,
-	PaletteItem,
 	PaletteType,
 	RGB,
-	SanitationUtilsInterface,
+	ServicesInterface,
 	SL,
 	SV,
-	ValidationUtilsInterface,
+	UtilitiesInterface,
 	XYZ
 } from '../../index.js';
-
-export interface ArgsHelpersInterface {
-	getCreatePaletteItemArgs(
-		baseColor: HSL,
-		itemID: number,
-		params: GeneratePaletteArgs
-	): CreatePaletteItemArgs_Tuple;
-	getCreatePaletteItemArrayArgs(
-		baseColor: HSL,
-		hues: number[],
-		paletteArgs: GeneratePaletteArgs
-	): CreatePaletteItemArrayArgs_Tuple;
-	getCreatePaletteObjectArgs(
-		type: PaletteType,
-		paletteID: string,
-		paletteItems: PaletteItem[],
-		swatchCount: number,
-		paletteArgs: GeneratePaletteArgs
-	): CreatePaletteObjectArgs;
-	getGenerateRandomColorArgs(
-		paletteArgs: GeneratePaletteArgs
-	): GenerateRandomColorArgs_Tuple;
-	getHueGenerationArgs(
-		baseColor: HSL,
-		paletteArgs: GeneratePaletteArgs
-	): GenerateHuesArgs;
-}
 
 export interface ColorConversionHelpersInterface {
 	cmykToHSL(
 		cmyk: CMYK,
-		adjust: AdjustmentUtilsInterface,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSL;
 	cmykToRGB(
 		cmyk: CMYK,
-		adjust: AdjustmentUtilsInterface,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): RGB;
 	hexToHSL(
 		hex: Hex,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		format: FormattingUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSL;
 	hexToRGB(
 		hex: Hex,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		format: FormattingUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): RGB;
 	hslToCMYK(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorUtils: ColorUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		sanitize: SanitationUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): CMYK;
 	hslToHex(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorUtils: ColorUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		format: FormattingUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): Hex;
 	hslToHSV(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSV;
 	hslToLAB(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorUtils: ColorUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		sanitize: SanitationUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): LAB;
 	hslToRGB(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorUtils: ColorUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): RGB;
 	hslToSL(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): SL;
 	hslToSV(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorUtils: ColorUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): SV;
 	hslToXYZ(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorUtils: ColorUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		sanitize: SanitationUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): XYZ;
 	hsvToHSL(
 		hsv: HSV,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSL;
 	hsvToSV(
 		hsv: HSV,
-		appServices: AppServicesInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): SV;
 	labToHSL(
 		lab: LAB,
-		adjust: AdjustmentUtilsInterface,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSL;
 	labToRGB(
 		lab: LAB,
-		adjust: AdjustmentUtilsInterface,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): RGB;
 	labToXYZ(
 		lab: LAB,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): XYZ;
 	rgbToCMYK(
 		rgb: RGB,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		sanitize: SanitationUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): CMYK;
 	rgbToHex(
 		rgb: RGB,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		format: FormattingUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): Hex;
 	rgbToHSL(
 		rgb: RGB,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSL;
 	rgbToHSV(
 		rgb: RGB,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSV;
 	rgbToXYZ(
 		rgb: RGB,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): XYZ;
 	xyzToHSL(
 		xyz: XYZ,
-		adjust: AdjustmentUtilsInterface,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSL;
 	xyzToLAB(
 		xyz: XYZ,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		sanitize: SanitationUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): LAB;
 	xyzToRGB(
 		xyz: XYZ,
-		adjust: AdjustmentUtilsInterface,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): RGB;
 }
 
@@ -257,11 +148,8 @@ export interface ColorUtilHelpersInterface
 	extends ColorConversionHelpersInterface {
 	hexToHSLWrapper(
 		input: string | Hex,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		format: FormattingUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSL;
 }
 
@@ -269,30 +157,26 @@ export interface PaletteUtilHelpersInterface {
 	getSelectedPaletteType(type: number): PaletteType;
 	getWeightedRandomInterval(
 		type: keyof ConstsDataInterface['probabilities'],
-		appServices: AppServicesInterface
+		services: ServicesInterface
 	): number;
 	isHSLInBounds(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): boolean;
 	isHSLTooDark(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): boolean;
 	isHSLTooGray(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): boolean;
 	isHSLTooLight(
 		hsl: HSL,
-		appServices: AppServicesInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): boolean;
 }

@@ -4,20 +4,29 @@ import {
 	AdjustmentUtilsInterface,
 	AppUtilsInterface,
 	BrandingUtilsInterface,
+	ColorConversionHelpersInterface,
+	ColorUtilHelpersInterface,
 	ColorUtilsInterface,
 	CoreUtilsInterface,
 	DOMUtilsInterface,
 	FormattingUtilsInterface,
+	PaletteUtilHelpersInterface,
 	PaletteUtilsInterface,
 	SanitationUtilsInterface,
 	TypeGuardUtilsInterface,
 	ValidationUtilsInterface
 } from '../../index.js';
 
+export interface HelpersInterface {
+	color: ColorUtilHelpersInterface;
+	colorConversion: ColorConversionHelpersInterface;
+	palette: PaletteUtilHelpersInterface;
+}
+
 export interface UtilitiesInterface {
 	adjust: AdjustmentUtilsInterface;
 	app: AppUtilsInterface;
-	branding: BrandingUtilsInterface;
+	brand: BrandingUtilsInterface;
 	color: ColorUtilsInterface;
 	core: CoreUtilsInterface;
 	dom: DOMUtilsInterface;

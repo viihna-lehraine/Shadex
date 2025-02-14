@@ -1,76 +1,55 @@
 // File: utils/sanitize.js
 
 import {
-	BrandingUtilsInterface,
 	ByteRange,
-	ColorUtilsInterface,
 	LAB_A,
 	LAB_B,
 	LAB_L,
 	Percentile,
 	Radial,
 	SanitationUtilsInterface,
-	ValidationUtilsInterface
+	UtilitiesInterface
 } from '../types/index.js';
 
 function lab(
 	value: number,
 	output: 'l' | 'a' | 'b',
-	brand: BrandingUtilsInterface,
-	validate: ValidationUtilsInterface
+	utils: UtilitiesInterface
 ): LAB_L | LAB_A | LAB_B {
 	if (output === 'l') {
-		return brand.asLAB_L(
+		return utils.brand.asLAB_L(
 			Math.round(Math.min(Math.max(value, 0), 100)),
-			validate
+			utils
 		);
 	} else if (output === 'a') {
-		return brand.asLAB_A(
+		return utils.brand.asLAB_A(
 			Math.round(Math.min(Math.max(value, -125), 125)),
-			validate
+			utils
 		);
 	} else if (output === 'b') {
-		return brand.asLAB_B(
+		return utils.brand.asLAB_B(
 			Math.round(Math.min(Math.max(value, -125), 125)),
-			validate
+			utils
 		);
 	} else throw new Error('Unable to return LAB value');
 }
 
-function percentile(
-	value: number,
-	brand: BrandingUtilsInterface,
-	validate: ValidationUtilsInterface
-): Percentile {
+function percentile(value: number, utils: UtilitiesInterface): Percentile {
 	const rawPercentile = Math.round(Math.min(Math.max(value, 0), 100));
 
-	return brand.asPercentile(rawPercentile, validate);
+	return utils.brand.asPercentile(rawPercentile, utils);
 }
 
-function radial(
-	value: number,
-	brand: BrandingUtilsInterface,
-	validate: ValidationUtilsInterface
-): Radial {
+function radial(value: number, utils: UtilitiesInterface): Radial {
 	const rawRadial = Math.round(Math.min(Math.max(value, 0), 360)) & 360;
 
-	return brand.asRadial(rawRadial, validate);
+	return utils.brand.asRadial(rawRadial, utils);
 }
 
-function rgb(
-	value: number,
-	colorUtils: ColorUtilsInterface,
-	brand: BrandingUtilsInterface,
-	validate: ValidationUtilsInterface
-): ByteRange {
+function rgb(value: number, utils: UtilitiesInterface): ByteRange {
 	const rawByteRange = Math.round(Math.min(Math.max(value, 0), 255));
 
-	return colorUtils.toColorValueRange(
-		rawByteRange,
-		'ByteRange',
-		brand,
-		validate
-	);
+	return utils.color.toColorValueRange(rawByteRange, 'ByteRange', utils);
 }
 
 export const sanitationUtils: SanitationUtilsInterface = {

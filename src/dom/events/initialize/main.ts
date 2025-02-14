@@ -2,13 +2,16 @@
 
 import {
 	AppServicesInterface,
+	AttachColorInputUpdateListenerFn,
+	AttachLockBtnLockingListenerFn,
+	AttachPaletteListenersFn,
+	AttachResizeHandleListenerFn,
 	AttachToolTipListenerFn,
-	CoreUtilsInterface,
 	CreatePaletteObserverFn,
 	CreateTooltipElementFn,
-	DOMUtilsInterface,
 	InitializeColumnPositionsFn,
-	ValidationUtilsInterface
+	UpdatePaletteItemColorFn,
+	UtilitiesInterface
 } from '../../../types/index.js';
 import { StateManager } from '../../../state/StateManager.js';
 import { domData } from '../../../data/dom.js';
@@ -17,14 +20,18 @@ const btnIDs = domData.ids.btns;
 
 export function initializeEventListeners(
 	appServices: AppServicesInterface,
+	attachColorInputUpdateListener: AttachColorInputUpdateListenerFn,
+	attachLockBtnLockingListener: AttachLockBtnLockingListenerFn,
+	attachPaletteListeners: AttachPaletteListenersFn,
+	attachResizeHandleListener: AttachResizeHandleListenerFn,
 	attachTooltipListener: AttachToolTipListenerFn,
-	coreUtils: CoreUtilsInterface,
+	colorHelpers:
 	createPaletteObserver: CreatePaletteObserverFn,
 	createTooltipElement: CreateTooltipElementFn,
-	domUtils: DOMUtilsInterface,
-	initializePaletteColumns: InitializeColumnPositionsFn,
+	initializeColumnPositions: InitializeColumnPositionsFn,
 	stateManager: StateManager,
-	validate: ValidationUtilsInterface
+	updatePaletteItemColor: UpdatePaletteItemColorFn,
+	utils: UtilitiesInterface
 ): void {
 	const log = appServices.log;
 
@@ -35,7 +42,7 @@ export function initializeEventListeners(
 		2
 	);
 
-	domUtils.addEventListener(
+	utils.dom.addEventListener(
 		btnIDs.desaturate,
 		'click',
 		(e: Event) => {
@@ -61,7 +68,7 @@ export function initializeEventListeners(
 		appServices
 	);
 
-	domUtils.addEventListener(
+	utils.dom.addEventListener(
 		btnIDs.export,
 		'click',
 		e => {
@@ -79,7 +86,7 @@ export function initializeEventListeners(
 		appServices
 	);
 
-	domUtils.addEventListener(
+	utils.dom.addEventListener(
 		btnIDs.generate,
 		'click',
 		e => {
@@ -97,15 +104,19 @@ export function initializeEventListeners(
 		appServices
 	);
 
-	initializePaletteColumns(coreUtils, stateManager);
+	initializeColumnPositions(stateManager, utils);
 
 	createPaletteObserver(
 		appServices,
+		attachColorInputUpdateListener,
+		attachLockBtnLockingListener,
+		attachPaletteListeners,
+		attachResizeHandleListener,
 		attachTooltipListener,
-		coreUtils,
+		colorHelpers,
 		createTooltipElement,
-		domUtils,
 		stateManager,
-		validate
+		updatePaletteItemColor,
+		utils
 	);
 }

@@ -44,14 +44,6 @@ const regex: ConfigDataInterface['regex'] = {
 		hsl: /^hsl\(\s*(\d+),\s*([\d.]+)%,\s*([\d.]+)%\s*\)$/,
 		rgb: /^rgb\(\s*(\d+),\s*(\d+),\s*(\d+)\s*\)$/
 	},
-	file: {
-		palette: {
-			css: {
-				color: /\.color-\d+\s*{\s*([\s\S]*?)\s*}/i,
-				metadata: /\.palette\s*{\s*([\s\S]*?)\s*}/i
-			}
-		}
-	},
 	userInput: {
 		hex: /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/i,
 		hsl: /^hsl\(\s*(\d{1,3})\s*,\s*([0-9]{1,3})%\s*,\s*([0-9]{1,3})%\s*\)$/i,

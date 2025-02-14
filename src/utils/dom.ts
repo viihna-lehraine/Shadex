@@ -1,18 +1,14 @@
 // File: utils/dom.js
 
 import {
-	AppServicesInterface,
-	BrandingUtilsInterface,
 	ColorInputElement,
 	ColorSpace,
-	ColorUtilHelpersInterface,
-	ColorUtilsInterface,
-	CoreUtilsInterface,
 	DOMUtilsInterface,
+	HelpersInterface,
 	HSL,
 	Palette,
-	TypeGuardUtilsInterface,
-	ValidationUtilsInterface
+	ServicesInterface,
+	UtilitiesInterface
 } from '../types/index.js';
 import { domData } from '../data/dom.js';
 import { modeData } from '../data/mode.js';
@@ -23,29 +19,21 @@ const mode = modeData;
 const addConversionListener = (
 	id: string,
 	colorSpace: string,
-	appServices: AppServicesInterface,
-	brand: BrandingUtilsInterface,
-	colorUtils: ColorUtilsInterface,
-	conversionUtils: ColorUtilHelpersInterface,
-	coreUtils: CoreUtilsInterface,
-	typeGuards: TypeGuardUtilsInterface,
-	validate: ValidationUtilsInterface
+	helpers: HelpersInterface,
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ) => {
-	const log = appServices.log;
+	const log = services.app.log;
 	const btn = document.getElementById(id) as HTMLButtonElement | null;
 
 	if (btn) {
-		if (typeGuards.isColorSpace(colorSpace)) {
+		if (utils.typeGuards.isColorSpace(colorSpace)) {
 			btn.addEventListener('click', () =>
 				switchColorSpaceInDOM(
 					colorSpace as ColorSpace,
-					appServices,
-					brand,
-					colorUtils,
-					conversionUtils,
-					coreUtils,
-					typeGuards,
-					validate
+					helpers,
+					services,
+					utils
 				)
 			);
 		} else {
@@ -68,9 +56,9 @@ function addEventListener<K extends keyof HTMLElementEventMap>(
 	id: string,
 	eventType: K,
 	callback: (ev: HTMLElementEventMap[K]) => void,
-	appServices: AppServicesInterface
+	services: ServicesInterface
 ): void {
-	const log = appServices.log;
+	const log = services.app.log;
 	const element = document.getElementById(id);
 
 	if (element) {
@@ -100,17 +88,17 @@ function downloadFile(data: string, filename: string, type: string): void {
 function enforceSwatchRules(
 	minSwatches: number,
 	maxSwatches: number,
-	appServices: AppServicesInterface
+	services: ServicesInterface
 ): void {
-	const log = appServices.log;
-	const swatchNumberSelector = document.getElementById(
-		domIDs.selects.swatchGen
+	const log = services.app.log;
+	const paletteColumnSelector = document.getElementById(
+		domIDs.selectors.paletteColumn
 	) as HTMLSelectElement;
 
-	if (!swatchNumberSelector) {
+	if (!paletteColumnSelector) {
 		log(
 			'error',
-			'paletteDropdown not found',
+			'paletteColumnSelector not found',
 			'domUtils.enforceSwatchRules()'
 		);
 
@@ -121,7 +109,7 @@ function enforceSwatchRules(
 		return;
 	}
 
-	const currentValue = parseInt(swatchNumberSelector.value, 10);
+	const currentValue = parseInt(paletteColumnSelector.value, 10);
 
 	let newValue = currentValue;
 
@@ -134,12 +122,12 @@ function enforceSwatchRules(
 
 	if (newValue !== currentValue) {
 		// update value in the dropdown menu
-		swatchNumberSelector.value = newValue.toString();
+		paletteColumnSelector.value = newValue.toString();
 
 		// trigger a change event to notify the application
 		const event = new Event('change', { bubbles: true });
 		try {
-			swatchNumberSelector.dispatchEvent(event);
+			paletteColumnSelector.dispatchEvent(event);
 		} catch (error) {
 			log(
 				'warn',
@@ -171,15 +159,11 @@ function readFile(file: File): Promise<string> {
 
 function switchColorSpaceInDOM(
 	targetFormat: ColorSpace,
-	appServices: AppServicesInterface,
-	brand: BrandingUtilsInterface,
-	colorUtils: ColorUtilsInterface,
-	conversionUtils: ColorUtilHelpersInterface,
-	coreUtils: CoreUtilsInterface,
-	typeGuards: TypeGuardUtilsInterface,
-	validate: ValidationUtilsInterface
+	helpers: HelpersInterface,
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): void {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	try {
 		const colorTextOutputBoxes =
@@ -191,7 +175,10 @@ function switchColorSpaceInDOM(
 			const inputBox = box as ColorInputElement;
 			const colorValues = inputBox.colorValues;
 
-			if (!colorValues || !validate.colorValue(colorValues, coreUtils)) {
+			if (
+				!colorValues ||
+				!utils.validate.colorValue(colorValues, utils)
+			) {
 				log(
 					'error',
 					'Invalid color values. Cannot display toast.',
@@ -212,11 +199,11 @@ function switchColorSpaceInDOM(
 				2
 			);
 
-			const convertFn = colorUtils.getConversionFn(
+			const convertFn = utils.color.getConversionFn(
 				currentFormat,
 				targetFormat,
-				conversionUtils,
-				log
+				helpers,
+				services
 			);
 
 			if (!convertFn) {
@@ -239,19 +226,13 @@ function switchColorSpaceInDOM(
 				continue;
 			}
 
-			const clonedColor = colorUtils.narrowToColor(
-				colorValues,
-				brand,
-				coreUtils,
-				typeGuards,
-				validate
-			);
+			const clonedColor = utils.color.narrowToColor(colorValues, utils);
 
 			if (
 				!clonedColor ||
-				typeGuards.isSLColor(clonedColor) ||
-				typeGuards.isSVColor(clonedColor) ||
-				typeGuards.isXYZ(clonedColor)
+				utils.typeGuards.isSLColor(clonedColor) ||
+				utils.typeGuards.isSVColor(clonedColor) ||
+				utils.typeGuards.isXYZ(clonedColor)
 			) {
 				log(
 					'error',
@@ -273,7 +254,7 @@ function switchColorSpaceInDOM(
 				continue;
 			}
 
-			const newColor = coreUtils.clone(convertFn(clonedColor));
+			const newColor = utils.core.clone(convertFn(clonedColor));
 
 			if (!newColor) {
 				log(
@@ -303,12 +284,12 @@ function switchColorSpaceInDOM(
 function updateColorBox(
 	color: HSL,
 	boxId: string,
-	colorUtils: ColorUtilsInterface
+	utils: UtilitiesInterface
 ): void {
 	const colorBox = document.getElementById(boxId);
 
 	if (colorBox) {
-		colorBox.style.backgroundColor = colorUtils.convertColorToCSS(color);
+		colorBox.style.backgroundColor = utils.color.convertColorToCSS(color);
 	}
 }
 
@@ -327,7 +308,7 @@ function updateHistory(history: Palette[]): void {
 		entry.innerHTML = `
 			<p>Palette #${palette.metadata.name || palette.id}</p>
 			<div class="color-preview">
-				${palette.items.map(item => `<span class="color-box" style="background: ${item.colors.css.hex};"></span>`).join(' ')}
+				${palette.items.map(item => `<span class="color-box" style="background: ${item.css.hex};"></span>`).join(' ')}
 			</div>
 			<button class="remove-history-item" data-id="${palette.id}-history-remove-btn">Remove</button>
 		`;
@@ -340,8 +321,8 @@ function updateHistory(history: Palette[]): void {
 	});
 }
 
-function validateStaticElements(appServices: AppServicesInterface): void {
-	const log = appServices.log;
+function validateStaticElements(services: ServicesInterface): void {
+	const log = services.app.log;
 	const missingElements: string[] = [];
 	const allIDs: string[] = Object.values(domIDs).flatMap(category =>
 		Object.values(category)

@@ -1,6 +1,7 @@
 // File: dom/ui/newPalette.js
 
 import {
+	AdjustmentUtilsInterface,
 	AppServicesInterface,
 	BrandingUtilsInterface,
 	Color,
@@ -139,9 +140,8 @@ export function renderNewPalette(args: RenderNewPaletteArgs): void {
 	const columns = newPalette.items.map((items, index) => {
 		const columnID = index + 1;
 		const colorValue =
-			items.cssColors[
-				validColorSpace as keyof PaletteItem['cssColors']
-			] || items.cssColors.hex;
+			items.css[validColorSpace as keyof PaletteItem['css']] ||
+			items.css.hex;
 
 		// create palette column div
 		const column = document.createElement('div');
@@ -223,12 +223,23 @@ export function renderNewPalette(args: RenderNewPaletteArgs): void {
 
 	// Step 8: Attach event listeners
 	args.attachPaletteListeners(
+		args.adjust,
 		args.appServices,
+		args.attachColorInputUpdateListener,
+		args.attachLockBtnLockingListener,
+		args.attachResizeHandleListener,
 		args.attachTooltipListener,
+		args.brand,
+		args.colorHelpers,
+		args.colorUtils,
 		args.coreUtils,
 		args.createTooltipElement,
 		args.domUtils,
+		args.format,
+		args.paletteUtils,
+		args.sanitize,
 		args.stateManager,
+		args.updatePaletteItemColor,
 		args.validate
 	);
 }
@@ -294,9 +305,10 @@ export function renderPaletteColor(
 	}
 }
 
-function updatePaletteItemColor(
+export function updatePaletteItemColor(
 	columnID: number,
 	newColor: string,
+	adjust: AdjustmentUtilsInterface,
 	appServices: AppServicesInterface,
 	brand: BrandingUtilsInterface,
 	colorHelpers: ColorUtilHelpersInterface,
@@ -309,17 +321,39 @@ function updatePaletteItemColor(
 	validate: ValidationUtilsInterface
 ): void {
 	const currentState = stateManager.getState();
+	const paletteHistory = currentState.paletteHistory;
+	const latestPalette = paletteHistory[0];
+
+	if (!latestPalette) return;
+
 	const paletteItems = currentState.paletteHistory[0].items; // Get latest palette
 
 	// Find the PaletteItem corresponding to this column
 	const updatedItems = paletteItems.map(item => {
 		if (item.itemID !== columnID) return item;
 
-		// CONVERT NEWCOLOR INTO A COLOR-TYPED OBJECT USING colorUtils.convertCSSToColor(color: string): Exclude<Color, SV | SL> | null
+		const parsedNewColor = colorUtils.convertCSSToColor(newColor, format);
 
-		// Convert newColor into different color spaces
-		const updatedColors = paletteUtils.generateAllColorValues(
-			newColor,
+		if (!parsedNewColor) {
+			throw new Error('Invalid color value');
+		}
+
+		const hslColor =
+			parsedNewColor.format === 'hsl'
+				? parsedNewColor
+				: colorUtils.convertToHSL(
+						parsedNewColor,
+						adjust,
+						appServices,
+						brand,
+						colorHelpers,
+						coreUtils,
+						format,
+						validate
+					);
+
+		const allColors = paletteUtils.generateAllColorValues(
+			hslColor,
 			appServices,
 			brand,
 			colorHelpers,
@@ -332,18 +366,44 @@ function updatePaletteItemColor(
 
 		return {
 			...item,
-			colors: updatedColors,
-			cssColors: {
-				hex: updatedColors.hex,
-				hsl: `hsl(${updatedColors.hsl.hue}, ${updatedColors.hsl.saturation}%, ${updatedColors.hsl.lightness}%)`,
-				rgb: `rgb(${updatedColors.rgb.red}, ${updatedColors.rgb.green}, ${updatedColors.rgb.blue})`,
-				cmyk: `cmyk(${updatedColors.cmyk.cyan}%, ${updatedColors.cmyk.magenta}%, ${updatedColors.cmyk.yellow}%, ${updatedColors.cmyk.key}%)`,
-				lab: `lab(${updatedColors.lab.l}, ${updatedColors.lab.a}, ${updatedColors.lab.b})`,
-				xyz: `xyz(${updatedColors.xyz.x}, ${updatedColors.xyz.y}, ${updatedColors.xyz.z})`,
+			colors: {
+				cmyk: allColors.cmyk.value,
+				hex: allColors.hex.value,
+				hsl: allColors.hsl.value,
+				hsv: allColors.hsv.value,
+				lab: allColors.lab.value,
+				rgb: allColors.rgb.value,
+				xyz: allColors.xyz.value
 			},
+			css: {
+				cmyk: colorUtils.convertColorToCSS(allColors.cmyk),
+				hex: colorUtils.convertColorToCSS(allColors.hex),
+				hsl: colorUtils.convertColorToCSS(allColors.hsl),
+				hsv: colorUtils.convertColorToCSS(allColors.hsv),
+				lab: colorUtils.convertColorToCSS(allColors.lab),
+				rgb: colorUtils.convertColorToCSS(allColors.rgb),
+				xyz: colorUtils.convertColorToCSS(allColors.xyz)
+			}
 		};
 	});
 
+	const updatedColumns = updatedItems.map((item, index) => {
+		return {
+			id: item.itemID,
+			isLocked: currentState.paletteContainer.columns[index].isLocked,
+			position: index + 1,
+			size: currentState.paletteContainer.columns[index].size
+		};
+	});
+
+	const updatedPaletteHistory = [
+		{ ...latestPalette, items: updatedItems },
+		...paletteHistory.slice(1)
+	];
+
 	// track this change in State history
-	stateManager.updatePaletteColumns(updatedItems, true, 3);
+	stateManager.updatePaletteColumns(updatedColumns, true, 3);
+
+	// update state history with new palette items
+	stateManager.updatePaletteHistory(updatedPaletteHistory);
 }

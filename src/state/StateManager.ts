@@ -219,6 +219,18 @@ export class StateManager implements StateManagerClassInterface {
 		this.saveStateAndLog('paletteColumnSize', 3);
 	}
 
+	public updatePaletteHistory(updatedHistory: Palette[]): void {
+		this.trackAction();
+		this.state.paletteHistory = updatedHistory;
+		this.saveToStorage('paletteHistory', updatedHistory);
+		this.log(
+			'info',
+			'Updated palette history',
+			'StateManager.updatePaletteHistory()',
+			3
+		);
+	}
+
 	public updateSelections(
 		selections: Partial<State['selections']>,
 		track: boolean

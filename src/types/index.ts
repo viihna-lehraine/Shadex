@@ -8,10 +8,12 @@ export type {
 	PaletteGenerationInterface,
 	SelectedPaletteOptions
 } from './app/palette.js';
-export type { AppServicesInterface } from './app/services.js';
+export type {
+	AppServicesInterface,
+	ServicesInterface
+} from './app/services.js';
 export type { History, State } from './app/state.js';
 export type {
-	ArgsHelpersInterface,
 	ColorConversionHelpersInterface,
 	ColorUtilHelpersInterface,
 	PaletteUtilHelpersInterface
@@ -29,7 +31,7 @@ export type {
 	TypeGuardUtilsInterface,
 	ValidationUtilsInterface
 } from './app/utils/partials.js';
-export type { UtilitiesInterface } from './app/utils/main.js';
+export type { HelpersInterface, UtilitiesInterface } from './app/utils/main.js';
 export type {
 	CMYK,
 	CMYK_StringProps,
@@ -60,16 +62,15 @@ export type {
 	XYZ_StringProps
 } from './data/colors/main.js';
 export type {
+	AllColors,
 	Color,
 	ColorData,
 	ColorDataAssertion,
 	ColorDataExtended,
 	ColorFormat,
-	ColorPartial,
 	ColorSpace,
 	ColorSpaceExtended,
 	Color_StringProps,
-	Color_StringProps_Extended,
 	UnbrandedColor
 } from './data/colors/sets.js';
 export type {
@@ -108,8 +109,7 @@ export type {
 	XYZ_Z
 } from './data/sets.js';
 export type {
-	CreatePaletteItemArrayArgs_Tuple,
-	CreatePaletteItemArgs_Tuple,
+	CreatePaletteDataArgs_Tuple,
 	CreatePaletteObjectArgs,
 	GenerateHuesArgs,
 	GeneratePaletteArgs,
@@ -118,10 +118,14 @@ export type {
 	RenderNewPaletteArgs
 } from './args.js';
 export type {
+	AttachColorInputUpdateListenerFn,
+	AttachLockBtnLockingListenerFn,
 	AttachPaletteListenersFn,
+	AttachResizeHandleListenerFn,
 	AttachToolTipListenerFn,
 	CreatePaletteObserverFn,
 	CreateTooltipElementFn,
+	EventListenerAttachmentFunctions,
 	GenerateHuesFn,
 	GeneratePaletteFn,
 	HueGenFunctions,

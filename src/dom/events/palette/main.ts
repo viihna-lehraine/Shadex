@@ -1,27 +1,45 @@
-// File: dom/events/palette.js
+// File: dom/events/palette/main.js
 
 import {
+	AdjustmentUtilsInterface,
 	AppServicesInterface,
+	AttachColorInputUpdateListenerFn,
+	AttachLockBtnLockingListenerFn,
 	AttachPaletteListenersFn,
+	AttachResizeHandleListenerFn,
 	AttachToolTipListenerFn,
+	BrandingUtilsInterface,
+	ColorUtilHelpersInterface,
+	ColorUtilsInterface,
 	CoreUtilsInterface,
 	CreateTooltipElementFn,
 	DOMUtilsInterface,
-	TypeGuardUtilsInterface,
+	FormattingUtilsInterface,
+	PaletteUtilsInterface,
+	SanitationUtilsInterface,
 	UpdatePaletteItemColorFn,
 	ValidationUtilsInterface
-} from '../../types/index.js';
-import { StateManager } from '../../state/StateManager.js';
-import { domData } from '../../data/dom.js';
+} from '../../../types/index.js';
+import { StateManager } from '../../../state/StateManager.js';
+import { domData } from '../../../data/dom.js';
 
 export function attachPaletteListeners(
+	adjust: AdjustmentUtilsInterface,
 	appServices: AppServicesInterface,
+	attachColorInputUpdateListener: AttachColorInputUpdateListenerFn,
+	attachLockBtnLockingListener: AttachLockBtnLockingListenerFn,
+	attachResizeHandleListener: AttachResizeHandleListenerFn,
 	attachTooltipListener: AttachToolTipListenerFn,
+	brand: BrandingUtilsInterface,
+	colorHelpers: ColorUtilHelpersInterface,
+	colorUtils: ColorUtilsInterface,
 	coreUtils: CoreUtilsInterface,
 	createTooltipElement: CreateTooltipElementFn,
 	domUtils: DOMUtilsInterface,
+	format: FormattingUtilsInterface,
+	paletteUtils: PaletteUtilsInterface,
+	sanitize: SanitationUtilsInterface,
 	stateManager: StateManager,
-	typeGuards: TypeGuardUtilsInterface,
 	updatePaletteItemColor: UpdatePaletteItemColorFn,
 	validate: ValidationUtilsInterface
 ): void {
@@ -61,29 +79,25 @@ export function attachPaletteListeners(
 		) as HTMLDivElement | null;
 
 		// color input update logic
-		if (colorDisplay && colorInput) {
-			// when color display input changes value...
-			addEventListener(
+		if (colorDisplay && colorInput && columnID !== undefined) {
+			attachColorInputUpdateListener(
 				colorDisplayID,
-				'input',
-				(e: Event) => {
-					const newColor = (
-						e.target as HTMLInputElement
-					).value.trim();
-
-					// validate before applying
-					if (!validate.userColorInput(newColor)) return;
-
-					// update background color of the palette column
-					column.style.backgroundColor = newColor;
-					// sync color input value
-					colorInput.value = newColor;
-
-					if (!columnID || columnID === undefined) return;
-
-					updatePaletteItemColor(columnID, newColor, stateManager);
-				},
-				appServices
+				colorInput,
+				column,
+				columnID,
+				adjust,
+				appServices,
+				brand,
+				colorHelpers,
+				colorUtils,
+				coreUtils,
+				domUtils,
+				format,
+				paletteUtils,
+				sanitize,
+				stateManager,
+				updatePaletteItemColor,
+				validate
 			);
 		}
 
@@ -133,33 +147,7 @@ export function attachPaletteListeners(
 
 			// handle locking logic
 			if (lockBtn) {
-				addEventListener(
-					lockBtnID,
-					'click',
-					(event: Event) => {
-						const btn = event.target as HTMLButtonElement;
-						const paletteColumn = btn.closest(
-							domData.classes.paletteColumn
-						) as HTMLDivElement;
-
-						if (!paletteColumn) {
-							return;
-						}
-
-						const isLocked =
-							paletteColumn.classList.toggle('locked');
-
-						// disable interactions when locked
-						paletteColumn.draggable = !isLocked;
-						const input = paletteColumn.querySelector(
-							'input'
-						) as HTMLInputElement | null;
-						if (input) {
-							input.disabled = isLocked;
-						}
-					},
-					appServices
-				);
+				attachLockBtnLockingListener(lockBtnID, appServices, domUtils);
 
 				// add tooltip to lock button
 				attachTooltipListener(
@@ -172,55 +160,12 @@ export function attachPaletteListeners(
 
 			// resize logic
 			if (resizeHandle) {
-				addEventListener(
+				attachResizeHandleListener(
+					column,
 					resizeHandleID,
-					'mousedown',
-					(event: MouseEvent) => {
-						const columnElement = column as HTMLElement;
-
-						if (
-							!columnElement ||
-							columnElement.classList.contains('locked')
-						) {
-							return;
-						}
-
-						const startX = event.clientX;
-						const startWidth = columnElement.offsetWidth;
-						const onMouseMove = (moveEvent: MouseEvent) => {
-							const diff = moveEvent.clientX - startX;
-							columnElement.style.width = `${startWidth + diff}px`;
-						};
-						const onMouseUp = () => {
-							window.removeEventListener(
-								'mousemove',
-								onMouseMove
-							);
-							window.removeEventListener('mouseup', onMouseUp);
-
-							const newSize = columnElement.offsetWidth;
-							const columnID = parseInt(
-								columnElement.id.split('-').pop()!
-							);
-							const currentState = stateManager.getState();
-							const updatedColumns =
-								currentState.paletteContainer.columns.map(
-									col =>
-										col.id === columnID
-											? { ...col, size: newSize }
-											: col
-								);
-							stateManager.updatePaletteColumns(
-								updatedColumns,
-								false,
-								4
-							);
-						};
-
-						window.addEventListener('mousemove', onMouseMove);
-						window.addEventListener('mouseup', onMouseUp);
-					},
-					appServices
+					appServices,
+					domUtils,
+					stateManager
 				);
 
 				// add tooltip to resize handle
@@ -236,14 +181,23 @@ export function attachPaletteListeners(
 }
 
 export function createPaletteObserver(
+	adjust: AdjustmentUtilsInterface,
 	appServices: AppServicesInterface,
+	attachColorInputUpdateListener: AttachColorInputUpdateListenerFn,
+	attachLockBtnLockingListener: AttachLockBtnLockingListenerFn,
 	attachPaletteListeners: AttachPaletteListenersFn,
+	attachResizeHandleListener: AttachResizeHandleListenerFn,
 	attachTooltipListener: AttachToolTipListenerFn,
+	brand: BrandingUtilsInterface,
+	colorHelpers: ColorUtilHelpersInterface,
+	colorUtils: ColorUtilsInterface,
 	coreUtils: CoreUtilsInterface,
 	createTooltipElement: CreateTooltipElementFn,
 	domUtils: DOMUtilsInterface,
+	format: FormattingUtilsInterface,
+	paletteUtils: PaletteUtilsInterface,
+	sanitize: SanitationUtilsInterface,
 	stateManager: StateManager,
-	typeGuards: TypeGuardUtilsInterface,
 	updatePaletteItemColor: UpdatePaletteItemColorFn,
 	validate: ValidationUtilsInterface
 ): MutationObserver {
@@ -257,13 +211,22 @@ export function createPaletteObserver(
 						node.classList.contains('palette-column')
 					) {
 						attachPaletteListeners(
+							adjust,
 							appServices,
+							attachColorInputUpdateListener,
+							attachLockBtnLockingListener,
+							attachResizeHandleListener,
 							attachTooltipListener,
+							brand,
+							colorHelpers,
+							colorUtils,
 							coreUtils,
 							createTooltipElement,
 							domUtils,
+							format,
+							paletteUtils,
+							sanitize,
 							stateManager,
-							typeGuards,
 							updatePaletteItemColor,
 							validate
 						);

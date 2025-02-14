@@ -2,30 +2,26 @@
 
 import {
 	AdjustmentUtilsInterface,
-	AppServicesInterface,
-	BrandingUtilsInterface,
-	CoreUtilsInterface,
 	HSL,
 	RGB,
-	ValidationUtilsInterface
+	ServicesInterface,
+	UtilitiesInterface
 } from '../types/index.js';
 import { constsData as consts } from '../data/consts.js';
 import { defaultData as defaults } from '../data/defaults.js';
 
 const adjustments = consts.adjustments;
-const defaultColors = defaults.colors.base.branded;
+const defaultColors = defaults.colors;
 
 function adjustSL(
 	color: HSL,
-	appServices: AppServicesInterface,
-	brandingUtils: BrandingUtilsInterface,
-	coreUtils: CoreUtilsInterface,
-	validate: ValidationUtilsInterface
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): HSL {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	try {
-		if (!validate.colorValue(color, coreUtils)) {
+		if (!utils.validate.colorValue(color, utils)) {
 			log(
 				'error',
 				'Invalid color valus for adjustment.',
@@ -44,14 +40,8 @@ function adjustSL(
 		return {
 			value: {
 				hue: color.value.hue,
-				saturation: brandingUtils.asPercentile(
-					adjustedSaturation,
-					validate
-				),
-				lightness: brandingUtils.asPercentile(
-					adjustedLightness,
-					validate
-				)
+				saturation: utils.brand.asPercentile(adjustedSaturation, utils),
+				lightness: utils.brand.asPercentile(adjustedLightness, utils)
 			},
 			format: 'hsl'
 		};
@@ -68,9 +58,9 @@ function adjustSL(
 
 function applyGammaCorrection(
 	value: number,
-	appServices: AppServicesInterface
+	services: ServicesInterface
 ): number {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	try {
 		return value > 0.0031308
@@ -89,15 +79,13 @@ function applyGammaCorrection(
 
 function clampRGB(
 	rgb: RGB,
-	appServices: AppServicesInterface,
-	brand: BrandingUtilsInterface,
-	coreUtils: CoreUtilsInterface,
-	validate: ValidationUtilsInterface
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): RGB {
-	const log = appServices.log;
+	const log = services.app.log;
 	const defaultRGB = defaultColors.rgb;
 
-	if (!validate.colorValue(rgb, coreUtils)) {
+	if (!utils.validate.colorValue(rgb, utils)) {
 		log(
 			'error',
 			`Invalid RGB value ${JSON.stringify(rgb)}`,
@@ -110,17 +98,17 @@ function clampRGB(
 	try {
 		return {
 			value: {
-				red: brand.asByteRange(
+				red: utils.brand.asByteRange(
 					Math.round(Math.min(Math.max(0, rgb.value.red), 1) * 255),
-					validate
+					utils
 				),
-				green: brand.asByteRange(
+				green: utils.brand.asByteRange(
 					Math.round(Math.min(Math.max(0, rgb.value.green), 1) * 255),
-					validate
+					utils
 				),
-				blue: brand.asByteRange(
+				blue: utils.brand.asByteRange(
 					Math.round(Math.min(Math.max(0, rgb.value.blue), 1) * 255),
-					validate
+					utils
 				)
 			},
 			format: 'rgb'

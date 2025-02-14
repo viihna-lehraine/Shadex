@@ -33,4 +33,5 @@ export interface State {
 		paletteType: PaletteType;
 		targetedColumnPosition: number;
 	};
+	timestamp: string;
 }

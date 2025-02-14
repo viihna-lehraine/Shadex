@@ -75,7 +75,7 @@ const paletteItem: PaletteItem = {
 			z: 0 as XYZ_Z
 		}
 	},
-	cssColors: {
+	css: {
 		cmyk: 'cmyk(0%, 0%, 0%, 100%)',
 		hex: '#000000',
 		hsl: 'hsl(0, 0%, 0%)',
@@ -253,17 +253,16 @@ const mutation: MutationLog = {
 };
 
 const paletteOptions: SelectedPaletteOptions = {
+	columnCount: 6,
 	distributionType: 'soft',
 	limitDark: false,
 	limitGray: false,
 	limitLight: false,
-	swatches: 6,
-	type: 1
+	paletteType: 'analogous'
 };
 
 const state: State = {
 	appMode: 'edit',
-	isLoading: false,
 	paletteHistory: [],
 	paletteContainer: {
 		columns: [],
@@ -280,7 +279,8 @@ const state: State = {
 		paletteColumnCount: 5,
 		paletteType: 'complementary',
 		targetedColumnPosition: 1
-	}
+	},
+	timestamp: 'NULL TIMESTAMP'
 };
 
 const unbrandedPalette: UnbrandedPalette = {
@@ -297,7 +297,7 @@ const unbrandedPalette: UnbrandedPalette = {
 		type: '???',
 		timestamp: '???'
 	}
-};
+} as const;
 
 const unbrandedPaletteItem: UnbrandedPaletteItem = {
 	itemID: 1,
@@ -310,7 +310,7 @@ const unbrandedPaletteItem: UnbrandedPaletteItem = {
 		rgb: { red: 0, green: 0, blue: 0 },
 		xyz: { x: 0, y: 0, z: 0 }
 	},
-	cssColors: {
+	css: {
 		cmyk: 'cmyk(0%, 0%, 0%, 100%)',
 		hex: '#000000',
 		hsl: 'hsl(0, 0%, 0%)',
@@ -319,7 +319,7 @@ const unbrandedPaletteItem: UnbrandedPaletteItem = {
 		rgb: 'rgb(0, 0, 0)',
 		xyz: 'xyz(0, 0, 0)'
 	}
-};
+} as const;
 
 export const defaultData: DefaultDataInterface = {
 	colors,

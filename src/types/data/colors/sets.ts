@@ -30,6 +30,18 @@ import {
 	XYZ_StringProps
 } from './main.js';
 
+export interface AllColors {
+	cmyk: CMYK;
+	hex: Hex;
+	hsl: HSL;
+	hsv: HSV;
+	lab: LAB;
+	rgb: RGB;
+	sl: SL;
+	sv: SV;
+	xyz: XYZ;
+}
+
 export type Color = CMYK | Hex | HSL | HSV | LAB | RGB | SL | SV | XYZ;
 
 export interface ColorData {
@@ -59,8 +71,6 @@ export interface ColorDataExtended extends ColorData {
 
 export type ColorFormat = keyof ColorSpace | 'sl' | 'sv';
 
-export type ColorPartial = SL | SV;
-
 export type ColorSpace = 'cmyk' | 'hex' | 'hsl' | 'hsv' | 'lab' | 'rgb' | 'xyz';
 
 export type ColorSpaceExtended = ColorSpace | 'sl' | 'sv';
@@ -75,13 +85,6 @@ export type Color_StringProps =
 	| SL_StringProps
 	| SV_StringProps
 	| XYZ_StringProps;
-
-export type Color_StringProps_Extended =
-	| Color_StringProps
-	| Hex
-	| LAB
-	| RGB
-	| XYZ;
 
 export type UnbrandedColor =
 	| UnbrandedCMYK

@@ -64,7 +64,7 @@ export interface PaletteItem {
 		rgb: RGB['value'];
 		xyz: XYZ['value'];
 	};
-	cssColors: {
+	css: {
 		cmyk: string;
 		hex: string;
 		hsl: string;
@@ -86,7 +86,7 @@ export interface UnbrandedPaletteItem {
 		rgb: UnbrandedRGB['value'];
 		xyz: UnbrandedXYZ['value'];
 	};
-	cssColors: {
+	css: {
 		cmyk: string;
 		hex: string;
 		hsl: string;

@@ -1,13 +1,12 @@
 // File: utils/helpers/palette.js
 
 import {
-	AppServicesInterface,
 	ConstsDataInterface,
-	CoreUtilsInterface,
 	HSL,
 	PaletteUtilHelpersInterface,
 	PaletteType,
-	ValidationUtilsInterface
+	ServicesInterface,
+	UtilitiesInterface
 } from '../../types/index.js';
 import { constsData as consts } from '../../data/consts.js';
 
@@ -50,9 +49,9 @@ function getSelectedPaletteType(type: number): PaletteType {
 
 function getWeightedRandomInterval(
 	distributionType: keyof ConstsDataInterface['probabilities'],
-	appServices: AppServicesInterface
+	services: ServicesInterface
 ): number {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	try {
 		// select appropriate type
@@ -89,13 +88,12 @@ function getWeightedRandomInterval(
 
 function isHSLInBounds(
 	hsl: HSL,
-	appServices: AppServicesInterface,
-	coreUtils: CoreUtilsInterface,
-	validate: ValidationUtilsInterface
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): boolean {
-	const log = appServices.log;
+	const log = services.app.log;
 
-	if (!validate.colorValue(hsl, coreUtils)) {
+	if (!utils.validate.colorValue(hsl, utils)) {
 		log(
 			'error',
 			`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -106,21 +104,20 @@ function isHSLInBounds(
 	}
 
 	return (
-		isHSLTooDark(hsl, appServices, coreUtils, validate) ||
-		isHSLTooGray(hsl, appServices, coreUtils, validate) ||
-		isHSLTooLight(hsl, appServices, coreUtils, validate)
+		isHSLTooDark(hsl, services, utils) ||
+		isHSLTooGray(hsl, services, utils) ||
+		isHSLTooLight(hsl, services, utils)
 	);
 }
 
 function isHSLTooDark(
 	hsl: HSL,
-	appServices: AppServicesInterface,
-	coreUtils: CoreUtilsInterface,
-	validate: ValidationUtilsInterface
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): boolean {
-	const log = appServices.log;
+	const log = services.app.log;
 
-	if (!validate.colorValue(hsl, coreUtils)) {
+	if (!utils.validate.colorValue(hsl, utils)) {
 		log(
 			'error',
 			`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -130,18 +127,17 @@ function isHSLTooDark(
 		return false;
 	}
 
-	return coreUtils.clone(hsl).value.lightness < consts.thresholds.dark;
+	return utils.core.clone(hsl).value.lightness < consts.thresholds.dark;
 }
 
 function isHSLTooGray(
 	hsl: HSL,
-	appServices: AppServicesInterface,
-	coreUtils: CoreUtilsInterface,
-	validate: ValidationUtilsInterface
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): boolean {
-	const log = appServices.log;
+	const log = services.app.log;
 
-	if (!validate.colorValue(hsl, coreUtils)) {
+	if (!utils.validate.colorValue(hsl, utils)) {
 		log(
 			'error',
 			`Invalid HSL value ${JSON.stringify(hsl)}`,
@@ -151,18 +147,17 @@ function isHSLTooGray(
 		return false;
 	}
 
-	return coreUtils.clone(hsl).value.saturation < consts.thresholds.gray;
+	return utils.core.clone(hsl).value.saturation < consts.thresholds.gray;
 }
 
 function isHSLTooLight(
 	hsl: HSL,
-	appServices: AppServicesInterface,
-	coreUtils: CoreUtilsInterface,
-	validate: ValidationUtilsInterface
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): boolean {
-	const log = appServices.log;
+	const log = services.app.log;
 
-	if (!validate.colorValue(hsl, coreUtils)) {
+	if (!utils.validate.colorValue(hsl, utils)) {
 		log(
 			'error',
 			'Invalid HSL value ${JSON.stringify(hsl)}',
@@ -172,7 +167,7 @@ function isHSLTooLight(
 		return false;
 	}
 
-	return coreUtils.clone(hsl).value.lightness > consts.thresholds.light;
+	return utils.core.clone(hsl).value.lightness > consts.thresholds.light;
 }
 
 export const paletteHelpers: PaletteUtilHelpersInterface = {

@@ -36,6 +36,7 @@ export interface StateManagerClassInterface {
 		verbosity: number
 	): void;
 	updatePaletteColumnSize(columnID: number, newSize: number): void;
+	updatePaletteHistory(updatedHistory: Palette[]): void;
 	updateSelections(
 		selections: Partial<State['selections']>,
 		track: boolean

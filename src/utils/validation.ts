@@ -2,10 +2,10 @@
 
 import {
 	Color,
-	CoreUtilsInterface,
 	DataSetsInterface,
 	SL,
 	SV,
+	UtilitiesInterface,
 	ValidationUtilsInterface
 } from '../types/index.js';
 import { configData as config } from '../data/config.js';
@@ -16,9 +16,9 @@ const sets = dataSets;
 
 function colorValue(
 	color: Color | SL | SV,
-	coreUtils: CoreUtilsInterface
+	utils: UtilitiesInterface
 ): boolean {
-	const clonedColor = coreUtils.clone(color);
+	const clonedColor = utils.core.clone(color);
 
 	const isNumericValid = (value: unknown): boolean =>
 		typeof value === 'number' && !isNaN(value);
@@ -197,7 +197,7 @@ function userColorInput(color: string): boolean {
 	);
 }
 
-export const validationUtils: ValidationUtilsInterface = {
+export const validate: ValidationUtilsInterface = {
 	colorValue,
 	ensureHash,
 	hex,

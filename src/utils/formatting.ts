@@ -1,31 +1,25 @@
 // File: utils/formatting.js
 
 import {
-	AppServicesInterface,
-	BrandingUtilsInterface,
 	Color,
 	ColorSpace,
-	CoreUtilsInterface,
 	FormattingUtilsInterface,
 	Hex,
 	HSL,
-	ValidationUtilsInterface
+	ServicesInterface,
+	UtilitiesInterface
 } from '../types/index.js';
 import { defaultData as defaults } from '../data/defaults.js';
 
 const defaultColors = defaults.colors;
 
-function addHashToHex(
-	hex: Hex,
-	brand: BrandingUtilsInterface,
-	validate: ValidationUtilsInterface
-): Hex {
+function addHashToHex(hex: Hex, utils: UtilitiesInterface): Hex {
 	try {
 		return hex.value.hex.startsWith('#')
 			? hex
 			: {
 					value: {
-						hex: brand.asHexSet(`#${hex.value}}`, validate)
+						hex: utils.brand.asHexSet(`#${hex.value}}`, utils)
 					},
 					format: 'hex' as 'hex'
 				};
@@ -36,9 +30,9 @@ function addHashToHex(
 
 function componentToHex(
 	component: number,
-	appServices: AppServicesInterface
+	services: ServicesInterface
 ): string {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	try {
 		const hex = Math.max(0, Math.min(255, component)).toString(16);
@@ -85,14 +79,15 @@ function formatPercentageValues<T extends Record<string, unknown>>(
 
 function hslAddFormat(
 	value: HSL['value'],
-	appServices: AppServicesInterface,
-	coreUtils: CoreUtilsInterface,
-	validate: ValidationUtilsInterface
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): HSL {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	try {
-		if (!validate.colorValue({ value: value, format: 'hsl' }, coreUtils)) {
+		if (
+			!utils.validate.colorValue({ value: value, format: 'hsl' }, utils)
+		) {
 			log(
 				'error',
 				`Invalid HSL value ${JSON.stringify(value)}`,
@@ -117,23 +112,22 @@ function hslAddFormat(
 const parseColor = (
 	colorSpace: ColorSpace,
 	value: string,
-	appServices: AppServicesInterface,
-	brand: BrandingUtilsInterface,
-	validate: ValidationUtilsInterface
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): Color | null => {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	try {
 		switch (colorSpace) {
 			case 'cmyk': {
-				const [c, m, y, k] = parseComponents(value, 5, appServices);
+				const [c, m, y, k] = parseComponents(value, 5, services);
 
 				return {
 					value: {
-						cyan: brand.asPercentile(c, validate),
-						magenta: brand.asPercentile(m, validate),
-						yellow: brand.asPercentile(y, validate),
-						key: brand.asPercentile(k, validate)
+						cyan: utils.brand.asPercentile(c, utils),
+						magenta: utils.brand.asPercentile(m, utils),
+						yellow: utils.brand.asPercentile(y, utils),
+						key: utils.brand.asPercentile(k, utils)
 					},
 					format: 'cmyk'
 				};
@@ -143,41 +137,41 @@ const parseColor = (
 
 				return {
 					value: {
-						hex: brand.asHexSet(hexValue, validate)
+						hex: utils.brand.asHexSet(hexValue, utils)
 					},
 					format: 'hex'
 				};
 			case 'hsl': {
-				const [h, s, l] = parseComponents(value, 4, appServices);
+				const [h, s, l] = parseComponents(value, 4, services);
 
 				return {
 					value: {
-						hue: brand.asRadial(h, validate),
-						saturation: brand.asPercentile(s, validate),
-						lightness: brand.asPercentile(l, validate)
+						hue: utils.brand.asRadial(h, utils),
+						saturation: utils.brand.asPercentile(s, utils),
+						lightness: utils.brand.asPercentile(l, utils)
 					},
 					format: 'hsl'
 				};
 			}
 			case 'hsv': {
-				const [h, s, v] = parseComponents(value, 4, appServices);
+				const [h, s, v] = parseComponents(value, 4, services);
 
 				return {
 					value: {
-						hue: brand.asRadial(h, validate),
-						saturation: brand.asPercentile(s, validate),
-						value: brand.asPercentile(v, validate)
+						hue: utils.brand.asRadial(h, utils),
+						saturation: utils.brand.asPercentile(s, utils),
+						value: utils.brand.asPercentile(v, utils)
 					},
 					format: 'hsv'
 				};
 			}
 			case 'lab': {
-				const [l, a, b] = parseComponents(value, 4, appServices);
+				const [l, a, b] = parseComponents(value, 4, services);
 				return {
 					value: {
-						l: brand.asLAB_L(l, validate),
-						a: brand.asLAB_A(a, validate),
-						b: brand.asLAB_B(b, validate)
+						l: utils.brand.asLAB_L(l, utils),
+						a: utils.brand.asLAB_A(a, utils),
+						b: utils.brand.asLAB_B(b, utils)
 					},
 					format: 'lab'
 				};
@@ -192,9 +186,9 @@ const parseColor = (
 
 				return {
 					value: {
-						red: brand.asByteRange(r, validate),
-						green: brand.asByteRange(g, validate),
-						blue: brand.asByteRange(b, validate)
+						red: utils.brand.asByteRange(r, utils),
+						green: utils.brand.asByteRange(g, utils),
+						blue: utils.brand.asByteRange(b, utils)
 					},
 					format: 'rgb'
 				};
@@ -224,9 +218,9 @@ const parseColor = (
 function parseComponents(
 	value: string,
 	count: number,
-	appServices: AppServicesInterface
+	services: ServicesInterface
 ): number[] {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	try {
 		const components = value
@@ -259,11 +253,10 @@ function parseComponents(
 
 function stripHashFromHex(
 	hex: Hex,
-	appServices: AppServicesInterface,
-	brand: BrandingUtilsInterface,
-	validate: ValidationUtilsInterface
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): Hex {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	try {
 		const hexString = `${hex.value.hex}`;
@@ -271,7 +264,7 @@ function stripHashFromHex(
 		return hex.value.hex.startsWith('#')
 			? {
 					value: {
-						hex: brand.asHexSet(hexString.slice(1), validate)
+						hex: utils.brand.asHexSet(hexString.slice(1), utils)
 					},
 					format: 'hex' as 'hex'
 				}

@@ -1,14 +1,14 @@
 // File: dom/events/initialize/paletteContainer.js
 
-import { CoreUtilsInterface } from '../../../types/index.js';
+import { UtilitiesInterface } from '../../../types/index.js';
 import { StateManager } from '../../../state/StateManager.js';
 import { domData } from '../../../data/dom.js';
 
 export function initializeColumnPositions(
-	coreUtils: CoreUtilsInterface,
-	stateManager: StateManager
+	stateManager: StateManager,
+	utils: UtilitiesInterface
 ): void {
-	const paletteColumns = coreUtils.getAllElements(
+	const paletteColumns = utils.core.getAllElements(
 		domData.classes.paletteColumn
 	);
 

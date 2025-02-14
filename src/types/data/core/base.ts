@@ -67,14 +67,6 @@ export interface ConfigDataInterface {
 			hsl: RegExp;
 			rgb: RegExp;
 		};
-		file: {
-			palette: {
-				css: {
-					color: RegExp;
-					metadata: RegExp;
-				};
-			};
-		};
 		userInput: {
 			hex: RegExp;
 			hsl: RegExp;

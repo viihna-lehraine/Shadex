@@ -4,17 +4,17 @@ import { ConstsDataInterface } from '../types/index.js';
 
 const adjustments: ConstsDataInterface['adjustments'] = {
 	slaValue: 10
-};
+} as const;
 
 const appLimits: ConstsDataInterface['appLimits'] = {
 	history: 100,
 	paletteHistory: 20
-};
+} as const;
 
 const debounce: ConstsDataInterface['debounce'] = {
 	btn: 300,
 	input: 200
-};
+} as const;
 
 const colorLimits: ConstsDataInterface['colorLimits'] = {
 	xyz: {
@@ -29,7 +29,7 @@ const colorLimits: ConstsDataInterface['colorLimits'] = {
 			z: 0
 		}
 	}
-};
+} as const;
 
 const paletteRanges: ConstsDataInterface['paletteRanges'] = {
 	shift: {
@@ -69,19 +69,19 @@ const probabilities: ConstsDataInterface['probabilities'] = {
 		// rare to see shifts beyond 80°
 		// feels bolder but still maintains balance.
 	}
-};
+} as const;
 
 const thresholds: ConstsDataInterface['thresholds'] = {
 	dark: 25,
 	gray: 20,
 	light: 75
-};
+} as const;
 
 const timeouts: ConstsDataInterface['timeouts'] = {
 	copyButtonText: 1000,
 	toast: 3000,
 	tooltip: 1000
-};
+} as const;
 
 export const constsData: ConstsDataInterface = {
 	adjustments,

@@ -1,15 +1,13 @@
 // File: types/functions.js
 
 import {
-	AppServicesInterface,
-	CoreUtilsInterface,
-	DOMUtilsInterface,
 	GenerateHuesArgs,
 	GeneratePaletteArgs,
+	HelpersInterface,
 	Palette,
 	SelectedPaletteOptions,
-	TypeGuardUtilsInterface,
-	ValidationUtilsInterface
+	ServicesInterface,
+	UtilitiesInterface
 } from './index.js';
 import { StateManager } from '../state/StateManager.js';
 
@@ -21,17 +19,50 @@ export interface NoArgVoidFn {
 
 // ******** SECTION 1: FUNCTION INTERFACES ********
 
+export interface AttachColorInputUpdateListenerFn {
+	(
+		colorDisplayID: string,
+		colorInput: HTMLInputElement,
+		column: HTMLElement,
+		columnID: string,
+		helpers: HelpersInterface,
+		services: ServicesInterface,
+		stateManager: StateManager,
+		updatePaletteItemColor: UpdatePaletteItemColorFn,
+		utils: UtilitiesInterface
+	): void;
+}
+
+export interface AttachLockBtnLockingListenerFn {
+	(
+		lockBtnID: string,
+		services: ServicesInterface,
+		utils: UtilitiesInterface
+	): void;
+}
+
 export interface AttachPaletteListenersFn {
 	(
-		appServices: AppServicesInterface,
+		attachColorInputUpdateListener: AttachColorInputUpdateListenerFn,
+		attachLockBtnLockingListener: AttachLockBtnLockingListenerFn,
+		attachResizeHandleListener: AttachResizeHandleListenerFn,
 		attachTooltipListener: AttachToolTipListenerFn,
-		coreUtils: CoreUtilsInterface,
 		createTooltipElement: CreateTooltipElementFn,
-		domUtils: DOMUtilsInterface,
+		helpers: HelpersInterface,
+		services: ServicesInterface,
 		stateManager: StateManager,
-		typeGuards: TypeGuardUtilsInterface,
 		updatePaletteItemColor: UpdatePaletteItemColorFn,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
+	): void;
+}
+
+export interface AttachResizeHandleListenerFn {
+	(
+		column: HTMLElement,
+		resizeHandleID: string,
+		services: ServicesInterface,
+		stateManager: StateManager,
+		utils: UtilitiesInterface
 	): void;
 }
 
@@ -39,22 +70,24 @@ export interface AttachToolTipListenerFn {
 	(
 		id: string,
 		tooltipText: string,
-		coreUtils: CoreUtilsInterface,
-		createTooltipElement: CreateTooltipElementFn
+		createTooltipElement: CreateTooltipElementFn,
+		utils: UtilitiesInterface
 	): void;
 }
 
 export interface CreatePaletteObserverFn {
 	(
-		appServices: AppServicesInterface,
+		attachColorInputUpdateListener: AttachColorInputUpdateListenerFn,
+		attachLockBtnLockingListener: AttachLockBtnLockingListenerFn,
+		attachPaletteListeners: AttachPaletteListenersFn,
+		attachResizeHandleListener: AttachResizeHandleListenerFn,
 		attachTooltipListener: AttachToolTipListenerFn,
-		coreUtils: CoreUtilsInterface,
 		createTooltipElement: CreateTooltipElementFn,
-		domUtils: DOMUtilsInterface,
+		helpers: HelpersInterface,
+		services: ServicesInterface,
 		stateManager: StateManager,
-		typeGuards: TypeGuardUtilsInterface,
 		updatePaletteItemColor: UpdatePaletteItemColorFn,
-		validate: ValidationUtilsInterface
+		utilities: UtilitiesInterface
 	): MutationObserver;
 }
 
@@ -71,21 +104,35 @@ export interface GeneratePaletteFn {
 }
 
 export interface InitializeColumnPositionsFn {
-	(coreUtils: CoreUtilsInterface, stateManager: StateManager): void;
+	(stateManager: StateManager, utils: UtilitiesInterface): void;
 }
 
 export interface PullParamsFromUIFn {
 	(
-		appServices: AppServicesInterface,
-		typeGuards: TypeGuardUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): SelectedPaletteOptions;
 }
 
 export interface UpdatePaletteItemColorFn {
-	(columnID: number, newColor: string, stateManager: StateManager): void;
+	(
+		numericColumnID: number,
+		newColor: string,
+		helpers: HelpersInterface,
+		services: ServicesInterface,
+		utils: UtilitiesInterface
+	): void;
 }
 
 // ******** SECTION 2: FUNCTION GROUPS ********
+
+export interface EventListenerAttachmentFunctions {
+	attachColorInputUpdateListener: AttachColorInputUpdateListenerFn;
+	attachLockBtnLockingListener: AttachLockBtnLockingListenerFn;
+	attachPaletteListeners: AttachPaletteListenersFn;
+	attachResizeHandleListener: AttachResizeHandleListenerFn;
+	attachTooltipListener: AttachToolTipListenerFn;
+}
 
 export interface HueGenFunctions {
 	generateAnalogousHues: GenerateHuesFn;

@@ -1,363 +1,147 @@
 // File: utils/palette.js
 
 import {
-	AppServicesInterface,
-	AppUtilsInterface,
-	BrandingUtilsInterface,
+	AllColors,
 	CMYK,
-	CMYK_StringProps,
-	ColorDataExtended,
-	ColorUtilHelpersInterface,
-	ColorUtilsInterface,
-	CoreUtilsInterface,
-	DOMUtilsInterface,
-	FormattingUtilsInterface,
+	HelpersInterface,
 	Hex,
-	Hex_StringProps,
 	HSL,
-	HSL_StringProps,
 	HSV,
-	HSV_StringProps,
 	LAB,
-	LAB_StringProps,
 	Palette,
 	PaletteArgs,
 	PaletteItem,
 	PaletteUtilsInterface,
 	RGB,
-	RGB_StringProps,
-	SL,
-	SV,
-	SanitationUtilsInterface,
-	TypeGuardUtilsInterface,
-	ValidationUtilsInterface,
-	XYZ,
-	XYZ_StringProps
+	ServicesInterface,
+	UtilitiesInterface,
+	XYZ
 } from '../types/index.js';
 
 function createPaletteItem(
 	color: HSL,
 	itemID: number,
-	appServices: AppServicesInterface,
-	brand: BrandingUtilsInterface,
-	colorHelpers: ColorUtilHelpersInterface,
-	colorUtils: ColorUtilsInterface,
-	coreUtils: CoreUtilsInterface,
-	format: FormattingUtilsInterface,
-	sanitize: SanitationUtilsInterface,
-	typeGuards: TypeGuardUtilsInterface,
-	validate: ValidationUtilsInterface
+	helpers: HelpersInterface,
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): PaletteItem {
-	const clonedColor = coreUtils.clone(color) as HSL;
+	const clonedColor = utils.core.clone(color) as HSL;
 
 	return {
 		itemID,
 		colors: {
-			main: {
-				cmyk: (
-					colorUtils.convertHSL(
-						clonedColor,
-						'cmyk',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					) as CMYK
-				).value,
-				hex: (
-					colorUtils.convertHSL(
-						clonedColor,
-						'hex',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					) as Hex
-				).value,
-				hsl: clonedColor.value,
-				hsv: (
-					colorUtils.convertHSL(
-						clonedColor,
-						'hsv',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					) as HSV
-				).value,
-				lab: (
-					colorUtils.convertHSL(
-						clonedColor,
-						'lab',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					) as LAB
-				).value,
-				rgb: (
-					colorUtils.convertHSL(
-						clonedColor,
-						'rgb',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					) as RGB
-				).value,
-				xyz: (
-					colorUtils.convertHSL(
-						clonedColor,
-						'xyz',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					) as XYZ
-				).value
-			},
-			stringProps: {
-				cmyk: (
-					colorUtils.convertColorToColorString(
-						colorUtils.convertHSL(
-							clonedColor,
-							'cmyk',
-							appServices,
-							brand,
-							colorHelpers,
-							colorUtils,
-							coreUtils,
-							format,
-							sanitize,
-							validate
-						),
-						appServices,
-						coreUtils,
-						format,
-						typeGuards
-					) as CMYK_StringProps
-				).value,
-				hex: (
-					colorUtils.convertColorToColorString(
-						colorUtils.convertHSL(
-							clonedColor,
-							'hex',
-							appServices,
-							brand,
-							colorHelpers,
-							colorUtils,
-							coreUtils,
-							format,
-							sanitize,
-							validate
-						),
-						appServices,
-						coreUtils,
-						format,
-						typeGuards
-					) as Hex_StringProps
-				).value,
-				hsl: (
-					colorUtils.convertColorToColorString(
-						clonedColor,
-						appServices,
-						coreUtils,
-						format,
-						typeGuards
-					) as HSL_StringProps
-				).value,
-				hsv: (
-					colorUtils.convertColorToColorString(
-						colorUtils.convertHSL(
-							clonedColor,
-							'hsv',
-							appServices,
-							brand,
-							colorHelpers,
-							colorUtils,
-							coreUtils,
-							format,
-							sanitize,
-							validate
-						),
-						appServices,
-						coreUtils,
-						format,
-						typeGuards
-					) as HSV_StringProps
-				).value,
-				lab: (
-					colorUtils.convertColorToColorString(
-						colorUtils.convertHSL(
-							clonedColor,
-							'lab',
-							appServices,
-							brand,
-							colorHelpers,
-							colorUtils,
-							coreUtils,
-							format,
-							sanitize,
-							validate
-						),
-						appServices,
-						coreUtils,
-						format,
-						typeGuards
-					) as LAB_StringProps
-				).value,
-				rgb: (
-					colorUtils.convertColorToColorString(
-						colorUtils.convertHSL(
-							clonedColor,
-							'rgb',
-							appServices,
-							brand,
-							colorHelpers,
-							colorUtils,
-							coreUtils,
-							format,
-							sanitize,
-							validate
-						),
-						appServices,
-						coreUtils,
-						format,
-						typeGuards
-					) as RGB_StringProps
-				).value,
-				xyz: (
-					colorUtils.convertColorToColorString(
-						colorUtils.convertHSL(
-							clonedColor,
-							'xyz',
-							appServices,
-							brand,
-							colorHelpers,
-							colorUtils,
-							coreUtils,
-							format,
-							sanitize,
-							validate
-						),
-						appServices,
-						coreUtils,
-						format,
-						typeGuards
-					) as XYZ_StringProps
-				).value
-			},
-			css: {
-				cmyk: colorUtils.convertColorToCSS(
-					colorUtils.convertHSL(
-						clonedColor,
-						'cmyk',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					)
-				),
-				hex: colorUtils.convertColorToCSS(
-					colorUtils.convertHSL(
-						clonedColor,
-						'hex',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					)
-				),
-				hsl: colorUtils.convertColorToCSS(clonedColor),
-				hsv: colorUtils.convertColorToCSS(
-					colorUtils.convertHSL(
-						clonedColor,
-						'hsv',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					)
-				),
-				lab: colorUtils.convertColorToCSS(
-					colorUtils.convertHSL(
-						clonedColor,
-						'lab',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					)
-				),
-				rgb: colorUtils.convertColorToCSS(
-					colorUtils.convertHSL(
-						clonedColor,
-						'rgb',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					)
-				),
-				xyz: colorUtils.convertColorToCSS(
-					colorUtils.convertHSL(
-						clonedColor,
-						'xyz',
-						appServices,
-						brand,
-						colorHelpers,
-						colorUtils,
-						coreUtils,
-						format,
-						sanitize,
-						validate
-					)
+			cmyk: (
+				utils.color.convertHSL(
+					clonedColor,
+					'cmyk',
+					helpers,
+					services,
+					utils
+				) as CMYK
+			).value,
+			hex: (
+				utils.color.convertHSL(
+					clonedColor,
+					'hex',
+					helpers,
+					services,
+					utils
+				) as Hex
+			).value,
+			hsl: clonedColor.value,
+			hsv: (
+				utils.color.convertHSL(
+					clonedColor,
+					'hsv',
+					helpers,
+					services,
+					utils
+				) as HSV
+			).value,
+			lab: (
+				utils.color.convertHSL(
+					clonedColor,
+					'lab',
+					helpers,
+					services,
+					utils
+				) as LAB
+			).value,
+			rgb: (
+				utils.color.convertHSL(
+					clonedColor,
+					'rgb',
+					helpers,
+					services,
+					utils
+				) as RGB
+			).value,
+			xyz: (
+				utils.color.convertHSL(
+					clonedColor,
+					'xyz',
+					helpers,
+					services,
+					utils
+				) as XYZ
+			).value
+		},
+		css: {
+			cmyk: utils.color.convertColorToCSS(
+				utils.color.convertHSL(
+					clonedColor,
+					'cmyk',
+					helpers,
+					services,
+					utils
 				)
-			}
+			),
+			hex: utils.color.convertColorToCSS(
+				utils.color.convertHSL(
+					clonedColor,
+					'hex',
+					helpers,
+					services,
+					utils
+				)
+			),
+			hsl: utils.color.convertColorToCSS(clonedColor),
+			hsv: utils.color.convertColorToCSS(
+				utils.color.convertHSL(
+					clonedColor,
+					'hsv',
+					helpers,
+					services,
+					utils
+				)
+			),
+			lab: utils.color.convertColorToCSS(
+				utils.color.convertHSL(
+					clonedColor,
+					'lab',
+					helpers,
+					services,
+					utils
+				)
+			),
+			rgb: utils.color.convertColorToCSS(
+				utils.color.convertHSL(
+					clonedColor,
+					'rgb',
+					helpers,
+					services,
+					utils
+				)
+			),
+			xyz: utils.color.convertColorToCSS(
+				utils.color.convertHSL(
+					clonedColor,
+					'xyz',
+					helpers,
+					services,
+					utils
+				)
+			)
 		}
 	};
 }
@@ -365,16 +149,9 @@ function createPaletteItem(
 function createPaletteItemArray(
 	baseColor: HSL,
 	hues: number[],
-	appServices: AppServicesInterface,
-	brand: BrandingUtilsInterface,
-	colorHelpers: ColorUtilHelpersInterface,
-	colorUtils: ColorUtilsInterface,
-	coreUtils: CoreUtilsInterface,
-	domUtils: DOMUtilsInterface,
-	format: FormattingUtilsInterface,
-	sanitize: SanitationUtilsInterface,
-	typeGuards: TypeGuardUtilsInterface,
-	validate: ValidationUtilsInterface
+	helpers: HelpersInterface,
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): PaletteItem[] {
 	const paletteItems: PaletteItem[] = [];
 
@@ -383,15 +160,9 @@ function createPaletteItemArray(
 		createPaletteItem(
 			baseColor,
 			1, // ID 1 for base color
-			appServices,
-			brand,
-			colorHelpers,
-			colorUtils,
-			coreUtils,
-			format,
-			sanitize,
-			typeGuards,
-			validate
+			helpers,
+			services,
+			utils
 		)
 	);
 
@@ -399,9 +170,12 @@ function createPaletteItemArray(
 	for (const [i, hue] of hues.entries()) {
 		const newColor: HSL = {
 			value: {
-				hue: brand.asRadial(hue, validate),
-				saturation: brand.asPercentile(Math.random() * 100, validate),
-				lightness: brand.asPercentile(Math.random() * 100, validate)
+				hue: utils.brand.asRadial(hue, utils),
+				saturation: utils.brand.asPercentile(
+					Math.random() * 100,
+					utils
+				),
+				lightness: utils.brand.asPercentile(Math.random() * 100, utils)
 			},
 			format: 'hsl'
 		};
@@ -409,19 +183,13 @@ function createPaletteItemArray(
 		const newPaletteItem = createPaletteItem(
 			newColor,
 			i + 2, // IDs start at 2 for generated colors
-			appServices,
-			brand,
-			colorHelpers,
-			colorUtils,
-			coreUtils,
-			format,
-			sanitize,
-			typeGuards,
-			validate
+			helpers,
+			services,
+			utils
 		);
 
 		paletteItems.push(newPaletteItem);
-		domUtils.updateColorBox(newColor, String(i + 2), colorUtils);
+		utils.dom.updateColorBox(newColor, String(i + 2), utils);
 	}
 
 	return paletteItems;
@@ -429,14 +197,14 @@ function createPaletteItemArray(
 
 function createPaletteObject(
 	args: PaletteArgs,
-	appUtils: AppUtilsInterface
+	utils: UtilitiesInterface
 ): Palette {
 	return {
 		id: `${args.type}_${args.paletteID}`,
 		items: args.items,
 		metadata: {
 			name: '',
-			timestamp: appUtils.getFormattedTimestamp(),
+			timestamp: utils.app.getFormattedTimestamp(),
 			swatches: args.swatches,
 			type: args.type,
 			flags: {
@@ -450,139 +218,42 @@ function createPaletteObject(
 
 function generateAllColorValues(
 	color: HSL,
-	appServices: AppServicesInterface,
-	brand: BrandingUtilsInterface,
-	colorHelpers: ColorUtilHelpersInterface,
-	colorUtils: ColorUtilsInterface,
-	coreUtils: CoreUtilsInterface,
-	format: FormattingUtilsInterface,
-	sanitize: SanitationUtilsInterface,
-	validate: ValidationUtilsInterface
-): Partial<ColorDataExtended> {
-	const log = console.log;
-	const result: Partial<ColorDataExtended> = {};
+	helpers: HelpersInterface,
+	services: ServicesInterface,
+	utils: UtilitiesInterface
+): AllColors {
+	const log = services.app.log;
+	const clonedColor = utils.core.clone(color);
 
-	try {
-		const clonedColor = coreUtils.clone(color);
-
-		if (!validate.colorValue(clonedColor, coreUtils)) {
-			log(
-				'error',
-				`Invalid color: ${JSON.stringify(clonedColor)}`,
-				'paletteUtils.generateAllColorValues()'
-			);
-
-			return {};
-		}
-
-		result.cmyk = colorUtils.convertHSL(
-			clonedColor,
-			'cmyk',
-			appServices,
-			brand,
-			colorHelpers,
-			colorUtils,
-			coreUtils,
-			format,
-			sanitize,
-			validate
-		) as CMYK;
-		result.hex = colorUtils.convertHSL(
-			clonedColor,
-			'hex',
-			appServices,
-			brand,
-			colorHelpers,
-			colorUtils,
-			coreUtils,
-			format,
-			sanitize,
-			validate
-		) as Hex;
-		result.hsl = clonedColor;
-		result.hsv = colorUtils.convertHSL(
-			clonedColor,
-			'hsv',
-			appServices,
-			brand,
-			colorHelpers,
-			colorUtils,
-			coreUtils,
-			format,
-			sanitize,
-			validate
-		) as HSV;
-		result.lab = colorUtils.convertHSL(
-			clonedColor,
-			'lab',
-			appServices,
-			brand,
-			colorHelpers,
-			colorUtils,
-			coreUtils,
-			format,
-			sanitize,
-			validate
-		) as LAB;
-		result.rgb = colorUtils.convertHSL(
-			clonedColor,
-			'rgb',
-			appServices,
-			brand,
-			colorHelpers,
-			colorUtils,
-			coreUtils,
-			format,
-			sanitize,
-			validate
-		) as RGB;
-		result.sl = colorUtils.convertHSL(
-			clonedColor,
-			'sl',
-			appServices,
-			brand,
-			colorHelpers,
-			colorUtils,
-			coreUtils,
-			format,
-			sanitize,
-			validate
-		) as SL;
-		result.sv = colorUtils.convertHSL(
-			clonedColor,
-			'sv',
-			appServices,
-			brand,
-			colorHelpers,
-			colorUtils,
-			coreUtils,
-			format,
-			sanitize,
-			validate
-		) as SV;
-		result.xyz = colorUtils.convertHSL(
-			clonedColor,
-			'xyz',
-			appServices,
-			brand,
-			colorHelpers,
-			colorUtils,
-			coreUtils,
-			format,
-			sanitize,
-			validate
-		) as XYZ;
-
-		return result;
-	} catch (error) {
+	if (!utils.validate.colorValue(clonedColor, utils)) {
 		log(
 			'error',
-			`Error generating all color values: ${error}`,
+			`Invalid color: ${JSON.stringify(clonedColor)}`,
 			'paletteUtils.generateAllColorValues()'
 		);
-
-		return {};
+		throw new Error('Invalid HSL color provided');
 	}
+
+	const convert = <T extends keyof AllColors>(target: T): AllColors[T] =>
+		utils.color.convertHSL(
+			clonedColor,
+			target,
+			helpers,
+			services,
+			utils
+		) as AllColors[T];
+
+	return {
+		cmyk: convert('cmyk'),
+		hex: convert('hex'),
+		hsl: clonedColor,
+		hsv: convert('hsv'),
+		lab: convert('lab'),
+		rgb: convert('rgb'),
+		sl: convert('sl'),
+		sv: convert('sv'),
+		xyz: convert('xyz')
+	};
 }
 
 export const paletteUtils: PaletteUtilsInterface = {

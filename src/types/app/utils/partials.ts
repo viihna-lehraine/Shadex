@@ -1,19 +1,18 @@
 // File: app/utils/partials.js
 
 import {
-	AppServicesInterface,
+	AllColors,
 	ByteRange,
 	CMYK,
 	CMYK_StringProps,
 	Color,
 	ColorDataAssertion,
-	ColorDataExtended,
 	ColorFormat,
 	ColorSpace,
 	ColorSpaceExtended,
 	Color_StringProps,
-	ColorUtilHelpersInterface,
 	DataSetsInterface,
+	HelpersInterface,
 	Hex,
 	HexSet,
 	Hex_StringProps,
@@ -36,6 +35,7 @@ import {
 	RangeKeyMap,
 	RGB,
 	RGB_StringProps,
+	ServicesInterface,
 	SL,
 	SL_StringProps,
 	SV,
@@ -55,44 +55,32 @@ import {
 	XYZ_StringProps,
 	XYZ_X,
 	XYZ_Y,
-	XYZ_Z
+	XYZ_Z,
+	UtilitiesInterface
 } from '../../../types/index.js';
 
 export interface AdjustmentUtilsInterface {
 	adjustSL(
 		color: HSL,
-		appServices: AppServicesInterface,
-		brandingUtils: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSL;
-	applyGammaCorrection(
-		value: number,
-		appServices: AppServicesInterface
-	): number;
+	applyGammaCorrection(value: number, services: ServicesInterface): number;
 	clampRGB(
 		rgb: RGB,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): RGB;
 }
 
 export interface AppUtilsInterface {
 	generateRandomHSL(
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		sanitize: SanitationUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSL;
 	generateRandomSL(
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		sanitize: SanitationUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): SL;
 	getFormattedTimestamp(): string;
 }
@@ -101,136 +89,103 @@ export interface BrandingUtilsInterface {
 	asBranded<T extends keyof RangeKeyMap>(
 		value: number,
 		rangeKey: T,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): RangeKeyMap[T];
-	asByteRange(value: number, validate: ValidationUtilsInterface): ByteRange;
-	asCMYK(color: UnbrandedCMYK, validate: ValidationUtilsInterface): CMYK;
-	asHex(
-		color: UnbrandedHex,
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
-	): Hex;
-	asHexSet(value: string, validate: ValidationUtilsInterface): HexSet;
-	asHSL(color: UnbrandedHSL, validate: ValidationUtilsInterface): HSL;
-	asHSV(color: UnbrandedHSV, validate: ValidationUtilsInterface): HSV;
-	asLAB(color: UnbrandedLAB, validate: ValidationUtilsInterface): LAB;
-	asLAB_A(value: number, validate: ValidationUtilsInterface): LAB_A;
-	asLAB_B(value: number, validate: ValidationUtilsInterface): LAB_B;
-	asLAB_L(value: number, validate: ValidationUtilsInterface): LAB_L;
-	asPercentile(value: number, validate: ValidationUtilsInterface): Percentile;
-	asRadial(value: number, validate: ValidationUtilsInterface): Radial;
-	asRGB(color: UnbrandedRGB, validate: ValidationUtilsInterface): RGB;
-	asSL(color: UnbrandedSL, validate: ValidationUtilsInterface): SL;
-	asSV(color: UnbrandedSV, validate: ValidationUtilsInterface): SV;
-	asXYZ(color: UnbrandedXYZ, validate: ValidationUtilsInterface): XYZ;
-	asXYZ_X(value: number, validate: ValidationUtilsInterface): XYZ_X;
-	asXYZ_Y(value: number, validate: ValidationUtilsInterface): XYZ_Y;
-	asXYZ_Z(value: number, validate: ValidationUtilsInterface): XYZ_Z;
-	brandColor(
-		color: UnbrandedColor,
-		validate: ValidationUtilsInterface
-	): Color;
-	brandPalette(
-		data: UnbrandedPalette,
-		validate: ValidationUtilsInterface
-	): Palette;
+	asByteRange(value: number, utils: UtilitiesInterface): ByteRange;
+	asCMYK(color: UnbrandedCMYK, utils: UtilitiesInterface): CMYK;
+	asHex(color: UnbrandedHex, utils: UtilitiesInterface): Hex;
+	asHexSet(value: string, utils: UtilitiesInterface): HexSet;
+	asHSL(color: UnbrandedHSL, utils: UtilitiesInterface): HSL;
+	asHSV(color: UnbrandedHSV, utils: UtilitiesInterface): HSV;
+	asLAB(color: UnbrandedLAB, utils: UtilitiesInterface): LAB;
+	asLAB_A(value: number, utils: UtilitiesInterface): LAB_A;
+	asLAB_B(value: number, utils: UtilitiesInterface): LAB_B;
+	asLAB_L(value: number, utils: UtilitiesInterface): LAB_L;
+	asPercentile(value: number, utils: UtilitiesInterface): Percentile;
+	asRadial(value: number, utils: UtilitiesInterface): Radial;
+	asRGB(color: UnbrandedRGB, utils: UtilitiesInterface): RGB;
+	asSL(color: UnbrandedSL, utils: UtilitiesInterface): SL;
+	asSV(color: UnbrandedSV, utils: UtilitiesInterface): SV;
+	asXYZ(color: UnbrandedXYZ, utils: UtilitiesInterface): XYZ;
+	asXYZ_X(value: number, utils: UtilitiesInterface): XYZ_X;
+	asXYZ_Y(value: number, utils: UtilitiesInterface): XYZ_Y;
+	asXYZ_Z(value: number, utils: UtilitiesInterface): XYZ_Z;
+	brandColor(color: UnbrandedColor, utils: UtilitiesInterface): Color;
+	brandPalette(data: UnbrandedPalette, utils: UtilitiesInterface): Palette;
 }
 
 export interface ColorUtilsInterface {
 	convertCMYKStringToValue(
 		cmyk: CMYK_StringProps['value'],
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): CMYK['value'];
 	convertCMYKValueToString(cmyk: CMYK['value']): CMYK_StringProps['value'];
 	convertColorStringToColor(
 		colorString: Color_StringProps,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): Color;
 	convertColorToColorString(
 		color: Color,
-		appServices: AppServicesInterface,
-		coreUtils: CoreUtilsInterface,
-		formattingUtils: FormattingUtilsInterface,
-		typeGuards: TypeGuardUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): Color_StringProps;
 	convertColorToCSS(color: Color): string;
 	convertCSSToColor(
 		color: string,
-		format: FormattingUtilsInterface
+		utils: UtilitiesInterface
 	): Exclude<Color, SL | SV> | null;
 	convertHexStringToValue(
 		hex: Hex_StringProps['value'],
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): Hex['value'];
 	convertHexValueToString(hex: Hex['value']): Hex_StringProps['value'];
 	convertHSL(
 		color: HSL,
 		colorSpace: ColorSpaceExtended,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorHelpers: ColorUtilHelpersInterface,
-		colorUtils: ColorUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		format: FormattingUtilsInterface,
-		sanitize: SanitationUtilsInterface,
-		validate: ValidationUtilsInterface
+		helpers: HelpersInterface,
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): Color;
 	convertHSLStringToValue(
 		hsl: HSL_StringProps['value'],
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): HSL['value'];
 	convertHSLValueToString(hsl: HSL['value']): HSL_StringProps['value'];
 	convertHSVStringToValue(
 		hsv: HSV_StringProps['value'],
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): HSV['value'];
 	convertHSVValueToString(hsv: HSV['value']): HSV_StringProps['value'];
 	convertLABStringToValue(
 		lab: LAB_StringProps['value'],
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): LAB['value'];
 	convertLABValueToString(lab: LAB['value']): LAB_StringProps['value'];
 	convertRGBStringToValue(
 		rgb: RGB_StringProps['value'],
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): RGB['value'];
 	convertRGBValueToString(rgb: RGB['value']): RGB_StringProps['value'];
 	convertToHSL(
 		color: Exclude<Color, SL | SV>,
-		adjust: AdjustmentUtilsInterface,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorHelpers: ColorUtilHelpersInterface,
-		coreUtils: CoreUtilsInterface,
-		format: FormattingUtilsInterface,
-		validate: ValidationUtilsInterface
+		helpers: HelpersInterface,
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSL;
 	convertXYZStringToValue(
 		xyz: XYZ_StringProps['value'],
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): XYZ['value'];
 	convertXYZValueToString(xyz: XYZ['value']): XYZ_StringProps['value'];
-	getColorString(
-		color: Color,
-		log: AppServicesInterface['log']
-	): string | null;
+	getColorString(color: Color, services: ServicesInterface): string | null;
 	getConversionFn<
 		From extends keyof ColorDataAssertion,
 		To extends keyof ColorDataAssertion
 	>(
 		from: From,
 		to: To,
-		conversionUtils: ColorUtilHelpersInterface,
-		log: AppServicesInterface['log']
+		helpers: HelpersInterface,
+		services: ServicesInterface
 	):
 		| ((value: ColorDataAssertion[From]) => ColorDataAssertion[To])
 		| undefined;
@@ -238,29 +193,22 @@ export interface ColorUtilsInterface {
 		p: number,
 		q: number,
 		t: number,
-		coreUtils: CoreUtilsInterface,
-		log: AppServicesInterface['log']
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): number;
 	narrowToColor(
 		color: Color | Color_StringProps,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		typeGuards: TypeGuardUtilsInterface,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): Color | null;
 	toColorValueRange<T extends keyof RangeKeyMap>(
 		value: string | number,
 		rangeKey: T,
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): RangeKeyMap[T];
 	validateAndConvertColor(
 		color: Color | Color_StringProps | null,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		typeGuards: TypeGuardUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): Color | null;
 }
 
@@ -279,82 +227,60 @@ export interface DOMUtilsInterface {
 	addConversionListener: (
 		id: string,
 		colorSpace: string,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorUtils: ColorUtilsInterface,
-		conversionUtils: ColorUtilHelpersInterface,
-		coreUtils: CoreUtilsInterface,
-		typeGuards: TypeGuardUtilsInterface,
-		validate: ValidationUtilsInterface
+		helpers: HelpersInterface,
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	) => void;
 	addEventListener<K extends keyof HTMLElementEventMap>(
 		id: string,
 		eventType: K,
 		callback: (ev: HTMLElementEventMap[K]) => void,
-		appServices: AppServicesInterface
+		services: ServicesInterface
 	): void;
 	downloadFile(data: string, filename: string, type: string): void;
 	enforceSwatchRules(
 		minSwatches: number,
 		maxSwatches: number,
-		appServices: AppServicesInterface
+		services: ServicesInterface
 	): void;
 	getCheckboxState(id: string): boolean | void;
 	readFile(file: File): Promise<string>;
 	switchColorSpaceInDOM(
 		targetFormat: ColorSpace,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorUtils: ColorUtilsInterface,
-		conversionUtils: ColorUtilHelpersInterface,
-		coreUtils: CoreUtilsInterface,
-		typeGuards: TypeGuardUtilsInterface,
-		validate: ValidationUtilsInterface
+		helpers: HelpersInterface,
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): void;
-	updateColorBox(
-		color: HSL,
-		boxId: string,
-		colorUtils: ColorUtilsInterface
-	): void;
+	updateColorBox(color: HSL, boxId: string, utils: UtilitiesInterface): void;
 	updateHistory(history: Palette[]): void;
-	validateStaticElements(appServices: AppServicesInterface): void;
+	validateStaticElements(services: ServicesInterface): void;
 }
 
 export interface FormattingUtilsInterface {
-	addHashToHex(
-		hex: Hex,
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
-	): Hex;
-	componentToHex(
-		component: number,
-		appServices: AppServicesInterface
-	): string;
+	addHashToHex(hex: Hex, utils: UtilitiesInterface): Hex;
+	componentToHex(component: number, services: ServicesInterface): string;
 	convertShortHexToLong(hex: string): string;
 	formatPercentageValues<T extends Record<string, unknown>>(value: T): T;
 	hslAddFormat(
 		value: HSL['value'],
-		appServices: AppServicesInterface,
-		coreUtils: CoreUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): HSL;
 	parseColor(
 		colorSpace: ColorSpace,
 		value: string,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): Color | null;
 	parseComponents(
 		value: string,
 		count: number,
-		appServices: AppServicesInterface
+		services: ServicesInterface
 	): number[];
 	stripHashFromHex(
 		hex: Hex,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): Hex;
 	stripPercentFromValues<T extends Record<string, number | string>>(
 		value: T
@@ -365,70 +291,35 @@ export interface PaletteUtilsInterface {
 	createPaletteItem(
 		color: HSL,
 		itemID: number,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorHelpers: ColorUtilHelpersInterface,
-		colorUtils: ColorUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		format: FormattingUtilsInterface,
-		sanitize: SanitationUtilsInterface,
-		typeGuards: TypeGuardUtilsInterface,
-		validate: ValidationUtilsInterface
+		helpers: HelpersInterface,
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): PaletteItem;
 	createPaletteItemArray(
 		baseColor: HSL,
 		hues: number[],
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorHelpers: ColorUtilHelpersInterface,
-		colorUtils: ColorUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		domUtils: DOMUtilsInterface,
-		format: FormattingUtilsInterface,
-		sanitize: SanitationUtilsInterface,
-		typeGuards: TypeGuardUtilsInterface,
-		validate: ValidationUtilsInterface
+		helpers: HelpersInterface,
+		services: ServicesInterface,
+		utils: UtilitiesInterface
 	): PaletteItem[];
-	createPaletteObject(
-		args: PaletteArgs,
-		appUtils: AppUtilsInterface
-	): Palette;
+	createPaletteObject(args: PaletteArgs, utils: UtilitiesInterface): Palette;
 	generateAllColorValues(
 		color: HSL,
-		appServices: AppServicesInterface,
-		brand: BrandingUtilsInterface,
-		colorHelpers: ColorUtilHelpersInterface,
-		colorUtils: ColorUtilsInterface,
-		coreUtils: CoreUtilsInterface,
-		format: FormattingUtilsInterface,
-		sanitize: SanitationUtilsInterface,
-		validate: ValidationUtilsInterface
-	): Partial<ColorDataExtended>;
+		helpers: HelpersInterface,
+		services: ServicesInterface,
+		utils: UtilitiesInterface
+	): AllColors;
 }
 
 export interface SanitationUtilsInterface {
 	lab(
 		value: number,
 		output: 'l' | 'a' | 'b',
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
+		utils: UtilitiesInterface
 	): LAB_L | LAB_A | LAB_B;
-	percentile(
-		value: number,
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
-	): Percentile;
-	radial(
-		value: number,
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
-	): Radial;
-	rgb(
-		value: number,
-		colorUtils: ColorUtilsInterface,
-		brand: BrandingUtilsInterface,
-		validate: ValidationUtilsInterface
-	): ByteRange;
+	percentile(value: number, utils: UtilitiesInterface): Percentile;
+	radial(value: number, utils: UtilitiesInterface): Radial;
+	rgb(value: number, utils: UtilitiesInterface): ByteRange;
 }
 
 export interface TypeGuardUtilsInterface {
@@ -472,7 +363,7 @@ export interface TypeGuardUtilsInterface {
 }
 
 export interface ValidationUtilsInterface {
-	colorValue(color: Color | SL | SV, coreUtils: CoreUtilsInterface): boolean;
+	colorValue(color: Color | SL | SV, utils: UtilitiesInterface): boolean;
 	ensureHash(value: string): string;
 	hex(value: string, pattern: RegExp): boolean;
 	hexComponent(value: string): boolean;
