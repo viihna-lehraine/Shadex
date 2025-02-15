@@ -2,21 +2,21 @@
 
 import {
 	CMYK,
-	CMYK_StringProps,
+	CMYKStringObject,
 	Hex,
-	Hex_StringProps,
+	HexStringObject,
 	HSL,
-	HSL_StringProps,
+	HSLStringObject,
 	HSV,
-	HSV_StringProps,
+	HSVStringObject,
 	LAB,
-	LAB_StringProps,
+	LABStringObject,
 	RGB,
-	RGB_StringProps,
+	RGBStringObject,
 	SL,
-	SL_StringProps,
+	SLStringObject,
 	SV,
-	SV_StringProps,
+	SVStringObject,
 	UnbrandedCMYK,
 	UnbrandedHex,
 	UnbrandedHSL,
@@ -27,7 +27,7 @@ import {
 	UnbrandedSV,
 	UnbrandedXYZ,
 	XYZ,
-	XYZ_StringProps
+	XYZStringObject
 } from './main.js';
 
 export interface AllColors {
@@ -75,16 +75,16 @@ export type ColorSpace = 'cmyk' | 'hex' | 'hsl' | 'hsv' | 'lab' | 'rgb' | 'xyz';
 
 export type ColorSpaceExtended = ColorSpace | 'sl' | 'sv';
 
-export type Color_StringProps =
-	| CMYK_StringProps
-	| Hex_StringProps
-	| HSL_StringProps
-	| HSV_StringProps
-	| LAB_StringProps
-	| RGB_StringProps
-	| SL_StringProps
-	| SV_StringProps
-	| XYZ_StringProps;
+export type ColorStringObject =
+	| CMYKStringObject
+	| HexStringObject
+	| HSLStringObject
+	| HSVStringObject
+	| LABStringObject
+	| RGBStringObject
+	| SLStringObject
+	| SVStringObject
+	| XYZStringObject;
 
 export type UnbrandedColor =
 	| UnbrandedCMYK

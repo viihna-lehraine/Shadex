@@ -1,4 +1,4 @@
-// File: utils/branding.js
+// File: utils/brand.js
 
 import {
 	BrandingUtilsInterface,

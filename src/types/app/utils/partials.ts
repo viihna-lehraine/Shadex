@@ -4,27 +4,27 @@ import {
 	AllColors,
 	ByteRange,
 	CMYK,
-	CMYK_StringProps,
+	CMYKStringObject,
 	Color,
 	ColorDataAssertion,
 	ColorFormat,
 	ColorSpace,
 	ColorSpaceExtended,
-	Color_StringProps,
+	ColorStringObject,
 	DataSetsInterface,
 	HelpersInterface,
 	Hex,
 	HexSet,
-	Hex_StringProps,
+	HexStringObject,
 	HSL,
-	HSL_StringProps,
+	HSLStringObject,
 	HSV,
-	HSV_StringProps,
+	HSVStringObject,
 	LAB,
 	LAB_A,
 	LAB_B,
 	LAB_L,
-	LAB_StringProps,
+	LABStringObject,
 	NumericRangeKey,
 	Palette,
 	PaletteArgs,
@@ -34,12 +34,13 @@ import {
 	Radial,
 	RangeKeyMap,
 	RGB,
-	RGB_StringProps,
+	RGBStringObject,
+	SelectedPaletteOptions,
 	ServicesInterface,
 	SL,
-	SL_StringProps,
+	SLStringObject,
 	SV,
-	SV_StringProps,
+	SVStringObject,
 	UnbrandedCMYK,
 	UnbrandedColor,
 	UnbrandedHex,
@@ -52,7 +53,7 @@ import {
 	UnbrandedSV,
 	UnbrandedXYZ,
 	XYZ,
-	XYZ_StringProps,
+	XYZStringObject,
 	XYZ_X,
 	XYZ_Y,
 	XYZ_Z,
@@ -60,17 +61,13 @@ import {
 } from '../../../types/index.js';
 
 export interface AdjustmentUtilsInterface {
-	adjustSL(
-		color: HSL,
-		services: ServicesInterface,
-		utils: UtilitiesInterface
-	): HSL;
 	applyGammaCorrection(value: number, services: ServicesInterface): number;
 	clampRGB(
 		rgb: RGB,
 		services: ServicesInterface,
 		utils: UtilitiesInterface
 	): RGB;
+	sl(color: HSL, services: ServicesInterface, utils: UtilitiesInterface): HSL;
 }
 
 export interface AppUtilsInterface {
@@ -116,29 +113,29 @@ export interface BrandingUtilsInterface {
 
 export interface ColorUtilsInterface {
 	convertCMYKStringToValue(
-		cmyk: CMYK_StringProps['value'],
+		cmyk: CMYKStringObject['value'],
 		utils: UtilitiesInterface
 	): CMYK['value'];
-	convertCMYKValueToString(cmyk: CMYK['value']): CMYK_StringProps['value'];
+	convertCMYKValueToString(cmyk: CMYK['value']): CMYKStringObject['value'];
 	convertColorStringToColor(
-		colorString: Color_StringProps,
+		colorString: ColorStringObject,
 		utils: UtilitiesInterface
 	): Color;
 	convertColorToColorString(
 		color: Color,
 		services: ServicesInterface,
 		utils: UtilitiesInterface
-	): Color_StringProps;
+	): ColorStringObject;
 	convertColorToCSS(color: Color): string;
 	convertCSSToColor(
 		color: string,
 		utils: UtilitiesInterface
 	): Exclude<Color, SL | SV> | null;
 	convertHexStringToValue(
-		hex: Hex_StringProps['value'],
+		hex: HexStringObject['value'],
 		utils: UtilitiesInterface
 	): Hex['value'];
-	convertHexValueToString(hex: Hex['value']): Hex_StringProps['value'];
+	convertHexValueToString(hex: Hex['value']): HexStringObject['value'];
 	convertHSL(
 		color: HSL,
 		colorSpace: ColorSpaceExtended,
@@ -147,25 +144,25 @@ export interface ColorUtilsInterface {
 		utils: UtilitiesInterface
 	): Color;
 	convertHSLStringToValue(
-		hsl: HSL_StringProps['value'],
+		hsl: HSLStringObject['value'],
 		utils: UtilitiesInterface
 	): HSL['value'];
-	convertHSLValueToString(hsl: HSL['value']): HSL_StringProps['value'];
+	convertHSLValueToString(hsl: HSL['value']): HSLStringObject['value'];
 	convertHSVStringToValue(
-		hsv: HSV_StringProps['value'],
+		hsv: HSVStringObject['value'],
 		utils: UtilitiesInterface
 	): HSV['value'];
-	convertHSVValueToString(hsv: HSV['value']): HSV_StringProps['value'];
+	convertHSVValueToString(hsv: HSV['value']): HSVStringObject['value'];
 	convertLABStringToValue(
-		lab: LAB_StringProps['value'],
+		lab: LABStringObject['value'],
 		utils: UtilitiesInterface
 	): LAB['value'];
-	convertLABValueToString(lab: LAB['value']): LAB_StringProps['value'];
+	convertLABValueToString(lab: LAB['value']): LABStringObject['value'];
 	convertRGBStringToValue(
-		rgb: RGB_StringProps['value'],
+		rgb: RGBStringObject['value'],
 		utils: UtilitiesInterface
 	): RGB['value'];
-	convertRGBValueToString(rgb: RGB['value']): RGB_StringProps['value'];
+	convertRGBValueToString(rgb: RGB['value']): RGBStringObject['value'];
 	convertToHSL(
 		color: Exclude<Color, SL | SV>,
 		helpers: HelpersInterface,
@@ -173,10 +170,10 @@ export interface ColorUtilsInterface {
 		utils: UtilitiesInterface
 	): HSL;
 	convertXYZStringToValue(
-		xyz: XYZ_StringProps['value'],
+		xyz: XYZStringObject['value'],
 		utils: UtilitiesInterface
 	): XYZ['value'];
-	convertXYZValueToString(xyz: XYZ['value']): XYZ_StringProps['value'];
+	convertXYZValueToString(xyz: XYZ['value']): XYZStringObject['value'];
 	getColorString(color: Color, services: ServicesInterface): string | null;
 	getConversionFn<
 		From extends keyof ColorDataAssertion,
@@ -197,7 +194,7 @@ export interface ColorUtilsInterface {
 		utils: UtilitiesInterface
 	): number;
 	narrowToColor(
-		color: Color | Color_StringProps,
+		color: Color | ColorStringObject,
 		utils: UtilitiesInterface
 	): Color | null;
 	toColorValueRange<T extends keyof RangeKeyMap>(
@@ -206,7 +203,7 @@ export interface ColorUtilsInterface {
 		utils: UtilitiesInterface
 	): RangeKeyMap[T];
 	validateAndConvertColor(
-		color: Color | Color_StringProps | null,
+		color: Color | ColorStringObject | null,
 		services: ServicesInterface,
 		utils: UtilitiesInterface
 	): Color | null;
@@ -237,14 +234,19 @@ export interface DOMUtilsInterface {
 		callback: (ev: HTMLElementEventMap[K]) => void,
 		services: ServicesInterface
 	): void;
+	createTooltipElement(
+		targetElement: HTMLElement,
+		text: string
+	): HTMLDivElement;
 	downloadFile(data: string, filename: string, type: string): void;
 	enforceSwatchRules(
 		minSwatches: number,
 		maxSwatches: number,
 		services: ServicesInterface
 	): void;
-	getCheckboxState(id: string): boolean | void;
 	readFile(file: File): Promise<string>;
+	removeTooltip(element: HTMLElement): void;
+	showTooltip(tooltipElement: HTMLElement): void;
 	switchColorSpaceInDOM(
 		targetFormat: ColorSpace,
 		helpers: HelpersInterface,
@@ -309,6 +311,35 @@ export interface PaletteUtilsInterface {
 		services: ServicesInterface,
 		utils: UtilitiesInterface
 	): AllColors;
+	getPaletteOptionsFromUI(
+		services: ServicesInterface,
+		utils: UtilitiesInterface
+	): SelectedPaletteOptions;
+}
+
+export interface ParseUtilsInterface {
+	checkbox(id: string, services: ServicesInterface): boolean | void;
+	colorInput(
+		input: HTMLInputElement,
+		services: ServicesInterface,
+		utils: UtilitiesInterface
+	): Hex | HSL | RGB | null;
+	dropdownSelection(
+		id: string,
+		validOptions: string[],
+		services: ServicesInterface
+	): string | void;
+	numberInput(
+		input: HTMLInputElement,
+		services: ServicesInterface,
+		min?: number,
+		max?: number
+	): number | null;
+	textInput(
+		input: HTMLInputElement,
+		services: ServicesInterface,
+		regex?: RegExp
+	): string | null;
 }
 
 export interface SanitationUtilsInterface {
@@ -325,7 +356,7 @@ export interface SanitationUtilsInterface {
 export interface TypeGuardUtilsInterface {
 	isCMYKColor(value: unknown): value is CMYK;
 	isCMYKFormat(color: Color): color is CMYK;
-	isCMYKString(value: unknown): value is CMYK_StringProps;
+	isCMYKString(value: unknown): value is CMYKStringObject;
 	isColor(value: unknown): value is Color;
 	isColorFormat<T extends Color>(
 		color: Color,
@@ -333,7 +364,7 @@ export interface TypeGuardUtilsInterface {
 	): color is T;
 	isColorSpace(value: unknown): value is ColorSpace;
 	isColorSpaceExtended(value: string): value is ColorSpaceExtended;
-	isColorString(value: unknown): value is Color_StringProps;
+	isColorString(value: unknown): value is ColorStringObject;
 	isConvertibleColor(
 		color: Color
 	): color is CMYK | Hex | HSL | HSV | LAB | RGB;
@@ -342,10 +373,10 @@ export interface TypeGuardUtilsInterface {
 	isHexFormat(color: Color): color is Hex;
 	isHSLColor(value: unknown): value is HSL;
 	isHSLFormat(color: Color): color is HSL;
-	isHSLString(value: unknown): value is HSL_StringProps;
+	isHSLString(value: unknown): value is HSLStringObject;
 	isHSVColor(value: unknown): value is HSV;
 	isHSVFormat(color: Color): color is HSV;
-	isHSVString(value: unknown): value is HSV_StringProps;
+	isHSVString(value: unknown): value is HSVStringObject;
 	isInputElement(element: HTMLElement | null): element is HTMLElement;
 	isLAB(value: unknown): value is LAB;
 	isLABFormat(color: Color): color is LAB;
@@ -354,10 +385,10 @@ export interface TypeGuardUtilsInterface {
 	isRGBFormat(color: Color): color is RGB;
 	isSLColor(value: unknown): value is SL;
 	isSLFormat(color: Color): color is SL;
-	isSLString(value: unknown): value is SL_StringProps;
+	isSLString(value: unknown): value is SLStringObject;
 	isSVColor(value: unknown): value is SV;
 	isSVFormat(color: Color): color is SV;
-	isSVString(value: unknown): value is SV_StringProps;
+	isSVString(value: unknown): value is SVStringObject;
 	isXYZ(value: unknown): value is XYZ;
 	isXYZFormat(color: Color): color is XYZ;
 }

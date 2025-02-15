@@ -1,22 +1,22 @@
-// File: dom/parse.js
+// File: utils/parse.js
 
 import {
-	AppServicesInterface,
-	BrandingUtilsInterface,
 	Hex,
 	HSL,
+	ParseUtilsInterface,
 	RGB,
-	ValidationUtilsInterface
+	ServicesInterface,
+	UtilitiesInterface
 } from '../types/index.js';
 import { configData as config } from '../data/config.js';
 
 const regex = config.regex.dom;
 
-export function parseCheckbox(
+export function checkbox(
 	id: string,
-	appServices: AppServicesInterface
+	services: ServicesInterface
 ): boolean | void {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	const checkbox = document.getElementById(id) as HTMLInputElement | null;
 
@@ -24,20 +24,19 @@ export function parseCheckbox(
 		log(
 			'warn',
 			`Checkbox element ${id} not found`,
-			'dom/parse > parseCheckbox()',
+			'parse > checkbox()',
 			1
 		);
 	}
 
 	return checkbox ? checkbox.checked : undefined;
 }
-export function parseColorInput(
+export function colorInput(
 	input: HTMLInputElement,
-	appServices: AppServicesInterface,
-	brand: BrandingUtilsInterface,
-	validate: ValidationUtilsInterface
+	services: ServicesInterface,
+	utils: UtilitiesInterface
 ): Hex | HSL | RGB | null {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	const colorStr = input.value.trim().toLowerCase();
 	const hexMatch = colorStr.match(regex.hex);
@@ -54,7 +53,7 @@ export function parseColorInput(
 		}
 		return {
 			format: 'hex',
-			value: { hex: brand.asHexSet(`#${hex}`, validate) }
+			value: { hex: utils.brand.asHexSet(`#${hex}`, utils) }
 		};
 	}
 
@@ -62,12 +61,15 @@ export function parseColorInput(
 		return {
 			format: 'hsl',
 			value: {
-				hue: brand.asRadial(parseInt(hslMatch[1], 10), validate),
-				saturation: brand.asPercentile(
+				hue: utils.brand.asRadial(parseInt(hslMatch[1], 10), utils),
+				saturation: utils.brand.asPercentile(
 					parseFloat(hslMatch[2]),
-					validate
+					utils
 				),
-				lightness: brand.asPercentile(parseFloat(hslMatch[3]), validate)
+				lightness: utils.brand.asPercentile(
+					parseFloat(hslMatch[3]),
+					utils
+				)
 			}
 		};
 	}
@@ -76,9 +78,12 @@ export function parseColorInput(
 		return {
 			format: 'rgb',
 			value: {
-				red: brand.asByteRange(parseInt(rgbMatch[1], 10), validate),
-				green: brand.asByteRange(parseInt(rgbMatch[2], 10), validate),
-				blue: brand.asByteRange(parseInt(rgbMatch[3], 10), validate)
+				red: utils.brand.asByteRange(parseInt(rgbMatch[1], 10), utils),
+				green: utils.brand.asByteRange(
+					parseInt(rgbMatch[2], 10),
+					utils
+				),
+				blue: utils.brand.asByteRange(parseInt(rgbMatch[3], 10), utils)
 			}
 		};
 	}
@@ -99,31 +104,26 @@ export function parseColorInput(
 				return {
 					format: 'rgb',
 					value: {
-						red: brand.asByteRange(rgb[0], validate),
-						green: brand.asByteRange(rgb[1], validate),
-						blue: brand.asByteRange(rgb[2], validate)
+						red: utils.brand.asByteRange(rgb[0], utils),
+						green: utils.brand.asByteRange(rgb[1], utils),
+						blue: utils.brand.asByteRange(rgb[2], utils)
 					}
 				};
 			}
 		}
 	}
 
-	log(
-		'warn',
-		`Invalid color input: ${colorStr}`,
-		'dom/parse > parseColorInput()',
-		1
-	);
+	log('warn', `Invalid color input: ${colorStr}`, 'parse > colorInput()', 1);
 
 	return null;
 }
 
-export function parseDropdownSelection(
+export function dropdownSelection(
 	id: string,
 	validOptions: string[],
-	appServices: AppServicesInterface
+	services: ServicesInterface
 ): string | void {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	const dropdown = document.getElementById(id) as HTMLSelectElement | null;
 
@@ -137,7 +137,7 @@ export function parseDropdownSelection(
 			`Invalid selection in ${id}: "${selectedValue}" is not one of ${validOptions.join(
 				', '
 			)}`,
-			'dom/parse > parseDropdownSelection()',
+			'parse > dropdownSelection()',
 			1
 		);
 	}
@@ -145,13 +145,13 @@ export function parseDropdownSelection(
 	return validOptions.includes(selectedValue) ? selectedValue : undefined;
 }
 
-export function parseNumberInput(
+export function numberInput(
 	input: HTMLInputElement,
-	appServices: AppServicesInterface,
+	services: ServicesInterface,
 	min?: number,
 	max?: number
 ): number | null {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	const value = parseFloat(input.value.trim());
 
@@ -159,7 +159,7 @@ export function parseNumberInput(
 		log(
 			'warn',
 			`Invalid number input: ${input.value}`,
-			'dom/parse > parseNumberInput()',
+			'parseUtils > numberInput()',
 			1
 		);
 	}
@@ -172,12 +172,12 @@ export function parseNumberInput(
 	return value;
 }
 
-export function parseTextInput(
+function textInput(
 	input: HTMLInputElement,
-	appServices: AppServicesInterface,
+	services: ServicesInterface,
 	regex?: RegExp
 ): string | null {
-	const log = appServices.log;
+	const log = services.app.log;
 
 	const text = input.value.trim();
 
@@ -185,7 +185,7 @@ export function parseTextInput(
 		log(
 			'warn',
 			`Invalid text input: ${text}`,
-			'dom/parse > parseTextInput()',
+			'parseUtils > textInput()',
 			1
 		);
 
@@ -194,3 +194,11 @@ export function parseTextInput(
 
 	return text || null;
 }
+
+export const parseUtils: ParseUtilsInterface = {
+	checkbox,
+	colorInput,
+	dropdownSelection,
+	numberInput,
+	textInput
+};

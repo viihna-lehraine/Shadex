@@ -6,12 +6,18 @@ const classes: DOMDataInterface['classes'] = {
 	colorDisplay: 'color-display',
 	colorInput: 'color-input',
 	colorInputBtn: 'color-input-btn',
+	colorInputModal: 'color-input-modal',
 	colorStripe: 'color-stripe',
 	colorSwatch: 'color-swatch',
 	dragHandle: 'drag-handle',
+	hidden: 'hidden',
 	lockBtn: 'lock-btn',
+	locked: 'locked',
+	modal: 'modal',
+	modalTrigger: 'modal-trigger',
 	paletteColumn: 'palette-column',
-	resizeHandle: 'resize-handle'
+	resizeHandle: 'resize-handle',
+	tooltipTrigger: 'tooltip-trigger'
 };
 
 const ids: DOMDataInterface['ids'] = {

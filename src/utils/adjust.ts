@@ -1,4 +1,4 @@
-// File: utils/adjustment.js
+// File: utils/adjust.js
 
 import {
 	AdjustmentUtilsInterface,
@@ -12,49 +12,6 @@ import { defaultData as defaults } from '../data/defaults.js';
 
 const adjustments = consts.adjustments;
 const defaultColors = defaults.colors;
-
-function adjustSL(
-	color: HSL,
-	services: ServicesInterface,
-	utils: UtilitiesInterface
-): HSL {
-	const log = services.app.log;
-
-	try {
-		if (!utils.validate.colorValue(color, utils)) {
-			log(
-				'error',
-				'Invalid color valus for adjustment.',
-				'adjustmentUtils.adjustSL()'
-			);
-
-			return color;
-		}
-
-		const adjustedSaturation = Math.min(
-			Math.max(color.value.saturation + adjustments.slaValue, 0),
-			100
-		);
-		const adjustedLightness = Math.min(100);
-
-		return {
-			value: {
-				hue: color.value.hue,
-				saturation: utils.brand.asPercentile(adjustedSaturation, utils),
-				lightness: utils.brand.asPercentile(adjustedLightness, utils)
-			},
-			format: 'hsl'
-		};
-	} catch (error) {
-		log(
-			'error',
-			`Error adjusting saturation and lightness: ${error}`,
-			'adjustmentUtils.adjustSL()'
-		);
-
-		return color;
-	}
-}
 
 function applyGammaCorrection(
 	value: number,
@@ -124,8 +81,51 @@ function clampRGB(
 	}
 }
 
+function sl(
+	color: HSL,
+	services: ServicesInterface,
+	utils: UtilitiesInterface
+): HSL {
+	const log = services.app.log;
+
+	try {
+		if (!utils.validate.colorValue(color, utils)) {
+			log(
+				'error',
+				'Invalid color valus for adjustment.',
+				'adjustmentUtils.adjustSL()'
+			);
+
+			return color;
+		}
+
+		const adjustedSaturation = Math.min(
+			Math.max(color.value.saturation + adjustments.slaValue, 0),
+			100
+		);
+		const adjustedLightness = Math.min(100);
+
+		return {
+			value: {
+				hue: color.value.hue,
+				saturation: utils.brand.asPercentile(adjustedSaturation, utils),
+				lightness: utils.brand.asPercentile(adjustedLightness, utils)
+			},
+			format: 'hsl'
+		};
+	} catch (error) {
+		log(
+			'error',
+			`Error adjusting saturation and lightness: ${error}`,
+			'adjustmentUtils.adjustSL()'
+		);
+
+		return color;
+	}
+}
+
 export const adjustmentUtils: AdjustmentUtilsInterface = {
-	adjustSL,
 	applyGammaCorrection,
-	clampRGB
+	clampRGB,
+	sl
 };

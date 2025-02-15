@@ -27,6 +27,7 @@ export type {
 	DOMUtilsInterface,
 	FormattingUtilsInterface,
 	PaletteUtilsInterface,
+	ParseUtilsInterface,
 	SanitationUtilsInterface,
 	TypeGuardUtilsInterface,
 	ValidationUtilsInterface
@@ -34,21 +35,21 @@ export type {
 export type { HelpersInterface, UtilitiesInterface } from './app/utils/main.js';
 export type {
 	CMYK,
-	CMYK_StringProps,
+	CMYKStringObject,
 	Hex,
-	Hex_StringProps,
+	HexStringObject,
 	HSL,
-	HSL_StringProps,
+	HSLStringObject,
 	HSV,
-	HSV_StringProps,
+	HSVStringObject,
 	LAB,
-	LAB_StringProps,
+	LABStringObject,
 	SL,
-	SL_StringProps,
+	SLStringObject,
 	SV,
-	SV_StringProps,
+	SVStringObject,
 	RGB,
-	RGB_StringProps,
+	RGBStringObject,
 	UnbrandedCMYK,
 	UnbrandedHex,
 	UnbrandedHSL,
@@ -59,7 +60,7 @@ export type {
 	UnbrandedSV,
 	UnbrandedXYZ,
 	XYZ,
-	XYZ_StringProps
+	XYZStringObject
 } from './data/colors/main.js';
 export type {
 	AllColors,
@@ -70,7 +71,7 @@ export type {
 	ColorFormat,
 	ColorSpace,
 	ColorSpaceExtended,
-	Color_StringProps,
+	ColorStringObject,
 	UnbrandedColor
 } from './data/colors/sets.js';
 export type {

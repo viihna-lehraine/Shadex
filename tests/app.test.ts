@@ -4,7 +4,7 @@
 import { generate } from '../src/palette-gen/generate';
 import { idbFn } from '../src/dom/idb-fn';
 import { domFn } from '../src/dom/dom-main';
-import { core } from '../src/utils/core';
+import { core } from '../utils/core';
 import * as colors from '../src/index/colors';
 
 function simulateDOMContentLoaded() {

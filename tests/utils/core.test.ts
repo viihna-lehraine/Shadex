@@ -1,4 +1,4 @@
-import { core } from '../../src/utils/core';
+import { core } from '../../utils/core';
 
 describe('core module', () => {
 	describe('clone', () => {

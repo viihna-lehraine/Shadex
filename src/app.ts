@@ -9,9 +9,8 @@
 
 // File: app.js
 
-import { AppServicesInterface } from './types/index.js';
+import { ServicesInterface } from './types/index.js';
 import { domUtils } from './utils/dom.js';
-import { initializeEventListeners } from './dom/events/initialize/main.js';
 import { modeData as mode } from './data/mode.js';
 
 const appServices = await import('./services/app.js').then(
@@ -40,10 +39,10 @@ if (document.readyState === 'loading') {
 		2
 	);
 
-	initializeApp(appServices);
+	initializeApp(services);
 }
 
-async function initializeApp(appServices: AppServicesInterface): Promise<void> {
+async function initializeApp(services: ServicesInterface): Promise<void> {
 	log(
 		'debug',
 		'DOM content loaded - Initializing application',
@@ -58,7 +57,7 @@ async function initializeApp(appServices: AppServicesInterface): Promise<void> {
 		2
 	);
 
-	domUtils.validateStaticElements(appServices);
+	domUtils.validateStaticElements(services);
 
 	if (logMode.verbosity > 1) {
 		log(
@@ -70,7 +69,7 @@ async function initializeApp(appServices: AppServicesInterface): Promise<void> {
 	}
 
 	try {
-		initializeEventListeners(appServices, domUtils);
+		initializeEventListeners(services, utils);
 
 		log(
 			'info',

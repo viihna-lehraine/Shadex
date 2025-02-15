@@ -4,12 +4,18 @@ interface DOM_ClassesInterface {
 	colorDisplay: string;
 	colorInput: string;
 	colorInputBtn: string;
+	colorInputModal: string;
 	colorStripe: string;
 	colorSwatch: string;
 	dragHandle: string;
+	hidden: string;
 	lockBtn: string;
+	locked: string;
+	modal: string;
+	modalTrigger: string;
 	paletteColumn: string;
 	resizeHandle: string;
+	tooltipTrigger: string;
 }
 
 interface DOMDataElementInterface {

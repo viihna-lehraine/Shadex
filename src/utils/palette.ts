@@ -11,12 +11,17 @@ import {
 	Palette,
 	PaletteArgs,
 	PaletteItem,
+	PaletteType,
 	PaletteUtilsInterface,
 	RGB,
+	SelectedPaletteOptions,
 	ServicesInterface,
 	UtilitiesInterface,
 	XYZ
 } from '../types/index.js';
+import { domData } from '../data/dom.js';
+
+const elements = domData.elements;
 
 function createPaletteItem(
 	color: HSL,
@@ -256,9 +261,85 @@ function generateAllColorValues(
 	};
 }
 
+function getPaletteOptionsFromUI(
+	services: ServicesInterface,
+	utils: UtilitiesInterface
+): SelectedPaletteOptions {
+	const log = services.app.log;
+
+	try {
+		const paletteColumnCountElement = elements.selectors.paletteColumnCount;
+		const paletteTypeElement = elements.selectors.paletteType;
+		const limitDarkChkbx = elements.inputs.limitDarkChkbx;
+		const limitGrayChkbx = elements.inputs.limitGrayChkbx;
+		const limitLightChkbx = elements.inputs.limitLightChkbx;
+
+		if (!paletteTypeElement) {
+			log(
+				'warn',
+				'paletteTypeOptions DOM element not found',
+				'paletteUtils > getPaletteOptionsFromUI()',
+				2
+			);
+		}
+		if (!paletteColumnCountElement) {
+			log(
+				'warn',
+				`paletteColumnCount DOM element not found`,
+				'paletteUtils > getPaletteOptionsFromUI()',
+				2
+			);
+		}
+		if (!limitDarkChkbx || !limitGrayChkbx || !limitLightChkbx) {
+			log(
+				'warn',
+				`One or more checkboxes not found`,
+				'paletteUtils > getPaletteOptionsFromUI()',
+				2
+			);
+		}
+
+		if (!utils.typeGuards.isPaletteType(paletteTypeElement!.value)) {
+			log(
+				'warn',
+				`Invalid palette type: ${paletteTypeElement!.value}`,
+				'paletteUtils > getPaletteOptionsFromUI()',
+				2
+			);
+		}
+
+		return {
+			columnCount: paletteColumnCountElement
+				? parseInt(paletteColumnCountElement.value, 10)
+				: 0,
+			distributionType: 'soft',
+			limitDark: limitDarkChkbx?.checked || false,
+			limitGray: limitGrayChkbx?.checked || false,
+			limitLight: limitLightChkbx?.checked || false,
+			paletteType: paletteTypeElement!.value as PaletteType
+		};
+	} catch (error) {
+		log(
+			'error',
+			`Failed to retrieve parameters from UI: ${error}`,
+			'paletteUtils > getPaletteOptionsFromUI()'
+		);
+
+		return {
+			columnCount: 0,
+			distributionType: 'base',
+			limitDark: false,
+			limitGray: false,
+			limitLight: false,
+			paletteType: 'random'
+		};
+	}
+}
+
 export const paletteUtils: PaletteUtilsInterface = {
 	createPaletteItem,
 	createPaletteItemArray,
 	createPaletteObject,
-	generateAllColorValues
+	generateAllColorValues,
+	getPaletteOptionsFromUI
 };

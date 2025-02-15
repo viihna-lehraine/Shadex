@@ -16,7 +16,7 @@ export function generatePalette(
 	params: GeneratePaletteArgs,
 	functions: PaletteGenFunctions
 ): Palette {
-	const log = params.appServices.log;
+	const log = params.services.app.log;
 
 	try {
 		log(
@@ -63,10 +63,10 @@ export function generateHues(
 	params: GenerateHuesArgs,
 	functions: HueGenFunctions
 ): number[] {
-	const log = params.appServices.log;
+	const log = params.services.app.log;
 
 	try {
-		if (!params.validate.colorValue(params.color, params.coreUtils)) {
+		if (!params.utils.validate.colorValue(params.color, params.utils)) {
 			log(
 				'error',
 				`Invalid color value ${JSON.stringify(params.color)}`,
@@ -76,7 +76,7 @@ export function generateHues(
 			return [];
 		}
 
-		const clonedColor = params.coreUtils.clone(params.color) as HSL;
+		const clonedColor = params.utils.core.clone(params.color) as HSL;
 
 		const newParams: GenerateHuesArgs = { ...params, color: clonedColor };
 

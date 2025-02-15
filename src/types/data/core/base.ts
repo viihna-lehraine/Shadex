@@ -2,25 +2,25 @@
 
 import {
 	CMYK,
-	CMYK_StringProps,
+	CMYKStringObject,
 	ColorSpace,
 	Hex,
-	Hex_StringProps,
+	HexStringObject,
 	HSL,
-	HSL_StringProps,
+	HSLStringObject,
 	HSV,
-	HSV_StringProps,
+	HSVStringObject,
 	LAB,
-	LAB_StringProps,
+	LABStringObject,
 	MutationLog,
 	Palette,
 	PaletteItem,
 	SL,
-	SL_StringProps,
+	SLStringObject,
 	SV,
-	SV_StringProps,
+	SVStringObject,
 	RGB,
-	RGB_StringProps,
+	RGBStringObject,
 	SelectedPaletteOptions,
 	State,
 	UnbrandedCMYK,
@@ -35,7 +35,7 @@ import {
 	UnbrandedPaletteItem,
 	UnbrandedXYZ,
 	XYZ,
-	XYZ_StringProps
+	XYZStringObject
 } from '../../index.js';
 
 export type AppModeData = 'dev' | 'prod';
@@ -199,15 +199,15 @@ export interface DefaultDataInterface {
 			xyz: UnbrandedXYZ;
 		};
 		strings: {
-			cmyk: CMYK_StringProps;
-			hex: Hex_StringProps;
-			hsl: HSL_StringProps;
-			hsv: HSV_StringProps;
-			lab: LAB_StringProps;
-			rgb: RGB_StringProps;
-			sl: SL_StringProps;
-			sv: SV_StringProps;
-			xyz: XYZ_StringProps;
+			cmyk: CMYKStringObject;
+			hex: HexStringObject;
+			hsl: HSLStringObject;
+			hsv: HSVStringObject;
+			lab: LABStringObject;
+			rgb: RGBStringObject;
+			sl: SLStringObject;
+			sv: SVStringObject;
+			xyz: XYZStringObject;
 		};
 		css: {
 			cmyk: string;

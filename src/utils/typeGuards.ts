@@ -2,24 +2,24 @@
 
 import {
 	CMYK,
-	CMYK_StringProps,
+	CMYKStringObject,
 	Color,
 	ColorFormat,
 	ColorSpace,
 	ColorSpaceExtended,
-	Color_StringProps,
+	ColorStringObject,
 	Hex,
 	HSL,
-	HSL_StringProps,
+	HSLStringObject,
 	HSV,
-	HSV_StringProps,
+	HSVStringObject,
 	LAB,
 	PaletteType,
 	RGB,
 	SL,
-	SL_StringProps,
+	SLStringObject,
 	SV,
-	SV_StringProps,
+	SVStringObject,
 	TypeGuardUtilsInterface,
 	XYZ
 } from '../types/index.js';
@@ -42,18 +42,18 @@ function isCMYKFormat(color: Color): color is CMYK {
 	return isColorFormat(color, 'cmyk');
 }
 
-function isCMYKString(value: unknown): value is CMYK_StringProps {
+function isCMYKString(value: unknown): value is CMYKStringObject {
 	return (
 		isColorString(value) &&
 		typeof value === 'object' &&
 		value !== null &&
 		'format' in value &&
-		(value as CMYK_StringProps).format === 'cmyk' &&
+		(value as CMYKStringObject).format === 'cmyk' &&
 		'value' in value &&
-		typeof (value as CMYK_StringProps).value.cyan === 'string' &&
-		typeof (value as CMYK_StringProps).value.magenta === 'string' &&
-		typeof (value as CMYK_StringProps).value.yellow === 'string' &&
-		typeof (value as CMYK_StringProps).value.key === 'string'
+		typeof (value as CMYKStringObject).value.cyan === 'string' &&
+		typeof (value as CMYKStringObject).value.magenta === 'string' &&
+		typeof (value as CMYKStringObject).value.yellow === 'string' &&
+		typeof (value as CMYKStringObject).value.key === 'string'
 	);
 }
 
@@ -118,10 +118,10 @@ function isColorSpaceExtended(value: string): value is ColorSpaceExtended {
 	].includes(value);
 }
 
-function isColorString(value: unknown): value is Color_StringProps {
+function isColorString(value: unknown): value is ColorStringObject {
 	if (typeof value !== 'object' || value === null) return false;
 
-	const colorString = value as Color_StringProps;
+	const colorString = value as ColorStringObject;
 	const validStringFormats: ColorSpaceExtended[] = [
 		'cmyk',
 		'hsl',
@@ -193,17 +193,17 @@ function isHSLFormat(color: Color): color is HSL {
 	return isColorFormat(color, 'hsl');
 }
 
-function isHSLString(value: unknown): value is HSL_StringProps {
+function isHSLString(value: unknown): value is HSLStringObject {
 	return (
 		isColorString(value) &&
 		typeof value === 'object' &&
 		value !== null &&
 		'format' in value &&
-		(value as HSL_StringProps).format === 'hsl' &&
+		(value as HSLStringObject).format === 'hsl' &&
 		'value' in value &&
-		typeof (value as HSL_StringProps).value.hue === 'number' &&
-		typeof (value as HSL_StringProps).value.saturation === 'string' &&
-		typeof (value as HSL_StringProps).value.lightness === 'string'
+		typeof (value as HSLStringObject).value.hue === 'number' &&
+		typeof (value as HSLStringObject).value.saturation === 'string' &&
+		typeof (value as HSLStringObject).value.lightness === 'string'
 	);
 }
 
@@ -225,17 +225,17 @@ function isHSVFormat(color: Color): color is HSV {
 	return isColorFormat(color, 'hsv');
 }
 
-function isHSVString(value: unknown): value is HSV_StringProps {
+function isHSVString(value: unknown): value is HSVStringObject {
 	return (
 		isColorString(value) &&
 		typeof value === 'object' &&
 		value !== null &&
 		'format' in value &&
-		(value as HSV_StringProps).format === 'hsv' &&
+		(value as HSVStringObject).format === 'hsv' &&
 		'value' in value &&
-		typeof (value as HSV_StringProps).value.hue === 'number' &&
-		typeof (value as HSV_StringProps).value.saturation === 'string' &&
-		typeof (value as HSV_StringProps).value.value === 'string'
+		typeof (value as HSVStringObject).value.hue === 'number' &&
+		typeof (value as HSVStringObject).value.saturation === 'string' &&
+		typeof (value as HSVStringObject).value.value === 'string'
 	);
 }
 
@@ -309,15 +309,15 @@ function isSLFormat(color: Color): color is SL {
 	return isColorFormat(color, 'sl');
 }
 
-function isSLString(value: unknown): value is SL_StringProps {
+function isSLString(value: unknown): value is SLStringObject {
 	return (
 		typeof value === 'object' &&
 		value !== null &&
 		'format' in value &&
-		(value as SL_StringProps).format === 'sl' &&
+		(value as SLStringObject).format === 'sl' &&
 		'value' in value &&
-		typeof (value as SL_StringProps).value.saturation === 'string' &&
-		typeof (value as SL_StringProps).value.lightness === 'string'
+		typeof (value as SLStringObject).value.saturation === 'string' &&
+		typeof (value as SLStringObject).value.lightness === 'string'
 	);
 }
 
@@ -337,15 +337,15 @@ function isSVFormat(color: Color): color is SV {
 	return isColorFormat(color, 'sv');
 }
 
-function isSVString(value: unknown): value is SV_StringProps {
+function isSVString(value: unknown): value is SVStringObject {
 	return (
 		typeof value === 'object' &&
 		value !== null &&
 		'format' in value &&
-		(value as SV_StringProps).format === 'sv' &&
+		(value as SVStringObject).format === 'sv' &&
 		'value' in value &&
-		typeof (value as SV_StringProps).value.saturation === 'string' &&
-		typeof (value as SV_StringProps).value.value === 'string'
+		typeof (value as SVStringObject).value.saturation === 'string' &&
+		typeof (value as SVStringObject).value.value === 'string'
 	);
 }
 

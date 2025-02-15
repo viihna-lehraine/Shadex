@@ -12,6 +12,7 @@ import {
 	FormattingUtilsInterface,
 	PaletteUtilHelpersInterface,
 	PaletteUtilsInterface,
+	ParseUtilsInterface,
 	SanitationUtilsInterface,
 	TypeGuardUtilsInterface,
 	ValidationUtilsInterface
@@ -32,6 +33,7 @@ export interface UtilitiesInterface {
 	dom: DOMUtilsInterface;
 	format: FormattingUtilsInterface;
 	palette: PaletteUtilsInterface;
+	parse: ParseUtilsInterface;
 	sanitize: SanitationUtilsInterface;
 	typeGuards: TypeGuardUtilsInterface;
 	validate: ValidationUtilsInterface;

@@ -10,11 +10,13 @@ import {
 	ServicesInterface,
 	UtilitiesInterface
 } from '../types/index.js';
+import { constsData as consts } from '../data/consts.js';
 import { domData } from '../data/dom.js';
 import { modeData } from '../data/mode.js';
 
 const domIDs = domData.ids;
 const mode = modeData;
+const timeouts = consts.timeouts;
 
 const addConversionListener = (
 	id: string,
@@ -71,6 +73,32 @@ function addEventListener<K extends keyof HTMLElementEventMap>(
 			2
 		);
 	}
+}
+
+function createTooltipElement(
+	targetElement: HTMLElement,
+	text: string
+): HTMLDivElement {
+	const tooltip = document.createElement('div');
+	tooltip.classList.add('tooltip');
+	tooltip.textContent = text;
+	document.body.appendChild(tooltip);
+
+	// Position tooltip relative to the target element
+	const rect = targetElement.getBoundingClientRect();
+	tooltip.style.position = 'absolute';
+	tooltip.style.left = `${rect.left + window.scrollX}px`;
+	tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 5}px`;
+	tooltip.style.zIndex = '1000';
+	tooltip.style.pointerEvents = 'none';
+	tooltip.style.opacity = '0';
+	tooltip.style.transition = 'opacity 0.2s ease-in-out';
+
+	setTimeout(() => {
+		tooltip.style.opacity = '1';
+	}, timeouts.tooltip);
+
+	return tooltip;
 }
 
 function downloadFile(data: string, filename: string, type: string): void {
@@ -140,12 +168,6 @@ function enforceSwatchRules(
 	}
 }
 
-function getCheckboxState(id: string): boolean | void {
-	const checkbox = document.getElementById(id) as HTMLInputElement | null;
-
-	return checkbox ? checkbox.checked : undefined;
-}
-
 function readFile(file: File): Promise<string> {
 	return new Promise((resolve, reject) => {
 		const reader = new FileReader();
@@ -155,6 +177,31 @@ function readFile(file: File): Promise<string> {
 
 		reader.readAsText(file);
 	});
+}
+
+function removeTooltip(element: HTMLElement): void {
+	const tooltip = element.querySelector('.tooltip');
+
+	if (tooltip) {
+		tooltip.classList.add('fade-out');
+		tooltip.addEventListener('transitionend', () => {
+			tooltip.remove();
+		});
+	}
+}
+
+function showTooltip(tooltipElement: HTMLElement): void {
+	const tooltip = tooltipElement.querySelector<HTMLElement>('.tooltiptext');
+
+	if (tooltip) {
+		tooltip.style.visibility = 'visible';
+		tooltip.style.opacity = '1';
+
+		setTimeout(() => {
+			tooltip.style.visibility = 'hidden';
+			tooltip.style.opacity = '0';
+		}, 1000);
+	}
 }
 
 function switchColorSpaceInDOM(
@@ -361,10 +408,12 @@ function validateStaticElements(services: ServicesInterface): void {
 export const domUtils: DOMUtilsInterface = {
 	addConversionListener,
 	addEventListener,
+	createTooltipElement,
 	downloadFile,
 	enforceSwatchRules,
-	getCheckboxState,
 	readFile,
+	removeTooltip,
+	showTooltip,
 	switchColorSpaceInDOM,
 	updateColorBox,
 	updateHistory,

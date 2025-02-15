@@ -1,4 +1,4 @@
-// File: utils/validation.js
+// File: utils/validate.js
 
 import {
 	Color,
@@ -197,7 +197,7 @@ function userColorInput(color: string): boolean {
 	);
 }
 
-export const validate: ValidationUtilsInterface = {
+export const validationUtils: ValidationUtilsInterface = {
 	colorValue,
 	ensureHash,
 	hex,

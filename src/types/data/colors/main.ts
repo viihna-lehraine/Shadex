@@ -95,7 +95,7 @@ export type XYZ = {
 
 // ***** 2. Colors w/ String Properties *****
 
-export type CMYK_StringProps = {
+export type CMYKStringObject = {
 	value: {
 		cyan: string;
 		magenta: string;
@@ -105,14 +105,14 @@ export type CMYK_StringProps = {
 	format: 'cmyk';
 };
 
-export type Hex_StringProps = {
+export type HexStringObject = {
 	value: {
 		hex: string;
 	};
 	format: 'hex';
 };
 
-export type HSL_StringProps = {
+export type HSLStringObject = {
 	value: {
 		hue: string;
 		saturation: string;
@@ -121,7 +121,7 @@ export type HSL_StringProps = {
 	format: 'hsl';
 };
 
-export type HSV_StringProps = {
+export type HSVStringObject = {
 	value: {
 		hue: string;
 		saturation: string;
@@ -130,7 +130,7 @@ export type HSV_StringProps = {
 	format: 'hsv';
 };
 
-export type LAB_StringProps = {
+export type LABStringObject = {
 	value: {
 		l: string;
 		a: string;
@@ -139,7 +139,7 @@ export type LAB_StringProps = {
 	format: 'lab';
 };
 
-export type RGB_StringProps = {
+export type RGBStringObject = {
 	value: {
 		red: string;
 		green: string;
@@ -148,7 +148,7 @@ export type RGB_StringProps = {
 	format: 'rgb';
 };
 
-export type SL_StringProps = {
+export type SLStringObject = {
 	value: {
 		saturation: string;
 		lightness: string;
@@ -156,7 +156,7 @@ export type SL_StringProps = {
 	format: 'sl';
 };
 
-export type SV_StringProps = {
+export type SVStringObject = {
 	value: {
 		saturation: string;
 		value: string;
@@ -164,7 +164,7 @@ export type SV_StringProps = {
 	format: 'sv';
 };
 
-export type XYZ_StringProps = {
+export type XYZStringObject = {
 	value: {
 		x: string;
 		y: string;
