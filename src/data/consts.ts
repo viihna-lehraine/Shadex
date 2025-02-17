@@ -77,10 +77,11 @@ const thresholds: ConstsDataInterface['thresholds'] = {
 	light: 75
 } as const;
 
-const timeouts: ConstsDataInterface['timeouts'] = {
-	copyButtonText: 1000,
+const timers: ConstsDataInterface['timers'] = {
+	copyButtonTextTimeout: 1000,
 	toast: 3000,
-	tooltip: 1000
+	tooltipFadeIn: 50,
+	tooltipFadeOut: 50
 } as const;
 
 export const constsData: ConstsDataInterface = {
@@ -91,5 +92,5 @@ export const constsData: ConstsDataInterface = {
 	paletteRanges,
 	probabilities,
 	thresholds,
-	timeouts
+	timers
 } as const;

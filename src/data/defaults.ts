@@ -27,14 +27,14 @@ const palette: Palette = {
 	id: `null-palette-${Date.now()}`,
 	items: [],
 	metadata: {
+		columnCount: 1,
 		flags: {
 			limitDark: false,
 			limitGray: false,
 			limitLight: false
 		},
+		type: 'random',
 		name: 'BRANDED DEFAULT PALETTE',
-		swatches: 1,
-		type: '???',
 		timestamp: '???'
 	}
 };
@@ -284,18 +284,18 @@ const state: State = {
 };
 
 const unbrandedPalette: UnbrandedPalette = {
-	id: `null-branded-palette-${Date.now()}`,
+	id: `null-unbranded-palette}`,
 	items: [],
 	metadata: {
+		name: 'UNBRANDED DEFAULT PALETTE',
+		timestamp: '???',
+		columnCount: 1,
 		flags: {
 			limitDark: false,
 			limitGray: false,
 			limitLight: false
 		},
-		name: 'UNBRANDED DEFAULT PALETTE',
-		swatches: 1,
-		type: '???',
-		timestamp: '???'
+		type: 'random'
 	}
 } as const;
 

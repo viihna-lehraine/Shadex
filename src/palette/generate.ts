@@ -1,54 +1,56 @@
 // File: palette/generate.js
 
 import {
-	GenerateHuesArgs,
-	GeneratePaletteArgs,
+	CommonFunctionsInterface,
+	GenerateHuesFnGroup,
+	GeneratePaletteFnGroup,
 	HSL,
-	HueGenFunctions,
 	Palette,
-	PaletteGenFunctions
+	SelectedPaletteOptions
 } from '../types/index.js';
 import { defaultData as defaults } from '../data/defaults.js';
 
 const defaultPalette = defaults.palette;
 
 export function generatePalette(
-	params: GeneratePaletteArgs,
-	functions: PaletteGenFunctions
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface,
+	generateHues: GenerateHuesFnGroup,
+	generatePalette: GeneratePaletteFnGroup
 ): Palette {
-	const log = params.services.app.log;
+	const log = common.services.app.log;
 
 	try {
 		log(
 			'debug',
-			`Generating ${params.options.paletteType} palette with args ${JSON.stringify(params.options)}`,
-			'palette/generate > generatePalette()',
+			`Generating ${options.paletteType} palette with args ${JSON.stringify(options)}`,
+			'generatePalette()',
 			2
 		);
 
-		switch (params.options.paletteType) {
+		switch (options.paletteType) {
 			case 'analogous':
-				return functions.generateAnalogousPalette(params);
+				return generatePalette.analogous(options, common, generateHues);
 			case 'complementary':
-				return functions.generateComplementaryPalette(params);
+				return generatePalette.complementary(options, common);
 			case 'diadic':
-				return functions.generateDiadicPalette(params);
+				return generatePalette.diadic(options, common, generateHues);
 			case 'hexadic':
-				return functions.generateHexadicPalette(params);
+				return generatePalette.hexadic(options, common, generateHues);
 			case 'monochromatic':
-				return functions.generateMonochromaticPalette(params);
+				return generatePalette.monochromatic(options, common);
 			case 'random':
-				return functions.generateRandomPalette(params);
+				return generatePalette.random(options, common);
 			case 'split-complementary':
-				return functions.generateSplitComplementaryPalette(params);
+				return generatePalette.splitComplementary(options, common);
 			case 'tetradic':
-				return functions.generateTetradicPalette(params);
+				return generatePalette.tetradic(options, common, generateHues);
 			case 'triadic':
-				return functions.generateTriadicPalette(params);
+				return generatePalette.triadic(options, common, generateHues);
 			default:
 				log(
 					'error',
-					`Invalid palette type ${params.options.paletteType}`,
+					`Invalid palette type ${options.paletteType}`,
 					'generatePalette()'
 				);
 
@@ -60,43 +62,44 @@ export function generatePalette(
 }
 
 export function generateHues(
-	params: GenerateHuesArgs,
-	functions: HueGenFunctions
+	color: HSL,
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface,
+	generateHues: GenerateHuesFnGroup
 ): number[] {
-	const log = params.services.app.log;
+	const utils = common.utils;
+	const log = common.services.app.log;
 
 	try {
-		if (!params.utils.validate.colorValue(params.color, params.utils)) {
+		if (!utils.validate.colorValue(color)) {
 			log(
 				'error',
-				`Invalid color value ${JSON.stringify(params.color)}`,
+				`Invalid color value ${JSON.stringify(color)}`,
 				'generateHues()'
 			);
 
 			return [];
 		}
 
-		const clonedColor = params.utils.core.clone(params.color) as HSL;
+		const clonedColor = utils.core.clone(color) as HSL;
 
-		const newParams: GenerateHuesArgs = { ...params, color: clonedColor };
-
-		switch (params.paletteType) {
+		switch (options.paletteType) {
 			case 'analogous':
-				return functions.generateAnalogousHues(newParams);
+				return generateHues.analogous(clonedColor, options, common);
 			case 'diadic':
-				return functions.generateDiadicHues(newParams);
+				return generateHues.diadic(clonedColor, options, common);
 			case 'hexadic':
-				return functions.generateHexadicHues(newParams);
+				return generateHues.hexadic(clonedColor, common);
 			case 'split-complementary':
-				return functions.generateSplitComplementaryHues(newParams);
+				return generateHues.splitComplementary(clonedColor, common);
 			case 'tetradic':
-				return functions.generateTetradicHues(newParams);
+				return generateHues.tetradic(clonedColor, common);
 			case 'triadic':
-				return functions.generateTriadicHues(newParams);
+				return generateHues.triadic(clonedColor, common);
 			default:
 				log(
 					'error',
-					`Invalid hue type ${newParams.paletteType}`,
+					`Invalid hue type ${options.paletteType}`,
 					'generateHues()'
 				);
 

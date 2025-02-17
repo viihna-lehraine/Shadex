@@ -1,35 +1,46 @@
 // File: palette/partials/hues.js
 
-import { GenerateHuesArgs } from '../../types/index.js';
+import {
+	CommonFunctionsInterface,
+	GenerateHuesFnGroup,
+	HSL,
+	SelectedPaletteOptions
+} from '../../types/index.js';
 
-export function generateAnalogousHues(params: GenerateHuesArgs): number[] {
-	const log = params.appServices.log;
+function analogous(
+	color: HSL,
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface
+): number[] {
+	const log = common.services.app.log;
 
 	try {
-		if (!params.validate.colorValue(params.color, params.coreUtils)) {
+		if (!common.utils.validate.colorValue(color)) {
 			log(
 				'error',
-				`Invalid color value ${JSON.stringify(params.color)}`,
-				'palette/partials/hues > generateAnalogousHues()'
+				`Invalid color value ${JSON.stringify(color)}`,
+				'generateAnalogousHues()'
 			);
 
 			return [];
 		}
 
 		const analogousHues: number[] = [];
-		const baseHue = params.color.value.hue;
+		const baseHue = color.value.hue;
 		const maxTotalDistance = 60;
 		const minTotalDistance = Math.max(
 			20,
-			10 + (params.columnCount - 2) * 12
+			10 + (options.columnCount - 2) * 12
 		);
 		const totalIncrement =
 			Math.floor(
 				Math.random() * (maxTotalDistance - minTotalDistance + 1)
 			) + minTotalDistance;
-		const increment = Math.floor(totalIncrement / (params.columnCount - 1));
+		const increment = Math.floor(
+			totalIncrement / (options.columnCount - 1)
+		);
 
-		for (let i = 1; i < params.columnCount; i++) {
+		for (let i = 1; i < options.columnCount; i++) {
 			analogousHues.push((baseHue + increment * i) % 360);
 		}
 
@@ -38,22 +49,26 @@ export function generateAnalogousHues(params: GenerateHuesArgs): number[] {
 		log(
 			'error',
 			`Error generating analogous hues: ${error}`,
-			'palette/partials/hues > generateAnalogousHues()'
+			'generateAnalogousHues()'
 		);
 
 		return [];
 	}
 }
 
-export function generateDiadicHues(params: GenerateHuesArgs): number[] {
-	const log = params.appServices.log;
+function diadic(
+	color: HSL,
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface
+): number[] {
+	const helpers = common.helpers;
+	const log = common.services.app.log;
 
 	try {
-		const baseHue = params.color.value.hue;
+		const baseHue = color.value.hue;
 		const diadicHues = [];
-		const randomDistance = params.paletteHelpers.getWeightedRandomInterval(
-			params.distributionType,
-			params.appServices
+		const randomDistance = helpers.palette.getWeightedRandomInterval(
+			options.distributionType
 		);
 		const hue1 = baseHue;
 		const hue2 = (hue1 + randomDistance) % 360;
@@ -65,27 +80,19 @@ export function generateDiadicHues(params: GenerateHuesArgs): number[] {
 		log(
 			'error',
 			`Error generating diadic hues: ${error}`,
-			'palette/partials/hues > generateDiadicHues()'
+			'generateDiadicHues()'
 		);
 
 		return [];
 	}
 }
 
-export function generateHexadicHues(params: GenerateHuesArgs): number[] {
-	const log = params.appServices.log;
+function hexadic(color: HSL, common: CommonFunctionsInterface): number[] {
+	const utils = common.utils;
+	const log = common.services.app.log;
 
 	try {
-		const clonedBaseHSL = params.colorUtils.convertToHSL(
-			params.color,
-			params.adjust,
-			params.appServices,
-			params.brand,
-			params.colorHelpers,
-			params.coreUtils,
-			params.format,
-			params.validate
-		);
+		const clonedBaseHSL = utils.color.convertToHSL(color);
 
 		const hexadicHues: number[] = [];
 		const baseHue = clonedBaseHSL.value.hue;
@@ -104,20 +111,21 @@ export function generateHexadicHues(params: GenerateHuesArgs): number[] {
 		log(
 			'error',
 			`Error generating hexadic hues: ${error}`,
-			'palette/partials/hues > generateHexadicHues()'
+			'generateHexadicHues()'
 		);
 
 		return [];
 	}
 }
 
-export function generateSplitComplementaryHues(
-	params: GenerateHuesArgs
+function splitComplementary(
+	color: HSL,
+	common: CommonFunctionsInterface
 ): number[] {
-	const log = params.appServices.log;
+	const log = common.services.app.log;
 
 	try {
-		const baseHue = params.color.value.hue;
+		const baseHue = color.value.hue;
 		const modifier = Math.floor(Math.random() * 11) + 20;
 
 		return [
@@ -128,18 +136,18 @@ export function generateSplitComplementaryHues(
 		log(
 			'error',
 			`Error generating split complementary hues: ${error}`,
-			'palette/partials/hues > generateSplitComplementaryHues()'
+			'generateSplitComplementaryHues()'
 		);
 
 		return [];
 	}
 }
 
-export function generateTetradicHues(params: GenerateHuesArgs): number[] {
-	const log = params.appServices.log;
+function tetradic(color: HSL, common: CommonFunctionsInterface): number[] {
+	const log = common.services.app.log;
 
 	try {
-		const baseHue = params.color.value.hue;
+		const baseHue = color.value.hue;
 		const randomOffset = Math.floor(Math.random() * 46) + 20;
 		const distance =
 			90 + (Math.random() < 0.5 ? -randomOffset : randomOffset);
@@ -154,27 +162,36 @@ export function generateTetradicHues(params: GenerateHuesArgs): number[] {
 		log(
 			'error',
 			`Error generating tetradic hues: ${error}`,
-			'palette/partials/hues > generateTetradicHues()'
+			'generateTetradicHues()'
 		);
 
 		return [];
 	}
 }
 
-export function generateTriadicHues(params: GenerateHuesArgs): number[] {
-	const log = params.appServices.log;
+function triadic(color: HSL, common: CommonFunctionsInterface): number[] {
+	const log = common.services.app.log;
 
 	try {
-		const baseHue = params.color.value.hue;
+		const baseHue = color.value.hue;
 
 		return [120, 240].map(increment => (baseHue + increment) % 360);
 	} catch (error) {
 		log(
 			'error',
 			`Error generating triadic hues: ${error}`,
-			'palette/partials/hues > generateTriadicHues()'
+			'generateTriadicHues()'
 		);
 
 		return [];
 	}
 }
+
+export const generateHues: GenerateHuesFnGroup = {
+	analogous,
+	diadic,
+	hexadic,
+	splitComplementary,
+	tetradic,
+	triadic
+};

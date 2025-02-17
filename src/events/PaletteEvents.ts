@@ -9,14 +9,14 @@ import { domData } from '../data/dom.js';
 
 const classes = domData.classes;
 const ids = domData.ids;
-const timeouts = consts.timeouts;
+const timers = consts.timers;
 
 export class PaletteEvents {
 	private draggedColumn: HTMLElement | null = null;
 
 	constructor(
-		private services: ServicesInterface,
 		private paletteState: PaletteState,
+		private services: ServicesInterface,
 		private stateManager: StateManager,
 		private utils: UtilitiesInterface
 	) {}
@@ -87,7 +87,11 @@ export class PaletteEvents {
 			const target = event.target as HTMLElement;
 
 			if (target.matches(classes.tooltipTrigger)) {
-				this.showTooltip(target);
+				const tooltipText = target.dataset.tooltip;
+
+				if (tooltipText) {
+					this.showTooltip(target, tooltipText);
+				}
 			}
 		});
 
@@ -96,7 +100,7 @@ export class PaletteEvents {
 			const target = event.target as HTMLElement;
 
 			if (target.matches(classes.tooltipTrigger)) {
-				this.hideTooltip(target);
+				this.hideTooltip();
 			}
 		});
 
@@ -283,11 +287,12 @@ export class PaletteEvents {
 		});
 	}
 
-	private copyToClipboard(text: string, tooltipElement: HTMLElement): void {
+	private copyToClipboard(text: string, targetElement: HTMLElement): void {
 		navigator.clipboard
 			.writeText(text.trim())
 			.then(() => {
-				this.utils.dom.createTooltipElement(tooltipElement, 'Copied!');
+				// show tooltip with "Copied!" message
+				this.showTooltip(targetElement, 'Copied!');
 
 				this.services.app.log(
 					'debug',
@@ -296,9 +301,10 @@ export class PaletteEvents {
 					4
 				);
 
+				// ensure tooltip is removed after the timeout
 				setTimeout(
-					() => this.utils.dom.removeTooltip(tooltipElement),
-					timeouts.tooltip || 1000
+					() => this.removeTooltip(targetElement),
+					timers.tooltipFadeOut
 				);
 			})
 			.catch(err => {
@@ -368,17 +374,39 @@ export class PaletteEvents {
 	}
 
 	// hides tooltip for a given element
-	private hideTooltip(element: HTMLElement): void {
-		this.utils.dom.removeTooltip(element);
+	private hideTooltip(): void {
+		this.utils.dom.hideTooltip();
+	}
+
+	private removeTooltip(element: HTMLElement): void {
+		const tooltipId = element.dataset.tooltipId;
+		if (!tooltipId) return;
+
+		const tooltip = document.getElementById(tooltipId);
+		if (tooltip) tooltip.remove();
+
+		// cleanup
+		delete element.dataset.tooltipId;
 	}
 
 	// displays tooltip for a given element
-	private showTooltip(element: HTMLElement): void {
-		const tooltipText = element.dataset.tooltip;
+	private showTooltip(element: HTMLElement, text: string): void {
+		// if tooltip already exists on this element, remove it
+		this.removeTooltip(element);
 
-		if (!tooltipText) return;
+		// create tooltip element
+		const tooltip = document.createElement('div');
+		tooltip.classList.add('tooltip');
+		tooltip.textContent = text;
+		document.body.appendChild(tooltip);
 
-		this.utils.dom.createTooltipElement(element, tooltipText);
+		// position tooltip near the element
+		const rect = element.getBoundingClientRect();
+		tooltip.style.left = `${rect.left + window.scrollX}px`;
+		tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 5}px`;
+
+		// associate tooltip with the element
+		element.dataset.tooltipId = tooltip.id;
 	}
 
 	// handles resizing of palette columns

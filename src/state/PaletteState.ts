@@ -1,25 +1,15 @@
 // File: state/PaletteState.ts
 
-import {
-	HelpersInterface,
-	ServicesInterface,
-	UtilitiesInterface
-} from '../types/index.js';
+import { UtilitiesInterface } from '../types/index.js';
 import { StateManager } from './StateManager.js';
 
 export class PaletteState {
-	private helpers: HelpersInterface;
-	private services: ServicesInterface;
 	private utils: UtilitiesInterface;
 
 	constructor(
 		private stateManager: StateManager,
-		helpers: HelpersInterface,
-		services: ServicesInterface,
 		utils: UtilitiesInterface
 	) {
-		this.helpers = helpers;
-		this.services = services;
 		this.utils = utils;
 	}
 
@@ -33,10 +23,7 @@ export class PaletteState {
 		const updatedItems = latestPalette.items.map(item => {
 			if (item.itemID !== columnID) return item;
 
-			const parsedNewColor = this.utils.color.convertCSSToColor(
-				newColor,
-				this.utils
-			);
+			const parsedNewColor = this.utils.color.convertCSSToColor(newColor);
 
 			if (!parsedNewColor) throw new Error('Invalid color value');
 
@@ -44,20 +31,11 @@ export class PaletteState {
 			const hslColor =
 				parsedNewColor.format === 'hsl'
 					? parsedNewColor
-					: this.utils.color.convertToHSL(
-							parsedNewColor,
-							this.helpers,
-							this.services,
-							this.utils
-						);
+					: this.utils.color.convertToHSL(parsedNewColor);
 
 			// generate all color representations
-			const allColors = this.utils.palette.generateAllColorValues(
-				hslColor,
-				this.helpers,
-				this.services,
-				this.utils
-			);
+			const allColors =
+				this.utils.palette.generateAllColorValues(hslColor);
 
 			return {
 				...item,

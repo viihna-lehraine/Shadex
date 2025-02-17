@@ -17,6 +17,7 @@ const classes: DOMDataInterface['classes'] = {
 	modalTrigger: 'modal-trigger',
 	paletteColumn: 'palette-column',
 	resizeHandle: 'resize-handle',
+	tooltipContainer: 'tooltip-container',
 	tooltipTrigger: 'tooltip-trigger'
 };
 
@@ -54,6 +55,12 @@ const ids: DOMDataInterface['ids'] = {
 	}
 } as const;
 
+const dynamicIDs: DOMDataInterface['dynamicIDs'] = {
+	divs: {
+		globalTooltip: 'global-tooltip'
+	}
+};
+
 function getElement<T extends HTMLElement>(id: string): T | null {
 	return document.getElementById(id) as T | null;
 }
@@ -62,6 +69,12 @@ const btnIds = ids.btns;
 const divIds = ids.divs;
 const inputIds = ids.inputs;
 const selectorIds = ids.selectors;
+
+const dynamicElements: DOMDataInterface['dynamicElements'] = {
+	divs: {
+		globalTooltip: getElement<HTMLDivElement>(dynamicIDs.divs.globalTooltip)
+	}
+};
 
 const elements: DOMDataInterface['elements'] = {
 	get btns() {
@@ -119,6 +132,8 @@ const elements: DOMDataInterface['elements'] = {
 
 export const domData: DOMDataInterface = {
 	classes,
+	dynamicElements,
+	dynamicIDs,
 	ids,
 	elements
 } as const;

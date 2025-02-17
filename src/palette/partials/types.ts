@@ -1,57 +1,49 @@
 // File: palette/partials/types.js
 
 import {
-	GeneratePaletteArgs,
+	CommonFunctionsInterface,
+	GenerateHuesFnGroup,
+	GeneratePaletteFnGroup,
 	HSL,
 	Palette,
 	PaletteItem,
-	PaletteType
+	SelectedPaletteOptions
 } from '../../types/index.js';
 import { constsData as consts } from '../../data/consts.js';
 
 const paletteRanges = consts.paletteRanges;
 
-export function generateAnalogousPalette(params: GeneratePaletteArgs): Palette {
-	if (params.options.columnCount < 2)
-		params.domUtils.enforceSwatchRules(2, 6, params.appServices);
+function analogous(
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface,
+	generateHues: GenerateHuesFnGroup
+): Palette {
+	const utils = common.utils;
 
-	const baseColor = params.appUtils.generateRandomHSL(
-		...params.argsHelpers.getGenerateRandomColorArgs(params)
-	);
-	const hues = params.generateHues(
-		params.argsHelpers.getHueGenerationArgs(baseColor, params)
-	);
-	const paletteItems = params.paletteUtils.createPaletteItemArray(
-		...params.argsHelpers.getCreatePaletteItemArrayArgs(
-			baseColor,
-			hues,
-			params
-		)
-	);
-	const analogousPalette = params.paletteUtils.createPaletteObject(
-		params.argsHelpers.getCreatePaletteObjectArgs(
-			'analogous',
-			`analogous_${Date.now()}`,
-			paletteItems,
-			params.options.columnCount,
-			params
-		),
-		params.appUtils
+	if (options.columnCount < 2) utils.dom.enforceSwatchRules(2, 6);
+
+	const baseColor = utils.app.generateRandomHSL();
+	const hues = generateHues.analogous(baseColor, options, common);
+	const paletteItems = utils.palette.createPaletteItemArray(baseColor, hues);
+	const analogousPalette = utils.palette.createPaletteObject(
+		options,
+		paletteItems
 	);
 
 	return analogousPalette;
 }
 
-export function generateComplementaryPalette(
-	params: GeneratePaletteArgs
+function complementary(
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface
 ): Palette {
-	const swatchCount = Math.max(2, Math.min(6, params.options.columnCount));
+	const helpers = common.helpers;
+	const utils = common.utils;
+	const columnCount = Math.max(2, Math.min(6, options.columnCount));
 
-	params.domUtils.enforceSwatchRules(swatchCount, 6, params.appServices);
+	utils.dom.enforceSwatchRules(columnCount, 6);
 
-	const randomColorArgs =
-		params.argsHelpers.getGenerateRandomColorArgs(params);
-	const baseColor = params.appUtils.generateRandomHSL(...randomColorArgs);
+	const baseColor = utils.app.generateRandomHSL();
 	const baseHue = baseColor.value.hue;
 	const hues: number[] = [baseHue];
 
@@ -59,15 +51,13 @@ export function generateComplementaryPalette(
 	hues.push((baseHue + 180) % 360);
 
 	// generate additional complementary variations if needed
-	const extraColorsNeeded = swatchCount - 2;
+	const extraColorsNeeded = columnCount - 2;
 
 	if (extraColorsNeeded > 0) {
 		for (let i = 0; i < extraColorsNeeded; i++) {
-			const variationOffset =
-				params.paletteHelpers.getWeightedRandomInterval(
-					params.options.distributionType,
-					params.appServices
-				);
+			const variationOffset = helpers.palette.getWeightedRandomInterval(
+				options.distributionType
+			);
 			const direction = Math.random() < 0.5 ? 1 : -1; // randomize direction
 			const newHue =
 				(baseHue + 180 + variationOffset * direction + 360) % 360;
@@ -87,70 +77,53 @@ export function generateComplementaryPalette(
 
 		const newColor: HSL = {
 			value: {
-				hue: params.brand.asRadial(hue, params.validate),
-				saturation: params.brand.asPercentile(
+				hue: utils.brand.asRadial(hue),
+				saturation: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
 							0,
 							baseColor.value.saturation + saturationOffset
 						)
-					),
-					params.validate
+					)
 				),
-				lightness: params.brand.asPercentile(
+				lightness: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessOffset)
-					),
-					params.validate
+					)
 				)
 			},
 			format: 'hsl'
 		};
 
-		return params.paletteUtils.createPaletteItem(
-			...params.argsHelpers.getCreatePaletteItemArgs(
-				newColor,
-				index + 1,
-				params
-			)
-		);
+		return utils.palette.createPaletteItem(newColor, index + 1);
 	});
 
-	return params.paletteUtils.createPaletteObject(
-		params.argsHelpers.getCreatePaletteObjectArgs(
-			'complementary',
-			`complementary_${params.appUtils.getFormattedTimestamp()}`,
-			paletteItems,
-			swatchCount,
-			params
-		),
-		params.appUtils
-	);
+	return utils.palette.createPaletteObject(options, paletteItems);
 }
 
-export function generateDiadicPalette(params: GeneratePaletteArgs): Palette {
-	const swatchCount = Math.max(2, Math.min(6, params.options.columnCount));
+function diadic(
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface,
+	generateHues: GenerateHuesFnGroup
+): Palette {
+	const helpers = common.helpers;
+	const utils = common.utils;
+	const columnCount = Math.max(2, Math.min(6, options.columnCount));
 
-	params.domUtils.enforceSwatchRules(swatchCount, 6, params.appServices);
+	utils.dom.enforceSwatchRules(columnCount, 6);
 
-	const baseColor = params.appUtils.generateRandomHSL(
-		...params.argsHelpers.getGenerateRandomColorArgs(params)
-	);
-	const hues = params.generateHues(
-		params.argsHelpers.getHueGenerationArgs(baseColor, params)
-	);
+	const baseColor = utils.app.generateRandomHSL();
+	const hues = generateHues.diadic(baseColor, options, common);
 
 	// if more swatches are needed, create slight variations
-	const extraColorsNeeded = swatchCount - 2;
+	const extraColorsNeeded = columnCount - 2;
 	if (extraColorsNeeded > 0) {
 		for (let i = 0; i < extraColorsNeeded; i++) {
-			const variationOffset =
-				params.paletteHelpers.getWeightedRandomInterval(
-					params.options.distributionType,
-					params.appServices
-				);
+			const variationOffset = helpers.palette.getWeightedRandomInterval(
+				options.distributionType
+			);
 			const direction = i % 2 === 0 ? 1 : -1;
 
 			hues.push(
@@ -169,60 +142,45 @@ export function generateDiadicPalette(params: GeneratePaletteArgs): Palette {
 			paletteRanges.shift.diadic.light / 2;
 		const newColor: HSL = {
 			value: {
-				hue: params.brand.asRadial(hue, params.validate),
-				saturation: params.brand.asPercentile(
+				hue: utils.brand.asRadial(hue),
+				saturation: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
 							0,
 							baseColor.value.saturation + saturationShift
 						)
-					),
-					params.validate
+					)
 				),
-				lightness: params.brand.asPercentile(
+				lightness: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessShift)
-					),
-					params.validate
+					)
 				)
 			},
 			format: 'hsl'
 		};
-		const paletteItemArgs = params.argsHelpers.getCreatePaletteItemArgs(
-			newColor,
-			index + 1,
-			params
-		);
 
-		return params.paletteUtils.createPaletteItem(...paletteItemArgs);
+		return utils.palette.createPaletteItem(newColor, index + 1);
 	});
 
-	return params.paletteUtils.createPaletteObject(
-		params.argsHelpers.getCreatePaletteObjectArgs(
-			'diadic',
-			`diadic_${params.appUtils.getFormattedTimestamp()}`,
-			paletteItems,
-			swatchCount,
-			params
-		),
-		params.appUtils
-	);
+	return utils.palette.createPaletteObject(options, paletteItems);
 }
 
-export function generateHexadicPalette(params: GeneratePaletteArgs): Palette {
+function hexadic(
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface,
+	generateHues: GenerateHuesFnGroup
+): Palette {
+	const utils = common.utils;
 	// hexadic palettes always have 6 swatches
-	const swatchCount = 6;
+	const columnCount = 6;
 
-	params.domUtils.enforceSwatchRules(swatchCount, 6, params.appServices);
+	utils.dom.enforceSwatchRules(columnCount, 6);
 
-	const baseColor = params.appUtils.generateRandomHSL(
-		...params.argsHelpers.getGenerateRandomColorArgs(params)
-	);
-	const hues = params.generateHues(
-		params.argsHelpers.getHueGenerationArgs(baseColor, params)
-	);
+	const baseColor = utils.app.generateRandomHSL();
+	const hues = generateHues.hexadic(baseColor, common);
 
 	// create PaletteItem array with assigned itemIDs
 	const paletteItems = hues.map((hue, index) => {
@@ -235,63 +193,45 @@ export function generateHexadicPalette(params: GeneratePaletteArgs): Palette {
 
 		const newColor: HSL = {
 			value: {
-				hue: params.brand.asRadial(hue, params.validate),
-				saturation: params.brand.asPercentile(
+				hue: utils.brand.asRadial(hue),
+				saturation: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
 							0,
 							baseColor.value.saturation + saturationShift
 						)
-					),
-					params.validate
+					)
 				),
-				lightness: params.brand.asPercentile(
+				lightness: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessShift)
-					),
-					params.validate
+					)
 				)
 			},
 			format: 'hsl'
 		};
-		const paletteItemArgs = params.argsHelpers.getCreatePaletteItemArgs(
-			newColor,
-			index + 1,
-			params
-		);
 
-		return params.paletteUtils.createPaletteItem(...paletteItemArgs);
+		return utils.palette.createPaletteItem(newColor, index + 1);
 	});
 
-	return params.paletteUtils.createPaletteObject(
-		params.argsHelpers.getCreatePaletteObjectArgs(
-			'hexadic',
-			`hexadic_${params.appUtils.getFormattedTimestamp()}`,
-			paletteItems,
-			swatchCount,
-			params
-		),
-		params.appUtils
-	);
+	return utils.palette.createPaletteObject(options, paletteItems);
 }
 
-export function generateMonochromaticPalette(
-	params: GeneratePaletteArgs
+function monochromatic(
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface
 ): Palette {
-	const columnCount = Math.max(2, Math.min(6, params.options.columnCount));
+	const utils = common.utils;
+	const columnCount = Math.max(2, Math.min(6, options.columnCount));
 
-	params.domUtils.enforceSwatchRules(columnCount, 6, params.appServices);
+	utils.dom.enforceSwatchRules(columnCount, 6);
 
-	const baseColor = params.appUtils.generateRandomHSL(
-		...params.argsHelpers.getGenerateRandomColorArgs(params)
-	);
+	const baseColor = utils.app.generateRandomHSL();
 	const paletteItems: PaletteItem[] = [];
 
-	const basePaletteItem = params.paletteUtils.createPaletteItem(
-		...params.argsHelpers.getCreatePaletteItemArgs(baseColor, 1, params)
-	);
+	const basePaletteItem = utils.palette.createPaletteItem(baseColor, 1);
 	paletteItems.push(basePaletteItem);
 
 	// generate monochromatic variations
@@ -302,113 +242,76 @@ export function generateMonochromaticPalette(
 
 		const newColor: HSL = {
 			value: {
-				hue: params.brand.asRadial(
-					(baseColor.value.hue + hueShift + 360) % 360,
-					params.validate
+				hue: utils.brand.asRadial(
+					(baseColor.value.hue + hueShift + 360) % 360
 				),
-				saturation: params.brand.asPercentile(
+				saturation: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
 							0,
 							baseColor.value.saturation + saturationShift
 						)
-					),
-					params.validate
+					)
 				),
-				lightness: params.brand.asPercentile(
+				lightness: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessShift)
-					),
-					params.validate
+					)
 				)
 			},
 			format: 'hsl'
 		};
-		const paletteItem = params.paletteUtils.createPaletteItem(
-			...params.argsHelpers.getCreatePaletteItemArgs(
-				newColor,
-				i + 1,
-				params
-			)
-		);
+		const paletteItem = utils.palette.createPaletteItem(newColor, i + 1);
 
 		paletteItems.push(paletteItem);
 	}
 
-	return params.paletteUtils.createPaletteObject(
-		params.argsHelpers.getCreatePaletteObjectArgs(
-			'monochromatic',
-			`monochromatic_${params.appUtils.getFormattedTimestamp()}`,
-			paletteItems,
-			columnCount,
-			params
-		),
-		params.appUtils
-	);
+	return utils.palette.createPaletteObject(options, paletteItems);
 }
 
-export function generateRandomPalette(params: GeneratePaletteArgs): Palette {
+function random(
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface
+): Palette {
+	const utils = common.utils;
 	// ensure column count is between 2 and 6
-	const swatchCount = Math.max(2, Math.min(6, params.options.columnCount));
+	const columnCount = Math.max(2, Math.min(6, options.columnCount));
 
-	params.domUtils.enforceSwatchRules(swatchCount, 6, params.appServices);
+	utils.dom.enforceSwatchRules(columnCount, 6);
 
-	const baseColor = params.appUtils.generateRandomHSL(
-		...params.argsHelpers.getGenerateRandomColorArgs(params)
-	);
+	const baseColor = utils.app.generateRandomHSL();
 
 	const paletteItems: PaletteItem[] = [];
 
-	const basePaletteItem = params.paletteUtils.createPaletteItem(
-		...params.argsHelpers.getCreatePaletteItemArgs(baseColor, 1, params)
-	);
+	const basePaletteItem = utils.palette.createPaletteItem(baseColor, 1);
 	paletteItems.push(basePaletteItem);
 
-	for (let i = 1; i < swatchCount; i++) {
-		const randomColor = params.appUtils.generateRandomHSL(
-			...params.argsHelpers.getGenerateRandomColorArgs(params)
-		);
-		const nextPaletteItem = params.paletteUtils.createPaletteItem(
-			...params.argsHelpers.getCreatePaletteItemArgs(
-				randomColor,
-				i + 1,
-				params
-			)
+	for (let i = 1; i < columnCount; i++) {
+		const randomColor = utils.app.generateRandomHSL();
+		const nextPaletteItem = utils.palette.createPaletteItem(
+			randomColor,
+			i + 1
 		);
 
 		paletteItems.push(nextPaletteItem);
-
-		params.domUtils.updateColorBox(
-			randomColor,
-			String(i + 1),
-			params.colorUtils
-		);
 	}
 
-	return params.paletteUtils.createPaletteObject(
-		params.argsHelpers.getCreatePaletteObjectArgs(
-			'random',
-			`random_${params.appUtils.getFormattedTimestamp()}`,
-			paletteItems,
-			swatchCount,
-			params
-		),
-		params.appUtils
-	);
+	return utils.palette.createPaletteObject(options, paletteItems);
 }
 
-export function generateSplitComplementaryPalette(
-	params: GeneratePaletteArgs
+function splitComplementary(
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface
 ): Palette {
+	const helpers = common.helpers;
+	const utils = common.utils;
 	// ensure column count is at least 3 and at most 6
-	const columnCount = Math.max(3, Math.min(6, params.options.columnCount));
-	params.domUtils.enforceSwatchRules(columnCount, 6, params.appServices);
+	const columnCount = Math.max(3, Math.min(6, options.columnCount));
+	utils.dom.enforceSwatchRules(columnCount, 6);
 
-	const randomColorArgs =
-		params.argsHelpers.getGenerateRandomColorArgs(params);
-	const baseColor = params.appUtils.generateRandomHSL(...randomColorArgs);
+	const baseColor = utils.app.generateRandomHSL();
 	const baseHue = baseColor.value.hue;
 
 	// generate split complementary hues
@@ -420,9 +323,8 @@ export function generateSplitComplementaryPalette(
 
 	// if swatchCount > 3, introduce additional variations
 	for (let i = 3; i < columnCount; i++) {
-		const variationOffset = params.paletteHelpers.getWeightedRandomInterval(
-			'soft',
-			params.appServices
+		const variationOffset = helpers.palette.getWeightedRandomInterval(
+			options.distributionType
 		);
 		const direction = i % 2 === 0 ? 1 : -1;
 		hues.push((baseHue + 180 + variationOffset * direction) % 360);
@@ -439,62 +341,46 @@ export function generateSplitComplementaryPalette(
 
 		const newColor: HSL = {
 			value: {
-				hue: params.brand.asRadial(hue, params.validate),
-				saturation: params.brand.asPercentile(
+				hue: utils.brand.asRadial(hue),
+				saturation: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
 							0,
 							baseColor.value.saturation + saturationShift
 						)
-					),
-					params.validate
+					)
 				),
-				lightness: params.brand.asPercentile(
+				lightness: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessShift)
-					),
-					params.validate
+					)
 				)
 			},
 			format: 'hsl'
 		};
 
-		return params.paletteUtils.createPaletteItem(
-			...params.argsHelpers.getCreatePaletteItemArgs(
-				newColor,
-				index + 1,
-				params
-			)
-		);
+		return utils.palette.createPaletteItem(newColor, index + 1);
 	});
 
-	return params.paletteUtils.createPaletteObject(
-		params.argsHelpers.getCreatePaletteObjectArgs(
-			'splitComplementary' as PaletteType,
-			`splitComplementary_${params.appUtils.getFormattedTimestamp()}`,
-			paletteItems,
-			columnCount,
-			params
-		),
-		params.appUtils
-	);
+	return utils.palette.createPaletteObject(options, paletteItems);
 }
 
-export function generateTetradicPalette(params: GeneratePaletteArgs): Palette {
+function tetradic(
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface,
+	generateHues: GenerateHuesFnGroup
+): Palette {
+	const utils = common.utils;
 	// tetradic palettes always have 4 swatches
-	const swatchCount = 4;
-	params.domUtils.enforceSwatchRules(swatchCount, 4, params.appServices);
+	const columnCount = 4;
+	utils.dom.enforceSwatchRules(columnCount, 4);
 
-	const baseColor = params.appUtils.generateRandomHSL(
-		...params.argsHelpers.getGenerateRandomColorArgs(params)
-	);
+	const baseColor = utils.app.generateRandomHSL();
 
 	// generate the 4 hues
-	const hues = params.generateHues(
-		params.argsHelpers.getHueGenerationArgs(baseColor, params)
-	);
+	const hues = generateHues.tetradic(baseColor, common);
 
 	// create PaletteItem array with assigned itemIDs
 	const paletteItems = hues.map((hue, index) => {
@@ -507,63 +393,47 @@ export function generateTetradicPalette(params: GeneratePaletteArgs): Palette {
 
 		const newColor: HSL = {
 			value: {
-				hue: params.brand.asRadial(hue, params.validate),
-				saturation: params.brand.asPercentile(
+				hue: utils.brand.asRadial(hue),
+				saturation: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
 							0,
 							baseColor.value.saturation + saturationShift
 						)
-					),
-					params.validate
+					)
 				),
-				lightness: params.brand.asPercentile(
+				lightness: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessShift)
-					),
-					params.validate
+					)
 				)
 			},
 			format: 'hsl'
 		};
 
-		return params.paletteUtils.createPaletteItem(
-			...params.argsHelpers.getCreatePaletteItemArgs(
-				newColor,
-				index + 1,
-				params
-			)
-		);
+		return utils.palette.createPaletteItem(newColor, index + 1);
 	});
 
-	return params.paletteUtils.createPaletteObject(
-		params.argsHelpers.getCreatePaletteObjectArgs(
-			'tetradic',
-			`tetradic_${Date.now()}`,
-			paletteItems,
-			swatchCount,
-			params
-		),
-		params.appUtils
-	);
+	return utils.palette.createPaletteObject(options, paletteItems);
 }
 
-export function generateTriadicPalette(params: GeneratePaletteArgs): Palette {
+function triadic(
+	options: SelectedPaletteOptions,
+	common: CommonFunctionsInterface,
+	generateHues: GenerateHuesFnGroup
+): Palette {
+	const utils = common.utils;
 	// triadic palettes always have exactly 3 colors
 	const columnCount = 3;
-	params.domUtils.enforceSwatchRules(columnCount, 3, params.appServices);
+	utils.dom.enforceSwatchRules(columnCount, 3);
 
 	// generate the base color
-	const baseColor = params.appUtils.generateRandomHSL(
-		...params.argsHelpers.getGenerateRandomColorArgs(params)
-	);
+	const baseColor = utils.app.generateRandomHSL();
 
 	// generate the 3 hues needed
-	const hues = params.generateHues(
-		params.argsHelpers.getHueGenerationArgs(baseColor, params)
-	);
+	const hues = generateHues.triadic(baseColor, common);
 
 	// create PaletteItem array with assigned itemIDs
 	const paletteItems = hues.map((hue, index) => {
@@ -576,45 +446,40 @@ export function generateTriadicPalette(params: GeneratePaletteArgs): Palette {
 
 		const newColor: HSL = {
 			value: {
-				hue: params.brand.asRadial(hue, params.validate),
-				saturation: params.brand.asPercentile(
+				hue: utils.brand.asRadial(hue),
+				saturation: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(
 							0,
 							baseColor.value.saturation + saturationShift
 						)
-					),
-					params.validate
+					)
 				),
-				lightness: params.brand.asPercentile(
+				lightness: utils.brand.asPercentile(
 					Math.min(
 						100,
 						Math.max(0, baseColor.value.lightness + lightnessShift)
-					),
-					params.validate
+					)
 				)
 			},
 			format: 'hsl'
 		};
 
-		return params.paletteUtils.createPaletteItem(
-			...params.argsHelpers.getCreatePaletteItemArgs(
-				newColor,
-				index + 1,
-				params
-			)
-		);
+		return utils.palette.createPaletteItem(newColor, index + 1);
 	});
 
-	return params.paletteUtils.createPaletteObject(
-		params.argsHelpers.getCreatePaletteObjectArgs(
-			'tetradic',
-			`triadic_${Date.now()}`,
-			paletteItems,
-			columnCount,
-			params
-		),
-		params.appUtils
-	);
+	return utils.palette.createPaletteObject(options, paletteItems);
 }
+
+export const generatePalette: GeneratePaletteFnGroup = {
+	analogous,
+	complementary,
+	diadic,
+	hexadic,
+	monochromatic,
+	random,
+	splitComplementary,
+	tetradic,
+	triadic
+};

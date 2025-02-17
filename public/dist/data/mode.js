@@ -1,14 +1,13 @@
 // File: data/mode.js
-export const modeData = {
-    environment: 'dev',
+const modeData = {
+    env: 'dev',
     debug: true,
     debugLevel: 1,
-    expose: { idbManager: true, logger: true, uiManager: true },
-    gracefulErrors: false,
     logging: {
         args: true,
         clicks: false,
         debug: true,
+        info: true,
         error: true,
         verbosity: 3,
         warn: true
@@ -16,4 +15,6 @@ export const modeData = {
     showAlerts: true,
     stackTrace: true
 };
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibW9kZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9kYXRhL21vZGUudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEscUJBQXFCO0FBSXJCLE1BQU0sQ0FBQyxNQUFNLFFBQVEsR0FBc0I7SUFDMUMsV0FBVyxFQUFFLEtBQUs7SUFDbEIsS0FBSyxFQUFFLElBQUk7SUFDWCxVQUFVLEVBQUUsQ0FBQztJQUNiLE1BQU0sRUFBRSxFQUFFLFVBQVUsRUFBRSxJQUFJLEVBQUUsTUFBTSxFQUFFLElBQUksRUFBRSxTQUFTLEVBQUUsSUFBSSxFQUFFO0lBQzNELGNBQWMsRUFBRSxLQUFLO0lBQ3JCLE9BQU8sRUFBRTtRQUNSLElBQUksRUFBRSxJQUFJO1FBQ1YsTUFBTSxFQUFFLEtBQUs7UUFDYixLQUFLLEVBQUUsSUFBSTtRQUNYLEtBQUssRUFBRSxJQUFJO1FBQ1gsU0FBUyxFQUFFLENBQUM7UUFDWixJQUFJLEVBQUUsSUFBSTtLQUNWO0lBQ0QsVUFBVSxFQUFFLElBQUk7SUFDaEIsVUFBVSxFQUFFLElBQUk7Q0FDUCxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLy8gRmlsZTogZGF0YS9tb2RlLmpzXG5cbmltcG9ydCB7IE1vZGVEYXRhSW50ZXJmYWNlIH0gZnJvbSAnLi4vdHlwZXMvaW5kZXguanMnO1xuXG5leHBvcnQgY29uc3QgbW9kZURhdGE6IE1vZGVEYXRhSW50ZXJmYWNlID0ge1xuXHRlbnZpcm9ubWVudDogJ2RldicsXG5cdGRlYnVnOiB0cnVlLFxuXHRkZWJ1Z0xldmVsOiAxLFxuXHRleHBvc2U6IHsgaWRiTWFuYWdlcjogdHJ1ZSwgbG9nZ2VyOiB0cnVlLCB1aU1hbmFnZXI6IHRydWUgfSxcblx0Z3JhY2VmdWxFcnJvcnM6IGZhbHNlLFxuXHRsb2dnaW5nOiB7XG5cdFx0YXJnczogdHJ1ZSxcblx0XHRjbGlja3M6IGZhbHNlLFxuXHRcdGRlYnVnOiB0cnVlLFxuXHRcdGVycm9yOiB0cnVlLFxuXHRcdHZlcmJvc2l0eTogMyxcblx0XHR3YXJuOiB0cnVlXG5cdH0sXG5cdHNob3dBbGVydHM6IHRydWUsXG5cdHN0YWNrVHJhY2U6IHRydWVcbn0gYXMgY29uc3Q7XG4iXX0=
+
+export { modeData };
+//# sourceMappingURL=mode.js.map

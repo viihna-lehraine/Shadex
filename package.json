@@ -21,6 +21,7 @@
 		"watch:lint": "npx eslint --watch"
 	},
 	"devDependencies": {
+		"@rollup/plugin-dynamic-import-vars": "^2.1.5",
 		"@types/jest": "^29.5.14",
 		"@typescript-eslint/eslint-plugin": "^8.11.0",
 		"@typescript-eslint/parser": "^8.11.0",
@@ -39,6 +40,7 @@
 		"@rollup/plugin-commonjs": "^28.0.2",
 		"@rollup/plugin-node-resolve": "^16.0.0",
 		"@rollup/plugin-typescript": "^12.1.2",
+		"idb": "^8.0.2",
 		"rollup": "^4.30.1",
 		"source-map-support": "^0.5.21"
 	}

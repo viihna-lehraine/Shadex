@@ -2,13 +2,11 @@
 
 import { ServicesInterface, UtilitiesInterface } from '../types/index.js';
 import { EventManager } from './EventManager.js';
-import { constsData as consts } from '../data/consts.js';
 import { domData } from '../data/dom.js';
 
 const btns = domData.elements.btns;
 const classes = domData.classes;
 const elements = domData.elements;
-const timeouts = consts.timeouts;
 
 export class UIEvents {
 	private log: ServicesInterface['app']['log'];
@@ -112,40 +110,12 @@ export class UIEvents {
 		const element = this.utils.core.getElement(id);
 		if (!element) return;
 
-		let tooltip: HTMLElement | null = null;
-
-		element.addEventListener('mouseenter', (e: MouseEvent) => {
-			tooltip = this.utils.dom.createTooltipElement(element, tooltipText);
-			tooltip.textContent = tooltipText;
-			tooltip.style.position = 'absolute';
-			tooltip.style.zIndex = '1000';
-			tooltip.style.pointerEvents = 'none';
-			tooltip.style.opacity = '0';
-			tooltip.style.transition = 'opacity 0.2s ease-in-out';
-
-			document.body.appendChild(tooltip);
-			tooltip.style.left = `${e.clientX + 10}px`;
-			tooltip.style.top = `${e.clientY + 10}px`;
-
-			setTimeout(() => {
-				if (tooltip) tooltip.style.opacity = '1';
-			}, timeouts.tooltip);
+		EventManager.add(element, 'mouseenter', () => {
+			this.utils.dom.createTooltip(element, tooltipText);
 		});
 
-		element.addEventListener('mousemove', (e: MouseEvent) => {
-			if (tooltip) {
-				tooltip.style.left = `${e.clientX + 10}px`;
-				tooltip.style.top = `${e.clientY + 10}px`;
-			}
-		});
-
-		element.addEventListener('mouseleave', () => {
-			if (tooltip) {
-				tooltip.style.opacity = '0';
-				setTimeout(() => {
-					tooltip?.remove();
-				}, timeouts.tooltip);
-			}
+		EventManager.add(element, 'mouseleave', () => {
+			this.utils.dom.removeTooltip(element);
 		});
 	}
 

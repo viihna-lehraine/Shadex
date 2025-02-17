@@ -3,9 +3,10 @@
 import { StateManager } from '../state/StateManager.js';
 import {
 	Color,
-	GenerateHuesFn,
+	CommonFunctionsInterface,
+	GenerateHuesFnGroup,
 	GeneratePaletteFn,
-	HelpersInterface,
+	GeneratePaletteFnGroup,
 	HSL,
 	PaletteItem,
 	ServicesInterface,
@@ -16,28 +17,28 @@ import { domData } from '../data/dom.js';
 const ids = domData.ids;
 
 export class PaletteManager {
-	private generateHues: GenerateHuesFn;
+	private generateHues: GenerateHuesFnGroup;
+	private generatePaletteFns: GeneratePaletteFnGroup;
 	private generatePalette: GeneratePaletteFn;
 
-	private helpers: HelpersInterface;
+	private common: CommonFunctionsInterface;
 	private log: ServicesInterface['app']['log'];
-	private services: ServicesInterface;
+
 	private utils: UtilitiesInterface;
 
 	constructor(
 		private stateManager: StateManager,
-		generateHues: GenerateHuesFn,
-		generatePalette: GeneratePaletteFn,
-		helpers: HelpersInterface,
-		services: ServicesInterface,
-		utils: UtilitiesInterface
+		common: CommonFunctionsInterface,
+		generateHues: GenerateHuesFnGroup,
+		generatePaletteFns: GeneratePaletteFnGroup,
+		generatePalette: GeneratePaletteFn
 	) {
-		this.log = services.app.log;
+		this.log = common.services.app.log;
 		this.generateHues = generateHues;
+		this.generatePaletteFns = generatePaletteFns;
 		this.generatePalette = generatePalette;
-		this.helpers = helpers;
-		this.services = services;
-		this.utils = utils;
+		this.common = common;
+		this.utils = common.utils;
 	}
 
 	public renderNewPalette(): void {
@@ -56,10 +57,7 @@ export class PaletteManager {
 		}
 
 		// Step 1: Retrieve palette generation options from the UI
-		const options = this.utils.palette.getPaletteOptionsFromUI(
-			this.services,
-			this.utils
-		);
+		const options = this.utils.palette.getPaletteOptionsFromUI();
 
 		this.log(
 			'debug',
@@ -76,13 +74,12 @@ export class PaletteManager {
 		paletteContainer.innerHTML = '';
 
 		// Step 4: Generate a new palette
-		const newPalette = this.generatePalette({
+		const newPalette = this.generatePalette(
 			options,
-			helpers: this.helpers,
-			generateHues: this.generateHues,
-			services: this.services,
-			utils: this.utils
-		});
+			this.common,
+			this.generateHues,
+			this.generatePaletteFns
+		);
 
 		// Step 5: Create and append palette columns
 		const columnWidth = 100 / newPalette.items.length;
@@ -143,9 +140,9 @@ export class PaletteManager {
 
 			const clonedColor: Color = this.utils.typeGuards.isColor(color)
 				? this.utils.core.clone(color)
-				: this.utils.color.convertColorStringToColor(color, this.utils);
+				: this.utils.color.convertColorStringToColor(color);
 
-			if (!this.utils.validate.colorValue(clonedColor, this.utils)) {
+			if (!this.utils.validate.colorValue(clonedColor)) {
 				this.log(
 					'error',
 					'Invalid color values.',

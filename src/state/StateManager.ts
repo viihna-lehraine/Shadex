@@ -1,9 +1,9 @@
 // File: state/StateManager.js
 
 import {
-	AppServicesInterface,
 	History,
 	Palette,
+	ServicesInterface,
 	State,
 	StateManagerClassInterface
 } from '../types/index.js';
@@ -16,13 +16,19 @@ export class StateManager implements StateManagerClassInterface {
 	private history: History;
 	private state: State;
 	private undoStack: History;
-	private log: AppServicesInterface['log'];
+	private log: ServicesInterface['app']['log'];
 
-	private constructor(appServices: AppServicesInterface) {
+	private constructor(services: ServicesInterface) {
+		console.log(`services.app.log:`, services?.app?.log);
+
+		if (!services?.app?.log || typeof services.app.log !== 'function') {
+			throw new Error('services.app.log is not a function');
+		}
+
 		this.state = defaultState;
 		this.history = [defaultState];
 		this.undoStack = [];
-		this.log = appServices.log;
+		this.log = services.app.log;
 		this.saveToStorage('appState', this.state);
 		this.log(
 			'info',
@@ -32,9 +38,9 @@ export class StateManager implements StateManagerClassInterface {
 		);
 	}
 
-	public static getInstance(appServices: AppServicesInterface): StateManager {
+	public static getInstance(services: ServicesInterface): StateManager {
 		if (!StateManager.instance) {
-			StateManager.instance = new StateManager(appServices);
+			StateManager.instance = new StateManager(services);
 		}
 
 		return StateManager.instance;

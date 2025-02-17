@@ -1,29 +1,21 @@
 // File: src/data/config.js
 const DEFAULT_KEYS = {
-    APP_SETTINGS: 'appSettings',
-    CUSTOM_COLOR: 'customColor'
+    SETTINGS: 'settings'
 };
 const DEFAULT_SETTINGS = {
     colorSpace: 'hsl',
     lastPaletteID: 0,
-    lastTableID: 0,
     theme: 'light',
     loggingEnabled: true
 };
-const STORE_NAMES = {
-    APP_SETTINGS: 'appSettings',
-    CUSTOM_COLOR: 'customColor',
-    MUTATIONS: 'mutations',
-    PALLETES: 'palettes',
-    SETTINGS: 'settings',
-    TABLES: 'tables'
-};
-const db = {
+const storage = {
     DEFAULT_KEYS,
-    DEFAULT_SETTINGS,
-    STORE_NAMES
+    DEFAULT_SETTINGS
 };
 const regex = {
+    brand: {
+        hex: /^#[0-9A-Fa-f]{8}$/
+    },
     colors: {
         cmyk: /cmyk\((\d+)%?,\s*(\d+)%?,\s*(\d+)%?,\s*(\d+)%?(?:,\s*([\d.]+))?\)/i,
         hex: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/,
@@ -33,19 +25,30 @@ const regex = {
         rgb: /rgb\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i,
         xyz: /xyz\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i
     },
+    css: {
+        cmyk: /^cmyk\((\d+)%?,\s*(\d+)%?,\s*(\d+)%?,\s*(\d+)%?\)$/,
+        hsl: /^hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)$/,
+        hsv: /^hsv\((\d+),\s*(\d+)%?,\s*(\d+)%?\)$/,
+        lab: /^lab\(([\d.]+),\s*([\d.]+),\s*([\d.]+)\)$/,
+        rgb: /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/,
+        xyz: /^xyz\(([\d.]+),\s*([\d.]+),\s*([\d.]+)\)$/
+    },
     dom: {
         hex: /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i,
         hsl: /^hsl\(\s*(\d+),\s*([\d.]+)%,\s*([\d.]+)%\s*\)$/,
         rgb: /^rgb\(\s*(\d+),\s*(\d+),\s*(\d+)\s*\)$/
     },
-    file: {
-        palette: {
-            css: {
-                color: /\.color-\d+\s*{\s*([\s\S]*?)\s*}/i,
-                metadata: /\.palette\s*{\s*([\s\S]*?)\s*}/i
-            }
-        }
+    userInput: {
+        hex: /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/i,
+        hsl: /^hsl\(\s*(\d{1,3})\s*,\s*([0-9]{1,3})%\s*,\s*([0-9]{1,3})%\s*\)$/i,
+        rgb: /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i
+    },
+    validation: {
+        hex: /^#[0-9A-Fa-f]{6}$/,
+        hexComponent: /^#[0-9a-fA-F]{2}$/
     }
 };
-export const configData = { db, regex };
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uZmlnLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2RhdGEvY29uZmlnLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLDJCQUEyQjtBQUkzQixNQUFNLFlBQVksR0FBOEM7SUFDL0QsWUFBWSxFQUFFLGFBQWE7SUFDM0IsWUFBWSxFQUFFLGFBQWE7Q0FDM0IsQ0FBQztBQUVGLE1BQU0sZ0JBQWdCLEdBQWtEO0lBQ3ZFLFVBQVUsRUFBRSxLQUFtQjtJQUMvQixhQUFhLEVBQUUsQ0FBQztJQUNoQixXQUFXLEVBQUUsQ0FBQztJQUNkLEtBQUssRUFBRSxPQUEyQjtJQUNsQyxjQUFjLEVBQUUsSUFBSTtDQUNwQixDQUFDO0FBRUYsTUFBTSxXQUFXLEdBQTZDO0lBQzdELFlBQVksRUFBRSxhQUFhO0lBQzNCLFlBQVksRUFBRSxhQUFhO0lBQzNCLFNBQVMsRUFBRSxXQUFXO0lBQ3RCLFFBQVEsRUFBRSxVQUFVO0lBQ3BCLFFBQVEsRUFBRSxVQUFVO0lBQ3BCLE1BQU0sRUFBRSxRQUFRO0NBQ2hCLENBQUM7QUFFRixNQUFNLEVBQUUsR0FBOEI7SUFDckMsWUFBWTtJQUNaLGdCQUFnQjtJQUNoQixXQUFXO0NBQ1gsQ0FBQztBQUVGLE1BQU0sS0FBSyxHQUFpQztJQUMzQyxNQUFNLEVBQUU7UUFDUCxJQUFJLEVBQUUsb0VBQW9FO1FBQzFFLEdBQUcsRUFBRSxvQ0FBb0M7UUFDekMsR0FBRyxFQUFFLCtEQUErRDtRQUNwRSxHQUFHLEVBQUUsK0RBQStEO1FBQ3BFLEdBQUcsRUFBRSwyREFBMkQ7UUFDaEUsR0FBRyxFQUFFLDJEQUEyRDtRQUNoRSxHQUFHLEVBQUUsMkRBQTJEO0tBQ2hFO0lBQ0QsR0FBRyxFQUFFO1FBQ0osR0FBRyxFQUFFLGdDQUFnQztRQUNyQyxHQUFHLEVBQUUsZ0RBQWdEO1FBQ3JELEdBQUcsRUFBRSx3Q0FBd0M7S0FDN0M7SUFDRCxJQUFJLEVBQUU7UUFDTCxPQUFPLEVBQUU7WUFDUixHQUFHLEVBQUU7Z0JBQ0osS0FBSyxFQUFFLG1DQUFtQztnQkFDMUMsUUFBUSxFQUFFLGlDQUFpQzthQUMzQztTQUNEO0tBQ0Q7Q0FDRCxDQUFDO0FBRUYsTUFBTSxDQUFDLE1BQU0sVUFBVSxHQUF3QixFQUFFLEVBQUUsRUFBRSxLQUFLLEVBQVcsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEZpbGU6IHNyYy9kYXRhL2NvbmZpZy5qc1xuXG5pbXBvcnQgeyBDb25maWdEYXRhSW50ZXJmYWNlLCBDb2xvclNwYWNlIH0gZnJvbSAnLi4vdHlwZXMvaW5kZXguanMnO1xuXG5jb25zdCBERUZBVUxUX0tFWVM6IENvbmZpZ0RhdGFJbnRlcmZhY2VbJ2RiJ11bJ0RFRkFVTFRfS0VZUyddID0ge1xuXHRBUFBfU0VUVElOR1M6ICdhcHBTZXR0aW5ncycsXG5cdENVU1RPTV9DT0xPUjogJ2N1c3RvbUNvbG9yJ1xufTtcblxuY29uc3QgREVGQVVMVF9TRVRUSU5HUzogQ29uZmlnRGF0YUludGVyZmFjZVsnZGInXVsnREVGQVVMVF9TRVRUSU5HUyddID0ge1xuXHRjb2xvclNwYWNlOiAnaHNsJyBhcyBDb2xvclNwYWNlLFxuXHRsYXN0UGFsZXR0ZUlEOiAwLFxuXHRsYXN0VGFibGVJRDogMCxcblx0dGhlbWU6ICdsaWdodCcgYXMgJ2xpZ2h0JyB8ICdkYXJrJyxcblx0bG9nZ2luZ0VuYWJsZWQ6IHRydWVcbn07XG5cbmNvbnN0IFNUT1JFX05BTUVTOiBDb25maWdEYXRhSW50ZXJmYWNlWydkYiddWydTVE9SRV9OQU1FUyddID0ge1xuXHRBUFBfU0VUVElOR1M6ICdhcHBTZXR0aW5ncycsXG5cdENVU1RPTV9DT0xPUjogJ2N1c3RvbUNvbG9yJyxcblx0TVVUQVRJT05TOiAnbXV0YXRpb25zJyxcblx0UEFMTEVURVM6ICdwYWxldHRlcycsXG5cdFNFVFRJTkdTOiAnc2V0dGluZ3MnLFxuXHRUQUJMRVM6ICd0YWJsZXMnXG59O1xuXG5jb25zdCBkYjogQ29uZmlnRGF0YUludGVyZmFjZVsnZGInXSA9IHtcblx0REVGQVVMVF9LRVlTLFxuXHRERUZBVUxUX1NFVFRJTkdTLFxuXHRTVE9SRV9OQU1FU1xufTtcblxuY29uc3QgcmVnZXg6IENvbmZpZ0RhdGFJbnRlcmZhY2VbJ3JlZ2V4J10gPSB7XG5cdGNvbG9yczoge1xuXHRcdGNteWs6IC9jbXlrXFwoKFxcZCspJT8sXFxzKihcXGQrKSU/LFxccyooXFxkKyklPyxcXHMqKFxcZCspJT8oPzosXFxzKihbXFxkLl0rKSk/XFwpL2ksXG5cdFx0aGV4OiAvXiMoW0EtRmEtZjAtOV17Nn18W0EtRmEtZjAtOV17OH0pJC8sXG5cdFx0aHNsOiAvaHNsXFwoKFtcXGQuXSspLFxccyooW1xcZC5dKyklPyxcXHMqKFtcXGQuXSspJT8oPzosXFxzKihbXFxkLl0rKSk/XFwpL2ksXG5cdFx0aHN2OiAvaHN2XFwoKFtcXGQuXSspLFxccyooW1xcZC5dKyklPyxcXHMqKFtcXGQuXSspJT8oPzosXFxzKihbXFxkLl0rKSk/XFwpL2ksXG5cdFx0bGFiOiAvbGFiXFwoKFtcXGQuXSspLFxccyooW1xcZC5dKyksXFxzKihbXFxkLl0rKSg/OixcXHMqKFtcXGQuXSspKT9cXCkvaSxcblx0XHRyZ2I6IC9yZ2JcXCgoW1xcZC5dKyksXFxzKihbXFxkLl0rKSxcXHMqKFtcXGQuXSspKD86LFxccyooW1xcZC5dKykpP1xcKS9pLFxuXHRcdHh5ejogL3h5elxcKChbXFxkLl0rKSxcXHMqKFtcXGQuXSspLFxccyooW1xcZC5dKykoPzosXFxzKihbXFxkLl0rKSk/XFwpL2lcblx0fSxcblx0ZG9tOiB7XG5cdFx0aGV4OiAvXiM/KFswLTlhLWZdezN9fFswLTlhLWZdezZ9KSQvaSxcblx0XHRoc2w6IC9eaHNsXFwoXFxzKihcXGQrKSxcXHMqKFtcXGQuXSspJSxcXHMqKFtcXGQuXSspJVxccypcXCkkLyxcblx0XHRyZ2I6IC9ecmdiXFwoXFxzKihcXGQrKSxcXHMqKFxcZCspLFxccyooXFxkKylcXHMqXFwpJC9cblx0fSxcblx0ZmlsZToge1xuXHRcdHBhbGV0dGU6IHtcblx0XHRcdGNzczoge1xuXHRcdFx0XHRjb2xvcjogL1xcLmNvbG9yLVxcZCtcXHMqe1xccyooW1xcc1xcU10qPylcXHMqfS9pLFxuXHRcdFx0XHRtZXRhZGF0YTogL1xcLnBhbGV0dGVcXHMqe1xccyooW1xcc1xcU10qPylcXHMqfS9pXG5cdFx0XHR9XG5cdFx0fVxuXHR9XG59O1xuXG5leHBvcnQgY29uc3QgY29uZmlnRGF0YTogQ29uZmlnRGF0YUludGVyZmFjZSA9IHsgZGIsIHJlZ2V4IH0gYXMgY29uc3Q7XG4iXX0=
+const configData = { regex, storage };
+
+export { configData };
+//# sourceMappingURL=config.js.map
