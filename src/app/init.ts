@@ -70,7 +70,11 @@ export async function initialize(): Promise<{
 
 		// 7. initialize PaletteState
 		console.log('[initialize-8] Calling initializePaletteState...');
-		const paletteState = await initializePaletteState(stateManager, utils);
+		const paletteState = await initializePaletteState(
+			services,
+			stateManager,
+			utils
+		);
 
 		// 8. initialize PaletteManager
 		console.log('[initialize-9] Calling initializePaletteManager...');
@@ -111,7 +115,7 @@ export async function initialize(): Promise<{
 					stateManager,
 					utils
 				),
-				ui: new UIEvents(services, utils)
+				ui: new UIEvents(paletteManager, services, utils)
 			};
 		}
 
@@ -127,7 +131,15 @@ export async function initialize(): Promise<{
 			);
 		}
 
-		console.log('[initialize-15] Initialization complete.');
+		// 12. Ensure state is fully initialized before rendering initial palette
+		await stateManager.ensureStateReady();
+
+		// 12. Render initial palette
+		console.log('[initialize-15] Calling paletteManager.loadPalette()...');
+		await paletteManager.loadPalette();
+		console.log('[initialize-15.5] After paletteManager.loadPalette()...');
+
+		console.log('[initialize-16] Initialization complete.');
 
 		return {
 			common,
@@ -184,7 +196,7 @@ async function initializeEvents(
 		stateManager,
 		utils
 	);
-	const uiEvents = new UIEvents(services, utils);
+	const uiEvents = new UIEvents(paletteManager, services, utils);
 
 	paletteEvents.init();
 
@@ -239,12 +251,13 @@ async function initializePaletteManager(
 }
 
 async function initializePaletteState(
+	services: ServicesInterface,
 	stateManager: StateManager,
 	utils: UtilitiesInterface
 ): Promise<PaletteState> {
 	try {
 		console.log('[initializePaletteState-1] Creating palette state...');
-		const palettestate = new PaletteState(stateManager, utils);
+		const palettestate = new PaletteState(stateManager, services, utils);
 		console.log('[initializePaletteState-2] PaletteState initialized.');
 		return palettestate;
 	} catch (err) {

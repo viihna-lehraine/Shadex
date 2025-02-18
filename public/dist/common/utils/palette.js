@@ -130,6 +130,41 @@ function createPaletteUtils(services, utils) {
                     paletteType: 'random'
                 };
             }
+        },
+        getRandomizedPaleteOptions() {
+            const paletteTypeMap = {
+                0: 'analogous',
+                1: 'complementary',
+                2: 'diadic',
+                3: 'hexadic',
+                4: 'monochromatic',
+                5: 'random',
+                6: 'split-complementary',
+                7: 'tetradic',
+                8: 'triadic'
+            };
+            const distributionTypeMap = {
+                0: 'base',
+                1: 'chaotic',
+                2: 'soft',
+                3: 'strong'
+            };
+            const randomPaletteTypeIndex = Math.floor(Math.random() * Object.keys(paletteTypeMap).length);
+            const randomDistributionTypeIndex = Math.floor(Math.random() * Object.keys(distributionTypeMap).length);
+            const paletteType = paletteTypeMap[randomPaletteTypeIndex];
+            const distributionType = distributionTypeMap[randomDistributionTypeIndex];
+            const columnCount = Math.floor(Math.random() * 6) + 1;
+            const limitDark = Math.random() < 0.5;
+            const limitGray = Math.random() < 0.5;
+            const limitLight = Math.random() < 0.5;
+            return {
+                columnCount,
+                distributionType,
+                limitDark,
+                limitGray,
+                limitLight,
+                paletteType
+            };
         }
     };
 }

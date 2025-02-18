@@ -1,23 +1,25 @@
 // File: storage/IDBManager.js
 
-import { ServicesInterface } from '../types/index.js';
+import { IDBManagerClassInterface, ServicesInterface } from '../types/index.js';
 import { data } from '../data/index.js';
 
 const dbName = data.storage.idb.dbName;
 const defaultVerson = data.storage.idb.defaultVersion;
 const storeName = data.storage.idb.storeName;
 
-export class IDBManager {
+export class IDBManager implements IDBManagerClassInterface {
 	private static instance: IDBManager | null = null;
 	private defaultVersion: number;
 	private version: number;
 	private db: IDBDatabase | null = null;
 	private log: ServicesInterface['log'];
+	private errors: ServicesInterface['errors'];
 
 	private constructor(services: ServicesInterface) {
 		this.defaultVersion = defaultVerson;
 		this.version = this.defaultVersion;
 		this.log = services.log;
+		this.errors = services.errors;
 	}
 
 	public static getInstance(services: ServicesInterface): IDBManager {
@@ -29,101 +31,55 @@ export class IDBManager {
 	}
 
 	public async init(): Promise<boolean> {
-		return new Promise((resolve, reject) => {
-			if (!window.indexedDB) {
-				this.log(
-					'warn',
-					'IndexedDB is not supported in this browser',
-					'IDBManager.init()',
-					2
-				);
-				reject(new Error('IndexedDB is not supported'));
-				return resolve(false);
-			}
-
-			console.log('[IDBManager.init] Opening IndexedDB...');
-			const request = indexedDB.open(dbName, this.version);
-
-			request.onupgradeneeded = event => {
-				const db = (event.target as IDBOpenDBRequest).result;
-				console.log(
-					`[IDBManager.init] Upgrading database to version ${this.version}`
-				);
-
-				if (!db.objectStoreNames.contains(storeName)) {
-					db.createObjectStore(storeName, {
-						keyPath: 'id',
-						autoIncrement: true
-					});
-					console.log(
-						`[IDBManager.init] Created object store: ${storeName}`
-					);
-					this.log(
-						'info',
-						`Created object store: ${storeName}`,
-						'IDBManager.init()',
-						3
+		return this.errors.handleAsync(
+			async () => {
+				if (!window.indexedDB) {
+					throw new Error(
+						'IndexedDB is not supported in this browser'
 					);
 				}
-			};
 
-			request.onsuccess = event => {
-				this.db = (event.target as IDBOpenDBRequest).result;
-				this.db.onversionchange = () => {
-					this.db?.close();
-					this.log(
-						'warn',
-						'IndexedDB version changed, closing database',
-						'IDBManager.init()'
-					);
-				};
+				console.log('[IDBManager.init] Opening IndexedDB...');
+				const request = indexedDB.open(dbName, this.version);
 
-				if (this.db) {
-					this.log(
-						'info',
-						'IndexedDB initialized successfully',
-						'IDBManager.init()',
-						2
-					);
-					resolve(true);
-				} else {
-					this.log(
-						'error',
-						'IndexedDB opened but db object is null',
-						'IDBManager.init()'
-					);
-					reject(new Error('IndexedDB opened but db object is null'));
-				}
-			};
+				return await new Promise((resolve, reject) => {
+					request.onupgradeneeded = event => {
+						const db = (event.target as IDBOpenDBRequest).result;
+						if (!db.objectStoreNames.contains(storeName)) {
+							db.createObjectStore(storeName, {
+								keyPath: 'id',
+								autoIncrement: true
+							});
+							console.log(
+								`[IDBManager.init] Created object store: ${storeName}`
+							);
+						}
+					};
 
-			request.onerror = event => {
-				const errorMessage =
-					(event.target as IDBOpenDBRequest).error?.message ||
-					'Unknown error';
-				console.error(
-					`[IDBManager.init] IndexedDB failed: ${errorMessage}`
-				);
-				this.log(
-					'error',
-					`IndexedDB failed to initialize: ${errorMessage}`,
-					'IDBManager.init()',
-					2
-				);
-				resolve(false);
-			};
-		});
-	}
+					request.onsuccess = event => {
+						this.db = (event.target as IDBOpenDBRequest).result;
+						this.db.onversionchange = () => {
+							this.db?.close();
+							this.log(
+								'warn',
+								'IndexedDB version changed, closing database',
+								'IDBManager.init()'
+							);
+						};
+						resolve(true);
+					};
 
-	public async clear(): Promise<void> {
-		return new Promise((resolve, reject) => {
-			const store = this.getTransaction('readwrite');
-			if (!store) return reject('IndexedDB is not initialized.');
-
-			const request = store.clear();
-
-			request.onsuccess = () => resolve();
-			request.onerror = () => reject();
-		});
+					request.onerror = event => {
+						reject(
+							(event.target as IDBOpenDBRequest).error?.message ||
+								'Unknown error'
+						);
+					};
+				});
+			},
+			'Failed to initialize IndexedDB',
+			'IDBManager.init()'
+		);
 	}
 
 	public async ensureDBReady(): Promise<void> {
@@ -137,95 +93,102 @@ export class IDBManager {
 		}
 	}
 
+	public async clear(): Promise<void> {
+		await this.errors.handleAsync(
+			async () => {
+				const store = this.getTransaction('readwrite');
+				if (!store) throw new Error('IndexedDB is not initialized.');
+
+				await new Promise<void>((resolve, reject) => {
+					const request = store.clear();
+					request.onsuccess = () => resolve();
+					request.onerror = event =>
+						reject(
+							(event.target as IDBRequest).error?.message ||
+								'Unknown error'
+						);
+				});
+			},
+			'Failed to clear IndexedDB',
+			'IDBManager.clear()'
+		);
+	}
+
 	public async getItem<T>(key: string): Promise<T | null> {
 		await this.ensureDBReady();
 
-		return new Promise((resolve, reject) => {
-			const store = this.getTransaction('readonly');
-			if (!store) {
-				this.log(
-					'error',
-					'IndexedDB transaction failed: Database is not initialized.',
-					'IDBManager.getItem()'
-				);
-				return reject(new Error('IndexedDB is not initialized.'));
-			}
+		return this.errors.handleAsync(
+			async () => {
+				const store = this.getTransaction('readonly');
+				if (!store) throw new Error('IndexedDB is not initialized.');
 
-			const request = store.get(key);
-
-			request.onsuccess = () => {
-				console.log(`[IDBManager.getItem] Retrieved item: ${key}`);
-				resolve(request.result?.value ?? null);
-			};
-
-			request.onerror = event => {
-				const errorMessage =
-					(event.target as IDBRequest).error?.message ||
-					'Unknown error';
-				console.error(
-					`[IDBManager.getItem] Failed to retrieve ${key}: ${errorMessage}`
-				);
-				this.log(
-					'error',
-					`Failed to retrieve item: ${key} - ${errorMessage}`,
-					'IDBManager.getItem()'
-				);
-				reject(null);
-			};
-		});
-	}
-
-	public getTransaction(mode: IDBTransactionMode): IDBObjectStore | null {
-		if (!this.db) return null;
-		const transaction = this.db.transaction(storeName, mode);
-		return transaction.objectStore(storeName);
-	}
-
-	public async removeItem(key: string): Promise<void> {
-		return new Promise((resolve, reject) => {
-			const store = this.getTransaction('readwrite');
-			if (!store) return reject('IndexedDB is not initialized.');
-
-			const request = store.delete(key);
-
-			request.onsuccess = () => resolve();
-			request.onerror = () => reject();
-		});
+				return await new Promise<T | null>((resolve, reject) => {
+					const request = store.get(key);
+					request.onsuccess = () =>
+						resolve(request.result?.value ?? null);
+					request.onerror = event =>
+						reject(
+							(event.target as IDBRequest).error?.message ||
+								'Unknown error'
+						);
+				});
+			},
+			`Failed to retrieve item ${key} from IndexedDB`,
+			'IDBManager.getItem()'
+		);
 	}
 
 	public async setItem(key: string, value: unknown): Promise<void> {
-		return new Promise((resolve, reject) => {
-			const store = this.getTransaction('readwrite');
-			if (!store) {
-				this.log(
-					'error',
-					'IndexedDB transaction failed: Database is not initialized.',
-					'IDBManager.setItem()'
-				);
-				return reject(new Error('IndexedDB is not initialized.'));
-			}
+		await this.errors.handleAsync(
+			async () => {
+				const store = this.getTransaction('readwrite');
+				if (!store) throw new Error('IndexedDB is not initialized.');
 
-			const request = store.put({ id: key, value });
+				await new Promise<void>((resolve, reject) => {
+					const request = store.put({ id: key, value });
+					request.onsuccess = () => resolve();
+					request.onerror = event =>
+						reject(
+							(event.target as IDBRequest).error?.message ||
+								'Unknown error'
+						);
+				});
+			},
+			`Failed to store item ${key} in IndexedDB`,
+			'IDBManager.setItem()'
+		);
+	}
 
-			request.onsuccess = () => {
-				console.log(`[IDBManager.setItem] Stored item: ${key}`);
-				resolve();
-			};
+	public async removeItem(key: string): Promise<void> {
+		await this.errors.handleAsync(
+			async () => {
+				const store = this.getTransaction('readwrite');
+				if (!store) throw new Error('IndexedDB is not initialized.');
 
-			request.onerror = event => {
-				const errorMessage =
-					(event.target as IDBRequest).error?.message ||
-					'Unknown error';
-				console.error(
-					`[IDBManager.setItem] Failed to store ${key}: ${errorMessage}`
-				);
-				this.log(
-					'error',
-					`Failed to store item: ${key} - ${errorMessage}`,
-					'IDBManager.setItem()'
-				);
-				reject(event);
-			};
-		});
+				await new Promise<void>((resolve, reject) => {
+					const request = store.delete(key);
+					request.onsuccess = () => resolve();
+					request.onerror = event =>
+						reject(
+							(event.target as IDBRequest).error?.message ||
+								'Unknown error'
+						);
+				});
+			},
+			`Failed to remove item ${key} from IndexedDB`,
+			'IDBManager.removeItem()'
+		);
+	}
+
+	private getTransaction(mode: IDBTransactionMode): IDBObjectStore | void {
+		return this.errors.handle(
+			() => {
+				if (!this.db) throw new Error('IndexedDB is not initialized.');
+				const transaction = this.db.transaction(storeName, mode);
+				return transaction.objectStore(storeName);
+			},
+			`Failed to get IndexedDB transaction (${mode})`,
+			'IDBManager.getTransaction'
+		);
 	}
 }

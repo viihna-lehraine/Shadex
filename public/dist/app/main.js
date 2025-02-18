@@ -1,9 +1,8 @@
 import { EventManager } from '../events/EventManager.js';
 import { initialize } from './init.js';
-import { data } from '../data/index.js';
+import '../data/index.js';
 
 // File: app/main.js
-const mode = data.mode;
 console.log('[main-1] Loading main.js...');
 console.log(`[main-3] Calling initialize()`);
 const init = await initialize();
@@ -24,17 +23,15 @@ if (log) {
 else {
     console.error('[main-5E] > log function is undefined.');
 }
+const errorHandler = init.common.services.errors;
 async function main() {
-    try {
+    await errorHandler.handleAsync(async () => {
         log('debug', 'DOM content loaded - Application initialized.', '[main-6]', 1);
-        if (mode.debug) {
+        {
             setTimeout(() => {
                 EventManager.listAll();
-            }, 2500);
+            }, 100);
         }
-    }
-    catch (error) {
-        log('error', `Application initialization failed: ${error instanceof Error ? error.message : error}`, '[main-ERROR]');
-    }
+    }, 'Application initialization failed', '[main-ERROR]');
 }
 //# sourceMappingURL=main.js.map

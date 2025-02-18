@@ -1,8 +1,10 @@
 // File: common/services/DataObserver.js
 
-import { Listener } from '../../types/index.js';
+import { DataObserverClassInterface, Listener } from '../../types/index.js';
 
-export class DataObserver<T extends Record<string, unknown>> {
+export class DataObserver<T extends Record<string, unknown>>
+	implements DataObserverClassInterface<T>
+{
 	private data: T;
 	private listeners: Partial<Record<keyof T, Listener<T[keyof T]>[]>> =
 		{} as Record<keyof T, Listener<T[keyof T]>[]>;
@@ -44,22 +46,22 @@ export class DataObserver<T extends Record<string, unknown>> {
 		});
 	}
 
+	public get<K extends keyof T>(prop: K): T[K] {
+		return this.data[prop];
+	}
+
 	// subscribe to property changes
-	on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void {
+	public on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void {
 		if (!this.listeners[prop]) this.listeners[prop] = [];
 		(this.listeners[prop] as Listener<T[K]>[]).push(callback);
+	}
+
+	public set<K extends keyof T>(prop: K, value: T[K]): void {
+		this.data[prop] = value;
 	}
 
 	// notify listeners when a property changes
 	private notify<K extends keyof T>(prop: K, newValue: T[K], oldValue: T[K]) {
 		this.listeners[prop]?.forEach(callback => callback(newValue, oldValue));
-	}
-
-	get<K extends keyof T>(prop: K): T[K] {
-		return this.data[prop];
-	}
-
-	set<K extends keyof T>(prop: K, value: T[K]): void {
-		this.data[prop] = value;
 	}
 }

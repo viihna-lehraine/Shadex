@@ -1,13 +1,18 @@
 // File: storage/LocalStorageManager.js
 
-import { ServicesInterface } from '../types/index.js';
+import {
+	LocalStorageManagerClassInterface,
+	ServicesInterface
+} from '../types/index.js';
 
-export class LocalStorageManager {
+export class LocalStorageManager implements LocalStorageManagerClassInterface {
 	private static instance: LocalStorageManager | null = null;
 	private log: ServicesInterface['log'];
+	private errors: ServicesInterface['errors'];
 
 	private constructor(services: ServicesInterface) {
 		this.log = services.log;
+		this.errors = services.errors;
 	}
 
 	public static getInstance(
@@ -31,41 +36,44 @@ export class LocalStorageManager {
 	}
 
 	public async clear(): Promise<void> {
-		localStorage.clear();
+		await this.errors.handleAsync(
+			async () => localStorage.clear(),
+			'Failed to clear LocalStorage',
+			'LocalStorageManager.clear()'
+		);
 	}
 
 	public async getItem<T>(key: string): Promise<T | null> {
-		try {
-			const value = localStorage.getItem(key);
-			return value ? JSON.parse(value) : null;
-		} catch (error) {
-			this.log(
-				'error',
-				`Failed to get item: ${key}`,
-				'LocalStorageManager.getItem()'
-			);
-			return null;
-		}
+		return this.errors.handleAsync(
+			async () => {
+				const value = localStorage.getItem(key);
+				return value ? JSON.parse(value) : null;
+			},
+			`Failed to get item ${key} from LocalStorage`,
+			'LocalStorageManager.getItem()'
+		);
 	}
 
 	public async removeItem(key: string): Promise<void> {
-		localStorage.removeItem(key);
+		await this.errors.handleAsync(
+			async () => localStorage.removeItem(key),
+			`Failed to remove item ${key} from LocalStorage`,
+			'LocalStorageManager.removeItem()'
+		);
 	}
 
 	public async setItem(key: string, value: unknown): Promise<void> {
-		try {
-			localStorage.setItem(key, JSON.stringify(value));
-			this.log(
-				'info',
-				`Stored item: ${key}`,
-				'LocalStorageManager.setItem()'
-			);
-		} catch (error) {
-			this.log(
-				'error',
-				`Failed to store item: ${key}`,
-				'LocalStorageManager.setItem()'
-			);
-		}
+		await this.errors.handleAsync(
+			async () => {
+				localStorage.setItem(key, JSON.stringify(value));
+				this.log(
+					'info',
+					`Stored item: ${key}`,
+					'LocalStorageManager.setItem()'
+				);
+			},
+			`Failed to store item ${key} in LocalStorage`,
+			'LocalStorageManager.setItem()'
+		);
 	}
 }

@@ -4,6 +4,7 @@ import { data } from '../data/index.js';
 const defaultPalette = data.defaults.palette;
 function generatePalette(options, common, generateHuesFns, generatePaletteFns) {
     const log = common.services.log;
+    const errors = common.services.errors;
     try {
         log('debug', `Generating ${options.paletteType} palette with args ${JSON.stringify(options)}`, 'generatePalette()', 2);
         switch (options.paletteType) {
@@ -31,7 +32,8 @@ function generatePalette(options, common, generateHuesFns, generatePaletteFns) {
         }
     }
     catch (error) {
-        throw new Error(`Error occurred during palette generation: ${error}`);
+        errors.handle(error, 'Error occurred during palette generation', 'generatePalette()');
+        return defaultPalette;
     }
 }
 

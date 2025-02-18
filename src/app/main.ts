@@ -42,29 +42,29 @@ if (log) {
 	console.error('[main-5E] > log function is undefined.');
 }
 
-async function main() {
-	try {
-		log(
-			'debug',
-			'DOM content loaded - Application initialized.',
-			'[main-6]',
-			1
-		);
+const errorHandler = init.common.services.errors;
 
-		if (mode.debug) {
-			setTimeout(() => {
-				EventManager.listAll();
-			}, 2500);
-		}
-	} catch (error) {
-		log(
-			'error',
-			`Application initialization failed: ${error instanceof Error ? error.message : error}`,
-			'[main-ERROR]'
-		);
-		if (mode.showAlerts)
-			alert(
-				'An error occurred during startup. Check console for details'
+async function main() {
+	await errorHandler.handleAsync(
+		async () => {
+			log(
+				'debug',
+				'DOM content loaded - Application initialized.',
+				'[main-6]',
+				1
 			);
+
+			if (mode.debug) {
+				setTimeout(() => {
+					EventManager.listAll();
+				}, 100);
+			}
+		},
+		'Application initialization failed',
+		'[main-ERROR]'
+	);
+
+	if (mode.showAlerts) {
+		alert('An error occurred during startup. Check console for details.');
 	}
 }

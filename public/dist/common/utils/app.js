@@ -58,6 +58,17 @@ function createAppUtils(services, utils) {
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        },
+        async tracePromise(promise, label) {
+            return promise
+                .then(result => {
+                console.log(`[TRACE SUCCESS] ${label}:`, result);
+                return result;
+            })
+                .catch(error => {
+                console.error(`[TRACE ERROR] ${label}:`, error);
+                throw error;
+            });
         }
     };
 }

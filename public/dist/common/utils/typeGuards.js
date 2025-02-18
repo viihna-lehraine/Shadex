@@ -180,9 +180,39 @@ function isLAB(value) {
 function isLABFormat(color) {
     return isColorFormat(color, 'lab');
 }
+function isPalette(palette) {
+    if (!palette ||
+        typeof palette !== 'object' ||
+        !('id' in palette && typeof palette.id === 'string') ||
+        !('items' in palette &&
+            Array.isArray(palette.items) &&
+            palette.items.length > 0) ||
+        !('metadata' in palette &&
+            typeof palette.metadata === 'object' &&
+            palette.metadata !== null))
+        return false;
+    const { metadata, items } = palette;
+    if (typeof metadata.columnCount !== 'number' ||
+        typeof metadata.timestamp !== 'string' ||
+        typeof metadata.type !== 'string' ||
+        !metadata.flags ||
+        typeof metadata.flags !== 'object')
+        return false;
+    const { flags } = metadata;
+    if (typeof flags.limitDark !== 'boolean' ||
+        typeof flags.limitGray !== 'boolean' ||
+        typeof flags.limitLight !== 'boolean')
+        return false;
+    return items.every(item => item &&
+        typeof item === 'object' &&
+        typeof item.itemID === 'number' &&
+        typeof item.css === 'object' &&
+        typeof item.css.hex === 'string');
+}
 function isPaletteType(value) {
     return [
         'analogous',
+        'custom',
         'complementary',
         'diadic',
         'hexadic',
@@ -281,6 +311,7 @@ const typeGuards = {
     isHSVColor,
     isHSVFormat,
     isHSVString,
+    isPalette,
     isInputElement,
     isLAB,
     isLABFormat,

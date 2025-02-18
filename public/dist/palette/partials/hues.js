@@ -18,13 +18,12 @@ function analogous(color, options, common) {
         return analogousHues;
     }
     catch (error) {
-        log('error', `Error generating analogous hues: ${error}`, 'generateAnalogousHues()');
+        common.services.errors.handle(error, 'Error generating analogous hues', 'generateAnalogousHues()', { options }, 'error');
         return [];
     }
 }
 function diadic(color, options, common) {
     const helpers = common.helpers;
-    const log = common.services.log;
     try {
         const baseHue = color.value.hue;
         const diadicHues = [];
@@ -35,13 +34,12 @@ function diadic(color, options, common) {
         return diadicHues;
     }
     catch (error) {
-        log('error', `Error generating diadic hues: ${error}`, 'generateDiadicHues()');
+        common.services.errors.handle(error, 'Error generating diadic hues', 'generateDiadicHues()', { options }, 'error');
         return [];
     }
 }
 function hexadic(color, common) {
     const utils = common.utils;
-    const log = common.services.log;
     try {
         const clonedBaseHSL = utils.color.convertToHSL(color);
         const hexadicHues = [];
@@ -57,12 +55,11 @@ function hexadic(color, common) {
         return hexadicHues;
     }
     catch (error) {
-        log('error', `Error generating hexadic hues: ${error}`, 'generateHexadicHues()');
+        common.services.errors.handle(error, 'Error generating hexadic hues', 'generateHexadicHues()', { color }, 'error');
         return [];
     }
 }
 function splitComplementary(color, common) {
-    const log = common.services.log;
     try {
         const baseHue = color.value.hue;
         const modifier = Math.floor(Math.random() * 11) + 20;
@@ -72,12 +69,11 @@ function splitComplementary(color, common) {
         ];
     }
     catch (error) {
-        log('error', `Error generating split complementary hues: ${error}`, 'generateSplitComplementaryHues()');
+        common.services.errors.handle(error, 'Error generating split-complementary hues', 'generateSplitComplementaryHues()', { color }, 'error');
         return [];
     }
 }
 function tetradic(color, common) {
-    const log = common.services.log;
     try {
         const baseHue = color.value.hue;
         const randomOffset = Math.floor(Math.random() * 46) + 20;
@@ -90,18 +86,17 @@ function tetradic(color, common) {
         ];
     }
     catch (error) {
-        log('error', `Error generating tetradic hues: ${error}`, 'generateTetradicHues()');
+        common.services.errors.handle(error, 'Error generating tetradic hues', 'generateTetradicHues()', { color }, 'error');
         return [];
     }
 }
 function triadic(color, common) {
-    const log = common.services.log;
     try {
         const baseHue = color.value.hue;
         return [120, 240].map(increment => (baseHue + increment) % 360);
     }
     catch (error) {
-        log('error', `Error generating triadic hues: ${error}`, 'generateTriadicHues()');
+        common.services.errors.handle(error, 'Error generating triadic hues', 'generateTriadicHues()', { color }, 'error');
         return [];
     }
 }

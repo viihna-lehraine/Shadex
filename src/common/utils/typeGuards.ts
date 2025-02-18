@@ -14,6 +14,7 @@ import {
 	HSV,
 	HSVStringObject,
 	LAB,
+	Palette,
 	PaletteType,
 	RGB,
 	SL,
@@ -261,9 +262,58 @@ function isLABFormat(color: Color): color is LAB {
 	return isColorFormat(color, 'lab');
 }
 
+function isPalette(palette: unknown): palette is Palette {
+	if (
+		!palette ||
+		typeof palette !== 'object' ||
+		!('id' in palette && typeof palette.id === 'string') ||
+		!(
+			'items' in palette &&
+			Array.isArray(palette.items) &&
+			palette.items.length > 0
+		) ||
+		!(
+			'metadata' in palette &&
+			typeof palette.metadata === 'object' &&
+			palette.metadata !== null
+		)
+	)
+		return false;
+
+	const { metadata, items } = palette as Palette;
+
+	if (
+		typeof metadata.columnCount !== 'number' ||
+		typeof metadata.timestamp !== 'string' ||
+		typeof metadata.type !== 'string' ||
+		!metadata.flags ||
+		typeof metadata.flags !== 'object'
+	)
+		return false;
+
+	const { flags } = metadata;
+
+	if (
+		typeof flags.limitDark !== 'boolean' ||
+		typeof flags.limitGray !== 'boolean' ||
+		typeof flags.limitLight !== 'boolean'
+	)
+		return false;
+
+	return items.every(
+		item =>
+			item &&
+			typeof item === 'object' &&
+			typeof item.itemID === 'number' &&
+			typeof item.css === 'object' &&
+			typeof item.css.hex === 'string'
+	);
+}
+
 function isPaletteType(value: string): value is PaletteType {
 	return [
 		'analogous',
+		'custom',
 		'complementary',
 		'diadic',
 		'hexadic',
@@ -385,6 +435,7 @@ export const typeGuards: TypeGuardUtilsInterface = {
 	isHSVColor,
 	isHSVFormat,
 	isHSVString,
+	isPalette,
 	isInputElement,
 	isLAB,
 	isLABFormat,

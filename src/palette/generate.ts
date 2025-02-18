@@ -19,6 +19,7 @@ export function generatePalette(
 	generatePaletteFns: GeneratePaletteFnGroup
 ): Palette {
 	const log = common.services.log;
+	const errors = common.services.errors;
 
 	try {
 		log(
@@ -73,11 +74,15 @@ export function generatePalette(
 					`Invalid palette type ${options.paletteType}`,
 					'generatePalette()'
 				);
-
 				return defaultPalette;
 		}
 	} catch (error) {
-		throw new Error(`Error occurred during palette generation: ${error}`);
+		errors.handle(
+			error,
+			'Error occurred during palette generation',
+			'generatePalette()'
+		);
+		return defaultPalette;
 	}
 }
 
@@ -89,6 +94,7 @@ export function generateHues(
 ): number[] {
 	const utils = common.utils;
 	const log = common.services.log;
+	const errors = common.services.errors;
 
 	try {
 		if (!utils.validate.colorValue(color)) {
@@ -97,7 +103,6 @@ export function generateHues(
 				`Invalid color value ${JSON.stringify(color)}`,
 				'generateHues()'
 			);
-
 			return [];
 		}
 
@@ -122,12 +127,10 @@ export function generateHues(
 					`Invalid hue type ${options.paletteType}`,
 					'generateHues()'
 				);
-
 				return [];
 		}
 	} catch (error) {
-		log('error', `Error generating hues: ${error}`, 'generateHues()');
-
+		errors.handle(error, 'Error generating hues', 'generateHues()');
 		return [];
 	}
 }

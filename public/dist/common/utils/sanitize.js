@@ -1,6 +1,27 @@
 // File: common/utils/sanitize.js
 function createSanitationUtils(utils) {
+    function sanitizeInput(str) {
+        return str.replace(/[&<>"'`/=():]/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;',
+            '`': '&#x60;',
+            '/': '&#x2F;',
+            '=': '&#x3D;',
+            '(': '&#40;',
+            ')': '&#41;',
+            ':': '&#58;'
+        })[char] || char);
+    }
     return {
+        sanitizeInput,
+        getSafeQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const rawValue = urlParams.get(param);
+            return rawValue ? sanitizeInput(rawValue) : null;
+        },
         lab(value, output) {
             if (output === 'l') {
                 return utils.brand.asLAB_L(Math.round(Math.min(Math.max(value, 0), 100)));

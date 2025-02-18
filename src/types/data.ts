@@ -23,20 +23,6 @@ export interface ConfigData {
 		history: number;
 		paletteHistory: number;
 	};
-	colorLimits: {
-		xyz: {
-			max: {
-				x: number;
-				y: number;
-				z: number;
-			};
-			min: {
-				x: number;
-				y: number;
-				z: number;
-			};
-		};
-	};
 	debounce: {
 		btn: number;
 		input: number;
@@ -272,6 +258,18 @@ export interface DOMElements {
 	};
 }
 
+export interface MathData {
+	epsilon: number;
+	limits: {
+		maxX: number;
+		maxY: number;
+		maxZ: number;
+		minX: number;
+		minY: number;
+		minZ: number;
+	};
+}
+
 export interface ModeData {
 	debug: boolean;
 	debugLevel: 0 | 1 | 2 | 3 | 4 | 5;
@@ -302,6 +300,7 @@ export interface DataInterface {
 	config: ConfigData;
 	defaults: DefaultData;
 	dom: DOMData;
+	math: MathData;
 	mode: ModeData;
 	sets: SetsData;
 	storage: StorageData;
@@ -710,6 +709,7 @@ export interface Palette {
 export type PaletteType =
 	| 'analogous'
 	| 'complementary'
+	| 'custom'
 	| 'diadic'
 	| 'monochromatic'
 	| 'hexadic'

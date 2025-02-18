@@ -4,5 +4,21 @@
 // You may use this code for any purpose EXCEPT for the creation of proprietary derivatives. I encourage you to improve on my code or to include it in other projects if you find it helpful. Please credit me as the original author.
 // This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE.
 // File: index.js
+window.onerror = function (message, source, lineno, colno, error) {
+    import('./common/services/AppLogger.js').then(({ AppLogger }) => {
+        const logger = AppLogger.getInstance();
+        logger.log(`Unhandled error: ${message} at ${source}:${lineno}:${colno}`, 'error', 1, `[GLOBAL ERROR HANDLER]`);
+        if (error && error.stack) {
+            logger.log(`Stack trace:\n${error.stack}`, 'error', 3, `[GLOBAL ERROR HANDLER]`);
+        }
+    });
+    return false; // prevent default logging
+};
+window.addEventListener('unhandledrejection', function (event) {
+    import('./common/services/AppLogger.js').then(({ AppLogger }) => {
+        const logger = AppLogger.getInstance();
+        logger.log(`Unhandled promise rejection: ${event.reason}`, 'error', 1, `[GLOBAL ERROR HANDLER]`);
+    });
+});
 import('./app/main.js');
 //# sourceMappingURL=index.js.map

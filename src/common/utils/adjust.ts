@@ -11,6 +11,7 @@ import { data } from '../../data/index.js';
 
 const adjustments = data.config.adjustments;
 const defaultColors = data.defaults.colors;
+const math = data.math;
 
 export function createAdjustmentUtils(
 	services: ServicesInterface,
@@ -78,6 +79,12 @@ export function createAdjustmentUtils(
 
 				return rgb;
 			}
+		},
+		clampXYZ(value: number, maxValue: number): number {
+			return Math.max(0, Math.min(maxValue + math.epsilon, value));
+		},
+		normalizeXYZ(value: number, reference: number): number {
+			return value / reference;
 		},
 		sl(color: HSL): HSL {
 			const log = services.log;

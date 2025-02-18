@@ -26,6 +26,7 @@ import {
 	LAB_B,
 	LAB_L,
 	LABStringObject,
+	Listener,
 	MutationLog,
 	NumericRangeKey,
 	Palette,
@@ -159,6 +160,8 @@ export interface HelpersInterface {
 export interface AdjustmentUtilsInterface {
 	applyGammaCorrection(value: number): number;
 	clampRGB(rgb: RGB): RGB;
+	clampXYZ(value: number, maxValue: number): number;
+	normalizeXYZ(value: number, reference: number): number;
 	sl(color: HSL): HSL;
 }
 
@@ -166,6 +169,7 @@ export interface AppUtilsInterface {
 	generateRandomHSL(): HSL;
 	generateRandomSL(): SL;
 	getFormattedTimestamp(): string;
+	tracePromise(promise: Promise<unknown>, label: string): Promise<unknown>;
 }
 
 export interface BrandingUtilsInterface {
@@ -293,6 +297,7 @@ export interface PaletteUtilsInterface {
 	): Palette;
 	generateAllColorValues(color: HSL): AllColors;
 	getPaletteOptionsFromUI(): SelectedPaletteOptions;
+	getRandomizedPaleteOptions(): SelectedPaletteOptions;
 }
 
 export interface ParseUtilsInterface {
@@ -308,10 +313,12 @@ export interface ParseUtilsInterface {
 }
 
 export interface SanitationUtilsInterface {
+	getSafeQueryParam(param: string): string | null;
 	lab(value: number, output: 'l' | 'a' | 'b'): LAB_L | LAB_A | LAB_B;
 	percentile(value: number): Percentile;
 	radial(value: number): Radial;
 	rgb(value: number): ByteRange;
+	sanitizeInput(str: string): string;
 }
 
 export interface TypeGuardUtilsInterface {
@@ -341,6 +348,7 @@ export interface TypeGuardUtilsInterface {
 	isInputElement(element: HTMLElement | null): element is HTMLElement;
 	isLAB(value: unknown): value is LAB;
 	isLABFormat(color: Color): color is LAB;
+	isPalette(value: unknown): value is Palette;
 	isPaletteType(value: string): value is PaletteType;
 	isRGB(value: unknown): value is RGB;
 	isRGBFormat(color: Color): color is RGB;
@@ -412,38 +420,83 @@ export interface AppLoggerClassInterface {
 	): void;
 }
 
+export interface AsyncLockClassInterface {
+	acquire(): Promise<void>;
+	release(): void;
+}
+
+export interface DataObserverClassInterface<T extends Record<string, unknown>> {
+	get<K extends keyof T>(prop: K): T[K];
+	on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void;
+	set<K extends keyof T>(prop: K, value: T[K]): void;
+}
+
 export interface ErrorHandlerClassInterface {
 	handle(
 		error: unknown,
 		errorMessage: string,
 		caller: string,
-		context: Record<string, unknown>,
-		severity: 'warn' | 'error'
+		context?: Record<string, unknown>,
+		severity?: 'warn' | 'error'
 	): void;
 	handleAsync<T>(
 		action: () => Promise<T>,
 		errorMessage: string,
 		caller: string,
-		context?: Record<string, unknown>
-	): Promise<T | null>;
+		context?: Record<string, unknown>,
+		severity?: 'warn' | 'error'
+	): Promise<T>;
+}
+
+export interface IDBManagerClassInterface {
+	clear(): Promise<void>;
+	ensureDBReady(): Promise<void>;
+	getItem<T>(key: string): Promise<T | null>;
+	init(): Promise<boolean>;
+	removeItem(key: string): Promise<void>;
+	setItem(key: string, value: unknown): Promise<void>;
+}
+
+export interface LocalStorageManagerClassInterface {
+	clear(): Promise<void>;
+	getItem<T>(key: string): Promise<T | null>;
+	init(): Promise<boolean>;
+	removeItem(key: string): Promise<void>;
+	setItem(key: string, value: unknown): Promise<void>;
+}
+
+export interface PaletteEventsClassInterface {
+	attachColorCopyHandlers(): void;
+	attachDragAndDropHandlers(): void;
+	init(): void;
+	initializeColumnPositions(): void;
+	renderColumnSizeChange(): void;
+	syncColumnColorsWithState(): void;
 }
 
 export interface PaletteManagerClassInterface {
+	extractPaletteFromDOM(): Palette | void;
 	handleColumnLock(columnID: number): void;
-	renderNewPalette(): void;
-	renderPaletteColor(
-		color: HSL,
-		colorBox: HTMLDivElement,
-		colorBoxNumber: number
-	): void;
+	handleColumnResize(columnID: number, newSize: number): void;
+	loadPalette(): Promise<void>;
+	renderNewPalette(): Promise<void>;
+	renderPaletteFromState(): Promise<void>;
 	swapColumns(draggedID: number, targetID: number): void;
+}
+
+export interface PaletteStateClassInterface {
+	updatePaletteItemColor(columnID: number, newColor: string): void;
 }
 
 export interface StateManagerClassInterface {
 	addPaletteToHistory(palette: Palette): void;
+	ensureStateReady(): Promise<void>;
 	getState(): State;
+	init(): Promise<void>;
+	loadState(): Promise<State>;
 	redo(): void;
 	resetState(): void;
+	setOnStateLoad(callback: () => void): void;
 	setState(state: State, track: boolean): void;
 	undo(): void;
 	updateAppModeState(appMode: State['appMode'], track: boolean): void;
@@ -458,6 +511,20 @@ export interface StateManagerClassInterface {
 		selections: Partial<State['selections']>,
 		track: boolean
 	): void;
+}
+
+export interface StorageManagerClassInterface {
+	clear(): Promise<void>;
+	getItem<T>(key: string): Promise<T | null>;
+	init(): Promise<boolean>;
+	removeItem(key: string): Promise<void>;
+	setItem(key: string, value: unknown): Promise<void>;
+}
+
+export interface UIEventsClassInterface {
+	attachTooltipListener(id: string, tooltipText: string): void;
+	init(): void;
+	initButtons(): void;
 }
 
 // ******** 10. FUNCTION INTERFACES ********

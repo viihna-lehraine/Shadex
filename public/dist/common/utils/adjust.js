@@ -3,6 +3,7 @@ import { data } from '../../data/index.js';
 // File: common/utils/adjust.js
 const adjustments = data.config.adjustments;
 const defaultColors = data.defaults.colors;
+const math = data.math;
 function createAdjustmentUtils(services, utils) {
     return {
         applyGammaCorrection(value) {
@@ -38,6 +39,12 @@ function createAdjustmentUtils(services, utils) {
                 log('error', `Error clamping RGB values: ${error}`, 'adjustmentUtils.clampRGB()');
                 return rgb;
             }
+        },
+        clampXYZ(value, maxValue) {
+            return Math.max(0, Math.min(maxValue + math.epsilon, value));
+        },
+        normalizeXYZ(value, reference) {
+            return value / reference;
         },
         sl(color) {
             const log = services.log;

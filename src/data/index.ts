@@ -11,6 +11,7 @@ import {
 	LAB_A,
 	LAB_B,
 	LAB_L,
+	MathData,
 	ModeData,
 	MutationLog,
 	Palette,
@@ -46,21 +47,6 @@ const appLimits: Readonly<ConfigData>['appLimits'] = {
 const debounce: Readonly<ConfigData>['debounce'] = {
 	btn: 300,
 	input: 200
-} as const;
-
-const colorLimits: Readonly<ConfigData>['colorLimits'] = {
-	xyz: {
-		max: {
-			x: 95.047,
-			y: 100,
-			z: 108.883
-		},
-		min: {
-			x: 0,
-			y: 0,
-			z: 0
-		}
-	}
 } as const;
 
 const paletteRanges: Readonly<ConfigData>['paletteRanges'] = {
@@ -143,7 +129,7 @@ const regex: Readonly<ConfigData>['regex'] = {
 		xyz: /^xyz\(([\d.]+),\s*([\d.]+),\s*([\d.]+)\)$/
 	},
 	dom: {
-		hex: /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i,
+		hex: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/i,
 		hsl: /^hsl\(\s*(\d+),\s*([\d.]+)%,\s*([\d.]+)%\s*\)$/,
 		rgb: /^rgb\(\s*(\d+),\s*(\d+),\s*(\d+)\s*\)$/
 	},
@@ -161,7 +147,6 @@ const regex: Readonly<ConfigData>['regex'] = {
 const config: Readonly<ConfigData> = {
 	adjustments,
 	appLimits,
-	colorLimits,
 	debounce,
 	paletteRanges,
 	probabilities,
@@ -178,18 +163,18 @@ const config: Readonly<ConfigData> = {
 //
 
 const palette: Readonly<Palette> = {
-	id: `null-palette-${Date.now()}`,
+	id: `default-palette-${Date.now()}`,
 	items: [],
 	metadata: {
-		columnCount: 1,
+		name: 'DEFAULT PALETTE',
+		columnCount: 5,
 		flags: {
 			limitDark: false,
 			limitGray: false,
 			limitLight: false
 		},
 		type: 'random',
-		name: 'BRANDED DEFAULT PALETTE',
-		timestamp: '???'
+		timestamp: `${Date.now()}`
 	}
 };
 
@@ -613,7 +598,24 @@ const storage: Readonly<StorageData> = {
 
 //
 ///
-//// ******** 7. FINAL EXPORTED DATA OBJECT ********
+//// ******** 7. MATHEMATICAL CONSTANTS ********
+
+const epsilon = 0.00001;
+
+const limits: Readonly<MathData>['limits'] = {
+	maxX: 95.047,
+	maxY: 100,
+	maxZ: 108.883,
+	minX: 0,
+	minY: 0,
+	minZ: 0
+} as const;
+
+const math: Readonly<MathData> = { epsilon, limits } as const;
+
+//
+///
+//// ******** 8. FINAL EXPORTED DATA OBJECT ********
 ///
 //
 
@@ -621,6 +623,7 @@ export const data: Readonly<DataInterface> = {
 	config,
 	defaults,
 	dom,
+	math,
 	mode,
 	sets,
 	storage

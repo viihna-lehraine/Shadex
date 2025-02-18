@@ -232,19 +232,21 @@ export function createColorUtils(
 			try {
 				switch (color.format) {
 					case 'cmyk':
-						return `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key}`;
+						return `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key})`;
 					case 'hex':
 						return String(color.value.hex);
 					case 'hsl':
-						return `hsl(${color.value.hue}, ${color.value.saturation}%, ${color.value.lightness}%`;
+						return `hsl(${Math.round(color.value.hue)},
+									${Math.round(color.value.saturation)}%,
+									${Math.round(color.value.lightness)}%)`;
 					case 'hsv':
-						return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%`;
+						return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%)`;
 					case 'lab':
 						return `lab(${color.value.l}, ${color.value.a}, ${color.value.b})`;
 					case 'rgb':
 						return `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue})`;
 					case 'xyz':
-						return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z}`;
+						return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z})`;
 					default:
 						console.error(
 							`Unexpected color format: ${color.format}`

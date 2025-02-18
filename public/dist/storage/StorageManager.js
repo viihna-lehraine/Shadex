@@ -7,78 +7,73 @@ class StorageManager {
     localStorageManager;
     services;
     log;
+    errors;
     useLocalStorage = false;
     constructor(services) {
-        this.services = services;
-        this.log = services.log;
-        this.localStorageManager = LocalStorageManager.getInstance(this.services);
+        services.errors.handle(() => {
+            this.services = services;
+            this.log = services.log;
+            this.errors = services.errors;
+            this.localStorageManager = LocalStorageManager.getInstance(this.services);
+        }, 'Failed to initialize StorageManager', 'StorageManager.constructor');
+        this.log('info', 'Storage Manager initialized', 'StorageManager.constructor');
     }
     async init() {
-        this.log('info', 'Initializing Storage Manager', 'StorageManager.init()');
-        try {
+        return this.errors.handleAsync(async () => {
+            this.log('info', 'Initializing Storage Manager', 'StorageManager.init()');
             this.idbManager = IDBManager.getInstance(this.services);
             const idbAvailable = await this.idbManager.init();
             if (idbAvailable) {
                 this.log('info', 'Using IndexedDB for storage.', 'StorageManager.init()');
                 return true;
             }
-        }
-        catch (error) {
-            this.log('warn', 'IndexedDB initialization failed, falling back to LocalStorage', 'StorageManager.init()');
-        }
-        this.useLocalStorage = true;
-        await this.localStorageManager.init();
-        return true;
+            this.useLocalStorage = true;
+            await this.localStorageManager.init();
+            return true;
+        }, 'StorageManager initialization failed', 'StorageManager.init()');
     }
     async clear() {
-        if (!this.useLocalStorage && this.idbManager) {
-            try {
-                await this.idbManager.clear();
-                return;
+        await this.errors.handleAsync(async () => {
+            if (!this.useLocalStorage && this.idbManager) {
+                const success = await this.idbManager.clear();
+                if (success !== null)
+                    return;
             }
-            catch (error) {
-                this.log('warn', 'Failed to clear IndexedDB, falling back to LocalStorage', 'StorageManager.clear()');
-            }
-        }
-        await this.localStorageManager.clear();
+            await this.localStorageManager.clear();
+        }, 'Failed to clear storage', 'StorageManager.clear()');
     }
     async getItem(key) {
-        if (!this.useLocalStorage && this.idbManager) {
-            try {
+        return this.errors.handleAsync(async () => {
+            if (!this.useLocalStorage && this.idbManager) {
                 const value = await this.idbManager.getItem(key);
                 if (value !== null)
                     return value;
             }
-            catch (error) {
-                this.log('warn', `Failed to get item ${key} from IndexedDB, trying LocalStorage`, 'StorageManager.getItem()');
-            }
-        }
-        return await this.localStorageManager.getItem(key);
+            return await this.localStorageManager.getItem(key);
+        }, `Failed to get item ${key} from storage`, 'StorageManager.getItem()', { key });
     }
     async removeItem(key) {
-        if (!this.useLocalStorage && this.idbManager) {
-            try {
-                await this.idbManager.removeItem(key);
-                return;
+        await this.errors.handleAsync(async () => {
+            if (!this.useLocalStorage && this.idbManager) {
+                try {
+                    await this.idbManager.removeItem(key);
+                    return;
+                }
+                catch { }
             }
-            catch (error) {
-                this.log('error', `Failed to remove item ${key} from IndexedDB, trying LocalStorage`, 'StorageManager.removeItem()');
-            }
-        }
-        await this.localStorageManager.removeItem(key);
+            await this.localStorageManager.removeItem(key);
+        }, `Failed to remove item ${key} from storage`, 'StorageManager.removeItem()', { key });
     }
     async setItem(key, value) {
-        if (!this.useLocalStorage && this.idbManager) {
-            try {
+        await this.errors.handleAsync(async () => {
+            if (!this.useLocalStorage && this.idbManager) {
                 await this.idbManager.ensureDBReady();
                 await this.idbManager.setItem(key, value);
                 return;
             }
-            catch (error) {
-                this.log('error', `Failed to set item ${key} in IndexedDB, using LocalStorage`, 'StorageManager.setItem()');
-            }
-        }
-        await this.localStorageManager.setItem(key, value);
+            this.log('warn', `Falling back to LocalStorage for key: ${key}`, 'StorageManager.setItem()');
+            await this.localStorageManager.setItem(key, value);
+        }, `Failed to set item ${key} in storage`, 'StorageManager.setItem()', { key, value });
     }
 }
 

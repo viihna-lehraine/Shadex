@@ -3,6 +3,7 @@
 import {
 	AllColors,
 	CMYK,
+	ConfigData,
 	Hex,
 	HSL,
 	HSV,
@@ -235,6 +236,54 @@ export function createPaletteUtils(
 					paletteType: 'random'
 				};
 			}
+		},
+		getRandomizedPaleteOptions(): SelectedPaletteOptions {
+			const paletteTypeMap: Record<number, PaletteType> = {
+				0: 'analogous',
+				1: 'complementary',
+				2: 'diadic',
+				3: 'hexadic',
+				4: 'monochromatic',
+				5: 'random',
+				6: 'split-complementary',
+				7: 'tetradic',
+				8: 'triadic'
+			};
+			const distributionTypeMap: Record<
+				number,
+				keyof ConfigData['probabilities']
+			> = {
+				0: 'base',
+				1: 'chaotic',
+				2: 'soft',
+				3: 'strong'
+			};
+			const randomPaletteTypeIndex = Math.floor(
+				Math.random() * Object.keys(paletteTypeMap).length
+			);
+			const randomDistributionTypeIndex = Math.floor(
+				Math.random() * Object.keys(distributionTypeMap).length
+			);
+			const paletteType =
+				paletteTypeMap[
+					randomPaletteTypeIndex as keyof typeof paletteTypeMap
+				];
+			const distributionType =
+				distributionTypeMap[
+					randomDistributionTypeIndex as keyof typeof distributionTypeMap
+				];
+			const columnCount = Math.floor(Math.random() * 6) + 1;
+			const limitDark = Math.random() < 0.5;
+			const limitGray = Math.random() < 0.5;
+			const limitLight = Math.random() < 0.5;
+			return {
+				columnCount,
+				distributionType,
+				limitDark,
+				limitGray,
+				limitLight,
+				paletteType
+			};
 		}
 	};
 }

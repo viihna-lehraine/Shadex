@@ -14,7 +14,34 @@ import {
 export function createSanitationUtils(
 	utils: UtilitiesInterface
 ): SanitationUtilsInterface {
+	function sanitizeInput(str: string): string {
+		return str.replace(
+			/[&<>"'`/=():]/g,
+			char =>
+				({
+					'&': '&amp;',
+					'<': '&lt;',
+					'>': '&gt;',
+					'"': '&quot;',
+					"'": '&#039;',
+					'`': '&#x60;',
+					'/': '&#x2F;',
+					'=': '&#x3D;',
+					'(': '&#40;',
+					')': '&#41;',
+					':': '&#58;'
+				})[char] || char
+		);
+	}
+
 	return {
+		sanitizeInput,
+		getSafeQueryParam(param: string): string | null {
+			const urlParams = new URLSearchParams(window.location.search);
+			const rawValue = urlParams.get(param);
+
+			return rawValue ? sanitizeInput(rawValue) : null;
+		},
 		lab(value: number, output: 'l' | 'a' | 'b'): LAB_L | LAB_A | LAB_B {
 			if (output === 'l') {
 				return utils.brand.asLAB_L(

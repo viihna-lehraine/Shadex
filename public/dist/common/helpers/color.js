@@ -1,6 +1,8 @@
 import { data } from '../../data/index.js';
 
 // File: common/helpers/color.js
+const math = data.math;
+const limits = math.limits;
 const defaults = data.defaults;
 const defaultCMYK = defaults.colors.cmyk;
 const defaultHex = defaults.colors.hex;
@@ -16,7 +18,7 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(cmyk)) {
-                log('error', `Invalid CMYK value ${JSON.stringify(cmyk)}`, 'colorUtils > helpers.cmykToRGB()');
+                log('error', `Invalid CMYK value ${JSON.stringify(cmyk)}`, 'cmykToRGB()');
                 return defaultRGB;
             }
             const clonedCMYK = utils.core.clone(cmyk);
@@ -31,16 +33,16 @@ function createColorHelpers(services, utils) {
                 (1 - clonedCMYK.value.key / 100);
             const rgb = {
                 value: {
-                    red: utils.brand.asByteRange(Math.round(r)),
-                    green: utils.brand.asByteRange(Math.round(g)),
-                    blue: utils.brand.asByteRange(Math.round(b))
+                    red: utils.brand.asByteRange(utils.sanitize.percentile(r)),
+                    green: utils.brand.asByteRange(utils.sanitize.percentile(g)),
+                    blue: utils.brand.asByteRange(utils.sanitize.percentile(b))
                 },
                 format: 'rgb'
             };
             return utils.adjust.clampRGB(rgb);
         }
         catch (error) {
-            log('error', `cmykToRGB error: ${error}`, 'colorUtils > helpers.cmykToRGB()');
+            log('error', `Error: ${error}`, 'cmykToRGB()');
             return defaultRGB;
         }
     }
@@ -48,13 +50,13 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(hex)) {
-                log('error', `Invalid Hex value ${JSON.stringify(hex)}`, 'colorUtils > helpers.hexToHSL()');
+                log('error', `Invalid Hex value ${JSON.stringify(hex)}`, 'hexToHSL()');
                 return defaultHSL;
             }
             return rgbToHSL(hexToRGB(utils.core.clone(hex)));
         }
         catch (error) {
-            log('error', `hexToHSL() error: ${error}`, 'colorUtils > helpers.hexToHSL()');
+            log('error', `Error: ${error}`, 'hexToHSL()');
             return defaultHSL;
         }
     }
@@ -62,7 +64,7 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(hex)) {
-                log('error', `Invalid Hex value ${JSON.stringify(hex)}`, 'colorUtils > helpers.hexToRGB()');
+                log('error', `Invalid Hex value ${JSON.stringify(hex)}`, 'hexToRGB()');
                 return defaultRGB;
             }
             const clonedHex = utils.core.clone(hex);
@@ -70,15 +72,15 @@ function createColorHelpers(services, utils) {
             const bigint = parseInt(strippedHex, 16);
             return {
                 value: {
-                    red: utils.brand.asByteRange(Math.round((bigint >> 16) & 255)),
-                    green: utils.brand.asByteRange(Math.round((bigint >> 8) & 255)),
-                    blue: utils.brand.asByteRange(Math.round(bigint & 255))
+                    red: utils.brand.asByteRange(utils.sanitize.percentile((bigint >> 16) & 255)),
+                    green: utils.brand.asByteRange(utils.sanitize.percentile((bigint >> 8) & 255)),
+                    blue: utils.brand.asByteRange(utils.sanitize.percentile(bigint & 255))
                 },
                 format: 'rgb'
             };
         }
         catch (error) {
-            log('error', `hexToRGB error: ${error}`, 'colorUtils > helpers.hexToRGB()');
+            log('error', `Error: ${error}`, 'hexToRGB()');
             return defaultRGB;
         }
     }
@@ -86,13 +88,13 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(hsl)) {
-                log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToLAB()');
+                log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'hslToLAB()');
                 return defaultLAB;
             }
             return xyzToLAB(rgbToXYZ(hslToRGB(utils.core.clone(hsl))));
         }
         catch (error) {
-            log('error', `hslToLab() error: ${error}`, 'colorUtils > helpers.hslToLAB()');
+            log('error', `Error: ${error}`, 'hslToLAB()');
             return defaultLAB;
         }
     }
@@ -100,26 +102,26 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(hsl)) {
-                log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToRGB()');
+                log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'hslToRGB()');
                 return defaultRGB;
             }
             const clonedHSL = utils.core.clone(hsl);
+            const hue = clonedHSL.value.hue / 360;
             const s = clonedHSL.value.saturation / 100;
             const l = clonedHSL.value.lightness / 100;
             const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
             const p = 2 * l - q;
             return {
                 value: {
-                    red: utils.brand.asByteRange(Math.round(utils.color.hueToRGB(p, q, clonedHSL.value.hue + 1 / 3) * 255)),
-                    green: utils.brand.asByteRange(Math.round(utils.color.hueToRGB(p, q, clonedHSL.value.hue) *
-                        255)),
-                    blue: utils.brand.asByteRange(Math.round(utils.color.hueToRGB(p, q, clonedHSL.value.hue - 1 / 3) * 255))
+                    red: utils.brand.asByteRange(utils.sanitize.percentile(utils.color.hueToRGB(p, q, hue + 1 / 3) * 255)),
+                    green: utils.brand.asByteRange(utils.sanitize.percentile(utils.color.hueToRGB(p, q, hue) * 255)),
+                    blue: utils.brand.asByteRange(utils.sanitize.percentile(utils.color.hueToRGB(p, q, hue - 1 / 3) * 255))
                 },
                 format: 'rgb'
             };
         }
         catch (error) {
-            log('error', `hslToRGB error: ${error}`, 'colorUtils > helpers.hslToRGB()');
+            log('error', `Error: ${error}`, 'hslToRGB()');
             return defaultRGB;
         }
     }
@@ -127,7 +129,7 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(hsv)) {
-                log('error', `Invalid HSV value ${JSON.stringify(hsv)}`, 'colorUtils > helpers.hsvToSV()');
+                log('error', `Invalid HSV value ${JSON.stringify(hsv)}`, 'hsvToSV()');
                 return defaultSV;
             }
             return {
@@ -139,7 +141,7 @@ function createColorHelpers(services, utils) {
             };
         }
         catch (error) {
-            log('error', `Error converting HSV to SV: ${error}`, 'colorUtils > helpers.hsvToSV()');
+            log('error', `Error: ${error}`, 'hsvToSV()');
             return defaultSV;
         }
     }
@@ -147,13 +149,13 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(lab)) {
-                log('error', `Invalid LAB value ${JSON.stringify(lab)}`, 'colorUtils > helpers.labToRGB()');
+                log('error', `Invalid LAB value ${JSON.stringify(lab)}`, 'labToRGB()');
                 return defaultRGB;
             }
             return xyzToRGB(labToXYZ(utils.core.clone(lab)));
         }
         catch (error) {
-            log('error', `labToRGB error: ${error}`, 'colorUtils > helpers.labToRGB()');
+            log('error', `Eerror: ${error}`, 'labToRGB()');
             return defaultRGB;
         }
     }
@@ -161,7 +163,7 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(lab)) {
-                log('error', `Invalid LAB value ${JSON.stringify(lab)}`, 'colorUtils > helpers.labToXYZ()');
+                log('error', `Invalid LAB value ${JSON.stringify(lab)}`, 'labToXYZ()');
                 return defaultXYZ;
             }
             const clonedLAB = utils.core.clone(lab);
@@ -172,15 +174,15 @@ function createColorHelpers(services, utils) {
             const pow = Math.pow;
             return {
                 value: {
-                    x: utils.brand.asXYZ_X(Math.round(refX *
+                    x: utils.brand.asXYZ_X(utils.sanitize.percentile(refX *
                         (pow(x, 3) > 0.008856
                             ? pow(x, 3)
                             : (x - 16 / 116) / 7.787))),
-                    y: utils.brand.asXYZ_Y(Math.round(refY *
+                    y: utils.brand.asXYZ_Y(utils.sanitize.percentile(refY *
                         (pow(y, 3) > 0.008856
                             ? pow(y, 3)
                             : (y - 16 / 116) / 7.787))),
-                    z: utils.brand.asXYZ_Z(Math.round(refZ *
+                    z: utils.brand.asXYZ_Z(utils.sanitize.percentile(refZ *
                         (pow(z, 3) > 0.008856
                             ? pow(z, 3)
                             : (z - 16 / 116) / 7.787)))
@@ -189,7 +191,7 @@ function createColorHelpers(services, utils) {
             };
         }
         catch (error) {
-            log('error', `labToXYZ error: ${error}`, 'colorUtils > helpers.labToXYZ()');
+            log('error', `Error: ${error}`, 'labToXYZ()');
             return defaultXYZ;
         }
     }
@@ -197,24 +199,24 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(rgb)) {
-                log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'colorUtils > helpers.rgbToCMYK()');
+                log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'rgbToCMYK()');
                 return defaultCMYK;
             }
             const clonedRGB = utils.core.clone(rgb);
             const redPrime = clonedRGB.value.red / 255;
             const greenPrime = clonedRGB.value.green / 255;
             const bluePrime = clonedRGB.value.blue / 255;
-            const key = utils.sanitize.percentile(Math.round(1 - Math.max(redPrime, greenPrime, bluePrime)));
-            const cyan = utils.sanitize.percentile(Math.round((1 - redPrime - key) / (1 - key) || 0));
-            const magenta = utils.sanitize.percentile(Math.round((1 - greenPrime - key) / (1 - key) || 0));
-            const yellow = utils.sanitize.percentile(Math.round((1 - bluePrime - key) / (1 - key) || 0));
+            const key = utils.sanitize.percentile(utils.sanitize.percentile(1 - Math.max(redPrime, greenPrime, bluePrime)));
+            const cyan = utils.sanitize.percentile(utils.sanitize.percentile((1 - redPrime - key) / (1 - key) || 0));
+            const magenta = utils.sanitize.percentile(utils.sanitize.percentile((1 - greenPrime - key) / (1 - key) || 0));
+            const yellow = utils.sanitize.percentile(utils.sanitize.percentile((1 - bluePrime - key) / (1 - key) || 0));
             const format = 'cmyk';
             const cmyk = { value: { cyan, magenta, yellow, key }, format };
-            log('debug', `Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(utils.core.clone(cmyk))}`, 'colorUtils > helpers.rgbToCMYK()', 5);
+            log('debug', `Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(utils.core.clone(cmyk))}`, 'rgbToCMYK()', 5);
             return cmyk;
         }
         catch (error) {
-            log('error', `Error converting RGB to CMYK: ${error}`, 'colorUtils > helpers.rgbToCMYK()');
+            log('error', `Error: ${error}`, 'rgbToCMYK()');
             return defaultCMYK;
         }
     }
@@ -222,7 +224,7 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(rgb)) {
-                log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'colorUtils > helpers.rgbToHex()');
+                log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'rgbToHex()');
                 return defaultHex;
             }
             const clonedRGB = utils.core.clone(rgb);
@@ -231,7 +233,7 @@ function createColorHelpers(services, utils) {
                 clonedRGB.value.green,
                 clonedRGB.value.blue
             ].some(v => isNaN(v) || v < 0 || v > 255)) {
-                log('error', `Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}`, 'colorUtils > helpers.rgbToHex()');
+                log('error', `Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}`, 'rgbToHex()');
                 return {
                     value: {
                         hex: utils.brand.asHexSet('#000000FF')
@@ -247,7 +249,7 @@ function createColorHelpers(services, utils) {
             };
         }
         catch (error) {
-            log('error', `rgbToHex error: ${error}`, 'colorUtils > helpers.rgbToHex()');
+            log('error', `Error: ${error}`, 'rgbToHex()');
             return defaultHex;
         }
     }
@@ -255,7 +257,7 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(rgb)) {
-                log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'colorUtils > helpers.rgbToHSL()');
+                log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'rgbToHSL()');
                 return defaultHSL;
             }
             const clonedRGB = utils.core.clone(rgb);
@@ -286,15 +288,15 @@ function createColorHelpers(services, utils) {
             }
             return {
                 value: {
-                    hue: utils.brand.asRadial(Math.round(hue)),
-                    saturation: utils.brand.asPercentile(Math.round(saturation * 100)),
-                    lightness: utils.brand.asPercentile(Math.round(lightness * 100))
+                    hue: utils.brand.asRadial(utils.sanitize.percentile(hue)),
+                    saturation: utils.brand.asPercentile(utils.sanitize.percentile(saturation * 100)),
+                    lightness: utils.brand.asPercentile(utils.sanitize.percentile(lightness * 100))
                 },
                 format: 'hsl'
             };
         }
         catch (error) {
-            log('error', `rgbToHSL() error: ${error}`, 'colorUtils > helpers.rgbToHSL()');
+            log('error', `Error: ${error}`, 'rgbToHSL()');
             return defaultHSL;
         }
     }
@@ -302,7 +304,7 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(rgb)) {
-                log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'colorUtils > helpers.rgbToHSV()');
+                log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'rgbToHSV()');
                 return defaultHSV;
             }
             const red = rgb.value.red / 255;
@@ -330,15 +332,15 @@ function createColorHelpers(services, utils) {
             }
             return {
                 value: {
-                    hue: utils.brand.asRadial(Math.round(hue)),
-                    saturation: utils.brand.asPercentile(Math.round(saturation * 100)),
-                    value: utils.brand.asPercentile(Math.round(value * 100))
+                    hue: utils.brand.asRadial(utils.sanitize.percentile(hue)),
+                    saturation: utils.brand.asPercentile(utils.sanitize.percentile(saturation * 100)),
+                    value: utils.brand.asPercentile(utils.sanitize.percentile(value * 100))
                 },
                 format: 'hsv'
             };
         }
         catch (error) {
-            log('error', `rgbToHSV() error: ${error}`, 'colorUtils > helpers.rgbToHSV()');
+            log('error', `Error: ${error}`, 'rgbToHSV()');
             return defaultHSV;
         }
     }
@@ -346,41 +348,40 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(rgb)) {
-                log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'colorUtils > helpers.rgbToXYZ()');
+                log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'rgbToXYZ()');
                 return defaultXYZ;
             }
+            // convert RGB values to linear space
             const red = rgb.value.red / 255;
             const green = rgb.value.green / 255;
             const blue = rgb.value.blue / 255;
-            const correctedRed = red > 0.04045
+            const linearRed = red > 0.04045
                 ? Math.pow((red + 0.055) / 1.055, 2.4)
                 : red / 12.92;
-            const correctedGreen = green > 0.04045
+            const linearGreen = green > 0.04045
                 ? Math.pow((green + 0.055) / 1.055, 2.4)
                 : green / 12.92;
-            const correctedBlue = blue > 0.04045
+            const linearBlue = blue > 0.04045
                 ? Math.pow((blue + 0.055) / 1.055, 2.4)
                 : blue / 12.92;
-            const scaledRed = correctedRed * 100;
-            const scaledGreen = correctedGreen * 100;
-            const scaledBlue = correctedBlue * 100;
-            return {
-                value: {
-                    x: utils.brand.asXYZ_X(Math.round(scaledRed * 0.4124 +
-                        scaledGreen * 0.3576 +
-                        scaledBlue * 0.1805)),
-                    y: utils.brand.asXYZ_Y(Math.round(scaledRed * 0.2126 +
-                        scaledGreen * 0.7152 +
-                        scaledBlue * 0.0722)),
-                    z: utils.brand.asXYZ_Z(Math.round(scaledRed * 0.0193 +
-                        scaledGreen * 0.1192 +
-                        scaledBlue * 0.9505))
-                },
-                format: 'xyz'
-            };
+            // scale to 100
+            const scaledRed = linearRed * 100;
+            const scaledGreen = linearGreen * 100;
+            const scaledBlue = linearBlue * 100;
+            const x = utils.brand.asXYZ_X(utils.adjust.clampXYZ(scaledRed * 0.4124 +
+                scaledGreen * 0.3576 +
+                scaledBlue * 0.1805, limits.maxX));
+            const y = utils.brand.asXYZ_Y(utils.adjust.clampXYZ(scaledRed * 0.2126 +
+                scaledGreen * 0.7152 +
+                scaledBlue * 0.0722, limits.maxY));
+            const z = utils.brand.asXYZ_Z(utils.adjust.clampXYZ(scaledRed * 0.0193 +
+                scaledGreen * 0.1192 +
+                scaledBlue * 0.9505, limits.maxZ));
+            const xyz = { value: { x, y, z }, format: 'xyz' };
+            return utils.validate.colorValue(xyz) ? xyz : defaultXYZ;
         }
         catch (error) {
-            log('error', `rgbToXYZ error: ${error}`, 'colorUtils > helpers.rgbToXYZ()');
+            log('error', `Error: ${error}`, 'rgbToXYZ()');
             return defaultXYZ;
         }
     }
@@ -388,14 +389,14 @@ function createColorHelpers(services, utils) {
         const log = services.log;
         try {
             if (!utils.validate.colorValue(xyz)) {
-                log('error', `Invalid XYZ value ${JSON.stringify(xyz)}`, 'colorUtils > helpers.xyzToLAB()');
+                log('error', `Invalid XYZ value ${JSON.stringify(xyz)}`, 'xyzToLAB()');
                 return defaultLAB;
             }
             const clonedXYZ = utils.core.clone(xyz);
-            const refX = 95.047, refY = 100.0, refZ = 108.883;
-            clonedXYZ.value.x = (clonedXYZ.value.x / refX);
-            clonedXYZ.value.y = (clonedXYZ.value.y / refY);
-            clonedXYZ.value.z = (clonedXYZ.value.z / refZ);
+            const refX = limits.maxX, refY = limits.maxY, refZ = limits.maxZ;
+            clonedXYZ.value.x = utils.adjust.normalizeXYZ(clonedXYZ.value.x, refX);
+            clonedXYZ.value.y = utils.adjust.normalizeXYZ(clonedXYZ.value.y, refY);
+            clonedXYZ.value.z = utils.adjust.normalizeXYZ(clonedXYZ.value.z, refZ);
             clonedXYZ.value.x =
                 clonedXYZ.value.x > 0.008856
                     ? Math.pow(clonedXYZ.value.x, 1 / 3)
@@ -413,20 +414,20 @@ function createColorHelpers(services, utils) {
             const b = utils.sanitize.lab(parseFloat((200 * (clonedXYZ.value.y - clonedXYZ.value.z)).toFixed(2)), 'b');
             const lab = {
                 value: {
-                    l: utils.brand.asLAB_L(Math.round(l)),
-                    a: utils.brand.asLAB_A(Math.round(a)),
-                    b: utils.brand.asLAB_B(Math.round(b))
+                    l: utils.brand.asLAB_L(utils.sanitize.percentile(l)),
+                    a: utils.brand.asLAB_A(utils.sanitize.percentile(a)),
+                    b: utils.brand.asLAB_B(utils.sanitize.percentile(b))
                 },
                 format: 'lab'
             };
             if (!utils.validate.colorValue(lab)) {
-                log('error', `Invalid LAB value ${JSON.stringify(lab)}`, 'colorUtils > helpers.labToXYZ()');
+                log('error', `Invalid LAB value ${JSON.stringify(lab)}`, 'labToXYZ()');
                 return defaultLAB;
             }
             return lab;
         }
         catch (error) {
-            log('error', `xyzToLab() error: ${error}`, 'colorUtils > helpers.xyzToLAB()');
+            log('error', `${error}`, 'xyzToLAB');
             return defaultLAB;
         }
     }
@@ -448,16 +449,16 @@ function createColorHelpers(services, utils) {
             blue = utils.adjust.applyGammaCorrection(blue);
             const rgb = utils.adjust.clampRGB({
                 value: {
-                    red: utils.brand.asByteRange(Math.round(red)),
-                    green: utils.brand.asByteRange(Math.round(green)),
-                    blue: utils.brand.asByteRange(Math.round(blue))
+                    red: utils.brand.asByteRange(utils.sanitize.percentile(red)),
+                    green: utils.brand.asByteRange(utils.sanitize.percentile(green)),
+                    blue: utils.brand.asByteRange(utils.sanitize.percentile(blue))
                 },
                 format: 'rgb'
             });
             return rgb;
         }
         catch (error) {
-            log('warn', `xyzToRGB error: ${error}`, 'colorUtils > helpers.xyzToRGB()');
+            log('warn', `Error: ${error}`, 'xyzToRGB()');
             return defaultRGB;
         }
     }
@@ -481,13 +482,13 @@ function createColorHelpers(services, utils) {
             const log = services.log;
             try {
                 if (!utils.validate.colorValue(cmyk)) {
-                    log('error', `Invalid CMYK value ${JSON.stringify(cmyk)}`, 'colorUtils > helpers.cmykToHSL()');
+                    log('error', `Invalid CMYK value ${JSON.stringify(cmyk)}`, 'cmykToHSL()');
                     return defaultHSL;
                 }
                 return rgbToHSL(cmykToRGB(utils.core.clone(cmyk)));
             }
             catch (error) {
-                log('error', `cmykToHSL() error: ${error}`, 'colorUtils > helpers.cmykToHSL()');
+                log('error', `Error: ${error}`, 'cmykToHSL()');
                 return defaultHSL;
             }
         },
@@ -511,7 +512,7 @@ function createColorHelpers(services, utils) {
                 return hexToHSL(hex);
             }
             catch (error) {
-                log('error', `Error converting hex to HSL: ${error}`, 'colorUtils > helpers.hexToHSLWrapper()');
+                log('error', `Error: ${error}`, 'hexToHSLWrapper()');
                 return defaultHSL;
             }
         },
@@ -519,7 +520,7 @@ function createColorHelpers(services, utils) {
             const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
-                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToCMYK()');
+                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'hslToCMYK()');
                     return defaultCMYK;
                 }
                 return rgbToCMYK(hslToRGB(utils.core.clone(hsl)));
@@ -533,13 +534,13 @@ function createColorHelpers(services, utils) {
             const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
-                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToHex()');
+                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'hslToHex()');
                     return defaultHex;
                 }
                 return rgbToHex(hslToRGB(utils.core.clone(hsl)));
             }
             catch (error) {
-                log('error', `hslToHex error: ${error}`, 'colorUtils > helpers.hslToHex()');
+                log('error', `Error: ${error}`, 'hslToHex()');
                 return defaultHex;
             }
         },
@@ -547,7 +548,7 @@ function createColorHelpers(services, utils) {
             const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
-                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToHSV()');
+                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'hslToHSV()');
                     return defaultHSV;
                 }
                 const clonedHSL = utils.core.clone(hsl);
@@ -557,15 +558,15 @@ function createColorHelpers(services, utils) {
                 const newSaturation = value === 0 ? 0 : 2 * (1 - l / value);
                 return {
                     value: {
-                        hue: utils.brand.asRadial(Math.round(clonedHSL.value.hue)),
-                        saturation: utils.brand.asPercentile(Math.round(newSaturation * 100)),
-                        value: utils.brand.asPercentile(Math.round(value * 100))
+                        hue: utils.brand.asRadial(utils.sanitize.percentile(clonedHSL.value.hue)),
+                        saturation: utils.brand.asPercentile(utils.sanitize.percentile(newSaturation * 100)),
+                        value: utils.brand.asPercentile(utils.sanitize.percentile(value * 100))
                     },
                     format: 'hsv'
                 };
             }
             catch (error) {
-                log('error', `hslToHSV() error: ${error}`, 'colorUtils > helpers.hslToHSV()');
+                log('error', `Error: ${error}`, 'hslToHSV()');
                 return defaultHSV;
             }
         },
@@ -573,7 +574,7 @@ function createColorHelpers(services, utils) {
             const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
-                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToSL()');
+                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'hslToSL()');
                     return defaultSL;
                 }
                 return {
@@ -585,7 +586,7 @@ function createColorHelpers(services, utils) {
                 };
             }
             catch (error) {
-                log('error', `Error converting HSL to SL: ${error}`, 'colorUtils > helpers.hslToSL()');
+                log('error', `Error: ${error}`, 'hslToSL()');
                 return defaultSL;
             }
         },
@@ -593,13 +594,13 @@ function createColorHelpers(services, utils) {
             const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
-                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToSV()');
+                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'hslToSV()');
                     return defaultSV;
                 }
                 return hsvToSV(rgbToHSV(hslToRGB(utils.core.clone(hsl))));
             }
             catch (error) {
-                log('error', `Error converting HSL to SV: ${error}`, 'colorUtils > helpers.hsvToSV()');
+                log('error', `Error: ${error}`, 'hsvToSV()');
                 return defaultSV;
             }
         },
@@ -607,13 +608,13 @@ function createColorHelpers(services, utils) {
             const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
-                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToXYZ()');
+                    log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'hslToXYZ()');
                     return defaultXYZ;
                 }
                 return labToXYZ(hslToLAB(utils.core.clone(hsl)));
             }
             catch (error) {
-                log('error', `hslToXYZ error: ${error}`, 'colorUtils > helpers.labToXYZ()');
+                log('error', `hslToXYZ error: ${error}`, 'labToXYZ()');
                 return defaultXYZ;
             }
         },
@@ -621,31 +622,27 @@ function createColorHelpers(services, utils) {
             const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsv)) {
-                    log('error', `Invalid HSV value ${JSON.stringify(hsv)}`, 'colorUtils > helpers.hsvToHSL()');
+                    log('error', `Invalid HSV value ${JSON.stringify(hsv)}`, 'hsvToHSL()');
                     return defaultHSL;
                 }
                 const clonedHSV = utils.core.clone(hsv);
-                const newSaturation = clonedHSV.value.value *
-                    (1 - clonedHSV.value.saturation / 100) ===
-                    0 || clonedHSV.value.value === 0
-                    ? 0
-                    : (clonedHSV.value.value -
-                        clonedHSV.value.value *
-                            (1 - clonedHSV.value.saturation / 100)) /
-                        Math.min(clonedHSV.value.value, 100 - clonedHSV.value.value);
+                const s = clonedHSV.value.saturation / 100;
+                const v = clonedHSV.value.value / 100;
+                const l = v * (1 - s / 2);
+                const newSaturation = l === 0 || l === 1 ? 0 : (v - l) / Math.min(l, 1 - l);
                 const lightness = clonedHSV.value.value *
                     (1 - clonedHSV.value.saturation / 200);
                 return {
                     value: {
-                        hue: utils.brand.asRadial(Math.round(clonedHSV.value.hue)),
-                        saturation: utils.brand.asPercentile(Math.round(newSaturation * 100)),
-                        lightness: utils.brand.asPercentile(Math.round(lightness))
+                        hue: utils.brand.asRadial(utils.sanitize.percentile(clonedHSV.value.hue)),
+                        saturation: utils.brand.asPercentile(utils.sanitize.percentile(newSaturation * 100)),
+                        lightness: utils.brand.asPercentile(utils.sanitize.percentile(lightness))
                     },
                     format: 'hsl'
                 };
             }
             catch (error) {
-                log('error', `hsvToHSL() error: ${error}`, 'colorUtils > helpers.hsvToHSL()');
+                log('error', `Error: ${error}`, 'hsvToHSL()');
                 return defaultHSL;
             }
         },
@@ -653,13 +650,13 @@ function createColorHelpers(services, utils) {
             const log = services.log;
             try {
                 if (!utils.validate.colorValue(lab)) {
-                    log('error', `Invalid LAB value ${JSON.stringify(lab)}`, 'colorUtils > helpers.labToHSL()');
+                    log('error', `Invalid LAB value ${JSON.stringify(lab)}`, 'labToHSL()');
                     return defaultHSL;
                 }
                 return rgbToHSL(labToRGB(utils.core.clone(lab)));
             }
             catch (error) {
-                log('error', `labToHSL() error: ${error}`, 'colorUtils > helpers.labToHSL()');
+                log('error', `Error: ${error}`, 'labToHSL()');
                 return defaultHSL;
             }
         },
@@ -667,13 +664,13 @@ function createColorHelpers(services, utils) {
             const log = services.log;
             try {
                 if (!utils.validate.colorValue(xyz)) {
-                    log('error', `Invalid XYZ value ${JSON.stringify(xyz)}`, 'colorUtils > helpers.xyzToHSL()');
+                    log('error', `Invalid XYZ value ${JSON.stringify(xyz)}`, 'xyzToHSL()');
                     return defaultHSL;
                 }
                 return rgbToHSL(xyzToRGB(utils.core.clone(xyz)));
             }
             catch (error) {
-                log('error', `xyzToHSL() error: ${error}`, 'colorUtils > helpers.xyzToHSL()');
+                log('error', `Error: ${error}`, 'xyzToHSL()');
                 return defaultHSL;
             }
         }

@@ -117,6 +117,20 @@ export function createAppUtils(
 			const seconds = String(now.getSeconds()).padStart(2, '0');
 
 			return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+		},
+		async tracePromise(
+			promise: Promise<unknown>,
+			label: string
+		): Promise<unknown> {
+			return promise
+				.then(result => {
+					console.log(`[TRACE SUCCESS] ${label}:`, result);
+					return result;
+				})
+				.catch(error => {
+					console.error(`[TRACE ERROR] ${label}:`, error);
+					throw error;
+				});
 		}
 	};
 }

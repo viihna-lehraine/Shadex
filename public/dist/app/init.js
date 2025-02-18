@@ -39,7 +39,7 @@ async function initialize() {
         const stateManager = await initializeStateManager(services, utils);
         // 7. initialize PaletteState
         console.log('[initialize-8] Calling initializePaletteState...');
-        const paletteState = await initializePaletteState(stateManager, utils);
+        const paletteState = await initializePaletteState(services, stateManager, utils);
         // 8. initialize PaletteManager
         console.log('[initialize-9] Calling initializePaletteManager...');
         const paletteManager = await initializePaletteManager(stateManager, common, generateHuesFnGroup, generatePaletteFnGroup, generatePalette);
@@ -58,7 +58,7 @@ async function initialize() {
             console.error(`[initialize-E] Error initializing events: ${err}`);
             events = {
                 palette: new PaletteEvents(paletteManager, paletteState, services, stateManager, utils),
-                ui: new UIEvents(services, utils)
+                ui: new UIEvents(paletteManager, services, utils)
             };
         }
         // 11. expose classes to window
@@ -66,7 +66,13 @@ async function initialize() {
             console.log('[initialize-14] Calling exposeToWindow...');
             await exposeToWindow(eventManager, events.palette, paletteManager, stateManager, events.ui);
         }
-        console.log('[initialize-15] Initialization complete.');
+        // 12. Ensure state is fully initialized before rendering initial palette
+        await stateManager.ensureStateReady();
+        // 12. Render initial palette
+        console.log('[initialize-15] Calling paletteManager.loadPalette()...');
+        await paletteManager.loadPalette();
+        console.log('[initialize-15.5] After paletteManager.loadPalette()...');
+        console.log('[initialize-16] Initialization complete.');
         return {
             common,
             events,
@@ -93,7 +99,7 @@ async function exposeToWindow(eventManager, paletteEvents, paletteManager, state
 async function initializeEvents(paletteManager, paletteState, services, stateManager, utils) {
     console.log('[initializeEvents] Creating event handlers...');
     const paletteEvents = new PaletteEvents(paletteManager, paletteState, services, stateManager, utils);
-    const uiEvents = new UIEvents(services, utils);
+    const uiEvents = new UIEvents(paletteManager, services, utils);
     paletteEvents.init();
     uiEvents.init();
     uiEvents.initButtons();
@@ -125,10 +131,10 @@ async function initializePaletteManager(stateManager, common, generateHuesFnGrou
         throw err;
     }
 }
-async function initializePaletteState(stateManager, utils) {
+async function initializePaletteState(services, stateManager, utils) {
     try {
         console.log('[initializePaletteState-1] Creating palette state...');
-        const palettestate = new PaletteState(stateManager, utils);
+        const palettestate = new PaletteState(stateManager, services, utils);
         console.log('[initializePaletteState-2] PaletteState initialized.');
         return palettestate;
     }
