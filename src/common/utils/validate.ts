@@ -2,17 +2,16 @@
 
 import {
 	Color,
-	DataSetsInterface,
+	SetsData,
 	SL,
 	SV,
 	UtilitiesInterface,
 	ValidationUtilsInterface
 } from '../../types/index.js';
-import { configData as config } from '../../data/config.js';
-import { dataSets } from '../../data/sets.js';
+import { data } from '../../data/index.js';
 
-const regex = config.regex;
-const sets = dataSets;
+const regex = data.config.regex;
+const sets = data.sets;
 
 export function createValidationUtils(
 	utils: UtilitiesInterface
@@ -177,7 +176,7 @@ export function createValidationUtils(
 		hexComponent(value: string): boolean {
 			return hex(value, regex.validation.hexComponent);
 		},
-		range<T extends keyof DataSetsInterface>(
+		range<T extends keyof SetsData>(
 			value: number | string,
 			rangeKey: T
 		): void {

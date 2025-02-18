@@ -1,21 +1,34 @@
 // File: common/factories/logger.js
 
-import { AppLogger } from '../logger/AppLogger.js';
+import { LoggerInterface } from '../../types/index.js';
+import { AppLogger } from '../services/AppLogger.js';
+import { data } from '../../data/index.js';
 
-export const createLogger = async () => {
+const debugLevel = data.mode.debugLevel;
+
+export const createLogger = async (): Promise<LoggerInterface> => {
 	console.log('[FACTORIES.logger] Loading createLogger...');
 	const appLogger = AppLogger.getInstance();
 	console.log(
 		`[FACTORIES.logger] AppLogger.getInstance() returned:`,
-		appLogger
+		Object.getOwnPropertyNames(Object.getPrototypeOf(appLogger))
 	);
 
 	return {
-		debug: appLogger.log.bind(appLogger, 'debug'),
-		info: appLogger.log.bind(appLogger, 'info'),
-		warn: appLogger.log.bind(appLogger, 'warn'),
-		error: appLogger.log.bind(appLogger, 'error'),
-		mutation: appLogger.logMutation.bind(appLogger)
+		debug: (message, caller) =>
+			appLogger.log(message, 'debug', debugLevel, caller),
+		info: (message, caller) =>
+			appLogger.log(message, 'info', debugLevel, caller),
+		warn: (message, caller) =>
+			appLogger.log(message, 'warn', debugLevel, caller),
+		error: (message, caller) =>
+			appLogger.log(message, 'error', debugLevel, caller),
+		mutation: (data, logCallback, caller) => {
+			appLogger.logMutation(data, logCallback);
+			if (caller) {
+				appLogger.log(`Mutation logged by ${caller}`, 'debug');
+			}
+		}
 	};
 };
 

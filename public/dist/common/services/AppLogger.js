@@ -1,10 +1,12 @@
-import { modeData } from '../../data/mode.js';
+import { data } from '../../data/index.js';
 
-// File: common/logger/AppLogger.js
-const mode = modeData;
+// File: common/services/AppLogger.js
+const mode = data.mode;
 class AppLogger {
     static instance = null;
-    constructor() { }
+    constructor() {
+        console.log('[AppLogger] AppLogger constructor executed.');
+    }
     static getInstance() {
         console.log('[AppLogger] Executing getInstance().');
         if (!AppLogger.instance) {
@@ -16,6 +18,14 @@ class AppLogger {
         return AppLogger.instance;
     }
     log(message, level = 'info', debugLevel = 0, caller) {
+        if (debugLevel >= 5) {
+            console.log(`[AppLogger.log] Log function CALLED with:`, {
+                message,
+                level,
+                debugLevel,
+                caller
+            });
+        }
         this.logMessage(message, level, debugLevel, caller);
     }
     async logAsync(message, level = 'info', debugLevel = 0, caller) {

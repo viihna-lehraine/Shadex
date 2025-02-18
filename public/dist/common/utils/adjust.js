@@ -1,13 +1,12 @@
-import { constsData } from '../../data/consts.js';
-import { defaultData } from '../../data/defaults.js';
+import { data } from '../../data/index.js';
 
 // File: common/utils/adjust.js
-const adjustments = constsData.adjustments;
-const defaultColors = defaultData.colors;
+const adjustments = data.config.adjustments;
+const defaultColors = data.defaults.colors;
 function createAdjustmentUtils(services, utils) {
     return {
         applyGammaCorrection(value) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 return value > 0.0031308
                     ? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
@@ -19,7 +18,7 @@ function createAdjustmentUtils(services, utils) {
             }
         },
         clampRGB(rgb) {
-            const log = services.app.log;
+            const log = services.log;
             const defaultRGB = defaultColors.rgb;
             if (!utils.validate.colorValue(rgb)) {
                 log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'adjustmentUtils.clampRGB()');
@@ -41,7 +40,7 @@ function createAdjustmentUtils(services, utils) {
             }
         },
         sl(color) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(color)) {
                     log('error', 'Invalid color valus for adjustment.', 'adjustmentUtils.adjustSL()');

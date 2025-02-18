@@ -27,11 +27,11 @@ import {
 	XYZ,
 	XYZStringObject
 } from '../../types/index.js';
-import { configData as config } from '../../data/config.js';
-import { defaultData as defaults } from '../../data/defaults.js';
+import { data } from '../../data/index.js';
 
-const defaultColors = defaults.colors;
-const defaultColorStrings = defaults.colors.strings;
+const config = data.config;
+const defaultColors = data.defaults.colors;
+const defaultColorStrings = data.defaults.colors.strings;
 
 export function createColorUtils(
 	helpers: HelpersInterface,
@@ -115,7 +115,7 @@ export function createColorUtils(
 			};
 		},
 		convertColorToColorString(color: Color): ColorStringObject {
-			const log = services.app.log;
+			const log = services.log;
 			const clonedColor = utils.core.clone(color);
 
 			if (utils.typeGuards.isColorString(clonedColor)) {
@@ -353,7 +353,7 @@ export function createColorUtils(
 			return { hex: hex.hex };
 		},
 		convertHSL(color: HSL, colorSpace: ColorSpaceExtended): Color {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(color)) {
@@ -457,7 +457,7 @@ export function createColorUtils(
 			};
 		},
 		convertToHSL(color: Exclude<Color, SL | SV>): HSL {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(color)) {
@@ -542,7 +542,7 @@ export function createColorUtils(
 					case 'xyz':
 						return formatters.xyz(color);
 					default:
-						services.app.log(
+						services.log(
 							'error',
 							`Unsupported color format for ${color}`,
 							'colorUtils.getColorString()'
@@ -551,7 +551,7 @@ export function createColorUtils(
 						return null;
 				}
 			} catch (error) {
-				services.app.log(
+				services.log(
 					'error',
 					`getColorString error: ${error}`,
 					'colorUtils.getColorString()'
@@ -584,7 +584,7 @@ export function createColorUtils(
 				): ColorDataAssertion[To] =>
 					structuredClone(conversionFn(value));
 			} catch (error) {
-				services.app.log(
+				services.log(
 					'error',
 					`Error getting conversion function: ${error}`,
 					'colorUtils.getConversionFn()'
@@ -612,7 +612,7 @@ export function createColorUtils(
 
 				return clonedP;
 			} catch (error) {
-				services.app.log(
+				services.log(
 					'error',
 					`Error converting hue to RGB: ${error}`,
 					'colorUtils.hueToRGB()'
@@ -657,7 +657,7 @@ export function createColorUtils(
 		validateAndConvertColor(
 			color: Color | ColorStringObject | null
 		): Color | null {
-			const log = services.app.log;
+			const log = services.log;
 
 			if (!color) return null;
 

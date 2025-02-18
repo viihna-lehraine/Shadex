@@ -8,9 +8,9 @@ import {
 	ServicesInterface,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { configData as config } from '../../data/config.js';
+import { data } from '../../data/index.js';
 
-const regex = config.regex.dom;
+const regex = data.config.regex.dom;
 
 export function createParsingUtils(
 	services: ServicesInterface,
@@ -18,7 +18,7 @@ export function createParsingUtils(
 ): ParseUtilsInterface {
 	return {
 		checkbox(id: string): boolean | void {
-			const log = services.app.log;
+			const log = services.log;
 
 			const checkbox = document.getElementById(
 				id
@@ -36,7 +36,7 @@ export function createParsingUtils(
 			return checkbox ? checkbox.checked : undefined;
 		},
 		colorInput(input: HTMLInputElement): Hex | HSL | RGB | null {
-			const log = services.app.log;
+			const log = services.log;
 
 			const colorStr = input.value.trim().toLowerCase();
 			const hexMatch = colorStr.match(regex.hex);
@@ -120,7 +120,7 @@ export function createParsingUtils(
 			return null;
 		},
 		dropdownSelection(id: string, validOptions: string[]): string | void {
-			const log = services.app.log;
+			const log = services.log;
 
 			const dropdown = document.getElementById(
 				id
@@ -150,7 +150,7 @@ export function createParsingUtils(
 			min?: number,
 			max?: number
 		): number | null {
-			const log = services.app.log;
+			const log = services.log;
 
 			const value = parseFloat(input.value.trim());
 
@@ -171,7 +171,7 @@ export function createParsingUtils(
 			return value;
 		},
 		textInput(input: HTMLInputElement, regex?: RegExp): string | null {
-			const log = services.app.log;
+			const log = services.log;
 
 			const text = input.value.trim();
 

@@ -1,11 +1,11 @@
-import { configData } from '../../data/config.js';
+import { data } from '../../data/index.js';
 
 // File: common/utils/parse.js
-const regex = configData.regex.dom;
+const regex = data.config.regex.dom;
 function createParsingUtils(services, utils) {
     return {
         checkbox(id) {
-            const log = services.app.log;
+            const log = services.log;
             const checkbox = document.getElementById(id);
             if (!checkbox) {
                 log('warn', `Checkbox element ${id} not found`, 'parseUtils.checkbox()', 1);
@@ -13,7 +13,7 @@ function createParsingUtils(services, utils) {
             return checkbox ? checkbox.checked : undefined;
         },
         colorInput(input) {
-            const log = services.app.log;
+            const log = services.log;
             const colorStr = input.value.trim().toLowerCase();
             const hexMatch = colorStr.match(regex.hex);
             const hslMatch = colorStr.match(regex.hsl);
@@ -75,7 +75,7 @@ function createParsingUtils(services, utils) {
             return null;
         },
         dropdownSelection(id, validOptions) {
-            const log = services.app.log;
+            const log = services.log;
             const dropdown = document.getElementById(id);
             if (!dropdown)
                 return;
@@ -88,7 +88,7 @@ function createParsingUtils(services, utils) {
                 : undefined;
         },
         numberInput(input, min, max) {
-            const log = services.app.log;
+            const log = services.log;
             const value = parseFloat(input.value.trim());
             if (isNaN(value)) {
                 log('warn', `Invalid number input: ${input.value}`, 'parseUtils > numberInput()', 1);
@@ -102,7 +102,7 @@ function createParsingUtils(services, utils) {
             return value;
         },
         textInput(input, regex) {
-            const log = services.app.log;
+            const log = services.log;
             const text = input.value.trim();
             if (regex && !regex.test(text)) {
                 log('warn', `Invalid text input: ${text}`, 'parseUtils > textInput()', 1);

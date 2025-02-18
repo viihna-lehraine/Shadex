@@ -1,14 +1,16 @@
-// File: common/logger/AppLogger.js
+// File: common/services/AppLogger.js
 
 import { AppLoggerClassInterface, MutationLog } from '../../types/index.js';
-import { modeData } from '../../data/mode.js';
+import { data } from '../../data/index.js';
 
-const mode = modeData;
+const mode = data.mode;
 
 export class AppLogger implements AppLoggerClassInterface {
 	private static instance: AppLogger | null = null;
 
-	private constructor() {}
+	private constructor() {
+		console.log('[AppLogger] AppLogger constructor executed.');
+	}
 
 	public static getInstance(): AppLogger {
 		console.log('[AppLogger] Executing getInstance().');
@@ -31,6 +33,14 @@ export class AppLogger implements AppLoggerClassInterface {
 		debugLevel: number = 0,
 		caller?: string
 	): void {
+		if (debugLevel >= 5) {
+			console.log(`[AppLogger.log] Log function CALLED with:`, {
+				message,
+				level,
+				debugLevel,
+				caller
+			});
+		}
 		this.logMessage(message, level, debugLevel, caller);
 	}
 

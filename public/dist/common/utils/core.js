@@ -1,7 +1,7 @@
-import { dataSets } from '../../data/sets.js';
+import { data } from '../../data/index.js';
 
 // File: common/utils/core.js
-const sets = dataSets;
+const sets = data.sets;
 function clampToRange(value, rangeKey) {
     const [min, max] = sets[rangeKey];
     return Math.min(Math.max(value, min), max);

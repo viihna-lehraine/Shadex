@@ -9,20 +9,21 @@ import {
 	GeneratePaletteFnGroup,
 	HSL,
 	PaletteItem,
+	PaletteManagerClassInterface,
 	ServicesInterface,
 	UtilitiesInterface
 } from '../types/index.js';
-import { domData } from '../data/dom.js';
+import { data } from '../data/index.js';
 
-const ids = domData.ids;
+const ids = data.dom.ids;
 
-export class PaletteManager {
+export class PaletteManager implements PaletteManagerClassInterface {
 	private generateHues: GenerateHuesFnGroup;
 	private generatePaletteFns: GeneratePaletteFnGroup;
 	private generatePalette: GeneratePaletteFn;
 
 	private common: CommonFunctionsInterface;
-	private log: ServicesInterface['app']['log'];
+	private log: ServicesInterface['log'];
 
 	private utils: UtilitiesInterface;
 
@@ -33,12 +34,102 @@ export class PaletteManager {
 		generatePaletteFns: GeneratePaletteFnGroup,
 		generatePalette: GeneratePaletteFn
 	) {
-		this.log = common.services.app.log;
+		console.log(`[PaletteManager.constructor] Entering constructor...`);
+		console.log(
+			'[PaletteManager.constructor] Argument 1 - stateManager',
+			stateManager
+		);
+		console.log(
+			`[PaletteManager.constructor] Argument 2 - Common Fn Group`,
+			common
+		);
+		console.log(
+			`[PaletteManager.constructor] Argument 3 - Generate Hues Fn Group`,
+			generateHues
+		);
+		console.log(
+			`[PaletteManager.constructor] Argument 4 - Generate Palette Fn Group`,
+			generatePaletteFns
+		);
+		console.log(
+			`[PaletteManager.constructor] Argument 5 - Generate Palette Fn`,
+			generatePalette
+		);
+
+		this.log = common.services.log;
 		this.generateHues = generateHues;
 		this.generatePaletteFns = generatePaletteFns;
 		this.generatePalette = generatePalette;
 		this.common = common;
 		this.utils = common.utils;
+
+		this.log(
+			'debug',
+			'Completing initialization',
+			'PaletteManager.constructor()',
+			2
+		);
+	}
+
+	public handleColumnResize(columnID: number, newSize: number): void {
+		const currentState = this.stateManager.getState();
+		const columns = currentState.paletteContainer.columns;
+
+		// find colunmn
+		const columnIndex = columns.findIndex(col => col.id === columnID);
+		if (columnIndex === -1) {
+			this.log(
+				'warn',
+				`Column with ID ${columnID} not found.`,
+				'PaletteManager.handleColumnResize()'
+			);
+		}
+
+		// ensure new size is within limits
+		const minSize = data.config.ui.minColumnSize;
+		const maxSize = data.config.ui.maxColumnSize;
+		const adjustedSize = Math.max(minSize, Math.min(newSize, maxSize));
+
+		// distribute size difference
+		const sizeDiff = adjustedSize - columns[columnIndex].size;
+		columns[columnIndex].size = adjustedSize;
+
+		const unlockedColumns = columns.filter(
+			(__, i) => i !== columnIndex && !columns[i].isLocked
+		);
+		const disributeAmount = sizeDiff / unlockedColumns.length;
+
+		unlockedColumns.forEach(col => (col.size -= disributeAmount));
+
+		// ensure total width is 100%
+		const totalSize = columns.reduce((sum, col) => sum + col.size, 0);
+		const correctionFactor = 100 / totalSize;
+		columns.forEach(col => (col.size *= correctionFactor));
+
+		// update state
+		this.stateManager.updatePaletteColumns(columns, true, 2);
+	}
+
+	public handleColumnLock(columnID: number): void {
+		const currentState = this.stateManager.getState();
+		const columns = currentState.paletteContainer.columns;
+
+		// find column by ID
+		const columnIndex = columns.findIndex(col => col.id === columnID);
+
+		if (columnIndex === -1) {
+			this.log(
+				'warn',
+				`Column with ID ${columnID} not found.`,
+				'PaletteManager.handleColumnLock()'
+			);
+			return;
+		}
+
+		// toggle lock state
+		columns[columnIndex].isLocked = !columns[columnIndex].isLocked;
+
+		this.stateManager.updatePaletteColumns(columns, true, 2);
 	}
 
 	public renderNewPalette(): void {
@@ -124,9 +215,6 @@ export class PaletteManager {
 			true,
 			3
 		);
-
-		// // Attach event listeners
-		// args.attachPaletteListeners();
 	}
 
 	public renderPaletteColor(
@@ -232,5 +320,40 @@ export class PaletteManager {
 		column.appendChild(dragHandle);
 		column.appendChild(resizeHandle);
 		column.appendChild(colorInputModal);
+	}
+
+	public swapColumns(draggedID: number, targetID: number): void {
+		const currentState = this.stateManager.getState();
+		const columns = [...currentState.paletteContainer.columns];
+
+		const draggedIndex = columns.findIndex(col => col.id === draggedID);
+		const targetIndex = columns.findIndex(col => col.id === targetID);
+
+		if (draggedIndex === -1 || targetIndex === -1) {
+			this.log(
+				'warn',
+				`Failed to swap: Column ID ${draggedID} or ${targetID} not found.`,
+				'PaletteManager.swapColumns()'
+			);
+			return;
+		}
+
+		// swap positions in the array
+		[columns[draggedIndex].position, columns[targetIndex].position] = [
+			columns[targetIndex].position,
+			columns[draggedIndex].position
+		];
+
+		// sort the array based on the new positions
+		columns.sort((a, b) => a.position - b.position);
+
+		// update state with new column order
+		this.stateManager.updatePaletteColumns(columns, true, 3);
+
+		this.log(
+			'debug',
+			`Swapped columns ${draggedID} and ${targetID}. New order: ${columns.map(col => col.id).join(', ')}`,
+			'PaletteManager.swapColumns()'
+		);
 	}
 }

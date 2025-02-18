@@ -37,9 +37,9 @@ import {
 	XYZ_Y,
 	XYZ_Z
 } from '../../types/index.js';
-import { configData as config } from '../../data/config.js';
+import { data } from '../../data/index.js';
 
-const regex = config.regex;
+const regex = data.config.regex;
 
 export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInterface {
 	function asByteRange(value: number): ByteRange {

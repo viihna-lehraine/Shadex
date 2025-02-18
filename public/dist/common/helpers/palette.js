@@ -1,38 +1,39 @@
-import { constsData } from '../../data/consts.js';
+import { data } from '../../data/index.js';
 
 // File: common/helpers/palette.js
-const probabilityConsts = constsData.probabilities;
+const config = data.config;
+const probabilityConsts = config.probabilities;
 function createPaletteHelpers(services, utils) {
     function isHSLTooDark(hsl) {
-        const log = services.app.log;
+        const log = services.log;
         if (!utils.validate.colorValue(hsl)) {
             log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'paletteUtils.isHSLTooDark()');
             return false;
         }
-        return utils.core.clone(hsl).value.lightness < constsData.thresholds.dark;
+        return utils.core.clone(hsl).value.lightness < config.thresholds.dark;
     }
     function isHSLTooGray(hsl) {
-        const log = services.app.log;
+        const log = services.log;
         if (!utils.validate.colorValue(hsl)) {
             log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'paletteUtils.isHSLTooGray()');
             return false;
         }
-        return utils.core.clone(hsl).value.saturation < constsData.thresholds.gray;
+        return utils.core.clone(hsl).value.saturation < config.thresholds.gray;
     }
     function isHSLTooLight(hsl) {
-        const log = services.app.log;
+        const log = services.log;
         if (!utils.validate.colorValue(hsl)) {
             log('error', 'Invalid HSL value ${JSON.stringify(hsl)}', 'paletteUtils.isHSLTooLight()');
             return false;
         }
-        return utils.core.clone(hsl).value.lightness > constsData.thresholds.light;
+        return utils.core.clone(hsl).value.lightness > config.thresholds.light;
     }
     return {
         isHSLTooDark,
         isHSLTooGray,
         isHSLTooLight,
         getWeightedRandomInterval(distributionType) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 // select appropriate type
                 const { weights, values } = probabilityConsts[distributionType];
@@ -56,7 +57,7 @@ function createPaletteHelpers(services, utils) {
             }
         },
         isHSLInBounds(hsl) {
-            const log = services.app.log;
+            const log = services.log;
             if (!utils.validate.colorValue(hsl)) {
                 log('error', `isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`, 'paletteUtils.isHSLInBounds()');
                 return false;

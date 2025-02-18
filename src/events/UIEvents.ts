@@ -1,15 +1,19 @@
 // File: events/UIEvents.js
 
-import { ServicesInterface, UtilitiesInterface } from '../types/index.js';
+import {
+	DOMElements,
+	ServicesInterface,
+	UtilitiesInterface
+} from '../types/index.js';
 import { EventManager } from './EventManager.js';
-import { domData } from '../data/dom.js';
+import { data } from '../data/index.js';
 
-const btns = domData.elements.btns;
-const classes = domData.classes;
-const elements = domData.elements;
+const classes = data.dom.classes;
+const ids = data.dom.ids;
 
 export class UIEvents {
-	private log: ServicesInterface['app']['log'];
+	private log: ServicesInterface['log'];
+	private elements: DOMElements;
 
 	constructor(
 		private services: ServicesInterface,
@@ -17,7 +21,15 @@ export class UIEvents {
 	) {
 		this.services = services;
 		this.utils = utils;
-		this.log = this.services.app.log;
+		this.log = this.services.log;
+
+		const validatedElements = this.utils.dom.getValidatedDOMElements(ids);
+		if (!validatedElements) {
+			throw new Error(
+				`Critical UI elements not found. Application cannot start`
+			);
+		}
+		this.elements = validatedElements;
 	}
 
 	public init() {
@@ -25,16 +37,16 @@ export class UIEvents {
 			const target = event.target as HTMLElement;
 
 			// open modal
-			if (target.matches(domData.classes.modalTrigger)) {
+			if (target.matches(classes.modalTrigger)) {
 				const modal = this.utils.core.getElement(
 					target.dataset.modalID!
 				);
-				modal?.classList.remove(domData.classes.hidden);
+				modal?.classList.remove(classes.hidden);
 			}
 
 			// close modal when clicking outside
-			if (target.matches(domData.classes.modal)) {
-				target.classList.add(domData.classes.hidden);
+			if (target.matches(classes.modal)) {
+				target.classList.add(classes.hidden);
 			}
 		});
 
@@ -42,10 +54,10 @@ export class UIEvents {
 		EventManager.add(document, 'keydown', ((event: KeyboardEvent) => {
 			if (event.key === 'Escape') {
 				const openModals = this.utils.core.getAllElements(
-					domData.classes.modal
+					classes.modal
 				);
 				openModals.forEach(modal =>
-					modal.classList.add(domData.classes.hidden)
+					modal.classList.add(classes.hidden)
 				);
 			}
 		}) as EventListener);
@@ -53,24 +65,24 @@ export class UIEvents {
 
 	public initButtons(): void {
 		// desaturate button (Placeholder logic)
-		EventManager.add(btns.desaturate!, 'click', (e: Event) => {
+		EventManager.add(this.elements.btns.desaturate, 'click', (e: Event) => {
 			e.preventDefault();
 			this.log(
 				'debug',
 				'Desaturate button clicked',
-				'UIEvents.initButtons()',
+				'UIEvents.initButtons',
 				5
 			);
 			this.log(
 				'debug',
 				'Desaturation logic not implemented!',
-				'UIEvents.initButtons()',
+				'UIEvents.initButtons',
 				2
 			);
 		});
 
 		// export button (Placeholder logic)
-		EventManager.add(btns.export!, 'click', (e: Event) => {
+		EventManager.add(this.elements.btns.export, 'click', (e: Event) => {
 			e.preventDefault();
 			this.log(
 				'debug',
@@ -87,7 +99,7 @@ export class UIEvents {
 		});
 
 		// generate button (Placeholder logic)
-		EventManager.add(btns.generate!, 'click', (e: Event) => {
+		EventManager.add(this.elements.btns.generate, 'click', (e: Event) => {
 			e.preventDefault();
 			this.log(
 				'debug',
@@ -122,12 +134,12 @@ export class UIEvents {
 	private handleWindowClick(event: Event): void {
 		const target = event.target as HTMLElement;
 
-		if (target === elements.divs.helpMenu) {
-			elements.divs.helpMenu.classList.add(classes.hidden);
+		if (target === this.elements.divs.helpMenu) {
+			this.elements.divs.helpMenu.classList.add(classes.hidden);
 		}
 
-		if (target === elements.divs.historyMenu) {
-			elements.divs.historyMenu.classList.add(classes.hidden);
+		if (target === this.elements.divs.historyMenu) {
+			this.elements.divs.historyMenu.classList.add(classes.hidden);
 		}
 	}
 }

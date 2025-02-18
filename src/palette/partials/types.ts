@@ -9,9 +9,9 @@ import {
 	PaletteItem,
 	SelectedPaletteOptions
 } from '../../types/index.js';
-import { constsData as consts } from '../../data/consts.js';
+import { data } from '../../data/index.js';
 
-const paletteRanges = consts.paletteRanges;
+const paletteRanges = data.config.paletteRanges;
 
 function analogous(
 	options: SelectedPaletteOptions,
@@ -472,7 +472,7 @@ function triadic(
 	return utils.palette.createPaletteObject(options, paletteItems);
 }
 
-export const generatePalette: GeneratePaletteFnGroup = {
+export const generatePaletteFnGroup: GeneratePaletteFnGroup = {
 	analogous,
 	complementary,
 	diadic,

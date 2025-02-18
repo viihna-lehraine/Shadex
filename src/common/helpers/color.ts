@@ -17,7 +17,9 @@ import {
 	XYZ_Y,
 	XYZ_Z
 } from '../../types/index.js';
-import { defaultData as defaults } from '../../data/defaults.js';
+import { data } from '../../data/index.js';
+
+const defaults = data.defaults;
 
 const defaultCMYK = defaults.colors.cmyk;
 const defaultHex = defaults.colors.hex;
@@ -34,7 +36,7 @@ export function createColorHelpers(
 	utils: UtilitiesInterface
 ): ColorUtilHelpersInterface {
 	function cmykToRGB(cmyk: CMYK): RGB {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(cmyk)) {
@@ -82,7 +84,7 @@ export function createColorHelpers(
 	}
 
 	function hexToHSL(hex: Hex): HSL {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(hex)) {
@@ -108,7 +110,7 @@ export function createColorHelpers(
 	}
 
 	function hexToRGB(hex: Hex): RGB {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(hex)) {
@@ -150,7 +152,7 @@ export function createColorHelpers(
 	}
 
 	function hslToLAB(hsl: HSL): LAB {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(hsl)) {
@@ -176,7 +178,7 @@ export function createColorHelpers(
 	}
 
 	function hslToRGB(hsl: HSL): RGB {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(hsl)) {
@@ -236,7 +238,7 @@ export function createColorHelpers(
 	}
 
 	function hsvToSV(hsv: HSV): SV {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(hsv)) {
@@ -268,7 +270,7 @@ export function createColorHelpers(
 	}
 
 	function labToRGB(lab: LAB): RGB {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(lab)) {
@@ -294,7 +296,7 @@ export function createColorHelpers(
 	}
 
 	function labToXYZ(lab: LAB): XYZ {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(lab)) {
@@ -359,7 +361,7 @@ export function createColorHelpers(
 	}
 
 	function rgbToCMYK(rgb: RGB): CMYK {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(rgb)) {
@@ -414,7 +416,7 @@ export function createColorHelpers(
 	}
 
 	function rgbToHex(rgb: RGB): Hex {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(rgb)) {
@@ -470,7 +472,7 @@ export function createColorHelpers(
 	}
 
 	function rgbToHSL(rgb: RGB): HSL {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(rgb)) {
@@ -542,7 +544,7 @@ export function createColorHelpers(
 	}
 
 	function rgbToHSV(rgb: RGB): HSV {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(rgb)) {
@@ -606,7 +608,7 @@ export function createColorHelpers(
 	}
 
 	function rgbToXYZ(rgb: RGB): XYZ {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(rgb)) {
@@ -678,7 +680,7 @@ export function createColorHelpers(
 	}
 
 	function xyzToLAB(xyz: XYZ): LAB {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(xyz)) {
@@ -761,7 +763,7 @@ export function createColorHelpers(
 	}
 
 	function xyzToRGB(xyz: XYZ): RGB {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			if (!utils.validate.colorValue(xyz)) {
@@ -824,7 +826,7 @@ export function createColorHelpers(
 		xyzToRGB,
 		xyzToLAB,
 		cmykToHSL(cmyk: CMYK): HSL {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(cmyk)) {
@@ -849,7 +851,7 @@ export function createColorHelpers(
 			}
 		},
 		hexToHSLWrapper(input: string | Hex): HSL {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				const clonedInput = utils.core.clone(input);
@@ -882,7 +884,7 @@ export function createColorHelpers(
 			}
 		},
 		hslToCMYK(hsl: HSL): CMYK {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(hsl)) {
@@ -907,7 +909,7 @@ export function createColorHelpers(
 			}
 		},
 		hslToHex(hsl: HSL): Hex {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(hsl)) {
@@ -932,7 +934,7 @@ export function createColorHelpers(
 			}
 		},
 		hslToHSV(hsl: HSL): HSV {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(hsl)) {
@@ -974,7 +976,7 @@ export function createColorHelpers(
 			}
 		},
 		hslToSL(hsl: HSL): SL {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(hsl)) {
@@ -1005,7 +1007,7 @@ export function createColorHelpers(
 			}
 		},
 		hslToSV(hsl: HSL): SV {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(hsl)) {
@@ -1030,7 +1032,7 @@ export function createColorHelpers(
 			}
 		},
 		hslToXYZ(hsl: HSL): XYZ {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(hsl)) {
@@ -1055,7 +1057,7 @@ export function createColorHelpers(
 			}
 		},
 		hsvToHSL(hsv: HSV): HSL {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(hsv)) {
@@ -1110,7 +1112,7 @@ export function createColorHelpers(
 			}
 		},
 		labToHSL(lab: LAB): HSL {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(lab)) {
@@ -1135,7 +1137,7 @@ export function createColorHelpers(
 			}
 		},
 		xyzToHSL(xyz: XYZ): HSL {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(xyz)) {

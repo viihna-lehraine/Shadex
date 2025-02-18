@@ -1,12 +1,12 @@
-import { constsData } from '../../data/consts.js';
-import { domData } from '../../data/dom.js';
+import { data } from '../../data/index.js';
 
 // File: common/utils/dom.js
-const domIDs = domData.ids;
-const timers = constsData.timers;
+const classes = data.dom.classes;
+const ids = data.dom.ids;
+const timers = data.config.timers;
 function createDOMUtils(services, utils) {
     const addConversionListener = (id, colorSpace) => {
-        const log = services.app.log;
+        const log = services.log;
         const btn = document.getElementById(id);
         if (btn) {
             if (utils.typeGuards.isColorSpace(colorSpace)) {
@@ -44,7 +44,7 @@ function createDOMUtils(services, utils) {
         delete element.dataset.tooltipId;
     }
     function switchColorSpaceInDOM(targetFormat) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             const colorTextOutputBoxes = document.querySelectorAll('.color-text-output-box');
             for (const box of colorTextOutputBoxes) {
@@ -96,7 +96,7 @@ function createDOMUtils(services, utils) {
         removeTooltip,
         switchColorSpaceInDOM,
         addEventListener(id, eventType, callback) {
-            const log = services.app.log;
+            const log = services.log;
             const element = document.getElementById(id);
             if (element) {
                 element.addEventListener(eventType, callback);
@@ -133,8 +133,8 @@ function createDOMUtils(services, utils) {
             URL.revokeObjectURL(url);
         },
         enforceSwatchRules(minSwatches, maxSwatches) {
-            const log = services.app.log;
-            const paletteColumnSelector = document.getElementById(domIDs.selectors.paletteColumn);
+            const log = services.log;
+            const paletteColumnSelector = document.getElementById(ids.inputs.paletteColumn);
             if (!paletteColumnSelector) {
                 log('error', 'paletteColumnSelector not found', 'domUtils.enforceSwatchRules()');
                 {
@@ -166,6 +166,43 @@ function createDOMUtils(services, utils) {
                 }
             }
         },
+        getValidatedDOMElements(unvalidatedIDs = data.dom.ids) {
+            const log = services.log;
+            const missingElements = [];
+            const elementTypeMap = {
+                btns: 'button',
+                divs: 'div',
+                inputs: 'input'
+            };
+            const elements = {
+                btns: {},
+                divs: {},
+                inputs: {}
+            };
+            for (const [category, elementsGroup] of Object.entries(unvalidatedIDs)) {
+                const tagName = elementTypeMap[category];
+                if (!tagName) {
+                    log('warn', `No element type mapping found for category "${category}". Skipping...`, 'getValidatedDOMElements()', 3);
+                    continue;
+                }
+                for (const [key, id] of Object.entries(elementsGroup)) {
+                    const element = utils.core.getElement(id);
+                    if (!element) {
+                        log('error', `Element with ID "${id}" not found`, 'getValidatedDOMElements()', 2);
+                        missingElements.push(id);
+                    }
+                    else {
+                        elements[category][key] = element;
+                    }
+                }
+            }
+            if (missingElements.length) {
+                log('warn', `Missing elements: ${missingElements.join(', ')}`, 'getValidatedDOMElements()', 2);
+                return null;
+            }
+            log('debug', 'All static elements are present.', 'getValidatedDOMElements()', 3);
+            return elements;
+        },
         hideTooltip() {
             const tooltip = utils.core.getElement('.tooltip');
             if (!tooltip)
@@ -175,6 +212,15 @@ function createDOMUtils(services, utils) {
                 tooltip.style.visibility = 'hidden';
                 tooltip.remove();
             }, timers.tooltipFadeOut);
+        },
+        scanPaletteColumns() {
+            const paletteColumns = utils.core.getAllElements(classes.paletteColumn);
+            return Array.from(paletteColumns).map((column, index) => {
+                const id = parseInt(column.id.split('-').pop() || `${index + 1}`, 10);
+                const size = column.clientWidth / paletteColumns.length;
+                const isLocked = column.classList.contains(classes.locked);
+                return { id, position: index + 1, size, isLocked };
+            });
         },
         readFile(file) {
             return new Promise((resolve, reject) => {
@@ -192,7 +238,7 @@ function createDOMUtils(services, utils) {
             }
         },
         updateHistory(history) {
-            const historyList = domData.elements.divs.paletteHistory;
+            const historyList = utils.core.getElement(ids.divs.paletteHistory);
             if (!historyList)
                 return;
             historyList.innerHTML = '';
@@ -215,22 +261,39 @@ function createDOMUtils(services, utils) {
                 historyList.appendChild(entry);
             });
         },
-        validateStaticElements() {
-            const log = services.app.log;
+        async validateStaticElements() {
+            const unvalidatedIDs = data.dom.ids;
+            const log = services.log;
             const missingElements = [];
-            const allIDs = Object.values(domIDs).flatMap(category => Object.values(category));
-            allIDs.forEach((id) => {
-                const element = document.getElementById(id);
-                if (!element) {
-                    log('error', `Element with ID "${id}" not found`, 'domUtils.validateStaticElements()', 2);
-                    missingElements.push(id);
+            const elementTypeMap = {
+                btns: 'button',
+                divs: 'div',
+                inputs: 'input'
+            };
+            Object.entries(unvalidatedIDs).forEach(([category, elements]) => {
+                const tagName = elementTypeMap[category];
+                if (!tagName) {
+                    log('warn', `No element type mapping found for category "${category}". Skipping...`, 'domUtils.validateStaticElements', 3);
+                    return;
                 }
+                // validate each ID within each category
+                Object.values(elements).forEach(unvalidatedIDs => {
+                    if (typeof unvalidatedIDs !== 'string') {
+                        log('error', `Invalid ID "${unvalidatedIDs}" in category "${category}". Expected string.`, 'domUtils.validateStaticElements', 2);
+                        return;
+                    }
+                    const element = utils.core.getElement(unvalidatedIDs);
+                    if (!element) {
+                        log('error', `Element with ID "${unvalidatedIDs}" not found`, 'validateStaticElements', 2);
+                        missingElements.push(unvalidatedIDs);
+                    }
+                });
             });
             if (missingElements.length) {
-                log('warn', `Missing elements: ${missingElements.join(', ')}`, 'domUtils.validateStaticElements()', 2);
+                log('warn', `Missing elements: ${missingElements.join(', ')}`, 'domUtils.validateStaticElements', 2);
             }
             else {
-                log('debug', 'All required DOM elements are present.', 'domUtils.validateStaticElements()', 3);
+                log('debug', 'All static elements are present.', 'domUtils.validateStaticElements', 3);
             }
         }
     };

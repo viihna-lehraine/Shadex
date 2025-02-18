@@ -9,9 +9,9 @@ import {
 	ServicesInterface,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { defaultData as defaults } from '../../data/defaults.js';
+import { data } from '../../data/index.js';
 
-const defaultColors = defaults.colors;
+const defaultColors = data.defaults.colors;
 
 export function createFormattingUtils(
 	services: ServicesInterface,
@@ -21,7 +21,7 @@ export function createFormattingUtils(
 		colorSpace: ColorSpace,
 		value: string
 	): Color | null => {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			switch (colorSpace) {
@@ -124,7 +124,7 @@ export function createFormattingUtils(
 	};
 
 	function parseComponents(value: string, count: number): number[] {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			const components = value
@@ -174,7 +174,7 @@ export function createFormattingUtils(
 			}
 		},
 		componentToHex(component: number): string {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				const hex = Math.max(0, Math.min(255, component)).toString(16);
@@ -215,7 +215,7 @@ export function createFormattingUtils(
 			) as T;
 		},
 		hslAddFormat(value: HSL['value']): HSL {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (
@@ -242,7 +242,7 @@ export function createFormattingUtils(
 			}
 		},
 		stripHashFromHex(hex: Hex): Hex {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				const hexString = `${hex.value.hex}`;

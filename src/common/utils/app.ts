@@ -7,9 +7,9 @@ import {
 	ServicesInterface,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { defaultData as defaults } from '../../data/defaults.js';
+import { data } from '../../data/index.js';
 
-const defaultColors = defaults.colors;
+const defaultColors = data.defaults.colors;
 
 export function createAppUtils(
 	services: ServicesInterface,
@@ -17,7 +17,7 @@ export function createAppUtils(
 ): AppUtilsInterface {
 	return {
 		generateRandomHSL(): HSL {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				const hsl: HSL = {
@@ -64,7 +64,8 @@ export function createAppUtils(
 			}
 		},
 		generateRandomSL(): SL {
-			const log = services.app.log;
+			const log = services.log;
+
 			try {
 				const sl: SL = {
 					value: {

@@ -1,22 +1,23 @@
 // File: common/helpers/palette.js
 
 import {
-	ConstsDataInterface,
+	ConfigData,
 	HSL,
 	PaletteUtilHelpersInterface,
 	ServicesInterface,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { constsData as consts } from '../../data/consts.js';
+import { data } from '../../data/index.js';
 
-const probabilityConsts = consts.probabilities;
+const config = data.config;
+const probabilityConsts = config.probabilities;
 
 export function createPaletteHelpers(
 	services: ServicesInterface,
 	utils: UtilitiesInterface
 ): PaletteUtilHelpersInterface {
 	function isHSLTooDark(hsl: HSL): boolean {
-		const log = services.app.log;
+		const log = services.log;
 
 		if (!utils.validate.colorValue(hsl)) {
 			log(
@@ -28,11 +29,11 @@ export function createPaletteHelpers(
 			return false;
 		}
 
-		return utils.core.clone(hsl).value.lightness < consts.thresholds.dark;
+		return utils.core.clone(hsl).value.lightness < config.thresholds.dark;
 	}
 
 	function isHSLTooGray(hsl: HSL): boolean {
-		const log = services.app.log;
+		const log = services.log;
 
 		if (!utils.validate.colorValue(hsl)) {
 			log(
@@ -44,11 +45,11 @@ export function createPaletteHelpers(
 			return false;
 		}
 
-		return utils.core.clone(hsl).value.saturation < consts.thresholds.gray;
+		return utils.core.clone(hsl).value.saturation < config.thresholds.gray;
 	}
 
 	function isHSLTooLight(hsl: HSL): boolean {
-		const log = services.app.log;
+		const log = services.log;
 
 		if (!utils.validate.colorValue(hsl)) {
 			log(
@@ -60,7 +61,7 @@ export function createPaletteHelpers(
 			return false;
 		}
 
-		return utils.core.clone(hsl).value.lightness > consts.thresholds.light;
+		return utils.core.clone(hsl).value.lightness > config.thresholds.light;
 	}
 
 	return {
@@ -68,9 +69,9 @@ export function createPaletteHelpers(
 		isHSLTooGray,
 		isHSLTooLight,
 		getWeightedRandomInterval(
-			distributionType: keyof ConstsDataInterface['probabilities']
+			distributionType: keyof ConfigData['probabilities']
 		): number {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				// select appropriate type
@@ -105,7 +106,7 @@ export function createPaletteHelpers(
 			}
 		},
 		isHSLInBounds(hsl: HSL): boolean {
-			const log = services.app.log;
+			const log = services.log;
 
 			if (!utils.validate.colorValue(hsl)) {
 				log(

@@ -1,18 +1,19 @@
-import { defaultData } from '../../data/defaults.js';
+import { data } from '../../data/index.js';
 
 // File: common/helpers/color.js
-const defaultCMYK = defaultData.colors.cmyk;
-const defaultHex = defaultData.colors.hex;
-const defaultHSL = defaultData.colors.hsl;
-const defaultHSV = defaultData.colors.hsv;
-const defaultLAB = defaultData.colors.lab;
-const defaultRGB = defaultData.colors.rgb;
-const defaultSL = defaultData.colors.sl;
-const defaultSV = defaultData.colors.sv;
-const defaultXYZ = defaultData.colors.xyz;
+const defaults = data.defaults;
+const defaultCMYK = defaults.colors.cmyk;
+const defaultHex = defaults.colors.hex;
+const defaultHSL = defaults.colors.hsl;
+const defaultHSV = defaults.colors.hsv;
+const defaultLAB = defaults.colors.lab;
+const defaultRGB = defaults.colors.rgb;
+const defaultSL = defaults.colors.sl;
+const defaultSV = defaults.colors.sv;
+const defaultXYZ = defaults.colors.xyz;
 function createColorHelpers(services, utils) {
     function cmykToRGB(cmyk) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(cmyk)) {
                 log('error', `Invalid CMYK value ${JSON.stringify(cmyk)}`, 'colorUtils > helpers.cmykToRGB()');
@@ -44,7 +45,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function hexToHSL(hex) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(hex)) {
                 log('error', `Invalid Hex value ${JSON.stringify(hex)}`, 'colorUtils > helpers.hexToHSL()');
@@ -58,7 +59,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function hexToRGB(hex) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(hex)) {
                 log('error', `Invalid Hex value ${JSON.stringify(hex)}`, 'colorUtils > helpers.hexToRGB()');
@@ -82,7 +83,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function hslToLAB(hsl) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(hsl)) {
                 log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToLAB()');
@@ -96,7 +97,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function hslToRGB(hsl) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(hsl)) {
                 log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToRGB()');
@@ -123,7 +124,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function hsvToSV(hsv) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(hsv)) {
                 log('error', `Invalid HSV value ${JSON.stringify(hsv)}`, 'colorUtils > helpers.hsvToSV()');
@@ -143,7 +144,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function labToRGB(lab) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(lab)) {
                 log('error', `Invalid LAB value ${JSON.stringify(lab)}`, 'colorUtils > helpers.labToRGB()');
@@ -157,7 +158,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function labToXYZ(lab) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(lab)) {
                 log('error', `Invalid LAB value ${JSON.stringify(lab)}`, 'colorUtils > helpers.labToXYZ()');
@@ -193,7 +194,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function rgbToCMYK(rgb) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(rgb)) {
                 log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'colorUtils > helpers.rgbToCMYK()');
@@ -218,7 +219,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function rgbToHex(rgb) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(rgb)) {
                 log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'colorUtils > helpers.rgbToHex()');
@@ -251,7 +252,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function rgbToHSL(rgb) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(rgb)) {
                 log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'colorUtils > helpers.rgbToHSL()');
@@ -298,7 +299,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function rgbToHSV(rgb) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(rgb)) {
                 log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'colorUtils > helpers.rgbToHSV()');
@@ -342,7 +343,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function rgbToXYZ(rgb) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(rgb)) {
                 log('error', `Invalid RGB value ${JSON.stringify(rgb)}`, 'colorUtils > helpers.rgbToXYZ()');
@@ -384,7 +385,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function xyzToLAB(xyz) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(xyz)) {
                 log('error', `Invalid XYZ value ${JSON.stringify(xyz)}`, 'colorUtils > helpers.xyzToLAB()');
@@ -430,7 +431,7 @@ function createColorHelpers(services, utils) {
         }
     }
     function xyzToRGB(xyz) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             if (!utils.validate.colorValue(xyz)) {
                 log('error', `Invalid XYZ value ${JSON.stringify(xyz)}`, 'colorUtils > helpers.xyzToRGB()');
@@ -477,7 +478,7 @@ function createColorHelpers(services, utils) {
         xyzToRGB,
         xyzToLAB,
         cmykToHSL(cmyk) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(cmyk)) {
                     log('error', `Invalid CMYK value ${JSON.stringify(cmyk)}`, 'colorUtils > helpers.cmykToHSL()');
@@ -491,7 +492,7 @@ function createColorHelpers(services, utils) {
             }
         },
         hexToHSLWrapper(input) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 const clonedInput = utils.core.clone(input);
                 const hex = typeof clonedInput === 'string'
@@ -515,7 +516,7 @@ function createColorHelpers(services, utils) {
             }
         },
         hslToCMYK(hsl) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
                     log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToCMYK()');
@@ -529,7 +530,7 @@ function createColorHelpers(services, utils) {
             }
         },
         hslToHex(hsl) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
                     log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToHex()');
@@ -543,7 +544,7 @@ function createColorHelpers(services, utils) {
             }
         },
         hslToHSV(hsl) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
                     log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToHSV()');
@@ -569,7 +570,7 @@ function createColorHelpers(services, utils) {
             }
         },
         hslToSL(hsl) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
                     log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToSL()');
@@ -589,7 +590,7 @@ function createColorHelpers(services, utils) {
             }
         },
         hslToSV(hsl) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
                     log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToSV()');
@@ -603,7 +604,7 @@ function createColorHelpers(services, utils) {
             }
         },
         hslToXYZ(hsl) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsl)) {
                     log('error', `Invalid HSL value ${JSON.stringify(hsl)}`, 'colorUtils > helpers.hslToXYZ()');
@@ -617,7 +618,7 @@ function createColorHelpers(services, utils) {
             }
         },
         hsvToHSL(hsv) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(hsv)) {
                     log('error', `Invalid HSV value ${JSON.stringify(hsv)}`, 'colorUtils > helpers.hsvToHSL()');
@@ -649,7 +650,7 @@ function createColorHelpers(services, utils) {
             }
         },
         labToHSL(lab) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(lab)) {
                     log('error', `Invalid LAB value ${JSON.stringify(lab)}`, 'colorUtils > helpers.labToHSL()');
@@ -663,7 +664,7 @@ function createColorHelpers(services, utils) {
             }
         },
         xyzToHSL(xyz) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(xyz)) {
                     log('error', `Invalid XYZ value ${JSON.stringify(xyz)}`, 'colorUtils > helpers.xyzToHSL()');

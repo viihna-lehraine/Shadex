@@ -1,18 +1,19 @@
 import { EventManager } from './EventManager.js';
-import { constsData } from '../data/consts.js';
-import { domData } from '../data/dom.js';
+import { data } from '../data/index.js';
 
 // events/PaleteEvents.js
-const classes = domData.classes;
-const ids = domData.ids;
-const timers = constsData.timers;
+const classes = data.dom.classes;
+const ids = data.dom.ids;
+const timers = data.config.timers;
 class PaletteEvents {
+    paletteManager;
     paletteState;
     services;
     stateManager;
     utils;
     draggedColumn = null;
-    constructor(paletteState, services, stateManager, utils) {
+    constructor(paletteManager, paletteState, services, stateManager, utils) {
+        this.paletteManager = paletteManager;
         this.paletteState = paletteState;
         this.services = services;
         this.stateManager = stateManager;
@@ -25,7 +26,7 @@ class PaletteEvents {
         // delegated event listener for color input changes
         EventManager.add(paletteContainer, 'input', event => {
             const target = event.target;
-            if (target.matches(domData.classes.colorDisplay)) {
+            if (target.matches(classes.colorDisplay)) {
                 const column = target.closest(classes.paletteColumn);
                 const columnID = column?.id.split('-').pop();
                 if (!column || !columnID)
@@ -79,7 +80,13 @@ class PaletteEvents {
         // observe for new elements
         this.createPaletteObserver();
         // automatically initialize column positions
-        this.initializeColumnPositions();
+        setTimeout(() => {
+            if (!this.stateManager.getState().paletteContainer) {
+                this.services.log('warn', 'Skipping initializeColumnPositions() because state is not initialized yet.', 'PaletteEvents.init()', 2);
+                return;
+            }
+            this.initializeColumnPositions();
+        }, 200);
     }
     attachColorCopyHandlers() {
         const paletteContainer = this.utils.core.getElement(ids.divs.paletteContainer);
@@ -95,20 +102,20 @@ class PaletteEvents {
     attachDragAndDropHandlers() {
         const paletteContainer = this.utils.core.getElement(ids.divs.paletteContainer);
         if (!paletteContainer) {
-            this.services.app.log('error', `Palette container not found! Cannot attach drag-and-drop handlers.`, 'PaletteEvents.attachDragAndDropHandlers()', 1);
+            this.services.log('error', `Palette container not found! Cannot attach drag-and-drop handlers.`, 'PaletteEvents.attachDragAndDropHandlers()', 1);
             return;
         }
         // drag start
         EventManager.add(paletteContainer, 'dragstart', ((event) => {
-            const dragHandle = event.target.closest(domData.classes.dragHandle);
+            const dragHandle = event.target.closest(classes.dragHandle);
             if (!dragHandle)
                 return;
-            this.draggedColumn = dragHandle.closest(domData.classes.paletteColumn);
+            this.draggedColumn = dragHandle.closest(classes.paletteColumn);
             if (!this.draggedColumn)
                 return;
             event.dataTransfer?.setData('text/plain', this.draggedColumn.id);
             this.draggedColumn.classList.add('dragging');
-            this.services.app.log('debug', `Drag started for column: ${this.draggedColumn.id}`, 'PaletteEvents.attachDragAndDropHandlers()', 4);
+            this.services.log('debug', `Drag started for column: ${this.draggedColumn.id}`, 'PaletteEvents.attachDragAndDropHandlers()', 4);
         }));
         // drag over (Allow dropping)
         EventManager.add(paletteContainer, 'dragover', ((event) => {
@@ -118,19 +125,14 @@ class PaletteEvents {
         // drop (Swap columns)
         EventManager.add(paletteContainer, 'drop', ((event) => {
             event.preventDefault();
-            const targetColumn = event.target.closest(domData.classes.paletteColumn);
+            const targetColumn = event.target.closest(classes.paletteColumn);
             if (!this.draggedColumn ||
                 !targetColumn ||
                 this.draggedColumn === targetColumn)
                 return;
-            const parent = targetColumn.parentElement;
-            if (!parent)
-                return;
-            // swap columns in the DOM
-            const draggedNext = this.draggedColumn.nextElementSibling;
-            const targetNext = targetColumn.nextElementSibling;
-            parent.insertBefore(this.draggedColumn, targetNext);
-            parent.insertBefore(targetColumn, draggedNext);
+            const draggedID = parseInt(this.draggedColumn.id.split('-').pop());
+            const targetID = parseInt(targetColumn.id.split('-').pop());
+            this.paletteManager.swapColumns(draggedID, targetID);
             // swap positions in State
             const updatedColumns = [
                 ...this.stateManager.getState().paletteContainer.columns
@@ -149,16 +151,17 @@ class PaletteEvents {
                 this.stateManager.updatePaletteColumns(updatedColumns, false, 5);
             }
             this.draggedColumn.classList.remove('dragging');
-            this.services.app.log('debug', `Successfully swapped columns: ${this.draggedColumn.id} and ${targetColumn.id}`, 'PaletteEvents.attachDragAndDropHandlers()', 4);
+            this.services.log('debug', `Successfully swapped columns: ${this.draggedColumn.id} and ${targetColumn.id}`, 'PaletteEvents.attachDragAndDropHandlers()', 4);
             this.draggedColumn = null;
         }));
         // drag end
         EventManager.add(paletteContainer, 'dragend', () => {
             if (this.draggedColumn) {
                 this.draggedColumn.classList.remove('dragging');
-                this.services.app.log('debug', `Drag ended for column.`, 'PaletteEvents.attachDnDHandlers()', 4);
+                this.services.log('debug', `Drag ended for column.`, 'PaletteEvents.attachDnDHandlers()', 4);
             }
         });
+        this.services.log(`debug`, `Drag and drop event listeners attached`, 'PaletteEvents.attachDragAndDropHandlers()', 3);
     }
     // initialiezs column positions on page load
     initializeColumnPositions() {
@@ -185,39 +188,64 @@ class PaletteEvents {
             }
         });
     }
+    syncColumnColorsWithState() {
+        const paletteColumns = this.utils.core.getAllElements(classes.paletteColumn);
+        const currentPalette = this.stateManager.getState().paletteContainer.columns;
+        const paletteData = this.stateManager.getState().paletteHistory.at(-1);
+        if (!paletteData || !paletteData.items) {
+            this.services.log('warn', 'No valid palette data found in history!', 'PaletteEvents.syncColumnColorsWithState()', 2);
+            return;
+        }
+        paletteColumns.forEach(column => {
+            const columnID = parseInt(column.id.split('-').pop());
+            const columnData = currentPalette.find(col => col.id === columnID);
+            const paletteItem = paletteData.items.find(item => item.itemID === columnID);
+            if (columnData && paletteItem) {
+                const colorValue = paletteItem.css.hex; // *DEV-NOTE* make this interchangeable
+                column.style.backgroundColor = colorValue;
+                const colorDisplay = column.querySelector(classes.colorDisplay);
+                if (colorDisplay)
+                    colorDisplay.value = colorValue;
+                this.services.log('debug', `Synchronized color for column ${columnID}: ${colorValue}`, 'PaletteEvents.syncColumnColorsWithState()', 4);
+            }
+        });
+    }
     copyToClipboard(text, targetElement) {
         navigator.clipboard
             .writeText(text.trim())
             .then(() => {
             // show tooltip with "Copied!" message
             this.showTooltip(targetElement, 'Copied!');
-            this.services.app.log('debug', `Copied color value: ${text}`, 'PaletteEvents.copyToClipboard()', 4);
+            this.services.log('debug', `Copied color value: ${text}`, 'PaletteEvents.copyToClipboard()', 4);
             // ensure tooltip is removed after the timeout
             setTimeout(() => this.removeTooltip(targetElement), timers.tooltipFadeOut);
         })
             .catch(err => {
-            this.services.app.log('error', `Error copying to clipboard: ${err}`, 'PaletteEvents.copyToClipboard()', 1);
+            this.services.log('error', `Error copying to clipboard: ${err}`, 'PaletteEvents.copyToClipboard()', 1);
         });
     }
     // observes palette container for new elements
     createPaletteObserver() {
-        const paletteContainer = this.utils.core.getElement(domData.ids.divs.paletteContainer);
+        const paletteContainer = this.utils.core.getElement(ids.divs.paletteContainer);
         if (!paletteContainer)
             return;
         const observer = new MutationObserver((mutationsList) => {
             mutationsList.forEach(mutation => {
                 mutation.addedNodes.forEach(node => {
                     if (node instanceof HTMLElement &&
-                        node.classList.contains(domData.classes.paletteColumn)) {
+                        node.classList.contains(classes.paletteColumn)) {
+                        if (!this.stateManager.getState().paletteContainer) {
+                            this.services.log('warn', 'Skipping initializeColumnPositions() - State is not ready!', 'PaletteEvents.createPaletteObserver()');
+                            return;
+                        }
                         this.initializeColumnPositions();
                     }
                 });
             });
         });
         observer.observe(paletteContainer, { childList: true, subtree: true });
-        this.services.app.log('info', 'Palette Container MutationObserver created', 'PaletteEvents.createPaletteObserver()', 2);
+        this.services.log('info', 'Palette Container MutationObserver created', 'PaletteEvents.createPaletteObserver()', 2);
     }
-    // handles color changes in palette columns
     handleColorInputChange(event, column, columnID) {
         const newColor = event.target.value.trim();
         if (!this.utils.validate.userColorInput(newColor))
@@ -270,7 +298,9 @@ class PaletteEvents {
         const startWidth = column.offsetWidth;
         const onMouseMove = (moveEvent) => {
             const diff = moveEvent.clientX - startX;
-            column.style.width = `${startWidth + diff}px`;
+            const newSize = startWidth + diff;
+            const columnID = parseInt(column.id.split('-').pop());
+            this.paletteManager.handleColumnResize(columnID, newSize);
         };
         const onMouseUp = () => {
             window.removeEventListener('mousemove', onMouseMove);
@@ -300,11 +330,8 @@ class PaletteEvents {
         const column = button.closest(classes.paletteColumn);
         if (!column)
             return;
-        const isLocked = column.classList.toggle(classes.locked);
-        column.draggable = !isLocked;
-        const input = column.querySelector('input');
-        if (input)
-            input.disabled = isLocked;
+        const columnID = parseInt(column.id.split('-').pop());
+        this.paletteManager.handleColumnLock(columnID);
     }
 }
 

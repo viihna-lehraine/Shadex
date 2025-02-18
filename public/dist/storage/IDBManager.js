@@ -1,15 +1,25 @@
+import { data } from '../data/index.js';
+
 // File: storage/IDBManager.js
-export class IDBManager {
-    dbName;
-    storeName;
+const dbName = data.storage.idb.dbName;
+const defaultVerson = data.storage.idb.defaultVersion;
+const storeName = data.storage.idb.storeName;
+class IDBManager {
+    static instance = null;
+    defaultVersion;
     version;
     db = null;
     log;
-    constructor(dbName, storeName, version, services) {
-        this.dbName = dbName;
-        this.storeName = storeName;
-        this.version = version;
-        this.log = services.app.log;
+    constructor(services) {
+        this.defaultVersion = defaultVerson;
+        this.version = this.defaultVersion;
+        this.log = services.log;
+    }
+    static getInstance(services) {
+        if (!IDBManager.instance) {
+            IDBManager.instance = new IDBManager(services);
+        }
+        return IDBManager.instance;
     }
     async init() {
         return new Promise((resolve, reject) => {
@@ -18,23 +28,40 @@ export class IDBManager {
                 reject(new Error('IndexedDB is not supported'));
                 return resolve(false);
             }
-            const request = indexedDB.open(this.dbName, this.version);
+            console.log('[IDBManager.init] Opening IndexedDB...');
+            const request = indexedDB.open(dbName, this.version);
             request.onupgradeneeded = event => {
                 const db = event.target.result;
-                if (!db.objectStoreNames.contains(this.storeName)) {
-                    db.createObjectStore(this.storeName, {
+                console.log(`[IDBManager.init] Upgrading database to version ${this.version}`);
+                if (!db.objectStoreNames.contains(storeName)) {
+                    db.createObjectStore(storeName, {
                         keyPath: 'id',
                         autoIncrement: true
                     });
-                    this.log('info', `Created object store: ${this.storeName}`, 'IDBManager.init()', 3);
+                    console.log(`[IDBManager.init] Created object store: ${storeName}`);
+                    this.log('info', `Created object store: ${storeName}`, 'IDBManager.init()', 3);
                 }
             };
             request.onsuccess = event => {
                 this.db = event.target.result;
-                this.log('info', 'IndexedDB initialized successfully', 'IDBManager.init()', 2);
+                this.db.onversionchange = () => {
+                    this.db?.close();
+                    this.log('warn', 'IndexedDB version changed, closing database', 'IDBManager.init()');
+                };
+                if (this.db) {
+                    this.log('info', 'IndexedDB initialized successfully', 'IDBManager.init()', 2);
+                    resolve(true);
+                }
+                else {
+                    this.log('error', 'IndexedDB opened but db object is null', 'IDBManager.init()');
+                    reject(new Error('IndexedDB opened but db object is null'));
+                }
             };
             request.onerror = event => {
-                this.log('error', `IndexedDB failed to initialize: ${event.target.error}`, 'IDBManager.init()', 2);
+                const errorMessage = event.target.error?.message ||
+                    'Unknown error';
+                console.error(`[IDBManager.init] IndexedDB failed: ${errorMessage}`);
+                this.log('error', `IndexedDB failed to initialize: ${errorMessage}`, 'IDBManager.init()', 2);
                 resolve(false);
             };
         });
@@ -49,21 +76,39 @@ export class IDBManager {
             request.onerror = () => reject();
         });
     }
+    async ensureDBReady() {
+        while (!this.db) {
+            this.log('warn', 'Waiting for IndexedDB to initialize...', 'IDBManager.ensureDBReady()');
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+    }
     async getItem(key) {
+        await this.ensureDBReady();
         return new Promise((resolve, reject) => {
             const store = this.getTransaction('readonly');
-            if (!store)
-                return reject('IndexedDB is not initialized.');
+            if (!store) {
+                this.log('error', 'IndexedDB transaction failed: Database is not initialized.', 'IDBManager.getItem()');
+                return reject(new Error('IndexedDB is not initialized.'));
+            }
             const request = store.get(key);
-            request.onsuccess = () => resolve(request.result?.value ?? null);
-            request.onerror = () => reject(null);
+            request.onsuccess = () => {
+                console.log(`[IDBManager.getItem] Retrieved item: ${key}`);
+                resolve(request.result?.value ?? null);
+            };
+            request.onerror = event => {
+                const errorMessage = event.target.error?.message ||
+                    'Unknown error';
+                console.error(`[IDBManager.getItem] Failed to retrieve ${key}: ${errorMessage}`);
+                this.log('error', `Failed to retrieve item: ${key} - ${errorMessage}`, 'IDBManager.getItem()');
+                reject(null);
+            };
         });
     }
     getTransaction(mode) {
         if (!this.db)
             return null;
-        const transaction = this.db.transaction(this.storeName, mode);
-        return transaction.objectStore(this.storeName);
+        const transaction = this.db.transaction(storeName, mode);
+        return transaction.objectStore(storeName);
     }
     async removeItem(key) {
         return new Promise((resolve, reject) => {
@@ -78,18 +123,25 @@ export class IDBManager {
     async setItem(key, value) {
         return new Promise((resolve, reject) => {
             const store = this.getTransaction('readwrite');
-            if (!store)
-                return reject('IndexedDB is not initialized.');
+            if (!store) {
+                this.log('error', 'IndexedDB transaction failed: Database is not initialized.', 'IDBManager.setItem()');
+                return reject(new Error('IndexedDB is not initialized.'));
+            }
             const request = store.put({ id: key, value });
             request.onsuccess = () => {
-                this.log('info', `Stoed item: ${key} in IndexedDB`, 'IDBManager.setItem()', 3);
+                console.log(`[IDBManager.setItem] Stored item: ${key}`);
                 resolve();
             };
             request.onerror = event => {
-                this.log('error', `Failed to store item: ${key}`, 'IDBManager.setItem()');
+                const errorMessage = event.target.error?.message ||
+                    'Unknown error';
+                console.error(`[IDBManager.setItem] Failed to store ${key}: ${errorMessage}`);
+                this.log('error', `Failed to store item: ${key} - ${errorMessage}`, 'IDBManager.setItem()');
                 reject(event);
             };
         });
     }
 }
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSURCTWFuYWdlci5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9zdG9yYWdlL0lEQk1hbmFnZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsOEJBQThCO0FBSTlCLE1BQU0sT0FBTyxVQUFVO0lBQ2QsTUFBTSxDQUFTO0lBQ2YsU0FBUyxDQUFTO0lBQ2xCLE9BQU8sQ0FBUztJQUNoQixFQUFFLEdBQXVCLElBQUksQ0FBQztJQUM5QixHQUFHLENBQWtDO0lBRTdDLFlBQ0MsTUFBYyxFQUNkLFNBQWlCLEVBQ2pCLE9BQWUsRUFDZixRQUEyQjtRQUUzQixJQUFJLENBQUMsTUFBTSxHQUFHLE1BQU0sQ0FBQztRQUNyQixJQUFJLENBQUMsU0FBUyxHQUFHLFNBQVMsQ0FBQztRQUMzQixJQUFJLENBQUMsT0FBTyxHQUFHLE9BQU8sQ0FBQztRQUN2QixJQUFJLENBQUMsR0FBRyxHQUFHLFFBQVEsQ0FBQyxHQUFHLENBQUMsR0FBRyxDQUFDO0lBQzdCLENBQUM7SUFFTSxLQUFLLENBQUMsSUFBSTtRQUNoQixPQUFPLElBQUksT0FBTyxDQUFDLENBQUMsT0FBTyxFQUFFLE1BQU0sRUFBRSxFQUFFO1lBQ3RDLElBQUksQ0FBQyxNQUFNLENBQUMsU0FBUyxFQUFFLENBQUM7Z0JBQ3ZCLElBQUksQ0FBQyxHQUFHLENBQ1AsTUFBTSxFQUNOLDRDQUE0QyxFQUM1QyxtQkFBbUIsRUFDbkIsQ0FBQyxDQUNELENBQUM7Z0JBQ0YsTUFBTSxDQUFDLElBQUksS0FBSyxDQUFDLDRCQUE0QixDQUFDLENBQUMsQ0FBQztnQkFDaEQsT0FBTyxPQUFPLENBQUMsS0FBSyxDQUFDLENBQUM7WUFDdkIsQ0FBQztZQUVELE1BQU0sT0FBTyxHQUFHLFNBQVMsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLE1BQU0sRUFBRSxJQUFJLENBQUMsT0FBTyxDQUFDLENBQUM7WUFFMUQsT0FBTyxDQUFDLGVBQWUsR0FBRyxLQUFLLENBQUMsRUFBRTtnQkFDakMs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QUFPLEdBQUcsS0FBSyxDQUFDLEVBQUU7Z0JBQ3pCLElBQUksQ0FBQyxHQUFHLENBQ1AsT0FBTyxFQUNQLHlCQUF5QixHQUFHLEVBQUUsRUFDOUIsc0JBQXNCLENBQ3RCLENBQUM7Z0JBQ0YsTUFBTSxDQUFDLEtBQUssQ0FBQyxDQUFDO1lBQ2YsQ0FBQyxDQUFDO1FBQ0gsQ0FBQyxDQUFDLENBQUM7SUFDSixDQUFDO0NBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyIvLyBGaWxlOiBzdG9yYWdlL0lEQk1hbmFnZXIuanNcblxuaW1wb3J0IHsgU2VydmljZXNJbnRlcmZhY2UgfSBmcm9tICcuLi90eXBlcy9pbmRleC5qcyc7XG5cbmV4cG9ydCBjbGFzcyBJREJNYW5hZ2VyIHtcblx0cHJpdmF0ZSBkYk5hbWU6IHN0cmluZztcblx0cHJpdmF0ZSBzdG9yZU5hbWU6IHN0cmluZztcblx0cHJpdmF0ZSB2ZXJzaW9uOiBudW1iZXI7XG5cdHByaXZhdGUgZGI6IElEQkRhdGFiYXNlIHwgbnVsbCA9IG51bGw7XG5cdHByaXZhdGUgbG9nOiBTZXJ2aWNlc0ludGVyZmFjZVsnYXBwJ11bJ2xvZyddO1xuXG5cdGNvbnN0cnVjdG9yKFxuXHRcdGRiTmFtZTogc3RyaW5nLFxuXHRcdHN0b3JlTmFtZTogc3RyaW5nLFxuXHRcdHZlcnNpb246IG51bWJlcixcblx0XHRzZXJ2aWNlczogU2VydmljZXNJbnRlcmZhY2Vcblx0KSB7XG5cdFx0dGhpcy5kYk5hbWUgPSBkYk5hbWU7XG5cdFx0dGhpcy5zdG9yZU5hbWUgPSBzdG9yZU5hbWU7XG5cdFx0dGhpcy52ZXJzaW9uID0gdmVyc2lvbjtcblx0XHR0aGlzLmxvZyA9IHNlcnZpY2VzLmFwcC5sb2c7XG5cdH1cblxuXHRwdWJsaWMgYXN5bmMgaW5pdCgpOiBQcm9taXNlPGJvb2xlYW4+IHtcblx0XHRyZXR1cm4gbmV3IFByb21pc2UoKHJlc29sdmUsIHJlamVjdCkgPT4ge1xuXHRcdFx0aWYgKCF3aW5kb3cuaW5kZXhlZERCKSB7XG5cdFx0XHRcdHRoaXMubG9nKFxuXHRcdFx0XHRcdCd3YXJuJyxcblx0XHRcdFx0XHQnSW5kZXhlZERCIGlzIG5vdCBzdXBwb3J0ZWQgaW4gdGhpcyBicm93c2VyJyxcblx0XHRcdFx0XHQnSURCTWFuYWdlci5pbml0KCknLFxuXHRcdFx0XHRcdDJcblx0XHRcdFx0KTtcblx0XHRcdFx0cmVqZWN0KG5ldyBFcnJvcignSW5kZXhlZERCIGlzIG5vdCBzdXBwb3J0ZWQnKSk7XG5cdFx0XHRcdHJldHVybiByZXNvbHZlKGZhbHNlKTtcblx0XHRcdH1cblxuXHRcdFx0Y29uc3QgcmVxdWVzdCA9IGluZGV4ZWREQi5vcGVuKHRoaXMuZGJOYW1lLCB0aGlzLnZlcnNpb24pO1xuXG5cdFx0XHRyZXF1ZXN0Lm9udXBncmFkZW5lZWRlZCA9IGV2ZW50ID0+IHtcblx0XHRcdFx0Y29uc3QgZGIgPSAoZXZlbnQudGFyZ2V0IGFzIElEQk9wZW5EQlJlcXVlc3QpLnJlc3VsdDtcblx0XHRcdFx0aWYgKCFkYi5vYmplY3RTdG9yZU5hbWVzLmNvbnRhaW5zKHRoaXMuc3RvcmVOYW1lKSkge1xuXHRcdFx0XHRcdGRiLmNyZWF0ZU9iamVjdFN0b3JlKHRoaXMuc3RvcmVOYW1lLCB7XG5cdFx0XHRcdFx0XHRrZXlQYXRoOiAnaWQnLFxuXHRcdFx0XHRcdFx0YXV0b0luY3JlbWVudDogdHJ1ZVxuXHRcdFx0XHRcdH0pO1xuXHRcdFx0XHRcdHRoaXMubG9nKFxuXHRcdFx0XHRcdFx0J2luZm8nLFxuXHRcdFx0XHRcdFx0YENyZWF0ZWQgb2JqZWN0IHN0b3JlOiAke3RoaXMuc3RvcmVOYW1lfWAsXG5cdFx0XHRcdFx0XHQnSURCTWFuYWdlci5pbml0KCknLFxuXHRcdFx0XHRcdFx0M1xuXHRcdFx0XHRcdCk7XG5cdFx0XHRcdH1cblx0XHRcdH07XG5cblx0XHRcdHJlcXVlc3Qub25zdWNjZXNzID0gZXZlbnQgPT4ge1xuXHRcdFx0XHR0aGlzLmRiID0gKGV2ZW50LnRhcmdldCBhcyBJREJPcGVuREJSZXF1ZXN0KS5yZXN1bHQ7XG5cdFx0XHRcdHRoaXMubG9nKFxuXHRcdFx0XHRcdCdpbmZvJyxcblx0XHRcdFx0XHQnSW5kZXhlZERCIGluaXRpYWxpemVkIHN1Y2Nlc3NmdWxseScsXG5cdFx0XHRcdFx0J0lEQk1hbmFnZXIuaW5pdCgpJyxcblx0XHRcdFx0XHQyXG5cdFx0XHRcdCk7XG5cdFx0XHR9O1xuXG5cdFx0XHRyZXF1ZXN0Lm9uZXJyb3IgPSBldmVudCA9PiB7XG5cdFx0XHRcdHRoaXMubG9nKFxuXHRcdFx0XHRcdCdlcnJvcicsXG5cdFx0XHRcdFx0YEluZGV4ZWREQiBmYWlsZWQgdG8gaW5pdGlhbGl6ZTogJHsoZXZlbnQudGFyZ2V0IGFzIElEQk9wZW5EQlJlcXVlc3QpLmVycm9yfWAsXG5cdFx0XHRcdFx0J0lEQk1hbmFnZXIuaW5pdCgpJyxcblx0XHRcdFx0XHQyXG5cdFx0XHRcdCk7XG5cdFx0XHRcdHJlc29sdmUoZmFsc2UpO1xuXHRcdFx0fTtcblx0XHR9KTtcblx0fVxuXG5cdHB1YmxpYyBhc3luYyBjbGVhcigpOiBQcm9taXNlPHZvaWQ+IHtcblx0XHRyZXR1cm4gbmV3IFByb21pc2UoKHJlc29sdmUsIHJlamVjdCkgPT4ge1xuXHRcdFx0Y29uc3Qgc3RvcmUgPSB0aGlzLmdldFRyYW5zYWN0aW9uKCdyZWFkd3JpdGUnKTtcblx0XHRcdGlmICghc3RvcmUpIHJldHVybiByZWplY3QoJ0luZGV4ZWREQiBpcyBub3QgaW5pdGlhbGl6ZWQuJyk7XG5cblx0XHRcdGNvbnN0IHJlcXVlc3QgPSBzdG9yZS5jbGVhcigpO1xuXG5cdFx0XHRyZXF1ZXN0Lm9uc3VjY2VzcyA9ICgpID0+IHJlc29sdmUoKTtcblx0XHRcdHJlcXVlc3Qub25lcnJvciA9ICgpID0+IHJlamVjdCgpO1xuXHRcdH0pO1xuXHR9XG5cblx0cHVibGljIGFzeW5jIGdldEl0ZW08VD4oa2V5OiBzdHJpbmcpOiBQcm9taXNlPFQgfCBudWxsPiB7XG5cdFx0cmV0dXJuIG5ldyBQcm9taXNlKChyZXNvbHZlLCByZWplY3QpID0+IHtcblx0XHRcdGNvbnN0IHN0b3JlID0gdGhpcy5nZXRUcmFuc2FjdGlvbigncmVhZG9ubHknKTtcblx0XHRcdGlmICghc3RvcmUpIHJldHVybiByZWplY3QoJ0luZGV4ZWREQiBpcyBub3QgaW5pdGlhbGl6ZWQuJyk7XG5cblx0XHRcdGNvbnN0IHJlcXVlc3QgPSBzdG9yZS5nZXQoa2V5KTtcblxuXHRcdFx0cmVxdWVzdC5vbnN1Y2Nlc3MgPSAoKSA9PiByZXNvbHZlKHJlcXVlc3QucmVzdWx0Py52YWx1ZSA/PyBudWxsKTtcblx0XHRcdHJlcXVlc3Qub25lcnJvciA9ICgpID0+IHJlamVjdChudWxsKTtcblx0XHR9KTtcblx0fVxuXG5cdHB1YmxpYyBnZXRUcmFuc2FjdGlvbihtb2RlOiBJREJUcmFuc2FjdGlvbk1vZGUpOiBJREJPYmplY3RTdG9yZSB8IG51bGwge1xuXHRcdGlmICghdGhpcy5kYikgcmV0dXJuIG51bGw7XG5cdFx0Y29uc3QgdHJhbnNhY3Rpb24gPSB0aGlzLmRiLnRyYW5zYWN0aW9uKHRoaXMuc3RvcmVOYW1lLCBtb2RlKTtcblx0XHRyZXR1cm4gdHJhbnNhY3Rpb24ub2JqZWN0U3RvcmUodGhpcy5zdG9yZU5hbWUpO1xuXHR9XG5cblx0cHVibGljIGFzeW5jIHJlbW92ZUl0ZW0oa2V5OiBzdHJpbmcpOiBQcm9taXNlPHZvaWQ+IHtcblx0XHRyZXR1cm4gbmV3IFByb21pc2UoKHJlc29sdmUsIHJlamVjdCkgPT4ge1xuXHRcdFx0Y29uc3Qgc3RvcmUgPSB0aGlzLmdldFRyYW5zYWN0aW9uKCdyZWFkd3JpdGUnKTtcblx0XHRcdGlmICghc3RvcmUpIHJldHVybiByZWplY3QoJ0luZGV4ZWREQiBpcyBub3QgaW5pdGlhbGl6ZWQuJyk7XG5cblx0XHRcdGNvbnN0IHJlcXVlc3QgPSBzdG9yZS5kZWxldGUoa2V5KTtcblxuXHRcdFx0cmVxdWVzdC5vbnN1Y2Nlc3MgPSAoKSA9PiByZXNvbHZlKCk7XG5cdFx0XHRyZXF1ZXN0Lm9uZXJyb3IgPSAoKSA9PiByZWplY3QoKTtcblx0XHR9KTtcblx0fVxuXG5cdHB1YmxpYyBhc3luYyBzZXRJdGVtKGtleTogc3RyaW5nLCB2YWx1ZTogdW5rbm93bik6IFByb21pc2U8dm9pZD4ge1xuXHRcdHJldHVybiBuZXcgUHJvbWlzZSgocmVzb2x2ZSwgcmVqZWN0KSA9PiB7XG5cdFx0XHRjb25zdCBzdG9yZSA9IHRoaXMuZ2V0VHJhbnNhY3Rpb24oJ3JlYWR3cml0ZScpO1xuXHRcdFx0aWYgKCFzdG9yZSkgcmV0dXJuIHJlamVjdCgnSW5kZXhlZERCIGlzIG5vdCBpbml0aWFsaXplZC4nKTtcblxuXHRcdFx0Y29uc3QgcmVxdWVzdCA9IHN0b3JlLnB1dCh7IGlkOiBrZXksIHZhbHVlIH0pO1xuXG5cdFx0XHRyZXF1ZXN0Lm9uc3VjY2VzcyA9ICgpID0+IHtcblx0XHRcdFx0dGhpcy5sb2coXG5cdFx0XHRcdFx0J2luZm8nLFxuXHRcdFx0XHRcdGBTdG9lZCBpdGVtOiAke2tleX0gaW4gSW5kZXhlZERCYCxcblx0XHRcdFx0XHQnSURCTWFuYWdlci5zZXRJdGVtKCknLFxuXHRcdFx0XHRcdDNcblx0XHRcdFx0KTtcblx0XHRcdFx0cmVzb2x2ZSgpO1xuXHRcdFx0fTtcblxuXHRcdFx0cmVxdWVzdC5vbmVycm9yID0gZXZlbnQgPT4ge1xuXHRcdFx0XHR0aGlzLmxvZyhcblx0XHRcdFx0XHQnZXJyb3InLFxuXHRcdFx0XHRcdGBGYWlsZWQgdG8gc3RvcmUgaXRlbTogJHtrZXl9YCxcblx0XHRcdFx0XHQnSURCTWFuYWdlci5zZXRJdGVtKCknXG5cdFx0XHRcdCk7XG5cdFx0XHRcdHJlamVjdChldmVudCk7XG5cdFx0XHR9O1xuXHRcdH0pO1xuXHR9XG59XG4iXX0=
+
+export { IDBManager };
+//# sourceMappingURL=IDBManager.js.map

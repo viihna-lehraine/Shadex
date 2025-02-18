@@ -3,10 +3,21 @@
 import { ServicesInterface } from '../types/index.js';
 
 export class LocalStorageManager {
-	private log: ServicesInterface['app']['log'];
+	private static instance: LocalStorageManager | null = null;
+	private log: ServicesInterface['log'];
 
-	constructor(services: ServicesInterface) {
-		this.log = services.app.log;
+	private constructor(services: ServicesInterface) {
+		this.log = services.log;
+	}
+
+	public static getInstance(
+		services: ServicesInterface
+	): LocalStorageManager {
+		if (!LocalStorageManager.instance) {
+			LocalStorageManager.instance = new LocalStorageManager(services);
+		}
+
+		return LocalStorageManager.instance;
 	}
 
 	public async init(): Promise<boolean> {

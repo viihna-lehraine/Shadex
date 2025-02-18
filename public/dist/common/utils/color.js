@@ -1,9 +1,9 @@
-import { configData } from '../../data/config.js';
-import { defaultData } from '../../data/defaults.js';
+import { data } from '../../data/index.js';
 
 // File: common/utils/color.js
-const defaultColors = defaultData.colors;
-const defaultColorStrings = defaultData.colors.strings;
+const config = data.config;
+const defaultColors = data.defaults.colors;
+const defaultColorStrings = data.defaults.colors.strings;
 function createColorUtils(helpers, services, utils) {
     function convertColorStringToColor(colorString) {
         const clonedColor = utils.core.clone(colorString);
@@ -60,7 +60,7 @@ function createColorUtils(helpers, services, utils) {
             };
         },
         convertColorToColorString(color) {
-            const log = services.app.log;
+            const log = services.log;
             const clonedColor = utils.core.clone(color);
             if (utils.typeGuards.isColorString(clonedColor)) {
                 log('error', `Already formatted as color string: ${JSON.stringify(color)}`, 'colorUtils.convertColorToColorString()');
@@ -175,12 +175,12 @@ function createColorUtils(helpers, services, utils) {
         },
         convertCSSToColor(color) {
             color = color.trim().toLowerCase();
-            const cmykMatch = color.match(configData.regex.css.cmyk);
-            const hslMatch = color.match(configData.regex.css.hsl);
-            const hsvMatch = color.match(configData.regex.css.hsv);
-            const labMatch = color.match(configData.regex.css.lab);
-            const rgbMatch = color.match(configData.regex.css.rgb);
-            const xyzMatch = color.match(configData.regex.css.xyz);
+            const cmykMatch = color.match(config.regex.css.cmyk);
+            const hslMatch = color.match(config.regex.css.hsl);
+            const hsvMatch = color.match(config.regex.css.hsv);
+            const labMatch = color.match(config.regex.css.lab);
+            const rgbMatch = color.match(config.regex.css.rgb);
+            const xyzMatch = color.match(config.regex.css.xyz);
             if (cmykMatch) {
                 return {
                     value: {
@@ -260,7 +260,7 @@ function createColorUtils(helpers, services, utils) {
             return { hex: hex.hex };
         },
         convertHSL(color, colorSpace) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(color)) {
                     log('error', `Invalid color value ${JSON.stringify(color)}`, 'colorUtils.convertHSL()');
@@ -351,7 +351,7 @@ function createColorUtils(helpers, services, utils) {
             };
         },
         convertToHSL(color) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue(color)) {
                     log('error', `Invalid color value ${JSON.stringify(color)}`, 'colorUtils.convertToHSL()');
@@ -422,12 +422,12 @@ function createColorUtils(helpers, services, utils) {
                     case 'xyz':
                         return formatters.xyz(color);
                     default:
-                        services.app.log('error', `Unsupported color format for ${color}`, 'colorUtils.getColorString()');
+                        services.log('error', `Unsupported color format for ${color}`, 'colorUtils.getColorString()');
                         return null;
                 }
             }
             catch (error) {
-                services.app.log('error', `getColorString error: ${error}`, 'colorUtils.getColorString()');
+                services.log('error', `getColorString error: ${error}`, 'colorUtils.getColorString()');
                 return null;
             }
         },
@@ -440,7 +440,7 @@ function createColorUtils(helpers, services, utils) {
                 return (value) => structuredClone(conversionFn(value));
             }
             catch (error) {
-                services.app.log('error', `Error getting conversion function: ${error}`, 'colorUtils.getConversionFn()');
+                services.log('error', `Error getting conversion function: ${error}`, 'colorUtils.getConversionFn()');
                 return undefined;
             }
         },
@@ -462,7 +462,7 @@ function createColorUtils(helpers, services, utils) {
                 return clonedP;
             }
             catch (error) {
-                services.app.log('error', `Error converting hue to RGB: ${error}`, 'colorUtils.hueToRGB()');
+                services.log('error', `Error converting hue to RGB: ${error}`, 'colorUtils.hueToRGB()');
                 return 0;
             }
         },
@@ -492,7 +492,7 @@ function createColorUtils(helpers, services, utils) {
             return utils.brand.asBranded(value, rangeKey);
         },
         validateAndConvertColor(color) {
-            const log = services.app.log;
+            const log = services.log;
             if (!color)
                 return null;
             const convertedColor = utils.typeGuards.isColorString(color)

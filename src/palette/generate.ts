@@ -8,17 +8,17 @@ import {
 	Palette,
 	SelectedPaletteOptions
 } from '../types/index.js';
-import { defaultData as defaults } from '../data/defaults.js';
+import { data } from '../data/index.js';
 
-const defaultPalette = defaults.palette;
+const defaultPalette = data.defaults.palette;
 
 export function generatePalette(
 	options: SelectedPaletteOptions,
 	common: CommonFunctionsInterface,
-	generateHues: GenerateHuesFnGroup,
-	generatePalette: GeneratePaletteFnGroup
+	generateHuesFns: GenerateHuesFnGroup,
+	generatePaletteFns: GeneratePaletteFnGroup
 ): Palette {
-	const log = common.services.app.log;
+	const log = common.services.log;
 
 	try {
 		log(
@@ -30,23 +30,43 @@ export function generatePalette(
 
 		switch (options.paletteType) {
 			case 'analogous':
-				return generatePalette.analogous(options, common, generateHues);
+				return generatePaletteFns.analogous(
+					options,
+					common,
+					generateHuesFns
+				);
 			case 'complementary':
-				return generatePalette.complementary(options, common);
+				return generatePaletteFns.complementary(options, common);
 			case 'diadic':
-				return generatePalette.diadic(options, common, generateHues);
+				return generatePaletteFns.diadic(
+					options,
+					common,
+					generateHuesFns
+				);
 			case 'hexadic':
-				return generatePalette.hexadic(options, common, generateHues);
+				return generatePaletteFns.hexadic(
+					options,
+					common,
+					generateHuesFns
+				);
 			case 'monochromatic':
-				return generatePalette.monochromatic(options, common);
+				return generatePaletteFns.monochromatic(options, common);
 			case 'random':
-				return generatePalette.random(options, common);
+				return generatePaletteFns.random(options, common);
 			case 'split-complementary':
-				return generatePalette.splitComplementary(options, common);
+				return generatePaletteFns.splitComplementary(options, common);
 			case 'tetradic':
-				return generatePalette.tetradic(options, common, generateHues);
+				return generatePaletteFns.tetradic(
+					options,
+					common,
+					generateHuesFns
+				);
 			case 'triadic':
-				return generatePalette.triadic(options, common, generateHues);
+				return generatePaletteFns.triadic(
+					options,
+					common,
+					generateHuesFns
+				);
 			default:
 				log(
 					'error',
@@ -68,7 +88,7 @@ export function generateHues(
 	generateHues: GenerateHuesFnGroup
 ): number[] {
 	const utils = common.utils;
-	const log = common.services.app.log;
+	const log = common.services.log;
 
 	try {
 		if (!utils.validate.colorValue(color)) {

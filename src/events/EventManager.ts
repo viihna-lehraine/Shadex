@@ -1,8 +1,7 @@
 // File: events/EventManager.js
 
-import { ServicesInterface } from '../types/index.js';
-
 export class EventManager {
+	private static instance: EventManager | null = null;
 	private static listeners: Map<
 		string,
 		{
@@ -10,10 +9,15 @@ export class EventManager {
 			handler: EventListenerOrEventListenerObject;
 		}
 	> = new Map();
-	private static services: ServicesInterface;
 
-	constructor(services: ServicesInterface) {
-		EventManager.services = services;
+	private constructor() {}
+
+	public static getInstance(): EventManager {
+		if (!EventManager.instance) {
+			EventManager.instance = new EventManager();
+		}
+
+		return EventManager.instance;
 	}
 
 	public static add(
@@ -29,12 +33,21 @@ export class EventManager {
 	}
 
 	public static listAll(): void {
-		EventManager.services.app.log(
-			'debug',
-			`Active Event Listeners: ${[...EventManager.listeners.keys()]}`,
-			'EventManager.listAll()',
-			3
-		);
+		console.groupCollapsed(`Active Listeners.`);
+		EventManager.listeners.forEach(({ element, handler }, key) => {
+			console.log(`🛠️ Event: ${key.split('_')[0]}`, { element, handler });
+		});
+		console.groupEnd();
+	}
+
+	public static listByType(eventType: string): void {
+		console.groupCollapsed(`Event Listeners for: ${eventType}`);
+		EventManager.listeners.forEach(({ element, handler }, key) => {
+			if (key.startsWith(`${eventType}_`)) {
+				console.log({ element, handler });
+			}
+		});
+		console.groupEnd();
 	}
 
 	public static remove(

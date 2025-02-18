@@ -1,9 +1,8 @@
-import { configData } from '../../data/config.js';
-import { dataSets } from '../../data/sets.js';
+import { data } from '../../data/index.js';
 
 // File: common/utils/validate.js
-const regex = configData.regex;
-const sets = dataSets;
+const regex = data.config.regex;
+const sets = data.sets;
 function createValidationUtils(utils) {
     function hex(value, pattern) {
         return pattern.test(value);

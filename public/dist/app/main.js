@@ -1,32 +1,40 @@
+import { EventManager } from '../events/EventManager.js';
+import { initialize } from './init.js';
+import { data } from '../data/index.js';
+
 // File: app/main.js
+const mode = data.mode;
 console.log('[main-1] Loading main.js...');
-console.log(`[main-1] Importing initialize.js...`);
-const initialize = await import('./initialize.js');
-if (initialize) {
-    console.log(`[main-1] Imported initialize.js .`);
-}
-const initializeApp = initialize.initializeApp ?? initialize.default;
-console.log('[main-2] Defining initializeApp() function.');
-console.log(`[main-3] Calling initializeApp() (define common)...`);
-const common = await initializeApp();
-console.log(`[main-4] Defining log as common.services.app.log...`);
-const log = common.services.app.log;
-log('debug', 'Executing main application script', '[main-5] > ANONYMOUS', 2);
-if (document.readyState === 'loading') {
-    log('debug', 'DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...', '[main-5.1] > ANONYMOUS', 2);
-    document.addEventListener('DOMContentLoaded', () => main());
+console.log(`[main-3] Calling initialize()`);
+const init = await initialize();
+console.log('[main-4] Initialization complete.');
+const log = init.common.services?.log;
+console.log(`[main-5] Executing main loop...`);
+if (log) {
+    log('debug', 'Executing main application script', '[main-5]', 2);
+    if (document.readyState === 'loading') {
+        log('debug', 'DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...', '[main-5.1]', 2);
+        document.addEventListener('DOMContentLoaded', () => main());
+    }
+    else {
+        log('debug', 'DOM content already loaded. Initializing application immediately.', '[main-5.1]', 2);
+        main();
+    }
 }
 else {
-    log('debug', 'DOM content already loaded. Initializing application immediately.', '[main-5.1]> ANONYMOUS', 2);
-    main();
+    console.error('[main-5E] > log function is undefined.');
 }
 async function main() {
     try {
-        log('debug', 'DOM content loaded - Application initialized.', '[main-6].main()]', 1);
+        log('debug', 'DOM content loaded - Application initialized.', '[main-6]', 1);
+        if (mode.debug) {
+            setTimeout(() => {
+                EventManager.listAll();
+            }, 2500);
+        }
     }
     catch (error) {
-        log('error', `Application initialization failed: ${error instanceof Error ? error.message : error}`, '[main-error].main()]');
-        alert('An error occurred during startup. Check console for details');
+        log('error', `Application initialization failed: ${error instanceof Error ? error.message : error}`, '[main-ERROR]');
     }
 }
 //# sourceMappingURL=main.js.map

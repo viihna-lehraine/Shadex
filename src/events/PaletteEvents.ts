@@ -2,19 +2,20 @@
 
 import { ServicesInterface, UtilitiesInterface } from '../types/index.js';
 import { EventManager } from './EventManager.js';
+import { PaletteManager } from '../palette/PaletteManager.js';
 import { PaletteState } from '../state/PaletteState.js';
 import { StateManager } from '../state/StateManager.js';
-import { constsData as consts } from '../data/consts.js';
-import { domData } from '../data/dom.js';
+import { data } from '../data/index.js';
 
-const classes = domData.classes;
-const ids = domData.ids;
-const timers = consts.timers;
+const classes = data.dom.classes;
+const ids = data.dom.ids;
+const timers = data.config.timers;
 
 export class PaletteEvents {
 	private draggedColumn: HTMLElement | null = null;
 
 	constructor(
+		private paletteManager: PaletteManager,
 		private paletteState: PaletteState,
 		private services: ServicesInterface,
 		private stateManager: StateManager,
@@ -32,7 +33,7 @@ export class PaletteEvents {
 		EventManager.add(paletteContainer, 'input', event => {
 			const target = event.target as HTMLElement;
 
-			if (target.matches(domData.classes.colorDisplay)) {
+			if (target.matches(classes.colorDisplay)) {
 				const column = target.closest(
 					classes.paletteColumn
 				) as HTMLElement;
@@ -108,7 +109,19 @@ export class PaletteEvents {
 		this.createPaletteObserver();
 
 		// automatically initialize column positions
-		this.initializeColumnPositions();
+		setTimeout(() => {
+			if (!this.stateManager.getState().paletteContainer) {
+				this.services.log(
+					'warn',
+					'Skipping initializeColumnPositions() because state is not initialized yet.',
+					'PaletteEvents.init()',
+					2
+				);
+				return;
+			}
+
+			this.initializeColumnPositions();
+		}, 200);
 	}
 
 	public attachColorCopyHandlers(): void {
@@ -133,7 +146,7 @@ export class PaletteEvents {
 		);
 
 		if (!paletteContainer) {
-			this.services.app.log(
+			this.services.log(
 				'error',
 				`Palette container not found! Cannot attach drag-and-drop handlers.`,
 				'PaletteEvents.attachDragAndDropHandlers()',
@@ -146,18 +159,19 @@ export class PaletteEvents {
 		// drag start
 		EventManager.add(paletteContainer, 'dragstart', ((event: DragEvent) => {
 			const dragHandle = (event.target as HTMLElement).closest(
-				domData.classes.dragHandle
+				classes.dragHandle
 			) as HTMLElement;
 			if (!dragHandle) return;
 
 			this.draggedColumn = dragHandle.closest(
-				domData.classes.paletteColumn
+				classes.paletteColumn
 			) as HTMLElement;
 			if (!this.draggedColumn) return;
 
 			event.dataTransfer?.setData('text/plain', this.draggedColumn.id);
 			this.draggedColumn.classList.add('dragging');
-			this.services.app.log(
+
+			this.services.log(
 				'debug',
 				`Drag started for column: ${this.draggedColumn.id}`,
 				'PaletteEvents.attachDragAndDropHandlers()',
@@ -176,7 +190,7 @@ export class PaletteEvents {
 			event.preventDefault();
 
 			const targetColumn = (event.target as HTMLElement).closest(
-				domData.classes.paletteColumn
+				classes.paletteColumn
 			) as HTMLElement;
 			if (
 				!this.draggedColumn ||
@@ -185,14 +199,12 @@ export class PaletteEvents {
 			)
 				return;
 
-			const parent = targetColumn.parentElement;
-			if (!parent) return;
+			const draggedID = parseInt(
+				this.draggedColumn!.id.split('-').pop()!
+			);
+			const targetID = parseInt(targetColumn.id.split('-').pop()!);
 
-			// swap columns in the DOM
-			const draggedNext = this.draggedColumn.nextElementSibling;
-			const targetNext = targetColumn.nextElementSibling;
-			parent.insertBefore(this.draggedColumn, targetNext);
-			parent.insertBefore(targetColumn, draggedNext);
+			this.paletteManager.swapColumns(draggedID, targetID);
 
 			// swap positions in State
 			const updatedColumns = [
@@ -225,7 +237,7 @@ export class PaletteEvents {
 			}
 
 			this.draggedColumn.classList.remove('dragging');
-			this.services.app.log(
+			this.services.log(
 				'debug',
 				`Successfully swapped columns: ${this.draggedColumn.id} and ${targetColumn.id}`,
 				'PaletteEvents.attachDragAndDropHandlers()',
@@ -239,7 +251,7 @@ export class PaletteEvents {
 		EventManager.add(paletteContainer, 'dragend', () => {
 			if (this.draggedColumn) {
 				this.draggedColumn.classList.remove('dragging');
-				this.services.app.log(
+				this.services.log(
 					'debug',
 					`Drag ended for column.`,
 					'PaletteEvents.attachDnDHandlers()',
@@ -247,6 +259,13 @@ export class PaletteEvents {
 				);
 			}
 		});
+
+		this.services.log(
+			`debug`,
+			`Drag and drop event listeners attached`,
+			'PaletteEvents.attachDragAndDropHandlers()',
+			3
+		);
 	}
 
 	// initialiezs column positions on page load
@@ -287,6 +306,50 @@ export class PaletteEvents {
 		});
 	}
 
+	public syncColumnColorsWithState(): void {
+		const paletteColumns = this.utils.core.getAllElements<HTMLDivElement>(
+			classes.paletteColumn
+		);
+		const currentPalette =
+			this.stateManager.getState().paletteContainer.columns;
+		const paletteData = this.stateManager.getState().paletteHistory.at(-1);
+
+		if (!paletteData || !paletteData.items) {
+			this.services.log(
+				'warn',
+				'No valid palette data found in history!',
+				'PaletteEvents.syncColumnColorsWithState()',
+				2
+			);
+			return;
+		}
+
+		paletteColumns.forEach(column => {
+			const columnID = parseInt(column.id.split('-').pop()!);
+			const columnData = currentPalette.find(col => col.id === columnID);
+			const paletteItem = paletteData.items.find(
+				item => item.itemID === columnID
+			);
+
+			if (columnData && paletteItem) {
+				const colorValue = paletteItem.css.hex; // *DEV-NOTE* make this interchangeable
+				column.style.backgroundColor = colorValue;
+
+				const colorDisplay = column.querySelector(
+					classes.colorDisplay
+				) as HTMLInputElement;
+				if (colorDisplay) colorDisplay.value = colorValue;
+
+				this.services.log(
+					'debug',
+					`Synchronized color for column ${columnID}: ${colorValue}`,
+					'PaletteEvents.syncColumnColorsWithState()',
+					4
+				);
+			}
+		});
+	}
+
 	private copyToClipboard(text: string, targetElement: HTMLElement): void {
 		navigator.clipboard
 			.writeText(text.trim())
@@ -294,7 +357,7 @@ export class PaletteEvents {
 				// show tooltip with "Copied!" message
 				this.showTooltip(targetElement, 'Copied!');
 
-				this.services.app.log(
+				this.services.log(
 					'debug',
 					`Copied color value: ${text}`,
 					'PaletteEvents.copyToClipboard()',
@@ -308,7 +371,7 @@ export class PaletteEvents {
 				);
 			})
 			.catch(err => {
-				this.services.app.log(
+				this.services.log(
 					'error',
 					`Error copying to clipboard: ${err}`,
 					'PaletteEvents.copyToClipboard()',
@@ -320,7 +383,7 @@ export class PaletteEvents {
 	// observes palette container for new elements
 	private createPaletteObserver(): void {
 		const paletteContainer = this.utils.core.getElement(
-			domData.ids.divs.paletteContainer
+			ids.divs.paletteContainer
 		);
 		if (!paletteContainer) return;
 
@@ -330,10 +393,19 @@ export class PaletteEvents {
 					mutation.addedNodes.forEach(node => {
 						if (
 							node instanceof HTMLElement &&
-							node.classList.contains(
-								domData.classes.paletteColumn
-							)
+							node.classList.contains(classes.paletteColumn)
 						) {
+							if (
+								!this.stateManager.getState().paletteContainer
+							) {
+								this.services.log(
+									'warn',
+									'Skipping initializeColumnPositions() - State is not ready!',
+									'PaletteEvents.createPaletteObserver()'
+								);
+								return;
+							}
+
 							this.initializeColumnPositions();
 						}
 					});
@@ -342,7 +414,8 @@ export class PaletteEvents {
 		);
 
 		observer.observe(paletteContainer, { childList: true, subtree: true });
-		this.services.app.log(
+
+		this.services.log(
 			'info',
 			'Palette Container MutationObserver created',
 			'PaletteEvents.createPaletteObserver()',
@@ -350,7 +423,6 @@ export class PaletteEvents {
 		);
 	}
 
-	// handles color changes in palette columns
 	private handleColorInputChange(
 		event: Event,
 		column: HTMLElement,
@@ -418,7 +490,10 @@ export class PaletteEvents {
 
 		const onMouseMove = (moveEvent: MouseEvent) => {
 			const diff = moveEvent.clientX - startX;
-			column.style.width = `${startWidth + diff}px`;
+			const newSize = startWidth + diff;
+
+			const columnID = parseInt(column.id.split('-').pop()!);
+			this.paletteManager.handleColumnResize(columnID, newSize);
 		};
 
 		const onMouseUp = () => {
@@ -455,14 +530,9 @@ export class PaletteEvents {
 		const column = button.closest(
 			classes.paletteColumn
 		) as HTMLElement | null;
-
 		if (!column) return;
 
-		const isLocked = column.classList.toggle(classes.locked);
-		column.draggable = !isLocked;
-
-		const input = column.querySelector('input') as HTMLInputElement | null;
-
-		if (input) input.disabled = isLocked;
+		const columnID = parseInt(column.id.split('-').pop()!);
+		this.paletteManager.handleColumnLock(columnID);
 	}
 }

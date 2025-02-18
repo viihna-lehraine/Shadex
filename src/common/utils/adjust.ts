@@ -7,11 +7,10 @@ import {
 	ServicesInterface,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { constsData as consts } from '../../data/consts.js';
-import { defaultData as defaults } from '../../data/defaults.js';
+import { data } from '../../data/index.js';
 
-const adjustments = consts.adjustments;
-const defaultColors = defaults.colors;
+const adjustments = data.config.adjustments;
+const defaultColors = data.defaults.colors;
 
 export function createAdjustmentUtils(
 	services: ServicesInterface,
@@ -19,7 +18,7 @@ export function createAdjustmentUtils(
 ): AdjustmentUtilsInterface {
 	return {
 		applyGammaCorrection(value: number): number {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				return value > 0.0031308
@@ -36,7 +35,7 @@ export function createAdjustmentUtils(
 			}
 		},
 		clampRGB(rgb: RGB): RGB {
-			const log = services.app.log;
+			const log = services.log;
 			const defaultRGB = defaultColors.rgb;
 
 			if (!utils.validate.colorValue(rgb)) {
@@ -81,7 +80,7 @@ export function createAdjustmentUtils(
 			}
 		},
 		sl(color: HSL): HSL {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
 				if (!utils.validate.colorValue(color)) {

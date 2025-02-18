@@ -1,9 +1,13 @@
 // File: events/EventManager.js
 class EventManager {
+    static instance = null;
     static listeners = new Map();
-    static services;
-    constructor(services) {
-        EventManager.services = services;
+    constructor() { }
+    static getInstance() {
+        if (!EventManager.instance) {
+            EventManager.instance = new EventManager();
+        }
+        return EventManager.instance;
     }
     static add(element, eventType, handler) {
         element.addEventListener(eventType, handler);
@@ -13,7 +17,20 @@ class EventManager {
         });
     }
     static listAll() {
-        EventManager.services.app.log('debug', `Active Event Listeners: ${[...EventManager.listeners.keys()]}`, 'EventManager.listAll()', 3);
+        console.groupCollapsed(`Active Listeners.`);
+        EventManager.listeners.forEach(({ element, handler }, key) => {
+            console.log(`🛠️ Event: ${key.split('_')[0]}`, { element, handler });
+        });
+        console.groupEnd();
+    }
+    static listByType(eventType) {
+        console.groupCollapsed(`Event Listeners for: ${eventType}`);
+        EventManager.listeners.forEach(({ element, handler }, key) => {
+            if (key.startsWith(`${eventType}_`)) {
+                console.log({ element, handler });
+            }
+        });
+        console.groupEnd();
     }
     static remove(element, eventType, handler) {
         element.removeEventListener(eventType, handler);

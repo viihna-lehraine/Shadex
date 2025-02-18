@@ -1,57 +1,62 @@
 import { EventManager } from './EventManager.js';
-import { domData } from '../data/dom.js';
+import { data } from '../data/index.js';
 
 // File: events/UIEvents.js
-const btns = domData.elements.btns;
-const classes = domData.classes;
-const elements = domData.elements;
+const classes = data.dom.classes;
+const ids = data.dom.ids;
 class UIEvents {
     services;
     utils;
     log;
+    elements;
     constructor(services, utils) {
         this.services = services;
         this.utils = utils;
         this.services = services;
         this.utils = utils;
-        this.log = this.services.app.log;
+        this.log = this.services.log;
+        const validatedElements = this.utils.dom.getValidatedDOMElements(ids);
+        if (!validatedElements) {
+            throw new Error(`Critical UI elements not found. Application cannot start`);
+        }
+        this.elements = validatedElements;
     }
     init() {
         EventManager.add(document, 'click', event => {
             const target = event.target;
             // open modal
-            if (target.matches(domData.classes.modalTrigger)) {
+            if (target.matches(classes.modalTrigger)) {
                 const modal = this.utils.core.getElement(target.dataset.modalID);
-                modal?.classList.remove(domData.classes.hidden);
+                modal?.classList.remove(classes.hidden);
             }
             // close modal when clicking outside
-            if (target.matches(domData.classes.modal)) {
-                target.classList.add(domData.classes.hidden);
+            if (target.matches(classes.modal)) {
+                target.classList.add(classes.hidden);
             }
         });
         // handle 'Esc' key press to close modals
         EventManager.add(document, 'keydown', ((event) => {
             if (event.key === 'Escape') {
-                const openModals = this.utils.core.getAllElements(domData.classes.modal);
-                openModals.forEach(modal => modal.classList.add(domData.classes.hidden));
+                const openModals = this.utils.core.getAllElements(classes.modal);
+                openModals.forEach(modal => modal.classList.add(classes.hidden));
             }
         }));
     }
     initButtons() {
         // desaturate button (Placeholder logic)
-        EventManager.add(btns.desaturate, 'click', (e) => {
+        EventManager.add(this.elements.btns.desaturate, 'click', (e) => {
             e.preventDefault();
-            this.log('debug', 'Desaturate button clicked', 'UIEvents.initButtons()', 5);
-            this.log('debug', 'Desaturation logic not implemented!', 'UIEvents.initButtons()', 2);
+            this.log('debug', 'Desaturate button clicked', 'UIEvents.initButtons', 5);
+            this.log('debug', 'Desaturation logic not implemented!', 'UIEvents.initButtons', 2);
         });
         // export button (Placeholder logic)
-        EventManager.add(btns.export, 'click', (e) => {
+        EventManager.add(this.elements.btns.export, 'click', (e) => {
             e.preventDefault();
             this.log('debug', 'Export button clicked', 'UIEvents.initButtons()', 5);
             this.log('debug', 'Export logic not implemented!', 'UIEvents.initButtons()', 2);
         });
         // generate button (Placeholder logic)
-        EventManager.add(btns.generate, 'click', (e) => {
+        EventManager.add(this.elements.btns.generate, 'click', (e) => {
             e.preventDefault();
             this.log('debug', 'Generate button clicked', 'UIEvents.initButtons()', 5);
             this.log('debug', 'Palette generation logic not implemented!', 'UIEvents.initButtons()', 2);
@@ -71,11 +76,11 @@ class UIEvents {
     }
     handleWindowClick(event) {
         const target = event.target;
-        if (target === elements.divs.helpMenu) {
-            elements.divs.helpMenu.classList.add(classes.hidden);
+        if (target === this.elements.divs.helpMenu) {
+            this.elements.divs.helpMenu.classList.add(classes.hidden);
         }
-        if (target === elements.divs.historyMenu) {
-            elements.divs.historyMenu.classList.add(classes.hidden);
+        if (target === this.elements.divs.historyMenu) {
+            this.elements.divs.historyMenu.classList.add(classes.hidden);
         }
     }
 }

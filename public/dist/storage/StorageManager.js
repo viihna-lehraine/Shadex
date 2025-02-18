@@ -1,9 +1,86 @@
-// File: storage/StorageManager.js
 import { IDBManager } from './IDBManager.js';
 import { LocalStorageManager } from './LocalStorageManager.js';
-export async function createStorageManager(dbName, storeName, version, services) {
-    const idbManager = new IDBManager(dbName, storeName, version, services);
-    const isIDBAvailable = await idbManager.init();
-    return isIDBAvailable ? idbManager : new LocalStorageManager(services);
+
+// File: storage/StorageManager.js
+class StorageManager {
+    idbManager = null;
+    localStorageManager;
+    services;
+    log;
+    useLocalStorage = false;
+    constructor(services) {
+        this.services = services;
+        this.log = services.log;
+        this.localStorageManager = LocalStorageManager.getInstance(this.services);
+    }
+    async init() {
+        this.log('info', 'Initializing Storage Manager', 'StorageManager.init()');
+        try {
+            this.idbManager = IDBManager.getInstance(this.services);
+            const idbAvailable = await this.idbManager.init();
+            if (idbAvailable) {
+                this.log('info', 'Using IndexedDB for storage.', 'StorageManager.init()');
+                return true;
+            }
+        }
+        catch (error) {
+            this.log('warn', 'IndexedDB initialization failed, falling back to LocalStorage', 'StorageManager.init()');
+        }
+        this.useLocalStorage = true;
+        await this.localStorageManager.init();
+        return true;
+    }
+    async clear() {
+        if (!this.useLocalStorage && this.idbManager) {
+            try {
+                await this.idbManager.clear();
+                return;
+            }
+            catch (error) {
+                this.log('warn', 'Failed to clear IndexedDB, falling back to LocalStorage', 'StorageManager.clear()');
+            }
+        }
+        await this.localStorageManager.clear();
+    }
+    async getItem(key) {
+        if (!this.useLocalStorage && this.idbManager) {
+            try {
+                const value = await this.idbManager.getItem(key);
+                if (value !== null)
+                    return value;
+            }
+            catch (error) {
+                this.log('warn', `Failed to get item ${key} from IndexedDB, trying LocalStorage`, 'StorageManager.getItem()');
+            }
+        }
+        return await this.localStorageManager.getItem(key);
+    }
+    async removeItem(key) {
+        if (!this.useLocalStorage && this.idbManager) {
+            try {
+                await this.idbManager.removeItem(key);
+                return;
+            }
+            catch (error) {
+                this.log('error', `Failed to remove item ${key} from IndexedDB, trying LocalStorage`, 'StorageManager.removeItem()');
+            }
+        }
+        await this.localStorageManager.removeItem(key);
+    }
+    async setItem(key, value) {
+        if (!this.useLocalStorage && this.idbManager) {
+            try {
+                await this.idbManager.ensureDBReady();
+                await this.idbManager.setItem(key, value);
+                return;
+            }
+            catch (error) {
+                this.log('error', `Failed to set item ${key} in IndexedDB, using LocalStorage`, 'StorageManager.setItem()');
+            }
+        }
+        await this.localStorageManager.setItem(key, value);
+    }
 }
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiU3RvcmFnZU1hbmFnZXIuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvc3RvcmFnZS9TdG9yYWdlTWFuYWdlci50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxrQ0FBa0M7QUFHbEMsT0FBTyxFQUFFLFVBQVUsRUFBRSxNQUFNLGlCQUFpQixDQUFDO0FBQzdDLE9BQU8sRUFBRSxtQkFBbUIsRUFBRSxNQUFNLDBCQUEwQixDQUFDO0FBRS9ELE1BQU0sQ0FBQyxLQUFLLFVBQVUsb0JBQW9CLENBQ3pDLE1BQWMsRUFDZCxTQUFpQixFQUNqQixPQUFlLEVBQ2YsUUFBMkI7SUFFM0IsTUFBTSxVQUFVLEdBQUcsSUFBSSxVQUFVLENBQUMsTUFBTSxFQUFFLFNBQVMsRUFBRSxPQUFPLEVBQUUsUUFBUSxDQUFDLENBQUM7SUFDeEUsTUFBTSxjQUFjLEdBQUcsTUFBTSxVQUFVLENBQUMsSUFBSSxFQUFFLENBQUM7SUFFL0MsT0FBTyxjQUFjLENBQUMsQ0FBQyxDQUFDLFVBQVUsQ0FBQyxDQUFDLENBQUMsSUFBSSxtQkFBbUIsQ0FBQyxRQUFRLENBQUMsQ0FBQztBQUN4RSxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLy8gRmlsZTogc3RvcmFnZS9TdG9yYWdlTWFuYWdlci5qc1xuXG5pbXBvcnQgeyBTZXJ2aWNlc0ludGVyZmFjZSB9IGZyb20gJy4uL3R5cGVzL2luZGV4LmpzJztcbmltcG9ydCB7IElEQk1hbmFnZXIgfSBmcm9tICcuL0lEQk1hbmFnZXIuanMnO1xuaW1wb3J0IHsgTG9jYWxTdG9yYWdlTWFuYWdlciB9IGZyb20gJy4vTG9jYWxTdG9yYWdlTWFuYWdlci5qcyc7XG5cbmV4cG9ydCBhc3luYyBmdW5jdGlvbiBjcmVhdGVTdG9yYWdlTWFuYWdlcihcblx0ZGJOYW1lOiBzdHJpbmcsXG5cdHN0b3JlTmFtZTogc3RyaW5nLFxuXHR2ZXJzaW9uOiBudW1iZXIsXG5cdHNlcnZpY2VzOiBTZXJ2aWNlc0ludGVyZmFjZVxuKSB7XG5cdGNvbnN0IGlkYk1hbmFnZXIgPSBuZXcgSURCTWFuYWdlcihkYk5hbWUsIHN0b3JlTmFtZSwgdmVyc2lvbiwgc2VydmljZXMpO1xuXHRjb25zdCBpc0lEQkF2YWlsYWJsZSA9IGF3YWl0IGlkYk1hbmFnZXIuaW5pdCgpO1xuXG5cdHJldHVybiBpc0lEQkF2YWlsYWJsZSA/IGlkYk1hbmFnZXIgOiBuZXcgTG9jYWxTdG9yYWdlTWFuYWdlcihzZXJ2aWNlcyk7XG59XG4iXX0=
+
+export { StorageManager };
+//# sourceMappingURL=StorageManager.js.map

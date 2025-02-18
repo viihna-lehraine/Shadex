@@ -1,7 +1,7 @@
-import { configData } from '../../data/config.js';
+import { data } from '../../data/index.js';
 
 // File: common/utils/brand.js
-const regex = configData.regex;
+const regex = data.config.regex;
 function createBrandingUtils(utils) {
     function asByteRange(value) {
         utils.validate.range(value, 'ByteRange');

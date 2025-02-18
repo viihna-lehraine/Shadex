@@ -1,60 +1,13 @@
 // File: types/data.js
 
-import { dataSets } from '../data/sets.js';
+import { data } from '../data/index.js';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const sets = data.sets;
 
 // ******** 1. APP CONFIGURATION ********
 
 export type AppModeData = 'dev' | 'prod';
-
-export interface ConfigDataInterface {
-	regex: {
-		brand: {
-			hex: RegExp;
-		};
-		colors: {
-			cmyk: RegExp;
-			hex: RegExp;
-			hsl: RegExp;
-			hsv: RegExp;
-			lab: RegExp;
-			rgb: RegExp;
-			xyz: RegExp;
-		};
-		css: {
-			cmyk: RegExp;
-			hsl: RegExp;
-			hsv: RegExp;
-			lab: RegExp;
-			rgb: RegExp;
-			xyz: RegExp;
-		};
-		dom: {
-			hex: RegExp;
-			hsl: RegExp;
-			rgb: RegExp;
-		};
-		userInput: {
-			hex: RegExp;
-			hsl: RegExp;
-			rgb: RegExp;
-		};
-		validation: {
-			hex: RegExp;
-			hexComponent: RegExp;
-		};
-	};
-	storage: {
-		DEFAULT_KEYS: {
-			SETTINGS: string;
-		};
-		DEFAULT_SETTINGS: {
-			colorSpace: ColorSpace;
-			lastPaletteID: number;
-			theme: 'light' | 'dark';
-			loggingEnabled: boolean;
-		};
-	};
-}
 
 interface PaletteRangeShiftProperties {
 	hue: number;
@@ -62,7 +15,7 @@ interface PaletteRangeShiftProperties {
 	light: number;
 }
 
-export interface ConstsDataInterface {
+export interface ConfigData {
 	adjustments: {
 		slaValue: number;
 	};
@@ -117,6 +70,42 @@ export interface ConstsDataInterface {
 			weights: readonly number[];
 		};
 	};
+	regex: {
+		brand: {
+			hex: RegExp;
+		};
+		colors: {
+			cmyk: RegExp;
+			hex: RegExp;
+			hsl: RegExp;
+			hsv: RegExp;
+			lab: RegExp;
+			rgb: RegExp;
+			xyz: RegExp;
+		};
+		css: {
+			cmyk: RegExp;
+			hsl: RegExp;
+			hsv: RegExp;
+			lab: RegExp;
+			rgb: RegExp;
+			xyz: RegExp;
+		};
+		dom: {
+			hex: RegExp;
+			hsl: RegExp;
+			rgb: RegExp;
+		};
+		userInput: {
+			hex: RegExp;
+			hsl: RegExp;
+			rgb: RegExp;
+		};
+		validation: {
+			hex: RegExp;
+			hexComponent: RegExp;
+		};
+	};
 	thresholds: {
 		dark: number;
 		gray: number;
@@ -128,22 +117,13 @@ export interface ConstsDataInterface {
 		tooltipFadeIn: number;
 		tooltipFadeOut: number;
 	};
+	ui: {
+		minColumnSize: 5;
+		maxColumnSize: 70;
+	};
 }
 
-export interface DataSetsInterface {
-	ByteRange: readonly [0, 255];
-	HexSet: 'HexSet';
-	LAB_L: readonly [0, 100];
-	LAB_A: readonly [-128, 127];
-	LAB_B: readonly [-128, 127];
-	Percentile: readonly [0, 100];
-	Radial: readonly [0, 360];
-	XYZ_X: readonly [number, number];
-	XYZ_Y: readonly [number, number];
-	XYZ_Z: readonly [number, number];
-}
-
-export interface DefaultDataInterface {
+export interface DefaultData {
 	colors: {
 		cmyk: CMYK;
 		hex: Hex;
@@ -197,7 +177,7 @@ export interface DefaultDataInterface {
 	unbrandedPaletteItem: UnbrandedPaletteItem;
 }
 
-interface DOMClassesInterface {
+export interface DOMClasses {
 	colorDisplay: string;
 	colorInput: string;
 	colorInputBtn: string;
@@ -216,53 +196,13 @@ interface DOMClassesInterface {
 	tooltipTrigger: string;
 }
 
-interface DOMDynamicElementInterface {
-	divs: {
-		globalTooltip: HTMLDivElement | null;
-	};
-}
-
-interface DOMDynamicIDInterface {
+export interface DOMDynamicIDs {
 	divs: {
 		globalTooltip: string;
 	};
 }
 
-interface DOMElementInterface {
-	btns: {
-		desaturate: HTMLButtonElement | null;
-		export: HTMLButtonElement | null;
-		generate: HTMLButtonElement | null;
-		helpMenu: HTMLButtonElement | null;
-		historyMenu: HTMLButtonElement | null;
-		import: HTMLButtonElement | null;
-		saturate: HTMLButtonElement | null;
-		showAsCMYK: HTMLButtonElement | null;
-		showAsHex: HTMLButtonElement | null;
-		showAsHSL: HTMLButtonElement | null;
-		showAsHSV: HTMLButtonElement | null;
-		showAsLAB: HTMLButtonElement | null;
-		showAsRGB: HTMLButtonElement | null;
-	};
-	divs: {
-		helpMenu: HTMLDivElement | null;
-		historyMenu: HTMLDivElement | null;
-		paletteContainer: HTMLDivElement | null;
-		paletteHistory: HTMLDivElement | null;
-	};
-	inputs: {
-		limitDarkChkbx: HTMLInputElement | null;
-		limitGrayChkbx: HTMLInputElement | null;
-		limitLightChkbx: HTMLInputElement | null;
-	};
-	selectors: {
-		paletteColumn: HTMLSelectElement | null;
-		paletteColumnCount: HTMLSelectElement | null;
-		paletteType: HTMLSelectElement | null;
-	};
-}
-
-interface DOMIDInterface {
+export interface DOM_IDs {
 	btns: {
 		desaturate: string;
 		export: string;
@@ -285,29 +225,58 @@ interface DOMIDInterface {
 		paletteHistory: string;
 	};
 	inputs: {
+		columnCount: string;
 		limitDarkChkbx: string;
 		limitGrayChkbx: string;
 		limitLightChkbx: string;
-	};
-	selectors: {
 		paletteColumn: string;
-		paletteColumnCount: string;
 		paletteType: string;
 	};
 }
 
-export interface DOMDataInterface {
-	classes: DOMClassesInterface;
-	dynamicElements: DOMDynamicElementInterface;
-	dynamicIDs: DOMDynamicIDInterface;
-	elements: DOMElementInterface;
-	ids: DOMIDInterface;
+export interface DOMData {
+	classes: DOMClasses;
+	dynamicIDs: DOMDynamicIDs;
+	ids: DOM_IDs;
 }
 
-export interface ModeDataInterface {
+export interface DOMElements {
+	btns: {
+		desaturate: HTMLButtonElement;
+		export: HTMLButtonElement;
+		generate: HTMLButtonElement;
+		helpMenu: HTMLButtonElement;
+		historyMenu: HTMLButtonElement;
+		import: HTMLButtonElement;
+		saturate: HTMLButtonElement;
+		showAsCMYK: HTMLButtonElement;
+		showAsHex: HTMLButtonElement;
+		showAsHSL: HTMLButtonElement;
+		showAsHSV: HTMLButtonElement;
+		showAsLAB: HTMLButtonElement;
+		showAsRGB: HTMLButtonElement;
+	};
+	divs: {
+		helpMenu: HTMLDivElement;
+		historyMenu: HTMLDivElement;
+		paletteContainer: HTMLDivElement;
+		paletteHistory: HTMLDivElement;
+	};
+	inputs: {
+		columnCount: HTMLInputElement;
+		limitDarkChkbx: HTMLInputElement;
+		limitGrayChkbx: HTMLInputElement;
+		limitLightChkbx: HTMLInputElement;
+		paletteColumn: HTMLInputElement;
+		paletteType: HTMLInputElement;
+	};
+}
+
+export interface ModeData {
 	debug: boolean;
 	debugLevel: 0 | 1 | 2 | 3 | 4 | 5;
 	env: 'dev' | 'prod' | 'test';
+	exposeToWindow: boolean;
 	logging: {
 		args: boolean;
 		clicks: boolean;
@@ -321,9 +290,21 @@ export interface ModeDataInterface {
 	stackTrace: boolean;
 }
 
-export interface StorageDataInterface {
-	HISTORY_KEY: string;
-	MUTATIONS_KEY: string;
+export interface StorageData {
+	idb: {
+		dbName: string;
+		defaultVersion: number;
+		storeName: string;
+	};
+}
+
+export interface DataInterface {
+	config: ConfigData;
+	defaults: DefaultData;
+	dom: DOMData;
+	mode: ModeData;
+	sets: SetsData;
+	storage: StorageData;
 }
 
 // ******** 2. SET DECLARATIONS ********
@@ -364,15 +345,25 @@ export type RangeKeyMap = {
 export type ColorValueRange = RangeKeyMap[keyof RangeKeyMap];
 
 export type NumericRangeKey = {
-	[K in keyof typeof dataSets]: (typeof dataSets)[K] extends readonly [
-		number,
-		number
-	]
+	[K in keyof typeof sets]: (typeof sets)[K] extends readonly [number, number]
 		? K
 		: never;
-}[keyof typeof dataSets & string];
+}[keyof typeof sets & string];
 
-export type Sets = typeof dataSets;
+export interface SetsData {
+	ByteRange: readonly [0, 255];
+	HexSet: 'HexSet';
+	LAB_L: readonly [0, 100];
+	LAB_A: readonly [-128, 127];
+	LAB_B: readonly [-128, 127];
+	Percentile: readonly [0, 100];
+	Radial: readonly [0, 360];
+	XYZ_X: readonly [number, number];
+	XYZ_Y: readonly [number, number];
+	XYZ_Z: readonly [number, number];
+}
+
+export type Sets = typeof sets;
 
 // ******** 3. BRANDED COLORS ********
 
@@ -751,7 +742,7 @@ export interface PaletteItem {
 
 export interface SelectedPaletteOptions {
 	columnCount: number;
-	distributionType: keyof ConstsDataInterface['probabilities'];
+	distributionType: keyof ConfigData['probabilities'];
 	limitDark: boolean;
 	limitGray: boolean;
 	limitLight: boolean;
@@ -768,11 +759,10 @@ export interface State {
 			position: number;
 			size: number;
 		}[];
-		dndAttached: boolean;
 	};
 	preferences: {
 		colorSpace: ColorSpace;
-		distributionType: keyof ConstsDataInterface['probabilities'];
+		distributionType: keyof ConfigData['probabilities'];
 		maxHistory: number;
 		maxPaletteHistory: number;
 		theme: 'light' | 'dark';
@@ -822,3 +812,7 @@ export interface UnbrandedPalette {
 		type: PaletteType;
 	};
 }
+
+// ******** 8. GENERICS ********
+
+export type Listener<T> = (newValue: T, oldValue: T) => void;

@@ -3,26 +3,28 @@
 import {
 	ColorInputElement,
 	ColorSpace,
+	DOMElements,
+	DOM_IDs,
 	DOMUtilsInterface,
 	HSL,
 	Palette,
 	ServicesInterface,
+	State,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { constsData as consts } from '../../data/consts.js';
-import { domData } from '../../data/dom.js';
-import { modeData } from '../../data/mode.js';
+import { data } from '../../data/index.js';
 
-const domIDs = domData.ids;
-const mode = modeData;
-const timers = consts.timers;
+const classes = data.dom.classes;
+const ids = data.dom.ids;
+const mode = data.mode;
+const timers = data.config.timers;
 
 export function createDOMUtils(
 	services: ServicesInterface,
 	utils: UtilitiesInterface
 ): DOMUtilsInterface {
 	const addConversionListener = (id: string, colorSpace: string) => {
-		const log = services.app.log;
+		const log = services.log;
 		const btn = document.getElementById(id) as HTMLButtonElement | null;
 
 		if (btn) {
@@ -75,7 +77,7 @@ export function createDOMUtils(
 	}
 
 	function switchColorSpaceInDOM(targetFormat: ColorSpace): void {
-		const log = services.app.log;
+		const log = services.log;
 
 		try {
 			const colorTextOutputBoxes =
@@ -160,16 +162,13 @@ export function createDOMUtils(
 
 					continue;
 				}
-
 				const newColor = utils.core.clone(convertFn(clonedColor));
-
 				if (!newColor) {
 					log(
 						'error',
 						`Conversion to ${targetFormat} failed.`,
 						'domUtils.switchColorSpaceInDOM()'
 					);
-
 					continue;
 				}
 
@@ -197,7 +196,7 @@ export function createDOMUtils(
 			eventType: K,
 			callback: (ev: HTMLElementEventMap[K]) => void
 		): void {
-			const log = services.app.log;
+			const log = services.log;
 			const element = document.getElementById(id);
 
 			if (element) {
@@ -247,9 +246,9 @@ export function createDOMUtils(
 			URL.revokeObjectURL(url);
 		},
 		enforceSwatchRules(minSwatches: number, maxSwatches: number): void {
-			const log = services.app.log;
+			const log = services.log;
 			const paletteColumnSelector = document.getElementById(
-				domIDs.selectors.paletteColumn
+				ids.inputs.paletteColumn
 			) as HTMLSelectElement;
 
 			if (!paletteColumnSelector) {
@@ -301,6 +300,89 @@ export function createDOMUtils(
 				}
 			}
 		},
+		getValidatedDOMElements(
+			unvalidatedIDs: DOM_IDs = data.dom.ids
+		): DOMElements | null {
+			const log = services.log;
+			const missingElements: string[] = [];
+
+			const elementTypeMap: Record<
+				keyof DOM_IDs,
+				keyof HTMLElementTagNameMap
+			> = {
+				btns: 'button',
+				divs: 'div',
+				inputs: 'input'
+			};
+
+			const elements: Partial<DOMElements> = {
+				btns: {} as DOMElements['btns'],
+				divs: {} as DOMElements['divs'],
+				inputs: {} as DOMElements['inputs']
+			};
+
+			for (const [category, elementsGroup] of Object.entries(
+				unvalidatedIDs
+			)) {
+				type Category = keyof DOM_IDs;
+				const tagName = elementTypeMap[category as Category];
+
+				if (!tagName) {
+					log(
+						'warn',
+						`No element type mapping found for category "${category}". Skipping...`,
+						'getValidatedDOMElements()',
+						3
+					);
+					continue;
+				}
+
+				for (const [key, id] of Object.entries(
+					elementsGroup as Record<string, string>
+				)) {
+					const element =
+						utils.core.getElement<
+							HTMLElementTagNameMap[typeof tagName]
+						>(id);
+
+					if (!element) {
+						log(
+							'error',
+							`Element with ID "${id}" not found`,
+							'getValidatedDOMElements()',
+							2
+						);
+						missingElements.push(id);
+					} else {
+						(
+							elements[category as Category] as Record<
+								string,
+								HTMLElement
+							>
+						)[key] = element;
+					}
+				}
+			}
+
+			if (missingElements.length) {
+				log(
+					'warn',
+					`Missing elements: ${missingElements.join(', ')}`,
+					'getValidatedDOMElements()',
+					2
+				);
+				return null;
+			}
+
+			log(
+				'debug',
+				'All static elements are present.',
+				'getValidatedDOMElements()',
+				3
+			);
+
+			return elements as DOMElements;
+		},
 		hideTooltip(): void {
 			const tooltip = utils.core.getElement<HTMLDivElement>('.tooltip');
 			if (!tooltip) return;
@@ -311,6 +393,22 @@ export function createDOMUtils(
 				tooltip.style.visibility = 'hidden';
 				tooltip.remove();
 			}, timers.tooltipFadeOut || 500);
+		},
+		scanPaletteColumns(): State['paletteContainer']['columns'] {
+			const paletteColumns = utils.core.getAllElements<HTMLDivElement>(
+				classes.paletteColumn
+			);
+
+			return Array.from(paletteColumns).map((column, index) => {
+				const id = parseInt(
+					column.id.split('-').pop() || `${index + 1}`,
+					10
+				);
+				const size = column.clientWidth / paletteColumns.length;
+				const isLocked = column.classList.contains(classes.locked);
+
+				return { id, position: index + 1, size, isLocked };
+			});
 		},
 		readFile(file: File): Promise<string> {
 			return new Promise((resolve, reject) => {
@@ -331,7 +429,9 @@ export function createDOMUtils(
 			}
 		},
 		updateHistory(history: Palette[]): void {
-			const historyList = domData.elements.divs.paletteHistory;
+			const historyList = utils.core.getElement<HTMLDivElement>(
+				ids.divs.paletteHistory
+			);
 
 			if (!historyList) return;
 
@@ -357,38 +457,75 @@ export function createDOMUtils(
 				historyList.appendChild(entry);
 			});
 		},
-		validateStaticElements(): void {
-			const log = services.app.log;
+		async validateStaticElements(): Promise<void> {
+			const unvalidatedIDs = data.dom.ids;
+			const log = services.log;
 			const missingElements: string[] = [];
-			const allIDs: string[] = Object.values(domIDs).flatMap(category =>
-				Object.values(category)
-			);
 
-			allIDs.forEach((id: string) => {
-				const element = document.getElementById(id);
-				if (!element) {
+			const elementTypeMap: Record<
+				keyof typeof ids,
+				keyof HTMLElementTagNameMap
+			> = {
+				btns: 'button',
+				divs: 'div',
+				inputs: 'input'
+			} as const;
+
+			Object.entries(unvalidatedIDs).forEach(([category, elements]) => {
+				const tagName =
+					elementTypeMap[category as keyof typeof elementTypeMap];
+
+				if (!tagName) {
 					log(
-						'error',
-						`Element with ID "${id}" not found`,
-						'domUtils.validateStaticElements()',
-						2
+						'warn',
+						`No element type mapping found for category "${category}". Skipping...`,
+						'domUtils.validateStaticElements',
+						3
 					);
-					missingElements.push(id);
+					return;
 				}
+
+				// validate each ID within each category
+				Object.values(elements).forEach(unvalidatedIDs => {
+					if (typeof unvalidatedIDs !== 'string') {
+						log(
+							'error',
+							`Invalid ID "${unvalidatedIDs}" in category "${category}". Expected string.`,
+							'domUtils.validateStaticElements',
+							2
+						);
+						return;
+					}
+
+					const element =
+						utils.core.getElement<
+							HTMLElementTagNameMap[typeof tagName]
+						>(unvalidatedIDs);
+
+					if (!element) {
+						log(
+							'error',
+							`Element with ID "${unvalidatedIDs}" not found`,
+							'validateStaticElements',
+							2
+						);
+						missingElements.push(unvalidatedIDs);
+					}
+				});
 			});
 
 			if (missingElements.length) {
 				log(
 					'warn',
 					`Missing elements: ${missingElements.join(', ')}`,
-					'domUtils.validateStaticElements()',
+					'domUtils.validateStaticElements',
 					2
 				);
 			} else {
 				log(
 					'debug',
-					'All required DOM elements are present.',
-					'domUtils.validateStaticElements()',
+					'All static elements are present.',
+					'domUtils.validateStaticElements',
 					3
 				);
 			}

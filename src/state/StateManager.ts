@@ -5,42 +5,52 @@ import {
 	Palette,
 	ServicesInterface,
 	State,
-	StateManagerClassInterface
+	StateManagerClassInterface,
+	UtilitiesInterface
 } from '../types/index.js';
-import { defaultData as defaults } from '../data/defaults.js';
+import { StorageManager } from '../storage/StorageManager.js';
+import { data } from '../data/index.js';
 
-const defaultState = defaults.state;
+const defaultState = data.defaults.state;
 
 export class StateManager implements StateManagerClassInterface {
 	private static instance: StateManager | null = null;
 	private history: History;
 	private state: State;
 	private undoStack: History;
-	private log: ServicesInterface['app']['log'];
+	private log: ServicesInterface['log'];
+	private utils: UtilitiesInterface;
+	private storage: StorageManager;
 
-	private constructor(services: ServicesInterface) {
-		console.log(`services.app.log:`, services?.app?.log);
-
-		if (!services?.app?.log || typeof services.app.log !== 'function') {
-			throw new Error('services.app.log is not a function');
-		}
-
-		this.state = defaultState;
-		this.history = [defaultState];
-		this.undoStack = [];
-		this.log = services.app.log;
-		this.saveToStorage('appState', this.state);
+	private constructor(
+		services: ServicesInterface,
+		utils: UtilitiesInterface
+	) {
+		this.log = services.log;
 		this.log(
-			'info',
-			'StateManager initialized with default app state.',
+			'debug',
+			'Initializing State Manager',
 			'StateManager.constructor()',
-			1
+			2
 		);
+		this.utils = utils;
+
+		this.storage = new StorageManager(services);
+		this.storage.init();
+
+		this.state = {} as State;
+		this.history = [this.state];
+		this.undoStack = [];
+		this.init();
+		this.saveStateAndLog('init', 3);
 	}
 
-	public static getInstance(services: ServicesInterface): StateManager {
+	public static getInstance(
+		services: ServicesInterface,
+		utils: UtilitiesInterface
+	): StateManager {
 		if (!StateManager.instance) {
-			StateManager.instance = new StateManager(services);
+			StateManager.instance = new StateManager(services, utils);
 		}
 
 		return StateManager.instance;
@@ -55,7 +65,7 @@ export class StateManager implements StateManagerClassInterface {
 	public getState(): State {
 		this.log(
 			'debug',
-			`State retrieved: ${this.state}`,
+			`Retrieving state: ${this.state}`,
 			'StateManager.getState()',
 			2
 		);
@@ -65,7 +75,7 @@ export class StateManager implements StateManagerClassInterface {
 	public resetState(): void {
 		this.trackAction();
 		this.state = defaultState;
-		this.saveToStorage('appState', this.state);
+		this.saveState();
 		this.log(
 			'info',
 			'App state has been reset',
@@ -158,22 +168,33 @@ export class StateManager implements StateManagerClassInterface {
 		this.saveStateAndLog('appMode', 3);
 	}
 
-	public updateDnDAttachedState(dndAttached: boolean): void {
-		this.state.paletteContainer.dndAttached = dndAttached;
-		this.log(
-			'info',
-			`Updated dndAttached: ${dndAttached}`,
-			'StateManager.updateDnDAttached()',
-			1
-		);
-		this.saveStateAndLog('dndAttached', 4);
-	}
-
 	public updatePaletteColumns(
 		columns: State['paletteContainer']['columns'],
 		track: boolean,
 		verbosity: number
 	): void {
+		if (!this.state || !this.state.paletteContainer) {
+			this.log(
+				`error`,
+				`updatePaletteColumns() called before state initialization.`,
+				`StateManager.updatePaletteColumns()`,
+				3
+			);
+			return;
+		}
+		if (
+			!this.utils.core.getElement<HTMLDivElement>(
+				data.dom.ids.divs.paletteContainer
+			)
+		) {
+			this.log(
+				`warn`,
+				`Palette Container not found in the DOM.`,
+				`StateManager.updatePaletteColumns()`,
+				3
+			);
+		}
+
 		if (track) this.trackAction();
 		this.state.paletteContainer.columns = columns;
 		this.log(
@@ -193,8 +214,8 @@ export class StateManager implements StateManagerClassInterface {
 		if (columnIndex === -1) return; // column not found
 
 		// ensure the new size isn't negative or too large
-		const minSize = 5; // minimum width in %
-		const maxSize = 70; // maximum width in %
+		const minSize = data.config.ui.minColumnSize; // minimum width in %
+		const maxSize = data.config.ui.maxColumnSize; // maximum width in %
 		const adjustedSize = Math.max(minSize, Math.min(newSize, maxSize));
 
 		// determine how much space was added or removed
@@ -228,7 +249,7 @@ export class StateManager implements StateManagerClassInterface {
 	public updatePaletteHistory(updatedHistory: Palette[]): void {
 		this.trackAction();
 		this.state.paletteHistory = updatedHistory;
-		this.saveToStorage('paletteHistory', updatedHistory);
+		this.saveState();
 		this.log(
 			'info',
 			'Updated palette history',
@@ -255,6 +276,75 @@ export class StateManager implements StateManagerClassInterface {
 		this.saveStateAndLog('selections', 2);
 	}
 
+	private generateInitialState(): State {
+		const columnData = this.utils.dom.scanPaletteColumns();
+
+		this.log(
+			`info`,
+			`Scanned ${columnData.length} columns in Palette Container element`,
+			'StateManager.generateInitialState()',
+			2
+		);
+
+		return {
+			appMode: 'edit',
+			paletteContainer: {
+				columns: columnData || []
+			},
+			paletteHistory: [],
+			preferences: {
+				colorSpace: 'hsl',
+				distributionType: 'soft',
+				maxHistory: 20,
+				maxPaletteHistory: 10,
+				theme: 'light'
+			},
+			selections: {
+				paletteColumnCount: columnData.length,
+				paletteType: 'complementary',
+				targetedColumnPosition: 1
+			},
+			timestamp: this.utils.app.getFormattedTimestamp()
+		};
+	}
+
+	private async init(): Promise<void> {
+		const storedState = await this.loadState();
+		if (storedState && storedState.paletteContainer) {
+			this.state = storedState;
+			this.log(
+				'info',
+				'State loaded from storage',
+				'StateManager.init()',
+				3
+			);
+		} else {
+			this.log(
+				'warn',
+				'No valid stored state found. Generating initial state.',
+				'StateManager.init()',
+				3
+			);
+			this.state = this.generateInitialState();
+			console.log('[StateManager] Generated initial state:', this.state);
+			if (!this.state.paletteContainer) {
+				this.log(
+					'error',
+					'State.paletteContainer is STILL undefined.',
+					'StateManager.init()',
+					3
+				);
+			}
+		}
+
+		await this.saveState();
+	}
+
+	private async loadState(): Promise<State> {
+		const storedState = await this.storage.getItem<State>('appState');
+		return storedState || defaultState;
+	}
+
 	private saveStateAndLog(property: string, verbosity: number): void {
 		this.log(
 			'info',
@@ -262,10 +352,10 @@ export class StateManager implements StateManagerClassInterface {
 			`StateManager.update${property}()`,
 			verbosity
 		);
-		this.saveToStorage('appState', this.state);
+		this.saveState();
 	}
 
-	private saveToStorage<T>(key: string, value: T): void {
-		localStorage.setItem(key, JSON.stringify(value));
+	private async saveState(): Promise<void> {
+		await this.storage.setItem('appState', this.state);
 	}
 }

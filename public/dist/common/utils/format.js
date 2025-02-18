@@ -1,10 +1,10 @@
-import { defaultData } from '../../data/defaults.js';
+import { data } from '../../data/index.js';
 
 // File: common/utils/formatting.js
-const defaultColors = defaultData.colors;
+const defaultColors = data.defaults.colors;
 function createFormattingUtils(services, utils) {
     const parseColor = (colorSpace, value) => {
-        const log = services.app.log;
+        const log = services.log;
         try {
             switch (colorSpace) {
                 case 'cmyk': {
@@ -88,7 +88,7 @@ function createFormattingUtils(services, utils) {
         }
     };
     function parseComponents(value, count) {
-        const log = services.app.log;
+        const log = services.log;
         try {
             const components = value
                 .split(',')
@@ -125,7 +125,7 @@ function createFormattingUtils(services, utils) {
             }
         },
         componentToHex(component) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 const hex = Math.max(0, Math.min(255, component)).toString(16);
                 return hex.length === 1 ? '0' + hex : hex;
@@ -157,7 +157,7 @@ function createFormattingUtils(services, utils) {
             }, {});
         },
         hslAddFormat(value) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 if (!utils.validate.colorValue({ value: value, format: 'hsl' })) {
                     log('error', `Invalid HSL value ${JSON.stringify(value)}`, 'formattingUtils.hslAddFormat()');
@@ -171,7 +171,7 @@ function createFormattingUtils(services, utils) {
             }
         },
         stripHashFromHex(hex) {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 const hexString = `${hex.value.hex}`;
                 return hex.value.hex.startsWith('#')

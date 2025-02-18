@@ -1,11 +1,11 @@
-import { defaultData } from '../../data/defaults.js';
+import { data } from '../../data/index.js';
 
 // File: common/utils/app.js
-const defaultColors = defaultData.colors;
+const defaultColors = data.defaults.colors;
 function createAppUtils(services, utils) {
     return {
         generateRandomHSL() {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 const hsl = {
                     value: {
@@ -28,7 +28,7 @@ function createAppUtils(services, utils) {
             }
         },
         generateRandomSL() {
-            const log = services.app.log;
+            const log = services.log;
             try {
                 const sl = {
                     value: {

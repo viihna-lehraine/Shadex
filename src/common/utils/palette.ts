@@ -17,9 +17,9 @@ import {
 	UtilitiesInterface,
 	XYZ
 } from '../../types/index.js';
-import { domData } from '../../data/dom.js';
+import { data } from '../../data/index.js';
 
-const elements = domData.elements;
+const ids = data.dom.ids;
 
 export function createPaletteUtils(
 	services: ServicesInterface,
@@ -121,7 +121,7 @@ export function createPaletteUtils(
 			};
 		},
 		generateAllColorValues(color: HSL): AllColors {
-			const log = services.app.log;
+			const log = services.log;
 			const clonedColor = utils.core.clone(color);
 
 			if (!utils.validate.colorValue(clonedColor)) {
@@ -151,29 +151,40 @@ export function createPaletteUtils(
 			};
 		},
 		getPaletteOptionsFromUI(): SelectedPaletteOptions {
-			const log = services.app.log;
+			const log = services.log;
 
 			try {
-				const paletteColumnCountElement =
-					elements.selectors.paletteColumnCount;
-				const paletteTypeElement = elements.selectors.paletteType;
-				const limitDarkChkbx = elements.inputs.limitDarkChkbx;
-				const limitGrayChkbx = elements.inputs.limitGrayChkbx;
-				const limitLightChkbx = elements.inputs.limitLightChkbx;
+				const columnCountElement =
+					utils.core.getElement<HTMLInputElement>(
+						ids.inputs.columnCount
+					);
+				const paletteTypeElement =
+					utils.core.getElement<HTMLInputElement>(
+						ids.inputs.paletteType
+					);
+				const limitDarkChkbx = utils.core.getElement<HTMLInputElement>(
+					ids.inputs.limitDarkChkbx
+				);
+				const limitGrayChkbx = utils.core.getElement<HTMLInputElement>(
+					ids.inputs.limitGrayChkbx
+				);
+				const limitLightChkbx = utils.core.getElement<HTMLInputElement>(
+					ids.inputs.limitLightChkbx
+				);
 
 				if (!paletteTypeElement) {
 					log(
 						'warn',
 						'paletteTypeOptions DOM element not found',
-						'paletteUtils > getPaletteOptionsFromUI()',
+						'paletteUtils.getPaletteOptionsFromUI',
 						2
 					);
 				}
-				if (!paletteColumnCountElement) {
+				if (!columnCountElement) {
 					log(
 						'warn',
-						`paletteColumnCount DOM element not found`,
-						'paletteUtils > getPaletteOptionsFromUI()',
+						`columnCount DOM element not found`,
+						'paletteUtils.getPaletteOptionsFromUI',
 						2
 					);
 				}
@@ -181,7 +192,7 @@ export function createPaletteUtils(
 					log(
 						'warn',
 						`One or more checkboxes not found`,
-						'paletteUtils > getPaletteOptionsFromUI()',
+						'paletteUtils.getPaletteOptionsFromUI',
 						2
 					);
 				}
@@ -192,14 +203,14 @@ export function createPaletteUtils(
 					log(
 						'warn',
 						`Invalid palette type: ${paletteTypeElement!.value}`,
-						'paletteUtils > getPaletteOptionsFromUI()',
+						'paletteUtils.getPaletteOptionsFromUI',
 						2
 					);
 				}
 
 				return {
-					columnCount: paletteColumnCountElement
-						? parseInt(paletteColumnCountElement.value, 10)
+					columnCount: columnCountElement
+						? parseInt(columnCountElement.value, 10)
 						: 0,
 					distributionType: 'soft',
 					limitDark: limitDarkChkbx?.checked || false,
@@ -211,12 +222,13 @@ export function createPaletteUtils(
 				log(
 					'error',
 					`Failed to retrieve parameters from UI: ${error}`,
-					'paletteUtils > getPaletteOptionsFromUI()'
+					'paletteUtils.getPaletteOptionsFromUI',
+					1
 				);
 
 				return {
 					columnCount: 0,
-					distributionType: 'base',
+					distributionType: 'soft',
 					limitDark: false,
 					limitGray: false,
 					limitLight: false,

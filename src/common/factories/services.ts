@@ -1,38 +1,43 @@
 // File: common/factories/services.js
 
 import { ServicesInterface } from '../../types/index.js';
+import { createErrorHandler } from './errorHandler.js';
+import { createLogger } from './logger.js';
+import { data } from '../../data/index.js';
+
+const mode = data.mode;
 
 export async function createServices(): Promise<ServicesInterface> {
-	console.log(`[FACTORIES.service] Executing createServices()...`);
+	console.log('[FACTORIES.service] Loading createServices...');
 
-	const services = {} as ServicesInterface;
+	const logger = await createLogger();
+	const errors = await createErrorHandler();
 
-	const { createAppServices } = await import('../services/app.js');
-	console.log(
-		'FACTORIES.service] Extracted createAppServices:',
-		createAppServices
-	);
-
-	const app = await createAppServices();
-	console.log('[FACTORIES.service] Created app services:', app);
-
-	if (!app || Object.keys(app).length === 0) {
-		console.error(
-			`[FACTORIES.service] ERROR: 'app' is EMPTY before assignment!`
+	if (!logger || !errors) {
+		throw new Error(
+			'[FACTORIES.service] Logger or ErrorHandler failed to initialize.'
 		);
 	}
-	services.app = Object.assign({}, app);
-	console.log(`[FACTORIES.service] After explicit assignment:`, services.app);
 
-	services.app.log(
-		`debug`,
-		'The log function is working properly!.',
-		'[FACTORIES.service]'
-	);
+	// Define logging function
+	const log: ServicesInterface['log'] = (
+		level,
+		message,
+		method,
+		verbosityRequirement
+	) => {
+		if (
+			mode.logging[level] &&
+			mode.logging.verbosity >= (verbosityRequirement ?? 0)
+		) {
+			logger[level](message, method);
+		}
 
-	console.log(
-		`[FACTORIES.service] Final Service Functions Object: ${services}`
-	);
+		if (level === 'error' && mode.showAlerts) {
+			alert(message);
+		}
+	};
 
-	return Object.freeze(services);
+	// Return flattened services object
+	return { log, errors };
 }

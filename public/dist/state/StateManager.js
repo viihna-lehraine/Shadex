@@ -1,28 +1,31 @@
-import { defaultData } from '../data/defaults.js';
+import { StorageManager } from '../storage/StorageManager.js';
+import { data } from '../data/index.js';
 
 // File: state/StateManager.js
-const defaultState = defaultData.state;
+const defaultState = data.defaults.state;
 class StateManager {
     static instance = null;
     history;
     state;
     undoStack;
     log;
-    constructor(services) {
-        console.log(`services.app.log:`, services?.app?.log);
-        if (!services?.app?.log || typeof services.app.log !== 'function') {
-            throw new Error('services.app.log is not a function');
-        }
-        this.state = defaultState;
-        this.history = [defaultState];
+    utils;
+    storage;
+    constructor(services, utils) {
+        this.log = services.log;
+        this.log('debug', 'Initializing State Manager', 'StateManager.constructor()', 2);
+        this.utils = utils;
+        this.storage = new StorageManager(services);
+        this.storage.init();
+        this.state = {};
+        this.history = [this.state];
         this.undoStack = [];
-        this.log = services.app.log;
-        this.saveToStorage('appState', this.state);
-        this.log('info', 'StateManager initialized with default app state.', 'StateManager.constructor()', 1);
+        this.init();
+        this.saveStateAndLog('init', 3);
     }
-    static getInstance(services) {
+    static getInstance(services, utils) {
         if (!StateManager.instance) {
-            StateManager.instance = new StateManager(services);
+            StateManager.instance = new StateManager(services, utils);
         }
         return StateManager.instance;
     }
@@ -32,13 +35,13 @@ class StateManager {
         this.saveStateAndLog('paletteHistory', 3);
     }
     getState() {
-        this.log('debug', `State retrieved: ${this.state}`, 'StateManager.getState()', 2);
+        this.log('debug', `Retrieving state: ${this.state}`, 'StateManager.getState()', 2);
         return this.state;
     }
     resetState() {
         this.trackAction();
         this.state = defaultState;
-        this.saveToStorage('appState', this.state);
+        this.saveState();
         this.log('info', 'App state has been reset', 'StateManager.resetState()', 3);
     }
     redo() {
@@ -93,12 +96,14 @@ class StateManager {
         this.log('info', `Updated appMode: ${appMode}`, 'StateManager.updateAppMode()', 1);
         this.saveStateAndLog('appMode', 3);
     }
-    updateDnDAttachedState(dndAttached) {
-        this.state.paletteContainer.dndAttached = dndAttached;
-        this.log('info', `Updated dndAttached: ${dndAttached}`, 'StateManager.updateDnDAttached()', 1);
-        this.saveStateAndLog('dndAttached', 4);
-    }
     updatePaletteColumns(columns, track, verbosity) {
+        if (!this.state || !this.state.paletteContainer) {
+            this.log(`error`, `updatePaletteColumns() called before state initialization.`, `StateManager.updatePaletteColumns()`, 3);
+            return;
+        }
+        if (!this.utils.core.getElement(data.dom.ids.divs.paletteContainer)) {
+            this.log(`warn`, `Palette Container not found in the DOM.`, `StateManager.updatePaletteColumns()`, 3);
+        }
         if (track)
             this.trackAction();
         this.state.paletteContainer.columns = columns;
@@ -111,8 +116,8 @@ class StateManager {
         if (columnIndex === -1)
             return; // column not found
         // ensure the new size isn't negative or too large
-        const minSize = 5; // minimum width in %
-        const maxSize = 70; // maximum width in %
+        const minSize = data.config.ui.minColumnSize; // minimum width in %
+        const maxSize = data.config.ui.maxColumnSize; // maximum width in %
         const adjustedSize = Math.max(minSize, Math.min(newSize, maxSize));
         // determine how much space was added or removed
         const sizeDifference = adjustedSize - columns[columnIndex].size;
@@ -133,7 +138,7 @@ class StateManager {
     updatePaletteHistory(updatedHistory) {
         this.trackAction();
         this.state.paletteHistory = updatedHistory;
-        this.saveToStorage('paletteHistory', updatedHistory);
+        this.saveState();
         this.log('info', 'Updated palette history', 'StateManager.updatePaletteHistory()', 3);
     }
     updateSelections(selections, track) {
@@ -146,12 +151,56 @@ class StateManager {
         this.log('info', `Updated selections`, 'StateManager.updateSelections()', 1);
         this.saveStateAndLog('selections', 2);
     }
+    generateInitialState() {
+        const columnData = this.utils.dom.scanPaletteColumns();
+        this.log(`info`, `Scanned ${columnData.length} columns in Palette Container element`, 'StateManager.generateInitialState()', 2);
+        return {
+            appMode: 'edit',
+            paletteContainer: {
+                columns: columnData || []
+            },
+            paletteHistory: [],
+            preferences: {
+                colorSpace: 'hsl',
+                distributionType: 'soft',
+                maxHistory: 20,
+                maxPaletteHistory: 10,
+                theme: 'light'
+            },
+            selections: {
+                paletteColumnCount: columnData.length,
+                paletteType: 'complementary',
+                targetedColumnPosition: 1
+            },
+            timestamp: this.utils.app.getFormattedTimestamp()
+        };
+    }
+    async init() {
+        const storedState = await this.loadState();
+        if (storedState && storedState.paletteContainer) {
+            this.state = storedState;
+            this.log('info', 'State loaded from storage', 'StateManager.init()', 3);
+        }
+        else {
+            this.log('warn', 'No valid stored state found. Generating initial state.', 'StateManager.init()', 3);
+            this.state = this.generateInitialState();
+            console.log('[StateManager] Generated initial state:', this.state);
+            if (!this.state.paletteContainer) {
+                this.log('error', 'State.paletteContainer is STILL undefined.', 'StateManager.init()', 3);
+            }
+        }
+        await this.saveState();
+    }
+    async loadState() {
+        const storedState = await this.storage.getItem('appState');
+        return storedState || defaultState;
+    }
     saveStateAndLog(property, verbosity) {
         this.log('info', `Updated ${property}`, `StateManager.update${property}()`, verbosity);
-        this.saveToStorage('appState', this.state);
+        this.saveState();
     }
-    saveToStorage(key, value) {
-        localStorage.setItem(key, JSON.stringify(value));
+    async saveState() {
+        await this.storage.setItem('appState', this.state);
     }
 }
 

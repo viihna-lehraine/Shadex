@@ -12,7 +12,7 @@ function analogous(
 	options: SelectedPaletteOptions,
 	common: CommonFunctionsInterface
 ): number[] {
-	const log = common.services.app.log;
+	const log = common.services.log;
 
 	try {
 		if (!common.utils.validate.colorValue(color)) {
@@ -62,7 +62,7 @@ function diadic(
 	common: CommonFunctionsInterface
 ): number[] {
 	const helpers = common.helpers;
-	const log = common.services.app.log;
+	const log = common.services.log;
 
 	try {
 		const baseHue = color.value.hue;
@@ -89,7 +89,7 @@ function diadic(
 
 function hexadic(color: HSL, common: CommonFunctionsInterface): number[] {
 	const utils = common.utils;
-	const log = common.services.app.log;
+	const log = common.services.log;
 
 	try {
 		const clonedBaseHSL = utils.color.convertToHSL(color);
@@ -122,7 +122,7 @@ function splitComplementary(
 	color: HSL,
 	common: CommonFunctionsInterface
 ): number[] {
-	const log = common.services.app.log;
+	const log = common.services.log;
 
 	try {
 		const baseHue = color.value.hue;
@@ -144,7 +144,7 @@ function splitComplementary(
 }
 
 function tetradic(color: HSL, common: CommonFunctionsInterface): number[] {
-	const log = common.services.app.log;
+	const log = common.services.log;
 
 	try {
 		const baseHue = color.value.hue;
@@ -170,7 +170,7 @@ function tetradic(color: HSL, common: CommonFunctionsInterface): number[] {
 }
 
 function triadic(color: HSL, common: CommonFunctionsInterface): number[] {
-	const log = common.services.app.log;
+	const log = common.services.log;
 
 	try {
 		const baseHue = color.value.hue;
@@ -187,7 +187,7 @@ function triadic(color: HSL, common: CommonFunctionsInterface): number[] {
 	}
 }
 
-export const generateHues: GenerateHuesFnGroup = {
+export const generateHuesFnGroup: GenerateHuesFnGroup = {
 	analogous,
 	diadic,
 	hexadic,

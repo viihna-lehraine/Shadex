@@ -11,8 +11,9 @@ import {
 	ColorSpace,
 	ColorSpaceExtended,
 	ColorStringObject,
-	ConstsDataInterface,
-	DataSetsInterface,
+	ConfigData,
+	DOM_IDs,
+	DOMElements,
 	Hex,
 	HexSet,
 	HexStringObject,
@@ -36,6 +37,7 @@ import {
 	RGB,
 	RGBStringObject,
 	SelectedPaletteOptions,
+	SetsData,
 	SL,
 	SLStringObject,
 	State,
@@ -61,25 +63,45 @@ import {
 
 // ******** 1. SERVICES ********
 
-export interface AppServicesInterface {
-	handleAsyncErrors<T>(
-		action: () => Promise<T>,
-		errorMessage: string,
-		caller: string,
-		context?: Record<string, unknown>
-	): Promise<T | null>;
+export interface LoggerInterface {
+	debug: (
+		message: string,
+		caller?: string,
+		verbosityRequirement?: number
+	) => void;
+	info: (
+		message: string,
+		caller?: string,
+		verbosityRequirement?: number
+	) => void;
+	warn: (
+		message: string,
+		caller?: string,
+		verbosityRequirement?: number
+	) => void;
+	error: (
+		message: string,
+		caller?: string,
+		verbosityRequirement?: number
+	) => void;
+	mutation: (
+		data: MutationLog,
+		logCallback: (data: unknown) => void,
+		caller?: string
+	) => void;
+	[key: string]: Function;
+}
+
+// ******** 2. SERVICES OBJECT ********
+
+export interface ServicesInterface {
 	log(
 		level: 'debug' | 'info' | 'warn' | 'error',
 		message: string,
 		method: string,
 		verbosityRequirement?: number
 	): void;
-}
-
-// ******** 2. SERVICES OBJECT ********
-
-export interface ServicesInterface {
-	app: AppServicesInterface;
+	errors: ErrorHandlerClassInterface;
 }
 
 // ******** 3. HELPERS ********
@@ -118,9 +140,7 @@ export interface ColorUtilHelpersInterface
 }
 
 export interface PaletteUtilHelpersInterface {
-	getWeightedRandomInterval(
-		type: keyof ConstsDataInterface['probabilities']
-	): number;
+	getWeightedRandomInterval(type: keyof ConfigData['probabilities']): number;
 	isHSLInBounds(hsl: HSL): boolean;
 	isHSLTooDark(hsl: HSL): boolean;
 	isHSLTooGray(hsl: HSL): boolean;
@@ -239,13 +259,15 @@ export interface DOMUtilsInterface {
 	createTooltip(element: HTMLElement, text: string): HTMLElement;
 	downloadFile(data: string, filename: string, type: string): void;
 	enforceSwatchRules(minSwatches: number, maxSwatches: number): void;
+	getValidatedDOMElements(unvalidatedIDs: DOM_IDs): DOMElements | null;
 	hideTooltip(): void;
 	readFile(file: File): Promise<string>;
 	removeTooltip(element: HTMLElement): void;
+	scanPaletteColumns(): State['paletteContainer']['columns'];
 	switchColorSpaceInDOM(targetFormat: ColorSpace): void;
 	updateColorBox(color: HSL, boxId: string): void;
 	updateHistory(history: Palette[]): void;
-	validateStaticElements(): void;
+	validateStaticElements(): Promise<void>;
 }
 
 export interface FormattingUtilsInterface {
@@ -338,10 +360,7 @@ export interface ValidationUtilsInterface {
 	hex(value: string, pattern: RegExp): boolean;
 	hexComponent(value: string): boolean;
 	hexSet(value: string): boolean;
-	range<T extends keyof DataSetsInterface>(
-		value: number | string,
-		rangeKey: T
-	): void;
+	range<T extends keyof SetsData>(value: number | string, rangeKey: T): void;
 	userColorInput(color: string): boolean;
 }
 
@@ -370,6 +389,8 @@ export interface CommonFunctionsInterface {
 	utils: UtilitiesInterface;
 }
 
+export type RequiredCommonFunctions = Required<CommonFunctionsInterface>;
+
 // ******** 8. CLASSES ********
 
 export interface AppLoggerClassInterface {
@@ -391,6 +412,33 @@ export interface AppLoggerClassInterface {
 	): void;
 }
 
+export interface ErrorHandlerClassInterface {
+	handle(
+		error: unknown,
+		errorMessage: string,
+		caller: string,
+		context: Record<string, unknown>,
+		severity: 'warn' | 'error'
+	): void;
+	handleAsync<T>(
+		action: () => Promise<T>,
+		errorMessage: string,
+		caller: string,
+		context?: Record<string, unknown>
+	): Promise<T | null>;
+}
+
+export interface PaletteManagerClassInterface {
+	handleColumnLock(columnID: number): void;
+	renderNewPalette(): void;
+	renderPaletteColor(
+		color: HSL,
+		colorBox: HTMLDivElement,
+		colorBoxNumber: number
+	): void;
+	swapColumns(draggedID: number, targetID: number): void;
+}
+
 export interface StateManagerClassInterface {
 	addPaletteToHistory(palette: Palette): void;
 	getState(): State;
@@ -399,7 +447,6 @@ export interface StateManagerClassInterface {
 	setState(state: State, track: boolean): void;
 	undo(): void;
 	updateAppModeState(appMode: State['appMode'], track: boolean): void;
-	updateDnDAttachedState(dndAttached: boolean): void;
 	updatePaletteColumns(
 		columns: State['paletteContainer']['columns'],
 		track: boolean,
