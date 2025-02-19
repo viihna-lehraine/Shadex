@@ -9,9 +9,9 @@ import {
 	ServicesInterface,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const defaultColors = data.defaults.colors;
+const defaultColors = config.defaults.colors;
 
 export function createFormattingUtils(
 	services: ServicesInterface,
@@ -104,20 +104,12 @@ export function createFormattingUtils(
 				default:
 					const message = `Unsupported color format: ${colorSpace}`;
 
-					log(
-						'warn',
-						`Failed to parse color: ${message}`,
-						`formattingUtils.parseColor()`
-					);
+					log(`Failed to parse color: ${message}`, `warn`);
 
 					return null;
 			}
 		} catch (error) {
-			log(
-				'warn',
-				`parseColor error: ${error}`,
-				`formattingUtils.parseColor()`
-			);
+			log(`parseColor error: ${error}`, `warn`);
 
 			return null;
 		}
@@ -136,21 +128,13 @@ export function createFormattingUtils(
 				);
 
 			if (components.length !== count) {
-				log(
-					'error',
-					`Expected ${count} components.`,
-					'formattingUtils.parseComponents()'
-				);
+				log(`Expected ${count} components.`, 'error');
 				return [];
 			}
 
 			return components;
 		} catch (error) {
-			log(
-				'error',
-				`Error parsing components: ${error}`,
-				'formattingUtils.parseComponents()'
-			);
+			log(`Error parsing components: ${error}`, 'error');
 
 			return [];
 		}
@@ -181,11 +165,7 @@ export function createFormattingUtils(
 
 				return hex.length === 1 ? '0' + hex : hex;
 			} catch (error) {
-				log(
-					'error',
-					`componentToHex error: ${error}`,
-					'formattingUtils.componentToHex()'
-				);
+				log(`componentToHex error: ${error}`, 'error');
 
 				return '00';
 			}
@@ -221,22 +201,14 @@ export function createFormattingUtils(
 				if (
 					!utils.validate.colorValue({ value: value, format: 'hsl' })
 				) {
-					log(
-						'error',
-						`Invalid HSL value ${JSON.stringify(value)}`,
-						'formattingUtils.hslAddFormat()'
-					);
+					log(`Invalid HSL value ${JSON.stringify(value)}`, 'error');
 
 					return defaultColors.hsl;
 				}
 
 				return { value: value, format: 'hsl' } as HSL;
 			} catch (error) {
-				log(
-					'error',
-					`Error adding HSL format: ${error}`,
-					'formattingUtils.hslAddFormat()'
-				);
+				log(`Error adding HSL format: ${error}`, 'error');
 
 				return defaultColors.hsl;
 			}
@@ -256,11 +228,7 @@ export function createFormattingUtils(
 						}
 					: hex;
 			} catch (error) {
-				log(
-					'error',
-					`stripHashFromHex error: ${error}`,
-					'formattingUtils.stripHashFromHex()'
-				);
+				log(`stripHashFromHex error: ${error}`, 'error');
 
 				return defaultColors.hex;
 			}

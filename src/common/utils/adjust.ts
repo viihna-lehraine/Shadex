@@ -7,11 +7,11 @@ import {
 	ServicesInterface,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const adjustments = data.config.adjustments;
-const defaultColors = data.defaults.colors;
-const math = data.math;
+const adjustments = config.env.adjustments;
+const defaultColors = config.defaults.colors;
+const math = config.math;
 
 export function createAdjustmentUtils(
 	services: ServicesInterface,
@@ -26,11 +26,7 @@ export function createAdjustmentUtils(
 					? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
 					: 12.92 * value;
 			} catch (error) {
-				log(
-					'error',
-					`Error applying gamma correction: ${error}`,
-					'adjustmentUtils.applyGammaCorrection()'
-				);
+				log(`Error applying gamma correction: ${error}`, 'error');
 
 				return value;
 			}
@@ -40,11 +36,7 @@ export function createAdjustmentUtils(
 			const defaultRGB = defaultColors.rgb;
 
 			if (!utils.validate.colorValue(rgb)) {
-				log(
-					'error',
-					`Invalid RGB value ${JSON.stringify(rgb)}`,
-					'adjustmentUtils.clampRGB()'
-				);
+				log(`Invalid RGB value ${JSON.stringify(rgb)}`, 'error');
 
 				return defaultRGB;
 			}
@@ -71,11 +63,7 @@ export function createAdjustmentUtils(
 					format: 'rgb'
 				};
 			} catch (error) {
-				log(
-					'error',
-					`Error clamping RGB values: ${error}`,
-					'adjustmentUtils.clampRGB()'
-				);
+				log(`Error clamping RGB values: ${error}`, 'error');
 
 				return rgb;
 			}
@@ -91,11 +79,7 @@ export function createAdjustmentUtils(
 
 			try {
 				if (!utils.validate.colorValue(color)) {
-					log(
-						'error',
-						'Invalid color valus for adjustment.',
-						'adjustmentUtils.adjustSL()'
-					);
+					log('Invalid color valus for adjustment.', 'error');
 
 					return color;
 				}
@@ -117,9 +101,8 @@ export function createAdjustmentUtils(
 				};
 			} catch (error) {
 				log(
-					'error',
 					`Error adjusting saturation and lightness: ${error}`,
-					'adjustmentUtils.adjustSL()'
+					'error'
 				);
 
 				return color;

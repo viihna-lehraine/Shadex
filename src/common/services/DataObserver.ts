@@ -1,9 +1,9 @@
 // File: common/services/DataObserver.js
 
-import { DataObserverClassInterface, Listener } from '../../types/index.js';
+import { DataObserverInterface, Listener } from '../../types/index.js';
 
 export class DataObserver<T extends Record<string, unknown>>
-	implements DataObserverClassInterface<T>
+	implements DataObserverInterface<T>
 {
 	private data: T;
 	private listeners: Partial<Record<keyof T, Listener<T[keyof T]>[]>> =

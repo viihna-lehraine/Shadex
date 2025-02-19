@@ -1,67 +1,55 @@
 // File: common/helpers/palette.js
 
 import {
-	ConfigData,
+	EnvData,
 	HSL,
-	PaletteUtilHelpersInterface,
+	PaletteHelpersInterface,
 	ServicesInterface,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const config = data.config;
-const probabilityConsts = config.probabilities;
+const env = config.env;
+const probabilityConsts = env.probabilities;
 
 export function createPaletteHelpers(
 	services: ServicesInterface,
 	utils: UtilitiesInterface
-): PaletteUtilHelpersInterface {
+): PaletteHelpersInterface {
 	function isHSLTooDark(hsl: HSL): boolean {
 		const log = services.log;
 
 		if (!utils.validate.colorValue(hsl)) {
-			log(
-				'error',
-				`Invalid HSL value ${JSON.stringify(hsl)}`,
-				'paletteUtils.isHSLTooDark()'
-			);
+			log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
 
 			return false;
 		}
 
-		return utils.core.clone(hsl).value.lightness < config.thresholds.dark;
+		return utils.core.clone(hsl).value.lightness < env.thresholds.dark;
 	}
 
 	function isHSLTooGray(hsl: HSL): boolean {
 		const log = services.log;
 
 		if (!utils.validate.colorValue(hsl)) {
-			log(
-				'error',
-				`Invalid HSL value ${JSON.stringify(hsl)}`,
-				'paletteUtils.isHSLTooGray()'
-			);
+			log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
 
 			return false;
 		}
 
-		return utils.core.clone(hsl).value.saturation < config.thresholds.gray;
+		return utils.core.clone(hsl).value.saturation < env.thresholds.gray;
 	}
 
 	function isHSLTooLight(hsl: HSL): boolean {
 		const log = services.log;
 
 		if (!utils.validate.colorValue(hsl)) {
-			log(
-				'error',
-				'Invalid HSL value ${JSON.stringify(hsl)}',
-				'paletteUtils.isHSLTooLight()'
-			);
+			log('Invalid HSL value ${JSON.stringify(hsl)}', 'error');
 
 			return false;
 		}
 
-		return utils.core.clone(hsl).value.lightness > config.thresholds.light;
+		return utils.core.clone(hsl).value.lightness > env.thresholds.light;
 	}
 
 	return {
@@ -69,7 +57,7 @@ export function createPaletteHelpers(
 		isHSLTooGray,
 		isHSLTooLight,
 		getWeightedRandomInterval(
-			distributionType: keyof ConfigData['probabilities']
+			distributionType: keyof EnvData['probabilities']
 		): number {
 			const log = services.log;
 
@@ -97,9 +85,8 @@ export function createPaletteHelpers(
 				return weights[weights.length - 1];
 			} catch (error) {
 				log(
-					'error',
 					`Error generating weighted random interval: ${error}`,
-					'paletteUtils.getWeightedRandomInterval()'
+					'error'
 				);
 
 				return 50; // default fallback value
@@ -109,11 +96,7 @@ export function createPaletteHelpers(
 			const log = services.log;
 
 			if (!utils.validate.colorValue(hsl)) {
-				log(
-					'error',
-					`isColorInBounds: Invalid HSL value ${JSON.stringify(hsl)}`,
-					'paletteUtils.isHSLInBounds()'
-				);
+				log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
 
 				return false;
 			}

@@ -1,4 +1,4 @@
-// File: common/factories/helpers.js
+// File: common/factories/helpers.ts
 
 import {
 	HelpersInterface,

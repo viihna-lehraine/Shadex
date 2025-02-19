@@ -1,11 +1,13 @@
 // File: common/services/AppLogger.js
 
-import { AppLoggerClassInterface, MutationLog } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { AppLoggerInterface, MutationLog } from '../../types/index.js';
+import { getCallerInfo } from './helpers.js';
+import { config } from '../../config/index.js';
 
-const mode = data.mode;
+const mode = config.mode;
+const debugLevel = mode.debugLevel;
 
-export class AppLogger implements AppLoggerClassInterface {
+export class AppLogger implements AppLoggerInterface {
 	private static instance: AppLogger | null = null;
 
 	private constructor() {
@@ -30,7 +32,6 @@ export class AppLogger implements AppLoggerClassInterface {
 	public log(
 		message: string,
 		level: 'debug' | 'info' | 'warn' | 'error' = 'info',
-		debugLevel: number = 0,
 		caller?: string
 	): void {
 		if (debugLevel >= 5) {
@@ -41,16 +42,7 @@ export class AppLogger implements AppLoggerClassInterface {
 				caller
 			});
 		}
-		this.logMessage(message, level, debugLevel, caller);
-	}
-
-	public async logAsync(
-		message: string,
-		level: 'debug' | 'info' | 'warn' | 'error' = 'info',
-		debugLevel: number = 0,
-		caller?: string
-	): Promise<void> {
-		this.logMessage(message, level, debugLevel, caller);
+		this.logMessage(message, level, caller);
 	}
 
 	public logMutation(
@@ -65,14 +57,13 @@ export class AppLogger implements AppLoggerClassInterface {
 	private logMessage(
 		message: string,
 		level: 'debug' | 'info' | 'warn' | 'error',
-		debugLevel: number,
 		caller?: string
 	): void {
 		if (level === 'info' || debugLevel < this.getDebugThreshold(level)) {
 			return;
 		}
 
-		const callerInfo = caller || this.getCallerInfo();
+		const callerInfo = caller || getCallerInfo();
 		const timestamp = this.getFormattedTimestamp();
 
 		try {
@@ -116,29 +107,6 @@ export class AppLogger implements AppLoggerClassInterface {
 			default:
 				return 0;
 		}
-	}
-
-	private getCallerInfo(): string {
-		const stack = new Error().stack;
-
-		if (stack) {
-			const stackLines = stack.split('\n');
-
-			for (const line of stackLines) {
-				if (!line.includes('AppLogger') && line.includes('at ')) {
-					const match =
-						line.match(/at\s+(.*)\s+\((.*):(\d+):(\d+)\)/) ||
-						line.match(/at\s+(.*):(\d+):(\d+)/);
-					if (match) {
-						return match[1]
-							? `${match[1]} (${match[2]}:${match[3]})`
-							: `${match[2]}:${match[3]}`;
-					}
-				}
-			}
-		}
-
-		return 'Unknown caller';
 	}
 
 	private getFormattedTimestamp(): string {

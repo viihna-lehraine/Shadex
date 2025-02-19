@@ -1,39 +1,36 @@
-// File: app/main.js
+// File: app/main.ts
 
 import { EventManager } from '../events/EventManager.js';
-import { initialize } from './init.js';
-import { data } from '../data/index.js';
+import { initializeApp, initializeServices } from './init.js';
+import { config } from '../config/index.js';
 
-const mode = data.mode;
+const mode = config.mode;
 
-console.log('[main-1] Loading main.js...');
+console.log('[MAIN-1] Loading main.js...');
 
-console.log(`[main-3] Calling initialize()`);
-const init = await initialize();
+console.log('[MAIN-2] Calling initializeServices()');
+const services = initializeServices();
+const { log } = services;
 
-console.log('[main-4] Initialization complete.');
-const log = init.common.services?.log;
-console.log(`[main-5] Executing main loop...`);
+log(`[MAIN-3] Calling initialize()`, 'info');
+const init = (await initializeApp(services))!;
+const { errors } = init.common.services;
+
+log('[MAIN-4] Initialization complete.');
+log(`[MAIN-5] Executing main loop...`);
 
 if (log) {
-	if (mode.debug)
-		log('debug', 'Executing main application script', '[main-5]', 2);
+	log('[MAIN-6] Executing main application script', 'debug');
 
 	if (document.readyState === 'loading') {
 		log(
-			'debug',
-			'DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...',
-			'[main-5.1]',
-			2
+			'[MAIN-7A] DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...'
 		);
 
 		document.addEventListener('DOMContentLoaded', () => main());
 	} else {
 		log(
-			'debug',
-			'DOM content already loaded. Initializing application immediately.',
-			'[main-5.1]',
-			2
+			'[MAIN-7B] DOM content already loaded. Initializing application immediately.'
 		);
 
 		main();
@@ -42,27 +39,16 @@ if (log) {
 	console.error('[main-5E] > log function is undefined.');
 }
 
-const errorHandler = init.common.services.errors;
-
 async function main() {
-	await errorHandler.handleAsync(
-		async () => {
-			log(
-				'debug',
-				'DOM content loaded - Application initialized.',
-				'[main-6]',
-				1
-			);
+	await errors.handleAsync(async () => {
+		log('[1] DOM content loaded - Application initialized.');
 
-			if (mode.debug) {
-				setTimeout(() => {
-					EventManager.listAll();
-				}, 100);
-			}
-		},
-		'Application initialization failed',
-		'[main-ERROR]'
-	);
+		if (mode.debug) {
+			setTimeout(() => {
+				EventManager.listAll();
+			}, 100);
+		}
+	}, 'Application initialization failed');
 
 	if (mode.showAlerts) {
 		alert('An error occurred during startup. Check console for details.');

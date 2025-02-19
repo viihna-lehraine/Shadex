@@ -1,26 +1,26 @@
-import { createErrorHandler } from './errorHandler.js';
-import { createLogger } from './logger.js';
-import { data } from '../../data/index.js';
-
-// File: common/factories/services.js
+// File: common/factories/services.ts
+import { AppLogger } from '../services/AppLogger.js';
+import { ErrorHandler } from '../services/ErrorHandler.js';
+import { data } from '../../config/index.js';
+import { getCallerInfo } from '../services/helpers.js';
 const mode = data.mode;
-async function createServices() {
+export function createServices() {
     console.log('[FACTORIES.service] Loading createServices...');
-    const logger = await createLogger();
-    const errors = await createErrorHandler();
+    const logger = AppLogger.getInstance();
+    const errors = ErrorHandler.getInstance(logger);
     if (!logger || !errors) {
         throw new Error('[FACTORIES.service] Logger or ErrorHandler failed to initialize.');
     }
-    // Define logging function
-    const log = (level, message, method, verbosityRequirement) => {
+    const log = (message, level = 'info', verbosityRequirement = 0) => {
         if (mode.logging[level] &&
-            mode.logging.verbosity >= (verbosityRequirement ?? 0)) {
-            logger[level](message, method);
+            mode.logging.verbosity >= verbosityRequirement) {
+            const caller = getCallerInfo();
+            logger.log(message, level, caller);
+        }
+        if (level === 'error' && mode.showAlerts) {
+            alert(message);
         }
     };
-    // Return flattened services object
     return { log, errors };
 }
-
-export { createServices };
-//# sourceMappingURL=services.js.map
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2VydmljZXMuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvY29tbW9uL2ZhY3Rvcmllcy9zZXJ2aWNlcy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxxQ0FBcUM7QUFHckMsT0FBTyxFQUFFLFNBQVMsRUFBRSxNQUFNLDBCQUEwQixDQUFDO0FBQ3JELE9BQU8sRUFBRSxZQUFZLEVBQUUsTUFBTSw2QkFBNkIsQ0FBQztBQUMzRCxPQUFPLEVBQUUsSUFBSSxFQUFFLE1BQU0sdUJBQXVCLENBQUM7QUFDN0MsT0FBTyxFQUFFLGFBQWEsRUFBRSxNQUFNLHdCQUF3QixDQUFDO0FBRXZELE1BQU0sSUFBSSxHQUFHLElBQUksQ0FBQyxJQUFJLENBQUM7QUFFdkIsTUFBTSxVQUFVLGNBQWM7SUFDN0IsT0FBTyxDQUFDLEdBQUcsQ0FBQywrQ0FBK0MsQ0FBQyxDQUFDO0lBRTdELE1BQU0sTUFBTSxHQUFHLFNBQVMsQ0FBQyxXQUFXLEVBQUUsQ0FBQztJQUN2QyxNQUFNLE1BQU0sR0FBRyxZQUFZLENBQUMsV0FBVyxDQUFDLE1BQU0sQ0FBQyxDQUFDO0lBRWhELElBQUksQ0FBQyxNQUFNLElBQUksQ0FBQyxNQUFNLEVBQUUsQ0FBQztRQUN4QixNQUFNLElBQUksS0FBSyxDQUNkLGtFQUFrRSxDQUNsRSxDQUFDO0lBQ0gsQ0FBQztJQUVELE1BQU0sR0FBRyxHQUE2QixDQUNyQyxPQUFlLEVBQ2YsUUFBNkMsTUFBTSxFQUNuRCx1QkFBK0IsQ0FBQyxFQUMvQixFQUFFO1FBQ0gsSUFDQyxJQUFJLENBQUMsT0FBTyxDQUFDLEtBQUssQ0FBQztZQUNuQixJQUFJLENBQUMsT0FBTyxDQUFDLFNBQVMsSUFBSSxvQkFBb0IsRUFDN0MsQ0FBQztZQUNGLE1BQU0sTUFBTSxHQUFHLGFBQWEsRUFBRSxDQUFDO1lBQy9CLE1BQU0sQ0FBQyxHQUFHLENBQUMsT0FBTyxFQUFFLEtBQUssRUFBRSxNQUFNLENBQUMsQ0FBQztRQUNwQyxDQUFDO1FBRUQsSUFBSSxLQUFLLEtBQUssT0FBTyxJQUFJLElBQUksQ0FBQyxVQUFVLEVBQUUsQ0FBQztZQUMxQyxLQUFLLENBQUMsT0FBTyxDQUFDLENBQUM7UUFDaEIsQ0FBQztJQUNGLENBQUMsQ0FBQztJQUVGLE9BQU8sRUFBRSxHQUFHLEVBQUUsTUFBTSxFQUFFLENBQUM7QUFDeEIsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEZpbGU6IGNvbW1vbi9mYWN0b3JpZXMvc2VydmljZXMudHNcblxuaW1wb3J0IHsgU2VydmljZXNJbnRlcmZhY2UgfSBmcm9tICcuLi8uLi90eXBlcy9pbmRleC5qcyc7XG5pbXBvcnQgeyBBcHBMb2dnZXIgfSBmcm9tICcuLi9zZXJ2aWNlcy9BcHBMb2dnZXIuanMnO1xuaW1wb3J0IHsgRXJyb3JIYW5kbGVyIH0gZnJvbSAnLi4vc2VydmljZXMvRXJyb3JIYW5kbGVyLmpzJztcbmltcG9ydCB7IGRhdGEgfSBmcm9tICcuLi8uLi9jb25maWcvaW5kZXguanMnO1xuaW1wb3J0IHsgZ2V0Q2FsbGVySW5mbyB9IGZyb20gJy4uL3NlcnZpY2VzL2hlbHBlcnMuanMnO1xuXG5jb25zdCBtb2RlID0gZGF0YS5tb2RlO1xuXG5leHBvcnQgZnVuY3Rpb24gY3JlYXRlU2VydmljZXMoKTogU2VydmljZXNJbnRlcmZhY2Uge1xuXHRjb25zb2xlLmxvZygnW0ZBQ1RPUklFUy5zZXJ2aWNlXSBMb2FkaW5nIGNyZWF0ZVNlcnZpY2VzLi4uJyk7XG5cblx0Y29uc3QgbG9nZ2VyID0gQXBwTG9nZ2VyLmdldEluc3RhbmNlKCk7XG5cdGNvbnN0IGVycm9ycyA9IEVycm9ySGFuZGxlci5nZXRJbnN0YW5jZShsb2dnZXIpO1xuXG5cdGlmICghbG9nZ2VyIHx8ICFlcnJvcnMpIHtcblx0XHR0aHJvdyBuZXcgRXJyb3IoXG5cdFx0XHQnW0ZBQ1RPUklFUy5zZXJ2aWNlXSBMb2dnZXIgb3IgRXJyb3JIYW5kbGVyIGZhaWxlZCB0byBpbml0aWFsaXplLidcblx0XHQpO1xuXHR9XG5cblx0Y29uc3QgbG9nOiBTZXJ2aWNlc0ludGVyZmFjZVsnbG9nJ10gPSAoXG5cdFx0bWVzc2FnZTogc3RyaW5nLFxuXHRcdGxldmVsOiAnZGVidWcnIHwgJ2luZm8nIHwgJ3dhcm4nIHwgJ2Vycm9yJyA9ICdpbmZvJyxcblx0XHR2ZXJib3NpdHlSZXF1aXJlbWVudDogbnVtYmVyID0gMFxuXHQpID0+IHtcblx0XHRpZiAoXG5cdFx0XHRtb2RlLmxvZ2dpbmdbbGV2ZWxdICYmXG5cdFx0XHRtb2RlLmxvZ2dpbmcudmVyYm9zaXR5ID49IHZlcmJvc2l0eVJlcXVpcmVtZW50XG5cdFx0KSB7XG5cdFx0XHRjb25zdCBjYWxsZXIgPSBnZXRDYWxsZXJJbmZvKCk7XG5cdFx0XHRsb2dnZXIubG9nKG1lc3NhZ2UsIGxldmVsLCBjYWxsZXIpO1xuXHRcdH1cblxuXHRcdGlmIChsZXZlbCA9PT0gJ2Vycm9yJyAmJiBtb2RlLnNob3dBbGVydHMpIHtcblx0XHRcdGFsZXJ0KG1lc3NhZ2UpO1xuXHRcdH1cblx0fTtcblxuXHRyZXR1cm4geyBsb2csIGVycm9ycyB9O1xufVxuIl19

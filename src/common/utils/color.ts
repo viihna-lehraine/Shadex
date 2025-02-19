@@ -27,11 +27,11 @@ import {
 	XYZ,
 	XYZStringObject
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const config = data.config;
-const defaultColors = data.defaults.colors;
-const defaultColorStrings = data.defaults.colors.strings;
+const env = config.env;
+const defaultColors = config.defaults.colors;
+const defaultColorStrings = config.defaults.colors.strings;
 
 export function createColorUtils(
 	helpers: HelpersInterface,
@@ -120,9 +120,8 @@ export function createColorUtils(
 
 			if (utils.typeGuards.isColorString(clonedColor)) {
 				log(
-					'error',
 					`Already formatted as color string: ${JSON.stringify(color)}`,
-					'colorUtils.convertColorToColorString()'
+					'error'
 				);
 
 				return clonedColor;
@@ -219,11 +218,7 @@ export function createColorUtils(
 					} as XYZStringObject['value']
 				};
 			} else {
-				log(
-					'error',
-					`Unsupported format: ${clonedColor.format}`,
-					'colorUtils.convertColorToColorString()'
-				);
+				log(`Unsupported format: ${clonedColor.format}`, 'error');
 
 				return defaultColorStrings.hsl;
 			}
@@ -261,12 +256,12 @@ export function createColorUtils(
 		convertCSSToColor(color: string): Exclude<Color, SL | SV> | null {
 			color = color.trim().toLowerCase();
 
-			const cmykMatch = color.match(config.regex.css.cmyk);
-			const hslMatch = color.match(config.regex.css.hsl);
-			const hsvMatch = color.match(config.regex.css.hsv);
-			const labMatch = color.match(config.regex.css.lab);
-			const rgbMatch = color.match(config.regex.css.rgb);
-			const xyzMatch = color.match(config.regex.css.xyz);
+			const cmykMatch = color.match(env.regex.css.cmyk);
+			const hslMatch = color.match(env.regex.css.hsl);
+			const hsvMatch = color.match(env.regex.css.hsv);
+			const labMatch = color.match(env.regex.css.lab);
+			const rgbMatch = color.match(env.regex.css.rgb);
+			const xyzMatch = color.match(env.regex.css.xyz);
 
 			if (cmykMatch) {
 				return {
@@ -360,9 +355,8 @@ export function createColorUtils(
 			try {
 				if (!utils.validate.colorValue(color)) {
 					log(
-						'error',
 						`Invalid color value ${JSON.stringify(color)}`,
-						'colorUtils.convertHSL()'
+						'error'
 					);
 
 					return defaultColors.hsl;
@@ -464,9 +458,8 @@ export function createColorUtils(
 			try {
 				if (!utils.validate.colorValue(color)) {
 					log(
-						'error',
 						`Invalid color value ${JSON.stringify(color)}`,
-						'colorUtils.convertToHSL()'
+						'error'
 					);
 
 					return defaultColors.hsl as HSL;
@@ -545,19 +538,14 @@ export function createColorUtils(
 						return formatters.xyz(color);
 					default:
 						services.log(
-							'error',
 							`Unsupported color format for ${color}`,
-							'colorUtils.getColorString()'
+							'error'
 						);
 
 						return null;
 				}
 			} catch (error) {
-				services.log(
-					'error',
-					`getColorString error: ${error}`,
-					'colorUtils.getColorString()'
-				);
+				services.log(`getColorString error: ${error}`, 'error');
 
 				return null;
 			}
@@ -587,9 +575,8 @@ export function createColorUtils(
 					structuredClone(conversionFn(value));
 			} catch (error) {
 				services.log(
-					'error',
 					`Error getting conversion function: ${error}`,
-					'colorUtils.getConversionFn()'
+					'error'
 				);
 
 				return undefined;
@@ -614,11 +601,7 @@ export function createColorUtils(
 
 				return clonedP;
 			} catch (error) {
-				services.log(
-					'error',
-					`Error converting hue to RGB: ${error}`,
-					'colorUtils.hueToRGB()'
-				);
+				services.log(`Error converting hue to RGB: ${error}`, 'error');
 
 				return 0;
 			}
@@ -669,9 +652,8 @@ export function createColorUtils(
 
 			if (!utils.validate.colorValue(convertedColor)) {
 				log(
-					'error',
 					`Invalid color: ${JSON.stringify(convertedColor)}`,
-					'colorUtils.validateAndConvertColor()'
+					'error'
 				);
 
 				return null;

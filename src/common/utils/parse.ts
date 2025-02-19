@@ -8,9 +8,9 @@ import {
 	ServicesInterface,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const regex = data.config.regex.dom;
+const regex = config.env.regex.dom;
 
 export function createParsingUtils(
 	services: ServicesInterface,
@@ -25,12 +25,7 @@ export function createParsingUtils(
 			) as HTMLInputElement | null;
 
 			if (!checkbox) {
-				log(
-					'warn',
-					`Checkbox element ${id} not found`,
-					'parseUtils.checkbox()',
-					1
-				);
+				log(`Checkbox element ${id} not found`, 'warn');
 			}
 
 			return checkbox ? checkbox.checked : undefined;
@@ -110,12 +105,7 @@ export function createParsingUtils(
 				}
 			}
 
-			log(
-				'warn',
-				`Invalid color input: ${colorStr}`,
-				'parseUtils.colorInput()',
-				1
-			);
+			log(`Invalid color input: ${colorStr}`, 'warn');
 
 			return null;
 		},
@@ -132,12 +122,10 @@ export function createParsingUtils(
 
 			if (!validOptions.includes(selectedValue)) {
 				log(
-					'warn',
 					`Invalid selection in ${id}: "${selectedValue}" is not one of ${validOptions.join(
 						', '
 					)}`,
-					'parse > dropdownSelection()',
-					1
+					'warn'
 				);
 			}
 
@@ -155,12 +143,7 @@ export function createParsingUtils(
 			const value = parseFloat(input.value.trim());
 
 			if (isNaN(value)) {
-				log(
-					'warn',
-					`Invalid number input: ${input.value}`,
-					'parseUtils > numberInput()',
-					1
-				);
+				log(`Invalid number input: ${input.value}`, 'warn');
 			}
 
 			if (isNaN(value)) return null;
@@ -176,12 +159,7 @@ export function createParsingUtils(
 			const text = input.value.trim();
 
 			if (regex && !regex.test(text)) {
-				log(
-					'warn',
-					`Invalid text input: ${text}`,
-					'parseUtils > textInput()',
-					1
-				);
+				log(`Invalid text input: ${text}`, 'warn');
 
 				return null;
 			}

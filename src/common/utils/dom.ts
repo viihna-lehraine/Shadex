@@ -12,12 +12,12 @@ import {
 	State,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const classes = data.dom.classes;
-const ids = data.dom.ids;
-const mode = data.mode;
-const timers = data.config.timers;
+const classes = config.dom.classes;
+const ids = config.dom.ids;
+const mode = config.mode;
+const timers = config.env.timers;
 
 export function createDOMUtils(
 	services: ServicesInterface,
@@ -33,18 +33,10 @@ export function createDOMUtils(
 					switchColorSpaceInDOM(colorSpace as ColorSpace)
 				);
 			} else {
-				log(
-					'warn',
-					`Invalid color space provided: ${colorSpace}`,
-					'domUtils.addConversionListener'
-				);
+				log(`Invalid color space provided: ${colorSpace}`, 'warn');
 			}
 		} else {
-			log(
-				'warn',
-				`Element with id "${id}" not found.`,
-				'domUtils.addConversionListener'
-			);
+			log(`Element with id "${id}" not found.`, 'warn');
 		}
 	};
 
@@ -90,11 +82,7 @@ export function createDOMUtils(
 				const colorValues = inputBox.colorValues;
 
 				if (!colorValues || !utils.validate.colorValue(colorValues)) {
-					log(
-						'error',
-						'Invalid color values. Cannot display toast.',
-						'domUtils.switchColorSpaceInDOM()'
-					);
+					log('Invalid color values. Cannot display toast.', 'error');
 
 					continue;
 				}
@@ -104,10 +92,8 @@ export function createDOMUtils(
 				) as ColorSpace;
 
 				log(
-					'debug',
 					`Converting from ${currentFormat} to ${targetFormat}`,
-					'domUtils.switchColorSpaceInDOM()',
-					2
+					'debug'
 				);
 
 				const convertFn = utils.color.getConversionFn(
@@ -117,9 +103,8 @@ export function createDOMUtils(
 
 				if (!convertFn) {
 					log(
-						'warn',
 						`Conversion from ${currentFormat} to ${targetFormat} is not supported.`,
-						'domUtils.switchColorSpaceInDOM()'
+						'warn'
 					);
 
 					continue;
@@ -127,9 +112,8 @@ export function createDOMUtils(
 
 				if (colorValues.format === 'xyz') {
 					log(
-						'warn',
 						'Cannot convert from XYZ to another color space.',
-						'domUtils.switchColorSpaceInDOM()'
+						'warn'
 					);
 
 					continue;
@@ -144,31 +128,21 @@ export function createDOMUtils(
 					utils.typeGuards.isXYZ(clonedColor)
 				) {
 					log(
-						'error',
 						'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.',
-						'domUtils.switchColorSpaceInDOM()',
-						3
+						'error'
 					);
 
 					continue;
 				}
 
 				if (!clonedColor) {
-					log(
-						'error',
-						`Conversion to ${targetFormat} failed.`,
-						'domUtils.switchColorSpaceInDOM()'
-					);
+					log(`Conversion to ${targetFormat} failed.`, 'error');
 
 					continue;
 				}
 				const newColor = utils.core.clone(convertFn(clonedColor));
 				if (!newColor) {
-					log(
-						'error',
-						`Conversion to ${targetFormat} failed.`,
-						'domUtils.switchColorSpaceInDOM()'
-					);
+					log(`Conversion to ${targetFormat} failed.`, 'error');
 					continue;
 				}
 
@@ -177,11 +151,7 @@ export function createDOMUtils(
 				inputBox.setAttribute('data-format', targetFormat);
 			}
 		} catch (error) {
-			log(
-				'warn',
-				'Color conversion failure.',
-				'domUtils.switchColorSpaceInDOM()'
-			);
+			log('Color conversion failure.', 'warn');
 
 			throw new Error(`Failed to convert colors: ${error as Error}`);
 		}
@@ -202,12 +172,7 @@ export function createDOMUtils(
 			if (element) {
 				element.addEventListener(eventType, callback);
 			} else {
-				log(
-					'warn',
-					`Element with id "${id}" not found.`,
-					'domUtils.addEventListener()',
-					2
-				);
+				log(`Element with id "${id}" not found.`, 'warn');
 			}
 		},
 		createTooltip(element: HTMLElement, text: string): HTMLElement {
@@ -252,11 +217,7 @@ export function createDOMUtils(
 			) as HTMLSelectElement;
 
 			if (!paletteColumnSelector) {
-				log(
-					'error',
-					'paletteColumnSelector not found',
-					'domUtils.enforceSwatchRules()'
-				);
+				log('paletteColumnSelector not found', 'error');
 
 				if (mode.stackTrace) {
 					console.trace('enforceMinimumSwatches stack trace');
@@ -289,9 +250,8 @@ export function createDOMUtils(
 					paletteColumnSelector.dispatchEvent(event);
 				} catch (error) {
 					log(
-						'warn',
 						`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`,
-						'domUtils.enforceSwatchRules()'
+						'error'
 					);
 
 					throw new Error(
@@ -301,7 +261,7 @@ export function createDOMUtils(
 			}
 		},
 		getValidatedDOMElements(
-			unvalidatedIDs: DOM_IDs = data.dom.ids
+			unvalidatedIDs: DOM_IDs = config.dom.ids
 		): DOMElements | null {
 			const log = services.log;
 			const missingElements: string[] = [];
@@ -329,10 +289,8 @@ export function createDOMUtils(
 
 				if (!tagName) {
 					log(
-						'warn',
 						`No element type mapping found for category "${category}". Skipping...`,
-						'getValidatedDOMElements()',
-						3
+						'warn'
 					);
 					continue;
 				}
@@ -346,12 +304,7 @@ export function createDOMUtils(
 						>(id);
 
 					if (!element) {
-						log(
-							'error',
-							`Element with ID "${id}" not found`,
-							'getValidatedDOMElements()',
-							2
-						);
+						log(`Element with ID "${id}" not found`, 'error');
 						missingElements.push(id);
 					} else {
 						(
@@ -365,21 +318,11 @@ export function createDOMUtils(
 			}
 
 			if (missingElements.length) {
-				log(
-					'warn',
-					`Missing elements: ${missingElements.join(', ')}`,
-					'getValidatedDOMElements()',
-					2
-				);
+				log(`Missing elements: ${missingElements.join(', ')}`, 'warn');
 				return null;
 			}
 
-			log(
-				'debug',
-				'All static elements are present.',
-				'getValidatedDOMElements()',
-				3
-			);
+			log('All static elements are present.', 'debug');
 
 			return elements as DOMElements;
 		},
@@ -452,13 +395,13 @@ export function createDOMUtils(
 				entry
 					.querySelector('.remove-history-item')
 					?.addEventListener('click', async () => {
-						// *DEV-NOTE* save to history somehow
+						// TODO: save to history somehow
 					});
 				historyList.appendChild(entry);
 			});
 		},
 		async validateStaticElements(): Promise<void> {
-			const unvalidatedIDs = data.dom.ids;
+			const unvalidatedIDs = config.dom.ids;
 			const log = services.log;
 			const missingElements: string[] = [];
 
@@ -477,10 +420,8 @@ export function createDOMUtils(
 
 				if (!tagName) {
 					log(
-						'warn',
 						`No element type mapping found for category "${category}". Skipping...`,
-						'domUtils.validateStaticElements',
-						3
+						'warn'
 					);
 					return;
 				}
@@ -489,10 +430,8 @@ export function createDOMUtils(
 				Object.values(elements).forEach(unvalidatedIDs => {
 					if (typeof unvalidatedIDs !== 'string') {
 						log(
-							'error',
 							`Invalid ID "${unvalidatedIDs}" in category "${category}". Expected string.`,
-							'domUtils.validateStaticElements',
-							2
+							'error'
 						);
 						return;
 					}
@@ -504,10 +443,8 @@ export function createDOMUtils(
 
 					if (!element) {
 						log(
-							'error',
 							`Element with ID "${unvalidatedIDs}" not found`,
-							'validateStaticElements',
-							2
+							'error'
 						);
 						missingElements.push(unvalidatedIDs);
 					}
@@ -515,19 +452,9 @@ export function createDOMUtils(
 			});
 
 			if (missingElements.length) {
-				log(
-					'warn',
-					`Missing elements: ${missingElements.join(', ')}`,
-					'domUtils.validateStaticElements',
-					2
-				);
+				log(`Missing elements: ${missingElements.join(', ')}`, 'warn');
 			} else {
-				log(
-					'debug',
-					'All static elements are present.',
-					'domUtils.validateStaticElements',
-					3
-				);
+				log('All static elements are present! 🩷', 'debug');
 			}
 		}
 	};

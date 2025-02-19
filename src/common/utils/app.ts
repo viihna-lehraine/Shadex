@@ -7,9 +7,9 @@ import {
 	ServicesInterface,
 	UtilitiesInterface
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const defaultColors = data.defaults.colors;
+const defaultColors = config.defaults.colors;
 
 export function createAppUtils(
 	services: ServicesInterface,
@@ -37,28 +37,18 @@ export function createAppUtils(
 
 				if (!utils.validate.colorValue(hsl)) {
 					log(
-						'error',
 						`Invalid random HSL color value ${JSON.stringify(hsl)}`,
-						'colorUtils.generateRandomHSL()'
+						'error'
 					);
 
 					return defaultColors.hsl;
 				}
 
-				log(
-					'debug',
-					`Generated randomHSL: ${JSON.stringify(hsl)}`,
-					'colorUtils.generateRandomHSL()',
-					5
-				);
+				log(`Generated randomHSL: ${JSON.stringify(hsl)}`, 'debug');
 
 				return hsl;
 			} catch (error) {
-				log(
-					'warn',
-					`Error generating random HSL color: ${error}`,
-					'colorUtils.generateRandomHSL()'
-				);
+				log(`Error generating random HSL color: ${error}`, 'warn');
 
 				return defaultColors.hsl;
 			}
@@ -81,28 +71,18 @@ export function createAppUtils(
 
 				if (!utils.validate.colorValue(sl as SL)) {
 					log(
-						'error',
 						`Invalid random SV color value ${JSON.stringify(sl)}`,
-						'colorUtils.generateRandomSL()'
+						'error'
 					);
 
 					return defaultColors.sl;
 				}
 
-				log(
-					'debug',
-					`Generated randomSL: ${JSON.stringify(sl)}`,
-					'colorUtils.generateRandomSL()',
-					5
-				);
+				log(`Generated randomSL: ${JSON.stringify(sl)}`, 'debug');
 
 				return sl;
 			} catch (error) {
-				log(
-					'error',
-					`Error generating random SL color: ${error}`,
-					'colorUtils.generateRandomSL()'
-				);
+				log(`Error generating random SL color: ${error}`, 'error');
 
 				return defaultColors.sl;
 			}

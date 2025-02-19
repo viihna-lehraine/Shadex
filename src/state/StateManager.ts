@@ -5,15 +5,15 @@ import {
 	Palette,
 	ServicesInterface,
 	State,
-	StateManagerClassInterface,
+	StateManagerInterface,
 	UtilitiesInterface
 } from '../types/index.js';
 import { StorageManager } from '../storage/StorageManager.js';
-import { data } from '../data/index.js';
+import { config } from '../config/index.js';
 
-const defaultState = data.defaults.state;
+const defaultState = config.defaults.state;
 
-export class StateManager implements StateManagerClassInterface {
+export class StateManager implements StateManagerInterface {
 	private static instance: StateManager | null = null;
 	private onStateLoadCallback: (() => void) | null = null;
 	private history: History;
@@ -53,28 +53,17 @@ export class StateManager implements StateManagerClassInterface {
 	}
 
 	public async init(): Promise<void> {
-		this.log(
-			'debug',
-			'Initializing State Manager',
-			'StateManager.init()',
-			2
-		);
+		this.log('Initializing State Manager', 'debug');
 
 		await this.storage.init();
 
 		this.state =
 			(await this.errors.handleAsync(
 				() => this.loadState(),
-				'Failed to load state. Generating initial state.',
-				'StateManager.init()'
+				'Failed to load state. Generating initial state.'
 			)) ?? this.generateInitialState();
 
-		this.log(
-			'info',
-			'StateManager initialized successfully.',
-			'StateManager.init()',
-			2
-		);
+		this.log('StateManager initialized successfully.', 'debug');
 
 		await this.saveState();
 	}
@@ -87,7 +76,6 @@ export class StateManager implements StateManagerClassInterface {
 				this.saveStateAndLog('paletteHistory', 3);
 			},
 			'Failed to add palette to history',
-			'StateManager.addPaletteToHistory()',
 			{ palette }
 		);
 	}
@@ -98,53 +86,36 @@ export class StateManager implements StateManagerClassInterface {
 
 		while (!this.state || !this.state.paletteContainer) {
 			if (attempts++ >= maxAttempts) {
-				this.log(
-					'error',
-					'State initialization timed out.',
-					'StateManager.ensureStateReady()'
-				);
+				this.log('State initialization timed out.', 'error');
 				break;
 			}
 
 			this.log(
-				'warn',
 				`Waiting for state to initialize... (Attempt ${attempts})`,
-				'StateManager.ensureStateReady()'
+				'debug',
+				3
 			);
-			await new Promise(resolve => setTimeout(resolve, 100));
+			await new Promise(resolve => setTimeout(resolve, 50));
 		}
 
-		this.log(
-			'info',
-			'State is now initialized.',
-			'StateManager.ensureStateReady()'
-		);
+		this.log('State is now initialized.');
 	}
 
 	public getState(): State {
 		return (
-			this.errors.handle(
-				() => {
-					if (!this.state) {
-						throw new Error(
-							'State accessed before initialization.'
-						);
-					}
-					if (!this.state.preferences) {
-						this.log(
-							'warn',
-							'State.preferences is undefined. Adding default preferences.',
-							'StateManager.getState()'
-						);
-						this.state.preferences = defaultState.preferences;
-					}
-					return this.state;
-				},
-				'Error retrieving state',
-				'StateManager.getState()',
-				{},
-				'error'
-			) ?? defaultState
+			this.errors.handle(() => {
+				if (!this.state) {
+					throw new Error('State accessed before initialization.');
+				}
+				if (!this.state.preferences) {
+					this.log(
+						'State.preferences is undefined. Adding default preferences.',
+						'warn'
+					);
+					this.state.preferences = defaultState.preferences;
+				}
+				return this.state;
+			}, 'Error retrieving state') ?? defaultState
 		);
 	}
 
@@ -160,103 +131,64 @@ export class StateManager implements StateManagerClassInterface {
 
 			return storedState;
 		} else {
-			this.log(
-				'warn',
-				'No stored state found.',
-				'StateManager.loadState()',
-				3
-			);
+			this.log('No stored state found.', 'warn');
 			return this.generateInitialState();
 		}
 	}
 
 	public redo(): void {
-		this.errors.handle(
-			() => {
-				if (this.undoStack.length > 0) {
-					const redoState = this.undoStack.pop();
-					if (!redoState) throw new Error('No state to redo.');
-
-					this.history.push(redoState);
-					this.state = { ...redoState };
-
-					this.log(
-						'info',
-						'Redo action performed.',
-						'StateManager.redo()',
-						3
-					);
-					this.saveStateAndLog('redo', 3);
-				} else {
-					throw new Error('No state to redo.');
+		this.errors.handle(() => {
+			if (this.undoStack.length > 0) {
+				const redoState = this.undoStack.pop();
+				if (!redoState) {
+					this.log('Cannot redo: No redoState found.', 'debug');
+					return;
 				}
-			},
-			'Redo operation failed',
-			'StateManager.redo()'
-		);
+
+				this.history.push(redoState);
+				this.state = { ...redoState };
+
+				this.log('Redo action performed.', 'debug');
+				this.saveStateAndLog('redo', 3);
+			} else {
+				throw new Error('No state to redo.');
+			}
+		}, 'Redo operation failed');
 	}
 
 	public async resetState(): Promise<void> {
-		await this.errors.handleAsync(
-			async () => {
-				this.trackAction();
-				this.state = defaultState;
-				await this.saveState();
-				this.log(
-					'info',
-					'App state has been reset',
-					'StateManager.resetState()',
-					3
-				);
-			},
-			'Failed to reset state',
-			'StateManager.resetState()'
-		);
+		await this.errors.handleAsync(async () => {
+			this.trackAction();
+			this.state = defaultState;
+			await this.saveState();
+			this.log('App state has been reset', 'debug');
+		}, 'Failed to reset state');
 	}
 
 	public setOnStateLoad(callback: () => void): void {
-		this.errors.handle(
-			() => {
-				this.onStateLoadCallback = callback;
-			},
-			'Failed to set onStateLoad callback',
-			'StateManager.setOnStateLoad()'
-		);
+		this.errors.handle(() => {
+			this.onStateLoadCallback = callback;
+		}, 'Failed to set onStateLoad callback');
 	}
 
 	public async setState(state: State, track: boolean): Promise<void> {
 		if (track) this.trackAction();
 		this.state = state;
-		this.log(
-			'info',
-			'App state has been updated',
-			'StateManager.setState()',
-			1
-		);
+		this.log('App state has been updated', 'debug');
 		await this.saveState();
 	}
 
 	public undo(): void {
-		this.errors.handle(
-			() => {
-				if (this.history.length < 1) {
-					throw new Error('No previous state to revert to.');
-				}
-				this.trackAction();
-				this.undoStack.push(this.history.pop() as State);
-				this.state = { ...this.history[this.history.length - 1] };
-
-				this.log(
-					'info',
-					'Undo action performed.',
-					'StateManager.undo()',
-					3
-				);
-				this.saveStateAndLog('undo', 3);
-			},
-			'Undo operation failed',
-			'StateManager.undo()'
-		);
+		this.errors.handle(() => {
+			if (this.history.length < 1) {
+				throw new Error('No previous state to revert to.');
+			}
+			this.trackAction();
+			this.undoStack.push(this.history.pop() as State);
+			this.state = { ...this.history[this.history.length - 1] };
+			this.log('Undo action performed.', 'debug');
+			this.saveStateAndLog('undo', 3);
+		}, 'Undo operation failed');
 	}
 
 	public updateAppModeState(appMode: State['appMode'], track: boolean): void {
@@ -264,16 +196,10 @@ export class StateManager implements StateManagerClassInterface {
 			() => {
 				if (track) this.trackAction();
 				this.state.appMode = appMode;
-				this.log(
-					'info',
-					`Updated appMode: ${appMode}`,
-					'StateManager.updateAppMode()',
-					1
-				);
+				this.log(`Updated appMode: ${appMode}`);
 				this.saveStateAndLog('appMode', 3);
 			},
 			'Failed to update app mode state',
-			'StateManager.updateAppModeState()',
 			{ appMode, track }
 		);
 	}
@@ -293,29 +219,18 @@ export class StateManager implements StateManagerClassInterface {
 
 				if (
 					!this.utils.core.getElement<HTMLDivElement>(
-						data.dom.ids.divs.paletteContainer
+						config.dom.ids.divs.paletteContainer
 					)
 				) {
-					this.log(
-						'warn',
-						'Palette Container not found in the DOM.',
-						'StateManager.updatePaletteColumns()',
-						3
-					);
+					this.log('Palette Container not found in the DOM.', 'warn');
 				}
 
 				if (track) this.trackAction();
 				this.state.paletteContainer.columns = columns;
-				this.log(
-					'info',
-					`Updated paletteContainer columns`,
-					'StateManager.updatePaletteColumns()',
-					1
-				);
+				this.log(`Updated paletteContainer columns`, 'debug');
 				this.saveStateAndLog('paletteColumns', verbosity);
 			},
 			'Failed to update palette columns',
-			'StateManager.updatePaletteColumns()',
 			{ columns, track, verbosity }
 		);
 	}
@@ -329,8 +244,8 @@ export class StateManager implements StateManagerClassInterface {
 				);
 				if (columnIndex === -1) return;
 
-				const minSize = data.config.ui.minColumnSize;
-				const maxSize = data.config.ui.maxColumnSize;
+				const minSize = config.env.ui.minColumnSize;
+				const maxSize = config.env.ui.maxColumnSize;
 				const adjustedSize = Math.max(
 					minSize,
 					Math.min(newSize, maxSize)
@@ -355,16 +270,10 @@ export class StateManager implements StateManagerClassInterface {
 				const correctionFactor = 100 / finalTotalSize;
 				columns.forEach(col => (col.size *= correctionFactor));
 
-				this.log(
-					'info',
-					`Updated column size`,
-					'StateManager.updatePaletteColumnSize()',
-					1
-				);
+				this.log(`Updated column size`, 'debug');
 				this.saveStateAndLog('paletteColumnSize', 3);
 			},
 			'Failed to update palette column size',
-			'StateManager.updatePaletteColumnSize()',
 			{ columnID, newSize }
 		);
 	}
@@ -375,15 +284,9 @@ export class StateManager implements StateManagerClassInterface {
 				this.trackAction();
 				this.state.paletteHistory = updatedHistory;
 				this.saveState();
-				this.log(
-					'info',
-					'Updated palette history',
-					'StateManager.updatePaletteHistory()',
-					3
-				);
+				this.log('Updated palette history');
 			},
 			'Failed to update palette history',
-			'StateManager.updatePaletteHistory()',
 			{ updatedHistory }
 		);
 	}
@@ -399,71 +302,53 @@ export class StateManager implements StateManagerClassInterface {
 					...this.state.selections,
 					...selections
 				};
-				this.log(
-					'info',
-					`Updated selections`,
-					'StateManager.updateSelections()',
-					1
-				);
+				this.log(`Updated selections`, 'debug');
 				this.saveStateAndLog('selections', 2);
 			},
 			'Failed to update selections',
-			'StateManager.updateSelections()',
 			{ selections, track }
 		);
 	}
 
 	private generateInitialState(): State {
 		return (
-			this.errors.handle(
-				() => {
-					const columnData = this.utils.dom.scanPaletteColumns();
-					this.log(
-						'info',
-						`Scanned ${columnData.length} columns in Palette Container element`,
-						'StateManager.generateInitialState()',
-						2
-					);
-					return {
-						appMode: 'edit',
-						paletteContainer: { columns: columnData || [] },
-						paletteHistory: [],
-						preferences: {
-							colorSpace: 'hsl',
-							distributionType: 'soft',
-							maxHistory: 20,
-							maxPaletteHistory: 10,
-							theme: 'light'
-						},
-						selections: {
-							paletteColumnCount: columnData.length,
-							paletteType: 'complementary',
-							targetedColumnPosition: 1
-						},
-						timestamp: this.utils.app.getFormattedTimestamp()
-					};
-				},
-				'Failed to generate initial state',
-				'StateManager.generateInitialState()'
-			) ?? defaultState
+			this.errors.handle(() => {
+				const columnData = this.utils.dom.scanPaletteColumns();
+				this.log(
+					`Scanned ${columnData.length} columns in Palette Container element`,
+					'debug'
+				);
+				return {
+					appMode: 'edit',
+					paletteContainer: { columns: columnData || [] },
+					paletteHistory: [],
+					preferences: {
+						colorSpace: 'hsl',
+						distributionType: 'soft',
+						maxHistory: 20,
+						maxPaletteHistory: 10,
+						theme: 'light'
+					},
+					selections: {
+						paletteColumnCount: columnData.length,
+						paletteType: 'complementary',
+						targetedColumnPosition: 1
+					},
+					timestamp: this.utils.app.getFormattedTimestamp()
+				};
+			}, 'Failed to generate initial state') ?? defaultState
 		);
 	}
 
-	private saveStateAndLog(property: string, verbosity: number): void {
-		this.log(
-			'info',
-			`Updated ${property}`,
-			`StateManager.update${property}()`,
-			verbosity
-		);
+	private saveStateAndLog(property: string, verbosity?: number): void {
+		this.log(`StateManager Updated ${property}`, 'debug', verbosity);
 		this.saveState();
 	}
 
 	private async saveState(): Promise<void> {
 		await this.errors.handleAsync(
 			() => this.storage.setItem('appState', this.state),
-			'Failed to save app state.',
-			'StateManager.saveState()'
+			'Failed to save app state.'
 		);
 	}
 

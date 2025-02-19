@@ -1,13 +1,10 @@
 // File: storage/StorageManager.js
 
-import {
-	ServicesInterface,
-	StorageManagerClassInterface
-} from '../types/index.js';
+import { ServicesInterface, StorageManagerInterface } from '../types/index.js';
 import { IDBManager } from './IDBManager.js';
 import { LocalStorageManager } from './LocalStorageManager.js';
 
-export class StorageManager implements StorageManagerClassInterface {
+export class StorageManager implements StorageManagerInterface {
 	private idbManager: IDBManager | null = null;
 	private localStorageManager!: LocalStorageManager;
 	private services!: ServicesInterface;
@@ -16,67 +13,43 @@ export class StorageManager implements StorageManagerClassInterface {
 	private useLocalStorage = false;
 
 	constructor(services: ServicesInterface) {
-		services.errors.handle(
-			() => {
-				this.services = services;
-				this.log = services.log;
-				this.errors = services.errors;
-				this.localStorageManager = LocalStorageManager.getInstance(
-					this.services
-				);
-			},
-			'Failed to initialize StorageManager',
-			'StorageManager.constructor'
-		);
+		services.errors.handle(() => {
+			this.services = services;
+			this.log = services.log;
+			this.errors = services.errors;
+			this.localStorageManager = LocalStorageManager.getInstance(
+				this.services
+			);
+		}, 'Failed to initialize StorageManager');
 
-		this.log(
-			'info',
-			'Storage Manager initialized',
-			'StorageManager.constructor'
-		);
+		this.log('Storage Manager initialized');
 	}
 
 	public async init(): Promise<boolean> {
-		return this.errors.handleAsync(
-			async () => {
-				this.log(
-					'info',
-					'Initializing Storage Manager',
-					'StorageManager.init()'
-				);
-				this.idbManager = IDBManager.getInstance(this.services);
+		return this.errors.handleAsync(async () => {
+			this.log('Initializing Storage Manager');
+			this.idbManager = IDBManager.getInstance(this.services);
 
-				const idbAvailable = await this.idbManager.init();
-				if (idbAvailable) {
-					this.log(
-						'info',
-						'Using IndexedDB for storage.',
-						'StorageManager.init()'
-					);
-					return true;
-				}
-
-				this.useLocalStorage = true;
-				await this.localStorageManager.init();
+			const idbAvailable = await this.idbManager.init();
+			if (idbAvailable) {
+				this.log('Using IndexedDB for storage.');
 				return true;
-			},
-			'StorageManager initialization failed',
-			'StorageManager.init()'
-		);
+			}
+
+			this.useLocalStorage = true;
+			await this.localStorageManager.init();
+			return true;
+		}, 'StorageManager initialization failed');
 	}
 
 	public async clear(): Promise<void> {
-		await this.errors.handleAsync(
-			async () => {
-				if (!this.useLocalStorage && this.idbManager) {
-					const success = await this.idbManager.clear();
-					if (success !== null) return;
-				}
-				await this.localStorageManager.clear();
-			},
-			'Failed to clear storage',
-			'StorageManager.clear()'
-		);
+		await this.errors.handleAsync(async () => {
+			if (!this.useLocalStorage && this.idbManager) {
+				const success = await this.idbManager.clear();
+				if (success !== null) return;
+			}
+			await this.localStorageManager.clear();
+		}, 'Failed to clear storage');
 	}
 
 	public async getItem<T>(key: string): Promise<T | null> {
@@ -89,7 +62,6 @@ export class StorageManager implements StorageManagerClassInterface {
 				return await this.localStorageManager.getItem<T>(key);
 			},
 			`Failed to get item ${key} from storage`,
-			'StorageManager.getItem()',
 			{ key }
 		);
 	}
@@ -106,7 +78,6 @@ export class StorageManager implements StorageManagerClassInterface {
 				await this.localStorageManager.removeItem(key);
 			},
 			`Failed to remove item ${key} from storage`,
-			'StorageManager.removeItem()',
 			{ key }
 		);
 	}
@@ -121,14 +92,12 @@ export class StorageManager implements StorageManagerClassInterface {
 				}
 
 				this.log(
-					'warn',
 					`Falling back to LocalStorage for key: ${key}`,
-					'StorageManager.setItem()'
+					'warn'
 				);
 				await this.localStorageManager.setItem(key, value);
 			},
 			`Failed to set item ${key} in storage`,
-			'StorageManager.setItem()',
 			{ key, value }
 		);
 	}

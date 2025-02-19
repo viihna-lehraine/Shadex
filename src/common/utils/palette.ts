@@ -3,7 +3,7 @@
 import {
 	AllColors,
 	CMYK,
-	ConfigData,
+	EnvData,
 	Hex,
 	HSL,
 	HSV,
@@ -18,9 +18,9 @@ import {
 	UtilitiesInterface,
 	XYZ
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const ids = data.dom.ids;
+const ids = config.dom.ids;
 
 export function createPaletteUtils(
 	services: ServicesInterface,
@@ -126,11 +126,7 @@ export function createPaletteUtils(
 			const clonedColor = utils.core.clone(color);
 
 			if (!utils.validate.colorValue(clonedColor)) {
-				log(
-					'error',
-					`Invalid color: ${JSON.stringify(clonedColor)}`,
-					'paletteUtils.generateAllColorValues()'
-				);
+				log(`Invalid color: ${JSON.stringify(clonedColor)}`, 'error');
 				throw new Error('Invalid HSL color provided');
 			}
 
@@ -174,38 +170,21 @@ export function createPaletteUtils(
 				);
 
 				if (!paletteTypeElement) {
-					log(
-						'warn',
-						'paletteTypeOptions DOM element not found',
-						'paletteUtils.getPaletteOptionsFromUI',
-						2
-					);
+					log('paletteTypeOptions DOM element not found', 'warn');
 				}
 				if (!columnCountElement) {
-					log(
-						'warn',
-						`columnCount DOM element not found`,
-						'paletteUtils.getPaletteOptionsFromUI',
-						2
-					);
+					log(`columnCount DOM element not found`, 'warn');
 				}
 				if (!limitDarkChkbx || !limitGrayChkbx || !limitLightChkbx) {
-					log(
-						'warn',
-						`One or more checkboxes not found`,
-						'paletteUtils.getPaletteOptionsFromUI',
-						2
-					);
+					log(`One or more checkboxes not found`, 'warn');
 				}
 
 				if (
 					!utils.typeGuards.isPaletteType(paletteTypeElement!.value)
 				) {
 					log(
-						'warn',
 						`Invalid palette type: ${paletteTypeElement!.value}`,
-						'paletteUtils.getPaletteOptionsFromUI',
-						2
+						'warn'
 					);
 				}
 
@@ -220,12 +199,7 @@ export function createPaletteUtils(
 					paletteType: paletteTypeElement!.value as PaletteType
 				};
 			} catch (error) {
-				log(
-					'error',
-					`Failed to retrieve parameters from UI: ${error}`,
-					'paletteUtils.getPaletteOptionsFromUI',
-					1
-				);
+				log(`Failed to retrieve parameters from UI: ${error}`, 'error');
 
 				return {
 					columnCount: 0,
@@ -251,7 +225,7 @@ export function createPaletteUtils(
 			};
 			const distributionTypeMap: Record<
 				number,
-				keyof ConfigData['probabilities']
+				keyof EnvData['probabilities']
 			> = {
 				0: 'base',
 				1: 'chaotic',

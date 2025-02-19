@@ -1,4 +1,4 @@
-// File: types/app/app.js
+// File: types/app/app.ts
 
 import {
 	AllColors,
@@ -11,9 +11,9 @@ import {
 	ColorSpace,
 	ColorSpaceExtended,
 	ColorStringObject,
-	ConfigData,
 	DOM_IDs,
 	DOMElements,
+	EnvData,
 	Hex,
 	HexSet,
 	HexStringObject,
@@ -64,53 +64,22 @@ import {
 
 // ******** 1. SERVICES ********
 
-export interface LoggerInterface {
-	debug: (
-		message: string,
-		caller?: string,
-		verbosityRequirement?: number
-	) => void;
-	info: (
-		message: string,
-		caller?: string,
-		verbosityRequirement?: number
-	) => void;
-	warn: (
-		message: string,
-		caller?: string,
-		verbosityRequirement?: number
-	) => void;
-	error: (
-		message: string,
-		caller?: string,
-		verbosityRequirement?: number
-	) => void;
-	mutation: (
-		data: MutationLog,
-		logCallback: (data: unknown) => void,
-		caller?: string
-	) => void;
-	[key: string]: Function;
-}
-
-// ******** 2. SERVICES OBJECT ********
-
 export interface ServicesInterface {
 	log(
-		level: 'debug' | 'info' | 'warn' | 'error',
 		message: string,
-		method: string,
+		level?: 'debug' | 'info' | 'warn' | 'error',
 		verbosityRequirement?: number
 	): void;
-	errors: ErrorHandlerClassInterface;
+	errors: ErrorHandlerInterface;
 }
 
-// ******** 3. HELPERS ********
+// ******** 2. HELPERS ********
 
-export interface ColorConversionHelpersInterface {
+export interface ColorHelpersInterface {
 	cmykToHSL(cmyk: CMYK): HSL;
 	cmykToRGB(cmyk: CMYK): RGB;
 	hexToHSL(hex: Hex): HSL;
+	hexToHSLWrapper(input: string | Hex): HSL;
 	hexToRGB(hex: Hex): RGB;
 	hslToCMYK(hsl: HSL): CMYK;
 	hslToHex(hsl: HSL): Hex;
@@ -135,27 +104,22 @@ export interface ColorConversionHelpersInterface {
 	xyzToRGB(xyz: XYZ): RGB;
 }
 
-export interface ColorUtilHelpersInterface
-	extends ColorConversionHelpersInterface {
-	hexToHSLWrapper(input: string | Hex): HSL;
-}
-
-export interface PaletteUtilHelpersInterface {
-	getWeightedRandomInterval(type: keyof ConfigData['probabilities']): number;
+export interface PaletteHelpersInterface {
+	getWeightedRandomInterval(type: keyof EnvData['probabilities']): number;
 	isHSLInBounds(hsl: HSL): boolean;
 	isHSLTooDark(hsl: HSL): boolean;
 	isHSLTooGray(hsl: HSL): boolean;
 	isHSLTooLight(hsl: HSL): boolean;
 }
 
-// ******** 4. HELPERS OBJECT ********
+// ******** 3. HELPERS ********
 
 export interface HelpersInterface {
-	color: ColorUtilHelpersInterface;
-	palette: PaletteUtilHelpersInterface;
+	color: ColorHelpersInterface;
+	palette: PaletteHelpersInterface;
 }
 
-// ******** 5. UTILITIES ********
+// ******** 4. UTILITIES ********
 
 export interface AdjustmentUtilsInterface {
 	applyGammaCorrection(value: number): number;
@@ -372,7 +336,7 @@ export interface ValidationUtilsInterface {
 	userColorInput(color: string): boolean;
 }
 
-// ******** 6. UTILITIES OBJECT ********
+// ******** 5. UTILITIES OBJECT ********
 
 export interface UtilitiesInterface {
 	adjust: AdjustmentUtilsInterface;
@@ -389,66 +353,53 @@ export interface UtilitiesInterface {
 	validate: ValidationUtilsInterface;
 }
 
-// ******** 7. COMMON FUNCTIONS COMPOSITE OBJECT ********
+// ******** 6. COMMON FUNCTIONS ********
 
-export interface CommonFunctionsInterface {
+export interface CommonFunctions {
 	helpers: HelpersInterface;
 	services: ServicesInterface;
 	utils: UtilitiesInterface;
 }
 
-export type RequiredCommonFunctions = Required<CommonFunctionsInterface>;
+// ******** 7. CLASSES ********
 
-// ******** 8. CLASSES ********
-
-export interface AppLoggerClassInterface {
+export interface AppLoggerInterface {
 	log(
 		message: string,
 		level: 'debug' | 'info' | 'warn' | 'error',
-		debugLevel: number,
 		caller?: string
 	): void;
-	logAsync(
-		message: string,
-		level: 'debug' | 'info' | 'warn' | 'error',
-		debugLevel: number,
-		caller?: string
-	): Promise<void>;
 	logMutation(
 		data: MutationLog,
 		logCallback: (data: MutationLog) => void
 	): void;
 }
 
-export interface AsyncLockClassInterface {
+export interface AsyncLockInterface {
 	acquire(): Promise<void>;
 	release(): void;
 }
 
-export interface DataObserverClassInterface<T extends Record<string, unknown>> {
+export interface DataObserverInterface<T extends Record<string, unknown>> {
 	get<K extends keyof T>(prop: K): T[K];
 	on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void;
 	set<K extends keyof T>(prop: K, value: T[K]): void;
 }
 
-export interface ErrorHandlerClassInterface {
+export interface ErrorHandlerInterface {
 	handle(
 		error: unknown,
 		errorMessage: string,
-		caller: string,
-		context?: Record<string, unknown>,
-		severity?: 'warn' | 'error'
+		context?: Record<string, unknown>
 	): void;
 	handleAsync<T>(
 		action: () => Promise<T>,
 		errorMessage: string,
-		caller: string,
-		context?: Record<string, unknown>,
-		severity?: 'warn' | 'error'
+		context?: Record<string, unknown>
 	): Promise<T>;
 }
 
-export interface IDBManagerClassInterface {
+export interface IDBManagerInterface {
 	clear(): Promise<void>;
 	ensureDBReady(): Promise<void>;
 	getItem<T>(key: string): Promise<T | null>;
@@ -457,7 +408,7 @@ export interface IDBManagerClassInterface {
 	setItem(key: string, value: unknown): Promise<void>;
 }
 
-export interface LocalStorageManagerClassInterface {
+export interface LocalStorageManagerInterface {
 	clear(): Promise<void>;
 	getItem<T>(key: string): Promise<T | null>;
 	init(): Promise<boolean>;
@@ -465,7 +416,7 @@ export interface LocalStorageManagerClassInterface {
 	setItem(key: string, value: unknown): Promise<void>;
 }
 
-export interface PaletteEventsClassInterface {
+export interface PaletteEventsInterface {
 	attachColorCopyHandlers(): void;
 	attachDragAndDropHandlers(): void;
 	init(): void;
@@ -474,7 +425,7 @@ export interface PaletteEventsClassInterface {
 	syncColumnColorsWithState(): void;
 }
 
-export interface PaletteManagerClassInterface {
+export interface PaletteManagerInterface {
 	extractPaletteFromDOM(): Palette | void;
 	handleColumnLock(columnID: number): void;
 	handleColumnResize(columnID: number, newSize: number): void;
@@ -484,11 +435,11 @@ export interface PaletteManagerClassInterface {
 	swapColumns(draggedID: number, targetID: number): void;
 }
 
-export interface PaletteStateClassInterface {
+export interface PaletteStateInterface {
 	updatePaletteItemColor(columnID: number, newColor: string): void;
 }
 
-export interface StateManagerClassInterface {
+export interface StateManagerInterface {
 	addPaletteToHistory(palette: Palette): void;
 	ensureStateReady(): Promise<void>;
 	getState(): State;
@@ -513,7 +464,7 @@ export interface StateManagerClassInterface {
 	): void;
 }
 
-export interface StorageManagerClassInterface {
+export interface StorageManagerInterface {
 	clear(): Promise<void>;
 	getItem<T>(key: string): Promise<T | null>;
 	init(): Promise<boolean>;
@@ -521,19 +472,19 @@ export interface StorageManagerClassInterface {
 	setItem(key: string, value: unknown): Promise<void>;
 }
 
-export interface UIEventsClassInterface {
+export interface UIEventsInterface {
 	attachTooltipListener(id: string, tooltipText: string): void;
 	init(): void;
 	initButtons(): void;
 }
 
-// ******** 10. FUNCTION INTERFACES ********
+// ******** 8. FUNCTION INTERFACES ********
 
 export interface GenerateHuesFn {
 	(
 		color: HSL,
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface,
+		common: CommonFunctions,
 		generateHues: GenerateHuesFnGroup
 	): number[];
 }
@@ -541,71 +492,68 @@ export interface GenerateHuesFn {
 export interface GeneratePaletteFn {
 	(
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface,
+		common: CommonFunctions,
 		generateHues: GenerateHuesFnGroup,
 		generatePalette: GeneratePaletteFnGroup
 	): Palette;
 }
 
-// ******** 11. FUNCTION OBJECTS ********
+// ******** 9. FUNCTION OBJECTS ********
 
 export interface GenerateHuesFnGroup {
 	analogous(
 		color: HSL,
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface
+		common: CommonFunctions
 	): number[];
 	diadic(
 		color: HSL,
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface
+		common: CommonFunctions
 	): number[];
-	hexadic(color: HSL, common: CommonFunctionsInterface): number[];
-	splitComplementary(color: HSL, common: CommonFunctionsInterface): number[];
-	tetradic(color: HSL, common: CommonFunctionsInterface): number[];
-	triadic(color: HSL, common: CommonFunctionsInterface): number[];
+	hexadic(color: HSL, common: CommonFunctions): number[];
+	splitComplementary(color: HSL, common: CommonFunctions): number[];
+	tetradic(color: HSL, common: CommonFunctions): number[];
+	triadic(color: HSL, common: CommonFunctions): number[];
 }
 
 export interface GeneratePaletteFnGroup {
 	analogous(
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface,
+		common: CommonFunctions,
 		generateHues: GenerateHuesFnGroup
 	): Palette;
 	complementary(
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface
+		common: CommonFunctions
 	): Palette;
 	diadic(
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface,
+		common: CommonFunctions,
 		generateHues: GenerateHuesFnGroup
 	): Palette;
 	hexadic(
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface,
+		common: CommonFunctions,
 		generateHues: GenerateHuesFnGroup
 	): Palette;
 	monochromatic(
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface
+		common: CommonFunctions
 	): Palette;
-	random(
-		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface
-	): Palette;
+	random(options: SelectedPaletteOptions, common: CommonFunctions): Palette;
 	splitComplementary(
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface
+		common: CommonFunctions
 	): Palette;
 	tetradic(
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface,
+		common: CommonFunctions,
 		generateHues: GenerateHuesFnGroup
 	): Palette;
 	triadic(
 		options: SelectedPaletteOptions,
-		common: CommonFunctionsInterface,
+		common: CommonFunctions,
 		generateHues: GenerateHuesFnGroup
 	): Palette;
 }

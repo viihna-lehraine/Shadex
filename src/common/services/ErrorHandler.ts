@@ -1,13 +1,12 @@
-// File: common/services/ErrorHandler.js
+// File: common/services/ErrorHandler.ts
 
-import { ErrorHandlerClassInterface } from '../../types/app.js';
+import { ErrorHandlerInterface } from '../../types/app.js';
 import { AppLogger } from './AppLogger.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const mode = data.mode;
-const debugLevel = mode.debugLevel;
+const mode = config.mode;
 
-export class ErrorHandler implements ErrorHandlerClassInterface {
+export class ErrorHandler implements ErrorHandlerInterface {
 	private static instance: ErrorHandler | null = null;
 	private logger: AppLogger;
 
@@ -19,29 +18,23 @@ export class ErrorHandler implements ErrorHandlerClassInterface {
 		if (!ErrorHandler.instance) {
 			ErrorHandler.instance = new ErrorHandler(logger);
 		}
-
 		return ErrorHandler.instance;
 	}
 
 	public handle(
 		error: unknown,
 		errorMessage: string,
-		caller: string,
-		context?: Record<string, unknown>,
-		severity?: 'warn' | 'error'
+		context: Record<string, unknown> = {}
 	): void {
-		if (!context) context = {};
-		if (!severity) severity = 'warn';
-
+		const caller = this.getCallerInfo();
 		const formattedError = this.formatError(error, errorMessage, context);
 
-		this.logger.log(formattedError, severity, debugLevel, caller);
+		this.logger.log(formattedError, 'error', caller);
 
 		if (mode.stackTrace) {
 			this.logger.log(
 				`Stack trace:\n${this.getStackTrace(error instanceof Error ? error : undefined)}`,
 				'debug',
-				3,
 				'[ErrorHandler]'
 			);
 		}
@@ -50,16 +43,12 @@ export class ErrorHandler implements ErrorHandlerClassInterface {
 	public async handleAsync<T>(
 		action: () => Promise<T>,
 		errorMessage: string,
-		caller: string = 'Unknown caller',
-		context?: Record<string, unknown>,
-		severity?: 'warn' | 'error'
+		context: Record<string, unknown> = {}
 	): Promise<T> {
-		if (!context) context = {};
-		if (!severity) severity = 'warn';
 		try {
 			return await action();
 		} catch (error) {
-			this.handle(error, errorMessage, caller, context, severity);
+			this.handle(error, errorMessage, context);
 			throw error;
 		}
 	}
@@ -67,7 +56,7 @@ export class ErrorHandler implements ErrorHandlerClassInterface {
 	private formatError(
 		error: unknown,
 		message: string,
-		context?: Record<string, unknown>
+		context: Record<string, unknown>
 	): string {
 		return error instanceof Error
 			? `${message}: ${error.message}. Context: ${JSON.stringify(context)}`
@@ -76,5 +65,29 @@ export class ErrorHandler implements ErrorHandlerClassInterface {
 
 	private getStackTrace(error?: Error): string {
 		return error?.stack ?? new Error().stack ?? 'No stack trace available';
+	}
+
+	private getCallerInfo(): string {
+		const stack = new Error().stack;
+		if (stack) {
+			const stackLines = stack.split('\n');
+			for (const line of stackLines) {
+				if (
+					!line.includes('AppLogger') &&
+					!line.includes('ErrorHandler') &&
+					line.includes('at ')
+				) {
+					const match =
+						line.match(/at\s+(.*)\s+\((.*):(\d+):(\d+)\)/) ||
+						line.match(/at\s+(.*):(\d+):(\d+)/);
+					if (match) {
+						return match[1]
+							? `${match[1]} (${match[2]}:${match[3]})`
+							: `${match[2]}:${match[3]}`;
+					}
+				}
+			}
+		}
+		return 'Unknown caller';
 	}
 }

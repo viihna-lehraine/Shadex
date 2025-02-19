@@ -1,8 +1,8 @@
 // File: common/servies/AsyncLock.ts
 
-import { AsyncLockClassInterface } from '../../types/index.js';
+import { AsyncLockInterface } from '../../types/index.js';
 
-export class AsyncLock implements AsyncLockClassInterface {
+export class AsyncLock implements AsyncLockInterface {
 	private isLocked: boolean = false;
 	private waitingQueue: (() => void)[] = [];
 

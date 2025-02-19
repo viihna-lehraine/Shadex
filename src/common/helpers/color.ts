@@ -2,7 +2,7 @@
 
 import {
 	CMYK,
-	ColorUtilHelpersInterface,
+	ColorHelpersInterface,
 	Hex,
 	HSL,
 	HSV,
@@ -17,12 +17,12 @@ import {
 	XYZ_Y,
 	XYZ_Z
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const math = data.math;
+const math = config.math;
 const limits = math.limits;
 
-const defaults = data.defaults;
+const defaults = config.defaults;
 
 const defaultCMYK = defaults.colors.cmyk;
 const defaultHex = defaults.colors.hex;
@@ -37,17 +37,13 @@ const defaultXYZ = defaults.colors.xyz;
 export function createColorHelpers(
 	services: ServicesInterface,
 	utils: UtilitiesInterface
-): ColorUtilHelpersInterface {
-	function cmykToRGB(cmyk: CMYK): RGB {
-		const log = services.log;
+): ColorHelpersInterface {
+	const { log } = services;
 
+	function cmykToRGB(cmyk: CMYK): RGB {
 		try {
 			if (!utils.validate.colorValue(cmyk)) {
-				log(
-					'error',
-					`Invalid CMYK value ${JSON.stringify(cmyk)}`,
-					'cmykToRGB()'
-				);
+				log(`Invalid CMYK value ${JSON.stringify(cmyk)}`, 'error');
 
 				return defaultRGB;
 			}
@@ -78,44 +74,32 @@ export function createColorHelpers(
 
 			return utils.adjust.clampRGB(rgb);
 		} catch (error) {
-			log('error', `Error: ${error}`, 'cmykToRGB()');
+			log('Error: ${error}', 'error');
 
 			return defaultRGB;
 		}
 	}
 
 	function hexToHSL(hex: Hex): HSL {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(hex)) {
-				log(
-					'error',
-					`Invalid Hex value ${JSON.stringify(hex)}`,
-					'hexToHSL()'
-				);
+				log(`Invalid Hex value ${JSON.stringify(hex)}`, 'error');
 
 				return defaultHSL;
 			}
 
 			return rgbToHSL(hexToRGB(utils.core.clone(hex)));
 		} catch (error) {
-			log('error', `Error: ${error}`, 'hexToHSL()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultHSL;
 		}
 	}
 
 	function hexToRGB(hex: Hex): RGB {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(hex)) {
-				log(
-					'error',
-					`Invalid Hex value ${JSON.stringify(hex)}`,
-					'hexToRGB()'
-				);
+				log(`Invalid Hex value ${JSON.stringify(hex)}`, 'error');
 
 				return defaultRGB;
 			}
@@ -140,44 +124,32 @@ export function createColorHelpers(
 				format: 'rgb'
 			};
 		} catch (error) {
-			log('error', `Error: ${error}`, 'hexToRGB()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultRGB;
 		}
 	}
 
 	function hslToLAB(hsl: HSL): LAB {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(hsl)) {
-				log(
-					'error',
-					`Invalid HSL value ${JSON.stringify(hsl)}`,
-					'hslToLAB()'
-				);
+				log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
 
 				return defaultLAB;
 			}
 
 			return xyzToLAB(rgbToXYZ(hslToRGB(utils.core.clone(hsl))));
 		} catch (error) {
-			log('error', `Error: ${error}`, 'hslToLAB()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultLAB;
 		}
 	}
 
 	function hslToRGB(hsl: HSL): RGB {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(hsl)) {
-				log(
-					'error',
-					`Invalid HSL value ${JSON.stringify(hsl)}`,
-					'hslToRGB()'
-				);
+				log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
 
 				return defaultRGB;
 			}
@@ -211,22 +183,16 @@ export function createColorHelpers(
 				format: 'rgb'
 			};
 		} catch (error) {
-			log('error', `Error: ${error}`, 'hslToRGB()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultRGB;
 		}
 	}
 
 	function hsvToSV(hsv: HSV): SV {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(hsv)) {
-				log(
-					'error',
-					`Invalid HSV value ${JSON.stringify(hsv)}`,
-					'hsvToSV()'
-				);
+				log(`Invalid HSV value ${JSON.stringify(hsv)}`, 'error');
 
 				return defaultSV;
 			}
@@ -239,44 +205,32 @@ export function createColorHelpers(
 				format: 'sv' as 'sv'
 			};
 		} catch (error) {
-			log('error', `Error: ${error}`, 'hsvToSV()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultSV;
 		}
 	}
 
 	function labToRGB(lab: LAB): RGB {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(lab)) {
-				log(
-					'error',
-					`Invalid LAB value ${JSON.stringify(lab)}`,
-					'labToRGB()'
-				);
+				log(`Invalid LAB value ${JSON.stringify(lab)}`, 'error');
 
 				return defaultRGB;
 			}
 
 			return xyzToRGB(labToXYZ(utils.core.clone(lab)));
 		} catch (error) {
-			log('error', `Eerror: ${error}`, 'labToRGB()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultRGB;
 		}
 	}
 
 	function labToXYZ(lab: LAB): XYZ {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(lab)) {
-				log(
-					'error',
-					`Invalid LAB value ${JSON.stringify(lab)}`,
-					'labToXYZ()'
-				);
+				log(`Invalid LAB value ${JSON.stringify(lab)}`, 'error');
 
 				return defaultXYZ;
 			}
@@ -322,22 +276,16 @@ export function createColorHelpers(
 				format: 'xyz'
 			};
 		} catch (error) {
-			log('error', `Error: ${error}`, 'labToXYZ()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultXYZ;
 		}
 	}
 
 	function rgbToCMYK(rgb: RGB): CMYK {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(rgb)) {
-				log(
-					'error',
-					`Invalid RGB value ${JSON.stringify(rgb)}`,
-					'rgbToCMYK()'
-				);
+				log(`Invalid RGB value ${JSON.stringify(rgb)}`, 'error');
 
 				return defaultCMYK;
 			}
@@ -371,15 +319,14 @@ export function createColorHelpers(
 			const cmyk = { value: { cyan, magenta, yellow, key }, format };
 
 			log(
-				'debug',
 				`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(utils.core.clone(cmyk))}`,
-				'rgbToCMYK()',
+				'debug',
 				5
 			);
 
 			return cmyk;
 		} catch (error) {
-			log('error', `Error: ${error}`, 'rgbToCMYK()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultCMYK;
 		}
@@ -390,11 +337,7 @@ export function createColorHelpers(
 
 		try {
 			if (!utils.validate.colorValue(rgb)) {
-				log(
-					'error',
-					`Invalid RGB value ${JSON.stringify(rgb)}`,
-					'rgbToHex()'
-				);
+				log(`Invalid RGB value ${JSON.stringify(rgb)}`, 'error');
 
 				return defaultHex;
 			}
@@ -409,9 +352,8 @@ export function createColorHelpers(
 				].some(v => isNaN(v) || v < 0 || v > 255)
 			) {
 				log(
-					'error',
 					`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}`,
-					'rgbToHex()'
+					'error'
 				);
 
 				return {
@@ -431,22 +373,16 @@ export function createColorHelpers(
 				format: 'hex' as 'hex'
 			};
 		} catch (error) {
-			log('error', `Error: ${error}`, 'rgbToHex()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultHex;
 		}
 	}
 
 	function rgbToHSL(rgb: RGB): HSL {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(rgb)) {
-				log(
-					'error',
-					`Invalid RGB value ${JSON.stringify(rgb)}`,
-					'rgbToHSL()'
-				);
+				log(`Invalid RGB value ${JSON.stringify(rgb)}`, 'error');
 
 				return defaultHSL;
 			}
@@ -499,22 +435,16 @@ export function createColorHelpers(
 				format: 'hsl'
 			};
 		} catch (error) {
-			log('error', `Error: ${error}`, 'rgbToHSL()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultHSL;
 		}
 	}
 
 	function rgbToHSV(rgb: RGB): HSV {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(rgb)) {
-				log(
-					'error',
-					`Invalid RGB value ${JSON.stringify(rgb)}`,
-					'rgbToHSV()'
-				);
+				log(`Invalid RGB value ${JSON.stringify(rgb)}`, 'error');
 
 				return defaultHSV;
 			}
@@ -561,22 +491,16 @@ export function createColorHelpers(
 				format: 'hsv'
 			};
 		} catch (error) {
-			log('error', `Error: ${error}`, 'rgbToHSV()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultHSV;
 		}
 	}
 
 	function rgbToXYZ(rgb: RGB): XYZ {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(rgb)) {
-				log(
-					'error',
-					`Invalid RGB value ${JSON.stringify(rgb)}`,
-					'rgbToXYZ()'
-				);
+				log(`Invalid RGB value ${JSON.stringify(rgb)}`, 'error');
 
 				return defaultXYZ;
 			}
@@ -633,22 +557,16 @@ export function createColorHelpers(
 
 			return utils.validate.colorValue(xyz) ? xyz : defaultXYZ;
 		} catch (error) {
-			log('error', `Error: ${error}`, 'rgbToXYZ()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultXYZ;
 		}
 	}
 
 	function xyzToLAB(xyz: XYZ): LAB {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(xyz)) {
-				log(
-					'error',
-					`Invalid XYZ value ${JSON.stringify(xyz)}`,
-					'xyzToLAB()'
-				);
+				log(`Invalid XYZ value ${JSON.stringify(xyz)}`, 'error');
 
 				return defaultLAB;
 			}
@@ -710,33 +628,23 @@ export function createColorHelpers(
 			};
 
 			if (!utils.validate.colorValue(lab)) {
-				log(
-					'error',
-					`Invalid LAB value ${JSON.stringify(lab)}`,
-					'labToXYZ()'
-				);
+				log(`Invalid LAB value ${JSON.stringify(lab)}`, 'error');
 
 				return defaultLAB;
 			}
 
 			return lab;
 		} catch (error) {
-			log('error', `${error}`, 'xyzToLAB');
+			log(`Error: ${error}`, 'error');
 
 			return defaultLAB;
 		}
 	}
 
 	function xyzToRGB(xyz: XYZ): RGB {
-		const log = services.log;
-
 		try {
 			if (!utils.validate.colorValue(xyz)) {
-				log(
-					'error',
-					`Invalid XYZ value ${JSON.stringify(xyz)}`,
-					'colorUtils > helpers.xyzToRGB()'
-				);
+				log(`Invalid XYZ value ${JSON.stringify(xyz)}`, 'error');
 
 				return defaultRGB;
 			}
@@ -770,7 +678,7 @@ export function createColorHelpers(
 
 			return rgb;
 		} catch (error) {
-			log('warn', `Error: ${error}`, 'xyzToRGB()');
+			log(`Error: ${error}`, 'error');
 
 			return defaultRGB;
 		}
@@ -793,29 +701,21 @@ export function createColorHelpers(
 		xyzToRGB,
 		xyzToLAB,
 		cmykToHSL(cmyk: CMYK): HSL {
-			const log = services.log;
-
 			try {
 				if (!utils.validate.colorValue(cmyk)) {
-					log(
-						'error',
-						`Invalid CMYK value ${JSON.stringify(cmyk)}`,
-						'cmykToHSL()'
-					);
+					log(`Invalid CMYK value ${JSON.stringify(cmyk)}`, 'error');
 
 					return defaultHSL;
 				}
 
 				return rgbToHSL(cmykToRGB(utils.core.clone(cmyk)));
 			} catch (error) {
-				log('error', `Error: ${error}`, 'cmykToHSL()');
+				log(`Error: ${error}`, 'error');
 
 				return defaultHSL;
 			}
 		},
 		hexToHSLWrapper(input: string | Hex): HSL {
-			const log = services.log;
-
 			try {
 				const clonedInput = utils.core.clone(input);
 
@@ -837,21 +737,15 @@ export function createColorHelpers(
 							};
 				return hexToHSL(hex);
 			} catch (error) {
-				log('error', `Error: ${error}`, 'hexToHSLWrapper()');
+				log(`Error: ${error}`, 'error');
 
 				return defaultHSL;
 			}
 		},
 		hslToCMYK(hsl: HSL): CMYK {
-			const log = services.log;
-
 			try {
 				if (!utils.validate.colorValue(hsl)) {
-					log(
-						'error',
-						`Invalid HSL value ${JSON.stringify(hsl)}`,
-						'hslToCMYK()'
-					);
+					log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
 
 					return defaultCMYK;
 				}
@@ -859,45 +753,32 @@ export function createColorHelpers(
 				return rgbToCMYK(hslToRGB(utils.core.clone(hsl)));
 			} catch (error) {
 				log(
-					'error',
 					`Error converting HSL ${JSON.stringify(hsl)} to CMYK: ${error}`,
-					'colorUtils > helpers.hslToCMYK()'
+					'error'
 				);
 
 				return defaultCMYK;
 			}
 		},
 		hslToHex(hsl: HSL): Hex {
-			const log = services.log;
-
 			try {
 				if (!utils.validate.colorValue(hsl)) {
-					log(
-						'error',
-						`Invalid HSL value ${JSON.stringify(hsl)}`,
-						'hslToHex()'
-					);
+					log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
 
 					return defaultHex;
 				}
 
 				return rgbToHex(hslToRGB(utils.core.clone(hsl)));
 			} catch (error) {
-				log('error', `Error: ${error}`, 'hslToHex()');
+				log(`Error: ${error}`, 'error');
 
 				return defaultHex;
 			}
 		},
 		hslToHSV(hsl: HSL): HSV {
-			const log = services.log;
-
 			try {
 				if (!utils.validate.colorValue(hsl)) {
-					log(
-						'error',
-						`Invalid HSL value ${JSON.stringify(hsl)}`,
-						'hslToHSV()'
-					);
+					log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
 
 					return defaultHSV;
 				}
@@ -923,21 +804,15 @@ export function createColorHelpers(
 					format: 'hsv'
 				};
 			} catch (error) {
-				log('error', `Error: ${error}`, 'hslToHSV()');
+				log(`Error: ${error}`, 'error');
 
 				return defaultHSV;
 			}
 		},
 		hslToSL(hsl: HSL): SL {
-			const log = services.log;
-
 			try {
 				if (!utils.validate.colorValue(hsl)) {
-					log(
-						'error',
-						`Invalid HSL value ${JSON.stringify(hsl)}`,
-						'hslToSL()'
-					);
+					log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
 
 					return defaultSL;
 				}
@@ -950,28 +825,22 @@ export function createColorHelpers(
 					format: 'sl' as 'sl'
 				};
 			} catch (error) {
-				log('error', `Error: ${error}`, 'hslToSL()');
+				log(`Error: ${error}`, 'error');
 
 				return defaultSL;
 			}
 		},
 		hslToSV(hsl: HSL): SV {
-			const log = services.log;
-
 			try {
 				if (!utils.validate.colorValue(hsl)) {
-					log(
-						'error',
-						`Invalid HSL value ${JSON.stringify(hsl)}`,
-						'hslToSV()'
-					);
+					log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
 
 					return defaultSV;
 				}
 
 				return hsvToSV(rgbToHSV(hslToRGB(utils.core.clone(hsl))));
 			} catch (error) {
-				log('error', `Error: ${error}`, 'hsvToSV()');
+				log(`Error: ${error}`, 'error');
 
 				return defaultSV;
 			}
@@ -981,32 +850,22 @@ export function createColorHelpers(
 
 			try {
 				if (!utils.validate.colorValue(hsl)) {
-					log(
-						'error',
-						`Invalid HSL value ${JSON.stringify(hsl)}`,
-						'hslToXYZ()'
-					);
+					log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
 
 					return defaultXYZ;
 				}
 
 				return labToXYZ(hslToLAB(utils.core.clone(hsl)));
 			} catch (error) {
-				log('error', `hslToXYZ error: ${error}`, 'labToXYZ()');
+				log(`hslToXYZ error: ${error}`, 'error');
 
 				return defaultXYZ;
 			}
 		},
 		hsvToHSL(hsv: HSV): HSL {
-			const log = services.log;
-
 			try {
 				if (!utils.validate.colorValue(hsv)) {
-					log(
-						'error',
-						`Invalid HSV value ${JSON.stringify(hsv)}`,
-						'hsvToHSL()'
-					);
+					log(`Invalid HSV value ${JSON.stringify(hsv)}`, 'error');
 
 					return defaultHSL;
 				}
@@ -1038,49 +897,37 @@ export function createColorHelpers(
 					format: 'hsl'
 				};
 			} catch (error) {
-				log('error', `Error: ${error}`, 'hsvToHSL()');
+				log(`Error: ${error}`, 'error');
 
 				return defaultHSL;
 			}
 		},
 		labToHSL(lab: LAB): HSL {
-			const log = services.log;
-
 			try {
 				if (!utils.validate.colorValue(lab)) {
-					log(
-						'error',
-						`Invalid LAB value ${JSON.stringify(lab)}`,
-						'labToHSL()'
-					);
+					log(`Invalid LAB value ${JSON.stringify(lab)}`, 'error');
 
 					return defaultHSL;
 				}
 
 				return rgbToHSL(labToRGB(utils.core.clone(lab)));
 			} catch (error) {
-				log('error', `Error: ${error}`, 'labToHSL()');
+				log(`Error: ${error}`, 'error');
 
 				return defaultHSL;
 			}
 		},
 		xyzToHSL(xyz: XYZ): HSL {
-			const log = services.log;
-
 			try {
 				if (!utils.validate.colorValue(xyz)) {
-					log(
-						'error',
-						`Invalid XYZ value ${JSON.stringify(xyz)}`,
-						'xyzToHSL()'
-					);
+					log(`Invalid XYZ value ${JSON.stringify(xyz)}`, 'error');
 
 					return defaultHSL;
 				}
 
 				return rgbToHSL(xyzToRGB(utils.core.clone(xyz)));
 			} catch (error) {
-				log('error', `Error: ${error}`, 'xyzToHSL()');
+				log(`Error: ${error}`, 'error');
 
 				return defaultHSL;
 			}

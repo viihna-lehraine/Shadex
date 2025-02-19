@@ -1,7 +1,7 @@
 // File: palette/partials/types.js
 
 import {
-	CommonFunctionsInterface,
+	CommonFunctions,
 	GenerateHuesFnGroup,
 	GeneratePaletteFnGroup,
 	HSL,
@@ -9,17 +9,20 @@ import {
 	PaletteItem,
 	SelectedPaletteOptions
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const paletteRanges = data.config.paletteRanges;
+const paletteRanges = config.env.paletteRanges;
 
 function analogous(
 	options: SelectedPaletteOptions,
-	common: CommonFunctionsInterface,
+	common: CommonFunctions,
 	generateHues: GenerateHuesFnGroup
 ): Palette {
-	const errors = common.services.errors;
-	const utils = common.utils;
+	const {
+		services: { errors },
+		utils
+	} = common;
+
 	try {
 		if (options.columnCount < 2) utils.dom.enforceSwatchRules(2, 6);
 
@@ -39,23 +42,23 @@ function analogous(
 		errors.handle(
 			error,
 			'Error generating analogous palette. Returning default.',
-			'analogous()',
-			{
-				options: options
-			},
-			'error'
+			{ options: options }
 		);
-		return data.defaults.palette;
+		return config.defaults.palette;
 	}
 }
 
 function complementary(
 	options: SelectedPaletteOptions,
-	common: CommonFunctionsInterface
+	common: CommonFunctions
 ): Palette {
+	const {
+		helpers,
+		services: { errors },
+		utils
+	} = common;
+
 	try {
-		const helpers = common.helpers;
-		const utils = common.utils;
 		const columnCount = Math.max(2, Math.min(6, options.columnCount));
 
 		utils.dom.enforceSwatchRules(columnCount, 6);
@@ -127,27 +130,27 @@ function complementary(
 
 		return utils.palette.createPaletteObject(options, paletteItems);
 	} catch (error) {
-		common.services.errors.handle(
+		errors.handle(
 			error,
 			'Error generating complementary palette. Returning default.',
-			'complementary()',
-			{
-				options: options
-			},
-			'error'
+			{ options: options }
 		);
-		return data.defaults.palette;
+		return config.defaults.palette;
 	}
 }
 
 function diadic(
 	options: SelectedPaletteOptions,
-	common: CommonFunctionsInterface,
+	common: CommonFunctions,
 	generateHues: GenerateHuesFnGroup
 ): Palette {
+	const {
+		helpers,
+		services: { errors },
+		utils
+	} = common;
+
 	try {
-		const helpers = common.helpers;
-		const utils = common.utils;
 		const columnCount = Math.max(2, Math.min(6, options.columnCount));
 
 		utils.dom.enforceSwatchRules(columnCount, 6);
@@ -209,26 +212,26 @@ function diadic(
 
 		return utils.palette.createPaletteObject(options, paletteItems);
 	} catch (error) {
-		common.services.errors.handle(
+		errors.handle(
 			error,
 			'Error generating diadic palette. Returning default.',
-			'diadic()',
-			{
-				options: options
-			},
-			'error'
+			{ options: options }
 		);
-		return data.defaults.palette;
+		return config.defaults.palette;
 	}
 }
 
 function hexadic(
 	options: SelectedPaletteOptions,
-	common: CommonFunctionsInterface,
+	common: CommonFunctions,
 	generateHues: GenerateHuesFnGroup
 ): Palette {
+	const {
+		services: { errors },
+		utils
+	} = common;
+
 	try {
-		const utils = common.utils;
 		// hexadic palettes always have 6 swatches
 		const columnCount = 6;
 
@@ -276,25 +279,25 @@ function hexadic(
 
 		return utils.palette.createPaletteObject(options, paletteItems);
 	} catch (error) {
-		common.services.errors.handle(
+		errors.handle(
 			error,
 			'Error generating hexadic palette. Returning default.',
-			'hexadic()',
-			{
-				options: options
-			},
-			'error'
+			{ options: options }
 		);
-		return data.defaults.palette;
+		return config.defaults.palette;
 	}
 }
 
 function monochromatic(
 	options: SelectedPaletteOptions,
-	common: CommonFunctionsInterface
+	common: CommonFunctions
 ): Palette {
+	const {
+		services: { errors },
+		utils
+	} = common;
+
 	try {
-		const utils = common.utils;
 		const columnCount = Math.max(2, Math.min(6, options.columnCount));
 
 		utils.dom.enforceSwatchRules(columnCount, 6);
@@ -347,25 +350,25 @@ function monochromatic(
 
 		return utils.palette.createPaletteObject(options, paletteItems);
 	} catch (error) {
-		common.services.errors.handle(
+		errors.handle(
 			error,
 			'Error generating monochromatic palette. Returning default.',
-			'monochromatic()',
-			{
-				options: options
-			},
-			'error'
+			{ options: options }
 		);
-		return data.defaults.palette;
+		return config.defaults.palette;
 	}
 }
 
 function random(
 	options: SelectedPaletteOptions,
-	common: CommonFunctionsInterface
+	common: CommonFunctions
 ): Palette {
+	const {
+		services: { errors },
+		utils
+	} = common;
+
 	try {
-		const utils = common.utils;
 		// ensure column count is between 2 and 6
 		const columnCount = Math.max(2, Math.min(6, options.columnCount));
 
@@ -390,26 +393,25 @@ function random(
 
 		return utils.palette.createPaletteObject(options, paletteItems);
 	} catch (error) {
-		common.services.errors.handle(
+		errors.handle(
 			error,
 			'Error generating random palette. Returning default.',
-			'random()',
-			{
-				options: options
-			},
-			'error'
+			{ options: options }
 		);
-		return data.defaults.palette;
+		return config.defaults.palette;
 	}
 }
 
 function splitComplementary(
 	options: SelectedPaletteOptions,
-	common: CommonFunctionsInterface
+	common: CommonFunctions
 ): Palette {
+	const {
+		helpers,
+		services: { errors },
+		utils
+	} = common;
 	try {
-		const helpers = common.helpers;
-		const utils = common.utils;
 		// ensure column count is at least 3 and at most 6
 		const columnCount = Math.max(3, Math.min(6, options.columnCount));
 		utils.dom.enforceSwatchRules(columnCount, 6);
@@ -472,26 +474,26 @@ function splitComplementary(
 
 		return utils.palette.createPaletteObject(options, paletteItems);
 	} catch (error) {
-		common.services.errors.handle(
+		errors.handle(
 			error,
 			'Error generating split-complementary palette. Returning default.',
-			'splitComplementary()',
-			{
-				options: options
-			},
-			'error'
+			{ options: options }
 		);
-		return data.defaults.palette;
+		return config.defaults.palette;
 	}
 }
 
 function tetradic(
 	options: SelectedPaletteOptions,
-	common: CommonFunctionsInterface,
+	common: CommonFunctions,
 	generateHues: GenerateHuesFnGroup
 ): Palette {
+	const {
+		services: { errors },
+		utils
+	} = common;
+
 	try {
-		const utils = common.utils;
 		// tetradic palettes always have 4 swatches
 		const columnCount = 4;
 		utils.dom.enforceSwatchRules(columnCount, 4);
@@ -540,26 +542,26 @@ function tetradic(
 
 		return utils.palette.createPaletteObject(options, paletteItems);
 	} catch (error) {
-		common.services.errors.handle(
+		errors.handle(
 			error,
 			'Error generating tetradic palette. Returning default.',
-			'tetradic()',
-			{
-				options: options
-			},
-			'error'
+			{ options: options }
 		);
-		return data.defaults.palette;
+		return config.defaults.palette;
 	}
 }
 
 function triadic(
 	options: SelectedPaletteOptions,
-	common: CommonFunctionsInterface,
+	common: CommonFunctions,
 	generateHues: GenerateHuesFnGroup
 ): Palette {
+	const {
+		services: { errors },
+		utils
+	} = common;
+
 	try {
-		const utils = common.utils;
 		// triadic palettes always have exactly 3 colors
 		const columnCount = 3;
 		utils.dom.enforceSwatchRules(columnCount, 3);
@@ -609,16 +611,12 @@ function triadic(
 
 		return utils.palette.createPaletteObject(options, paletteItems);
 	} catch (error) {
-		common.services.errors.handle(
+		errors.handle(
 			error,
 			'Error generating triadic palette. Returning default.',
-			'triadic()',
-			{
-				options: options
-			},
-			'error'
+			{ options: options }
 		);
-		return data.defaults.palette;
+		return config.defaults.palette;
 	}
 }
 

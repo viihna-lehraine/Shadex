@@ -1,32 +1,29 @@
 // File: palette/generate.js
 
 import {
-	CommonFunctionsInterface,
+	CommonFunctions,
 	GenerateHuesFnGroup,
 	GeneratePaletteFnGroup,
 	HSL,
 	Palette,
 	SelectedPaletteOptions
 } from '../types/index.js';
-import { data } from '../data/index.js';
+import { config } from '../config/index.js';
 
-const defaultPalette = data.defaults.palette;
+const defaultPalette = config.defaults.palette;
 
 export function generatePalette(
 	options: SelectedPaletteOptions,
-	common: CommonFunctionsInterface,
+	common: CommonFunctions,
 	generateHuesFns: GenerateHuesFnGroup,
 	generatePaletteFns: GeneratePaletteFnGroup
 ): Palette {
-	const log = common.services.log;
-	const errors = common.services.errors;
+	const { log, errors } = common.services;
 
 	try {
 		log(
-			'debug',
 			`Generating ${options.paletteType} palette with args ${JSON.stringify(options)}`,
-			'generatePalette()',
-			2
+			'debug'
 		);
 
 		switch (options.paletteType) {
@@ -69,19 +66,11 @@ export function generatePalette(
 					generateHuesFns
 				);
 			default:
-				log(
-					'error',
-					`Invalid palette type ${options.paletteType}`,
-					'generatePalette()'
-				);
+				log(`Invalid palette type ${options.paletteType}`, 'error');
 				return defaultPalette;
 		}
 	} catch (error) {
-		errors.handle(
-			error,
-			'Error occurred during palette generation',
-			'generatePalette()'
-		);
+		errors.handle(error, 'Error occurred during palette generation');
 		return defaultPalette;
 	}
 }
@@ -89,20 +78,15 @@ export function generatePalette(
 export function generateHues(
 	color: HSL,
 	options: SelectedPaletteOptions,
-	common: CommonFunctionsInterface,
+	common: CommonFunctions,
 	generateHues: GenerateHuesFnGroup
 ): number[] {
-	const utils = common.utils;
-	const log = common.services.log;
-	const errors = common.services.errors;
+	const { log, errors } = common.services;
+	const { utils } = common;
 
 	try {
 		if (!utils.validate.colorValue(color)) {
-			log(
-				'error',
-				`Invalid color value ${JSON.stringify(color)}`,
-				'generateHues()'
-			);
+			log(`Invalid color value ${JSON.stringify(color)}`, 'error');
 			return [];
 		}
 
@@ -122,15 +106,11 @@ export function generateHues(
 			case 'triadic':
 				return generateHues.triadic(clonedColor, common);
 			default:
-				log(
-					'error',
-					`Invalid hue type ${options.paletteType}`,
-					'generateHues()'
-				);
+				log(`Invalid hue type ${options.paletteType}`, 'error');
 				return [];
 		}
 	} catch (error) {
-		errors.handle(error, 'Error generating hues', 'generateHues()');
+		errors.handle(error, 'Error generating hues');
 		return [];
 	}
 }

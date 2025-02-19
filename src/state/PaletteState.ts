@@ -3,13 +3,13 @@
 import {
 	AllColors,
 	PaletteItem,
-	PaletteStateClassInterface,
+	PaletteStateInterface,
 	ServicesInterface,
 	UtilitiesInterface
 } from '../types/index.js';
 import { StateManager } from './StateManager.js';
 
-export class PaletteState implements PaletteStateClassInterface {
+export class PaletteState implements PaletteStateInterface {
 	private errors: ServicesInterface['errors'];
 	private utils: UtilitiesInterface;
 
@@ -85,7 +85,6 @@ export class PaletteState implements PaletteStateClassInterface {
 				]);
 			},
 			'Failed to update palette item color',
-			'PaletteState.updatePaletteItemColor()',
 			{ columnID, newColor }
 		);
 	}

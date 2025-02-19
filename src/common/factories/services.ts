@@ -1,17 +1,18 @@
-// File: common/factories/services.js
+// File: common/factories/services.ts
 
 import { ServicesInterface } from '../../types/index.js';
-import { createErrorHandler } from './errorHandler.js';
-import { createLogger } from './logger.js';
-import { data } from '../../data/index.js';
+import { AppLogger } from '../services/AppLogger.js';
+import { ErrorHandler } from '../services/ErrorHandler.js';
+import { config } from '../../config/index.js';
+import { getCallerInfo } from '../services/helpers.js';
 
-const mode = data.mode;
+const mode = config.mode;
 
-export async function createServices(): Promise<ServicesInterface> {
+export function createServices(): ServicesInterface {
 	console.log('[FACTORIES.service] Loading createServices...');
 
-	const logger = await createLogger();
-	const errors = await createErrorHandler();
+	const logger = AppLogger.getInstance();
+	const errors = ErrorHandler.getInstance(logger);
 
 	if (!logger || !errors) {
 		throw new Error(
@@ -19,18 +20,17 @@ export async function createServices(): Promise<ServicesInterface> {
 		);
 	}
 
-	// Define logging function
 	const log: ServicesInterface['log'] = (
-		level,
-		message,
-		method,
-		verbosityRequirement
+		message: string,
+		level: 'debug' | 'info' | 'warn' | 'error' = 'info',
+		verbosityRequirement: number = 0
 	) => {
 		if (
 			mode.logging[level] &&
-			mode.logging.verbosity >= (verbosityRequirement ?? 0)
+			mode.logging.verbosity >= verbosityRequirement
 		) {
-			logger[level](message, method);
+			const caller = getCallerInfo();
+			logger.log(message, level, caller);
 		}
 
 		if (level === 'error' && mode.showAlerts) {
@@ -38,6 +38,5 @@ export async function createServices(): Promise<ServicesInterface> {
 		}
 	};
 
-	// Return flattened services object
 	return { log, errors };
 }

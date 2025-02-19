@@ -8,10 +8,10 @@ import {
 	UtilitiesInterface,
 	ValidationUtilsInterface
 } from '../../types/index.js';
-import { data } from '../../data/index.js';
+import { config } from '../../config/index.js';
 
-const regex = data.config.regex;
-const sets = data.sets;
+const regex = config.env.regex;
+const sets = config.sets;
 
 export function createValidationUtils(
 	utils: UtilitiesInterface
