@@ -1,22 +1,25 @@
 // File: common/factories/helpers.ts
 
-import {
-	HelpersInterface,
-	ServicesInterface,
-	UtilitiesInterface
-} from '../../types/index.js';
+import { Helpers } from '../../types/index.js';
 
-export async function createHelpers(
-	services: ServicesInterface,
-	utils: UtilitiesInterface
-): Promise<HelpersInterface> {
-	const helpers = {} as HelpersInterface;
+export async function helpersFactory(): Promise<Helpers> {
+	const helpers = {} as Helpers;
 
-	const { createColorHelpers } = await import('../helpers/color.js');
-	const { createPaletteHelpers } = await import('../helpers/palette.js');
+	const { colorHelpersFactory } = await import('../helpers/color.js');
+	const { dataHelpersFactory } = await import('../helpers/data.js');
+	const { domHelpersFactory } = await import('../helpers/dom.js');
+	const { mathHelpersFactory } = await import('../helpers/math.js');
+	const { timeHelpersFactory } = await import('../helpers/time.js');
+	const { typeGuardHelpersFactory } = await import(
+		'../helpers/typeGuards.js'
+	);
 
-	helpers.color = createColorHelpers(services, utils);
-	helpers.palette = createPaletteHelpers(services, utils);
+	helpers.color = colorHelpersFactory(helpers);
+	helpers.data = dataHelpersFactory();
+	helpers.dom = domHelpersFactory();
+	helpers.math = mathHelpersFactory();
+	helpers.time = timeHelpersFactory();
+	helpers.typeGuards = typeGuardHelpersFactory();
 
 	return helpers;
 }

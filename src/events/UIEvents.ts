@@ -1,50 +1,51 @@
 // File: events/UIEvents.js
 
-import {
-	DOMElements,
-	ServicesInterface,
-	UtilitiesInterface
-} from '../types/index.js';
+import { DOMElements, Helpers, Services, Utilities } from '../types/index.js';
 import { EventManager } from './EventManager.js';
 import { PaletteManager } from '../palette/PaletteManager.js';
-import { config } from '../config/index.js';
+import { domIndex } from '../config/index.js';
 
-const classes = config.dom.classes;
-const ids = config.dom.ids;
+const classes = domIndex.classes;
 
 export class UIEvents {
-	private log: ServicesInterface['log'];
-	private errors: ServicesInterface['errors'];
-	private elements: DOMElements;
+	#domStore: Services['domStore'];
+	#elements: DOMElements;
+	#errors: Services['errors'];
+	#helpers: Helpers;
+	#log: Services['log'];
+	#utils: Utilities;
 
 	constructor(
+		helpers: Helpers,
 		private paletteManager: PaletteManager,
-		private services: ServicesInterface,
-		private utils: UtilitiesInterface
+		private services: Services,
+		utils: Utilities
 	) {
 		this.services = services;
-		this.errors = services.errors;
-		this.utils = utils;
-		this.log = this.services.log;
+		this.#domStore = services.domStore;
+		this.#errors = services.errors;
+		this.#helpers = helpers;
+		this.#log = this.services.log;
 		this.paletteManager = paletteManager;
+		this.#utils = utils;
 
-		const validatedElements = this.utils.dom.getValidatedDOMElements(ids);
+		const validatedElements = this.#domStore.getElements();
 		if (!validatedElements) {
 			throw new Error(
 				`Critical UI elements not found. Application cannot start`
 			);
 		}
-		this.elements = validatedElements;
+		this.#elements = validatedElements;
 	}
 
-	public init(): void {
-		this.errors.handle(() => {
+	init(): void {
+		this.#errors.handleSync(() => {
 			EventManager.add(document, 'click', event => {
 				const target = event.target as HTMLElement;
 
 				// open modal
 				if (target.matches(classes.modalTrigger)) {
-					const modal = this.utils.core.getElement(
+					const modal = this.#helpers.dom.getElement(
 						target.dataset.modalID!
 					);
 					modal?.classList.remove(classes.hidden);
@@ -59,7 +60,7 @@ export class UIEvents {
 			// handle 'Esc' key press to close modals
 			EventManager.add(document, 'keydown', ((event: KeyboardEvent) => {
 				if (event.key === 'Escape') {
-					this.utils.core
+					this.#helpers.dom
 						.getAllElements(classes.modal)
 						.forEach(modal => modal.classList.add(classes.hidden));
 				}
@@ -67,8 +68,8 @@ export class UIEvents {
 		}, 'Failed to initialize UI events');
 	}
 
-	public initButtons(): void {
-		this.errors.handle(() => {
+	initButtons(): void {
+		this.#errors.handleSync(() => {
 			const addButtonEvent = (
 				button: HTMLElement | null,
 				logMessage: string,
@@ -78,33 +79,33 @@ export class UIEvents {
 
 				EventManager.add(button, 'click', (e: Event) => {
 					e.preventDefault();
-					this.log(logMessage, 'debug');
+					this.#log(logMessage, 'debug');
 					action?.();
 				});
 			};
 
 			addButtonEvent(
-				this.elements.btns.desaturate,
+				this.#elements.btns.desaturate,
 				'Desaturate button clicked',
 				() => {
-					this.log('Desaturation logic not implemented!', 'warn');
+					this.#log('Desaturation logic not implemented!', 'warn');
 				}
 			);
 
 			addButtonEvent(
-				this.elements.btns.export,
+				this.#elements.btns.export,
 				'Export button clicked',
 				() => {
-					this.log('Export logic not implemented!', 'debug');
+					this.#log('Export logic not implemented!', 'debug');
 				}
 			);
 
 			addButtonEvent(
-				this.elements.btns.generate,
+				this.#elements.btns.generate,
 				'Generate button clicked',
 				() => {
 					this.paletteManager.renderNewPalette();
-					this.log('New palette generated and rendered', 'debug');
+					this.#log('New palette generated and rendered', 'debug');
 				}
 			);
 
@@ -116,30 +117,30 @@ export class UIEvents {
 		}, 'Failed to initialize buttons');
 	}
 
-	public attachTooltipListener(id: string, tooltipText: string): void {
-		this.errors.handle(() => {
-			const element = this.utils.core.getElement(id);
+	attachTooltipListener(id: string, tooltipText: string): void {
+		this.#errors.handleSync(() => {
+			const element = this.#helpers.dom.getElement(id);
 			if (!element) return;
 
 			EventManager.add(element, 'mouseenter', () =>
-				this.utils.dom.createTooltip(element, tooltipText)
+				this.#utils.dom.createTooltip(element, tooltipText)
 			);
 			EventManager.add(element, 'mouseleave', () =>
-				this.utils.dom.removeTooltip(element)
+				this.#utils.dom.removeTooltip(element)
 			);
 		}, `Failed to attach tooltip listener for ${id}`);
 	}
 
 	private handleWindowClick(event: Event): void {
-		this.errors.handle(() => {
+		this.#errors.handleSync(() => {
 			const target = event.target as HTMLElement;
 
-			if (target === this.elements.divs.helpMenu) {
-				this.elements.divs.helpMenu.classList.add(classes.hidden);
+			if (target === this.#elements.divs.helpMenu) {
+				this.#elements.divs.helpMenu.classList.add(classes.hidden);
 			}
 
-			if (target === this.elements.divs.historyMenu) {
-				this.elements.divs.historyMenu.classList.add(classes.hidden);
+			if (target === this.#elements.divs.historyMenu) {
+				this.#elements.divs.historyMenu.classList.add(classes.hidden);
 			}
 		}, 'Failed to handle window click');
 	}

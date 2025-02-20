@@ -1,24 +1,24 @@
-// File: common/utils/app.js
+// File: common/utils/partials/color/generate.js
 
 import {
-	AppUtilsInterface,
+	ColorGenerationUtils,
 	HSL,
 	SL,
-	ServicesInterface,
-	UtilitiesInterface
-} from '../../types/index.js';
-import { config } from '../../config/index.js';
+	Services,
+	Utilities
+} from '../../../../types/index.js';
+import { defaults } from '../../../../config/index.js';
 
-const defaultColors = config.defaults.colors;
+const defaultColors = defaults.colors;
 
-export function createAppUtils(
-	services: ServicesInterface,
-	utils: UtilitiesInterface
-): AppUtilsInterface {
+export function colorGenerationUtilsFactory(
+	services: Services,
+	utils: Utilities
+): ColorGenerationUtils {
+	const { log } = services;
+
 	return {
 		generateRandomHSL(): HSL {
-			const log = services.log;
-
 			try {
 				const hsl: HSL = {
 					value: {
@@ -54,8 +54,6 @@ export function createAppUtils(
 			}
 		},
 		generateRandomSL(): SL {
-			const log = services.log;
-
 			try {
 				const sl: SL = {
 					value: {
@@ -86,31 +84,6 @@ export function createAppUtils(
 
 				return defaultColors.sl;
 			}
-		},
-		getFormattedTimestamp(): string {
-			const now = new Date();
-			const year = now.getFullYear();
-			const month = String(now.getMonth() + 1).padStart(2, '0');
-			const day = String(now.getDate()).padStart(2, '0');
-			const hours = String(now.getHours()).padStart(2, '0');
-			const minutes = String(now.getMinutes()).padStart(2, '0');
-			const seconds = String(now.getSeconds()).padStart(2, '0');
-
-			return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-		},
-		async tracePromise(
-			promise: Promise<unknown>,
-			label: string
-		): Promise<unknown> {
-			return promise
-				.then(result => {
-					console.log(`[TRACE SUCCESS] ${label}:`, result);
-					return result;
-				})
-				.catch(error => {
-					console.error(`[TRACE ERROR] ${label}:`, error);
-					throw error;
-				});
 		}
 	};
 }

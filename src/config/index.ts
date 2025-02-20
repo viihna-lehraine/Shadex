@@ -4,7 +4,8 @@ import {
 	ByteRange,
 	ColorSpace,
 	Configuration,
-	DefaultData,
+	DefaultObserverData,
+	Defaults,
 	DOMConfig,
 	DOMIndex,
 	EnvData,
@@ -58,29 +59,35 @@ const classes: Readonly<DOMIndex>['classes'] = {
 } as const;
 
 const ids: Readonly<DOMIndex>['ids'] = {
-	desaturateBtn: 'desaturate-btn',
-	exportBtn: 'export-btn',
-	generateBtn: 'generate-btn',
-	helpMenuBtn: 'help-menu-btn',
-	historyMenuBtn: 'history-menu-btn',
-	importBtn: 'import-btn',
-	saturateBtn: 'saturate-btn',
-	showAsCMYKBtn: 'show-as-cmyk-btn',
-	showAsHexBtn: 'show-as-hex-btn',
-	showAsHSLBtn: 'show-as-hsl-btn',
-	showAsHSVBtn: 'show-as-hsv-btn',
-	showAsLABBtn: 'show-as-lab-btn',
-	showAsRGBBtn: 'show-as-rgb-btn',
-	helpMenuDiv: 'help-menu',
-	historyMenuDiv: 'history-menu',
-	paletteContainerDiv: 'palette-container',
-	paletteHistoryDiv: 'palette-history',
-	columnCountInput: 'palette-column-count-selector',
-	limitDarkChkbx: 'limit-dark-chkbx',
-	limitGrayChkbx: 'limit-gray-chkbx',
-	limitLightChkbx: 'limit-light-chkbx',
-	paletteColumnInput: 'palette-column-selector',
-	paletteTypeInput: 'palette-type-selector'
+	btns: {
+		desaturate: 'desaturate-btn',
+		export: 'export-btn',
+		generate: 'generate-btn',
+		helpMenu: 'help-menu-btn',
+		historyMenu: 'history-menu-btn',
+		import: 'import-btn',
+		saturate: 'saturate-btn',
+		showAsCMYK: 'show-as-cmyk-btn',
+		showAsHex: 'show-as-hex-btn',
+		showAsHSL: 'show-as-hsl-btn',
+		showAsHSV: 'show-as-hsv-btn',
+		showAsLAB: 'show-as-lab-btn',
+		showAsRGB: 'show-as-rgb-btn'
+	},
+	divs: {
+		helpMenu: 'help-menu',
+		historyMenu: 'history-menu',
+		paletteContainer: 'palette-container',
+		paletteHistory: 'palette-history'
+	},
+	inputs: {
+		columnCount: 'palette-column-count-selector',
+		limitDarkChkbx: 'limit-dark-chkbx',
+		limitGrayChkbx: 'limit-gray-chkbx',
+		limitLightChkbx: 'limit-light-chkbx',
+		paletteColumn: 'palette-column-selector',
+		paletteType: 'palette-type-selector'
+	}
 } as const;
 
 const dynamicIDs: Readonly<DOMIndex['dynamicIDs']> = {
@@ -111,9 +118,7 @@ const domConfig: DOMConfig = {
 // ***********************************************************
 
 const paletteConfig: PaletteConfig = {
-	adjustment: {
-		slaValue: 10
-	},
+	adjustment: { slaValue: 10 },
 	probabilities: {
 		base: {
 			values: [40, 45, 50, 55, 60, 65, 70],
@@ -133,44 +138,40 @@ const paletteConfig: PaletteConfig = {
 		}
 	},
 	shiftRanges: {
+		analogous: { hue: 30, sat: 30, light: 30 },
 		complementary: { hue: 10, sat: 0, light: 0 },
+		custom: { hue: 0, sat: 0, light: 0 },
 		diadic: { hue: 30, sat: 30, light: 30 },
 		hexadic: { hue: 0, sat: 30, light: 30 },
+		monochromatic: { hue: 0, sat: 0, light: 10 },
 		random: { hue: 0, sat: 0, light: 0 },
 		splitComplementary: { hue: 30, sat: 30, light: 30 },
 		tetradic: { hue: 0, sat: 30, light: 30 },
 		triadic: { hue: 0, sat: 30, light: 30 }
 	},
-	thresholds: {
-		dark: 25,
-		gray: 20,
-		light: 75
-	}
+	thresholds: { dark: 25, gray: 20, light: 75 }
 };
 
-//
-///
-//// ******** 1. ENVIRONMENT CONSTANTS ********
-///
-//
-
-const appHistoryLimit = 100;
-const appPaletteHistoryLimit = 20;
-
-// ***************** REGEX *******************
+// ****************************************************
+/// **************************************************
+//// ******************* 4. REGEX *******************
+/// **************************************************
+// ****************************************************
 
 const number = '\\d+';
 const decimal = '[\\d.]+';
 const percent = '%?';
 const optionalAlpha = '(?:,\\s*([\\d.]+))?';
 
-const colorFunc = (name: string, args: string[]) => {
-	new RegExp(`${name}\\(${args.join(',\\s*')}${optionalAlpha}\\)`, 'i');
+const colorFunc = (name: string, args: string[]): RegExp => {
+	return new RegExp(
+		`${name}\\(${args.join(',\\s*')}${optionalAlpha}\\)`,
+		'i'
+	);
 };
 
-const regex = {
+const regex: Readonly<RegexConfig> = {
 	brand: { hex: /^#[0-9A-Fa-f]{8}$/ },
-
 	colors: {
 		cmyk: colorFunc('cmyk', [
 			number + percent,
@@ -185,7 +186,6 @@ const regex = {
 		rgb: colorFunc('rgb', [decimal, decimal, decimal]),
 		xyz: colorFunc('xyz', [decimal, decimal, decimal])
 	},
-
 	css: {
 		cmyk: colorFunc('cmyk', [
 			number + percent,
@@ -194,44 +194,50 @@ const regex = {
 			number + percent
 		]),
 		hsl: colorFunc('hsl', [number, number + percent, number + percent]),
-		rgb: colorFunc('rgb', [number, number, number])
+		hsv: colorFunc('hsv', [number, number + percent, number + percent]),
+		lab: colorFunc('lab', [decimal, decimal, decimal]),
+		rgb: colorFunc('rgb', [number, number, number]),
+		xyz: colorFunc('xyz', [decimal, decimal, decimal])
 	},
-
 	dom: {
 		hex: /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/i,
 		hsl: colorFunc('hsl', [number, decimal + percent, decimal + percent]),
 		rgb: colorFunc('rgb', [number, number, number])
 	},
-
+	stackTrace: {
+		withFn: /at\s+(.*)\s+\((.*):(\d+):(\d+)\)/,
+		withoutFn: /at\s+(.*):(\d+):(\d+)/
+	},
 	userInput: {
 		hex: /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/i,
 		hsl: colorFunc('hsl', [number, number + percent, number + percent]),
 		rgb: colorFunc('rgb', [number, number, number])
 	},
-
 	validation: {
 		hex: /^#[0-9A-Fa-f]{6}$/,
 		hexComponent: /^#[0-9a-fA-F]{2}$/
 	}
 };
 
+// *****************************************************
+/// ***************************************************
+//// **************** 5. ENV CONFIG ******************
+/// ***************************************************
+// *****************************************************
+
 const env: Readonly<EnvData> = {
-	adjustments,
-	appLimits,
-	debounce,
-	paletteRanges,
-	probabilities,
-	regex,
-	thresholds,
-	timers,
-	ui
+	appHistoryLimit: 100,
+	appPaletteHistoryLimit: 20,
+	observerDebounce: 100,
+	semaphoreMaxLocks: 10,
+	semaphoreTimeout: 5000
 } as const;
 
-//
-///
-//// ******** 2. DEFAULT DATA ********
-///
-//
+// *****************************************************
+/// ***************************************************
+//// **************** 5. DEFAULT DATA ****************
+/// ***************************************************
+// *****************************************************
 
 const palette: Readonly<Palette> = {
 	id: `default-palette-${Date.now()}`,
@@ -239,11 +245,9 @@ const palette: Readonly<Palette> = {
 	metadata: {
 		name: 'DEFAULT PALETTE',
 		columnCount: 5,
-		flags: {
-			limitDark: false,
-			limitGray: false,
-			limitLight: false
-		},
+		limitDark: false,
+		limitGray: false,
+		limitLight: false,
 		type: 'random',
 		timestamp: `${Date.now()}`
 	}
@@ -269,11 +273,7 @@ const paletteItem: Readonly<PaletteItem> = {
 			saturation: 0 as Percentile,
 			value: 0 as Percentile
 		},
-		lab: {
-			l: 0 as LAB_L,
-			a: 0 as LAB_A,
-			b: 0 as LAB_B
-		},
+		lab: { l: 0 as LAB_L, a: 0 as LAB_A, b: 0 as LAB_B },
 		rgb: {
 			red: 0 as ByteRange,
 			green: 0 as ByteRange,
@@ -296,7 +296,7 @@ const paletteItem: Readonly<PaletteItem> = {
 	}
 };
 
-const colors: Readonly<DefaultData>['colors'] = {
+const colors: Readonly<Defaults>['colors'] = {
 	cmyk: {
 		value: {
 			cyan: 0 as Percentile,
@@ -327,11 +327,7 @@ const colors: Readonly<DefaultData>['colors'] = {
 		format: 'hsv'
 	},
 	lab: {
-		value: {
-			l: 0 as LAB_L,
-			a: 0 as LAB_A,
-			b: 0 as LAB_B
-		},
+		value: { l: 0 as LAB_L, a: 0 as LAB_A, b: 0 as LAB_B },
 		format: 'lab'
 	},
 	rgb: {
@@ -343,114 +339,55 @@ const colors: Readonly<DefaultData>['colors'] = {
 		format: 'rgb'
 	},
 	sl: {
-		value: {
-			saturation: 0 as Percentile,
-			lightness: 0 as Percentile
-		},
+		value: { saturation: 0 as Percentile, lightness: 0 as Percentile },
 		format: 'sl'
 	},
 	sv: {
-		value: {
-			saturation: 0 as Percentile,
-			value: 0 as Percentile
-		},
+		value: { saturation: 0 as Percentile, value: 0 as Percentile },
 		format: 'sv'
 	},
 	xyz: {
-		value: {
-			x: 0 as XYZ_X,
-			y: 0 as XYZ_Y,
-			z: 0 as XYZ_Z
-		},
+		value: { x: 0 as XYZ_X, y: 0 as XYZ_Y, z: 0 as XYZ_Z },
 		format: 'xyz'
 	},
-	unbranded: {
-		cmyk: {
-			value: { cyan: 0, magenta: 0, yellow: 0, key: 0 },
-			format: 'cmyk'
-		},
-		hex: {
-			value: { hex: '#000000FF' },
-			format: 'hex'
-		},
-		hsl: {
-			value: { hue: 0, saturation: 0, lightness: 0 },
-			format: 'hsl'
-		},
-		hsv: {
-			value: { hue: 0, saturation: 0, value: 0 },
-			format: 'hsv'
-		},
-		lab: {
-			value: { l: 0, a: 0, b: 0 },
-			format: 'lab'
-		},
-		sl: {
-			value: { saturation: 0, lightness: 0 },
-			format: 'sl'
-		},
-		rgb: {
-			value: { red: 0, green: 0, blue: 0 },
-			format: 'rgb'
-		},
-		sv: {
-			value: { saturation: 0, value: 0 },
-			format: 'sv'
-		},
-		xyz: {
-			value: { x: 0, y: 0, z: 0 },
-			format: 'xyz'
-		}
+	cmykNum: {
+		value: { cyan: 0, magenta: 0, yellow: 0, key: 0 },
+		format: 'cmyk'
 	},
-	css: {
-		cmyk: 'cmyk(0%, 0%, 0%, 0%)',
-		hex: '#000000',
-		hsl: 'hsl(0, 0%, 0%)',
-		hsv: 'hsv(0, 0%, 0%)',
-		lab: 'lab(0, 0, 0)',
-		rgb: 'rgb(0, 0, 0)',
-		sl: 'sl(0%, 0%)',
-		sv: 'sv(0%, 0%)',
-		xyz: 'xyz(0, 0, 0)'
+	hslNum: { value: { hue: 0, saturation: 0, lightness: 0 }, format: 'hsl' },
+	hsvNum: { value: { hue: 0, saturation: 0, value: 0 }, format: 'hsv' },
+	labNum: { value: { l: 0, a: 0, b: 0 }, format: 'lab' },
+	rgbNum: { value: { red: 0, green: 0, blue: 0 }, format: 'rgb' },
+	slNum: { value: { saturation: 0, lightness: 0 }, format: 'sl' },
+	svNum: { value: { saturation: 0, value: 0 }, format: 'sv' },
+	xyzNum: { value: { x: 0, y: 0, z: 0 }, format: 'xyz' },
+	cmykString: {
+		value: { cyan: '0', magenta: '0', yellow: '0', key: '0' },
+		format: 'cmyk'
 	},
-	strings: {
-		cmyk: {
-			value: { cyan: '0', magenta: '0', yellow: '0', key: '0' },
-			format: 'cmyk'
-		},
-		hex: {
-			value: { hex: '#000000' },
-			format: 'hex'
-		},
-		hsl: {
-			value: { hue: '0', saturation: '0', lightness: '0' },
-			format: 'hsl'
-		},
-		hsv: {
-			value: { hue: '0', saturation: '0', value: '0' },
-			format: 'hsv'
-		},
-		lab: {
-			value: { l: '0', a: '0', b: '0' },
-			format: 'lab'
-		},
-		rgb: {
-			value: { red: '0', green: '0', blue: '0' },
-			format: 'rgb'
-		},
-		sl: {
-			value: { saturation: '0', lightness: '0' },
-			format: 'sl'
-		},
-		sv: {
-			value: { saturation: '0', value: '0' },
-			format: 'sv'
-		},
-		xyz: {
-			value: { x: '0', y: '0', z: '0' },
-			format: 'xyz'
-		}
-	}
+	hexString: { value: { hex: '#000000' }, format: 'hex' },
+	hslString: {
+		value: { hue: '0', saturation: '0', lightness: '0' },
+		format: 'hsl'
+	},
+	hsvString: {
+		value: { hue: '0', saturation: '0', value: '0' },
+		format: 'hsv'
+	},
+	labString: { value: { l: '0', a: '0', b: '0' }, format: 'lab' },
+	rgbString: { value: { red: '0', green: '0', blue: '0' }, format: 'rgb' },
+	slString: { value: { saturation: '0', lightness: '0' }, format: 'sl' },
+	svString: { value: { saturation: '0', value: '0' }, format: 'sv' },
+	xyzString: { value: { x: '0', y: '0', z: '0' }, format: 'xyz' },
+	cmykCSS: 'cmyk(0%, 0%, 0%, 0%)',
+	hexCSS: '#000000',
+	hslCSS: 'hsl(0, 0%, 0%)',
+	hsvCSS: 'hsv(0, 0%, 0%)',
+	labCSS: 'lab(0, 0, 0)',
+	rgbCSS: 'rgb(0, 0, 0)',
+	slCSS: 'sl(0%, 0%)',
+	svCSS: 'sv(0%, 0%)',
+	xyzCSS: 'xyz(0, 0, 0)'
 };
 
 const mutation: Readonly<MutationLog> = {
@@ -460,6 +397,11 @@ const mutation: Readonly<MutationLog> = {
 	newValue: { value: 'new_value' },
 	oldValue: { value: 'old_value' },
 	origin: 'DEFAULT'
+};
+
+const observerData: Readonly<DefaultObserverData> = {
+	count: 0,
+	name: 'TEST'
 };
 
 const paletteOptions: Readonly<SelectedPaletteOptions> = {
@@ -474,12 +416,10 @@ const paletteOptions: Readonly<SelectedPaletteOptions> = {
 const state: Readonly<State> = {
 	appMode: 'edit',
 	paletteHistory: [],
-	paletteContainer: {
-		columns: []
-	},
+	paletteContainer: { columns: [] },
 	preferences: {
 		colorSpace: 'hsl' as ColorSpace,
-		distributionType: 'soft' as keyof EnvData['probabilities'],
+		distributionType: 'soft' as keyof PaletteConfig['probabilities'],
 		maxHistory: 20,
 		maxPaletteHistory: 10,
 		theme: 'light'
@@ -489,21 +429,19 @@ const state: Readonly<State> = {
 		paletteType: 'complementary',
 		targetedColumnPosition: 1
 	},
-	timestamp: 'NULL TIMESTAMP'
+	timestamp: 'NULL'
 };
 
 const unbrandedPalette: Readonly<UnbrandedPalette> = {
-	id: `null-unbranded-palette}`,
+	id: `null-unbranded-palette`,
 	items: [],
 	metadata: {
 		name: 'UNBRANDED DEFAULT PALETTE',
 		timestamp: '???',
 		columnCount: 1,
-		flags: {
-			limitDark: false,
-			limitGray: false,
-			limitLight: false
-		},
+		limitDark: false,
+		limitGray: false,
+		limitLight: false,
 		type: 'random'
 	}
 } as const;
@@ -530,28 +468,11 @@ const unbrandedPaletteItem: Readonly<UnbrandedPaletteItem> = {
 	}
 } as const;
 
-const defaults: Readonly<DefaultData> = {
-	colors,
-	mutation,
-	palette,
-	paletteItem,
-	paletteOptions,
-	state,
-	unbrandedPalette,
-	unbrandedPaletteItem
-} as const;
-
-//
-///
-//// ******** 3. DOM INDEX ********
-///
-//
-
-//
-///
-//// ******** 4. MODE ********
-///
-//
+// *****************************************************
+/// ***************************************************
+//// ******************** 6. MODE ********************
+/// ***************************************************
+// *****************************************************
 
 const mode: Readonly<ModeData> = {
 	env: 'dev',
@@ -568,11 +489,11 @@ const mode: Readonly<ModeData> = {
 	stackTrace: true
 } as const;
 
-//
-///
-//// ******** 5. SETS ********
-///
-//
+// *****************************************************
+/// ***************************************************
+//// ******************** 7. SETS ********************
+/// ***************************************************
+// *****************************************************
 
 export const sets: Readonly<SetsData> = {
 	ByteRange: [0, 255] as const,
@@ -587,11 +508,11 @@ export const sets: Readonly<SetsData> = {
 	XYZ_Z: [0, 108.883] as const
 } as const;
 
-//
-///
-//// ******** 6. STORAGE DATA ********
-///
-//
+// *****************************************************
+/// ***************************************************
+//// **************** 8. STORAGE DATA ****************
+/// ***************************************************
+// *****************************************************
 
 const storage: Readonly<StorageData> = {
 	idbDBName: 'IndexedDB',
@@ -599,9 +520,11 @@ const storage: Readonly<StorageData> = {
 	idbStoreName: 'AppStorage'
 };
 
-//
-///
-//// ******** 7. MATHEMATICAL CONSTANTS ********
+// *********************************************************
+/// *******************************************************
+//// ************* 9. MATHEMATICAL CONSTANTS *************
+/// *******************************************************
+// *********************************************************
 
 const math: Readonly<MathData> = {
 	epsilon: 0.00001,
@@ -613,14 +536,13 @@ const math: Readonly<MathData> = {
 	minXYZ_Z: 0
 } as const;
 
-//
-///
-//// ******** 8. FINAL EXPORTED DATA OBJECTS ********
-///
-//
+// *****************************************************
+/// ***************************************************
+//// ***************** 10. EXPORTS *******************
+/// ***************************************************
+// *****************************************************
 
 export const config: Readonly<Configuration> = {
-	defaults,
 	env,
 	math,
 	mode,
@@ -628,8 +550,22 @@ export const config: Readonly<Configuration> = {
 	storage
 } as const;
 
-const domIndex: Readonly<DOMIndex> = {
+export const defaults: Readonly<Defaults> = {
+	colors,
+	mutation,
+	observerData,
+	palette,
+	paletteItem,
+	paletteOptions,
+	state,
+	unbrandedPalette,
+	unbrandedPaletteItem
+} as const;
+
+export const domIndex: Readonly<DOMIndex> = {
 	classes,
 	dynamicIDs,
 	ids
 } as const;
+
+export { domConfig, paletteConfig, regex };

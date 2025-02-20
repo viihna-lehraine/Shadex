@@ -1,42 +1,66 @@
 // File: common/factories/services.ts
 
-import { ServicesInterface } from '../../types/index.js';
-import { AppLogger } from '../services/AppLogger.js';
-import { ErrorHandler } from '../services/ErrorHandler.js';
+import { DefaultObserverData, Helpers, Services } from '../../types/index.js';
+import {
+	DataObserver,
+	DOMStore,
+	ErrorHandler,
+	Logger,
+	Semaphore
+} from '../services/index.js';
 import { config } from '../../config/index.js';
-import { getCallerInfo } from '../services/helpers.js';
 
-const mode = config.mode;
+export function serviceFactory<
+	T extends DefaultObserverData = DefaultObserverData
+>(helpers: Helpers, initialData: T): Services<T> {
+	console.log('[ServiceFactory-1] Loading createServices...');
 
-export function createServices(): ServicesInterface {
-	console.log('[FACTORIES.service] Loading createServices...');
+	const services = {} as Services<T>;
 
-	const logger = AppLogger.getInstance();
-	const errors = ErrorHandler.getInstance(logger);
+	const logger = Logger.getInstance(helpers);
+	services.errors = ErrorHandler.getInstance(helpers, logger);
 
-	if (!logger || !errors) {
+	if (!logger || !services.errors) {
 		throw new Error(
-			'[FACTORIES.service] Logger or ErrorHandler failed to initialize.'
+			'[ServiceFactory-2] Logger or ErrorHandler failed to initialize.'
 		);
 	}
 
-	const log: ServicesInterface['log'] = (
+	services.log = (
 		message: string,
 		level: 'debug' | 'info' | 'warn' | 'error' = 'info',
 		verbosityRequirement: number = 0
 	) => {
 		if (
-			mode.logging[level] &&
-			mode.logging.verbosity >= verbosityRequirement
+			config.mode.log[level] &&
+			config.mode.log.verbosity >= verbosityRequirement
 		) {
-			const caller = getCallerInfo();
+			const caller = helpers.data.getCallerInfo();
 			logger.log(message, level, caller);
 		}
 
-		if (level === 'error' && mode.showAlerts) {
+		if (level === 'error' && config.mode.showAlerts) {
 			alert(message);
 		}
 	};
 
-	return { log, errors };
+	services.domStore = DOMStore.getInstance(
+		services.errors,
+		helpers,
+		services.log
+	);
+	services.observer = new DataObserver<T>(initialData);
+
+	services.setObserverData = (newData: T) => {
+		services.observer.setData(newData);
+		services.log(
+			`DataObserver updated with new data: ${JSON.stringify(newData)}`,
+			'debug',
+			2
+		);
+	};
+
+	services.semaphore = new Semaphore();
+
+	return services;
 }

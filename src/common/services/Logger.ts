@@ -1,82 +1,79 @@
-// File: common/services/AppLogger.js
+// File: common/services/Logger.js
 
-import { AppLoggerInterface, MutationLog } from '../../types/index.js';
-import { getCallerInfo } from './helpers.js';
+import { Helpers, LoggerInterface, MutationLog } from '../../types/index.js';
 import { config } from '../../config/index.js';
 
 const mode = config.mode;
 const debugLevel = mode.debugLevel;
 
-export class AppLogger implements AppLoggerInterface {
-	private static instance: AppLogger | null = null;
+export class Logger implements LoggerInterface {
+	static #instance: Logger | null = null;
+	#getCallerInfo: Helpers['data']['getCallerInfo'];
 
-	private constructor() {
-		console.log('[AppLogger] AppLogger constructor executed.');
+	constructor(helpers: Helpers) {
+		this.#getCallerInfo = helpers.data.getCallerInfo;
+		console.log('[Logger] Logger class constructor executed successfully.');
 	}
 
-	public static getInstance(): AppLogger {
-		console.log('[AppLogger] Executing getInstance().');
+	static getInstance(helpers: Helpers): Logger {
+		console.log('[Logger] Executing getInstance().');
 
-		if (!AppLogger.instance) {
-			console.log(
-				'[AppLogger] No instance found. Creating new instance.'
-			);
-			AppLogger.instance = new AppLogger();
-			console.log('[AppLogger] Instance created.');
+		if (!Logger.#instance) {
+			console.log('[Logger] No instance found. Creating new instance.');
+			Logger.#instance = new Logger(helpers);
+			console.log('[Logger] Instance created.');
 		}
 
-		console.log('[AppLogger] Returning existing instance.');
-		return AppLogger.instance;
+		console.log('[Logger] Returning existing instance.');
+		return Logger.#instance;
 	}
 
-	public log(
+	log(
 		message: string,
 		level: 'debug' | 'info' | 'warn' | 'error' = 'info',
 		caller?: string
 	): void {
 		if (debugLevel >= 5) {
-			console.log(`[AppLogger.log] Log function CALLED with:`, {
+			console.log(`[Logger.log] Log function CALLED with:`, {
 				message,
 				level,
 				debugLevel,
 				caller
 			});
 		}
-		this.logMessage(message, level, caller);
+		this.#logMessage(message, level, caller);
 	}
 
-	public logMutation(
+	logMutation(
 		data: MutationLog,
 		logCallback: (data: MutationLog) => void = () => {}
 	): void {
-		this.log(this.formatMutationLog(data), 'info');
+		this.log(this.#formatMutationLog(data), 'info');
 
 		logCallback(data);
 	}
 
-	private logMessage(
+	#logMessage(
 		message: string,
 		level: 'debug' | 'info' | 'warn' | 'error',
 		caller?: string
 	): void {
-		if (level === 'info' || debugLevel < this.getDebugThreshold(level)) {
+		if (level === 'info' || debugLevel < this.#getDebugThreshold(level)) {
 			return;
 		}
 
-		const callerInfo = caller || getCallerInfo();
-		const timestamp = this.getFormattedTimestamp();
+		const callerInfo = caller || this.#getCallerInfo();
+		const timestamp = this.#getFormattedTimestamp();
 
 		try {
 			console.log(
 				`%c[${level.toUpperCase()}]%c ${timestamp} [${callerInfo}] %c${message}`,
-				this.getLevelColor(level),
+				this.#getLevelColor(level),
 				'color: gray',
 				'color: inherit'
 			);
 		} catch (error) {
-			console.error(
-				`AppLogger encountered an unexpected error: ${error}`
-			);
+			console.error(`Logger encountered an unexpected error: ${error}`);
 		}
 
 		if (
@@ -88,13 +85,11 @@ export class AppLogger implements AppLoggerInterface {
 		}
 	}
 
-	private formatMutationLog(data: MutationLog): string {
+	#formatMutationLog(data: MutationLog): string {
 		return `Mutation logged: ${JSON.stringify(data)}`;
 	}
 
-	private getDebugThreshold(
-		level: 'debug' | 'info' | 'warn' | 'error'
-	): number {
+	#getDebugThreshold(level: 'debug' | 'info' | 'warn' | 'error'): number {
 		switch (level) {
 			case 'debug':
 				return 2;
@@ -109,7 +104,7 @@ export class AppLogger implements AppLoggerInterface {
 		}
 	}
 
-	private getFormattedTimestamp(): string {
+	#getFormattedTimestamp(): string {
 		return new Date().toLocaleString('en-US', {
 			year: 'numeric',
 			month: '2-digit',
@@ -121,7 +116,7 @@ export class AppLogger implements AppLoggerInterface {
 		});
 	}
 
-	private getLevelColor(level: 'debug' | 'info' | 'warn' | 'error'): string {
+	#getLevelColor(level: 'debug' | 'info' | 'warn' | 'error'): string {
 		switch (level) {
 			case 'debug':
 				return 'color: green';

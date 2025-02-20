@@ -1,26 +1,26 @@
 // File: common/utils/adjust.js
 
 import {
-	AdjustmentUtilsInterface,
+	AdjustmentUtils,
 	HSL,
 	RGB,
-	ServicesInterface,
-	UtilitiesInterface
+	Services,
+	Utilities
 } from '../../types/index.js';
-import { config } from '../../config/index.js';
+import { config, defaults, paletteConfig } from '../../config/index.js';
 
-const adjustments = config.env.adjustments;
-const defaultColors = config.defaults.colors;
+const adjustments = paletteConfig.adjustment;
+const defaultColors = defaults.colors;
 const math = config.math;
 
-export function createAdjustmentUtils(
-	services: ServicesInterface,
-	utils: UtilitiesInterface
-): AdjustmentUtilsInterface {
+export function adjustmentUtilsFactory(
+	services: Services,
+	utils: Utilities
+): AdjustmentUtils {
+	const { log } = services;
+
 	return {
 		applyGammaCorrection(value: number): number {
-			const log = services.log;
-
 			try {
 				return value > 0.0031308
 					? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
@@ -32,7 +32,6 @@ export function createAdjustmentUtils(
 			}
 		},
 		clampRGB(rgb: RGB): RGB {
-			const log = services.log;
 			const defaultRGB = defaultColors.rgb;
 
 			if (!utils.validate.colorValue(rgb)) {
@@ -75,8 +74,6 @@ export function createAdjustmentUtils(
 			return value / reference;
 		},
 		sl(color: HSL): HSL {
-			const log = services.log;
-
 			try {
 				if (!utils.validate.colorValue(color)) {
 					log('Invalid color valus for adjustment.', 'error');

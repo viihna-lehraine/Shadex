@@ -9,9 +9,13 @@
 
 // File: index.js
 
+import { helpersFactory } from './common/factories/helpers.js';
+
+const helpers = await helpersFactory();
+
 window.onerror = function (message, source, lineno, colno, error) {
-	import('./common/services/AppLogger.js').then(({ AppLogger }) => {
-		const logger = AppLogger.getInstance();
+	import('./common/services/Logger.js').then(({ Logger }) => {
+		const logger = Logger.getInstance(helpers);
 		logger.log(
 			`[GLOBAL ERROR HANDLER]: Unhandled error: ${message} at ${source}:${lineno}:${colno}`
 		);
@@ -24,8 +28,8 @@ window.onerror = function (message, source, lineno, colno, error) {
 };
 
 window.addEventListener('unhandledrejection', function (event) {
-	import('./common/services/AppLogger.js').then(({ AppLogger }) => {
-		const logger = AppLogger.getInstance();
+	import('./common/services/Logger.js').then(({ Logger }) => {
+		const logger = Logger.getInstance(helpers);
 		logger.log(
 			`[GLOBAL ERROR HANDLER]: Unhandled promise rejection: ${event.reason}`
 		);

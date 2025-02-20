@@ -1,15 +1,21 @@
 // File: common/utils/brand.js
 
 import {
-	BrandingUtilsInterface,
+	BrandingUtils,
 	ByteRange,
 	CMYK,
+	CMYKNumMap,
 	Color,
+	ColorNumMap,
 	Hex,
 	HexSet,
+	HexStringMap,
 	HSL,
+	HSLNumMap,
 	HSV,
+	HSVNumMap,
 	LAB,
+	LABNumMap,
 	LAB_L,
 	LAB_A,
 	LAB_B,
@@ -20,28 +26,20 @@ import {
 	RGB,
 	SL,
 	SV,
-	UnbrandedCMYK,
-	UnbrandedColor,
-	UnbrandedHex,
-	UnbrandedHSL,
-	UnbrandedHSV,
-	UnbrandedLAB,
 	UnbrandedPalette,
-	UnbrandedRGB,
-	UnbrandedSL,
-	UnbrandedSV,
-	UnbrandedXYZ,
-	UtilitiesInterface,
+	RGBNumMap,
+	SLNumMap,
+	SVNumMap,
+	Utilities,
 	XYZ,
+	XYZNumMap,
 	XYZ_X,
 	XYZ_Y,
 	XYZ_Z
 } from '../../types/index.js';
-import { config } from '../../config/index.js';
+import { regex } from '../../config/index.js';
 
-const regex = config.env.regex;
-
-export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInterface {
+export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
 	function asByteRange(value: number): ByteRange {
 		utils.validate.range(value, 'ByteRange');
 
@@ -126,7 +124,7 @@ export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInt
 
 			return value as RangeKeyMap[T];
 		},
-		asCMYK(color: UnbrandedCMYK): CMYK {
+		asCMYK(color: CMYKNumMap): CMYK {
 			const brandedCyan = asPercentile(color.value.cyan);
 			const brandedMagenta = asPercentile(color.value.magenta);
 			const brandedYellow = asPercentile(color.value.yellow);
@@ -142,7 +140,7 @@ export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInt
 				format: 'cmyk'
 			};
 		},
-		asHex(color: UnbrandedHex): Hex {
+		asHex(color: HexStringMap): Hex {
 			let hex = color.value.hex;
 
 			if (!hex.startsWith('#')) hex = `#${hex}`;
@@ -159,7 +157,7 @@ export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInt
 				format: 'hex'
 			};
 		},
-		asHSL(color: UnbrandedHSL): HSL {
+		asHSL(color: HSLNumMap): HSL {
 			const brandedHue = asRadial(color.value.hue);
 			const brandedSaturation = asPercentile(color.value.saturation);
 			const brandedLightness = asPercentile(color.value.lightness);
@@ -173,7 +171,7 @@ export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInt
 				format: 'hsl'
 			};
 		},
-		asHSV(color: UnbrandedHSV): HSV {
+		asHSV(color: HSVNumMap): HSV {
 			const brandedHue = asRadial(color.value.hue);
 			const brandedSaturation = asPercentile(color.value.saturation);
 			const brandedValue = asPercentile(color.value.value);
@@ -187,7 +185,7 @@ export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInt
 				format: 'hsv'
 			};
 		},
-		asLAB(color: UnbrandedLAB): LAB {
+		asLAB(color: LABNumMap): LAB {
 			const brandedL = asLAB_L(color.value.l);
 			const brandedA = asLAB_A(color.value.a);
 			const brandedB = asLAB_B(color.value.b);
@@ -201,7 +199,7 @@ export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInt
 				format: 'lab'
 			};
 		},
-		asRGB(color: UnbrandedRGB): RGB {
+		asRGB(color: RGBNumMap): RGB {
 			const brandedRed = asByteRange(color.value.red);
 			const brandedGreen = asByteRange(color.value.green);
 			const brandedBlue = asByteRange(color.value.blue);
@@ -215,7 +213,7 @@ export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInt
 				format: 'rgb'
 			};
 		},
-		asSL(color: UnbrandedSL): SL {
+		asSL(color: SLNumMap): SL {
 			const brandedSaturation = asPercentile(color.value.saturation);
 			const brandedLightness = asPercentile(color.value.lightness);
 
@@ -227,7 +225,7 @@ export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInt
 				format: 'sl'
 			};
 		},
-		asSV(color: UnbrandedSV): SV {
+		asSV(color: SVNumMap): SV {
 			const brandedSaturation = asPercentile(color.value.saturation);
 			const brandedValue = asPercentile(color.value.value);
 
@@ -239,7 +237,7 @@ export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInt
 				format: 'sv'
 			};
 		},
-		asXYZ(color: UnbrandedXYZ): XYZ {
+		asXYZ(color: XYZNumMap): XYZ {
 			const brandedX = asXYZ_X(color.value.x);
 			const brandedY = asXYZ_Y(color.value.y);
 			const brandedZ = asXYZ_Z(color.value.z);
@@ -253,7 +251,7 @@ export function createBrandingUtils(utils: UtilitiesInterface): BrandingUtilsInt
 				format: 'xyz'
 			};
 		},
-		brandColor(color: UnbrandedColor): Color {
+		brandColor(color: ColorNumMap): Color {
 			switch (color.format) {
 				case 'cmyk':
 					return {

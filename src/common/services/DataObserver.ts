@@ -2,66 +2,103 @@
 
 import { DataObserverInterface, Listener } from '../../types/index.js';
 
+interface DebounceOptions {
+	delay?: number;
+}
+
 export class DataObserver<T extends Record<string, unknown>>
 	implements DataObserverInterface<T>
 {
-	private data: T;
-	private listeners: Partial<Record<keyof T, Listener<T[keyof T]>[]>> =
-		{} as Record<keyof T, Listener<T[keyof T]>[]>;
+	#listeners: { [P in keyof T]?: Listener<T[P]>[] } = {};
+	#debounceTimers: Partial<Record<keyof T, NodeJS.Timeout>> = {};
 
-	constructor(initialData: T) {
-		this.data = new Proxy(initialData, {
-			set: (obj, prop: string | symbol, value: unknown) => {
-				if (typeof prop === 'string' && prop in obj) {
-					const typedProp = prop as keyof T;
-					const oldValue = obj[typedProp];
-
-					obj[typedProp] = value as T[keyof T];
-
-					console.log(
-						`[Proxy] ${prop as string} changed from`,
-						oldValue,
-						'to',
-						value
-					);
-					this.notify(prop, value as T[keyof T], oldValue);
-				}
-
-				return true;
-			},
-			deleteProperty: (obj, prop: string | symbol) => {
-				if (typeof prop === 'string' && prop in obj) {
-					const typedProp = prop as keyof T;
-					console.log(`[Proxy] ${typedProp as string} deleted.`);
-					this.notify(
-						typedProp as string,
-						undefined as T[keyof T],
-						obj[typedProp]
-					);
-					delete obj[typedProp];
-				}
-
-				return true;
-			}
-		});
+	constructor(
+		private data: T,
+		private debounceOptions: DebounceOptions = {}
+	) {
+		this.data = this.#deepObserve(this.data);
 	}
 
-	public get<K extends keyof T>(prop: K): T[K] {
+	get<K extends keyof T>(prop: K): T[K] {
 		return this.data[prop];
 	}
 
-	// subscribe to property changes
-	public on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void {
-		if (!this.listeners[prop]) this.listeners[prop] = [];
-		(this.listeners[prop] as Listener<T[K]>[]).push(callback);
+	off<K extends keyof T>(prop: K, callback: Listener<T[K]>): void {
+		this.#listeners[prop] =
+			this.#listeners[prop]?.filter(cb => cb !== callback) ?? [];
 	}
 
-	public set<K extends keyof T>(prop: K, value: T[K]): void {
+	on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void {
+		if (!this.#listeners[prop]) {
+			this.#listeners[prop] = [];
+		}
+		this.#listeners[prop]!.push(callback);
+	}
+
+	set<K extends keyof T>(prop: K, value: T[K]): void {
 		this.data[prop] = value;
 	}
 
-	// notify listeners when a property changes
-	private notify<K extends keyof T>(prop: K, newValue: T[K], oldValue: T[K]) {
-		this.listeners[prop]?.forEach(callback => callback(newValue, oldValue));
+	setData<U extends Record<string, unknown>>(newData: U): DataObserver<U> {
+		return new DataObserver(newData);
+	}
+
+	#deepObserve(obj: T): T {
+		if (typeof obj !== 'object' || obj === null) {
+			return obj;
+		}
+
+		// recursively proxy nested objects
+		return new Proxy(obj as Record<string, unknown>, {
+			get: (target, prop: string) => {
+				const value = target[prop];
+				return typeof value === 'object' && value !== null
+					? this.#deepObserve(value as T)
+					: value;
+			},
+			set: (target, prop: string, value) => {
+				if (Object.prototype.hasOwnProperty.call(target, prop)) {
+					const oldValue = target[prop];
+					target[prop] = value;
+					this.#triggerNotify(
+						prop as keyof T,
+						value as T[keyof T],
+						oldValue as T[keyof T]
+					);
+				}
+				return true;
+			},
+			deleteProperty: (target, prop: string) => {
+				if (Object.prototype.hasOwnProperty.call(target, prop)) {
+					const oldValue = target[prop];
+					delete target[prop];
+					this.#triggerNotify(
+						prop as keyof T,
+						undefined as T[keyof T],
+						oldValue as T[keyof T]
+					);
+				}
+				return true;
+			}
+		}) as T;
+	}
+
+	#notify<K extends keyof T>(prop: K, newValue: T[K], oldValue: T[K]) {
+		this.#listeners[prop]?.forEach(callback =>
+			callback(newValue, oldValue)
+		);
+	}
+
+	#triggerNotify<K extends keyof T>(prop: K, newValue: T[K], oldValue: T[K]) {
+		const delay = this.debounceOptions.delay ?? 0;
+
+		if (delay > 0) {
+			clearTimeout(this.#debounceTimers[prop]);
+			this.#debounceTimers[prop] = setTimeout(() => {
+				this.#notify(prop, newValue, oldValue);
+			}, delay);
+		} else {
+			this.#notify(prop, newValue, oldValue);
+		}
 	}
 }

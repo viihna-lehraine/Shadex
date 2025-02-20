@@ -1,45 +1,34 @@
 // File: common/factories/utils.js
 
-import {
-	HelpersInterface,
-	ServicesInterface,
-	UtilitiesInterface
-} from '../../types/index.js';
-import { coreUtils } from '../utils/core.js';
-import { typeGuards as typeGuardUtils } from '../utils/typeGuards.js';
+import { Helpers, Services, Utilities } from '../../types/index.js';
 
-export async function createUtils(
-	helpers: HelpersInterface,
-	services: ServicesInterface
-): Promise<UtilitiesInterface> {
-	const utilities = {} as UtilitiesInterface;
-
-	// load independent utility groups
-	utilities.core = coreUtils;
-	utilities.typeGuards = typeGuardUtils;
+export async function utilitiesFactory(
+	helpers: Helpers,
+	services: Services
+): Promise<Utilities> {
+	const utilities = {} as Utilities;
 
 	// dynamically import factories without calling them
-	const { createAdjustmentUtils } = await import('../utils/adjust.js');
-	const { createAppUtils } = await import('../utils/app.js');
-	const { createBrandingUtils } = await import('../utils/brand.js');
-	const { createColorUtils } = await import('../utils/color.js');
-	const { createDOMUtils } = await import('../utils/dom.js');
-	const { createFormattingUtils } = await import('../utils/format.js');
-	const { createPaletteUtils } = await import('../utils/palette.js');
-	const { createParsingUtils } = await import('../utils/parse.js');
-	const { createSanitationUtils } = await import('../utils/sanitize.js');
-	const { createValidationUtils } = await import('../utils/validate.js');
+	const { adjustmentUtilsFactory } = await import('../utils/adjust.js');
+	const { brandingUtilsFactory } = await import('../utils/brand.js');
+	const { colorUtilsFactory } = await import('../utils/color.js');
+	const { domUtilsFactory } = await import('../utils/dom.js');
+	const { formattingUtilsFactory } = await import('../utils/format.js');
+	const { paletteUtilsFactory } = await import('../utils/palette.js');
+	const { sanitationUtilsFactory } = await import('../utils/sanitize.js');
+	const { typeGuardsFactory } = await import('../utils/typeGuards.js');
+	const { validationUtilsFactory } = await import('../utils/validate.js');
 
-	utilities.adjust = createAdjustmentUtils(services, utilities);
-	utilities.app = createAppUtils(services, utilities);
-	utilities.brand = createBrandingUtils(utilities);
-	utilities.color = createColorUtils(helpers, services, utilities);
-	utilities.dom = createDOMUtils(services, utilities);
-	utilities.format = createFormattingUtils(services, utilities);
-	utilities.palette = createPaletteUtils(services, utilities);
-	utilities.parse = createParsingUtils(services, utilities);
-	utilities.sanitize = createSanitationUtils(utilities);
-	utilities.validate = createValidationUtils(utilities);
+	utilities.color = await colorUtilsFactory(helpers, services, utilities);
+	utilities.dom = await domUtilsFactory(helpers, services, utilities);
 
-	return utilities as UtilitiesInterface;
+	utilities.adjust = adjustmentUtilsFactory(services, utilities);
+	utilities.brand = brandingUtilsFactory(utilities);
+	utilities.format = formattingUtilsFactory(services, utilities);
+	utilities.palette = paletteUtilsFactory(helpers, services, utilities);
+	utilities.sanitize = sanitationUtilsFactory(utilities);
+	utilities.typeGuards = typeGuardsFactory(helpers);
+	utilities.validate = validationUtilsFactory(helpers);
+
+	return utilities as Utilities;
 }

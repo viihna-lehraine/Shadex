@@ -5,9 +5,9 @@ import type {
 	GenerateHuesFnGroup,
 	GeneratePaletteFn,
 	GeneratePaletteFnGroup,
-	HelpersInterface,
-	ServicesInterface,
-	UtilitiesInterface
+	Helpers,
+	Services,
+	Utilities
 } from '../types/index.js';
 import { EventManager } from '../events/EventManager.js';
 import { PaletteEvents } from '../events/PaletteEvents.js';
@@ -15,22 +15,23 @@ import { PaletteManager } from '../palette/PaletteManager.js';
 import { PaletteState } from '../state/PaletteState.js';
 import { StateManager } from '../state/StateManager.js';
 import { UIEvents } from '../events/UIEvents.js';
-import { createHelpers } from '../common/factories/helpers.js';
-import { createServices } from '../common/factories/services.js';
-import { createUtils } from '../common/factories/utils.js';
+import { config, defaults } from '../config/index.js';
 import { generateHuesFnGroup } from '../palette/partials/hues.js';
 import { generatePalette } from '../palette/generate.js';
 import { generatePaletteFnGroup } from '../palette/partials/types.js';
-import { config } from '../config/index.js';
+import { helpersFactory } from '../common/factories/helpers.js';
+import { serviceFactory } from '../common/factories/services.js';
+import { utilitiesFactory } from '../common/factories/utils.js';
 
+const initialData = defaults.observerData;
 const mode = config.mode;
 
-export async function initializeApp(services: ServicesInterface): Promise<{
+export async function initializeApp(
+	helpers: Helpers,
+	services: Services
+): Promise<{
 	common: Required<CommonFunctions>;
-	events: {
-		palette: PaletteEvents;
-		ui: UIEvents;
-	};
+	events: { palette: PaletteEvents; ui: UIEvents };
 	paletteManager: PaletteManager;
 	paletteState: PaletteState;
 	stateManager: StateManager;
@@ -41,40 +42,39 @@ export async function initializeApp(services: ServicesInterface): Promise<{
 		let events: { palette: PaletteEvents; ui: UIEvents } | null = null;
 
 		// 1. create empty placeholders for utils and helpers
-		log('[1] Creating placeholders for utils and helpers...');
-		const utils = {} as UtilitiesInterface;
-		const helpers = {} as HelpersInterface;
+		log('[1] Creating placeholders and helpers...');
+		const utils = {} as Utilities;
 
 		// 2. initialize utils (pass placeholders)
 		log('[2] Calling initializeUtils...');
 		Object.assign(utils, await initializeUtils(helpers, services));
 
-		// 3. initialize helpers (pass placeholders and utils)
-		log('[3] Calling initializeHelpers...');
-		Object.assign(helpers, await initializeHelpers(services, utils));
-
-		// 4. create the Common Fns object with all properties required
+		// 3. create the Common Fns object with all properties required
 		const common: Required<CommonFunctions> = {
 			helpers,
 			services,
 			utils
 		};
-		log('[4] Common functions object created.');
+		log('[3] Common functions object created.');
 
 		// 5. initialize StateManager
-		log('[5] Calling initializeStateManager...');
-		const stateManager = await initializeStateManager(services, utils);
+		log('[4] Calling initializeStateManager...');
+		const stateManager = await initializeStateManager(
+			helpers,
+			services,
+			utils
+		);
 
-		// 6. initialize PaletteState
-		log('[6] Calling initializePaletteState...');
+		// 5. initialize PaletteState
+		log('[5] Calling initializePaletteState...');
 		const paletteState = await initializePaletteState(
 			services,
 			stateManager!,
 			utils
 		);
 
-		// 7. initialize PaletteManager
-		log('[7] Calling initializePaletteManager...');
+		// 6. initialize PaletteManager
+		log('[6] Calling initializePaletteManager...');
 		const paletteManager = await initializePaletteManager(
 			stateManager!,
 			common,
@@ -82,15 +82,16 @@ export async function initializeApp(services: ServicesInterface): Promise<{
 			generatePaletteFnGroup,
 			generatePalette
 		);
-		log('[7-D] PaletteManager initialized successfully.', 'debug', 3);
+		log('[6-D] PaletteManager initialized successfully.', 'debug', 3);
 
-		// 8. instantiate Event Manager
-		log('[8] Calling EventManager.getInstance()...');
-		const eventManager = EventManager.getInstance();
+		// 7. instantiate Event Manager
+		log('[7] Calling EventManager.getInstance()...');
+		const eventManager = EventManager.getInstance(services);
 
-		// 9. initialize Events
-		log('[9] Calling initializeEvents...');
+		// 8. initialize Events
+		log('[8] Calling initializeEvents...');
 		events = (await initializeEvents(
+			helpers,
 			paletteManager!,
 			paletteState!,
 			services,
@@ -98,9 +99,9 @@ export async function initializeApp(services: ServicesInterface): Promise<{
 			utils
 		))!;
 
-		// 9a. expose classes to window
-		if (mode.exposeToWindow) {
-			log('[9a] Calling exposeToWindow...');
+		// 8-A. expose classes to window
+		if (mode.exposeClasses) {
+			log('[8-A] Calling exposeToWindow...');
 			await exposeToWindow(
 				eventManager,
 				events!.palette,
@@ -111,17 +112,17 @@ export async function initializeApp(services: ServicesInterface): Promise<{
 			);
 		}
 
-		// 10. Ensure state is fully initialized before rendering initial palette
-		log('[10] Calling stateManager.ensureStateReady()...');
+		// 9. Ensure state is fully initialized before rendering initial palette
+		log('[9] Calling stateManager.ensureStateReady()...');
 		await stateManager!.ensureStateReady();
 
-		// 11. Render initial palette
-		log('[11] Calling paletteManager.loadPalette()...');
+		// 10. Render initial palette
+		log('[10] Calling paletteManager.loadPalette()...');
 		await paletteManager!.loadPalette();
-		log('[11-D] After paletteManager.loadPalette()...', 'debug');
+		log('[10-DEBUG] After paletteManager.loadPalette()...', 'debug');
 
-		// 12. Log initialization complete
-		console.log('[12] Initialization complete.');
+		// 11. Log initialization complete
+		log('[12] Initialization complete.', 'info', 2);
 
 		return {
 			common,
@@ -133,11 +134,22 @@ export async function initializeApp(services: ServicesInterface): Promise<{
 	}, 'Error initializing application');
 }
 
-export function initializeServices(): ServicesInterface {
+export async function initializeHelpers(): Promise<Helpers> {
+	try {
+		console.log('[initializeHelpers-1] Creating helpers...');
+		const helpers = await helpersFactory();
+		console.log('[initializeHelpers-2] Helpers initialized.');
+		return helpers;
+	} catch (error) {
+		throw new Error(`Error initializing helpers: ${error}`);
+	}
+}
+
+export function initializeServices(helpers: Helpers): Services {
 	try {
 		console.log(`[initializeServices-1] Creating services....`);
-		const services = createServices();
-		services.log(`[2] Services initialized.`);
+		const services = serviceFactory(helpers, initialData);
+		services.log(`[initializeServices-2] Services initialized.`);
 		return services;
 	} catch (err) {
 		console.error(`[initializeServices-ERR] Error: ${err}`);
@@ -155,7 +167,7 @@ async function exposeToWindow(
 	eventManager: EventManager,
 	paletteEvents: PaletteEvents,
 	paletteManager: PaletteManager,
-	services: ServicesInterface,
+	services: Services,
 	stateManager: StateManager,
 	uiEvents: UIEvents
 ): Promise<void> {
@@ -174,11 +186,12 @@ async function exposeToWindow(
 }
 
 async function initializeEvents(
+	helpers: Helpers,
 	paletteManager: PaletteManager,
 	paletteState: PaletteState,
-	services: ServicesInterface,
+	services: Services,
 	stateManager: StateManager,
-	utils: UtilitiesInterface
+	utils: Utilities
 ): Promise<{
 	palette: PaletteEvents;
 	ui: UIEvents;
@@ -188,13 +201,14 @@ async function initializeEvents(
 
 	await errors.handleAsync(async () => {
 		const paletteEvents = new PaletteEvents(
+			helpers,
 			paletteManager,
 			paletteState,
 			services,
 			stateManager,
 			utils
 		);
-		const uiEvents = new UIEvents(paletteManager, services, utils);
+		const uiEvents = new UIEvents(helpers, paletteManager, services, utils);
 
 		paletteEvents.init();
 
@@ -205,20 +219,6 @@ async function initializeEvents(
 
 		return { palette: paletteEvents, ui: uiEvents };
 	}, 'Error initializing events');
-}
-
-async function initializeHelpers(
-	services: ServicesInterface,
-	utils: UtilitiesInterface
-): Promise<HelpersInterface | void> {
-	const { log, errors } = services;
-
-	await errors.handleAsync(async () => {
-		log('[1] Creating helpers...');
-		const helpers = await createHelpers(services, utils);
-		log('[2] Helpers initialized.');
-		return helpers;
-	}, 'Error initializing helpers');
 }
 
 async function initializePaletteManager(
@@ -248,9 +248,9 @@ async function initializePaletteManager(
 }
 
 async function initializePaletteState(
-	services: ServicesInterface,
+	services: Services,
 	stateManager: StateManager,
-	utils: UtilitiesInterface
+	utils: Utilities
 ): Promise<PaletteState | void> {
 	const { log, errors } = services;
 	await errors.handleAsync(async () => {
@@ -262,26 +262,27 @@ async function initializePaletteState(
 }
 
 async function initializeStateManager(
-	services: ServicesInterface,
-	utils: UtilitiesInterface
+	helpers: Helpers,
+	services: Services,
+	utils: Utilities
 ): Promise<StateManager | void> {
 	const { log, errors } = services;
 	await errors.handleAsync(async () => {
 		log('[1] Creating state manager...');
-		const stateManager = StateManager.getInstance(services, utils);
+		const stateManager = StateManager.getInstance(helpers, services, utils);
 		log('[2] StateManager initialized.');
 		return stateManager;
 	}, 'Error initializing StateManager');
 }
 
 async function initializeUtils(
-	helpers: HelpersInterface,
-	services: ServicesInterface
-): Promise<UtilitiesInterface | void> {
+	helpers: Helpers,
+	services: Services
+): Promise<Utilities | void> {
 	const { log, errors } = services;
 	await errors.handleAsync(async () => {
 		log('[initUtils-1] Creating utils...');
-		const utils = await createUtils(helpers, services);
+		const utils = await utilitiesFactory(helpers, services);
 		log('[initUtils-2] Utils initialized.');
 		return utils;
 	}, 'Error initializing utils');

@@ -7,13 +7,11 @@ import {
 	LAB_L,
 	Percentile,
 	Radial,
-	SanitationUtilsInterface,
-	UtilitiesInterface
+	SanitationUtils,
+	Utilities
 } from '../../types/index.js';
 
-export function createSanitationUtils(
-	utils: UtilitiesInterface
-): SanitationUtilsInterface {
+export function sanitationUtilsFactory(utils: Utilities): SanitationUtils {
 	function sanitizeInput(str: string): string {
 		return str.replace(
 			/[&<>"'`/=():]/g,

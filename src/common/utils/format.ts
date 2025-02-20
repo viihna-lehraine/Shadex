@@ -3,20 +3,20 @@
 import {
 	Color,
 	ColorSpace,
-	FormattingUtilsInterface,
+	FormattingUtils,
 	Hex,
 	HSL,
-	ServicesInterface,
-	UtilitiesInterface
+	Services,
+	Utilities
 } from '../../types/index.js';
-import { config } from '../../config/index.js';
+import { defaults } from '../../config/index.js';
 
-const defaultColors = config.defaults.colors;
+const defaultColors = defaults.colors;
 
-export function createFormattingUtils(
-	services: ServicesInterface,
-	utils: UtilitiesInterface
-): FormattingUtilsInterface {
+export function formattingUtilsFactory(
+	services: Services,
+	utils: Utilities
+): FormattingUtils {
 	const parseColor = (
 		colorSpace: ColorSpace,
 		value: string

@@ -2,20 +2,19 @@
 
 import {
 	Color,
+	Helpers,
 	SetsData,
 	SL,
 	SV,
-	UtilitiesInterface,
-	ValidationUtilsInterface
+	ValidationUtils
 } from '../../types/index.js';
-import { config } from '../../config/index.js';
+import { config, regex } from '../../config/index.js';
 
-const regex = config.env.regex;
 const sets = config.sets;
 
-export function createValidationUtils(
-	utils: UtilitiesInterface
-): ValidationUtilsInterface {
+export function validationUtilsFactory(helpers: Helpers): ValidationUtils {
+	const { clone } = helpers.data;
+
 	function hex(value: string, pattern: RegExp): boolean {
 		return pattern.test(value);
 	}
@@ -28,7 +27,7 @@ export function createValidationUtils(
 		hex,
 		hexSet,
 		colorValue(color: Color | SL | SV): boolean {
-			const clonedColor = utils.core.clone(color);
+			const clonedColor = clone(color);
 
 			const isNumericValid = (value: unknown): boolean =>
 				typeof value === 'number' && !isNaN(value);

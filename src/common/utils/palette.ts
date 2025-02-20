@@ -3,31 +3,37 @@
 import {
 	AllColors,
 	CMYK,
-	EnvData,
+	Helpers,
 	Hex,
 	HSL,
 	HSV,
 	LAB,
 	Palette,
+	PaletteConfig,
 	PaletteItem,
 	PaletteType,
-	PaletteUtilsInterface,
+	PaletteUtils,
 	RGB,
 	SelectedPaletteOptions,
-	ServicesInterface,
-	UtilitiesInterface,
+	Services,
+	Utilities,
 	XYZ
 } from '../../types/index.js';
-import { config } from '../../config/index.js';
+import { domIndex, paletteConfig } from '../../config/index.js';
 
-const ids = config.dom.ids;
+const ids = domIndex.ids;
 
-export function createPaletteUtils(
-	services: ServicesInterface,
-	utils: UtilitiesInterface
-): PaletteUtilsInterface {
+export function paletteUtilsFactory(
+	helpers: Helpers,
+	services: Services,
+	utils: Utilities
+): PaletteUtils {
+	const { clone } = helpers.data;
+	const { getElement } = helpers.dom;
+	const { log } = services;
+
 	function createPaletteItem(color: HSL, itemID: number): PaletteItem {
-		const clonedColor = utils.core.clone(color) as HSL;
+		const clonedColor = clone(color) as HSL;
 
 		return {
 			itemID,
@@ -42,31 +48,64 @@ export function createPaletteUtils(
 				xyz: (utils.color.convertHSL(clonedColor, 'xyz') as XYZ).value
 			},
 			css: {
-				cmyk: utils.color.convertColorToCSS(
+				cmyk: utils.color.formatColorAsCSS(
 					utils.color.convertHSL(clonedColor, 'cmyk')
 				),
-				hex: utils.color.convertColorToCSS(
+				hex: utils.color.formatColorAsCSS(
 					utils.color.convertHSL(clonedColor, 'hex')
 				),
-				hsl: utils.color.convertColorToCSS(clonedColor),
-				hsv: utils.color.convertColorToCSS(
+				hsl: utils.color.formatColorAsCSS(clonedColor),
+				hsv: utils.color.formatColorAsCSS(
 					utils.color.convertHSL(clonedColor, 'hsv')
 				),
-				lab: utils.color.convertColorToCSS(
+				lab: utils.color.formatColorAsCSS(
 					utils.color.convertHSL(clonedColor, 'lab')
 				),
-				rgb: utils.color.convertColorToCSS(
+				rgb: utils.color.formatColorAsCSS(
 					utils.color.convertHSL(clonedColor, 'rgb')
 				),
-				xyz: utils.color.convertColorToCSS(
+				xyz: utils.color.formatColorAsCSS(
 					utils.color.convertHSL(clonedColor, 'xyz')
 				)
 			}
 		};
 	}
 
+	function isHSLTooDark(hsl: HSL): boolean {
+		if (!utils.validate.colorValue(hsl)) {
+			log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
+
+			return false;
+		}
+
+		return clone(hsl).value.lightness < paletteConfig.thresholds.dark;
+	}
+
+	function isHSLTooGray(hsl: HSL): boolean {
+		if (!utils.validate.colorValue(hsl)) {
+			log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
+
+			return false;
+		}
+
+		return clone(hsl).value.saturation < paletteConfig.thresholds.gray;
+	}
+
+	function isHSLTooLight(hsl: HSL): boolean {
+		if (!utils.validate.colorValue(hsl)) {
+			log('Invalid HSL value ${JSON.stringify(hsl)}', 'error');
+
+			return false;
+		}
+
+		return clone(hsl).value.lightness > paletteConfig.thresholds.light;
+	}
+
 	return {
 		createPaletteItem,
+		isHSLTooDark,
+		isHSLTooGray,
+		isHSLTooLight,
 		createPaletteItemArray(baseColor: HSL, hues: number[]): PaletteItem[] {
 			const paletteItems: PaletteItem[] = [];
 
@@ -111,19 +150,16 @@ export function createPaletteUtils(
 				items: paletteItems,
 				metadata: {
 					columnCount: options.columnCount,
-					flags: {
-						limitDark: options.limitDark,
-						limitGray: options.limitGray,
-						limitLight: options.limitLight
-					},
-					timestamp: utils.app.getFormattedTimestamp(),
+					limitDark: options.limitDark,
+					limitGray: options.limitGray,
+					limitLight: options.limitLight,
+					timestamp: helpers.data.getFormattedTimestamp(),
 					type: options.paletteType
 				}
 			};
 		},
 		generateAllColorValues(color: HSL): AllColors {
-			const log = services.log;
-			const clonedColor = utils.core.clone(color);
+			const clonedColor = clone(color);
 
 			if (!utils.validate.colorValue(clonedColor)) {
 				log(`Invalid color: ${JSON.stringify(clonedColor)}`, 'error');
@@ -148,24 +184,20 @@ export function createPaletteUtils(
 			};
 		},
 		getPaletteOptionsFromUI(): SelectedPaletteOptions {
-			const log = services.log;
-
 			try {
-				const columnCountElement =
-					utils.core.getElement<HTMLInputElement>(
-						ids.inputs.columnCount
-					);
-				const paletteTypeElement =
-					utils.core.getElement<HTMLInputElement>(
-						ids.inputs.paletteType
-					);
-				const limitDarkChkbx = utils.core.getElement<HTMLInputElement>(
+				const columnCountElement = getElement<HTMLInputElement>(
+					ids.inputs.columnCount
+				);
+				const paletteTypeElement = getElement<HTMLInputElement>(
+					ids.inputs.paletteType
+				);
+				const limitDarkChkbx = getElement<HTMLInputElement>(
 					ids.inputs.limitDarkChkbx
 				);
-				const limitGrayChkbx = utils.core.getElement<HTMLInputElement>(
+				const limitGrayChkbx = getElement<HTMLInputElement>(
 					ids.inputs.limitGrayChkbx
 				);
-				const limitLightChkbx = utils.core.getElement<HTMLInputElement>(
+				const limitLightChkbx = getElement<HTMLInputElement>(
 					ids.inputs.limitLightChkbx
 				);
 
@@ -219,13 +251,13 @@ export function createPaletteUtils(
 				3: 'hexadic',
 				4: 'monochromatic',
 				5: 'random',
-				6: 'split-complementary',
+				6: 'splitComplementary',
 				7: 'tetradic',
 				8: 'triadic'
 			};
 			const distributionTypeMap: Record<
 				number,
-				keyof EnvData['probabilities']
+				keyof PaletteConfig['probabilities']
 			> = {
 				0: 'base',
 				1: 'chaotic',
@@ -233,10 +265,10 @@ export function createPaletteUtils(
 				3: 'strong'
 			};
 			const randomPaletteTypeIndex = Math.floor(
-				Math.random() * Object.keys(paletteTypeMap).length
+				Math.random() * Object.values(paletteTypeMap).length
 			);
 			const randomDistributionTypeIndex = Math.floor(
-				Math.random() * Object.keys(distributionTypeMap).length
+				Math.random() * Object.values(distributionTypeMap).length
 			);
 			const paletteType =
 				paletteTypeMap[
@@ -258,6 +290,15 @@ export function createPaletteUtils(
 				limitLight,
 				paletteType
 			};
+		},
+		isHSLInBounds(hsl: HSL): boolean {
+			if (!utils.validate.colorValue(hsl)) {
+				log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
+
+				return false;
+			}
+
+			return isHSLTooDark(hsl) || isHSLTooGray(hsl) || isHSLTooLight(hsl);
 		}
 	};
 }
