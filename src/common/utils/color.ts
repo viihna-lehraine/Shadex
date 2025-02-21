@@ -38,7 +38,7 @@ export async function colorUtilsFactory(
 		utils
 	);
 	const colorGenerationUtils = colorGenerationUtilsFactory(services, utils);
-	const colorParseUtils = colorParsingUtilsFactory(utils);
+	const colorParseUtils = colorParsingUtilsFactory(helpers, utils);
 	const colorValidationUtils = colorValidationUtilsFactory(utils);
 
 	return {

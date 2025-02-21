@@ -2,7 +2,8 @@ import { regex, config } from '../../config/index.js';
 
 // File: common/utils/validate.js
 const sets = config.sets;
-function createValidationUtils(utils) {
+function validationUtilsFactory(helpers) {
+    const { clone } = helpers.data;
     function hex(value, pattern) {
         return pattern.test(value);
     }
@@ -13,7 +14,7 @@ function createValidationUtils(utils) {
         hex,
         hexSet,
         colorValue(color) {
-            const clonedColor = utils.core.clone(color);
+            const clonedColor = clone(color);
             const isNumericValid = (value) => typeof value === 'number' && !isNaN(value);
             const normalizePercentage = (value) => {
                 if (typeof value === 'string' && value.endsWith('%')) {
@@ -158,5 +159,5 @@ function createValidationUtils(utils) {
     };
 }
 
-export { createValidationUtils };
+export { validationUtilsFactory };
 //# sourceMappingURL=validate.js.map

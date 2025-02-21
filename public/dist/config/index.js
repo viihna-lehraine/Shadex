@@ -156,6 +156,10 @@ const regex = {
         hsl: colorFunc('hsl', [number, decimal + percent, decimal + percent]),
         rgb: colorFunc('rgb', [number, number, number])
     },
+    stackTrace: {
+        withFn: /at\s+(.*)\s+\((.*):(\d+):(\d+)\)/,
+        withoutFn: /at\s+(.*):(\d+):(\d+)/
+    },
     userInput: {
         hex: /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/i,
         hsl: colorFunc('hsl', [number, number + percent, number + percent]),
@@ -166,13 +170,21 @@ const regex = {
         hexComponent: /^#[0-9a-fA-F]{2}$/
     }
 };
+// *****************************************************
+/// ***************************************************
+//// **************** 5. ENV CONFIG ******************
+/// ***************************************************
+// *****************************************************
 const env = {
     appHistoryLimit: 100,
-    appPaletteHistoryLimit: 20
+    appPaletteHistoryLimit: 20,
+    observerDebounce: 100,
+    semaphoreMaxLocks: 10,
+    semaphoreTimeout: 5000
 };
 // *****************************************************
 /// ***************************************************
-//// **************** 2. DEFAULT DATA ****************
+//// **************** 5. DEFAULT DATA ****************
 /// ***************************************************
 // *****************************************************
 const palette = {
@@ -284,21 +296,17 @@ const colors = {
         value: { x: 0, y: 0, z: 0 },
         format: 'xyz'
     },
-    unbrandedCMYK: {
+    cmykNum: {
         value: { cyan: 0, magenta: 0, yellow: 0, key: 0 },
         format: 'cmyk'
     },
-    unbrandedHex: { value: { hex: '#000000FF' }, format: 'hex' },
-    unbrandedHSL: {
-        value: { hue: 0, saturation: 0, lightness: 0 },
-        format: 'hsl'
-    },
-    unbrandedHSV: { value: { hue: 0, saturation: 0, value: 0 }, format: 'hsv' },
-    unbrandedLAB: { value: { l: 0, a: 0, b: 0 }, format: 'lab' },
-    unbrandedRGB: { value: { red: 0, green: 0, blue: 0 }, format: 'rgb' },
-    unbrandedSL: { value: { saturation: 0, lightness: 0 }, format: 'sl' },
-    unbrandedSV: { value: { saturation: 0, value: 0 }, format: 'sv' },
-    unbrandedXYZ: { value: { x: 0, y: 0, z: 0 }, format: 'xyz' },
+    hslNum: { value: { hue: 0, saturation: 0, lightness: 0 }, format: 'hsl' },
+    hsvNum: { value: { hue: 0, saturation: 0, value: 0 }, format: 'hsv' },
+    labNum: { value: { l: 0, a: 0, b: 0 }, format: 'lab' },
+    rgbNum: { value: { red: 0, green: 0, blue: 0 }, format: 'rgb' },
+    slNum: { value: { saturation: 0, lightness: 0 }, format: 'sl' },
+    svNum: { value: { saturation: 0, value: 0 }, format: 'sv' },
+    xyzNum: { value: { x: 0, y: 0, z: 0 }, format: 'xyz' },
     cmykString: {
         value: { cyan: '0', magenta: '0', yellow: '0', key: '0' },
         format: 'cmyk'
@@ -335,6 +343,10 @@ const mutation = {
     oldValue: { value: 'old_value' },
     origin: 'DEFAULT'
 };
+const observerData = {
+    count: 0,
+    name: 'TEST'
+};
 const paletteOptions = {
     columnCount: 6,
     distributionType: 'soft',
@@ -359,10 +371,10 @@ const state = {
         paletteType: 'complementary',
         targetedColumnPosition: 1
     },
-    timestamp: 'NULL TIMESTAMP'
+    timestamp: 'NULL'
 };
 const unbrandedPalette = {
-    id: `null-unbranded-palette}`,
+    id: `null-unbranded-palette`,
     items: [],
     metadata: {
         name: 'UNBRANDED DEFAULT PALETTE',
@@ -395,19 +407,9 @@ const unbrandedPaletteItem = {
         xyz: 'xyz(0, 0, 0)'
     }
 };
-const defaults = {
-    colors,
-    mutation,
-    palette,
-    paletteItem,
-    paletteOptions,
-    state,
-    unbrandedPalette,
-    unbrandedPaletteItem
-};
 // *****************************************************
 /// ***************************************************
-//// ******************** 4. MODE ********************
+//// ******************** 6. MODE ********************
 /// ***************************************************
 // *****************************************************
 const mode = {
@@ -426,7 +428,7 @@ const mode = {
 };
 // *****************************************************
 /// ***************************************************
-//// ******************** 5. SETS ********************
+//// ******************** 7. SETS ********************
 /// ***************************************************
 // *****************************************************
 const sets = {
@@ -443,7 +445,7 @@ const sets = {
 };
 // *****************************************************
 /// ***************************************************
-//// **************** 6. STORAGE DATA ****************
+//// **************** 8. STORAGE DATA ****************
 /// ***************************************************
 // *****************************************************
 const storage = {
@@ -453,7 +455,7 @@ const storage = {
 };
 // *********************************************************
 /// *******************************************************
-//// ************* 7. MATHEMATICAL CONSTANTS *************
+//// ************* 9. MATHEMATICAL CONSTANTS *************
 /// *******************************************************
 // *********************************************************
 const math = {
@@ -467,16 +469,26 @@ const math = {
 };
 // *****************************************************
 /// ***************************************************
-//// ******************** EXPORTS ********************
+//// ***************** 10. EXPORTS *******************
 /// ***************************************************
 // *****************************************************
 const config = {
-    defaults,
     env,
     math,
     mode,
     sets,
     storage
+};
+const defaults = {
+    colors,
+    mutation,
+    observerData,
+    palette,
+    paletteItem,
+    paletteOptions,
+    state,
+    unbrandedPalette,
+    unbrandedPaletteItem
 };
 const domIndex = {
     classes,
@@ -484,5 +496,5 @@ const domIndex = {
     ids
 };
 
-export { config, domConfig, domIndex, paletteConfig, regex, sets };
+export { config, defaults, domConfig, domIndex, paletteConfig, regex, sets };
 //# sourceMappingURL=index.js.map

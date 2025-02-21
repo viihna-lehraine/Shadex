@@ -323,7 +323,7 @@ export class PaletteEvents implements PaletteEventsInterface {
 
 			const userPreference =
 				localStorage.getItem('colorPreference') || 'hex';
-			const validColorSpace = this.utils.typeGuards.isColorSpace(
+			const validColorSpace = this.helpers.typeguards.isColorSpace(
 				userPreference
 			)
 				? userPreference

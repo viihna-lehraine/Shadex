@@ -10,16 +10,14 @@ export async function helpersFactory(): Promise<Helpers> {
 	const { domHelpersFactory } = await import('../helpers/dom.js');
 	const { mathHelpersFactory } = await import('../helpers/math.js');
 	const { timeHelpersFactory } = await import('../helpers/time.js');
-	const { typeGuardHelpersFactory } = await import(
-		'../helpers/typeGuards.js'
-	);
+	const { typeguardsFactory } = await import('../helpers/typeguards/main.js');
 
 	helpers.color = colorHelpersFactory(helpers);
 	helpers.data = dataHelpersFactory();
 	helpers.dom = domHelpersFactory();
 	helpers.math = mathHelpersFactory();
 	helpers.time = timeHelpersFactory();
-	helpers.typeGuards = typeGuardHelpersFactory();
+	helpers.typeguards = typeguardsFactory();
 
 	return helpers;
 }

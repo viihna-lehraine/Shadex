@@ -1,8 +1,8 @@
-import { config } from '../../config/index.js';
+import { defaults } from '../../config/index.js';
 
 // File: common/utils/formatting.js
-const defaultColors = config.defaults.colors;
-function createFormattingUtils(services, utils) {
+const defaultColors = defaults.colors;
+function formattingUtilsFactory(services, utils) {
     const parseColor = (colorSpace, value) => {
         const log = services.log;
         try {
@@ -152,7 +152,7 @@ function createFormattingUtils(services, utils) {
                     'key'
                 ].includes(key)
                     ? `${val}%`
-                    : val;
+                    : val; // 🛡️ Keep branded types untouched
                 return acc;
             }, {});
         },
@@ -201,5 +201,5 @@ function createFormattingUtils(services, utils) {
     };
 }
 
-export { createFormattingUtils };
+export { formattingUtilsFactory };
 //# sourceMappingURL=format.js.map

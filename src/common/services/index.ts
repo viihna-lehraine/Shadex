@@ -5,3 +5,4 @@ export { DOMStore } from './DOMStore.js';
 export { ErrorHandler } from './ErrorHandler.js';
 export { Logger } from './Logger.js';
 export { Semaphore } from './Semaphore.js';
+export { UserFacingError } from './ErrorClasses.js';

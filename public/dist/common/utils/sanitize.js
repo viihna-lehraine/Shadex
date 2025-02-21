@@ -1,5 +1,5 @@
 // File: common/utils/sanitize.js
-function createSanitationUtils(utils) {
+function sanitationUtilsFactory(utils) {
     function sanitizeInput(str) {
         return str.replace(/[&<>"'`/=():]/g, char => ({
             '&': '&amp;',
@@ -50,5 +50,5 @@ function createSanitationUtils(utils) {
     };
 }
 
-export { createSanitationUtils };
+export { sanitationUtilsFactory };
 //# sourceMappingURL=sanitize.js.map

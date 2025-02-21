@@ -1,6 +1,11 @@
 // File: common/services/ErrorHandler.ts
 
-import { ErrorHandlerInterface, Helpers } from '../../types/app.js';
+import {
+	ErrorHandlerInterface,
+	ErrorHandlerOptions,
+	Helpers
+} from '../../types/index.js';
+import { UserFacingError } from './ErrorClasses.js';
 import { Logger } from './Logger.js';
 import { config } from '../../config/index.js';
 
@@ -34,12 +39,12 @@ export class ErrorHandler implements ErrorHandlerInterface {
 	async handleAsync<T>(
 		action: () => Promise<T>,
 		errorMessage: string,
-		context: Record<string, unknown> = {}
+		options: ErrorHandlerOptions = {}
 	): Promise<T> {
 		try {
 			return await action();
 		} catch (error) {
-			this.#handle(error, errorMessage, context);
+			this.#handle(error, errorMessage, options);
 			throw error;
 		}
 	}
@@ -47,12 +52,12 @@ export class ErrorHandler implements ErrorHandlerInterface {
 	handleSync<T>(
 		action: () => T,
 		errorMessage: string,
-		context: Record<string, unknown> = {}
+		options: ErrorHandlerOptions = {}
 	): T {
 		try {
 			return action();
 		} catch (error) {
-			this.#handle(error, errorMessage, context);
+			this.#handle(error, errorMessage, options);
 			throw error;
 		}
 	}
@@ -74,10 +79,14 @@ export class ErrorHandler implements ErrorHandlerInterface {
 	#handle(
 		error: unknown,
 		errorMessage: string,
-		context: Record<string, unknown> = {}
+		options: ErrorHandlerOptions = {}
 	): void {
 		const caller = this.#getCallerInfo();
-		const formattedError = this.#formatError(error, errorMessage, context);
+		const formattedError = this.#formatError(
+			error,
+			errorMessage,
+			options.context ?? {}
+		);
 
 		this.#logger.log(formattedError, 'error', caller);
 
@@ -87,6 +96,14 @@ export class ErrorHandler implements ErrorHandlerInterface {
 				'debug',
 				'[ErrorHandler]'
 			);
+		}
+
+		const userMessage =
+			options.userMessage ??
+			(error instanceof UserFacingError ? error.userMessage : undefined);
+
+		if (userMessage) {
+			alert(userMessage);
 		}
 	}
 }

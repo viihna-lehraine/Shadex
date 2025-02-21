@@ -1,12 +1,20 @@
 // File: common/factories/helpers.ts
-async function createHelpers(services, utils) {
+async function helpersFactory() {
     const helpers = {};
-    const { createColorHelpers } = await import('../helpers/color.js');
-    const { createPaletteHelpers } = await import('../helpers/palette.js');
-    helpers.color = createColorHelpers(services, utils);
-    helpers.palette = createPaletteHelpers(services, utils);
+    const { colorHelpersFactory } = await import('../helpers/color.js');
+    const { dataHelpersFactory } = await import('../helpers/data.js');
+    const { domHelpersFactory } = await import('../helpers/dom.js');
+    const { mathHelpersFactory } = await import('../helpers/math.js');
+    const { timeHelpersFactory } = await import('../helpers/time.js');
+    const { typeguardsFactory } = await import('../helpers/typeguards/main.js');
+    helpers.color = colorHelpersFactory(helpers);
+    helpers.data = dataHelpersFactory();
+    helpers.dom = domHelpersFactory();
+    helpers.math = mathHelpersFactory();
+    helpers.time = timeHelpersFactory();
+    helpers.typeguards = typeguardsFactory();
     return helpers;
 }
 
-export { createHelpers };
+export { helpersFactory };
 //# sourceMappingURL=helpers.js.map

@@ -1,10 +1,10 @@
-import { config } from '../config/index.js';
+import { defaults } from '../config/index.js';
 
 // File: palette/generate.js
-const defaultPalette = config.defaults.palette;
+const defaultPalette = defaults.palette;
 function generatePalette(options, common, generateHuesFns, generatePaletteFns) {
     const { log, errors } = common.services;
-    try {
+    errors.handleSync(() => {
         log(`Generating ${options.paletteType} palette with args ${JSON.stringify(options)}`, 'debug');
         switch (options.paletteType) {
             case 'analogous':
@@ -29,11 +29,8 @@ function generatePalette(options, common, generateHuesFns, generatePaletteFns) {
                 log(`Invalid palette type ${options.paletteType}`, 'error');
                 return defaultPalette;
         }
-    }
-    catch (error) {
-        errors.handle(error, 'Error occurred during palette generation');
-        return defaultPalette;
-    }
+    }, 'Error generating palette', { options });
+    return defaultPalette;
 }
 
 export { generatePalette };

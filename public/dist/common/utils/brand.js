@@ -1,7 +1,7 @@
 import { regex } from '../../config/index.js';
 
 // File: common/utils/brand.js
-function createBrandingUtils(utils) {
+function brandingUtilsFactory(utils) {
     function asByteRange(value) {
         utils.validate.range(value, 'ByteRange');
         return value;
@@ -319,5 +319,5 @@ function createBrandingUtils(utils) {
     };
 }
 
-export { createBrandingUtils };
+export { brandingUtilsFactory };
 //# sourceMappingURL=brand.js.map

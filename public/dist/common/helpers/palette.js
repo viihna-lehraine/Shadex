@@ -1,72 +1,13 @@
+// File: common/helpers/palette.ts
 import { paletteConfig } from '../../config/index.js';
-
-// File: common/helpers/palette.js
-function createPaletteHelpers(services, utils) {
-    function isHSLTooDark(hsl) {
-        const log = services.log;
-        if (!utils.validate.colorValue(hsl)) {
-            log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
-            return false;
+export const createPaletteHelpers = () => ({
+    getWeightsAndValues(distributionType) {
+        const probabilityProps = paletteConfig.probabilities[distributionType];
+        if (!probabilityProps) {
+            throw new Error(`Invalid distribution type: ${distributionType}`);
         }
-        return (utils.core.clone(hsl).value.lightness <
-            paletteConfig.thresholds.dark);
+        const { weights, values } = probabilityProps;
+        return { weights, values };
     }
-    function isHSLTooGray(hsl) {
-        const log = services.log;
-        if (!utils.validate.colorValue(hsl)) {
-            log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
-            return false;
-        }
-        return (utils.core.clone(hsl).value.saturation <
-            paletteConfig.thresholds.gray);
-    }
-    function isHSLTooLight(hsl) {
-        const log = services.log;
-        if (!utils.validate.colorValue(hsl)) {
-            log('Invalid HSL value ${JSON.stringify(hsl)}', 'error');
-            return false;
-        }
-        return (utils.core.clone(hsl).value.lightness >
-            paletteConfig.thresholds.light);
-    }
-    return {
-        isHSLTooDark,
-        isHSLTooGray,
-        isHSLTooLight,
-        getWeightedRandomInterval(distributionType) {
-            const log = services.log;
-            try {
-                // select appropriate type
-                const { weights, values } = paletteConfig.probabilities[distributionType];
-                // compute cumulative probabilities
-                const cumulativeProbabilities = values.reduce((acc, prob, i) => {
-                    acc[i] = (acc[i - 1] || 0) + prob;
-                    return acc;
-                }, []);
-                const random = Math.random();
-                // find corresponding weighted value
-                for (let i = 0; i < cumulativeProbabilities.length; i++) {
-                    if (random < cumulativeProbabilities[i])
-                        return weights[i];
-                }
-                // fallback in case of error
-                return weights[weights.length - 1];
-            }
-            catch (error) {
-                log(`Error generating weighted random interval: ${error}`, 'error');
-                return 50; // default fallback value
-            }
-        },
-        isHSLInBounds(hsl) {
-            const log = services.log;
-            if (!utils.validate.colorValue(hsl)) {
-                log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
-                return false;
-            }
-            return isHSLTooDark(hsl) || isHSLTooGray(hsl) || isHSLTooLight(hsl);
-        }
-    };
-}
-
-export { createPaletteHelpers };
-//# sourceMappingURL=palette.js.map
+});
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGFsZXR0ZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL3NyYy9jb21tb24vaGVscGVycy9wYWxldHRlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLGtDQUFrQztBQU9sQyxPQUFPLEVBQUUsYUFBYSxFQUFFLE1BQU0sdUJBQXVCLENBQUM7QUFFdEQsTUFBTSxDQUFDLE1BQU0sb0JBQW9CLEdBQUcsR0FBbUIsRUFBRSxDQUN4RCxDQUFDO0lBQ0EsbUJBQW1CLENBQ2xCLGdCQUFzRDtRQUV0RCxNQUFNLGdCQUFnQixHQUNyQixhQUFhLENBQUMsYUFBYSxDQUFDLGdCQUFnQixDQUFDLENBQUM7UUFFL0MsSUFBSSxDQUFDLGdCQUFnQixFQUFFLENBQUM7WUFDdkIsTUFBTSxJQUFJLEtBQUssQ0FDZCw4QkFBOEIsZ0JBQWdCLEVBQUUsQ0FDaEQsQ0FBQztRQUNILENBQUM7UUFFRCxNQUFNLEVBQUUsT0FBTyxFQUFFLE1BQU0sRUFBRSxHQUFHLGdCQUFnQixDQUFDO1FBQzdDLE9BQU8sRUFBRSxPQUFPLEVBQUUsTUFBTSxFQUFFLENBQUM7SUFDNUIsQ0FBQztDQUNELENBQVUsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEZpbGU6IGNvbW1vbi9oZWxwZXJzL3BhbGV0dGUudHNcblxuaW1wb3J0IHtcblx0UGFsZXR0ZUNvbmZpZyxcblx0UGFsZXR0ZUhlbHBlcnMsXG5cdFByb2JhYmlsaXR5UHJvcGVydGllc1xufSBmcm9tICcuLi8uLi90eXBlcy9pbmRleC5qcyc7XG5pbXBvcnQgeyBwYWxldHRlQ29uZmlnIH0gZnJvbSAnLi4vLi4vY29uZmlnL2luZGV4LmpzJztcblxuZXhwb3J0IGNvbnN0IGNyZWF0ZVBhbGV0dGVIZWxwZXJzID0gKCk6IFBhbGV0dGVIZWxwZXJzID0+XG5cdCh7XG5cdFx0Z2V0V2VpZ2h0c0FuZFZhbHVlcyhcblx0XHRcdGRpc3RyaWJ1dGlvblR5cGU6IGtleW9mIFBhbGV0dGVDb25maWdbJ3Byb2JhYmlsaXRpZXMnXVxuXHRcdCk6IHsgd2VpZ2h0czogcmVhZG9ubHkgbnVtYmVyW107IHZhbHVlczogcmVhZG9ubHkgbnVtYmVyW10gfSB7XG5cdFx0XHRjb25zdCBwcm9iYWJpbGl0eVByb3BzOiBQcm9iYWJpbGl0eVByb3BlcnRpZXMgPVxuXHRcdFx0XHRwYWxldHRlQ29uZmlnLnByb2JhYmlsaXRpZXNbZGlzdHJpYnV0aW9uVHlwZV07XG5cblx0XHRcdGlmICghcHJvYmFiaWxpdHlQcm9wcykge1xuXHRcdFx0XHR0aHJvdyBuZXcgRXJyb3IoXG5cdFx0XHRcdFx0YEludmFsaWQgZGlzdHJpYnV0aW9uIHR5cGU6ICR7ZGlzdHJpYnV0aW9uVHlwZX1gXG5cdFx0XHRcdCk7XG5cdFx0XHR9XG5cblx0XHRcdGNvbnN0IHsgd2VpZ2h0cywgdmFsdWVzIH0gPSBwcm9iYWJpbGl0eVByb3BzO1xuXHRcdFx0cmV0dXJuIHsgd2VpZ2h0cywgdmFsdWVzIH07XG5cdFx0fVxuXHR9KSBhcyBjb25zdDtcbiJdfQ==

@@ -2,61 +2,57 @@ import '../../config/index.js';
 
 // File: common/services/ErrorHandler.ts
 class ErrorHandler {
-    static instance = null;
-    logger;
-    constructor(logger) {
-        this.logger = logger;
+    static #instance = null;
+    #getCallerInfo;
+    #logger;
+    constructor(helpers, logger) {
+        this.#getCallerInfo = helpers.data.getCallerInfo;
+        this.#logger = logger;
     }
-    static getInstance(logger) {
-        if (!ErrorHandler.instance) {
-            ErrorHandler.instance = new ErrorHandler(logger);
+    static getInstance(helpers, logger) {
+        if (!ErrorHandler.#instance) {
+            console.debug('[ErrorHandler] No ErrorHandler instance exists yet. Creating new instance.');
+            ErrorHandler.#instance = new ErrorHandler(helpers, logger);
         }
-        return ErrorHandler.instance;
+        console.debug('[ErrorHandler] Returning existing ErrorHandler instance.');
+        return ErrorHandler.#instance;
     }
-    handle(error, errorMessage, context = {}) {
-        const caller = this.getCallerInfo();
-        const formattedError = this.formatError(error, errorMessage, context);
-        this.logger.log(formattedError, 'error', caller);
-        {
-            this.logger.log(`Stack trace:\n${this.getStackTrace(error instanceof Error ? error : undefined)}`, 'debug', '[ErrorHandler]');
-        }
-    }
-    async handleAsync(action, errorMessage, context = {}) {
+    async handleAsync(action, errorMessage, options = {}) {
         try {
             return await action();
         }
         catch (error) {
-            this.handle(error, errorMessage, context);
+            this.#handle(error, errorMessage, options);
             throw error;
         }
     }
-    formatError(error, message, context) {
+    handleSync(action, errorMessage, options = {}) {
+        try {
+            return action();
+        }
+        catch (error) {
+            this.#handle(error, errorMessage, options);
+            throw error;
+        }
+    }
+    #formatError(error, message, context) {
         return error instanceof Error
             ? `${message}: ${error.message}. Context: ${JSON.stringify(context)}`
             : `${message}: ${error}. Context: ${JSON.stringify(context)}`;
     }
-    getStackTrace(error) {
+    #getStackTrace(error) {
         return error?.stack ?? new Error().stack ?? 'No stack trace available';
     }
-    getCallerInfo() {
-        const stack = new Error().stack;
-        if (stack) {
-            const stackLines = stack.split('\n');
-            for (const line of stackLines) {
-                if (!line.includes('AppLogger') &&
-                    !line.includes('ErrorHandler') &&
-                    line.includes('at ')) {
-                    const match = line.match(/at\s+(.*)\s+\((.*):(\d+):(\d+)\)/) ||
-                        line.match(/at\s+(.*):(\d+):(\d+)/);
-                    if (match) {
-                        return match[1]
-                            ? `${match[1]} (${match[2]}:${match[3]})`
-                            : `${match[2]}:${match[3]}`;
-                    }
-                }
-            }
+    #handle(error, errorMessage, options = {}) {
+        const caller = this.#getCallerInfo();
+        const formattedError = this.#formatError(error, errorMessage, options.context ?? {});
+        this.#logger.log(formattedError, 'error', caller);
+        {
+            this.#logger.log(`Stack trace:\n${this.#getStackTrace(error instanceof Error ? error : undefined)}`, 'debug', '[ErrorHandler]');
         }
-        return 'Unknown caller';
+        if (options.userMessage) {
+            alert(options.userMessage);
+        }
     }
 }
 

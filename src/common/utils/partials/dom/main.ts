@@ -107,9 +107,9 @@ export function partialDOMUtilsFactory(
 
 				if (
 					!clonedColor ||
-					utils.typeGuards.isSLColor(clonedColor) ||
-					utils.typeGuards.isSVColor(clonedColor) ||
-					utils.typeGuards.isXYZ(clonedColor)
+					helpers.typeguards.isSL(clonedColor) ||
+					helpers.typeguards.isSV(clonedColor) ||
+					helpers.typeguards.isXYZ(clonedColor)
 				) {
 					log(
 						'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.',

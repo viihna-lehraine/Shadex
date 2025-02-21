@@ -1,29 +1,26 @@
-import { config, paletteConfig } from '../../config/index.js';
+import { defaults, paletteConfig } from '../../config/index.js';
 
 // File: palette/partials/types.js
 const shiftRanges = paletteConfig.shiftRanges;
 function analogous(options, common, generateHues) {
     const { services: { errors }, utils } = common;
-    try {
+    errors.handleSync(() => {
         if (options.columnCount < 2)
             utils.dom.enforceSwatchRules(2, 6);
-        const baseColor = utils.app.generateRandomHSL();
+        const baseColor = utils.color.generateRandomHSL();
         const hues = generateHues.analogous(baseColor, options, common);
         const paletteItems = utils.palette.createPaletteItemArray(baseColor, hues);
         const analogousPalette = utils.palette.createPaletteObject(options, paletteItems);
         return analogousPalette;
-    }
-    catch (error) {
-        errors.handle(error, 'Error generating analogous palette. Returning default.', { options: options });
-        return config.defaults.palette;
-    }
+    }, 'Error generating analogous palette.', { options: options });
+    return defaults.palette;
 }
 function complementary(options, common) {
     const { helpers, services: { errors }, utils } = common;
-    try {
+    errors.handleSync(() => {
         const columnCount = Math.max(2, Math.min(6, options.columnCount));
         utils.dom.enforceSwatchRules(columnCount, 6);
-        const baseColor = utils.app.generateRandomHSL();
+        const baseColor = utils.color.generateRandomHSL();
         const baseHue = baseColor.value.hue;
         const hues = [baseHue];
         // always include the direct complement
@@ -32,9 +29,11 @@ function complementary(options, common) {
         const extraColorsNeeded = columnCount - 2;
         if (extraColorsNeeded > 0) {
             for (let i = 0; i < extraColorsNeeded; i++) {
-                const variationOffset = helpers.palette.getWeightedRandomInterval(options.distributionType);
+                const { weights, values } = helpers.palette.getWeightsAndValues(options.distributionType);
+                const variationOffset = helpers.math.getWeightedRandomValue(weights, values);
                 const direction = Math.random() < 0.5 ? 1 : -1; // randomize direction
-                const newHue = (baseHue + 180 + variationOffset * direction + 360) % 360;
+                const newHue = (baseHue + 180 + variationOffset * direction + 360) %
+                    360;
                 hues.push(newHue);
             }
         }
@@ -47,7 +46,8 @@ function complementary(options, common) {
             const newColor = {
                 value: {
                     hue: utils.brand.asRadial(hue),
-                    saturation: utils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation + saturationOffset))),
+                    saturation: utils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation +
+                        saturationOffset))),
                     lightness: utils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + lightnessOffset)))
                 },
                 format: 'hsl'
@@ -55,26 +55,25 @@ function complementary(options, common) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }
-    catch (error) {
-        errors.handle(error, 'Error generating complementary palette. Returning default.', { options: options });
-        return config.defaults.palette;
-    }
+    }, 'Error generating complementary palette.', { options: options });
+    return defaults.palette;
 }
 function diadic(options, common, generateHues) {
     const { helpers, services: { errors }, utils } = common;
-    try {
+    errors.handleSync(() => {
         const columnCount = Math.max(2, Math.min(6, options.columnCount));
         utils.dom.enforceSwatchRules(columnCount, 6);
-        const baseColor = utils.app.generateRandomHSL();
+        const baseColor = utils.color.generateRandomHSL();
         const hues = generateHues.diadic(baseColor, options, common);
         // if more swatches are needed, create slight variations
         const extraColorsNeeded = columnCount - 2;
         if (extraColorsNeeded > 0) {
             for (let i = 0; i < extraColorsNeeded; i++) {
-                const variationOffset = helpers.palette.getWeightedRandomInterval(options.distributionType);
+                const { weights, values } = helpers.palette.getWeightsAndValues(options.distributionType);
+                const variationOffset = helpers.math.getWeightedRandomValue(weights, values);
                 const direction = i % 2 === 0 ? 1 : -1;
-                hues.push((baseColor.value.hue + variationOffset * direction) % 360);
+                hues.push((baseColor.value.hue + variationOffset * direction) %
+                    360);
             }
         }
         // create PaletteItem array with incrementing itemIDs
@@ -94,19 +93,16 @@ function diadic(options, common, generateHues) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }
-    catch (error) {
-        errors.handle(error, 'Error generating diadic palette. Returning default.', { options: options });
-        return config.defaults.palette;
-    }
+    }, 'Error generating diadic palette.', { options: options });
+    return defaults.palette;
 }
 function hexadic(options, common, generateHues) {
     const { services: { errors }, utils } = common;
-    try {
+    errors.handleSync(() => {
         // hexadic palettes always have 6 swatches
         const columnCount = 6;
         utils.dom.enforceSwatchRules(columnCount, 6);
-        const baseColor = utils.app.generateRandomHSL();
+        const baseColor = utils.color.generateRandomHSL();
         const hues = generateHues.hexadic(baseColor, common);
         // create PaletteItem array with assigned itemIDs
         const paletteItems = hues.map((hue, index) => {
@@ -125,18 +121,15 @@ function hexadic(options, common, generateHues) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }
-    catch (error) {
-        errors.handle(error, 'Error generating hexadic palette. Returning default.', { options: options });
-        return config.defaults.palette;
-    }
+    }, 'Error generating hexadic palette.', { options: options });
+    return defaults.palette;
 }
 function monochromatic(options, common) {
     const { services: { errors }, utils } = common;
-    try {
+    errors.handleSync(() => {
         const columnCount = Math.max(2, Math.min(6, options.columnCount));
         utils.dom.enforceSwatchRules(columnCount, 6);
-        const baseColor = utils.app.generateRandomHSL();
+        const baseColor = utils.color.generateRandomHSL();
         const paletteItems = [];
         const basePaletteItem = utils.palette.createPaletteItem(baseColor, 1);
         paletteItems.push(basePaletteItem);
@@ -157,46 +150,42 @@ function monochromatic(options, common) {
             paletteItems.push(paletteItem);
         }
         return utils.palette.createPaletteObject(options, paletteItems);
-    }
-    catch (error) {
-        errors.handle(error, 'Error generating monochromatic palette. Returning default.', { options: options });
-        return config.defaults.palette;
-    }
+    }, 'Error generating monochromatic palette.', { options: options });
+    return defaults.palette;
 }
 function random(options, common) {
     const { services: { errors }, utils } = common;
-    try {
+    errors.handleSync(() => {
         // ensure column count is between 2 and 6
         const columnCount = Math.max(2, Math.min(6, options.columnCount));
         utils.dom.enforceSwatchRules(columnCount, 6);
-        const baseColor = utils.app.generateRandomHSL();
+        const baseColor = utils.color.generateRandomHSL();
         const paletteItems = [];
         const basePaletteItem = utils.palette.createPaletteItem(baseColor, 1);
         paletteItems.push(basePaletteItem);
         for (let i = 1; i < columnCount; i++) {
-            const randomColor = utils.app.generateRandomHSL();
+            const randomColor = utils.color.generateRandomHSL();
             const nextPaletteItem = utils.palette.createPaletteItem(randomColor, i + 1);
             paletteItems.push(nextPaletteItem);
         }
         return utils.palette.createPaletteObject(options, paletteItems);
-    }
-    catch (error) {
-        errors.handle(error, 'Error generating random palette. Returning default.', { options: options });
-        return config.defaults.palette;
-    }
+    }, 'Error generating random palette.', { options: options });
+    return defaults.palette;
 }
 function splitComplementary(options, common) {
     const { helpers, services: { errors }, utils } = common;
-    try {
+    errors.handleSync(() => {
         // ensure column count is at least 3 and at most 6
         const columnCount = Math.max(3, Math.min(6, options.columnCount));
         utils.dom.enforceSwatchRules(columnCount, 6);
-        const baseColor = utils.app.generateRandomHSL();
+        const baseColor = utils.color.generateRandomHSL();
         const baseHue = baseColor.value.hue;
         // generate split complementary hues
         const hues = [
             baseHue,
-            (baseHue + 180 + paletteConfig.shiftRanges.splitComplementary.hue) %
+            (baseHue +
+                180 +
+                paletteConfig.shiftRanges.splitComplementary.hue) %
                 360,
             (baseHue +
                 180 -
@@ -206,7 +195,8 @@ function splitComplementary(options, common) {
         ];
         // if swatchCount > 3, introduce additional variations
         for (let i = 3; i < columnCount; i++) {
-            const variationOffset = helpers.palette.getWeightedRandomInterval(options.distributionType);
+            const { weights, values } = helpers.palette.getWeightsAndValues(options.distributionType);
+            const variationOffset = helpers.math.getWeightedRandomValue(weights, values);
             const direction = i % 2 === 0 ? 1 : -1;
             hues.push((baseHue + 180 + variationOffset * direction) % 360);
         }
@@ -229,19 +219,16 @@ function splitComplementary(options, common) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }
-    catch (error) {
-        errors.handle(error, 'Error generating split-complementary palette. Returning default.', { options: options });
-        return config.defaults.palette;
-    }
+    }, 'Error generating split-complementary palette.', { options: options });
+    return defaults.palette;
 }
 function tetradic(options, common, generateHues) {
     const { services: { errors }, utils } = common;
-    try {
+    errors.handleSync(() => {
         // tetradic palettes always have 4 swatches
         const columnCount = 4;
         utils.dom.enforceSwatchRules(columnCount, 4);
-        const baseColor = utils.app.generateRandomHSL();
+        const baseColor = utils.color.generateRandomHSL();
         // generate the 4 hues
         const hues = generateHues.tetradic(baseColor, common);
         // create PaletteItem array with assigned itemIDs
@@ -261,20 +248,17 @@ function tetradic(options, common, generateHues) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }
-    catch (error) {
-        errors.handle(error, 'Error generating tetradic palette. Returning default.', { options: options });
-        return config.defaults.palette;
-    }
+    }, 'Error generating tetradic palette.', { options: options });
+    return defaults.palette;
 }
 function triadic(options, common, generateHues) {
     const { services: { errors }, utils } = common;
-    try {
+    errors.handleSync(() => {
         // triadic palettes always have exactly 3 colors
         const columnCount = 3;
         utils.dom.enforceSwatchRules(columnCount, 3);
         // generate the base color
-        const baseColor = utils.app.generateRandomHSL();
+        const baseColor = utils.color.generateRandomHSL();
         // generate the 3 hues needed
         const hues = generateHues.triadic(baseColor, common);
         // create PaletteItem array with assigned itemIDs
@@ -294,11 +278,8 @@ function triadic(options, common, generateHues) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }
-    catch (error) {
-        errors.handle(error, 'Error generating triadic palette. Returning default.', { options: options });
-        return config.defaults.palette;
-    }
+    }, 'Error generating triadic palette.', { options: options });
+    return defaults.palette;
 }
 const generatePaletteFnGroup = {
     analogous,

@@ -7,7 +7,6 @@ import {
 	CMYKNumMap,
 	CMYKStringMap,
 	Color,
-	ColorFormatMap,
 	ColorNumMap,
 	ColorDataAssertion,
 	ColorFormat,
@@ -34,6 +33,7 @@ import {
 	LAB_L,
 	Listener,
 	MutationLog,
+	NumericBrandedType,
 	NumericRangeKey,
 	Palette,
 	PaletteConfig,
@@ -127,24 +127,49 @@ export interface TimeHelpers {
 	): (...args: Parameters<T>) => void;
 }
 
-export interface TypeGuardHelpers {
-	hasFormat: <T extends { format: string }>(
+export interface Typeguards {
+	isCMYK(value: unknown): value is CMYK;
+	isColor(value: unknown): value is Color;
+	isColorNumMap(value: unknown, format?: ColorFormat): value is ColorNumMap;
+	isColorSpace(value: unknown): value is ColorSpace;
+	isColorSpaceExtended(value: string): value is ColorSpaceExtended;
+	isColorStringMap(value: unknown): value is ColorStringMap;
+	isConvertibleColor(
+		color: Color
+	): color is CMYK | Hex | HSL | HSV | LAB | RGB;
+	isFormat(format: unknown): format is ColorFormat;
+	isHex(value: unknown): value is Hex;
+	isHSL(value: unknown): value is HSL;
+	isHSV(value: unknown): value is HSV;
+	isLAB(value: unknown): value is LAB;
+	isInputElement(element: HTMLElement | null): element is HTMLElement;
+	isPalette(value: unknown): value is Palette;
+	isPaletteType(value: string): value is PaletteType;
+	isRGB(value: unknown): value is RGB;
+	isSL(value: unknown): value is SL;
+	isSV(value: unknown): value is SV;
+	isXYZ(value: unknown): value is XYZ;
+}
+
+export interface MicroTypeguards {
+	hasFormat<T extends { format: string }>(
 		value: unknown,
 		expectedFormat: string
-	) => value is T;
-	hasNumericProperties: (
-		obj: Record<string, unknown>,
-		keys: string[]
-	) => boolean;
-	hasStringProperties: (
-		obj: Record<string, unknown>,
-		keys: string[]
-	) => boolean;
-
-	hasValueProperty: <T extends { value: unknown }>(
-		value: unknown
-	) => value is T;
-	isObject: (value: unknown) => value is Record<string, unknown>;
+	): value is T;
+	hasNumericProperties(obj: Record<string, unknown>, keys: string[]): boolean;
+	hasStringProperties(obj: Record<string, unknown>, keys: string[]): boolean;
+	hasValueProperty<T extends { value: unknown }>(value: unknown): value is T;
+	isByteRange(value: unknown): value is ByteRange;
+	isHexSet(value: unknown): value is HexSet;
+	isLAB_A(value: unknown): value is LAB_A;
+	isLAB_B(value: unknown): value is LAB_B;
+	isLAB_L(value: unknown): value is LAB_L;
+	isObject(value: unknown): value is Record<string, unknown>;
+	isPercentile(value: unknown): value is Percentile;
+	isRadial(value: unknown): value is Radial;
+	isXYZ_X(value: unknown): value is XYZ_X;
+	isXYZ_Y(value: unknown): value is XYZ_Y;
+	isXYZ_Z(value: unknown): value is XYZ_Z;
 }
 
 // ******** 3. HELPERS ********
@@ -154,9 +179,10 @@ export interface Helpers {
 	data: DataHelpers;
 	dom: DOMHelpers;
 	math: MathHelpers;
+	microTypeguards: MicroTypeguards;
 	palette: PaletteHelpers;
 	time: TimeHelpers;
-	typeGuards: TypeGuardHelpers;
+	typeguards: Typeguards;
 }
 
 // ******** 4. UTILITIES ********
@@ -296,7 +322,15 @@ export interface FormattingUtils {
 	addHashToHex(hex: Hex): Hex;
 	componentToHex(component: number): string;
 	convertShortHexToLong(hex: string): string;
-	formatPercentageValues<T extends Record<string, unknown>>(value: T): T;
+	formatPercentageValues<
+		T extends Record<string, number | NumericBrandedType>
+	>(
+		value: T
+	): {
+		[K in keyof T]: T[K] extends number | NumericBrandedType
+			? `${number}%` | T[K]
+			: T[K];
+	};
 	hslAddFormat(value: HSL['value']): HSL;
 	parseColor(colorSpace: ColorSpace, value: string): Color | null;
 	parseComponents(value: string, count: number): number[];
@@ -342,25 +376,6 @@ export interface SanitationUtils {
 	sanitizeInput(str: string): string;
 }
 
-export interface TypeGuards {
-	isColor(value: unknown): value is Color;
-	isColorFormat<F extends ColorFormat>(
-		color: Color,
-		format: F
-	): color is ColorFormatMap[F];
-	isColorNumMap(value: unknown, format?: ColorFormat): value is ColorNumMap;
-	isColorSpace(value: unknown): value is ColorSpace;
-	isColorSpaceExtended(value: string): value is ColorSpaceExtended;
-	isColorStringMap(value: unknown): value is ColorStringMap;
-	isConvertibleColor(
-		color: Color
-	): color is CMYK | Hex | HSL | HSV | LAB | RGB;
-	isFormat(format: unknown): format is ColorFormat;
-	isInputElement(element: HTMLElement | null): element is HTMLElement;
-	isPalette(value: unknown): value is Palette;
-	isPaletteType(value: string): value is PaletteType;
-}
-
 export interface ValidationUtils {
 	colorValue(color: Color | SL | SV): boolean;
 	ensureHash(value: string): string;
@@ -392,7 +407,6 @@ export interface Utilities {
 	palette: PaletteUtils;
 	parse: ParsingUtils;
 	sanitize: SanitationUtils;
-	typeGuards: TypeGuards;
 	validate: ValidationUtils;
 }
 
@@ -605,4 +619,11 @@ export interface GeneratePaletteFnGroup {
 		common: CommonFunctions,
 		generateHues: GenerateHuesFnGroup
 	): Palette;
+}
+
+// ******** 10. OTHER ********
+
+export interface ErrorHandlerOptions {
+	userMessage?: string;
+	context?: Record<string, unknown>;
 }

@@ -320,6 +320,17 @@ export type NumericRangeKey = {
 		: never;
 }[keyof typeof sets & string];
 
+export type NumericBrandedType =
+	| ByteRange
+	| LAB_A
+	| LAB_B
+	| LAB_L
+	| Percentile
+	| Radial
+	| XYZ_X
+	| XYZ_Y
+	| XYZ_Z;
+
 export type Sets = typeof sets;
 
 // *********************************************************
@@ -529,7 +540,16 @@ export interface ColorDataExtended extends ColorData {
 	sv?: SV;
 }
 
-export type ColorFormat = keyof ColorSpace | 'sl' | 'sv';
+export type ColorFormat =
+	| 'cmyk'
+	| 'hex'
+	| 'hsl'
+	| 'hsv'
+	| 'lab'
+	| 'rgb'
+	| 'sl'
+	| 'sv'
+	| 'xyz';
 
 export type ColorFormatMap = {
 	cmyk: CMYK;

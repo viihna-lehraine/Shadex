@@ -212,7 +212,7 @@ export function paletteUtilsFactory(
 				}
 
 				if (
-					!utils.typeGuards.isPaletteType(paletteTypeElement!.value)
+					!helpers.typeguards.isPaletteType(paletteTypeElement!.value)
 				) {
 					log(
 						`Invalid palette type: ${paletteTypeElement!.value}`,

@@ -16,7 +16,6 @@ export async function utilitiesFactory(
 	const { formattingUtilsFactory } = await import('../utils/format.js');
 	const { paletteUtilsFactory } = await import('../utils/palette.js');
 	const { sanitationUtilsFactory } = await import('../utils/sanitize.js');
-	const { typeGuardsFactory } = await import('../utils/typeGuards.js');
 	const { validationUtilsFactory } = await import('../utils/validate.js');
 
 	utilities.color = await colorUtilsFactory(helpers, services, utilities);
@@ -27,7 +26,6 @@ export async function utilitiesFactory(
 	utilities.format = formattingUtilsFactory(services, utilities);
 	utilities.palette = paletteUtilsFactory(helpers, services, utilities);
 	utilities.sanitize = sanitationUtilsFactory(utilities);
-	utilities.typeGuards = typeGuardsFactory(helpers);
 	utilities.validate = validationUtilsFactory(helpers);
 
 	return utilities as Utilities;

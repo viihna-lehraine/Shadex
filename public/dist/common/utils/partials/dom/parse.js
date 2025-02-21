@@ -1,18 +1,15 @@
-import { regex } from '../../config/index.js';
+import { regex } from '../../../../config/index.js';
 
-// File: common/utils/parse.js
-function createParsingUtils(services, utils) {
+// File: common/utils/dom/partials/parse.ts
+function domParsingUtilsFactory(services, utils) {
+    const { brand } = utils;
+    const { log } = services;
     return {
-        checkbox(id) {
-            const log = services.log;
+        parseCheckbox(id) {
             const checkbox = document.getElementById(id);
-            if (!checkbox) {
-                log(`Checkbox element ${id} not found`, 'warn');
-            }
             return checkbox ? checkbox.checked : undefined;
         },
-        colorInput(input) {
-            const log = services.log;
+        parseColorInput(input) {
             const colorStr = input.value.trim().toLowerCase();
             const hexMatch = colorStr.match(regex.dom.hex);
             const hslMatch = colorStr.match(regex.dom.hsl);
@@ -34,9 +31,9 @@ function createParsingUtils(services, utils) {
                 return {
                     format: 'hsl',
                     value: {
-                        hue: utils.brand.asRadial(parseInt(hslMatch[1], 10)),
-                        saturation: utils.brand.asPercentile(parseFloat(hslMatch[2])),
-                        lightness: utils.brand.asPercentile(parseFloat(hslMatch[3]))
+                        hue: brand.asRadial(parseInt(hslMatch[1], 10)),
+                        saturation: brand.asPercentile(parseFloat(hslMatch[2])),
+                        lightness: brand.asPercentile(parseFloat(hslMatch[3]))
                     }
                 };
             }
@@ -44,9 +41,9 @@ function createParsingUtils(services, utils) {
                 return {
                     format: 'rgb',
                     value: {
-                        red: utils.brand.asByteRange(parseInt(rgbMatch[1], 10)),
-                        green: utils.brand.asByteRange(parseInt(rgbMatch[2], 10)),
-                        blue: utils.brand.asByteRange(parseInt(rgbMatch[3], 10))
+                        red: brand.asByteRange(parseInt(rgbMatch[1], 10)),
+                        green: brand.asByteRange(parseInt(rgbMatch[2], 10)),
+                        blue: brand.asByteRange(parseInt(rgbMatch[3], 10))
                     }
                 };
             }
@@ -62,9 +59,9 @@ function createParsingUtils(services, utils) {
                         return {
                             format: 'rgb',
                             value: {
-                                red: utils.brand.asByteRange(rgb[0]),
-                                green: utils.brand.asByteRange(rgb[1]),
-                                blue: utils.brand.asByteRange(rgb[2])
+                                red: brand.asByteRange(rgb[0]),
+                                green: brand.asByteRange(rgb[1]),
+                                blue: brand.asByteRange(rgb[2])
                             }
                         };
                     }
@@ -73,25 +70,19 @@ function createParsingUtils(services, utils) {
             log(`Invalid color input: ${colorStr}`, 'warn');
             return null;
         },
-        dropdownSelection(id, validOptions) {
-            const log = services.log;
+        parseDropdownSelection(id, validOptions) {
             const dropdown = document.getElementById(id);
             if (!dropdown)
                 return;
             const selectedValue = dropdown.value;
             if (!validOptions.includes(selectedValue)) {
-                log(`Invalid selection in ${id}: "${selectedValue}" is not one of ${validOptions.join(', ')}`, 'warn');
+                return validOptions.includes(selectedValue)
+                    ? selectedValue
+                    : undefined;
             }
-            return validOptions.includes(selectedValue)
-                ? selectedValue
-                : undefined;
         },
-        numberInput(input, min, max) {
-            const log = services.log;
+        parseNumberInput(input, min, max) {
             const value = parseFloat(input.value.trim());
-            if (isNaN(value)) {
-                log(`Invalid number input: ${input.value}`, 'warn');
-            }
             if (isNaN(value))
                 return null;
             if (min !== undefined && value < min)
@@ -100,11 +91,9 @@ function createParsingUtils(services, utils) {
                 return max;
             return value;
         },
-        textInput(input, regex) {
-            const log = services.log;
+        parseTextInput(input, regex) {
             const text = input.value.trim();
             if (regex && !regex.test(text)) {
-                log(`Invalid text input: ${text}`, 'warn');
                 return null;
             }
             return text || null;
@@ -112,5 +101,5 @@ function createParsingUtils(services, utils) {
     };
 }
 
-export { createParsingUtils };
+export { domParsingUtilsFactory };
 //# sourceMappingURL=parse.js.map

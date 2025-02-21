@@ -5,6 +5,7 @@ import {
 	ColorParseUtils,
 	ColorSpaceExtended,
 	ColorStringMap,
+	Helpers,
 	Hex,
 	HexStringMap,
 	HSL,
@@ -20,9 +21,12 @@ import {
 	XYZStringMap
 } from '../../../../types/index.js';
 
-export function colorParsingUtilsFactory(utils: Utilities): ColorParseUtils {
+export function colorParsingUtilsFactory(
+	helpers: Helpers,
+	utils: Utilities
+): ColorParseUtils {
 	const { brandColorStringMap } = utils.color;
-	const { isColorStringMap } = utils.typeGuards;
+	const { isColorStringMap } = helpers.typeguards;
 
 	return {
 		narrowToColor(color: Color | ColorStringMap): Color | null {

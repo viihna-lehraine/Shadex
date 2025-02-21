@@ -6,6 +6,7 @@ import {
 	FormattingUtils,
 	Hex,
 	HSL,
+	NumericBrandedType,
 	Services,
 	Utilities
 } from '../../types/index.js';
@@ -175,7 +176,15 @@ export function formattingUtilsFactory(
 
 			return `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
 		},
-		formatPercentageValues<T extends Record<string, unknown>>(value: T): T {
+		formatPercentageValues<
+			T extends Record<string, number | NumericBrandedType>
+		>(
+			value: T
+		): {
+			[K in keyof T]: T[K] extends number | NumericBrandedType
+				? `${number}%` | T[K]
+				: T[K];
+		} {
 			return Object.entries(value).reduce(
 				(acc, [key, val]) => {
 					(acc as Record<string, unknown>)[key] = [
@@ -187,12 +196,16 @@ export function formattingUtilsFactory(
 						'yellow',
 						'key'
 					].includes(key)
-						? `${val}%`
-						: val;
+						? `${val as number}%`
+						: val; // 🛡️ Keep branded types untouched
 					return acc;
 				},
-				{} as Record<string, unknown>
-			) as T;
+				{} as {
+					[K in keyof T]: T[K] extends number | NumericBrandedType
+						? `${number}%` | T[K]
+						: T[K];
+				}
+			);
 		},
 		hslAddFormat(value: HSL['value']): HSL {
 			const log = services.log;

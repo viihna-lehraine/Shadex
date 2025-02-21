@@ -31,6 +31,7 @@ export async function initializeApp(
 	services: Services
 ): Promise<{
 	common: Required<CommonFunctions>;
+	eventManager: EventManager;
 	events: { palette: PaletteEvents; ui: UIEvents };
 	paletteManager: PaletteManager;
 	paletteState: PaletteState;
@@ -126,6 +127,7 @@ export async function initializeApp(
 
 		return {
 			common,
+			eventManager,
 			events,
 			paletteManager: paletteManager!,
 			paletteState: paletteState!,

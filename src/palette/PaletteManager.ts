@@ -215,7 +215,7 @@ export class PaletteManager implements PaletteManagerInterface {
 			const storedPalette = await this.#storage.getItem('palette');
 			if (
 				storedPalette &&
-				this.#utils.typeGuards.isPalette(storedPalette)
+				this.#helpers.typeguards.isPalette(storedPalette)
 			) {
 				this.stateManager.addPaletteToHistory(storedPalette);
 				this.#log(`Stored palette added to history`, 'debug');
@@ -279,7 +279,7 @@ export class PaletteManager implements PaletteManagerInterface {
 			);
 
 			// ensure valid palette before storing
-			if (!this.#utils.typeGuards.isPalette(newPalette)) {
+			if (!this.#helpers.typeguards.isPalette(newPalette)) {
 				throw new Error('Generated palette is invalid.');
 			}
 

@@ -36,4 +36,6 @@ window.addEventListener('unhandledrejection', function (event) {
 	});
 });
 
-import('./app/main.js');
+const { startApp } = await import('./app/main.js');
+
+startApp(helpers);

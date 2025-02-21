@@ -1,13 +1,13 @@
-import { paletteConfig, config } from '../../config/index.js';
+import { paletteConfig, config, defaults } from '../../config/index.js';
 
 // File: common/utils/adjust.js
 const adjustments = paletteConfig.adjustment;
-const defaultColors = config.defaults.colors;
+const defaultColors = defaults.colors;
 const math = config.math;
-function createAdjustmentUtils(services, utils) {
+function adjustmentUtilsFactory(services, utils) {
+    const { log } = services;
     return {
         applyGammaCorrection(value) {
-            const log = services.log;
             try {
                 return value > 0.0031308
                     ? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
@@ -19,7 +19,6 @@ function createAdjustmentUtils(services, utils) {
             }
         },
         clampRGB(rgb) {
-            const log = services.log;
             const defaultRGB = defaultColors.rgb;
             if (!utils.validate.colorValue(rgb)) {
                 log(`Invalid RGB value ${JSON.stringify(rgb)}`, 'error');
@@ -47,7 +46,6 @@ function createAdjustmentUtils(services, utils) {
             return value / reference;
         },
         sl(color) {
-            const log = services.log;
             try {
                 if (!utils.validate.colorValue(color)) {
                     log('Invalid color valus for adjustment.', 'error');
@@ -72,5 +70,5 @@ function createAdjustmentUtils(services, utils) {
     };
 }
 
-export { createAdjustmentUtils };
+export { adjustmentUtilsFactory };
 //# sourceMappingURL=adjust.js.map
