@@ -2,19 +2,11 @@ import { defaults } from '../../../../config/index.js';
 
 // File: common/utils/partials/color/brand.ts
 const defaultColors = defaults.colors;
-function colorBrandingUtilsFactory(helpers, utils) {
-    const { clone, parseValue } = helpers.data;
-    const { brand } = utils;
-    return {
-        brandCMYKStringMapValue(cmyk) {
-            return {
-                cyan: brand.asPercentile(parseFloat(cmyk.cyan) / 100),
-                magenta: brand.asPercentile(parseFloat(cmyk.magenta) / 100),
-                yellow: brand.asPercentile(parseFloat(cmyk.yellow) / 100),
-                key: brand.asPercentile(parseFloat(cmyk.key) / 100)
-            };
-        },
-        brandColorStringMap(color) {
+function colorBrandingUtilsFactory(brand, helpers, services) {
+    const { data: { clone, parseValue } } = helpers;
+    const { errors, log } = services;
+    function brandColorString(color) {
+        return errors.handleSync(() => {
             const clonedColor = clone(color);
             const newValue = Object.entries(clonedColor.value).reduce((acc, [key, val]) => {
                 acc[key] =
@@ -33,11 +25,14 @@ function colorBrandingUtilsFactory(helpers, utils) {
                 case 'sv':
                     return { format: 'sv', value: newValue };
                 default:
-                    console.error('Unsupported format for colorStringToColor');
+                    log('Unsupported format for colorStringToColor', {
+                        caller: 'utils.color.brandColorString',
+                        level: 'error'
+                    });
                     const unbrandedHSL = defaultColors.hsl;
-                    const brandedHue = utils.brand.asRadial(unbrandedHSL.value.hue);
-                    const brandedSaturation = utils.brand.asPercentile(unbrandedHSL.value.saturation);
-                    const brandedLightness = utils.brand.asPercentile(unbrandedHSL.value.lightness);
+                    const brandedHue = brand.asRadial(unbrandedHSL.value.hue);
+                    const brandedSaturation = brand.asPercentile(unbrandedHSL.value.saturation);
+                    const brandedLightness = brand.asPercentile(unbrandedHSL.value.lightness);
                     return {
                         value: {
                             hue: brandedHue,
@@ -47,46 +42,79 @@ function colorBrandingUtilsFactory(helpers, utils) {
                         format: 'hsl'
                     };
             }
-        },
-        brandHexStringMapValue(hex) {
-            return { hex: utils.brand.asHexSet(hex.hex) };
-        },
-        brandHSLStringMapValue(hsl) {
+        }, 'Error occurred while branding color string map value.');
+    }
+    function brandCMYKString(cmyk) {
+        return errors.handleSync(() => {
             return {
-                hue: utils.brand.asRadial(parseFloat(hsl.hue)),
-                saturation: utils.brand.asPercentile(parseFloat(hsl.saturation) / 100),
-                lightness: utils.brand.asPercentile(parseFloat(hsl.lightness) / 100)
+                cyan: brand.asPercentile(parseFloat(cmyk.cyan) / 100),
+                magenta: brand.asPercentile(parseFloat(cmyk.magenta) / 100),
+                yellow: brand.asPercentile(parseFloat(cmyk.yellow) / 100),
+                key: brand.asPercentile(parseFloat(cmyk.key) / 100)
             };
-        },
-        brandHSVStringMapValue(hsv) {
+        }, 'Error occurred while branding CMYK string.');
+    }
+    function brandHexString(hex) {
+        return errors.handleSync(() => {
+            return { hex: brand.asHexSet(hex.hex) };
+        }, 'Error occurred while branding hex string.');
+    }
+    function brandHSLString(hsl) {
+        return errors.handleSync(() => {
             return {
-                hue: utils.brand.asRadial(parseFloat(hsv.hue)),
-                saturation: utils.brand.asPercentile(parseFloat(hsv.saturation) / 100),
-                value: utils.brand.asPercentile(parseFloat(hsv.value) / 100)
+                hue: brand.asRadial(parseFloat(hsl.hue)),
+                saturation: brand.asPercentile(parseFloat(hsl.saturation) / 100),
+                lightness: brand.asPercentile(parseFloat(hsl.lightness) / 100)
             };
-        },
-        brandLABStringMapValue(lab) {
+        }, 'Error occurred while branding HSL string.');
+    }
+    function brandHSVString(hsv) {
+        return errors.handleSync(() => {
             return {
-                l: utils.brand.asLAB_L(parseFloat(lab.l)),
-                a: utils.brand.asLAB_A(parseFloat(lab.a)),
-                b: utils.brand.asLAB_B(parseFloat(lab.b))
+                hue: brand.asRadial(parseFloat(hsv.hue)),
+                saturation: brand.asPercentile(parseFloat(hsv.saturation) / 100),
+                value: brand.asPercentile(parseFloat(hsv.value) / 100)
             };
-        },
-        brandRGBStringMapValue(rgb) {
+        }, 'Error occurred while branding HSV string.');
+    }
+    function brandLABString(lab) {
+        return errors.handleSync(() => {
             return {
-                red: utils.brand.asByteRange(parseFloat(rgb.red)),
-                green: utils.brand.asByteRange(parseFloat(rgb.green)),
-                blue: utils.brand.asByteRange(parseFloat(rgb.blue))
+                l: brand.asLAB_L(parseFloat(lab.l)),
+                a: brand.asLAB_A(parseFloat(lab.a)),
+                b: brand.asLAB_B(parseFloat(lab.b))
             };
-        },
-        brandXYZStringMapValue(xyz) {
+        }, 'Error occurred while branding LAB string.');
+    }
+    function brandRGBString(rgb) {
+        return errors.handleSync(() => {
             return {
-                x: utils.brand.asXYZ_X(parseFloat(xyz.x)),
-                y: utils.brand.asXYZ_Y(parseFloat(xyz.y)),
-                z: utils.brand.asXYZ_Z(parseFloat(xyz.z))
+                red: brand.asByteRange(parseFloat(rgb.red)),
+                green: brand.asByteRange(parseFloat(rgb.green)),
+                blue: brand.asByteRange(parseFloat(rgb.blue))
             };
-        }
+        }, 'Error occurred while branding RGB string.');
+    }
+    function brandXYZString(xyz) {
+        return errors.handleSync(() => {
+            return {
+                x: brand.asXYZ_X(parseFloat(xyz.x)),
+                y: brand.asXYZ_Y(parseFloat(xyz.y)),
+                z: brand.asXYZ_Z(parseFloat(xyz.z))
+            };
+        }, 'Error occurred while branding XYZ string.');
+    }
+    const colorBrandingUtils = {
+        brandCMYKString,
+        brandColorString,
+        brandHexString,
+        brandHSLString,
+        brandHSVString,
+        brandLABString,
+        brandRGBString,
+        brandXYZString
     };
+    return errors.handleSync(() => colorBrandingUtils, 'Error creating color branding utils.');
 }
 
 export { colorBrandingUtilsFactory };

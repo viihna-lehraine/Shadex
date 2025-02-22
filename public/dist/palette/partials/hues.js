@@ -1,10 +1,13 @@
 // File: palette/partials/hues.js
 // TODO: These definiely need refinement
-function analogous(color, options, common) {
+function generateAnalogousHues(color, options, common) {
     const { errors, log } = common.services;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         if (!common.utils.validate.colorValue(color)) {
-            log(`Invalid color value ${JSON.stringify(color)}`, 'error');
+            log(`Invalid color value ${JSON.stringify(color)}`, {
+                caller: '[generateAnalogousHues]',
+                level: 'error'
+            });
             return [];
         }
         const analogousHues = [];
@@ -18,29 +21,30 @@ function analogous(color, options, common) {
         }
         return analogousHues;
     }, 'Error generating analogous hues', {
-        options
+        context: { options }
     });
-    return [];
 }
-function diadic(color, options, common) {
+function generateDiadicHues(color, options, common) {
     const { helpers, services: { errors } } = common;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         const baseHue = color.value.hue;
         const diadicHues = [];
         const { weights, values } = helpers.palette.getWeightsAndValues(options.distributionType);
-        const randomDistance = helpers.math.getWeightedRandomValue(weights, values);
+        const randomDistance = helpers.random.selectRandomFromWeights({
+            weights,
+            values
+        });
         const hue1 = baseHue;
         const hue2 = (hue1 + randomDistance) % 360;
         diadicHues.push(hue1, hue2);
         return diadicHues;
     }, 'Error generating diadic hues', {
-        options
+        context: { options }
     });
-    return [];
 }
-function hexadic(color, common) {
+function generateHexadicHues(color, common) {
     const { utils, services: { errors } } = common;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         const clonedBaseHSL = utils.color.convertToHSL(color);
         const hexadicHues = [];
         const baseHue = clonedBaseHSL.value.hue;
@@ -54,13 +58,12 @@ function hexadic(color, common) {
         hexadicHues.push(hue1, hue2, hue3, hue4, hue5, hue6);
         return hexadicHues;
     }, 'Error generating hexadic hues', {
-        color
+        context: { color }
     });
-    return [];
 }
-function splitComplementary(color, common) {
+function generateSplitComplementaryHues(color, common) {
     const { errors } = common.services;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         const baseHue = color.value.hue;
         const modifier = Math.floor(Math.random() * 11) + 20;
         return [
@@ -68,13 +71,12 @@ function splitComplementary(color, common) {
             (baseHue + 180 - modifier + 360) % 360
         ];
     }, 'Error generating split-complementary hues', {
-        color
+        context: { color }
     });
-    return [];
 }
-function tetradic(color, common) {
+function generateTetradicHues(color, common) {
     const { errors } = common.services;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         const baseHue = color.value.hue;
         const randomOffset = Math.floor(Math.random() * 46) + 20;
         const distance = 90 + (Math.random() < 0.5 ? -randomOffset : randomOffset);
@@ -85,27 +87,25 @@ function tetradic(color, common) {
             (baseHue + distance + 180) % 360
         ];
     }, 'Error generating tetradic hues', {
-        color
+        context: { color }
     });
-    return [];
 }
-function triadic(color, common) {
+function generateTriadic(color, common) {
     const { errors } = common.services;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         const baseHue = color.value.hue;
         return [120, 240].map(increment => (baseHue + increment) % 360);
     }, 'Error generating triadic hues', {
-        color
+        context: { color }
     });
-    return [];
 }
 const generateHuesFnGroup = {
-    analogous,
-    diadic,
-    hexadic,
-    splitComplementary,
-    tetradic,
-    triadic
+    analogous: generateAnalogousHues,
+    diadic: generateDiadicHues,
+    hexadic: generateHexadicHues,
+    splitComplementary: generateSplitComplementaryHues,
+    tetradic: generateTetradicHues,
+    triadic: generateTriadic
 };
 
 export { generateHuesFnGroup };

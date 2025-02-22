@@ -36,6 +36,28 @@ export class ErrorHandler implements ErrorHandlerInterface {
 		return ErrorHandler.#instance;
 	}
 
+	handleAndReturn<T>(
+		action: () => T | Promise<T>,
+		errorMessage: string,
+		options: ErrorHandlerOptions = {}
+	): T | Promise<T> {
+		try {
+			const result = action();
+
+			if (result instanceof Promise) {
+				return result.catch(error => {
+					this.#handle(error, errorMessage, options);
+					return (options.fallback as T) ?? Promise.reject(error);
+				});
+			}
+
+			return result;
+		} catch (error) {
+			this.#handle(error, errorMessage, options);
+			return options.fallback as T;
+		}
+	}
+
 	async handleAsync<T>(
 		action: () => Promise<T>,
 		errorMessage: string,

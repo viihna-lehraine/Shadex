@@ -9,17 +9,20 @@ import {
 
 // TODO: These definiely need refinement
 
-function analogous(
+function generateAnalogousHues(
 	color: HSL,
 	options: SelectedPaletteOptions,
 	common: CommonFunctions
 ): number[] {
 	const { errors, log } = common.services;
 
-	errors.handleSync(
+	return errors.handleSync(
 		() => {
 			if (!common.utils.validate.colorValue(color)) {
-				log(`Invalid color value ${JSON.stringify(color)}`, 'error');
+				log(`Invalid color value ${JSON.stringify(color)}`, {
+					caller: '[generateAnalogousHues]',
+					level: 'error'
+				});
 
 				return [];
 			}
@@ -47,13 +50,12 @@ function analogous(
 		},
 		'Error generating analogous hues',
 		{
-			options
+			context: { options }
 		}
 	);
-	return [];
 }
 
-function diadic(
+function generateDiadicHues(
 	color: HSL,
 	options: SelectedPaletteOptions,
 	common: CommonFunctions
@@ -63,7 +65,7 @@ function diadic(
 		services: { errors }
 	} = common;
 
-	errors.handleSync(
+	return errors.handleSync(
 		() => {
 			const baseHue = color.value.hue;
 			const diadicHues = [];
@@ -71,10 +73,10 @@ function diadic(
 			const { weights, values } = helpers.palette.getWeightsAndValues(
 				options.distributionType
 			);
-			const randomDistance = helpers.math.getWeightedRandomValue(
+			const randomDistance = helpers.random.selectRandomFromWeights({
 				weights,
 				values
-			);
+			});
 			const hue1 = baseHue;
 			const hue2 = (hue1 + randomDistance) % 360;
 
@@ -84,19 +86,18 @@ function diadic(
 		},
 		'Error generating diadic hues',
 		{
-			options
+			context: { options }
 		}
 	);
-	return [];
 }
 
-function hexadic(color: HSL, common: CommonFunctions): number[] {
+function generateHexadicHues(color: HSL, common: CommonFunctions): number[] {
 	const {
 		utils,
 		services: { errors }
 	} = common;
 
-	errors.handleSync(
+	return errors.handleSync(
 		() => {
 			const clonedBaseHSL = utils.color.convertToHSL(color);
 
@@ -116,16 +117,18 @@ function hexadic(color: HSL, common: CommonFunctions): number[] {
 		},
 		'Error generating hexadic hues',
 		{
-			color
+			context: { color }
 		}
 	);
-	return [];
 }
 
-function splitComplementary(color: HSL, common: CommonFunctions): number[] {
+function generateSplitComplementaryHues(
+	color: HSL,
+	common: CommonFunctions
+): number[] {
 	const { errors } = common.services;
 
-	errors.handleSync(
+	return errors.handleSync(
 		() => {
 			const baseHue = color.value.hue;
 			const modifier = Math.floor(Math.random() * 11) + 20;
@@ -137,16 +140,15 @@ function splitComplementary(color: HSL, common: CommonFunctions): number[] {
 		},
 		'Error generating split-complementary hues',
 		{
-			color
+			context: { color }
 		}
 	);
-	return [];
 }
 
-function tetradic(color: HSL, common: CommonFunctions): number[] {
+function generateTetradicHues(color: HSL, common: CommonFunctions): number[] {
 	const { errors } = common.services;
 
-	errors.handleSync(
+	return errors.handleSync(
 		() => {
 			const baseHue = color.value.hue;
 			const randomOffset = Math.floor(Math.random() * 46) + 20;
@@ -162,16 +164,15 @@ function tetradic(color: HSL, common: CommonFunctions): number[] {
 		},
 		'Error generating tetradic hues',
 		{
-			color
+			context: { color }
 		}
 	);
-	return [];
 }
 
-function triadic(color: HSL, common: CommonFunctions): number[] {
+function generateTriadic(color: HSL, common: CommonFunctions): number[] {
 	const { errors } = common.services;
 
-	errors.handleSync(
+	return errors.handleSync(
 		() => {
 			const baseHue = color.value.hue;
 
@@ -179,17 +180,16 @@ function triadic(color: HSL, common: CommonFunctions): number[] {
 		},
 		'Error generating triadic hues',
 		{
-			color
+			context: { color }
 		}
 	);
-	return [];
 }
 
 export const generateHuesFnGroup: GenerateHuesFnGroup = {
-	analogous,
-	diadic,
-	hexadic,
-	splitComplementary,
-	tetradic,
-	triadic
-};
+	analogous: generateAnalogousHues,
+	diadic: generateDiadicHues,
+	hexadic: generateHexadicHues,
+	splitComplementary: generateSplitComplementaryHues,
+	tetradic: generateTetradicHues,
+	triadic: generateTriadic
+} as const;

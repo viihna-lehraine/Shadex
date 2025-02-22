@@ -1,8 +1,9 @@
 // File: common/services/Semaphore.ts
 
-import { SemaphoreInterface } from '../../types/index.js';
+import { SemaphoreInterface, Services } from '../../types/index.js';
 import { config } from '../../config/index.js';
 
+const caller = 'Semaphore';
 const maxLocks = config.env.semaphoreMaxLocks;
 const timeout = config.env.semaphoreTimeout;
 
@@ -10,55 +11,78 @@ export class Semaphore implements SemaphoreInterface {
 	#isLocked: boolean = false;
 	#waitingQueue: (() => void)[] = [];
 	#lockCount: number = 0;
+	#errors: Services['errors'];
+	#log: Services['log'];
+
+	constructor(errors: Services['errors'], log: Services['log']) {
+		log('Constructing Semaphore instance.', {
+			caller: `${caller} constructor`
+		});
+		this.#errors = errors;
+		this.#log = log;
+	}
 
 	async acquire(): Promise<void> {
-		if (this.#lockCount >= maxLocks) {
-			throw new Error(
-				`Cannot acquire lock. Maximum number of locks (${maxLocks}) reached.`
-			);
-		}
+		return this.#errors.handleAndReturn(() => {
+			this.#log('Semaphore acquiring lock.', {
+				caller: `${caller}.acquire`,
+				level: 'debug'
+			});
 
-		return new Promise<void>((resolve, reject) => {
-			const timer = setTimeout(
-				() =>
-					reject(
-						new Error(
-							`Lock acquisition timed out after ${timeout} ms`
-						)
-					),
-				timeout
-			);
+			if (this.#lockCount >= maxLocks) {
+				throw new Error(
+					`Cannot acquire lock. Maximum number of locks (${maxLocks}) reached.`
+				);
+			}
 
-			const tryAcquire = () => {
-				if (!this.#isLocked) {
-					clearTimeout(timer);
+			return new Promise<void>((resolve, reject) => {
+				const timer = setTimeout(
+					() =>
+						reject(
+							new Error(
+								`Lock acquisition timed out after ${timeout} ms`
+							)
+						),
+					timeout
+				);
 
-					this.#isLocked = true;
+				const tryAcquire = () => {
+					if (!this.#isLocked) {
+						clearTimeout(timer);
 
-					resolve();
-				} else {
-					this.#waitingQueue.push(tryAcquire);
-				}
-			};
+						this.#isLocked = true;
 
-			tryAcquire();
+						resolve();
+					} else {
+						this.#waitingQueue.push(tryAcquire);
+					}
+				};
 
-			this.#lockCount++;
-		});
+				tryAcquire();
+
+				this.#lockCount++;
+			});
+		}, 'Error acquiring semaphore lock.');
 	}
 
 	release(): void {
-		if (!this.#isLocked) {
-			throw new Error("Cannot release a lock that isn't acquired.");
-		}
+		return this.#errors.handleAndReturn(() => {
+			this.#log('Semaphore releasing lock.', {
+				caller: `${caller}.release`,
+				level: 'debug'
+			});
+			if (!this.#isLocked) {
+				throw new Error("Cannot release a lock that isn't acquired.");
+			}
 
-		this.#isLocked = false;
+			this.#isLocked = false;
 
-		const next = this.#waitingQueue.shift();
+			const next = this.#waitingQueue.shift();
 
-		this.#lockCount--;
-		if (next) {
-			next();
-		}
+			this.#lockCount--;
+			if (next) {
+				next();
+			}
+		}, 'Error releasing semaphore lock.') as void;
 	}
 }

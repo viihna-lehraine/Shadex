@@ -1,11 +1,18 @@
-// File: common/services/DataObserver.js
+// File: common/services/DataObserver.ts
 
-import { DataObserverInterface, Listener } from '../../types/index.js';
+import {
+	DataObserverInterface,
+	DebounceOptions,
+	Listener
+} from '../../types/index.js';
 
-interface DebounceOptions {
-	delay?: number;
-}
-
+/**
+ * @description Used for observing changes to a data object
+ * @export
+ * @class DataObserver
+ * @implements {DataObserverInterface<T>}
+ * @template T
+ */
 export class DataObserver<T extends Record<string, unknown>>
 	implements DataObserverInterface<T>
 {
@@ -19,15 +26,36 @@ export class DataObserver<T extends Record<string, unknown>>
 		this.data = this.#deepObserve(this.data);
 	}
 
+	/**
+	 * @description Get the value of a property from the data object
+	 * @template K
+	 * @param {K} prop
+	 * @return {*}  {T[K]}
+	 * @memberof DataObserver
+	 */
 	get<K extends keyof T>(prop: K): T[K] {
 		return this.data[prop];
 	}
 
+	/**
+	 * @description Remove a listener from the list of listeners for a property
+	 * @template K
+	 * @param {K} prop
+	 * @param {Listener<T[K]>} callback
+	 * @memberof DataObserver
+	 */
 	off<K extends keyof T>(prop: K, callback: Listener<T[K]>): void {
 		this.#listeners[prop] =
 			this.#listeners[prop]?.filter(cb => cb !== callback) ?? [];
 	}
 
+	/**
+	 * @description Add a listener to the list of listeners for a property
+	 * @template K
+	 * @param {K} prop
+	 * @param {Listener<T[K]>} callback
+	 * @memberof DataObserver
+	 */
 	on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void {
 		if (!this.#listeners[prop]) {
 			this.#listeners[prop] = [];
@@ -35,14 +63,34 @@ export class DataObserver<T extends Record<string, unknown>>
 		this.#listeners[prop]!.push(callback);
 	}
 
+	/**
+	 * @description Set the value of a property in the data object
+	 * @template K
+	 * @param {K} prop
+	 * @param {T[K]} value
+	 * @memberof DataObserver
+	 */
 	set<K extends keyof T>(prop: K, value: T[K]): void {
 		this.data[prop] = value;
 	}
 
+	/**
+	 * @description
+	 * @template U
+	 * @param {U} newData
+	 * @return {*}  {DataObserver<U>}
+	 * @memberof DataObserver
+	 */
 	setData<U extends Record<string, unknown>>(newData: U): DataObserver<U> {
 		return new DataObserver(newData);
 	}
 
+	/**
+	 * @description Recursively observe nested objects
+	 * @param {T} obj
+	 * @return {*}  {T}
+	 * @memberof DataObserver
+	 */
 	#deepObserve(obj: T): T {
 		if (typeof obj !== 'object' || obj === null) {
 			return obj;
@@ -83,12 +131,28 @@ export class DataObserver<T extends Record<string, unknown>>
 		}) as T;
 	}
 
+	/**
+	 * @description Notify listeners of a property change
+	 * @template K
+	 * @param {K} prop
+	 * @param {T[K]} newValue
+	 * @param {T[K]} oldValue
+	 * @memberof DataObserver
+	 */
 	#notify<K extends keyof T>(prop: K, newValue: T[K], oldValue: T[K]) {
 		this.#listeners[prop]?.forEach(callback =>
 			callback(newValue, oldValue)
 		);
 	}
 
+	/**
+	 * @description
+	 * @template K
+	 * @param {K} prop
+	 * @param {T[K]} newValue
+	 * @param {T[K]} oldValue
+	 * @memberof DataObserver
+	 */
 	#triggerNotify<K extends keyof T>(prop: K, newValue: T[K], oldValue: T[K]) {
 		const delay = this.debounceOptions.delay ?? 0;
 

@@ -1,4 +1,4 @@
-// File: src/config/index.js
+// File: src/config/index.ts
 
 import {
 	ByteRange,
@@ -205,8 +205,14 @@ const regex: Readonly<RegexConfig> = {
 		rgb: colorFunc('rgb', [number, number, number])
 	},
 	stackTrace: {
-		withFn: /at\s+(.*)\s+\((.*):(\d+):(\d+)\)/,
-		withoutFn: /at\s+(.*):(\d+):(\d+)/
+		anon: /at\s+(.*?):(\d+):(\d+)/,
+		chrome: /at\s+(.*?)\s+\((.*?):(\d+):(\d+)\)/,
+		electron: /at\s+(.*?)\s+\((.*?):(\d+):(\d+)\)/,
+		fallback: /(.*?):(\d+):(\d+)/,
+		firefox: /(.*?)@(.*?):(\d+):(\d+)/,
+		node: /at\s+(.*?)\s+\((.*?):(\d+):(\d+)\)/,
+		safari: /(.*?)@(.*?):(\d+):(\d+)/,
+		workers: /at\s+(.*?):(\d+):(\d+)/
 	},
 	userInput: {
 		hex: /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/i,
@@ -228,6 +234,7 @@ const regex: Readonly<RegexConfig> = {
 const env: Readonly<EnvData> = {
 	appHistoryLimit: 100,
 	appPaletteHistoryLimit: 20,
+	idbRetryDelay: 50,
 	observerDebounce: 100,
 	semaphoreMaxLocks: 10,
 	semaphoreTimeout: 5000

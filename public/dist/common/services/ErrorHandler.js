@@ -1,3 +1,4 @@
+import { UserFacingError } from './ErrorClasses.js';
 import '../../config/index.js';
 
 // File: common/services/ErrorHandler.ts
@@ -16,6 +17,22 @@ class ErrorHandler {
         }
         console.debug('[ErrorHandler] Returning existing ErrorHandler instance.');
         return ErrorHandler.#instance;
+    }
+    handleAndReturn(action, errorMessage, options = {}) {
+        try {
+            const result = action();
+            if (result instanceof Promise) {
+                return result.catch(error => {
+                    this.#handle(error, errorMessage, options);
+                    return options.fallback ?? Promise.reject(error);
+                });
+            }
+            return result;
+        }
+        catch (error) {
+            this.#handle(error, errorMessage, options);
+            return options.fallback;
+        }
     }
     async handleAsync(action, errorMessage, options = {}) {
         try {
@@ -50,8 +67,10 @@ class ErrorHandler {
         {
             this.#logger.log(`Stack trace:\n${this.#getStackTrace(error instanceof Error ? error : undefined)}`, 'debug', '[ErrorHandler]');
         }
-        if (options.userMessage) {
-            alert(options.userMessage);
+        const userMessage = options.userMessage ??
+            (error instanceof UserFacingError ? error.userMessage : undefined);
+        if (userMessage) {
+            alert(userMessage);
         }
     }
 }

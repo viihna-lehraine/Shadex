@@ -7,35 +7,78 @@
 
 // This application comes with ABSOLUTELY NO WARRANTY OR GUARANTEE.
 
-// File: index.js
+// File: index.ts
 
-import { helpersFactory } from './common/factories/helpers.js';
+import { EventManager } from './events/EventManager.js';
+import { config } from './config/index.js';
 
-const helpers = await helpersFactory();
+const mode = config.mode;
 
-window.onerror = function (message, source, lineno, colno, error) {
-	import('./common/services/Logger.js').then(({ Logger }) => {
-		const logger = Logger.getInstance(helpers);
-		logger.log(
-			`[GLOBAL ERROR HANDLER]: Unhandled error: ${message} at ${source}:${lineno}:${colno}`
-		);
+async function initializeApp() {
+	// 1. Bootstrap minimal dependencies
+	console.log('[STARTUP]: Importing bootstrap module...');
+	const { bootstrap } = await import('./app/bootstrap.js');
+
+	console.log('[STARTUP]: Executing bootstrap process.');
+	const { helpers, services } = await bootstrap();
+
+	const { errors, log } = services;
+	log('Boostrap process complete.', { caller: '[STARTUP]' });
+
+	log('Registering global error handlers...', { caller: '[STARTUP]' });
+	window.onerror = function (message, source, lineno, colno, error) {
+		log(`Unhandled error: ${message} at ${source}:${lineno}:${colno}`, {
+			caller: '[GLOBAL ERROR HANDLER]'
+		});
 		if (error && error.stack) {
-			logger.log(`[GLOBAL ERROR HANDLER]: Stack trace:\n${error.stack}`);
+			log(`Stack trace:\n${error.stack}`, {
+				caller: '[GLOBAL ERROR HANDLER]'
+			});
 		}
+		return false;
+	};
+	window.addEventListener('unhandledrejection', function (event) {
+		log(`Unhandled promise rejection: ${event.reason}`, {
+			caller: '[GLOBAL ERROR HANDLER]'
+		});
 	});
 
-	return false; // prevent default logging
-};
+	const { registerDependencies } = await import('./app/registry.js');
+	log('Registering dependencies.', { caller: '[STARTUP]' });
+	const deps = await registerDependencies(helpers, services);
+	log('Dependencies registered.', { caller: '[STARTUP]' });
 
-window.addEventListener('unhandledrejection', function (event) {
-	import('./common/services/Logger.js').then(({ Logger }) => {
-		const logger = Logger.getInstance(helpers);
-		logger.log(
-			`[GLOBAL ERROR HANDLER]: Unhandled promise rejection: ${event.reason}`
+	console.log(`mode.exposeClasses ${mode.exposeClasses}`);
+	if (mode.exposeClasses) {
+		log(`Exposing classes to console.`, { caller: '[STARTUP_OPTION]' });
+		const { exposeClasses } = await import('./app/init.js');
+		await exposeClasses(
+			deps.eventManager,
+			deps.events.palette,
+			deps.paletteManager,
+			deps.common.services,
+			deps.stateManager,
+			deps.events.ui
 		);
-	});
-});
+	}
 
-const { startApp } = await import('./app/main.js');
+	await errors.handleAsync(async () => {
+		if (mode.debugLevel >= 3) {
+			setTimeout(() => {
+				EventManager.listAll();
+			}, 100);
+		}
+	}, 'Application startup failed');
+}
 
-startApp(helpers);
+if (document.readyState === 'loading') {
+	console.log(
+		'[INIT]: DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...'
+	);
+	document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+	console.log(
+		'[INIT]: DOM content already loaded. Initializing application immediately.'
+	);
+	initializeApp();
+}

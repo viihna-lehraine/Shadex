@@ -149,8 +149,14 @@ export interface RegexConfig {
 		rgb: RegExp;
 	};
 	stackTrace: {
-		withFn: RegExp;
-		withoutFn: RegExp;
+		anon: RegExp;
+		chrome: RegExp;
+		electron: RegExp;
+		fallback: RegExp;
+		firefox: RegExp;
+		node: RegExp;
+		safari: RegExp;
+		workers: RegExp;
 	};
 	userInput: {
 		hex: RegExp;
@@ -166,6 +172,7 @@ export interface RegexConfig {
 export interface EnvData {
 	appHistoryLimit: number;
 	appPaletteHistoryLimit: number;
+	idbRetryDelay: number;
 	observerDebounce: number;
 	semaphoreMaxLocks: number;
 	semaphoreTimeout: number;

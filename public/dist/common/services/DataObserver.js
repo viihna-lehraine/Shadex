@@ -1,4 +1,11 @@
-// File: common/services/DataObserver.js
+// File: common/services/DataObserver.ts
+/**
+ * @description Used for observing changes to a data object
+ * @export
+ * @class DataObserver
+ * @implements {DataObserverInterface<T>}
+ * @template T
+ */
 class DataObserver {
     data;
     debounceOptions;
@@ -9,25 +16,66 @@ class DataObserver {
         this.debounceOptions = debounceOptions;
         this.data = this.#deepObserve(this.data);
     }
+    /**
+     * @description Get the value of a property from the data object
+     * @template K
+     * @param {K} prop
+     * @return {*}  {T[K]}
+     * @memberof DataObserver
+     */
     get(prop) {
         return this.data[prop];
     }
+    /**
+     * @description Remove a listener from the list of listeners for a property
+     * @template K
+     * @param {K} prop
+     * @param {Listener<T[K]>} callback
+     * @memberof DataObserver
+     */
     off(prop, callback) {
         this.#listeners[prop] =
             this.#listeners[prop]?.filter(cb => cb !== callback) ?? [];
     }
+    /**
+     * @description Add a listener to the list of listeners for a property
+     * @template K
+     * @param {K} prop
+     * @param {Listener<T[K]>} callback
+     * @memberof DataObserver
+     */
     on(prop, callback) {
         if (!this.#listeners[prop]) {
             this.#listeners[prop] = [];
         }
         this.#listeners[prop].push(callback);
     }
+    /**
+     * @description Set the value of a property in the data object
+     * @template K
+     * @param {K} prop
+     * @param {T[K]} value
+     * @memberof DataObserver
+     */
     set(prop, value) {
         this.data[prop] = value;
     }
+    /**
+     * @description
+     * @template U
+     * @param {U} newData
+     * @return {*}  {DataObserver<U>}
+     * @memberof DataObserver
+     */
     setData(newData) {
         return new DataObserver(newData);
     }
+    /**
+     * @description Recursively observe nested objects
+     * @param {T} obj
+     * @return {*}  {T}
+     * @memberof DataObserver
+     */
     #deepObserve(obj) {
         if (typeof obj !== 'object' || obj === null) {
             return obj;
@@ -58,9 +106,25 @@ class DataObserver {
             }
         });
     }
+    /**
+     * @description Notify listeners of a property change
+     * @template K
+     * @param {K} prop
+     * @param {T[K]} newValue
+     * @param {T[K]} oldValue
+     * @memberof DataObserver
+     */
     #notify(prop, newValue, oldValue) {
         this.#listeners[prop]?.forEach(callback => callback(newValue, oldValue));
     }
+    /**
+     * @description
+     * @template K
+     * @param {K} prop
+     * @param {T[K]} newValue
+     * @param {T[K]} oldValue
+     * @memberof DataObserver
+     */
     #triggerNotify(prop, newValue, oldValue) {
         const delay = this.debounceOptions.delay ?? 0;
         if (delay > 0) {

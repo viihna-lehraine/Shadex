@@ -1,8 +1,11 @@
-// File: common/utils/palette.js
+// File: common/utils/palette.ts
 
 import {
 	AllColors,
+	BrandingUtils,
 	CMYK,
+	ColorUtils,
+	DOMUtils,
 	Helpers,
 	Hex,
 	HSL,
@@ -16,7 +19,7 @@ import {
 	RGB,
 	SelectedPaletteOptions,
 	Services,
-	Utilities,
+	ValidationUtils,
 	XYZ
 } from '../../types/index.js';
 import { domIndex, paletteConfig } from '../../config/index.js';
@@ -24,89 +27,70 @@ import { domIndex, paletteConfig } from '../../config/index.js';
 const ids = domIndex.ids;
 
 export function paletteUtilsFactory(
+	brand: BrandingUtils,
+	colorUtils: ColorUtils,
+	dom: DOMUtils,
 	helpers: Helpers,
 	services: Services,
-	utils: Utilities
+	validate: ValidationUtils
 ): PaletteUtils {
-	const { clone } = helpers.data;
-	const { getElement } = helpers.dom;
-	const { log } = services;
+	const {
+		data: { clone },
+		dom: { getElement }
+	} = helpers;
+	const { errors, log } = services;
 
 	function createPaletteItem(color: HSL, itemID: number): PaletteItem {
-		const clonedColor = clone(color) as HSL;
+		return errors.handleSync(() => {
+			const clonedColor = clone(color) as HSL;
 
-		return {
-			itemID,
-			colors: {
-				cmyk: (utils.color.convertHSL(clonedColor, 'cmyk') as CMYK)
-					.value,
-				hex: (utils.color.convertHSL(clonedColor, 'hex') as Hex).value,
-				hsl: clonedColor.value,
-				hsv: (utils.color.convertHSL(clonedColor, 'hsv') as HSV).value,
-				lab: (utils.color.convertHSL(clonedColor, 'lab') as LAB).value,
-				rgb: (utils.color.convertHSL(clonedColor, 'rgb') as RGB).value,
-				xyz: (utils.color.convertHSL(clonedColor, 'xyz') as XYZ).value
-			},
-			css: {
-				cmyk: utils.color.formatColorAsCSS(
-					utils.color.convertHSL(clonedColor, 'cmyk')
-				),
-				hex: utils.color.formatColorAsCSS(
-					utils.color.convertHSL(clonedColor, 'hex')
-				),
-				hsl: utils.color.formatColorAsCSS(clonedColor),
-				hsv: utils.color.formatColorAsCSS(
-					utils.color.convertHSL(clonedColor, 'hsv')
-				),
-				lab: utils.color.formatColorAsCSS(
-					utils.color.convertHSL(clonedColor, 'lab')
-				),
-				rgb: utils.color.formatColorAsCSS(
-					utils.color.convertHSL(clonedColor, 'rgb')
-				),
-				xyz: utils.color.formatColorAsCSS(
-					utils.color.convertHSL(clonedColor, 'xyz')
-				)
-			}
-		};
+			return {
+				itemID,
+				colors: {
+					cmyk: (colorUtils.convertHSL(clonedColor, 'cmyk') as CMYK)
+						.value,
+					hex: (colorUtils.convertHSL(clonedColor, 'hex') as Hex)
+						.value,
+					hsl: clonedColor.value,
+					hsv: (colorUtils.convertHSL(clonedColor, 'hsv') as HSV)
+						.value,
+					lab: (colorUtils.convertHSL(clonedColor, 'lab') as LAB)
+						.value,
+					rgb: (colorUtils.convertHSL(clonedColor, 'rgb') as RGB)
+						.value,
+					xyz: (colorUtils.convertHSL(clonedColor, 'xyz') as XYZ)
+						.value
+				},
+				css: {
+					cmyk: colorUtils.formatColorAsCSS(
+						colorUtils.convertHSL(clonedColor, 'cmyk')
+					),
+					hex: colorUtils.formatColorAsCSS(
+						colorUtils.convertHSL(clonedColor, 'hex')
+					),
+					hsl: colorUtils.formatColorAsCSS(clonedColor),
+					hsv: colorUtils.formatColorAsCSS(
+						colorUtils.convertHSL(clonedColor, 'hsv')
+					),
+					lab: colorUtils.formatColorAsCSS(
+						colorUtils.convertHSL(clonedColor, 'lab')
+					),
+					rgb: colorUtils.formatColorAsCSS(
+						colorUtils.convertHSL(clonedColor, 'rgb')
+					),
+					xyz: colorUtils.formatColorAsCSS(
+						colorUtils.convertHSL(clonedColor, 'xyz')
+					)
+				}
+			};
+		}, 'Error occurred while creating palette item');
 	}
 
-	function isHSLTooDark(hsl: HSL): boolean {
-		if (!utils.validate.colorValue(hsl)) {
-			log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
-
-			return false;
-		}
-
-		return clone(hsl).value.lightness < paletteConfig.thresholds.dark;
-	}
-
-	function isHSLTooGray(hsl: HSL): boolean {
-		if (!utils.validate.colorValue(hsl)) {
-			log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
-
-			return false;
-		}
-
-		return clone(hsl).value.saturation < paletteConfig.thresholds.gray;
-	}
-
-	function isHSLTooLight(hsl: HSL): boolean {
-		if (!utils.validate.colorValue(hsl)) {
-			log('Invalid HSL value ${JSON.stringify(hsl)}', 'error');
-
-			return false;
-		}
-
-		return clone(hsl).value.lightness > paletteConfig.thresholds.light;
-	}
-
-	return {
-		createPaletteItem,
-		isHSLTooDark,
-		isHSLTooGray,
-		isHSLTooLight,
-		createPaletteItemArray(baseColor: HSL, hues: number[]): PaletteItem[] {
+	function createPaletteItemArray(
+		baseColor: HSL,
+		hues: number[]
+	): PaletteItem[] {
+		return errors.handleSync(() => {
 			const paletteItems: PaletteItem[] = [];
 
 			// base color always gets itemID = 1
@@ -121,11 +105,9 @@ export function paletteUtilsFactory(
 			for (const [i, hue] of hues.entries()) {
 				const newColor: HSL = {
 					value: {
-						hue: utils.brand.asRadial(hue),
-						saturation: utils.brand.asPercentile(
-							Math.random() * 100
-						),
-						lightness: utils.brand.asPercentile(Math.random() * 100)
+						hue: brand.asRadial(hue),
+						saturation: brand.asPercentile(Math.random() * 100),
+						lightness: brand.asPercentile(Math.random() * 100)
 					},
 					format: 'hsl'
 				};
@@ -136,15 +118,18 @@ export function paletteUtilsFactory(
 				);
 
 				paletteItems.push(newPaletteItem);
-				utils.dom.updateColorBox(newColor, String(i + 2));
+				dom.updateColorBox(newColor, String(i + 2));
 			}
 
 			return paletteItems;
-		},
-		createPaletteObject(
-			options: SelectedPaletteOptions,
-			paletteItems: PaletteItem[]
-		): Palette {
+		}, 'Error occurred while creating palette item array');
+	}
+
+	function createPaletteObject(
+		options: SelectedPaletteOptions,
+		paletteItems: PaletteItem[]
+	): Palette {
+		return errors.handleSync(() => {
 			return {
 				id: `${options.paletteType}_${crypto.randomUUID()}`,
 				items: paletteItems,
@@ -157,19 +142,25 @@ export function paletteUtilsFactory(
 					type: options.paletteType
 				}
 			};
-		},
-		generateAllColorValues(color: HSL): AllColors {
+		}, 'Error occurred while creating palette object');
+	}
+
+	function generateAllColorValues(color: HSL): AllColors {
+		return errors.handleSync(() => {
 			const clonedColor = clone(color);
 
-			if (!utils.validate.colorValue(clonedColor)) {
-				log(`Invalid color: ${JSON.stringify(clonedColor)}`, 'error');
+			if (!validate.colorValue(clonedColor)) {
+				log(`Invalid color: ${JSON.stringify(clonedColor)}`, {
+					caller: 'utils.palette.generateAllColorValues',
+					level: 'error'
+				});
 				throw new Error('Invalid HSL color provided');
 			}
 
 			const convert = <T extends keyof AllColors>(
 				target: T
 			): AllColors[T] =>
-				utils.color.convertHSL(clonedColor, target) as AllColors[T];
+				colorUtils.convertHSL(clonedColor, target) as AllColors[T];
 
 			return {
 				cmyk: convert('cmyk'),
@@ -182,68 +173,68 @@ export function paletteUtilsFactory(
 				sv: convert('sv'),
 				xyz: convert('xyz')
 			};
-		},
-		getPaletteOptionsFromUI(): SelectedPaletteOptions {
-			try {
-				const columnCountElement = getElement<HTMLInputElement>(
-					ids.inputs.columnCount
-				);
-				const paletteTypeElement = getElement<HTMLInputElement>(
-					ids.inputs.paletteType
-				);
-				const limitDarkChkbx = getElement<HTMLInputElement>(
-					ids.inputs.limitDarkChkbx
-				);
-				const limitGrayChkbx = getElement<HTMLInputElement>(
-					ids.inputs.limitGrayChkbx
-				);
-				const limitLightChkbx = getElement<HTMLInputElement>(
-					ids.inputs.limitLightChkbx
-				);
+		}, 'Error occurred while generating all color values');
+	}
 
-				if (!paletteTypeElement) {
-					log('paletteTypeOptions DOM element not found', 'warn');
-				}
-				if (!columnCountElement) {
-					log(`columnCount DOM element not found`, 'warn');
-				}
-				if (!limitDarkChkbx || !limitGrayChkbx || !limitLightChkbx) {
-					log(`One or more checkboxes not found`, 'warn');
-				}
+	function getPaletteOptionsFromUI(): SelectedPaletteOptions {
+		return errors.handleSync(() => {
+			const columnCountElement = getElement<HTMLInputElement>(
+				ids.inputs.columnCount
+			);
+			const paletteTypeElement = getElement<HTMLInputElement>(
+				ids.inputs.paletteType
+			);
+			const limitDarkChkbx = getElement<HTMLInputElement>(
+				ids.inputs.limitDarkChkbx
+			);
+			const limitGrayChkbx = getElement<HTMLInputElement>(
+				ids.inputs.limitGrayChkbx
+			);
+			const limitLightChkbx = getElement<HTMLInputElement>(
+				ids.inputs.limitLightChkbx
+			);
 
-				if (
-					!helpers.typeguards.isPaletteType(paletteTypeElement!.value)
-				) {
-					log(
-						`Invalid palette type: ${paletteTypeElement!.value}`,
-						'warn'
-					);
-				}
-
-				return {
-					columnCount: columnCountElement
-						? parseInt(columnCountElement.value, 10)
-						: 0,
-					distributionType: 'soft',
-					limitDark: limitDarkChkbx?.checked || false,
-					limitGray: limitGrayChkbx?.checked || false,
-					limitLight: limitLightChkbx?.checked || false,
-					paletteType: paletteTypeElement!.value as PaletteType
-				};
-			} catch (error) {
-				log(`Failed to retrieve parameters from UI: ${error}`, 'error');
-
-				return {
-					columnCount: 0,
-					distributionType: 'soft',
-					limitDark: false,
-					limitGray: false,
-					limitLight: false,
-					paletteType: 'random'
-				};
+			if (!paletteTypeElement) {
+				log('paletteTypeOptions DOM element not found', {
+					caller: 'utils.palette.getPaletteOptionsFromUI',
+					level: 'warn'
+				});
 			}
-		},
-		getRandomizedPaleteOptions(): SelectedPaletteOptions {
+			if (!columnCountElement) {
+				log(`columnCount DOM element not found`, {
+					caller: 'utils.palette.getPaletteOptionsFromUI',
+					level: 'warn'
+				});
+			}
+			if (!limitDarkChkbx || !limitGrayChkbx || !limitLightChkbx) {
+				log(`One or more checkboxes not found`, {
+					caller: 'utils.palette.getPaletteOptionsFromUI',
+					level: 'warn'
+				});
+			}
+
+			if (!helpers.typeguards.isPaletteType(paletteTypeElement!.value)) {
+				log(`Invalid palette type: ${paletteTypeElement!.value}`, {
+					caller: 'utils.palette.getPaletteOptionsFromUI',
+					level: 'warn'
+				});
+			}
+
+			return {
+				columnCount: columnCountElement
+					? parseInt(columnCountElement.value, 10)
+					: 0,
+				distributionType: 'soft',
+				limitDark: limitDarkChkbx?.checked || false,
+				limitGray: limitGrayChkbx?.checked || false,
+				limitLight: limitLightChkbx?.checked || false,
+				paletteType: paletteTypeElement!.value as PaletteType
+			};
+		}, 'Error occurred while getting palette options from UI');
+	}
+
+	function getRandomizedPaleteOptions(): SelectedPaletteOptions {
+		return errors.handleSync(() => {
 			const paletteTypeMap: Record<number, PaletteType> = {
 				0: 'analogous',
 				1: 'complementary',
@@ -290,15 +281,81 @@ export function paletteUtilsFactory(
 				limitLight,
 				paletteType
 			};
-		},
-		isHSLInBounds(hsl: HSL): boolean {
-			if (!utils.validate.colorValue(hsl)) {
-				log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
+		}, 'Error occurred while getting randomized palette options');
+	}
+
+	function isHSLInBounds(hsl: HSL): boolean {
+		return errors.handleSync(() => {
+			if (!validate.colorValue(hsl)) {
+				log(`Invalid HSL value ${JSON.stringify(hsl)}`, {
+					caller: 'utils.palette.isHSLInBounds',
+					level: 'error'
+				});
 
 				return false;
 			}
 
 			return isHSLTooDark(hsl) || isHSLTooGray(hsl) || isHSLTooLight(hsl);
-		}
+		}, 'Error occurred while checking if HSL is in bounds');
+	}
+
+	function isHSLTooDark(hsl: HSL): boolean {
+		return errors.handleSync(() => {
+			if (!validate.colorValue(hsl)) {
+				log(`Invalid HSL value ${JSON.stringify(hsl)}`, {
+					caller: 'utils.palette.isHSLTooDark',
+					level: 'error'
+				});
+
+				return false;
+			}
+
+			return clone(hsl).value.lightness < paletteConfig.thresholds.dark;
+		}, 'Error occurred while checking if HSL is too dark');
+	}
+
+	function isHSLTooGray(hsl: HSL): boolean {
+		return errors.handleSync(() => {
+			if (!validate.colorValue(hsl)) {
+				log(`Invalid HSL value ${JSON.stringify(hsl)}`, {
+					caller: 'utils.palette.isHSLTooGray',
+					level: 'error'
+				});
+
+				return false;
+			}
+
+			return clone(hsl).value.saturation < paletteConfig.thresholds.gray;
+		}, 'Error occurred while checking if HSL is too gray');
+	}
+
+	function isHSLTooLight(hsl: HSL): boolean {
+		return errors.handleSync(() => {
+			if (!validate.colorValue(hsl)) {
+				log('Invalid HSL value ${JSON.stringify(hsl)}', {
+					caller: 'utils.palette.isHSLTooLight',
+					level: 'error'
+				});
+
+				return false;
+			}
+
+			return clone(hsl).value.lightness > paletteConfig.thresholds.light;
+		}, 'Error occurred while checking if HSL is too light');
+	}
+
+	const paletteUtils: PaletteUtils = {
+		createPaletteItem,
+		createPaletteItemArray,
+		createPaletteObject,
+		generateAllColorValues,
+		getPaletteOptionsFromUI,
+		getRandomizedPaleteOptions,
+		isHSLInBounds,
+		isHSLTooDark,
+		isHSLTooGray,
+		isHSLTooLight
 	};
+
+	return errors.handleSync(() => paletteUtils, 'Error creating paletteUtils');
 }

@@ -1,20 +1,42 @@
 // File: common/utils/dom.ts
 
-import { DOMUtils, Helpers, Services, Utilities } from '../../types/index.js';
+import {
+	BrandingUtils,
+	ColorUtils,
+	DOMUtils,
+	Helpers,
+	Services,
+	ValidationUtils
+} from '../../types/index.js';
 
 export async function domUtilsFactory(
+	brand: BrandingUtils,
+	colorUtils: ColorUtils,
 	helpers: Helpers,
 	services: Services,
-	utils: Utilities
+	validate: ValidationUtils
 ): Promise<DOMUtils> {
-	const { domParsingUtilsFactory } = await import('./partials/dom/parse.js');
-	const { partialDOMUtilsFactory } = await import('./partials/dom/main.js');
+	const { errors } = services;
 
-	const domParsingUtils = domParsingUtilsFactory(services, utils);
-	const domUtils = partialDOMUtilsFactory(helpers, services, utils);
+	return errors.handleAsync(async () => {
+		const { domParsingUtilsFactory } = await import(
+			'./partials/dom/parse.js'
+		);
+		const { partialDOMUtilsFactory } = await import(
+			'./partials/dom/main.js'
+		);
 
-	return {
-		...domParsingUtils,
-		...domUtils
-	};
+		const domParsingUtils = domParsingUtilsFactory(brand, services);
+		const domUtils = partialDOMUtilsFactory(
+			colorUtils,
+			helpers,
+			services,
+			validate
+		);
+
+		return {
+			...domParsingUtils,
+			...domUtils
+		};
+	}, 'Error occurred while creating DOM utilities group');
 }

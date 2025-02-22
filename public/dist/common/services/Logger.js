@@ -1,6 +1,6 @@
 import { config } from '../../config/index.js';
 
-// File: common/services/Logger.js
+// File: common/services/Logger.ts
 const mode = config.mode;
 const debugLevel = mode.debugLevel;
 class Logger {

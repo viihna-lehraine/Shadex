@@ -9,8 +9,15 @@ import {
 } from '../../types/index.js';
 import { domIndex } from '../../config/index.js';
 
+const caller = '[DOMStore]';
 const ids = domIndex.ids;
 
+/**
+ * @description Stores validation data for DOM elements
+ * @export
+ * @class DOMStore
+ * @implements {DOMStoreInterface}
+ */
 export class DOMStore implements DOMStoreInterface {
 	static #instance: DOMStore;
 	#elements: DOMElements | null = null;
@@ -34,54 +41,112 @@ export class DOMStore implements DOMStoreInterface {
 		helpers: Helpers,
 		log: Services['log']
 	): DOMStore {
-		if (!DOMStore.#instance) {
-			log(
-				'No DOMStore instance exists yet. Creating DOMStore instance',
-				'debug'
-			);
-			DOMStore.#instance = new DOMStore(errors, helpers, log);
-		}
+		return errors.handleSync(
+			() => {
+				if (!DOMStore.#instance) {
+					log(
+						'No DOMStore instance exists yet. Creating DOMStore instance',
+						{
+							caller: `${caller}.getInstance`,
+							level: 'debug'
+						}
+					);
+					DOMStore.#instance = new DOMStore(errors, helpers, log);
+				}
 
-		log(
-			'DOMStore instance already exists. Returning existing instance',
-			'debug'
+				log(
+					'DOMStore instance already exists. Returning existing instance',
+					{
+						caller: `${caller}.getInstance`,
+						level: 'debug'
+					}
+				);
+
+				return DOMStore.#instance;
+			},
+			'Error getting DOMStore instance.',
+			{ fallback: new DOMStore(errors, helpers, log) }
 		);
-
-		return DOMStore.#instance;
 	}
 
+	/**
+	 * @description Get a single DOM element
+	 * @param category *
+	 * @param key *
+	 * @returns {DOMElements[K][E]}
+	 */
 	getElement<K extends keyof DOMElements, E extends keyof DOMElements[K]>(
 		category: K,
 		key: E
 	): DOMElements[K][E] {
-		const element = this.#elements?.[category]?.[key];
+		return this.#errors.handleSync(
+			() => {
+				const element = this.#elements?.[category]?.[key];
 
-		if (!element) {
-			this.#log(
-				`Element ${category}.${String(key)} is not validated or missing.`,
-				'error'
-			);
-			throw new Error(`Element ${category}.${String(key)} not found`);
-		}
-		return element;
+				if (!element) {
+					this.#log(
+						`Element ${category}.${String(key)} is not validated or missing.`,
+						{
+							caller: `${caller}.getElement`,
+							level: 'error'
+						}
+					);
+					throw new Error(
+						`Element ${category}.${String(key)} not found`
+					);
+				}
+				return element;
+			},
+			'Error getting DOM element.',
+			{ fallback: null as unknown as DOMElements[K][E] }
+		);
 	}
 
+	/**
+	 * @description Get all DOM elements
+	 * @param category *
+	 * @param key *
+	 * @returns {DOMElements[K][E]}
+	 */
 	getElements(): DOMElements {
-		if (!this.#elements) {
-			this.#log('DOM elements are not validated yet.', 'error');
-			throw new Error('DOM elements not validated');
-		}
+		return this.#errors.handleSync(
+			() => {
+				if (!this.#elements) {
+					this.#log('DOM elements are not validated yet.', {
+						caller: `${caller}.getElements`,
+						level: 'warn'
+					});
+					throw new Error('DOM elements not validated');
+				}
 
-		return this.#elements;
+				return this.#elements;
+			},
+			'Error getting DOM elements.',
+			{ fallback: {} as DOMElements }
+		);
 	}
 
+	/**
+	 * @description Sets class instance's DOM elements value
+	 * @param elements DOMElements
+	 */
 	setElements(elements: DOMElements): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			this.#elements = elements;
+
+			this.#log('DOM elements set successfully', {
+				caller: `${caller}.setElements`,
+				level: 'debug'
+			});
 		}, 'Unable to set DOM elements');
-		this.#log('DOM elements set successfully', 'debug');
 	}
 
+	/**
+	 * @description Validates and retrieves DOM elements
+	 * @private
+	 * @memberof DOMStore
+	 * @returns {void}
+	 */
 	#validateAndGetDOMElements(): void {
 		const missingElements: string[] = [];
 
@@ -110,7 +175,10 @@ export class DOMStore implements DOMStoreInterface {
 					if (!tagName) {
 						this.#log(
 							`No element type mapping for category "${category}". Skipping...`,
-							'warn'
+							{
+								caller: `${caller}.#validateAndGetDOMElements`,
+								level: 'warn'
+							}
 						);
 						continue;
 					}
@@ -121,10 +189,10 @@ export class DOMStore implements DOMStoreInterface {
 								HTMLElementTagNameMap[typeof tagName]
 							>(id);
 						if (!element) {
-							this.#log(
-								`Element with ID "${id}" not found.`,
-								'error'
-							);
+							this.#log(`Element with ID "${id}" not found.`, {
+								caller: `${caller}.#validateAndGetDOMElements`,
+								level: 'warn'
+							});
 							missingElements.push(id);
 						} else {
 							(
@@ -139,7 +207,10 @@ export class DOMStore implements DOMStoreInterface {
 				if (missingElements.length > 0) {
 					this.#log(
 						`Missing elements: ${missingElements.join(', ')}`,
-						'warn'
+						{
+							caller: `${caller}.#validateAndGetDOMElements`,
+							level: 'error'
+						}
 					);
 					throw new Error(
 						'Some DOM elements are missing. Validation failed.'
@@ -149,8 +220,11 @@ export class DOMStore implements DOMStoreInterface {
 				this.#elements = elements as DOMElements;
 			},
 			'Unable to validate DOM elements',
-			{ missingElements: missingElements }
+			{ context: { missingElements } }
 		);
-		this.#log('All static elements are present! 🏳️‍⚧️ 🩷 🏳️‍⚧️', 'debug');
+		this.#log('All static elements are present! 🏳️‍⚧️ 🩷 🏳️‍⚧️', {
+			caller: `${caller}.#validateAndGetDOMElements`,
+			level: 'info'
+		});
 	}
 }

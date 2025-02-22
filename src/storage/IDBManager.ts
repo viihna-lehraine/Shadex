@@ -1,10 +1,11 @@
-// File: storage/IDBManager.js
+// File: storage/IDBManager.ts
 
 import { IDBManagerInterface, Services } from '../types/index.js';
 import { config } from '../config/index.js';
 
 const dbName = config.storage.idbDBName;
 const defaultVerson = config.storage.idbDefaultVersion;
+const idbRetryDelay = config.env.idbRetryDelay;
 const storeName = config.storage.idbStoreName;
 
 export class IDBManager implements IDBManagerInterface {
@@ -40,28 +41,55 @@ export class IDBManager implements IDBManagerInterface {
 			const request = indexedDB.open(dbName, this.#version);
 
 			return await new Promise((resolve, reject) => {
+				let upgradeComplete = false;
+
 				request.onupgradeneeded = event => {
 					const db = (event.target as IDBOpenDBRequest).result;
+					this.#log(
+						`Upgrading IndexedDB to version: ${this.#version}`,
+						{ caller: '[IDBManager.init]', level: 'warn' }
+					);
+
 					if (!db.objectStoreNames.contains(storeName)) {
 						db.createObjectStore(storeName, {
 							keyPath: 'id',
 							autoIncrement: true
 						});
-						console.log(
-							`[IDBManager.init] Created object store: ${storeName}`
-						);
+						this.#log(`Created object store: ${storeName}`, {
+							caller: '[IDBManager.init]',
+							level: 'info'
+						});
 					}
+
+					upgradeComplete = true;
 				};
 
 				request.onsuccess = event => {
+					if (
+						!upgradeComplete &&
+						request.result.version !== this.#version
+					) {
+						this.#log('Waiting for upgrade to finish.', {
+							caller: '[IDBManager.init]',
+							level: 'warn'
+						});
+					}
 					this.#db = (event.target as IDBOpenDBRequest).result;
 					this.#db.onversionchange = () => {
 						this.#db?.close();
 						this.#log(
-							'IndexedDB version changed, closing database',
-							'warn'
+							'IndexedDB version changed. Closing database',
+							{
+								caller: '[IDBManager.init]',
+								level: 'warn'
+							}
 						);
 					};
+
+					this.#log(`IndexedDB opened successfully`, {
+						caller: '[IDBManager.init]',
+						level: 'info'
+					});
 					resolve(true);
 				};
 
@@ -71,12 +99,22 @@ export class IDBManager implements IDBManagerInterface {
 							'Unknown IDBManager.init() error'
 					);
 				};
+
+				request.onblocked = () => {
+					this.#log(`[IDBManager.init] IndexedDB upgade blocked!`, {
+						caller: '[IDBManager.init]',
+						level: 'warn'
+					});
+					reject(
+						`Upgrade blocked. Close other tabs using this database.`
+					);
+				};
 			});
 		}, 'Failed to initialize IndexedDB');
 	}
 
 	async clear(): Promise<void> {
-		await this.#errors.handleAsync(async () => {
+		return await this.#errors.handleAsync(async () => {
 			const store = this.getTransaction('readwrite');
 			if (!store) throw new Error('IndexedDB is not initialized.');
 
@@ -94,8 +132,12 @@ export class IDBManager implements IDBManagerInterface {
 
 	async ensureDBReady(): Promise<void> {
 		while (!this.#db) {
-			this.#log('Waiting for IndexedDB to initialize...', 'warn');
-			await new Promise(resolve => setTimeout(resolve, 50));
+			this.#log('Waiting for IndexedDB to initialize...', {
+				caller: '[IDBManager.ensureDBReady]',
+				level: 'warn'
+			});
+			// TODO: replace with a better solution??
+			await new Promise(resolve => setTimeout(resolve, idbRetryDelay));
 		}
 	}
 
@@ -120,7 +162,7 @@ export class IDBManager implements IDBManagerInterface {
 	}
 
 	async setItem(key: string, value: unknown): Promise<void> {
-		await this.#errors.handleAsync(async () => {
+		return await this.#errors.handleAsync(async () => {
 			const store = this.getTransaction('readwrite');
 			if (!store) throw new Error('IndexedDB is not initialized.');
 
@@ -137,7 +179,7 @@ export class IDBManager implements IDBManagerInterface {
 	}
 
 	async removeItem(key: string): Promise<void> {
-		await this.#errors.handleAsync(async () => {
+		return await this.#errors.handleAsync(async () => {
 			const store = this.getTransaction('readwrite');
 			if (!store) throw new Error('IndexedDB is not initialized.');
 

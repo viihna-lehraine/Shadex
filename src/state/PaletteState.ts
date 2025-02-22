@@ -23,7 +23,7 @@ export class PaletteState implements PaletteStateInterface {
 	}
 
 	updatePaletteItemColor(columnID: number, newColor: string): void {
-		this.#errors.handleSync(
+		return this.#errors.handleSync(
 			() => {
 				const currentState = this.stateManager.getState();
 				const latestPalette = currentState.paletteHistory[0];
@@ -85,7 +85,7 @@ export class PaletteState implements PaletteStateInterface {
 				]);
 			},
 			'Failed to update palette item color',
-			{ columnID, newColor }
+			{ context: { columnID, newColor } }
 		);
 	}
 }

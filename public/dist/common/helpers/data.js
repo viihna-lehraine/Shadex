@@ -6,25 +6,33 @@ const dataHelpersFactory = () => ({
         return structuredClone(value);
     },
     getCallerInfo: () => {
-        const stack = new Error().stack;
-        if (stack) {
-            const stackLines = stack.split('\n');
-            for (const line of stackLines) {
-                if (!line.includes('Logger') &&
-                    !line.includes('ErrorHandler') &&
-                    !line.includes('serviceFactory') &&
-                    line.includes('at ')) {
-                    const match = line.match(regex.stackTrace.withFn) ||
-                        line.match(regex.stackTrace.withoutFn);
-                    if (match) {
-                        return match[1]
-                            ? `${match[1]} (${match[2]}:${match[3]})`
-                            : `${match[2]}:${match[3]}`;
-                    }
-                }
+        const error = new Error();
+        const stackLines = error.stack?.split('\n') ?? [];
+        const skipPatterns = [
+            'getCallerInfo',
+            'ErrorHandler',
+            'Logger',
+            'handleSync',
+            'handleAsync',
+            'Module._compile',
+            'Object.<anonymous>',
+            'processTicksAndRejections'
+        ];
+        // find the first frame that isn't internal
+        const callerLine = stackLines.find(line => !skipPatterns.some(pattern => line.includes(pattern)));
+        if (!callerLine)
+            return '[UNKNOWN CALLER]';
+        for (const pattern of Object.values(regex.stackTrace)) {
+            const match = callerLine.match(pattern);
+            if (match) {
+                const functionName = match[1]?.trim() || 'anonymous';
+                const fileName = match[3] ?? match[2] ?? 'unknown';
+                const lineNumber = match[4] ?? '0';
+                const columnNumber = match[5] ?? '0';
+                return `${functionName} (${fileName}:${lineNumber}:${columnNumber})`;
             }
         }
-        return 'UNKNOWN CALLER';
+        return '[UNKNOWN CALLER]';
     },
     getFormattedTimestamp() {
         const now = new Date();

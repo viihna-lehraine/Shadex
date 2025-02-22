@@ -9,7 +9,7 @@ class PaletteState {
         this.#utils = utils;
     }
     updatePaletteItemColor(columnID, newColor) {
-        this.#errors.handleSync(() => {
+        return this.#errors.handleSync(() => {
             const currentState = this.stateManager.getState();
             const latestPalette = currentState.paletteHistory[0];
             if (!latestPalette)
@@ -56,7 +56,7 @@ class PaletteState {
                 { ...latestPalette, items: updatedItems },
                 ...currentState.paletteHistory.slice(1)
             ]);
-        }, 'Failed to update palette item color', { columnID, newColor });
+        }, 'Failed to update palette item color', { context: { columnID, newColor } });
     }
 }
 

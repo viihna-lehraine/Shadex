@@ -1,4 +1,4 @@
-// events/PaleteEvents.js
+// events/PaleteEvents.ts
 
 import {
 	ColorSpace,
@@ -33,7 +33,7 @@ export class PaletteEvents implements PaletteEventsInterface {
 	}
 
 	init() {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const paletteContainer = this.helpers.dom.getElement(
 				ids.divs.paletteContainer
 			);
@@ -127,7 +127,7 @@ export class PaletteEvents implements PaletteEventsInterface {
 	}
 
 	attachColorCopyHandlers(): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const paletteContainer = this.helpers.dom.getElement(
 				ids.divs.paletteContainer
 			);
@@ -142,14 +142,17 @@ export class PaletteEvents implements PaletteEventsInterface {
 	}
 
 	attachDragAndDropHandlers(): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const paletteContainer = this.helpers.dom.getElement(
 				ids.divs.paletteContainer
 			);
 			if (!paletteContainer) {
 				this.services.log(
 					`Palette container not found! Cannot attach drag-and-drop handlers.`,
-					'error'
+					{
+						caller: '[PaletteEvents.attachDragAndDropHandlers]',
+						level: 'warn'
+					}
 				);
 				return;
 			}
@@ -176,7 +179,10 @@ export class PaletteEvents implements PaletteEventsInterface {
 
 				this.services.log(
 					`Drag started for column: ${this.#draggedColumn.id}`,
-					'debug'
+					{
+						caller: '[PaletteEvents.attachDragAndDropHandlers]',
+						level: 'debug'
+					}
 				);
 			}) as EventListener);
 
@@ -239,7 +245,10 @@ export class PaletteEvents implements PaletteEventsInterface {
 				this.#draggedColumn.classList.remove('dragging');
 				this.services.log(
 					`Successfully swapped columns: ${this.#draggedColumn.id} and ${targetColumn.id}`,
-					'debug'
+					{
+						caller: '[PaletteEvents.attachDragAndDropHandlers]',
+						level: 'debug'
+					}
 				);
 
 				this.#draggedColumn = null;
@@ -249,21 +258,24 @@ export class PaletteEvents implements PaletteEventsInterface {
 			EventManager.add(paletteContainer, 'dragend', () => {
 				if (this.#draggedColumn) {
 					this.#draggedColumn.classList.remove('dragging');
-					this.services.log('Drag ended for column.', 'debug');
+					this.services.log('Drag ended for column.', {
+						caller: '[PaletteEvents.attachDragAndDropHandlers]',
+						level: 'debug'
+					});
 					this.#draggedColumn = null;
 				}
 			});
 
-			this.services.log(
-				`Drag and drop event listeners attached`,
-				'debug'
-			);
+			this.services.log(`Drag and drop event listeners attached`, {
+				caller: '[PaletteEvents.attachDragAndDropHandlers]',
+				level: 'debug'
+			});
 		}, 'Failed to attach drag-and-drop handlers');
 	}
 
 	// initialiezs column positions on page load
 	initializeColumnPositions(): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const paletteColumns = this.helpers.dom.getAllElements(
 				classes.paletteColumn
 			);
@@ -283,7 +295,7 @@ export class PaletteEvents implements PaletteEventsInterface {
 
 	// renders column sizes based on stored state
 	renderColumnSizeChange(): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const paletteColumns = this.helpers.dom.getAllElements(
 				classes.paletteColumn
 			);
@@ -304,7 +316,7 @@ export class PaletteEvents implements PaletteEventsInterface {
 	}
 
 	syncColumnColorsWithState(): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const paletteColumns =
 				this.helpers.dom.getAllElements<HTMLDivElement>(
 					classes.paletteColumn
@@ -314,10 +326,10 @@ export class PaletteEvents implements PaletteEventsInterface {
 				.paletteHistory.at(-1);
 
 			if (!currentPalette || !currentPalette.items) {
-				this.services.log(
-					'No valid palette data found in history!',
-					'warn'
-				);
+				this.services.log('No valid palette data found in history!', {
+					caller: '[PaletteEvents.syncColumnColorsWithState]',
+					level: 'warn'
+				});
 				return;
 			}
 
@@ -349,7 +361,10 @@ export class PaletteEvents implements PaletteEventsInterface {
 
 					this.services.log(
 						`Updated color for column ${columnID}: ${colorValue}`,
-						'debug'
+						{
+							caller: '[PaletteEvents.syncColumnColorsWithState]',
+							level: 'debug'
+						}
 					);
 				}
 			});
@@ -357,29 +372,32 @@ export class PaletteEvents implements PaletteEventsInterface {
 	}
 
 	#copyToClipboard(text: string, targetElement: HTMLElement): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			navigator.clipboard
 				.writeText(text.trim())
 				.then(() => {
 					this.#showTooltip(targetElement, 'Copied!');
-					this.services.log(`Copied color value: ${text}`, 'debug');
+					this.services.log(`Copied color value: ${text}`, {
+						caller: '[PaletteEvents.#copyToClipboard]',
+						level: 'debug'
+					});
 					setTimeout(
 						() => this.#removeTooltip(targetElement),
 						domConfig.tooltipFadeOut
 					);
 				})
 				.catch(err => {
-					this.services.log(
-						`Error copying to clipboard: ${err}`,
-						'error'
-					);
+					this.services.log(`Error copying to clipboard: ${err}`, {
+						caller: '[PaletteEvents.#copyToClipboard]',
+						level: 'error'
+					});
 				});
 		}, 'Failed to copy to clipboard');
 	}
 
 	// observes palette container for new elements
 	#createPaletteObserver(): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const paletteContainer = this.helpers.dom.getElement(
 				ids.divs.paletteContainer
 			);
@@ -399,7 +417,10 @@ export class PaletteEvents implements PaletteEventsInterface {
 								) {
 									this.services.log(
 										'Skipping initializeColumnPositions() - State is not ready!',
-										'warn'
+										{
+											caller: '[PaletteEvents.createPaletteObserver]',
+											level: 'warn'
+										}
 									);
 									return;
 								}
@@ -415,17 +436,22 @@ export class PaletteEvents implements PaletteEventsInterface {
 				subtree: true
 			});
 
-			this.services.log('Palette Container MutationObserver created');
-		}, 'Failed to create palette observer');
+			this.services.log('Palette Container MutationObserver created.', {
+				caller: '[PaletteEvents.createPaletteObserver]'
+			});
+		}, 'Failed to create palette observer.');
 	}
 
 	#getColorByPreference(
 		colorData: PaletteItem['css'],
 		preference: ColorSpace
 	): string {
-		return (
-			colorData[preference as keyof PaletteItem['css']] || colorData.hex
-		);
+		return this.#errors.handleSync(() => {
+			return (
+				colorData[preference as keyof PaletteItem['css']] ||
+				colorData.hex
+			);
+		}, 'Failed to retrieve color by preference.');
 	}
 
 	#handleColorInputChange(
@@ -433,7 +459,7 @@ export class PaletteEvents implements PaletteEventsInterface {
 		column: HTMLElement,
 		columnID: string
 	): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const newColor = (event.target as HTMLInputElement).value.trim();
 			if (!this.utils.validate.userColorInput(newColor)) return;
 
@@ -451,16 +477,18 @@ export class PaletteEvents implements PaletteEventsInterface {
 					newColor
 				);
 			}
-		}, 'Failed to handle color input change');
+		}, 'Failed to handle color input change.');
 	}
 
 	// hides tooltip for a given element
 	#hideTooltip(): void {
-		this.utils.dom.hideTooltip();
+		return this.#errors.handleSync(() => {
+			this.utils.dom.hideTooltip();
+		}, 'Failed to hide tooltip.');
 	}
 
 	#removeTooltip(element: HTMLElement): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const tooltipId = element.dataset.tooltipId;
 			if (!tooltipId) return;
 
@@ -468,11 +496,11 @@ export class PaletteEvents implements PaletteEventsInterface {
 			if (tooltip) tooltip.remove();
 
 			delete element.dataset.tooltipId;
-		}, 'Failed to remove tooltip');
+		}, 'Failed to remove tooltip.');
 	}
 
 	#showTooltip(element: HTMLElement, text: string): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			this.#removeTooltip(element);
 
 			const tooltip = document.createElement('div');
@@ -485,12 +513,12 @@ export class PaletteEvents implements PaletteEventsInterface {
 			tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 5}px`;
 
 			element.dataset.tooltipId = tooltip.id;
-		}, 'Failed to show tooltip');
+		}, 'Failed to show tooltip.');
 	}
 
 	// handles resizing of palette columns
 	#startResize(event: MouseEvent, column: HTMLElement): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			if (!column || column.classList.contains(classes.locked)) return;
 
 			const startX = event.clientX;
@@ -526,21 +554,21 @@ export class PaletteEvents implements PaletteEventsInterface {
 
 			window.addEventListener('mousemove', onMouseMove);
 			window.addEventListener('mouseup', onMouseUp);
-		}, 'Failed to start column resize');
+		}, 'Failed to start column resize.');
 	}
 
 	#toggleColorModal(button: HTMLElement): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const modalID = button.dataset.modalID;
 			if (!modalID) return;
 			const modal = this.helpers.dom.getElement<HTMLDivElement>(modalID);
 			modal?.classList.toggle(classes.hidden);
-		}, 'Failed to toggle color modal');
+		}, 'Failed to toggle color modal.');
 	}
 
 	// toggles lock state of a palette column
 	#toggleLock(button: HTMLElement): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const column = button.closest(
 				classes.paletteColumn
 			) as HTMLElement | null;
@@ -548,6 +576,6 @@ export class PaletteEvents implements PaletteEventsInterface {
 
 			const columnID = parseInt(column.id.split('-').pop()!);
 			this.paletteManager.handleColumnLock(columnID);
-		}, 'Failed to toggle lock state');
+		}, 'Failed to toggle lock state.');
 	}
 }

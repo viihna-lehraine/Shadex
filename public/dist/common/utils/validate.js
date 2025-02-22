@@ -1,19 +1,12 @@
 import { regex, config } from '../../config/index.js';
 
-// File: common/utils/validate.js
+// File: common/utils/validate.ts
 const sets = config.sets;
-function validationUtilsFactory(helpers) {
-    const { clone } = helpers.data;
-    function hex(value, pattern) {
-        return pattern.test(value);
-    }
-    function hexSet(value) {
-        return regex.validation.hex.test(value);
-    }
-    return {
-        hex,
-        hexSet,
-        colorValue(color) {
+function validationUtilsFactory(helpers, services) {
+    const { data: { clone } } = helpers;
+    const { errors } = services;
+    function colorValue(color) {
+        return errors.handleSync(() => {
             const clonedColor = clone(color);
             const isNumericValid = (value) => typeof value === 'number' && !isNaN(value);
             const normalizePercentage = (value) => {
@@ -49,10 +42,8 @@ function validationUtilsFactory(helpers) {
                         normalizePercentage(clonedColor.value.saturation) <=
                             100;
                     const isValidHSLLightness = clonedColor.value.lightness
-                        ? normalizePercentage(clonedColor.value.lightness) >=
-                            0 &&
-                            normalizePercentage(clonedColor.value.lightness) <=
-                                100
+                        ? normalizePercentage(clonedColor.value.lightness) >= 0 &&
+                            normalizePercentage(clonedColor.value.lightness) <= 100
                         : true;
                     return (isValidHSLHue &&
                         isValidHSLSaturation &&
@@ -66,10 +57,14 @@ function validationUtilsFactory(helpers) {
                         normalizePercentage(clonedColor.value.saturation) <=
                             100;
                     const isValidHSVValue = clonedColor.value.value
-                        ? normalizePercentage(clonedColor.value.value) >= 0 &&
-                            normalizePercentage(clonedColor.value.value) <= 100
+                        ? normalizePercentage(clonedColor.value.value) >=
+                            0 &&
+                            normalizePercentage(clonedColor.value.value) <=
+                                100
                         : true;
-                    return (isValidHSVHue && isValidHSVSaturation && isValidHSVValue);
+                    return (isValidHSVHue &&
+                        isValidHSVSaturation &&
+                        isValidHSVValue);
                 case 'lab':
                     return ([
                         clonedColor.value.l,
@@ -128,21 +123,38 @@ function validationUtilsFactory(helpers) {
                     console.error(`Unsupported color format: ${color.format}`);
                     return false;
             }
-        },
-        ensureHash(value) {
+        }, `Error occurred while validating color value: ${JSON.stringify(color)}`);
+    }
+    function ensureHash(value) {
+        return errors.handleSync(() => {
             return value.startsWith('#') ? value : `#${value}`;
-        },
-        hexComponent(value) {
+        }, `Error occurred while ensuring hash for value: ${value}`);
+    }
+    function hex(value, pattern) {
+        return errors.handleSync(() => {
+            return pattern.test(value);
+        }, `Error occurred while validating hex value: ${value}`);
+    }
+    function hexComponent(value) {
+        return errors.handleSync(() => {
             return hex(value, regex.validation.hexComponent);
-        },
-        range(value, rangeKey) {
+        }, `Error occurred while validating hex component: ${value}`);
+    }
+    function hexSet(value) {
+        return errors.handleSync(() => {
+            return regex.validation.hex.test(value);
+        }, `Error occurred while validating hex set: ${value}`);
+    }
+    function range(value, rangeKey) {
+        return errors.handleSync(() => {
             if (rangeKey === 'HexSet') {
                 if (!hexSet(value)) {
                     throw new Error(`Invalid value for ${String(rangeKey)}: ${value}`);
                 }
                 return;
             }
-            if (typeof value === 'number' && Array.isArray(sets[rangeKey])) {
+            if (typeof value === 'number' &&
+                Array.isArray(sets[rangeKey])) {
                 const [min, max] = sets[rangeKey];
                 if (value < min || value > max) {
                     throw new Error(`Value ${value} is out of range for ${String(rangeKey)} [${min}, ${max}]`);
@@ -150,13 +162,25 @@ function validationUtilsFactory(helpers) {
                 return;
             }
             throw new Error(`Invalid range or value for ${String(rangeKey)}`);
-        },
-        userColorInput(color) {
+        }, `Error occurred while validating range for ${String(rangeKey)}: ${value}`);
+    }
+    function userColorInput(color) {
+        return errors.handleSync(() => {
             return (regex.userInput.hex.test(color) ||
                 regex.userInput.hsl.test(color) ||
                 regex.userInput.rgb.test(color));
-        }
+        }, `Error occurred while validating user color input: ${color}`);
+    }
+    const validationUtils = {
+        colorValue,
+        ensureHash,
+        hex,
+        hexComponent,
+        hexSet,
+        range,
+        userColorInput
     };
+    return errors.handleSync(() => validationUtils, 'Error occurred while creating validation utilities group.');
 }
 
 export { validationUtilsFactory };

@@ -62,17 +62,19 @@ import {
 } from './index.js';
 import { DataObserver } from '../common/services/DataObserver.js';
 import { DOMStore } from '../common/services/DOMStore.js';
+import { EventManager } from '../events/EventManager.js';
+import { PaletteEvents } from '../events/PaletteEvents.js';
+import { PaletteManager } from '../palette/PaletteManager.js';
+import { PaletteState } from '../state/PaletteState.js';
+import { StateManager } from '../state/StateManager.js';
+import { UIEvents } from '../events/UIEvents.js';
 
 // ******** 1. SERVICES ********
 
 export interface Services<T extends DefaultObserverData = DefaultObserverData> {
 	domStore: DOMStore;
 	errors: ErrorHandlerInterface;
-	log(
-		message: string,
-		level?: 'debug' | 'info' | 'warn' | 'error',
-		verbosityRequirement?: number
-	): void;
+	log(message: string, options: LoggerOptions): void;
 	observer: DataObserver<T>;
 	semaphore: SemaphoreInterface;
 	setObserverData(newData: T): void;
@@ -108,16 +110,23 @@ export interface DOMHelpers {
 
 export interface MathHelpers {
 	clampToRange: (value: number, rangeKey: NumericRangeKey) => number;
-	getWeightedRandomValue(
-		weights: readonly number[],
-		probabilities: readonly number[]
-	): number;
 }
 
 export interface PaletteHelpers {
 	getWeightsAndValues(
 		distributionType: keyof PaletteConfig['probabilities']
 	): { weights: readonly number[]; values: readonly number[] };
+}
+
+export interface RandomHelpers {
+	selectRandomFromWeights(obj: {
+		weights: readonly number[];
+		values: readonly number[];
+	}): number;
+	selectWeightedRandom(
+		weights: readonly number[],
+		values: readonly number[]
+	): number;
 }
 
 export interface TimeHelpers {
@@ -128,6 +137,14 @@ export interface TimeHelpers {
 }
 
 export interface Typeguards {
+	hasFormat<T extends { format: string }>(
+		value: unknown,
+		expectedFormat: string
+	): value is T;
+	hasNumericProperties(obj: Record<string, unknown>, keys: string[]): boolean;
+	hasStringProperties(obj: Record<string, unknown>, keys: string[]): boolean;
+	hasValueProperty<T extends { value: unknown }>(value: unknown): value is T;
+	isByteRange(value: unknown): value is ByteRange;
 	isCMYK(value: unknown): value is CMYK;
 	isColor(value: unknown): value is Color;
 	isColorNumMap(value: unknown, format?: ColorFormat): value is ColorNumMap;
@@ -139,34 +156,23 @@ export interface Typeguards {
 	): color is CMYK | Hex | HSL | HSV | LAB | RGB;
 	isFormat(format: unknown): format is ColorFormat;
 	isHex(value: unknown): value is Hex;
+	isHexSet(value: unknown): value is HexSet;
 	isHSL(value: unknown): value is HSL;
 	isHSV(value: unknown): value is HSV;
 	isLAB(value: unknown): value is LAB;
+	isLAB_A(value: unknown): value is LAB_A;
+	isLAB_B(value: unknown): value is LAB_B;
+	isLAB_L(value: unknown): value is LAB_L;
 	isInputElement(element: HTMLElement | null): element is HTMLElement;
+	isObject(value: unknown): value is Record<string, unknown>;
 	isPalette(value: unknown): value is Palette;
 	isPaletteType(value: string): value is PaletteType;
+	isPercentile(value: unknown): value is Percentile;
+	isRadial(value: unknown): value is Radial;
 	isRGB(value: unknown): value is RGB;
 	isSL(value: unknown): value is SL;
 	isSV(value: unknown): value is SV;
 	isXYZ(value: unknown): value is XYZ;
-}
-
-export interface MicroTypeguards {
-	hasFormat<T extends { format: string }>(
-		value: unknown,
-		expectedFormat: string
-	): value is T;
-	hasNumericProperties(obj: Record<string, unknown>, keys: string[]): boolean;
-	hasStringProperties(obj: Record<string, unknown>, keys: string[]): boolean;
-	hasValueProperty<T extends { value: unknown }>(value: unknown): value is T;
-	isByteRange(value: unknown): value is ByteRange;
-	isHexSet(value: unknown): value is HexSet;
-	isLAB_A(value: unknown): value is LAB_A;
-	isLAB_B(value: unknown): value is LAB_B;
-	isLAB_L(value: unknown): value is LAB_L;
-	isObject(value: unknown): value is Record<string, unknown>;
-	isPercentile(value: unknown): value is Percentile;
-	isRadial(value: unknown): value is Radial;
 	isXYZ_X(value: unknown): value is XYZ_X;
 	isXYZ_Y(value: unknown): value is XYZ_Y;
 	isXYZ_Z(value: unknown): value is XYZ_Z;
@@ -179,8 +185,8 @@ export interface Helpers {
 	data: DataHelpers;
 	dom: DOMHelpers;
 	math: MathHelpers;
-	microTypeguards: MicroTypeguards;
 	palette: PaletteHelpers;
+	random: RandomHelpers;
 	time: TimeHelpers;
 	typeguards: Typeguards;
 }
@@ -219,19 +225,19 @@ export interface BrandingUtils {
 	asXYZ_X(value: number): XYZ_X;
 	asXYZ_Y(value: number): XYZ_Y;
 	asXYZ_Z(value: number): XYZ_Z;
-	brandColor(color: ColorNumMap): Color;
+	brandColor(color: ColorNumMap | ColorStringMap): Color;
 	brandPalette(data: UnbrandedPalette): Palette;
 }
 
 export interface ColorBrandUtils {
-	brandCMYKStringMapValue(cmyk: CMYKStringMap['value']): CMYK['value'];
-	brandColorStringMap(color: ColorStringMap): Color;
-	brandHexStringMapValue(hex: HexStringMap['value']): Hex['value'];
-	brandHSLStringMapValue(hsl: HSLStringMap['value']): HSL['value'];
-	brandHSVStringMapValue(hsv: HSVStringMap['value']): HSV['value'];
-	brandLABStringMapValue(lab: LABStringMap['value']): LAB['value'];
-	brandRGBStringMapValue(rgb: RGBStringMap['value']): RGB['value'];
-	brandXYZStringMapValue(xyz: XYZStringMap['value']): XYZ['value'];
+	brandColorString(color: ColorStringMap): Color;
+	brandCMYKString(cmyk: CMYKStringMap['value']): CMYK['value'];
+	brandHexString(hex: HexStringMap['value']): Hex['value'];
+	brandHSLString(hsl: HSLStringMap['value']): HSL['value'];
+	brandHSVString(hsv: HSVStringMap['value']): HSV['value'];
+	brandLABString(lab: LABStringMap['value']): LAB['value'];
+	brandRGBString(rgb: RGBStringMap['value']): RGB['value'];
+	brandXYZString(xyz: XYZStringMap['value']): XYZ['value'];
 }
 
 export interface ColorConversionUtils {
@@ -277,7 +283,6 @@ export interface ColorGenerationUtils {
 }
 
 export interface ColorParseUtils {
-	narrowToColor(color: Color | ColorStringMap): Color | null;
 	parseHexValueAsStringMap(hex: Hex['value']): HexStringMap['value'];
 	parseHSLValueAsStringMap(hsl: HSL['value']): HSLStringMap['value'];
 	parseHSVValueAsStringMap(hsv: HSV['value']): HSVStringMap['value'];
@@ -286,21 +291,15 @@ export interface ColorParseUtils {
 	parseXYZValueAsStringMap(xyz: XYZ['value']): XYZStringMap['value'];
 }
 
-export interface ColorValidationUtils {
-	toColorValueRange<T extends keyof RangeKeyMap>(
-		value: string | number,
-		rangeKey: T
-	): RangeKeyMap[T];
-}
-
 export interface DOMUtilsPartial {
-	createTooltip(element: HTMLElement, text: string): HTMLElement;
+	createTooltip(element: HTMLElement, text: string): HTMLElement | void;
 	downloadFile(data: string, filename: string, type: string): void;
 	enforceSwatchRules(minSwatches: number, maxSwatches: number): void;
 	hideTooltip(): void;
+	positionTooltip(element: HTMLElement, tooltip: HTMLElement): void;
 	readFile(file: File): Promise<string>;
 	removeTooltip(element: HTMLElement): void;
-	scanPaletteColumns(): State['paletteContainer']['columns'];
+	scanPaletteColumns(): State['paletteContainer']['columns'] | void;
 	switchColorSpaceInDOM(targetFormat: ColorSpace): void;
 	updateColorBox(color: HSL, boxId: string): void;
 	updateHistory(history: Palette[]): void;
@@ -374,6 +373,10 @@ export interface SanitationUtils {
 	radial(value: number): Radial;
 	rgb(value: number): ByteRange;
 	sanitizeInput(str: string): string;
+	toColorValueRange<T extends keyof RangeKeyMap>(
+		value: string | number,
+		rangeKey: T
+	): RangeKeyMap[T];
 }
 
 export interface ValidationUtils {
@@ -392,8 +395,7 @@ export type ColorUtils = ColorBrandUtils &
 	ColorConversionUtils &
 	ColorGenerationUtils &
 	ColorFormatUtils &
-	ColorParseUtils &
-	ColorValidationUtils;
+	ColorParseUtils;
 
 export type DOMUtils = DOMParsingUtils & DOMUtilsPartial;
 
@@ -433,15 +435,20 @@ export interface DOMStoreInterface {
 }
 
 export interface ErrorHandlerInterface {
+	handleAndReturn<T>(
+		action: () => T | Promise<T>,
+		errorMessage: string,
+		options?: ErrorHandlerOptions & { fallback?: T }
+	): T | Promise<T>;
 	handleAsync<T>(
 		action: () => Promise<T>,
 		errorMessage: string,
-		context?: Record<string, unknown>
+		options?: ErrorHandlerOptions
 	): Promise<T>;
 	handleSync<T>(
 		action: () => T,
 		errorMessage: string,
-		context?: Record<string, unknown>
+		options?: ErrorHandlerOptions
 	): T;
 }
 
@@ -623,7 +630,27 @@ export interface GeneratePaletteFnGroup {
 
 // ******** 10. OTHER ********
 
+export interface AppDependencies {
+	common: Required<CommonFunctions>;
+	eventManager: EventManager;
+	events: { palette: PaletteEvents; ui: UIEvents };
+	paletteManager: PaletteManager;
+	paletteState: PaletteState;
+	stateManager: StateManager;
+}
+
+export interface DebounceOptions {
+	delay?: number;
+}
+
 export interface ErrorHandlerOptions {
-	userMessage?: string;
 	context?: Record<string, unknown>;
+	fallback?: unknown;
+	userMessage?: string;
+}
+
+export interface LoggerOptions {
+	caller: string;
+	level?: 'debug' | 'info' | 'warn' | 'error';
+	verbosity?: number;
 }

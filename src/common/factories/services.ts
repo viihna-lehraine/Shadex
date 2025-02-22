@@ -1,6 +1,11 @@
 // File: common/factories/services.ts
 
-import { DefaultObserverData, Helpers, Services } from '../../types/index.js';
+import {
+	DefaultObserverData,
+	Helpers,
+	LoggerOptions,
+	Services
+} from '../../types/index.js';
 import {
 	DataObserver,
 	DOMStore,
@@ -13,37 +18,44 @@ import { config } from '../../config/index.js';
 export function serviceFactory<
 	T extends DefaultObserverData = DefaultObserverData
 >(helpers: Helpers, initialData: T): Services<T> {
-	console.log('[ServiceFactory-1] Loading createServices...');
+	console.log('[SERVICE_FACTORY]: Executing createServices.');
 
+	console.log(
+		`[SERVICE_FACTORY]: Initializing services with empty placeholder object.`
+	);
 	const services = {} as Services<T>;
 
+	console.log(
+		`[SERVICE_FACTORY]: Initializing Logger and ErrorHandler (creating instances).`
+	);
 	const logger = Logger.getInstance(helpers);
 	services.errors = ErrorHandler.getInstance(helpers, logger);
 
 	if (!logger || !services.errors) {
 		throw new Error(
-			'[ServiceFactory-2] Logger or ErrorHandler failed to initialize.'
+			'[SERVICE_FACTORY]: Logger or ErrorHandler failed to initialize.'
 		);
 	}
 
-	services.log = (
-		message: string,
-		level: 'debug' | 'info' | 'warn' | 'error' = 'info',
-		verbosityRequirement: number = 0
-	) => {
+	services.log = (message: string, options: LoggerOptions) => {
+		options.level ??= 'info';
+		options.verbosity ??= 1;
+
 		if (
-			config.mode.log[level] &&
-			config.mode.log.verbosity >= verbosityRequirement
+			config.mode.log[options.level] &&
+			config.mode.log.verbosity >= options.verbosity
 		) {
-			const caller = helpers.data.getCallerInfo();
-			logger.log(message, level, caller);
+			logger.log(message, options.level, options.caller);
 		}
 
-		if (level === 'error' && config.mode.showAlerts) {
+		if (options.level === 'error' && config.mode.showAlerts) {
 			alert(message);
 		}
 	};
 
+	console.log(
+		`[SERVICE_FACTORY]: Initializing DOMStore, DataObserver, and Semaphore.`
+	);
 	services.domStore = DOMStore.getInstance(
 		services.errors,
 		helpers,
@@ -55,12 +67,15 @@ export function serviceFactory<
 		services.observer.setData(newData);
 		services.log(
 			`DataObserver updated with new data: ${JSON.stringify(newData)}`,
-			'debug',
-			2
+			{
+				caller: '[SERVICE_FACTORY.setObserverData]',
+				level: 'debug',
+				verbosity: 2
+			}
 		);
 	};
 
-	services.semaphore = new Semaphore();
+	services.semaphore = new Semaphore(services.errors, services.log);
 
 	return services;
 }

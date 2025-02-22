@@ -1,7 +1,8 @@
-// File: types/index.js
+// File: types/index.ts
 
 export type {
 	AdjustmentUtils,
+	AppDependencies,
 	BrandingUtils,
 	ColorBrandUtils,
 	ColorConversionUtils,
@@ -10,10 +11,10 @@ export type {
 	ColorHelpers,
 	ColorParseUtils,
 	ColorUtils,
-	ColorValidationUtils,
 	CommonFunctions,
 	DataHelpers,
 	DataObserverInterface,
+	DebounceOptions,
 	DOMHelpers,
 	DOMParsingUtils,
 	DOMStoreInterface,
@@ -30,14 +31,15 @@ export type {
 	IDBManagerInterface,
 	LocalStorageManagerInterface,
 	LoggerInterface,
+	LoggerOptions,
 	MathHelpers,
-	MicroTypeguards,
 	PaletteEventsInterface,
 	PaletteHelpers,
 	PaletteManagerInterface,
 	PaletteStateInterface,
 	PaletteUtils,
 	ParsingUtils,
+	RandomHelpers,
 	SanitationUtils,
 	SemaphoreInterface,
 	Services,

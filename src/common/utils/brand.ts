@@ -1,4 +1,4 @@
-// File: common/utils/brand.js
+// File: common/utils/brand.ts
 
 import {
 	BrandingUtils,
@@ -7,6 +7,7 @@ import {
 	CMYKNumMap,
 	Color,
 	ColorNumMap,
+	ColorStringMap,
 	Hex,
 	HexSet,
 	HexStringMap,
@@ -28,9 +29,10 @@ import {
 	SV,
 	UnbrandedPalette,
 	RGBNumMap,
+	Services,
 	SLNumMap,
 	SVNumMap,
-	Utilities,
+	ValidationUtils,
 	XYZ,
 	XYZNumMap,
 	XYZ_X,
@@ -39,108 +41,50 @@ import {
 } from '../../types/index.js';
 import { regex } from '../../config/index.js';
 
-export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
+export function brandingUtilsFactory(
+	services: Services,
+	validate: ValidationUtils
+): BrandingUtils {
+	const { errors } = services;
+
+	function asBranded<T extends keyof RangeKeyMap>(
+		value: number,
+		rangeKey: T
+	): RangeKeyMap[T] {
+		validate.range(value, rangeKey);
+
+		return value as RangeKeyMap[T];
+	}
+
 	function asByteRange(value: number): ByteRange {
-		utils.validate.range(value, 'ByteRange');
+		return errors.handleSync(() => {
+			validate.range(value, 'ByteRange');
 
-		return value as ByteRange;
+			return value as ByteRange;
+		}, 'Error occurred while branding ByteRange value.');
 	}
 
-	function asHexSet(value: string): HexSet {
-		if (regex.brand.hex.test(value)) {
-			value = value.slice(0, 7);
-		}
+	function asCMYK(color: CMYKNumMap): CMYK {
+		return errors.handleSync(() => {
+		const brandedCyan = asPercentile(color.value.cyan);
+		const brandedMagenta = asPercentile(color.value.magenta);
+		const brandedYellow = asPercentile(color.value.yellow);
+		const brandedKey = asPercentile(color.value.key);
 
-		if (!utils.validate.hexSet(value)) {
-			throw new Error(`Invalid HexSet value: ${value}`);
-		}
-
-		return value as HexSet;
+		return {
+			value: {
+				cyan: brandedCyan,
+				magenta: brandedMagenta,
+				yellow: brandedYellow,
+				key: brandedKey
+			},
+			format: 'cmyk'
+		};
+		}, 'Error occurred while branding color as CMYK.');
 	}
 
-	function asLAB_A(value: number): LAB_A {
-		utils.validate.range(value, 'LAB_A');
-
-		return value as LAB_A;
-	}
-
-	function asLAB_B(value: number): LAB_B {
-		utils.validate.range(value, 'LAB_B');
-
-		return value as LAB_B;
-	}
-
-	function asLAB_L(value: number): LAB_L {
-		utils.validate.range(value, 'LAB_L');
-
-		return value as LAB_L;
-	}
-
-	function asPercentile(value: number): Percentile {
-		utils.validate.range(value, 'Percentile');
-
-		return value as Percentile;
-	}
-
-	function asRadial(value: number): Radial {
-		utils.validate.range(value, 'Radial');
-
-		return value as Radial;
-	}
-	function asXYZ_X(value: number): XYZ_X {
-		utils.validate.range(value, 'XYZ_X');
-
-		return value as XYZ_X;
-	}
-
-	function asXYZ_Y(value: number): XYZ_Y {
-		utils.validate.range(value, 'XYZ_Y');
-
-		return value as XYZ_Y;
-	}
-
-	function asXYZ_Z(value: number): XYZ_Z {
-		utils.validate.range(value, 'XYZ_Z');
-
-		return value as XYZ_Z;
-	}
-
-	return {
-		asByteRange,
-		asHexSet,
-		asLAB_A,
-		asLAB_B,
-		asLAB_L,
-		asPercentile,
-		asRadial,
-		asXYZ_X,
-		asXYZ_Y,
-		asXYZ_Z,
-		asBranded<T extends keyof RangeKeyMap>(
-			value: number,
-			rangeKey: T
-		): RangeKeyMap[T] {
-			utils.validate.range(value, rangeKey);
-
-			return value as RangeKeyMap[T];
-		},
-		asCMYK(color: CMYKNumMap): CMYK {
-			const brandedCyan = asPercentile(color.value.cyan);
-			const brandedMagenta = asPercentile(color.value.magenta);
-			const brandedYellow = asPercentile(color.value.yellow);
-			const brandedKey = asPercentile(color.value.key);
-
-			return {
-				value: {
-					cyan: brandedCyan,
-					magenta: brandedMagenta,
-					yellow: brandedYellow,
-					key: brandedKey
-				},
-				format: 'cmyk'
-			};
-		},
-		asHex(color: HexStringMap): Hex {
+	function asHex(color: HexStringMap): Hex {
+		return errors.handleSync(() => {
 			let hex = color.value.hex;
 
 			if (!hex.startsWith('#')) hex = `#${hex}`;
@@ -150,14 +94,31 @@ export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
 
 			const hexRaw = hex.slice(0, 7);
 
-			const brandedHex = utils.brand.asHexSet(hexRaw) as HexSet;
+			const brandedHex = asHexSet(hexRaw) as HexSet;
 
 			return {
 				value: { hex: brandedHex },
 				format: 'hex'
 			};
-		},
-		asHSL(color: HSLNumMap): HSL {
+		}, 'Error occurred while branding color as Hex.');
+	}
+
+	function asHexSet(value: string): HexSet {
+		return errors.handleSync(() => {
+			if (regex.brand.hex.test(value)) {
+				value = value.slice(0, 7);
+			}
+
+			if (!validate.hexSet(value)) {
+				throw new Error(`Invalid HexSet value: ${value}`);
+			}
+
+			return value as HexSet;
+		}, 'Error occurred while branding HexSet value.');
+	}
+
+	function asHSL(color: HSLNumMap): HSL {
+		return errors.handleSync(() => {
 			const brandedHue = asRadial(color.value.hue);
 			const brandedSaturation = asPercentile(color.value.saturation);
 			const brandedLightness = asPercentile(color.value.lightness);
@@ -170,8 +131,11 @@ export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
 				},
 				format: 'hsl'
 			};
-		},
-		asHSV(color: HSVNumMap): HSV {
+		}, 'Error occurred while branding color as HSL.');
+	}
+
+	function asHSV(color: HSVNumMap): HSV {
+		return errors.handleSync(() => {
 			const brandedHue = asRadial(color.value.hue);
 			const brandedSaturation = asPercentile(color.value.saturation);
 			const brandedValue = asPercentile(color.value.value);
@@ -184,8 +148,11 @@ export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
 				},
 				format: 'hsv'
 			};
-		},
-		asLAB(color: LABNumMap): LAB {
+		}, 'Error occurred while branding color as HSV.');
+	}
+
+	function asLAB(color: LABNumMap): LAB {
+		return errors.handleSync(() => {
 			const brandedL = asLAB_L(color.value.l);
 			const brandedA = asLAB_A(color.value.a);
 			const brandedB = asLAB_B(color.value.b);
@@ -198,8 +165,51 @@ export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
 				},
 				format: 'lab'
 			};
-		},
-		asRGB(color: RGBNumMap): RGB {
+		}, 'Error occurred while branding color as LAB.');
+	}
+
+	function asLAB_A(value: number): LAB_A {
+		return errors.handleSync(() => {
+			validate.range(value, 'LAB_A');
+
+			return value as LAB_A;
+		}, 'Error occurred while branding LAB_A value.');
+	}
+
+	function asLAB_B(value: number): LAB_B {
+		return errors.handleSync(() => {
+			validate.range(value, 'LAB_B');
+
+			return value as LAB_B;
+		}, 'Error occurred while branding LAB_B value.');
+	}
+
+	function asLAB_L(value: number): LAB_L {
+		return errors.handleSync(() => {
+			validate.range(value, 'LAB_L');
+
+			return value as LAB_L;
+		}, 'Error occurred while branding LAB_L value.');
+	}
+
+	function asPercentile(value: number): Percentile {
+		return errors.handleSync(() => {
+			validate.range(value, 'Percentile');
+
+			return value as Percentile;
+		}, 'Error occurred while branding Percentile value.');
+	}
+
+	function asRadial(value: number): Radial {
+		return errors.handleSync(() => {
+			validate.range(value, 'Radial');
+
+			return value as Radial;
+		}, 'Error occurred while branding Radial value.');
+	}
+
+	function asRGB(color: RGBNumMap): RGB {
+		return errors.handleSync(() => {
 			const brandedRed = asByteRange(color.value.red);
 			const brandedGreen = asByteRange(color.value.green);
 			const brandedBlue = asByteRange(color.value.blue);
@@ -212,8 +222,11 @@ export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
 				},
 				format: 'rgb'
 			};
-		},
-		asSL(color: SLNumMap): SL {
+		}, 'Error occurred while branding color as RGB.');
+	}
+
+	function asSL(color: SLNumMap): SL {
+		return errors.handleSync(() => {
 			const brandedSaturation = asPercentile(color.value.saturation);
 			const brandedLightness = asPercentile(color.value.lightness);
 
@@ -224,8 +237,11 @@ export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
 				},
 				format: 'sl'
 			};
-		},
-		asSV(color: SVNumMap): SV {
+		}, 'Error occurred while branding color as SL.');
+	}
+
+	function asSV(color: SVNumMap): SV {
+		return errors.handleSync(() => {
 			const brandedSaturation = asPercentile(color.value.saturation);
 			const brandedValue = asPercentile(color.value.value);
 
@@ -236,8 +252,11 @@ export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
 				},
 				format: 'sv'
 			};
-		},
-		asXYZ(color: XYZNumMap): XYZ {
+		}, 'Error occurred while branding color as SV.');
+	}
+
+	function asXYZ(color: XYZNumMap): XYZ {
+		return errors.handleSync(() => {
 			const brandedX = asXYZ_X(color.value.x);
 			const brandedY = asXYZ_Y(color.value.y);
 			const brandedZ = asXYZ_Z(color.value.z);
@@ -250,8 +269,35 @@ export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
 				},
 				format: 'xyz'
 			};
-		},
-		brandColor(color: ColorNumMap): Color {
+		}, 'Error occurred while branding color as XYZ.');
+	}
+
+	function asXYZ_X(value: number): XYZ_X {
+		return errors.handleSync(() => {
+			validate.range(value, 'XYZ_X');
+
+			return value as XYZ_X;
+		}, 'Error occurred while branding XYZ_X value.');
+	}
+
+	function asXYZ_Y(value: number): XYZ_Y {
+		return errors.handleSync(() => {
+			validate.range(value, 'XYZ_Y');
+
+			return value as XYZ_Y;
+		}, 'Error occurred while branding XYZ_Y value.');
+	}
+
+	function asXYZ_Z(value: number): XYZ_Z {
+		return errors.handleSync(() => {
+			validate.range(value, 'XYZ_Z');
+
+			return value as XYZ_Z;
+		}, 'Error occurred while branding XYZ_Z value.');
+	}
+
+	function brandColor(color: ColorNumMap | ColorStringMap): Color {
+		return errors.handleSync(() => {
 			switch (color.format) {
 				case 'cmyk':
 					return {
@@ -335,8 +381,11 @@ export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
 					throw new Error(`
 						Unknown color format\nDetails: ${JSON.stringify(color)}`);
 			}
-		},
-		brandPalette(data: UnbrandedPalette): Palette {
+		}, 'Error occurred while branding color.');
+	}
+
+	function brandPalette(data: UnbrandedPalette): Palette {
+		return errors.handleSync(() => {
 			return {
 				...data,
 				metadata: { ...data.metadata },
@@ -395,6 +444,35 @@ export function brandingUtilsFactory(utils: Utilities): BrandingUtils {
 					}
 				}))
 			};
-		}
+		}, 'Error occurred while branding palette.');
 	}
+
+	const brandingUtils: BrandingUtils = {
+		asBranded,
+		asByteRange,
+		asCMYK,
+		asHex,
+		asHexSet,
+		asHSL,
+		asHSV,
+		asLAB,
+		asLAB_A,
+		asLAB_B,
+		asLAB_L,
+		asPercentile,
+		asRadial,
+		asRGB,
+		asSL,
+		asSV,
+		asXYZ,
+		asXYZ_X,
+		asXYZ_Y,
+		asXYZ_Z,
+		brandColor,
+		brandPalette
+	};
+
+	return errors.handleSync(() => {
+		return brandingUtils;
+	}, 'Error occurred while creating branding utilities.');
 }

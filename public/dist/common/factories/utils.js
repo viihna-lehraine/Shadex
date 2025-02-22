@@ -1,24 +1,74 @@
-// File: common/factories/utils.js
+// File: common/factories/utils.ts
 async function utilitiesFactory(helpers, services) {
+    const { errors, log } = services;
     const utilities = {};
-    // dynamically import factories without calling them
-    const { adjustmentUtilsFactory } = await import('../utils/adjust.js');
-    const { brandingUtilsFactory } = await import('../utils/brand.js');
-    const { colorUtilsFactory } = await import('../utils/color.js');
-    const { domUtilsFactory } = await import('../utils/dom.js');
-    const { formattingUtilsFactory } = await import('../utils/format.js');
-    const { paletteUtilsFactory } = await import('../utils/palette.js');
-    const { sanitationUtilsFactory } = await import('../utils/sanitize.js');
-    const { validationUtilsFactory } = await import('../utils/validate.js');
-    utilities.color = await colorUtilsFactory(helpers, services, utilities);
-    utilities.dom = await domUtilsFactory(helpers, services, utilities);
-    utilities.adjust = adjustmentUtilsFactory(services, utilities);
-    utilities.brand = brandingUtilsFactory(utilities);
-    utilities.format = formattingUtilsFactory(services, utilities);
-    utilities.palette = paletteUtilsFactory(helpers, services, utilities);
-    utilities.sanitize = sanitationUtilsFactory(utilities);
-    utilities.validate = validationUtilsFactory(helpers);
-    return utilities;
+    log('Executing utilitiesFactory.', { caller: '[UTILITIES_FACTORY]' });
+    return await errors.handleAndReturn(async () => {
+        // 1. Import utility group sub-factories
+        log('Importing utility group sub-factories.', {
+            caller: '[UTILITIES_FACTORY]'
+        });
+        const [{ adjustmentUtilsFactory }, { brandingUtilsFactory }, { colorUtilsFactory }, { domUtilsFactory }, { formattingUtilsFactory }, { paletteUtilsFactory }, { sanitationUtilsFactory }, { validationUtilsFactory }] = await Promise.all([
+            import('../utils/adjust.js'),
+            import('../utils/brand.js'),
+            import('../utils/color.js'),
+            import('../utils/dom.js'),
+            import('../utils/format.js'),
+            import('../utils/palette.js'),
+            import('../utils/sanitize.js'),
+            import('../utils/validate.js')
+        ]);
+        log('Utility group sub-factories imported successfully.', {
+            caller: '[UTILITIES_FACTORY]'
+        });
+        // 2. Initialize validation utilities
+        log('Calling validationUtilsFactory.', {
+            caller: '[UTILITIES_FACTORY]'
+        });
+        utilities.validate = validationUtilsFactory(helpers, services);
+        // 3. Initialize branding utilities
+        log('Initializing branding utilities.', {
+            caller: '[UTILITIES_FACTORY]'
+        });
+        utilities.brand = brandingUtilsFactory(services, utilities.validate);
+        // 4. Initialize adjustment utilities
+        log('[UTILITIES_FACTORY]', {
+            caller: 'Initializing adjustment utilities.'
+        });
+        utilities.adjust = adjustmentUtilsFactory(utilities.brand, services, utilities.validate);
+        // 5. Initialize formatting utilities
+        log('Initializing formatting utilities.', {
+            caller: '[UTILITIES_FACTORY]'
+        });
+        utilities.format = formattingUtilsFactory(utilities.brand, services, utilities.validate);
+        // 6. Initialize sanitation utilities
+        log('Initializing sanitation utilities.', {
+            caller: '[UTILITIES_FACTORY]'
+        });
+        utilities.sanitize = sanitationUtilsFactory(utilities.brand, services, utilities.validate);
+        // 7. Initialize color utilities
+        log('Initializing color utilities.', {
+            caller: '[UTILITIES_FACTORY]'
+        });
+        utilities.color = await colorUtilsFactory(utilities.adjust, utilities.brand, utilities.format, helpers, utilities.sanitize, services, utilities.validate);
+        // 8. Initialize DOM utilities
+        log('Initializing DOM utilities.', {
+            caller: '[UTILITIES_FACTORY]'
+        });
+        utilities.dom = await domUtilsFactory(utilities.brand, utilities.color, helpers, services, utilities.validate);
+        // 9. Initialize palette utilities
+        log('Initializing palette utilities.', {
+            caller: '[UTILITIES_FACTORY]'
+        });
+        utilities.palette = paletteUtilsFactory(utilities.brand, utilities.color, utilities.dom, helpers, services, utilities.validate);
+        // 10. Log success
+        log('Utilities initialized successfully.', {
+            caller: '[UTILITIES_FACTORY]'
+        });
+        // 11. Return utilities
+        console.log('[UTILITIES_FACTORY]: Utilities value before return.', utilities);
+        return utilities;
+    }, 'Error initializing utilities', { context: { utilities } });
 }
 
 export { utilitiesFactory };

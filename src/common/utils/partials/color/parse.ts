@@ -1,11 +1,7 @@
 // File: common/utils/partials/color/parse.ts
 
 import {
-	Color,
 	ColorParseUtils,
-	ColorSpaceExtended,
-	ColorStringMap,
-	Helpers,
 	Hex,
 	HexStringMap,
 	HSL,
@@ -16,74 +12,92 @@ import {
 	LABStringMap,
 	RGB,
 	RGBStringMap,
-	Utilities,
+	Services,
 	XYZ,
 	XYZStringMap
 } from '../../../../types/index.js';
 
-export function colorParsingUtilsFactory(
-	helpers: Helpers,
-	utils: Utilities
-): ColorParseUtils {
-	const { brandColorStringMap } = utils.color;
-	const { isColorStringMap } = helpers.typeguards;
+export function colorParsingUtilsFactory(services: Services): ColorParseUtils {
+	const { errors } = services;
 
-	return {
-		narrowToColor(color: Color | ColorStringMap): Color | null {
-			if (isColorStringMap(color)) return brandColorStringMap(color);
-
-			switch (color.format as ColorSpaceExtended) {
-				case 'cmyk':
-				case 'hex':
-				case 'hsl':
-				case 'hsv':
-				case 'lab':
-				case 'sl':
-				case 'sv':
-				case 'rgb':
-				case 'xyz':
-					return color;
-				default:
-					return null;
-			}
-		},
-		parseHexValueAsStringMap(hex: Hex['value']): HexStringMap['value'] {
+	function parseHexValueAsStringMap(
+		hex: Hex['value']
+	): HexStringMap['value'] {
+		return errors.handleSync(() => {
 			return { hex: hex.hex };
-		},
-		parseHSLValueAsStringMap(hsl: HSL['value']): HSLStringMap['value'] {
+		}, 'Error parsing hex value as raw hex');
+	}
+
+	function parseHSLValueAsStringMap(
+		hsl: HSL['value']
+	): HSLStringMap['value'] {
+		return errors.handleSync(() => {
 			return {
 				hue: `${hsl.hue}°`,
 				saturation: `${hsl.saturation * 100}%`,
 				lightness: `${hsl.lightness * 100}%`
 			};
-		},
-		parseHSVValueAsStringMap(hsv: HSV['value']): HSVStringMap['value'] {
+		}, 'Error parsing HSL value as string map');
+	}
+
+	function parseHSVValueAsStringMap(
+		hsv: HSV['value']
+	): HSVStringMap['value'] {
+		return errors.handleSync(() => {
 			return {
 				hue: `${hsv.hue}°`,
 				saturation: `${hsv.saturation * 100}%`,
 				value: `${hsv.value * 100}%`
 			};
-		},
-		parseLABValueAsStringMap(lab: LAB['value']): LABStringMap['value'] {
+		}, 'Error parsing HSV value as string map');
+	}
+	function parseLABValueAsStringMap(
+		lab: LAB['value']
+	): LABStringMap['value'] {
+		return errors.handleSync(() => {
 			return {
 				l: `${lab.l}`,
 				a: `${lab.a}`,
 				b: `${lab.b}`
 			};
-		},
-		parseRGBValueAsStringMap(rgb: RGB['value']): RGBStringMap['value'] {
+		}, 'Error parsing LAB value as string map');
+	}
+
+	function parseRGBValueAsStringMap(
+		rgb: RGB['value']
+	): RGBStringMap['value'] {
+		return errors.handleSync(() => {
 			return {
 				red: `${rgb.red}`,
 				green: `${rgb.green}`,
 				blue: `${rgb.blue}`
 			};
-		},
-		parseXYZValueAsStringMap(xyz: XYZ['value']): XYZStringMap['value'] {
+		}, 'Error parsing RGB value as string map');
+	}
+
+	function parseXYZValueAsStringMap(
+		xyz: XYZ['value']
+	): XYZStringMap['value'] {
+		return errors.handleSync(() => {
 			return {
 				x: `${xyz.x}`,
 				y: `${xyz.y}`,
 				z: `${xyz.z}`
 			};
-		}
+		}, 'Error parsing XYZ value as string map');
+	}
+
+	const colorParsingUtils: ColorParseUtils = {
+		parseHexValueAsStringMap,
+		parseHSLValueAsStringMap,
+		parseHSVValueAsStringMap,
+		parseLABValueAsStringMap,
+		parseRGBValueAsStringMap,
+		parseXYZValueAsStringMap
 	};
+
+	return errors.handleSync(
+		() => colorParsingUtils,
+		'Error occurred while creating color parsing utils'
+	);
 }

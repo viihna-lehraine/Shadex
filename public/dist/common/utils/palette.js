@@ -1,63 +1,44 @@
-import { domIndex, paletteConfig } from '../../config/index.js';
+import { paletteConfig, domIndex } from '../../config/index.js';
 
-// File: common/utils/palette.js
+// File: common/utils/palette.ts
 const ids = domIndex.ids;
-function paletteUtilsFactory(helpers, services, utils) {
-    const { clone } = helpers.data;
-    const { getElement } = helpers.dom;
-    const { log } = services;
+function paletteUtilsFactory(brand, colorUtils, dom, helpers, services, validate) {
+    const { data: { clone }, dom: { getElement } } = helpers;
+    const { errors, log } = services;
     function createPaletteItem(color, itemID) {
-        const clonedColor = clone(color);
-        return {
-            itemID,
-            colors: {
-                cmyk: utils.color.convertHSL(clonedColor, 'cmyk')
-                    .value,
-                hex: utils.color.convertHSL(clonedColor, 'hex').value,
-                hsl: clonedColor.value,
-                hsv: utils.color.convertHSL(clonedColor, 'hsv').value,
-                lab: utils.color.convertHSL(clonedColor, 'lab').value,
-                rgb: utils.color.convertHSL(clonedColor, 'rgb').value,
-                xyz: utils.color.convertHSL(clonedColor, 'xyz').value
-            },
-            css: {
-                cmyk: utils.color.formatColorAsCSS(utils.color.convertHSL(clonedColor, 'cmyk')),
-                hex: utils.color.formatColorAsCSS(utils.color.convertHSL(clonedColor, 'hex')),
-                hsl: utils.color.formatColorAsCSS(clonedColor),
-                hsv: utils.color.formatColorAsCSS(utils.color.convertHSL(clonedColor, 'hsv')),
-                lab: utils.color.formatColorAsCSS(utils.color.convertHSL(clonedColor, 'lab')),
-                rgb: utils.color.formatColorAsCSS(utils.color.convertHSL(clonedColor, 'rgb')),
-                xyz: utils.color.formatColorAsCSS(utils.color.convertHSL(clonedColor, 'xyz'))
-            }
-        };
+        return errors.handleSync(() => {
+            const clonedColor = clone(color);
+            return {
+                itemID,
+                colors: {
+                    cmyk: colorUtils.convertHSL(clonedColor, 'cmyk')
+                        .value,
+                    hex: colorUtils.convertHSL(clonedColor, 'hex')
+                        .value,
+                    hsl: clonedColor.value,
+                    hsv: colorUtils.convertHSL(clonedColor, 'hsv')
+                        .value,
+                    lab: colorUtils.convertHSL(clonedColor, 'lab')
+                        .value,
+                    rgb: colorUtils.convertHSL(clonedColor, 'rgb')
+                        .value,
+                    xyz: colorUtils.convertHSL(clonedColor, 'xyz')
+                        .value
+                },
+                css: {
+                    cmyk: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'cmyk')),
+                    hex: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'hex')),
+                    hsl: colorUtils.formatColorAsCSS(clonedColor),
+                    hsv: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'hsv')),
+                    lab: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'lab')),
+                    rgb: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'rgb')),
+                    xyz: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'xyz'))
+                }
+            };
+        }, 'Error occurred while creating palette item');
     }
-    function isHSLTooDark(hsl) {
-        if (!utils.validate.colorValue(hsl)) {
-            log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
-            return false;
-        }
-        return clone(hsl).value.lightness < paletteConfig.thresholds.dark;
-    }
-    function isHSLTooGray(hsl) {
-        if (!utils.validate.colorValue(hsl)) {
-            log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
-            return false;
-        }
-        return clone(hsl).value.saturation < paletteConfig.thresholds.gray;
-    }
-    function isHSLTooLight(hsl) {
-        if (!utils.validate.colorValue(hsl)) {
-            log('Invalid HSL value ${JSON.stringify(hsl)}', 'error');
-            return false;
-        }
-        return clone(hsl).value.lightness > paletteConfig.thresholds.light;
-    }
-    return {
-        createPaletteItem,
-        isHSLTooDark,
-        isHSLTooGray,
-        isHSLTooLight,
-        createPaletteItemArray(baseColor, hues) {
+    function createPaletteItemArray(baseColor, hues) {
+        return errors.handleSync(() => {
             const paletteItems = [];
             // base color always gets itemID = 1
             paletteItems.push(createPaletteItem(baseColor, 1 // ID 1 for base color
@@ -66,20 +47,22 @@ function paletteUtilsFactory(helpers, services, utils) {
             for (const [i, hue] of hues.entries()) {
                 const newColor = {
                     value: {
-                        hue: utils.brand.asRadial(hue),
-                        saturation: utils.brand.asPercentile(Math.random() * 100),
-                        lightness: utils.brand.asPercentile(Math.random() * 100)
+                        hue: brand.asRadial(hue),
+                        saturation: brand.asPercentile(Math.random() * 100),
+                        lightness: brand.asPercentile(Math.random() * 100)
                     },
                     format: 'hsl'
                 };
                 const newPaletteItem = createPaletteItem(newColor, i + 2 // IDs start at 2 for generated colors
                 );
                 paletteItems.push(newPaletteItem);
-                utils.dom.updateColorBox(newColor, String(i + 2));
+                dom.updateColorBox(newColor, String(i + 2));
             }
             return paletteItems;
-        },
-        createPaletteObject(options, paletteItems) {
+        }, 'Error occurred while creating palette item array');
+    }
+    function createPaletteObject(options, paletteItems) {
+        return errors.handleSync(() => {
             return {
                 id: `${options.paletteType}_${crypto.randomUUID()}`,
                 items: paletteItems,
@@ -92,14 +75,19 @@ function paletteUtilsFactory(helpers, services, utils) {
                     type: options.paletteType
                 }
             };
-        },
-        generateAllColorValues(color) {
+        }, 'Error occurred while creating palette object');
+    }
+    function generateAllColorValues(color) {
+        return errors.handleSync(() => {
             const clonedColor = clone(color);
-            if (!utils.validate.colorValue(clonedColor)) {
-                log(`Invalid color: ${JSON.stringify(clonedColor)}`, 'error');
+            if (!validate.colorValue(clonedColor)) {
+                log(`Invalid color: ${JSON.stringify(clonedColor)}`, {
+                    caller: 'utils.palette.generateAllColorValues',
+                    level: 'error'
+                });
                 throw new Error('Invalid HSL color provided');
             }
-            const convert = (target) => utils.color.convertHSL(clonedColor, target);
+            const convert = (target) => colorUtils.convertHSL(clonedColor, target);
             return {
                 cmyk: convert('cmyk'),
                 hex: convert('hex'),
@@ -111,50 +99,53 @@ function paletteUtilsFactory(helpers, services, utils) {
                 sv: convert('sv'),
                 xyz: convert('xyz')
             };
-        },
-        getPaletteOptionsFromUI() {
-            try {
-                const columnCountElement = getElement(ids.inputs.columnCount);
-                const paletteTypeElement = getElement(ids.inputs.paletteType);
-                const limitDarkChkbx = getElement(ids.inputs.limitDarkChkbx);
-                const limitGrayChkbx = getElement(ids.inputs.limitGrayChkbx);
-                const limitLightChkbx = getElement(ids.inputs.limitLightChkbx);
-                if (!paletteTypeElement) {
-                    log('paletteTypeOptions DOM element not found', 'warn');
-                }
-                if (!columnCountElement) {
-                    log(`columnCount DOM element not found`, 'warn');
-                }
-                if (!limitDarkChkbx || !limitGrayChkbx || !limitLightChkbx) {
-                    log(`One or more checkboxes not found`, 'warn');
-                }
-                if (!helpers.typeguards.isPaletteType(paletteTypeElement.value)) {
-                    log(`Invalid palette type: ${paletteTypeElement.value}`, 'warn');
-                }
-                return {
-                    columnCount: columnCountElement
-                        ? parseInt(columnCountElement.value, 10)
-                        : 0,
-                    distributionType: 'soft',
-                    limitDark: limitDarkChkbx?.checked || false,
-                    limitGray: limitGrayChkbx?.checked || false,
-                    limitLight: limitLightChkbx?.checked || false,
-                    paletteType: paletteTypeElement.value
-                };
+        }, 'Error occurred while generating all color values');
+    }
+    function getPaletteOptionsFromUI() {
+        return errors.handleSync(() => {
+            const columnCountElement = getElement(ids.inputs.columnCount);
+            const paletteTypeElement = getElement(ids.inputs.paletteType);
+            const limitDarkChkbx = getElement(ids.inputs.limitDarkChkbx);
+            const limitGrayChkbx = getElement(ids.inputs.limitGrayChkbx);
+            const limitLightChkbx = getElement(ids.inputs.limitLightChkbx);
+            if (!paletteTypeElement) {
+                log('paletteTypeOptions DOM element not found', {
+                    caller: 'utils.palette.getPaletteOptionsFromUI',
+                    level: 'warn'
+                });
             }
-            catch (error) {
-                log(`Failed to retrieve parameters from UI: ${error}`, 'error');
-                return {
-                    columnCount: 0,
-                    distributionType: 'soft',
-                    limitDark: false,
-                    limitGray: false,
-                    limitLight: false,
-                    paletteType: 'random'
-                };
+            if (!columnCountElement) {
+                log(`columnCount DOM element not found`, {
+                    caller: 'utils.palette.getPaletteOptionsFromUI',
+                    level: 'warn'
+                });
             }
-        },
-        getRandomizedPaleteOptions() {
+            if (!limitDarkChkbx || !limitGrayChkbx || !limitLightChkbx) {
+                log(`One or more checkboxes not found`, {
+                    caller: 'utils.palette.getPaletteOptionsFromUI',
+                    level: 'warn'
+                });
+            }
+            if (!helpers.typeguards.isPaletteType(paletteTypeElement.value)) {
+                log(`Invalid palette type: ${paletteTypeElement.value}`, {
+                    caller: 'utils.palette.getPaletteOptionsFromUI',
+                    level: 'warn'
+                });
+            }
+            return {
+                columnCount: columnCountElement
+                    ? parseInt(columnCountElement.value, 10)
+                    : 0,
+                distributionType: 'soft',
+                limitDark: limitDarkChkbx?.checked || false,
+                limitGray: limitGrayChkbx?.checked || false,
+                limitLight: limitLightChkbx?.checked || false,
+                paletteType: paletteTypeElement.value
+            };
+        }, 'Error occurred while getting palette options from UI');
+    }
+    function getRandomizedPaleteOptions() {
+        return errors.handleSync(() => {
             const paletteTypeMap = {
                 0: 'analogous',
                 1: 'complementary',
@@ -188,15 +179,69 @@ function paletteUtilsFactory(helpers, services, utils) {
                 limitLight,
                 paletteType
             };
-        },
-        isHSLInBounds(hsl) {
-            if (!utils.validate.colorValue(hsl)) {
-                log(`Invalid HSL value ${JSON.stringify(hsl)}`, 'error');
+        }, 'Error occurred while getting randomized palette options');
+    }
+    function isHSLInBounds(hsl) {
+        return errors.handleSync(() => {
+            if (!validate.colorValue(hsl)) {
+                log(`Invalid HSL value ${JSON.stringify(hsl)}`, {
+                    caller: 'utils.palette.isHSLInBounds',
+                    level: 'error'
+                });
                 return false;
             }
             return isHSLTooDark(hsl) || isHSLTooGray(hsl) || isHSLTooLight(hsl);
-        }
+        }, 'Error occurred while checking if HSL is in bounds');
+    }
+    function isHSLTooDark(hsl) {
+        return errors.handleSync(() => {
+            if (!validate.colorValue(hsl)) {
+                log(`Invalid HSL value ${JSON.stringify(hsl)}`, {
+                    caller: 'utils.palette.isHSLTooDark',
+                    level: 'error'
+                });
+                return false;
+            }
+            return clone(hsl).value.lightness < paletteConfig.thresholds.dark;
+        }, 'Error occurred while checking if HSL is too dark');
+    }
+    function isHSLTooGray(hsl) {
+        return errors.handleSync(() => {
+            if (!validate.colorValue(hsl)) {
+                log(`Invalid HSL value ${JSON.stringify(hsl)}`, {
+                    caller: 'utils.palette.isHSLTooGray',
+                    level: 'error'
+                });
+                return false;
+            }
+            return clone(hsl).value.saturation < paletteConfig.thresholds.gray;
+        }, 'Error occurred while checking if HSL is too gray');
+    }
+    function isHSLTooLight(hsl) {
+        return errors.handleSync(() => {
+            if (!validate.colorValue(hsl)) {
+                log('Invalid HSL value ${JSON.stringify(hsl)}', {
+                    caller: 'utils.palette.isHSLTooLight',
+                    level: 'error'
+                });
+                return false;
+            }
+            return clone(hsl).value.lightness > paletteConfig.thresholds.light;
+        }, 'Error occurred while checking if HSL is too light');
+    }
+    const paletteUtils = {
+        createPaletteItem,
+        createPaletteItemArray,
+        createPaletteObject,
+        generateAllColorValues,
+        getPaletteOptionsFromUI,
+        getRandomizedPaleteOptions,
+        isHSLInBounds,
+        isHSLTooDark,
+        isHSLTooGray,
+        isHSLTooLight
     };
+    return errors.handleSync(() => paletteUtils, 'Error creating paletteUtils');
 }
 
 export { paletteUtilsFactory };

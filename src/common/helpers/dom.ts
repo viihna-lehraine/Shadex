@@ -1,4 +1,4 @@
-// File: common/helpers/dom.ts}
+// File: common/helpers/dom.ts
 
 import { DOMHelpers } from '../../types/index.js';
 

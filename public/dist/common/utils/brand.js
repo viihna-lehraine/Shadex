@@ -1,68 +1,20 @@
 import { regex } from '../../config/index.js';
 
-// File: common/utils/brand.js
-function brandingUtilsFactory(utils) {
+// File: common/utils/brand.ts
+function brandingUtilsFactory(services, validate) {
+    const { errors } = services;
+    function asBranded(value, rangeKey) {
+        validate.range(value, rangeKey);
+        return value;
+    }
     function asByteRange(value) {
-        utils.validate.range(value, 'ByteRange');
-        return value;
-    }
-    function asHexSet(value) {
-        if (regex.brand.hex.test(value)) {
-            value = value.slice(0, 7);
-        }
-        if (!utils.validate.hexSet(value)) {
-            throw new Error(`Invalid HexSet value: ${value}`);
-        }
-        return value;
-    }
-    function asLAB_A(value) {
-        utils.validate.range(value, 'LAB_A');
-        return value;
-    }
-    function asLAB_B(value) {
-        utils.validate.range(value, 'LAB_B');
-        return value;
-    }
-    function asLAB_L(value) {
-        utils.validate.range(value, 'LAB_L');
-        return value;
-    }
-    function asPercentile(value) {
-        utils.validate.range(value, 'Percentile');
-        return value;
-    }
-    function asRadial(value) {
-        utils.validate.range(value, 'Radial');
-        return value;
-    }
-    function asXYZ_X(value) {
-        utils.validate.range(value, 'XYZ_X');
-        return value;
-    }
-    function asXYZ_Y(value) {
-        utils.validate.range(value, 'XYZ_Y');
-        return value;
-    }
-    function asXYZ_Z(value) {
-        utils.validate.range(value, 'XYZ_Z');
-        return value;
-    }
-    return {
-        asByteRange,
-        asHexSet,
-        asLAB_A,
-        asLAB_B,
-        asLAB_L,
-        asPercentile,
-        asRadial,
-        asXYZ_X,
-        asXYZ_Y,
-        asXYZ_Z,
-        asBranded(value, rangeKey) {
-            utils.validate.range(value, rangeKey);
+        return errors.handleSync(() => {
+            validate.range(value, 'ByteRange');
             return value;
-        },
-        asCMYK(color) {
+        }, 'Error occurred while branding ByteRange value.');
+    }
+    function asCMYK(color) {
+        return errors.handleSync(() => {
             const brandedCyan = asPercentile(color.value.cyan);
             const brandedMagenta = asPercentile(color.value.magenta);
             const brandedYellow = asPercentile(color.value.yellow);
@@ -76,21 +28,36 @@ function brandingUtilsFactory(utils) {
                 },
                 format: 'cmyk'
             };
-        },
-        asHex(color) {
+        }, 'Error occurred while branding color as CMYK.');
+    }
+    function asHex(color) {
+        return errors.handleSync(() => {
             let hex = color.value.hex;
             if (!hex.startsWith('#'))
                 hex = `#${hex}`;
             if (!regex.brand.hex.test(hex))
                 throw new Error(`Invalid Hex color format: ${hex}`);
             const hexRaw = hex.slice(0, 7);
-            const brandedHex = utils.brand.asHexSet(hexRaw);
+            const brandedHex = asHexSet(hexRaw);
             return {
                 value: { hex: brandedHex },
                 format: 'hex'
             };
-        },
-        asHSL(color) {
+        }, 'Error occurred while branding color as Hex.');
+    }
+    function asHexSet(value) {
+        return errors.handleSync(() => {
+            if (regex.brand.hex.test(value)) {
+                value = value.slice(0, 7);
+            }
+            if (!validate.hexSet(value)) {
+                throw new Error(`Invalid HexSet value: ${value}`);
+            }
+            return value;
+        }, 'Error occurred while branding HexSet value.');
+    }
+    function asHSL(color) {
+        return errors.handleSync(() => {
             const brandedHue = asRadial(color.value.hue);
             const brandedSaturation = asPercentile(color.value.saturation);
             const brandedLightness = asPercentile(color.value.lightness);
@@ -102,8 +69,10 @@ function brandingUtilsFactory(utils) {
                 },
                 format: 'hsl'
             };
-        },
-        asHSV(color) {
+        }, 'Error occurred while branding color as HSL.');
+    }
+    function asHSV(color) {
+        return errors.handleSync(() => {
             const brandedHue = asRadial(color.value.hue);
             const brandedSaturation = asPercentile(color.value.saturation);
             const brandedValue = asPercentile(color.value.value);
@@ -115,8 +84,10 @@ function brandingUtilsFactory(utils) {
                 },
                 format: 'hsv'
             };
-        },
-        asLAB(color) {
+        }, 'Error occurred while branding color as HSV.');
+    }
+    function asLAB(color) {
+        return errors.handleSync(() => {
             const brandedL = asLAB_L(color.value.l);
             const brandedA = asLAB_A(color.value.a);
             const brandedB = asLAB_B(color.value.b);
@@ -128,8 +99,40 @@ function brandingUtilsFactory(utils) {
                 },
                 format: 'lab'
             };
-        },
-        asRGB(color) {
+        }, 'Error occurred while branding color as LAB.');
+    }
+    function asLAB_A(value) {
+        return errors.handleSync(() => {
+            validate.range(value, 'LAB_A');
+            return value;
+        }, 'Error occurred while branding LAB_A value.');
+    }
+    function asLAB_B(value) {
+        return errors.handleSync(() => {
+            validate.range(value, 'LAB_B');
+            return value;
+        }, 'Error occurred while branding LAB_B value.');
+    }
+    function asLAB_L(value) {
+        return errors.handleSync(() => {
+            validate.range(value, 'LAB_L');
+            return value;
+        }, 'Error occurred while branding LAB_L value.');
+    }
+    function asPercentile(value) {
+        return errors.handleSync(() => {
+            validate.range(value, 'Percentile');
+            return value;
+        }, 'Error occurred while branding Percentile value.');
+    }
+    function asRadial(value) {
+        return errors.handleSync(() => {
+            validate.range(value, 'Radial');
+            return value;
+        }, 'Error occurred while branding Radial value.');
+    }
+    function asRGB(color) {
+        return errors.handleSync(() => {
             const brandedRed = asByteRange(color.value.red);
             const brandedGreen = asByteRange(color.value.green);
             const brandedBlue = asByteRange(color.value.blue);
@@ -141,8 +144,10 @@ function brandingUtilsFactory(utils) {
                 },
                 format: 'rgb'
             };
-        },
-        asSL(color) {
+        }, 'Error occurred while branding color as RGB.');
+    }
+    function asSL(color) {
+        return errors.handleSync(() => {
             const brandedSaturation = asPercentile(color.value.saturation);
             const brandedLightness = asPercentile(color.value.lightness);
             return {
@@ -152,8 +157,10 @@ function brandingUtilsFactory(utils) {
                 },
                 format: 'sl'
             };
-        },
-        asSV(color) {
+        }, 'Error occurred while branding color as SL.');
+    }
+    function asSV(color) {
+        return errors.handleSync(() => {
             const brandedSaturation = asPercentile(color.value.saturation);
             const brandedValue = asPercentile(color.value.value);
             return {
@@ -163,8 +170,10 @@ function brandingUtilsFactory(utils) {
                 },
                 format: 'sv'
             };
-        },
-        asXYZ(color) {
+        }, 'Error occurred while branding color as SV.');
+    }
+    function asXYZ(color) {
+        return errors.handleSync(() => {
             const brandedX = asXYZ_X(color.value.x);
             const brandedY = asXYZ_Y(color.value.y);
             const brandedZ = asXYZ_Z(color.value.z);
@@ -176,8 +185,28 @@ function brandingUtilsFactory(utils) {
                 },
                 format: 'xyz'
             };
-        },
-        brandColor(color) {
+        }, 'Error occurred while branding color as XYZ.');
+    }
+    function asXYZ_X(value) {
+        return errors.handleSync(() => {
+            validate.range(value, 'XYZ_X');
+            return value;
+        }, 'Error occurred while branding XYZ_X value.');
+    }
+    function asXYZ_Y(value) {
+        return errors.handleSync(() => {
+            validate.range(value, 'XYZ_Y');
+            return value;
+        }, 'Error occurred while branding XYZ_Y value.');
+    }
+    function asXYZ_Z(value) {
+        return errors.handleSync(() => {
+            validate.range(value, 'XYZ_Z');
+            return value;
+        }, 'Error occurred while branding XYZ_Z value.');
+    }
+    function brandColor(color) {
+        return errors.handleSync(() => {
             switch (color.format) {
                 case 'cmyk':
                     return {
@@ -261,8 +290,10 @@ function brandingUtilsFactory(utils) {
                     throw new Error(`
 						Unknown color format\nDetails: ${JSON.stringify(color)}`);
             }
-        },
-        brandPalette(data) {
+        }, 'Error occurred while branding color.');
+    }
+    function brandPalette(data) {
+        return errors.handleSync(() => {
             return {
                 ...data,
                 metadata: { ...data.metadata },
@@ -315,8 +346,35 @@ function brandingUtilsFactory(utils) {
                     }
                 }))
             };
-        }
+        }, 'Error occurred while branding palette.');
+    }
+    const brandingUtils = {
+        asBranded,
+        asByteRange,
+        asCMYK,
+        asHex,
+        asHexSet,
+        asHSL,
+        asHSV,
+        asLAB,
+        asLAB_A,
+        asLAB_B,
+        asLAB_L,
+        asPercentile,
+        asRadial,
+        asRGB,
+        asSL,
+        asSV,
+        asXYZ,
+        asXYZ_X,
+        asXYZ_Y,
+        asXYZ_Z,
+        brandColor,
+        brandPalette
     };
+    return errors.handleSync(() => {
+        return brandingUtils;
+    }, 'Error occurred while creating branding utilities.');
 }
 
 export { brandingUtilsFactory };

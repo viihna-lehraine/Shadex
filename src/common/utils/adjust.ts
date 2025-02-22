@@ -1,11 +1,12 @@
-// File: common/utils/adjust.js
+// File: common/utils/adjust.ts
 
 import {
 	AdjustmentUtils,
+	BrandingUtils,
 	HSL,
 	RGB,
 	Services,
-	Utilities
+	ValidationUtils
 } from '../../types/index.js';
 import { config, defaults, paletteConfig } from '../../config/index.js';
 
@@ -14,96 +15,105 @@ const defaultColors = defaults.colors;
 const math = config.math;
 
 export function adjustmentUtilsFactory(
+	brand: BrandingUtils,
 	services: Services,
-	utils: Utilities
+	validate: ValidationUtils
 ): AdjustmentUtils {
-	const { log } = services;
+	const { errors, log } = services;
 
-	return {
-		applyGammaCorrection(value: number): number {
-			try {
-				return value > 0.0031308
-					? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
-					: 12.92 * value;
-			} catch (error) {
-				log(`Error applying gamma correction: ${error}`, 'error');
+	function applyGammaCorrection(value: number): number {
+		return errors.handleSync(() => {
+			return value > 0.0031308
+				? 1.055 * Math.pow(value, 1 / 2.4) - 0.055
+				: 12.92 * value;
+		}, 'Error occurred while applying gamma correction.');
+	}
 
-				return value;
-			}
-		},
-		clampRGB(rgb: RGB): RGB {
+	function clampRGB(rgb: RGB): RGB {
+		return errors.handleSync(() => {
 			const defaultRGB = defaultColors.rgb;
 
-			if (!utils.validate.colorValue(rgb)) {
-				log(`Invalid RGB value ${JSON.stringify(rgb)}`, 'error');
+			if (!validate.colorValue(rgb)) {
+				log(`Invalid RGB value ${JSON.stringify(rgb)}`, {
+					caller: 'clampRGB',
+					level: 'error'
+				});
 
 				return defaultRGB;
 			}
 
-			try {
-				return {
-					value: {
-						red: utils.brand.asByteRange(
-							Math.round(
-								Math.min(Math.max(0, rgb.value.red), 1) * 255
-							)
-						),
-						green: utils.brand.asByteRange(
-							Math.round(
-								Math.min(Math.max(0, rgb.value.green), 1) * 255
-							)
-						),
-						blue: utils.brand.asByteRange(
-							Math.round(
-								Math.min(Math.max(0, rgb.value.blue), 1) * 255
-							)
+			return {
+				value: {
+					red: brand.asByteRange(
+						Math.round(
+							Math.min(Math.max(0, rgb.value.red), 1) * 255
 						)
-					},
-					format: 'rgb'
-				};
-			} catch (error) {
-				log(`Error clamping RGB values: ${error}`, 'error');
+					),
+					green: brand.asByteRange(
+						Math.round(
+							Math.min(Math.max(0, rgb.value.green), 1) * 255
+						)
+					),
+					blue: brand.asByteRange(
+						Math.round(
+							Math.min(Math.max(0, rgb.value.blue), 1) * 255
+						)
+					)
+				},
+				format: 'rgb'
+			};
+		}, 'Error occurred while clamping RGB value.');
+	}
 
-				return rgb;
-			}
-		},
-		clampXYZ(value: number, maxValue: number): number {
+	function clampXYZ(value: number, maxValue: number): number {
+		return errors.handleSync(() => {
 			return Math.max(0, Math.min(maxValue + math.epsilon, value));
-		},
-		normalizeXYZ(value: number, reference: number): number {
+		}, 'Error occurred while clamping XYZ value.');
+	}
+
+	function normalizeXYZ(value: number, reference: number): number {
+		return errors.handleSync(() => {
 			return value / reference;
-		},
-		sl(color: HSL): HSL {
-			try {
-				if (!utils.validate.colorValue(color)) {
-					log('Invalid color valus for adjustment.', 'error');
+		}, 'Error occurred while normalizing XYZ value.');
+	}
 
-					return color;
-				}
-
-				const adjustedSaturation = Math.min(
-					Math.max(color.value.saturation + adjustments.slaValue, 0),
-					100
-				);
-				const adjustedLightness = Math.min(100);
-
-				return {
-					value: {
-						hue: color.value.hue,
-						saturation:
-							utils.brand.asPercentile(adjustedSaturation),
-						lightness: utils.brand.asPercentile(adjustedLightness)
-					},
-					format: 'hsl'
-				};
-			} catch (error) {
-				log(
-					`Error adjusting saturation and lightness: ${error}`,
-					'error'
-				);
+	function sl(color: HSL): HSL {
+		return errors.handleSync(() => {
+			if (!validate.colorValue(color)) {
+				log('Invalid color valus for adjustment.', {
+					caller: 'sl (adjustSL)',
+					level: 'error'
+				});
 
 				return color;
 			}
-		}
+
+			const adjustedSaturation = Math.min(
+				Math.max(color.value.saturation + adjustments.slaValue, 0),
+				100
+			);
+			const adjustedLightness = Math.min(100);
+
+			return {
+				value: {
+					hue: color.value.hue,
+					saturation: brand.asPercentile(adjustedSaturation),
+					lightness: brand.asPercentile(adjustedLightness)
+				},
+				format: 'hsl'
+			};
+		}, 'Error occurred while adjusting saturation and lightness.');
+	}
+
+	const adjustmentUtils: AdjustmentUtils = {
+		applyGammaCorrection,
+		clampRGB,
+		clampXYZ,
+		normalizeXYZ,
+		sl
 	};
+
+	return errors.handleSync(() => {
+		return adjustmentUtils;
+	}, 'Error occurred while creating adjustment utils.');
 }

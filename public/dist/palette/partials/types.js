@@ -1,10 +1,10 @@
-import { defaults, paletteConfig } from '../../config/index.js';
+import { paletteConfig } from '../../config/index.js';
 
 // File: palette/partials/types.js
 const shiftRanges = paletteConfig.shiftRanges;
-function analogous(options, common, generateHues) {
+function generateAnalogousPalette(options, common, generateHues) {
     const { services: { errors }, utils } = common;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         if (options.columnCount < 2)
             utils.dom.enforceSwatchRules(2, 6);
         const baseColor = utils.color.generateRandomHSL();
@@ -12,12 +12,11 @@ function analogous(options, common, generateHues) {
         const paletteItems = utils.palette.createPaletteItemArray(baseColor, hues);
         const analogousPalette = utils.palette.createPaletteObject(options, paletteItems);
         return analogousPalette;
-    }, 'Error generating analogous palette.', { options: options });
-    return defaults.palette;
+    }, 'Error generating analogous palette.', { context: { options } });
 }
-function complementary(options, common) {
+function generateComplementaryPalette(options, common) {
     const { helpers, services: { errors }, utils } = common;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         const columnCount = Math.max(2, Math.min(6, options.columnCount));
         utils.dom.enforceSwatchRules(columnCount, 6);
         const baseColor = utils.color.generateRandomHSL();
@@ -30,7 +29,10 @@ function complementary(options, common) {
         if (extraColorsNeeded > 0) {
             for (let i = 0; i < extraColorsNeeded; i++) {
                 const { weights, values } = helpers.palette.getWeightsAndValues(options.distributionType);
-                const variationOffset = helpers.math.getWeightedRandomValue(weights, values);
+                const variationOffset = helpers.random.selectRandomFromWeights({
+                    weights,
+                    values
+                });
                 const direction = Math.random() < 0.5 ? 1 : -1; // randomize direction
                 const newHue = (baseHue + 180 + variationOffset * direction + 360) %
                     360;
@@ -55,12 +57,11 @@ function complementary(options, common) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }, 'Error generating complementary palette.', { options: options });
-    return defaults.palette;
+    }, 'Error generating complementary palette.', { context: { options } });
 }
-function diadic(options, common, generateHues) {
+function generateDiadicPalette(options, common, generateHues) {
     const { helpers, services: { errors }, utils } = common;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         const columnCount = Math.max(2, Math.min(6, options.columnCount));
         utils.dom.enforceSwatchRules(columnCount, 6);
         const baseColor = utils.color.generateRandomHSL();
@@ -70,7 +71,10 @@ function diadic(options, common, generateHues) {
         if (extraColorsNeeded > 0) {
             for (let i = 0; i < extraColorsNeeded; i++) {
                 const { weights, values } = helpers.palette.getWeightsAndValues(options.distributionType);
-                const variationOffset = helpers.math.getWeightedRandomValue(weights, values);
+                const variationOffset = helpers.random.selectRandomFromWeights({
+                    weights,
+                    values
+                });
                 const direction = i % 2 === 0 ? 1 : -1;
                 hues.push((baseColor.value.hue + variationOffset * direction) %
                     360);
@@ -93,12 +97,11 @@ function diadic(options, common, generateHues) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }, 'Error generating diadic palette.', { options: options });
-    return defaults.palette;
+    }, 'Error generating diadic palette.', { context: { options } });
 }
-function hexadic(options, common, generateHues) {
+function generateHexadicPalette(options, common, generateHues) {
     const { services: { errors }, utils } = common;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         // hexadic palettes always have 6 swatches
         const columnCount = 6;
         utils.dom.enforceSwatchRules(columnCount, 6);
@@ -121,12 +124,11 @@ function hexadic(options, common, generateHues) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }, 'Error generating hexadic palette.', { options: options });
-    return defaults.palette;
+    }, 'Error generating hexadic palette.', { context: { options } });
 }
-function monochromatic(options, common) {
+function generateMonochromaticPalette(options, common) {
     const { services: { errors }, utils } = common;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         const columnCount = Math.max(2, Math.min(6, options.columnCount));
         utils.dom.enforceSwatchRules(columnCount, 6);
         const baseColor = utils.color.generateRandomHSL();
@@ -150,12 +152,11 @@ function monochromatic(options, common) {
             paletteItems.push(paletteItem);
         }
         return utils.palette.createPaletteObject(options, paletteItems);
-    }, 'Error generating monochromatic palette.', { options: options });
-    return defaults.palette;
+    }, 'Error generating monochromatic palette.', { context: { options } });
 }
-function random(options, common) {
+function generateRandomPalette(options, common) {
     const { services: { errors }, utils } = common;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         // ensure column count is between 2 and 6
         const columnCount = Math.max(2, Math.min(6, options.columnCount));
         utils.dom.enforceSwatchRules(columnCount, 6);
@@ -169,12 +170,11 @@ function random(options, common) {
             paletteItems.push(nextPaletteItem);
         }
         return utils.palette.createPaletteObject(options, paletteItems);
-    }, 'Error generating random palette.', { options: options });
-    return defaults.palette;
+    }, 'Error generating random palette.', { context: { options } });
 }
-function splitComplementary(options, common) {
+function generateSplitComplementaryPalette(options, common) {
     const { helpers, services: { errors }, utils } = common;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         // ensure column count is at least 3 and at most 6
         const columnCount = Math.max(3, Math.min(6, options.columnCount));
         utils.dom.enforceSwatchRules(columnCount, 6);
@@ -196,7 +196,10 @@ function splitComplementary(options, common) {
         // if swatchCount > 3, introduce additional variations
         for (let i = 3; i < columnCount; i++) {
             const { weights, values } = helpers.palette.getWeightsAndValues(options.distributionType);
-            const variationOffset = helpers.math.getWeightedRandomValue(weights, values);
+            const variationOffset = helpers.random.selectRandomFromWeights({
+                weights,
+                values
+            });
             const direction = i % 2 === 0 ? 1 : -1;
             hues.push((baseHue + 180 + variationOffset * direction) % 360);
         }
@@ -219,12 +222,11 @@ function splitComplementary(options, common) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }, 'Error generating split-complementary palette.', { options: options });
-    return defaults.palette;
+    }, 'Error generating split-complementary palette.', { context: { options } });
 }
-function tetradic(options, common, generateHues) {
+function generateTetradicPalette(options, common, generateHues) {
     const { services: { errors }, utils } = common;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         // tetradic palettes always have 4 swatches
         const columnCount = 4;
         utils.dom.enforceSwatchRules(columnCount, 4);
@@ -248,12 +250,11 @@ function tetradic(options, common, generateHues) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }, 'Error generating tetradic palette.', { options: options });
-    return defaults.palette;
+    }, 'Error generating tetradic palette.', { context: { options } });
 }
-function triadic(options, common, generateHues) {
+function generateTriadicPalette(options, common, generateHues) {
     const { services: { errors }, utils } = common;
-    errors.handleSync(() => {
+    return errors.handleSync(() => {
         // triadic palettes always have exactly 3 colors
         const columnCount = 3;
         utils.dom.enforceSwatchRules(columnCount, 3);
@@ -278,19 +279,18 @@ function triadic(options, common, generateHues) {
             return utils.palette.createPaletteItem(newColor, index + 1);
         });
         return utils.palette.createPaletteObject(options, paletteItems);
-    }, 'Error generating triadic palette.', { options: options });
-    return defaults.palette;
+    }, 'Error generating triadic palette.', { context: { options } });
 }
 const generatePaletteFnGroup = {
-    analogous,
-    complementary,
-    diadic,
-    hexadic,
-    monochromatic,
-    random,
-    splitComplementary,
-    tetradic,
-    triadic
+    analogous: generateAnalogousPalette,
+    complementary: generateComplementaryPalette,
+    diadic: generateDiadicPalette,
+    hexadic: generateHexadicPalette,
+    monochromatic: generateMonochromaticPalette,
+    random: generateRandomPalette,
+    splitComplementary: generateSplitComplementaryPalette,
+    tetradic: generateTetradicPalette,
+    triadic: generateTriadicPalette
 };
 
 export { generatePaletteFnGroup };

@@ -1,4 +1,4 @@
-// File: common/helpers/dom.ts}
+// File: common/helpers/dom.ts
 const domHelpersFactory = () => ({
     getAllElements(selector) {
         return document.querySelectorAll(selector);

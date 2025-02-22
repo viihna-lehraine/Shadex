@@ -6,6 +6,7 @@ import {
 	Color,
 	ColorFormatUtils,
 	ColorStringMap,
+	FormattingUtils,
 	Helpers,
 	Hex,
 	HexStringMap,
@@ -20,7 +21,6 @@ import {
 	Services,
 	SL,
 	SV,
-	Utilities,
 	XYZ,
 	XYZStringMap
 } from '../../../../types/index.js';
@@ -29,47 +29,46 @@ import { defaults, regex } from '../../../../config/index.js';
 const defaultColors = defaults.colors;
 
 export function colorFormattingUtilsFactory(
+	format: FormattingUtils,
 	helpers: Helpers,
-	services: Services,
-	utils: Utilities
+	services: Services
 ): ColorFormatUtils {
-	const { clone } = helpers.data;
-	const { typeguards } = helpers;
-	const { log } = services;
-	const { format } = utils;
+	const {
+		data: { clone },
+		typeguards
+	} = helpers;
+	const { errors, log } = services;
 
-	return {
-		formatColorAsCSS(color: Color): string {
-			try {
-				switch (color.format) {
-					case 'cmyk':
-						return `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key})`;
-					case 'hex':
-						return String(color.value.hex);
-					case 'hsl':
-						return `hsl(${Math.round(color.value.hue)},
-									${Math.round(color.value.saturation)}%,
-									${Math.round(color.value.lightness)}%)`;
-					case 'hsv':
-						return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%)`;
-					case 'lab':
-						return `lab(${color.value.l}, ${color.value.a}, ${color.value.b})`;
-					case 'rgb':
-						return `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue})`;
-					case 'xyz':
-						return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z})`;
-					default:
-						console.error(
-							`Unexpected color format: ${color.format}`
-						);
+	function formatColorAsCSS(color: Color): string {
+		errors.handleSync(() => {
+			switch (color.format) {
+				case 'cmyk':
+					return `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key})`;
+				case 'hex':
+					return String(color.value.hex);
+				case 'hsl':
+					return `hsl(${Math.round(color.value.hue)},
+								${Math.round(color.value.saturation)}%,
+								${Math.round(color.value.lightness)}%)`;
+				case 'hsv':
+					return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%)`;
+				case 'lab':
+					return `lab(${color.value.l}, ${color.value.a}, ${color.value.b})`;
+				case 'rgb':
+					return `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue})`;
+				case 'xyz':
+					return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z})`;
+				default:
+					console.error(`Unexpected color format: ${color.format}`);
 
-						return '#FFFFFF';
-				}
-			} catch (error) {
-				throw new Error(`getCSSColorString error: ${error}`);
+					return '#FFFFFF';
 			}
-		},
-		formatColorAsStringMap(color: Color): ColorStringMap {
+		}, 'Error formatting color as CSS');
+		return defaults.colors.hexCSS;
+	}
+
+	function formatColorAsStringMap(color: Color): ColorStringMap {
+		errors.handleSync(() => {
 			const clonedColor = clone(color);
 
 			if (typeguards.isHex(clonedColor)) {
@@ -82,7 +81,9 @@ export function colorFormattingUtilsFactory(
 			} else if (typeguards.isColorStringMap(clonedColor)) {
 				log(
 					`Already formatted as color string: ${JSON.stringify(color)}`,
-					'error'
+					{
+						caller: 'formatColorAsStringMap'
+					}
 				);
 
 				return clonedColor;
@@ -166,12 +167,19 @@ export function colorFormattingUtilsFactory(
 					} as XYZStringMap['value']
 				};
 			} else {
-				log(`Unsupported format: ${clonedColor.format}`, 'error');
+				log(`Unsupported format: ${clonedColor.format}`, {
+					caller: 'formatColorAsStringMap',
+					level: 'warn'
+				});
 
 				return defaultColors.hslString;
 			}
-		},
-		formatCSSAsColor(color: string): Exclude<Color, SL | SV> | null {
+		}, 'Error formatting color as string map');
+		return defaults.colors.hexString;
+	}
+
+	function formatCSSAsColor(color: string): Exclude<Color, SL | SV> | null {
+		errors.handleSync(() => {
 			color = color.trim().toLowerCase();
 
 			const cmykMatch = color.match(regex.css.cmyk);
@@ -260,6 +268,18 @@ export function colorFormattingUtilsFactory(
 			}
 
 			return null;
-		}
+		}, 'Error formatting CSS as color');
+		return null;
+	}
+
+	const colorFormattingUtils: ColorFormatUtils = {
+		formatColorAsCSS,
+		formatColorAsStringMap,
+		formatCSSAsColor
 	};
+
+	return errors.handleSync(
+		() => colorFormattingUtils,
+		'Error creating color formatting utils'
+	);
 }

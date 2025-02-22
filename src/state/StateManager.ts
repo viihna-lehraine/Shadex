@@ -1,4 +1,4 @@
-// File: state/StateManager.js
+// File: state/StateManager.ts
 
 import {
 	Helpers,
@@ -42,8 +42,18 @@ export class StateManager implements StateManagerInterface {
 		this.#state.paletteHistory = [];
 		this.#history = [this.#state];
 		this.#undoStack = [];
-		this.init();
-		this.#saveStateAndLog('init', 3);
+
+		this.init()
+			.then(() => {
+				this.#saveStateAndLog('init', 3);
+			})
+			.catch(error => {
+				this.#log('StateManager init failed.', {
+					caller: '[StateManager constructor]',
+					level: 'error'
+				});
+				console.error(error);
+			});
 	}
 
 	static getInstance(
@@ -52,14 +62,25 @@ export class StateManager implements StateManagerInterface {
 		utils: Utilities
 	): StateManager {
 		if (!StateManager.#instance) {
+			services.log(`Creating new StateManager instance.`, {
+				caller: '[StateManager.getInstance]',
+				level: 'debug'
+			});
 			StateManager.#instance = new StateManager(helpers, services, utils);
 		}
 
+		services.log(`Returning StateManager instance.`, {
+			caller: '[StateManager.getInstance]',
+			level: 'debug'
+		});
 		return StateManager.#instance;
 	}
 
 	async init(): Promise<void> {
-		this.#log('Initializing State Manager', 'debug');
+		this.#log('Initializing State Manager', {
+			caller: '[StateManager.init]',
+			level: 'debug'
+		});
 
 		await this.#storage.init();
 
@@ -69,47 +90,58 @@ export class StateManager implements StateManagerInterface {
 				'Failed to load state. Generating initial state.'
 			)) ?? this.#generateInitialState();
 
-		this.#log('StateManager initialized successfully.', 'debug');
+		this.#log('StateManager initialized successfully.', {
+			caller: '[StateManager.init]',
+			level: 'debug'
+		});
 
 		await this.#saveState();
 	}
 
 	addPaletteToHistory(palette: Palette): void {
-		this.#errors.handleSync(
+		return this.#errors.handleSync(
 			() => {
 				this.#trackAction();
 				this.#state.paletteHistory.push(palette);
 				this.#saveStateAndLog('paletteHistory', 3);
 			},
 			'Failed to add palette to history',
-			{ palette }
+			{ context: { palette } }
 		);
 	}
 
 	async ensureStateReady(): Promise<void> {
-		await this.#errors.handleAsync(
+		return await this.#errors.handleAsync(
 			async () => {
 				let attempts = 0;
 
 				while (!this.#state || !this.#state.paletteContainer) {
 					if (attempts++ >= maxStateReadyAttempts) {
-						this.#log('State initialization timed out.', 'error');
+						this.#log('State initialization timed out.', {
+							caller: '[StateManager.ensureStateReady]',
+							level: 'error'
+						});
 						throw new Error('State initialization timed out.');
 					}
 
 					this.#log(
 						`Waiting for state to initialize... (Attempt ${attempts})`,
-						'debug',
-						3
+						{
+							caller: '[StateManager.ensureStateReady]',
+							level: 'debug',
+							verbosity: 3
+						}
 					);
 
 					await new Promise(resolve => setTimeout(resolve, 50));
 				}
 
-				this.#log('State is now initialized.');
+				this.#log('State is now initialized.', {
+					caller: '[StateManager.ensureStateReady]'
+				});
 			},
 			'Failed to ensure state readiness',
-			{ maxStateReadyAttempts }
+			{ context: { maxStateReadyAttempts } }
 		);
 	}
 
@@ -122,7 +154,10 @@ export class StateManager implements StateManagerInterface {
 				if (!this.#state.preferences) {
 					this.#log(
 						'State.preferences is undefined. Adding default preferences.',
-						'warn'
+						{
+							caller: '[StateManager.getState]',
+							level: 'warn'
+						}
 					);
 					this.#state.preferences = defaultState.preferences;
 				}
@@ -132,87 +167,132 @@ export class StateManager implements StateManagerInterface {
 	}
 
 	async loadState(): Promise<State> {
-		const storedState = await this.#storage.getItem<State>('appState');
+		return this.#errors.handleAsync(async () => {
+			this.#log('Attempting to load state...', {
+				caller: '[StateManager.loadState]',
+				level: 'debug'
+			});
+			const storedState = await this.#storage.getItem<State>('appState');
 
-		if (storedState) {
-			this.#state = storedState;
-
-			if (this.#onStateLoadCallback) {
-				this.#onStateLoadCallback();
+			if (storedState) {
+				this.#state = storedState;
+				this.#log('Loaded stored state', {
+					caller: '[StateManager.loadState]',
+					level: 'debug'
+				});
+				this.#onStateLoadCallback?.();
+				return storedState;
 			}
 
-			return storedState;
-		} else {
-			this.#log('No stored state found.', 'warn');
+			this.#log('No stored state found. Generating initial state.', {
+				caller: '[StateManager.loadState]',
+				level: 'warn'
+			});
 			return this.#generateInitialState();
-		}
+		}, 'Failed to load state');
 	}
 
 	redo(): void {
-		this.#errors.handleSync(() => {
-			if (this.#undoStack.length > 0) {
-				const redoState = this.#undoStack.pop();
-				if (!redoState) {
-					this.#log('Cannot redo: No redoState found.', 'debug');
-					return;
+		return this.#errors.handleSync(
+			() => {
+				if (this.#undoStack.length > 0) {
+					const redoState = this.#undoStack.pop();
+					if (!redoState) {
+						this.#log('Cannot redo: No redoState found.', {
+							caller: '[StateManager.redo]',
+							level: 'warn'
+						});
+						return;
+					}
+
+					this.#history.push(redoState);
+					this.#state = { ...redoState };
+
+					this.#log('Redo action performed.', {
+						caller: '[StateManager.redo]',
+						level: 'debug'
+					});
+					this.#saveStateAndLog('redo', 3);
+				} else {
+					throw new Error('No state to redo.');
 				}
-
-				this.#history.push(redoState);
-				this.#state = { ...redoState };
-
-				this.#log('Redo action performed.', 'debug');
-				this.#saveStateAndLog('redo', 3);
-			} else {
-				throw new Error('No state to redo.');
-			}
-		}, 'Redo operation failed');
+			},
+			'Redo operation failed',
+			{ fallback: { redo: null } }
+		);
 	}
 
 	async resetState(): Promise<void> {
-		await this.#errors.handleAsync(async () => {
-			this.#trackAction();
-			this.#state = defaultState;
-			await this.#saveState();
-			this.#log('App state has been reset', 'debug');
-		}, 'Failed to reset state');
+		return await this.#errors.handleAsync(
+			async () => {
+				this.#trackAction();
+				this.#state = defaultState;
+				await this.#saveState();
+				this.#log('App state has been reset', {
+					caller: '[StateManager.resetState]',
+					level: 'debug'
+				});
+			},
+			'Failed to reset state',
+			{ fallback: defaultState }
+		);
 	}
 
 	setOnStateLoad(callback: () => void): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			this.#onStateLoadCallback = callback;
 		}, 'Failed to set onStateLoad callback');
 	}
 
 	async setState(state: State, track: boolean): Promise<void> {
-		if (track) this.#trackAction();
-		this.#state = state;
-		this.#log('App state has been updated', 'debug');
-		await this.#saveState();
+		return await this.#errors.handleAsync(
+			async () => {
+				if (track) this.#trackAction();
+				this.#state = state;
+				this.#log('App state has been updated', {
+					caller: '[StateManager.setState]',
+					level: 'debug'
+				});
+				await this.#saveState();
+			},
+			'Failed to set state',
+			{ context: { state, track } }
+		);
 	}
 
 	undo(): void {
-		this.#errors.handleSync(() => {
-			if (this.#history.length < 1) {
-				throw new Error('No previous state to revert to.');
-			}
-			this.#trackAction();
-			this.#undoStack.push(this.#history.pop() as State);
-			this.#state = { ...this.#history[this.#history.length - 1] };
-			this.#log('Undo action performed.', 'debug');
-			this.#saveStateAndLog('undo', 3);
-		}, 'Undo operation failed');
+		return this.#errors.handleSync(
+			() => {
+				if (this.#history.length < 1) {
+					throw new Error('No previous state to revert to.');
+				}
+				this.#trackAction();
+				this.#undoStack.push(this.#history.pop() as State);
+				this.#state = { ...this.#history[this.#history.length - 1] };
+				this.#log('Undo action performed.', {
+					caller: '[StateManager.undo]',
+					level: 'debug'
+				});
+				this.#saveStateAndLog('undo', 3);
+			},
+			'Undo operation failed',
+			{ fallback: { undo: null } }
+		);
 	}
 
 	updateAppModeState(appMode: State['appMode'], track: boolean): void {
-		this.#errors.handleSync(
+		return this.#errors.handleSync(
 			() => {
 				if (track) this.#trackAction();
 				this.#state.appMode = appMode;
-				this.#log(`Updated appMode: ${appMode}`);
+				this.#log(`Updated appMode: ${appMode}`, {
+					caller: '[StateManager.updateAppModeState]',
+					level: 'debug'
+				});
 				this.#saveStateAndLog('appMode', 3);
 			},
 			'Failed to update app mode state',
-			{ appMode, track }
+			{ context: { appMode, track } }
 		);
 	}
 
@@ -221,7 +301,7 @@ export class StateManager implements StateManagerInterface {
 		track: boolean,
 		verbosity: number
 	): void {
-		this.#errors.handleSync(
+		return this.#errors.handleSync(
 			() => {
 				if (!this.#state || !this.#state.paletteContainer) {
 					throw new Error(
@@ -234,24 +314,27 @@ export class StateManager implements StateManagerInterface {
 						domIndex.ids.divs.paletteContainer
 					)
 				) {
-					this.#log(
-						'Palette Container not found in the DOM.',
-						'warn'
-					);
+					this.#log('Palette Container not found in the DOM.', {
+						caller: '[StateManager.updatePaletteColumns]',
+						level: 'warn'
+					});
 				}
 
 				if (track) this.#trackAction();
 				this.#state.paletteContainer.columns = columns;
-				this.#log(`Updated paletteContainer columns`, 'debug');
+				this.#log(`Updated paletteContainer columns`, {
+					caller: '[StateManager.updatePaletteColumns]',
+					level: 'debug'
+				});
 				this.#saveStateAndLog('paletteColumns', verbosity);
 			},
 			'Failed to update palette columns',
-			{ columns, track, verbosity }
+			{ context: { columns, track, verbosity } }
 		);
 	}
 
 	updatePaletteColumnSize(columnID: number, newSize: number): void {
-		this.#errors.handleSync(
+		return this.#errors.handleSync(
 			() => {
 				const columns = this.#state.paletteContainer.columns;
 				const columnIndex = columns.findIndex(
@@ -285,24 +368,30 @@ export class StateManager implements StateManagerInterface {
 				const correctionFactor = 100 / finalTotalSize;
 				columns.forEach(col => (col.size *= correctionFactor));
 
-				this.#log(`Updated column size`, 'debug');
+				this.#log(`Updated column size`, {
+					caller: '[StateManager.updatePaletteColumnSize]',
+					level: 'debug'
+				});
 				this.#saveStateAndLog('paletteColumnSize', 3);
 			},
 			'Failed to update palette column size',
-			{ columnID, newSize }
+			{ context: { columnID, newSize } }
 		);
 	}
 
 	updatePaletteHistory(updatedHistory: Palette[]): void {
-		this.#errors.handleSync(
+		return this.#errors.handleSync(
 			() => {
 				this.#trackAction();
 				this.#state.paletteHistory = updatedHistory;
 				this.#saveState();
-				this.#log('Updated palette history');
+				this.#log('Updated palette history', {
+					caller: '[StateManager.updatePaletteHistory]',
+					level: 'debug'
+				});
 			},
 			'Failed to update palette history',
-			{ updatedHistory }
+			{ context: { updatedHistory } }
 		);
 	}
 
@@ -310,32 +399,51 @@ export class StateManager implements StateManagerInterface {
 		selections: Partial<State['selections']>,
 		track: boolean
 	): void {
-		this.#errors.handleSync(
+		return this.#errors.handleSync(
 			() => {
 				if (track) this.#trackAction();
 				this.#state.selections = {
 					...this.#state.selections,
 					...selections
 				};
-				this.#log(`Updated selections`, 'debug');
+				this.#log(`Updated selections`, {
+					caller: '[StateManager.updateSelections]',
+					level: 'debug'
+				});
 				this.#saveStateAndLog('selections', 2);
 			},
 			'Failed to update selections',
-			{ selections, track }
+			{ context: { selections, track } }
 		);
 	}
 
 	#generateInitialState(): State {
 		return (
 			this.#errors.handleSync(() => {
-				const columnData = this.#utils.dom.scanPaletteColumns();
 				this.#log(
-					`Scanned ${columnData.length} columns in Palette Container element`,
-					'debug'
+					'[StateManager.#generateInitialState] Generating initial state...',
+					{
+						caller: '[StateManager.#generateInitialState]',
+						level: 'debug'
+					}
+				);
+				const columnData = this.#utils.dom.scanPaletteColumns();
+				if (!columnData || columnData.length === 0) {
+					this.#log('No palette columns found!', {
+						caller: '[StateManager.#generateInitialState]',
+						level: 'error'
+					});
+				}
+				this.#log(
+					`Scanned ${columnData!.length} columns in Palette Container element`,
+					{
+						caller: '[StateManager.#generateInitialState]',
+						level: 'debug'
+					}
 				);
 				return {
 					appMode: 'edit',
-					paletteContainer: { columns: columnData || [] },
+					paletteContainer: { columns: columnData ?? [] },
 					paletteHistory: [],
 					preferences: {
 						colorSpace: 'hsl',
@@ -345,23 +453,26 @@ export class StateManager implements StateManagerInterface {
 						theme: 'light'
 					},
 					selections: {
-						paletteColumnCount: columnData.length,
+						paletteColumnCount: columnData!.length ?? 0,
 						paletteType: 'complementary',
 						targetedColumnPosition: 1
 					},
 					timestamp: this.#helpers.data.getFormattedTimestamp()
 				};
-			}, 'Failed to generate initial state') ?? defaultState
+			}, 'Failed to generate initial state') ?? ({} as State)
 		);
 	}
 
 	#saveStateAndLog(property: string, verbosity?: number): void {
-		this.#log(`StateManager Updated ${property}`, 'debug', verbosity);
+		this.#log(`StateManager Updated ${property}`, {
+			caller: '[StateManager.#saveStateAndLog]',
+			verbosity: verbosity ?? 0
+		});
 		this.#saveState();
 	}
 
 	async #saveState(): Promise<void> {
-		await this.#errors.handleAsync(
+		return await this.#errors.handleAsync(
 			() => this.#storage.setItem('appState', this.#state),
 			'Failed to save app state.'
 		);

@@ -1,4 +1,4 @@
-// File: common/services/Logger.js
+// File: common/services/Logger.ts
 
 import { Helpers, LoggerInterface, MutationLog } from '../../types/index.js';
 import { config } from '../../config/index.js';

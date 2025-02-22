@@ -1,42 +1,38 @@
-import { regex, defaults } from '../../../../config/index.js';
+import { defaults, regex } from '../../../../config/index.js';
 
 // File: common/utils/partials/color/format.ts
 const defaultColors = defaults.colors;
-function colorFormattingUtilsFactory(helpers, services, utils) {
-    const { clone } = helpers.data;
-    const { typeguards } = helpers;
-    const { log } = services;
-    const { format } = utils;
-    return {
-        formatColorAsCSS(color) {
-            try {
-                switch (color.format) {
-                    case 'cmyk':
-                        return `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key})`;
-                    case 'hex':
-                        return String(color.value.hex);
-                    case 'hsl':
-                        return `hsl(${Math.round(color.value.hue)},
-									${Math.round(color.value.saturation)}%,
-									${Math.round(color.value.lightness)}%)`;
-                    case 'hsv':
-                        return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%)`;
-                    case 'lab':
-                        return `lab(${color.value.l}, ${color.value.a}, ${color.value.b})`;
-                    case 'rgb':
-                        return `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue})`;
-                    case 'xyz':
-                        return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z})`;
-                    default:
-                        console.error(`Unexpected color format: ${color.format}`);
-                        return '#FFFFFF';
-                }
+function colorFormattingUtilsFactory(format, helpers, services) {
+    const { data: { clone }, typeguards } = helpers;
+    const { errors, log } = services;
+    function formatColorAsCSS(color) {
+        errors.handleSync(() => {
+            switch (color.format) {
+                case 'cmyk':
+                    return `cmyk(${color.value.cyan}, ${color.value.magenta}, ${color.value.yellow}, ${color.value.key})`;
+                case 'hex':
+                    return String(color.value.hex);
+                case 'hsl':
+                    return `hsl(${Math.round(color.value.hue)},
+								${Math.round(color.value.saturation)}%,
+								${Math.round(color.value.lightness)}%)`;
+                case 'hsv':
+                    return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%)`;
+                case 'lab':
+                    return `lab(${color.value.l}, ${color.value.a}, ${color.value.b})`;
+                case 'rgb':
+                    return `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue})`;
+                case 'xyz':
+                    return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z})`;
+                default:
+                    console.error(`Unexpected color format: ${color.format}`);
+                    return '#FFFFFF';
             }
-            catch (error) {
-                throw new Error(`getCSSColorString error: ${error}`);
-            }
-        },
-        formatColorAsStringMap(color) {
+        }, 'Error formatting color as CSS');
+        return defaults.colors.hexCSS;
+    }
+    function formatColorAsStringMap(color) {
+        errors.handleSync(() => {
             const clonedColor = clone(color);
             if (typeguards.isHex(clonedColor)) {
                 return {
@@ -47,7 +43,9 @@ function colorFormattingUtilsFactory(helpers, services, utils) {
                 };
             }
             else if (typeguards.isColorStringMap(clonedColor)) {
-                log(`Already formatted as color string: ${JSON.stringify(color)}`, 'error');
+                log(`Already formatted as color string: ${JSON.stringify(color)}`, {
+                    caller: 'formatColorAsStringMap'
+                });
                 return clonedColor;
             }
             else if (typeguards.isCMYK(clonedColor)) {
@@ -118,11 +116,17 @@ function colorFormattingUtilsFactory(helpers, services, utils) {
                 };
             }
             else {
-                log(`Unsupported format: ${clonedColor.format}`, 'error');
+                log(`Unsupported format: ${clonedColor.format}`, {
+                    caller: 'formatColorAsStringMap',
+                    level: 'warn'
+                });
                 return defaultColors.hslString;
             }
-        },
-        formatCSSAsColor(color) {
+        }, 'Error formatting color as string map');
+        return defaults.colors.hexString;
+    }
+    function formatCSSAsColor(color) {
+        errors.handleSync(() => {
             color = color.trim().toLowerCase();
             const cmykMatch = color.match(regex.css.cmyk);
             const hslMatch = color.match(regex.css.hsl);
@@ -201,8 +205,15 @@ function colorFormattingUtilsFactory(helpers, services, utils) {
                 };
             }
             return null;
-        }
+        }, 'Error formatting CSS as color');
+        return null;
+    }
+    const colorFormattingUtils = {
+        formatColorAsCSS,
+        formatColorAsStringMap,
+        formatCSSAsColor
     };
+    return errors.handleSync(() => colorFormattingUtils, 'Error creating color formatting utils');
 }
 
 export { colorFormattingUtilsFactory };

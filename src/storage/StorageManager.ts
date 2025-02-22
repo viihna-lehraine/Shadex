@@ -1,4 +1,4 @@
-// File: storage/StorageManager.js
+// File: storage/StorageManager.ts
 
 import { Services, StorageManagerInterface } from '../types/index.js';
 import { IDBManager } from './IDBManager.js';
@@ -22,17 +22,24 @@ export class StorageManager implements StorageManagerInterface {
 			);
 		}, 'Failed to initialize StorageManager');
 
-		this.#log('Storage Manager initialized');
+		this.#log('Storage Manager initialized', {
+			caller: '[StorageManager.constructor]'
+		});
 	}
 
 	async init(): Promise<boolean> {
 		return this.#errors.handleAsync(async () => {
-			this.#log('Initializing Storage Manager');
+			this.#log('Initializing Storage Manager.', {
+				caller: '[StorageManager.init]'
+			});
 			this.#idbManager = IDBManager.getInstance(this.#services);
 
 			const idbAvailable = await this.#idbManager.init();
 			if (idbAvailable) {
-				this.#log('Using IndexedDB for storage.');
+				this.#log(
+					'Using IndexedDB for storage!',
+					{ caller: '[StorageManager.init]' },
+				);
 				return true;
 			}
 
@@ -43,7 +50,7 @@ export class StorageManager implements StorageManagerInterface {
 	}
 
 	async clear(): Promise<void> {
-		await this.#errors.handleAsync(async () => {
+		return await this.#errors.handleAsync(async () => {
 			if (!this.#useLocalStorage && this.#idbManager) {
 				const success = await this.#idbManager.clear();
 				if (success !== null) return;
@@ -62,12 +69,12 @@ export class StorageManager implements StorageManagerInterface {
 				return await this.#localStorageManager.getItem<T>(key);
 			},
 			`Failed to get item ${key} from storage`,
-			{ key }
+			{ context: { key } }
 		);
 	}
 
 	async removeItem(key: string): Promise<void> {
-		await this.#errors.handleAsync(
+		return await this.#errors.handleAsync(
 			async () => {
 				if (!this.#useLocalStorage && this.#idbManager) {
 					try {
@@ -78,12 +85,12 @@ export class StorageManager implements StorageManagerInterface {
 				await this.#localStorageManager.removeItem(key);
 			},
 			`Failed to remove item ${key} from storage`,
-			{ key }
+			{ context: { key } }
 		);
 	}
 
 	async setItem(key: string, value: unknown): Promise<void> {
-		await this.#errors.handleAsync(
+		return await this.#errors.handleAsync(
 			async () => {
 				if (!this.#useLocalStorage && this.#idbManager) {
 					await this.#idbManager.ensureDBReady();
@@ -91,14 +98,14 @@ export class StorageManager implements StorageManagerInterface {
 					return;
 				}
 
-				this.#log(
-					`Falling back to LocalStorage for key: ${key}`,
-					'warn'
-				);
+				this.#log(`Falling back to LocalStorage for key: ${key}`, {
+					caller: '[StorageManager.setItem]',
+					level: 'warn'
+				});
 				await this.#localStorageManager.setItem(key, value);
 			},
 			`Failed to set item ${key} in storage`,
-			{ key, value }
+			{ context: { key, value } }
 		);
 	}
 }

@@ -1,4 +1,4 @@
-// File: events/UIEvents.js
+// File: events/UIEvents.ts
 
 import { DOMElements, Helpers, Services, Utilities } from '../types/index.js';
 import { EventManager } from './EventManager.js';
@@ -39,7 +39,7 @@ export class UIEvents {
 	}
 
 	init(): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			EventManager.add(document, 'click', event => {
 				const target = event.target as HTMLElement;
 
@@ -65,11 +65,11 @@ export class UIEvents {
 						.forEach(modal => modal.classList.add(classes.hidden));
 				}
 			}) as EventListener);
-		}, 'Failed to initialize UI events');
+		}, 'Failed to initialize UI events.');
 	}
 
 	initButtons(): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const addButtonEvent = (
 				button: HTMLElement | null,
 				logMessage: string,
@@ -79,7 +79,10 @@ export class UIEvents {
 
 				EventManager.add(button, 'click', (e: Event) => {
 					e.preventDefault();
-					this.#log(logMessage, 'debug');
+					this.#log(logMessage, {
+						caller: '[UIEvents.initButtons]',
+						level: 'debug'
+					});
 					action?.();
 				});
 			};
@@ -88,7 +91,10 @@ export class UIEvents {
 				this.#elements.btns.desaturate,
 				'Desaturate button clicked',
 				() => {
-					this.#log('Desaturation logic not implemented!', 'warn');
+					this.#log('Desaturation logic not implemented!', {
+						caller: '[UIEvents.initButtons]',
+						level: 'warn'
+					});
 				}
 			);
 
@@ -96,7 +102,10 @@ export class UIEvents {
 				this.#elements.btns.export,
 				'Export button clicked',
 				() => {
-					this.#log('Export logic not implemented!', 'debug');
+					this.#log('Export logic not implemented!', {
+						caller: '[UIEvents.initButtons]',
+						level: 'warn'
+					});
 				}
 			);
 
@@ -105,7 +114,10 @@ export class UIEvents {
 				'Generate button clicked',
 				() => {
 					this.paletteManager.renderNewPalette();
-					this.#log('New palette generated and rendered', 'debug');
+					this.#log('New palette generated and rendered', {
+						caller: '[UIEvents.initButtons]',
+						level: 'debug'
+					});
 				}
 			);
 
@@ -114,11 +126,11 @@ export class UIEvents {
 				'click',
 				this.handleWindowClick.bind(this)
 			);
-		}, 'Failed to initialize buttons');
+		}, 'Failed to initialize buttons.');
 	}
 
 	attachTooltipListener(id: string, tooltipText: string): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const element = this.#helpers.dom.getElement(id);
 			if (!element) return;
 
@@ -128,11 +140,11 @@ export class UIEvents {
 			EventManager.add(element, 'mouseleave', () =>
 				this.#utils.dom.removeTooltip(element)
 			);
-		}, `Failed to attach tooltip listener for ${id}`);
+		}, `Failed to attach tooltip listener for ${id}.`);
 	}
 
 	private handleWindowClick(event: Event): void {
-		this.#errors.handleSync(() => {
+		return this.#errors.handleSync(() => {
 			const target = event.target as HTMLElement;
 
 			if (target === this.#elements.divs.helpMenu) {
@@ -142,6 +154,6 @@ export class UIEvents {
 			if (target === this.#elements.divs.historyMenu) {
 				this.#elements.divs.historyMenu.classList.add(classes.hidden);
 			}
-		}, 'Failed to handle window click');
+		}, 'Failed to handle window click.');
 	}
 }

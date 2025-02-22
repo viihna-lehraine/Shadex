@@ -4,8 +4,11 @@ import { defaults } from '../config/index.js';
 const defaultPalette = defaults.palette;
 function generatePalette(options, common, generateHuesFns, generatePaletteFns) {
     const { log, errors } = common.services;
-    errors.handleSync(() => {
-        log(`Generating ${options.paletteType} palette with args ${JSON.stringify(options)}`, 'debug');
+    return errors.handleSync(() => {
+        log(`Generating ${options.paletteType} palette with args ${JSON.stringify(options)}`, {
+            caller: '[generatePalette]',
+            level: 'debug'
+        });
         switch (options.paletteType) {
             case 'analogous':
                 return generatePaletteFns.analogous(options, common, generateHuesFns);
@@ -26,11 +29,13 @@ function generatePalette(options, common, generateHuesFns, generatePaletteFns) {
             case 'triadic':
                 return generatePaletteFns.triadic(options, common, generateHuesFns);
             default:
-                log(`Invalid palette type ${options.paletteType}`, 'error');
+                log(`Invalid palette type ${options.paletteType}`, {
+                    caller: '[generatePalette]',
+                    level: 'error'
+                });
                 return defaultPalette;
         }
-    }, 'Error generating palette', { options });
-    return defaultPalette;
+    }, 'Error generating palette', { context: { options } });
 }
 
 export { generatePalette };

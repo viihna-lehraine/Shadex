@@ -1,15 +1,16 @@
 import { regex } from '../../../../config/index.js';
 
 // File: common/utils/dom/partials/parse.ts
-function domParsingUtilsFactory(services, utils) {
-    const { brand } = utils;
-    const { log } = services;
-    return {
-        parseCheckbox(id) {
+function domParsingUtilsFactory(brand, services) {
+    const { errors, log } = services;
+    function parseCheckbox(id) {
+        return errors.handleSync(() => {
             const checkbox = document.getElementById(id);
             return checkbox ? checkbox.checked : undefined;
-        },
-        parseColorInput(input) {
+        }, 'Error occurred while parsing checkbox.');
+    }
+    function parseColorInput(input) {
+        return errors.handleSync(() => {
             const colorStr = input.value.trim().toLowerCase();
             const hexMatch = colorStr.match(regex.dom.hex);
             const hslMatch = colorStr.match(regex.dom.hsl);
@@ -24,7 +25,7 @@ function domParsingUtilsFactory(services, utils) {
                 }
                 return {
                     format: 'hex',
-                    value: { hex: utils.brand.asHexSet(`#${hex}`) }
+                    value: { hex: brand.asHexSet(`#${hex}`) }
                 };
             }
             if (hslMatch) {
@@ -67,10 +68,14 @@ function domParsingUtilsFactory(services, utils) {
                     }
                 }
             }
-            log(`Invalid color input: ${colorStr}`, 'warn');
+            log(`Invalid color input: ${colorStr}`, {
+                caller: 'parseColorInput'
+            });
             return null;
-        },
-        parseDropdownSelection(id, validOptions) {
+        }, 'Error occurred while parsing color input.');
+    }
+    function parseDropdownSelection(id, validOptions) {
+        return errors.handleSync(() => {
             const dropdown = document.getElementById(id);
             if (!dropdown)
                 return;
@@ -80,8 +85,11 @@ function domParsingUtilsFactory(services, utils) {
                     ? selectedValue
                     : undefined;
             }
-        },
-        parseNumberInput(input, min, max) {
+            return;
+        }, 'Error occurred while parsing dropdown selection.');
+    }
+    function parseNumberInput(input, min, max) {
+        return errors.handleSync(() => {
             const value = parseFloat(input.value.trim());
             if (isNaN(value))
                 return null;
@@ -90,15 +98,25 @@ function domParsingUtilsFactory(services, utils) {
             if (max !== undefined && value > max)
                 return max;
             return value;
-        },
-        parseTextInput(input, regex) {
+        }, 'Error occurred while parsing number input.');
+    }
+    function parseTextInput(input, regex) {
+        return errors.handleSync(() => {
             const text = input.value.trim();
             if (regex && !regex.test(text)) {
                 return null;
             }
             return text || null;
-        }
+        }, 'Error occurred while parsing text input.');
+    }
+    const domParsingUtils = {
+        parseCheckbox,
+        parseColorInput,
+        parseDropdownSelection,
+        parseNumberInput,
+        parseTextInput
     };
+    return errors.handleSync(() => domParsingUtils, 'Error occurred while creating DOM parsing utils.');
 }
 
 export { domParsingUtilsFactory };

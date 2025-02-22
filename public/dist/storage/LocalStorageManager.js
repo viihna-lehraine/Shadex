@@ -1,4 +1,4 @@
-// File: storage/LocalStorageManager.js
+// File: storage/LocalStorageManager.ts
 class LocalStorageManager {
     static #instance = null;
     #log;
@@ -14,11 +14,14 @@ class LocalStorageManager {
         return LocalStorageManager.#instance;
     }
     async init() {
-        this.#log('Using LocalStorage as a fallback.', 'warn');
+        this.#log('Using LocalStorage as a fallback.', {
+            caller: '[LocalStorageManager.init()]',
+            level: 'warn'
+        });
         return true;
     }
     async clear() {
-        await this.#errors.handleAsync(async () => localStorage.clear(), 'Failed to clear LocalStorage');
+        return await this.#errors.handleAsync(async () => localStorage.clear(), 'Failed to clear LocalStorage');
     }
     async getItem(key) {
         return this.#errors.handleAsync(async () => {
@@ -27,12 +30,15 @@ class LocalStorageManager {
         }, `Failed to get item ${key} from LocalStorage`);
     }
     async removeItem(key) {
-        await this.#errors.handleAsync(async () => localStorage.removeItem(key), `Failed to remove item ${key} from LocalStorage`);
+        return await this.#errors.handleAsync(async () => localStorage.removeItem(key), `Failed to remove item ${key} from LocalStorage`);
     }
     async setItem(key, value) {
-        await this.#errors.handleAsync(async () => {
+        return await this.#errors.handleAsync(async () => {
             localStorage.setItem(key, JSON.stringify(value));
-            this.#log(`Stored item: ${key}`);
+            this.#log(`Stored item: ${key}`, {
+                caller: '[LocalStorageManager.setItem()]',
+                level: 'debug'
+            });
         }, `Failed to store item ${key} in LocalStorage`);
     }
 }

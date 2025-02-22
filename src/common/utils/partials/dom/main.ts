@@ -3,13 +3,14 @@
 import {
 	ColorInputElement,
 	ColorSpace,
+	ColorUtils,
 	DOMUtilsPartial,
 	Helpers,
 	HSL,
 	Palette,
 	Services,
 	State,
-	Utilities
+	ValidationUtils
 } from '../../../../types/index.js';
 import { config, domConfig, domIndex } from '../../../../config/index.js';
 
@@ -18,186 +19,73 @@ const ids = domIndex.ids;
 const mode = config.mode;
 
 export function partialDOMUtilsFactory(
+	colorUtils: ColorUtils,
 	helpers: Helpers,
 	services: Services,
-	utils: Utilities
+	validate: ValidationUtils
 ): DOMUtilsPartial {
-	const { clone } = helpers.data;
-	const { getElement, getAllElements } = helpers.dom;
-	const { log } = services;
+	const {
+		data: { clone },
+		dom: { getElement, getAllElements }
+	} = helpers;
+	const { errors, log } = services;
 
-	function positionTooltip(element: HTMLElement, tooltip: HTMLElement): void {
-		const rect = element.getBoundingClientRect();
-
-		tooltip.style.position = 'absolute';
-		tooltip.style.left = `${rect.left + window.scrollX}px`;
-		tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 5}px`;
-		tooltip.style.zIndex = '1000';
-		tooltip.style.pointerEvents = 'none';
-		tooltip.style.opacity = '0';
-		tooltip.style.transition = 'opacity 0.2s ease-in-out';
-	}
-
-	function removeTooltip(element: HTMLElement): void {
-		const tooltipId = element.dataset.tooltipId;
-
-		if (!tooltipId) return;
-
-		const tooltip = document.getElementById(tooltipId);
-		if (tooltip) {
-			tooltip.style.opacity = '0';
-			setTimeout(() => {
-				tooltip?.remove();
-			}, 300);
-		}
-
-		delete element.dataset.tooltipId;
-	}
-
-	function switchColorSpaceInDOM(targetFormat: ColorSpace): void {
-		try {
-			const colorTextOutputBoxes =
-				document.querySelectorAll<HTMLInputElement>(
-					'.color-text-output-box'
-				);
-
-			for (const box of colorTextOutputBoxes) {
-				const inputBox = box as ColorInputElement;
-				const colorValues = inputBox.colorValues;
-
-				if (!colorValues || !utils.validate.colorValue(colorValues)) {
-					log('Invalid color values. Cannot display toast.', 'error');
-
-					continue;
-				}
-
-				const currentFormat = inputBox.getAttribute(
-					'data-format'
-				) as ColorSpace;
-
-				log(
-					`Converting from ${currentFormat} to ${targetFormat}`,
-					'debug'
-				);
-
-				const convertFn = helpers.color.getConversionFn(
-					currentFormat,
-					targetFormat
-				);
-
-				if (!convertFn) {
-					log(
-						`Conversion from ${currentFormat} to ${targetFormat} is not supported.`,
-						'warn'
-					);
-
-					continue;
-				}
-
-				if (colorValues.format === 'xyz') {
-					log(
-						'Cannot convert from XYZ to another color space.',
-						'warn'
-					);
-
-					continue;
-				}
-
-				const clonedColor = utils.color.narrowToColor(colorValues);
-
-				if (
-					!clonedColor ||
-					helpers.typeguards.isSL(clonedColor) ||
-					helpers.typeguards.isSV(clonedColor) ||
-					helpers.typeguards.isXYZ(clonedColor)
-				) {
-					log(
-						'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.',
-						'error'
-					);
-
-					continue;
-				}
-
-				if (!clonedColor) {
-					log(`Conversion to ${targetFormat} failed.`, 'error');
-
-					continue;
-				}
-				const newColor = clone(convertFn(clonedColor));
-				if (!newColor) {
-					log(`Conversion to ${targetFormat} failed.`, 'error');
-					continue;
-				}
-
-				inputBox.value = String(newColor);
-
-				inputBox.setAttribute('data-format', targetFormat);
-			}
-		} catch (error) {
-			log('Color conversion failure.', 'warn');
-
-			throw new Error(`Failed to convert colors: ${error as Error}`);
-		}
-	}
-
-	return {
-		removeTooltip,
-		switchColorSpaceInDOM,
-		createTooltip(element: HTMLElement, text: string): HTMLElement {
+	function createTooltip(
+		element: HTMLElement,
+		text: string
+	): HTMLElement | void {
+		return errors.handleSync(() => {
 			// remove existing tooltip if present
 			removeTooltip(element);
-
 			const tooltip = document.createElement('div');
 			tooltip.classList.add('tooltip');
 			tooltip.textContent = text;
-
 			// add to body
 			document.body.appendChild(tooltip);
-
 			// position it
 			positionTooltip(element, tooltip);
-
 			// store reference in dataset for later removal
 			element.dataset.tooltipId = tooltip.id;
-
 			// show tooltip with fade-in effect
 			setTimeout(() => {
 				tooltip.style.opacity = '1';
 			}, domConfig.tooltipFadeOut);
-
 			return tooltip;
-		},
-		downloadFile(data: string, filename: string, type: string): void {
+		}, 'Error occurred while creating tooltip.');
+	}
+
+	function downloadFile(data: string, filename: string, type: string): void {
+		return errors.handleSync(() => {
 			const blob = new Blob([data], { type });
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement('a');
-
 			a.href = url;
 			a.download = filename;
 			a.click();
-
 			URL.revokeObjectURL(url);
-		},
-		enforceSwatchRules(minSwatches: number, maxSwatches: number): void {
+		}, 'Error occurred while downloading file.');
+	}
+
+	function enforceSwatchRules(
+		minSwatches: number,
+		maxSwatches: number
+	): void {
+		return errors.handleSync(() => {
 			const paletteColumnSelector = document.getElementById(
 				domIndex.ids.inputs.paletteColumn
 			) as HTMLSelectElement;
-
 			if (!paletteColumnSelector) {
-				log('paletteColumnSelector not found', 'error');
-
+				log('paletteColumnSelector not found', {
+					caller: 'enforceMinimumSwatches',
+					level: 'error'
+				});
 				if (mode.stackTrace) {
 					console.trace('enforceMinimumSwatches stack trace');
 				}
-
 				return;
 			}
-
 			const currentValue = parseInt(paletteColumnSelector.value, 10);
-
 			let newValue = currentValue;
-
 			// ensure the value is within the allowed range
 			if (currentValue < minSwatches) {
 				newValue = minSwatches;
@@ -207,11 +95,9 @@ export function partialDOMUtilsFactory(
 			) {
 				newValue = maxSwatches;
 			}
-
 			if (newValue !== currentValue) {
 				// update value in the dropdown menu
 				paletteColumnSelector.value = newValue.toString();
-
 				// trigger a change event to notify the application
 				const event = new Event('change', { bubbles: true });
 				try {
@@ -219,30 +105,93 @@ export function partialDOMUtilsFactory(
 				} catch (error) {
 					log(
 						`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`,
-						'error'
+						{
+							caller: 'enforceMinimumSwatches',
+							level: 'error'
+						}
 					);
-
 					throw new Error(
 						`Failed to dispatch change event: ${error}`
 					);
 				}
 			}
-		},
-		hideTooltip(): void {
+		}, 'Error occurred while enforcing swatch rules.');
+	}
+
+	function hideTooltip(): void {
+		return errors.handleSync(() => {
 			const tooltip = getElement<HTMLDivElement>('.tooltip');
 			if (!tooltip) return;
-
 			tooltip.style.opacity = '0';
-
 			setTimeout(() => {
 				tooltip.style.visibility = 'hidden';
 				tooltip.remove();
 			}, domConfig.tooltipFadeOut || 500);
-		},
-		scanPaletteColumns(): State['paletteContainer']['columns'] {
+		}, 'Error occurred while hiding tooltip.');
+	}
+
+	function positionTooltip(element: HTMLElement, tooltip: HTMLElement): void {
+		return errors.handleSync(() => {
+			const rect = element.getBoundingClientRect();
+			tooltip.style.position = 'absolute';
+			tooltip.style.left = `${rect.left + window.scrollX}px`;
+			tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 5}px`;
+			tooltip.style.zIndex = '1000';
+			tooltip.style.pointerEvents = 'none';
+			tooltip.style.opacity = '0';
+			tooltip.style.transition = 'opacity 0.2s ease-in-out';
+		}, 'Error occurred while positioning tooltip.');
+	}
+
+	function removeTooltip(element: HTMLElement): void {
+		return errors.handleSync(() => {
+			const tooltipId = element.dataset.tooltipId;
+			if (!tooltipId) return;
+			const tooltip = document.getElementById(tooltipId);
+			if (tooltip) {
+				tooltip.style.opacity = '0';
+				setTimeout(() => {
+					tooltip?.remove();
+				}, 300);
+			}
+			delete element.dataset.tooltipId;
+		}, 'Error occurred while removing tooltip.');
+	}
+
+	function readFile(file: File): Promise<string> {
+		return errors.handleAsync(async () => {
+			return new Promise((resolve, reject) => {
+				const reader = new FileReader();
+				reader.onload = () => resolve(reader.result as string);
+				reader.onerror = () => reject(reader.error);
+				reader.readAsText(file);
+			});
+		}, 'Error occurred while reading file.');
+	}
+
+	function scanPaletteColumns(): State['paletteContainer']['columns'] {
+		return errors.handleSync(() => {
+			if (document.readyState === 'loading') {
+				log(
+					'[scanPaletteColumns] Document not ready. Returning empty array.',
+					{
+						caller: 'scanPaletteColumns',
+						level: 'warn'
+					}
+				);
+				return [];
+			}
+
 			const paletteColumns = getAllElements<HTMLDivElement>(
 				classes.paletteColumn
 			);
+			if (!paletteColumns.length) {
+				log('[scanPaletteColumns] No palette columns found.', {
+					caller: 'scanPaletteColumns',
+					level: 'warn'
+				});
+				return [];
+			}
 
 			return Array.from(paletteColumns).map((column, index) => {
 				const id = parseInt(
@@ -251,49 +200,110 @@ export function partialDOMUtilsFactory(
 				);
 				const size = column.clientWidth / paletteColumns.length;
 				const isLocked = column.classList.contains(classes.locked);
-
 				return { id, position: index + 1, size, isLocked };
 			});
-		},
-		readFile(file: File): Promise<string> {
-			return new Promise((resolve, reject) => {
-				const reader = new FileReader();
+		}, 'Error occurred while scanning palette columns.');
+	}
 
-				reader.onload = () => resolve(reader.result as string);
-				reader.onerror = () => reject(reader.error);
+	function switchColorSpaceInDOM(targetFormat: ColorSpace): void {
+		return errors.handleSync(() => {
+			const colorTextOutputBoxes =
+				document.querySelectorAll<HTMLInputElement>(
+					'.color-text-output-box'
+				);
+			for (const box of colorTextOutputBoxes) {
+				const inputBox = box as ColorInputElement;
+				const colorValues = inputBox.colorValues;
+				if (!colorValues || !validate.colorValue(colorValues)) {
+					log('Invalid color values. Cannot display toast.', {
+						caller: 'switchColorSpaceInDOM',
+						level: 'error'
+					});
+					continue;
+				}
+				const currentFormat = inputBox.getAttribute(
+					'data-format'
+				) as ColorSpace;
+				log(`Converting from ${currentFormat} to ${targetFormat}`, {
+					caller: 'switchColorSpaceInDOM',
+					level: 'info'
+				});
+				const convertFn = helpers.color.getConversionFn(
+					currentFormat,
+					targetFormat
+				);
+				if (!convertFn) {
+					log(
+						`Conversion from ${currentFormat} to ${targetFormat} is not supported.`,
+						{
+							caller: 'switchColorSpaceInDOM',
+							level: 'error'
+						}
+					);
+					continue;
+				}
+				if (colorValues.format === 'xyz') {
+					log('Cannot convert from XYZ to another color space.', {
+						caller: 'switchColorSpaceInDOM',
+						level: 'error'
+					});
+					continue;
+				}
 
-				reader.readAsText(file);
-			});
-		},
-		updateColorBox(color: HSL, boxId: string): void {
+				const clonedColor = clone(colorValues);
+
+				if (!helpers.typeguards.isConvertibleColor(clonedColor)) {
+					log(
+						'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.',
+						{
+							caller: 'switchColorSpaceInDOM',
+							level: 'error'
+						}
+					);
+					continue;
+				}
+				const newColor = convertFn(clonedColor);
+				if (!newColor) {
+					log(`Conversion to ${targetFormat} failed.`, {
+						caller: 'switchColorSpaceInDOM',
+						level: 'error'
+					});
+					continue;
+				}
+				inputBox.value = String(newColor);
+				inputBox.setAttribute('data-format', targetFormat);
+			}
+		}, 'Error occurred while converting colors.');
+	}
+
+	function updateColorBox(color: HSL, boxId: string): void {
+		return errors.handleSync(() => {
 			const colorBox = document.getElementById(boxId);
-
 			if (colorBox) {
 				colorBox.style.backgroundColor =
-					utils.color.formatColorAsCSS(color);
+					colorUtils.formatColorAsCSS(color);
 			}
-		},
-		updateHistory(history: Palette[]): void {
+		}, 'Error occurred while updating color box.');
+	}
+
+	function updateHistory(history: Palette[]): void {
+		return errors.handleSync(() => {
 			const historyList = getElement<HTMLDivElement>(
 				ids.divs.paletteHistory
 			);
-
 			if (!historyList) return;
-
 			historyList.innerHTML = '';
-
 			history.forEach(palette => {
 				const entry = document.createElement('div');
-
 				entry.classList.add('history-item');
 				entry.id = `palette_${palette.id}`;
 				entry.innerHTML = `
-					<p>Palette #${palette.metadata.name || palette.id}</p>
-					<div class="color-preview">
-						${palette.items.map(item => `<span class="color-box" style="background: ${item.css.hex};"></span>`).join(' ')}
-					</div>
-					<button class="remove-history-item" data-id="${palette.id}-history-remove-btn">Remove</button>
-				`;
+				<p>Palette #${palette.metadata.name || palette.id}</p>
+				<div class="color-preview">
+					${palette.items.map(item => `<span class="color-box" style="background: ${item.css.hex};"></span>`).join(' ')}
+				</div>
+				<button class="remove-history-item" data-id="${palette.id}-history-remove-btn">Remove</button>
+			`;
 				entry
 					.querySelector('.remove-history-item')
 					?.addEventListener('click', async () => {
@@ -301,6 +311,26 @@ export function partialDOMUtilsFactory(
 					});
 				historyList.appendChild(entry);
 			});
-		}
-	};
+		}, 'Error occurred while updating history.');
+	}
+
+	const domUtilsPartial: DOMUtilsPartial = {
+		createTooltip,
+		downloadFile,
+		enforceSwatchRules,
+		hideTooltip,
+		positionTooltip,
+		removeTooltip,
+		readFile,
+		scanPaletteColumns,
+		switchColorSpaceInDOM,
+		updateColorBox,
+		updateHistory
+	} as const;
+
+	return errors.handleSync(
+		() => domUtilsPartial,
+		'Error occurred while creating partial DOM utilities group.',
+		{ context: { domUtilsPartial } }
+	);
 }

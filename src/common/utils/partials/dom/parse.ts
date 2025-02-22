@@ -1,31 +1,33 @@
 // File: common/utils/dom/partials/parse.ts
 
 import {
+	BrandingUtils,
 	DOMParsingUtils,
 	Hex,
 	HSL,
 	RGB,
-	Services,
-	Utilities
+	Services
 } from '../../../../types/index.js';
 import { regex } from '../../../../config/index.js';
 
 export function domParsingUtilsFactory(
-	services: Services,
-	utils: Utilities
+	brand: BrandingUtils,
+	services: Services
 ): DOMParsingUtils {
-	const { brand } = utils;
-	const { log } = services;
+	const { errors, log } = services;
 
-	return {
-		parseCheckbox(id: string): boolean | void {
+	function parseCheckbox(id: string): boolean | void {
+		return errors.handleSync(() => {
 			const checkbox = document.getElementById(
 				id
 			) as HTMLInputElement | null;
 
 			return checkbox ? checkbox.checked : undefined;
-		},
-		parseColorInput(input: HTMLInputElement): Hex | HSL | RGB | null {
+		}, 'Error occurred while parsing checkbox.');
+	}
+
+	function parseColorInput(input: HTMLInputElement): Hex | HSL | RGB | null {
+		return errors.handleSync(() => {
 			const colorStr = input.value.trim().toLowerCase();
 			const hexMatch = colorStr.match(regex.dom.hex);
 			const hslMatch = colorStr.match(regex.dom.hsl);
@@ -41,7 +43,7 @@ export function domParsingUtilsFactory(
 				}
 				return {
 					format: 'hex',
-					value: { hex: utils.brand.asHexSet(`#${hex}`) }
+					value: { hex: brand.asHexSet(`#${hex}`) }
 				};
 			}
 
@@ -92,14 +94,19 @@ export function domParsingUtilsFactory(
 				}
 			}
 
-			log(`Invalid color input: ${colorStr}`, 'warn');
+			log(`Invalid color input: ${colorStr}`, {
+				caller: 'parseColorInput'
+			});
 
 			return null;
-		},
-		parseDropdownSelection(
-			id: string,
-			validOptions: string[]
-		): string | void {
+		}, 'Error occurred while parsing color input.');
+	}
+
+	function parseDropdownSelection(
+		id: string,
+		validOptions: string[]
+	): string | void {
+		return errors.handleSync(() => {
 			const dropdown = document.getElementById(
 				id
 			) as HTMLSelectElement | null;
@@ -113,12 +120,17 @@ export function domParsingUtilsFactory(
 					? selectedValue
 					: undefined;
 			}
-		},
-		parseNumberInput(
-			input: HTMLInputElement,
-			min?: number,
-			max?: number
-		): number | null {
+
+			return;
+		}, 'Error occurred while parsing dropdown selection.');
+	}
+
+	function parseNumberInput(
+		input: HTMLInputElement,
+		min?: number,
+		max?: number
+	): number | null {
+		return errors.handleSync(() => {
 			const value = parseFloat(input.value.trim());
 
 			if (isNaN(value)) return null;
@@ -127,8 +139,14 @@ export function domParsingUtilsFactory(
 			if (max !== undefined && value > max) return max;
 
 			return value;
-		},
-		parseTextInput(input: HTMLInputElement, regex?: RegExp): string | null {
+		}, 'Error occurred while parsing number input.');
+	}
+
+	function parseTextInput(
+		input: HTMLInputElement,
+		regex?: RegExp
+	): string | null {
+		return errors.handleSync(() => {
 			const text = input.value.trim();
 
 			if (regex && !regex.test(text)) {
@@ -136,6 +154,19 @@ export function domParsingUtilsFactory(
 			}
 
 			return text || null;
-		}
+		}, 'Error occurred while parsing text input.');
+	}
+
+	const domParsingUtils: DOMParsingUtils = {
+		parseCheckbox,
+		parseColorInput,
+		parseDropdownSelection,
+		parseNumberInput,
+		parseTextInput
 	};
+
+	return errors.handleSync(
+		() => domParsingUtils,
+		'Error occurred while creating DOM parsing utils.'
+	);
 }
