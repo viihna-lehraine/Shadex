@@ -36,7 +36,6 @@ import {
 	NumericBrandedType,
 	NumericRangeKey,
 	Palette,
-	PaletteConfig,
 	PaletteItem,
 	PaletteType,
 	Percentile,
@@ -112,12 +111,6 @@ export interface MathHelpers {
 	clampToRange: (value: number, rangeKey: NumericRangeKey) => number;
 }
 
-export interface PaletteHelpers {
-	getWeightsAndValues(
-		distributionType: keyof PaletteConfig['probabilities']
-	): { weights: readonly number[]; values: readonly number[] };
-}
-
 export interface RandomHelpers {
 	selectRandomFromWeights(obj: {
 		weights: readonly number[];
@@ -185,7 +178,6 @@ export interface Helpers {
 	data: DataHelpers;
 	dom: DOMHelpers;
 	math: MathHelpers;
-	palette: PaletteHelpers;
 	random: RandomHelpers;
 	time: TimeHelpers;
 	typeguards: Typeguards;

@@ -6,6 +6,7 @@ import {
 	HSL,
 	SelectedPaletteOptions
 } from '../../types/index.js';
+import { paletteConfig } from '../../config/index.js';
 
 // TODO: These definiely need refinement
 
@@ -70,9 +71,8 @@ function generateDiadicHues(
 			const baseHue = color.value.hue;
 			const diadicHues = [];
 
-			const { weights, values } = helpers.palette.getWeightsAndValues(
-				options.distributionType
-			);
+			const { weights, values } =
+				paletteConfig.probabilities[options.distributionType];
 			const randomDistance = helpers.random.selectRandomFromWeights({
 				weights,
 				values

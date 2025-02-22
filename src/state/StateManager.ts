@@ -9,6 +9,8 @@ import {
 	StateManagerInterface,
 	Utilities
 } from '../types/index.js';
+import { DataObserver } from '../common/services/DataObserver.js';
+import { Semaphore } from '../common/services/Semaphore.js';
 import { StorageManager } from '../storage/StorageManager.js';
 import { defaults, domConfig, domIndex } from '../config/index.js';
 
@@ -24,7 +26,9 @@ export class StateManager implements StateManagerInterface {
 	#log: Services['log'];
 	#errors: Services['errors'];
 	#helpers: Helpers;
+	#observer: DataObserver<State>;
 	#utils: Utilities;
+	#stateLock: Semaphore;
 	#storage: StorageManager;
 
 	private constructor(
@@ -39,8 +43,26 @@ export class StateManager implements StateManagerInterface {
 		this.#storage = new StorageManager(services);
 
 		this.#state = {} as State;
+		this.#observer = new DataObserver<State>(
+			this.#state,
+			{ delay: 50 },
+			this.#helpers
+		);
+		this.#observer.on('paletteHistory', (newVal, oldVal) => {
+			this.#log(`paletteHistory updated.\nNew Value: ${JSON.stringify(newVal)}. `, {
+				caller: '[StateManager #observer]',
+				level: 'debug'
+			});
+		});
+		this.#observer.on('appMode', newVal => {
+			this.#log(`App mode canged to ${newVal}`, {
+				caller: '[StateManager]',
+				level: 'debug'
+			});
+		});
 		this.#state.paletteHistory = [];
 		this.#history = [this.#state];
+		this.#stateLock = new Semaphore(services.errors, services.log);
 		this.#undoStack = [];
 
 		this.init()
@@ -247,13 +269,18 @@ export class StateManager implements StateManagerInterface {
 	async setState(state: State, track: boolean): Promise<void> {
 		return await this.#errors.handleAsync(
 			async () => {
-				if (track) this.#trackAction();
-				this.#state = state;
-				this.#log('App state has been updated', {
-					caller: '[StateManager.setState]',
-					level: 'debug'
-				});
-				await this.#saveState();
+				this.#stateLock.acquire();
+				try {
+					if (track) this.#trackAction();
+					this.#state = state;
+					this.#log('App state has been updated', {
+						caller: '[StateManager.setState]',
+						level: 'debug'
+					});
+					await this.#saveState();
+				} finally {
+					this.#stateLock.release();
+				}
 			},
 			'Failed to set state',
 			{ context: { state, track } }

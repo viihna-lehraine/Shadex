@@ -34,7 +34,6 @@ export type {
 	LoggerOptions,
 	MathHelpers,
 	PaletteEventsInterface,
-	PaletteHelpers,
 	PaletteManagerInterface,
 	PaletteStateInterface,
 	PaletteUtils,

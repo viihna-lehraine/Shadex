@@ -700,6 +700,7 @@ export interface State {
 		targetedColumnPosition: number;
 	};
 	timestamp: string;
+	[key: string]: unknown;
 }
 
 export interface UnbrandedPaletteItem {

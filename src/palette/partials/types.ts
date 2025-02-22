@@ -74,9 +74,7 @@ function generateComplementaryPalette(
 			if (extraColorsNeeded > 0) {
 				for (let i = 0; i < extraColorsNeeded; i++) {
 					const { weights, values } =
-						helpers.palette.getWeightsAndValues(
-							options.distributionType
-						);
+						paletteConfig.probabilities[options.distributionType];
 					const variationOffset =
 						helpers.random.selectRandomFromWeights({
 							weights,
@@ -165,9 +163,7 @@ function generateDiadicPalette(
 			if (extraColorsNeeded > 0) {
 				for (let i = 0; i < extraColorsNeeded; i++) {
 					const { weights, values } =
-						helpers.palette.getWeightsAndValues(
-							options.distributionType
-						);
+						paletteConfig.probabilities[options.distributionType];
 					const variationOffset =
 						helpers.random.selectRandomFromWeights({
 							weights,
@@ -438,9 +434,8 @@ function generateSplitComplementaryPalette(
 
 			// if swatchCount > 3, introduce additional variations
 			for (let i = 3; i < columnCount; i++) {
-				const { weights, values } = helpers.palette.getWeightsAndValues(
-					options.distributionType
-				);
+				const { weights, values } =
+					paletteConfig.probabilities[options.distributionType];
 				const variationOffset = helpers.random.selectRandomFromWeights({
 					weights,
 					values

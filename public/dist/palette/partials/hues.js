@@ -1,3 +1,5 @@
+import { paletteConfig } from '../../config/index.js';
+
 // File: palette/partials/hues.js
 // TODO: These definiely need refinement
 function generateAnalogousHues(color, options, common) {
@@ -29,7 +31,7 @@ function generateDiadicHues(color, options, common) {
     return errors.handleSync(() => {
         const baseHue = color.value.hue;
         const diadicHues = [];
-        const { weights, values } = helpers.palette.getWeightsAndValues(options.distributionType);
+        const { weights, values } = paletteConfig.probabilities[options.distributionType];
         const randomDistance = helpers.random.selectRandomFromWeights({
             weights,
             values

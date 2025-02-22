@@ -4,8 +4,8 @@ import { RandomHelpers } from '../../types/index.js';
 
 export const randomHelpersFactory = (): RandomHelpers => ({
 	selectRandomFromWeights(obj: {
-		weights: number[];
-		values: number[];
+		weights: readonly number[];
+		values: readonly number[];
 	}): number {
 		return this.selectWeightedRandom(obj.weights, obj.values);
 	},
