@@ -1,15 +1,6 @@
 // File: types/config.ts
 
-import { config } from '../config/index.js';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const sets = config.sets;
-
-// ***********************************************************
-/// *********************************************************
-//// ******************* 1. DOM INDEX **********************
-/// *********************************************************
-// ***********************************************************
+import { sets } from '../config/index.js';
 
 export interface DOMIndex {
 	classes: {
@@ -118,6 +109,34 @@ export interface PaletteConfig {
 
 // ****************************************************
 /// **************************************************
+//// ************ 5. ENVIRONMENT DATA ***************
+/// **************************************************
+// ****************************************************
+
+export interface Environment {
+	app: {
+		historyLimit: number;
+		paletteHistoryLimit: number;
+	};
+	idb: {
+		retryDelay: number;
+	};
+	mutex: {
+		contentionHistoryLimit: number;
+		timeout: number;
+	};
+	observer: {
+		debounce: number;
+	};
+	state: {
+		maxReadyAttempts: number;
+		maxSaveRetries: number;
+		saveThrottleDelay: number;
+	};
+}
+
+// ****************************************************
+/// **************************************************
 //// ******************* 4. REGEX *******************
 /// **************************************************
 // ****************************************************
@@ -169,17 +188,7 @@ export interface RegexConfig {
 	};
 }
 
-export interface EnvData {
-	appHistoryLimit: number;
-	appPaletteHistoryLimit: number;
-	idbRetryDelay: number;
-	observerDebounce: number;
-	semaphoreMaxLocks: number;
-	semaphoreTimeout: number;
-}
-
 export interface Configuration {
-	env: EnvData;
 	math: {
 		epsilon: number;
 		maxXYZ_X: number;
@@ -202,18 +211,6 @@ export interface Configuration {
 		};
 		showAlerts: boolean;
 		stackTrace: boolean;
-	};
-	sets: {
-		ByteRange: readonly [0, 255];
-		HexSet: 'HexSet';
-		LAB_L: readonly [0, 100];
-		LAB_A: readonly [-128, 127];
-		LAB_B: readonly [-128, 127];
-		Percentile: readonly [0, 100];
-		Radial: readonly [0, 360];
-		XYZ_X: readonly [number, number];
-		XYZ_Y: readonly [number, number];
-		XYZ_Z: readonly [number, number];
 	};
 	storage: {
 		idbDBName: string;
@@ -261,7 +258,6 @@ export interface Defaults {
 		xyzCSS: string;
 	};
 	mutation: MutationLog;
-	observerData: DefaultObserverData;
 	palette: Palette;
 	paletteItem: PaletteItem;
 	paletteOptions: SelectedPaletteOptions;
@@ -270,13 +266,22 @@ export interface Defaults {
 	unbrandedPaletteItem: UnbrandedPaletteItem;
 }
 
-export type DefaultObserverData = { count: number; name: string };
-
 export type MathData = Configuration['math'];
 
 export type ModeData = Configuration['mode'];
 
-export type SetsData = Configuration['sets'];
+export interface SetsData {
+	ByteRange: readonly [0, 255];
+	HexSet: 'HexSet';
+	LAB_L: readonly [0, 100];
+	LAB_A: readonly [-128, 127];
+	LAB_B: readonly [-128, 127];
+	Percentile: readonly [0, 100];
+	Radial: readonly [0, 360];
+	XYZ_X: readonly [number, number];
+	XYZ_Y: readonly [number, number];
+	XYZ_Z: readonly [number, number];
+}
 
 export type StorageData = Configuration['storage'];
 

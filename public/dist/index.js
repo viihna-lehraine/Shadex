@@ -1,5 +1,7 @@
 import { EventManager } from './events/EventManager.js';
-import { config } from './config/index.js';
+import { config } from './config/partials/base.js';
+import './config/partials/defaults.js';
+import './config/partials/regex.js';
 
 // ColorGen - version 0.6.3-dev
 // Author: Viihna Leraine (viihna@ViihnaTech.com / viihna.78 (Signal) / Viihna-Lehraine (Github))

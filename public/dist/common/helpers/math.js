@@ -1,7 +1,8 @@
-import { config } from '../../config/index.js';
+import '../../config/partials/defaults.js';
+import '../../config/partials/regex.js';
+import { sets } from '../../config/partials/sets.js';
 
 // File: File: common/helpers/math.ts
-const sets = config.sets;
 const mathHelpersFactory = () => ({
     clampToRange(value, rangeKey) {
         const [min, max] = sets[rangeKey];

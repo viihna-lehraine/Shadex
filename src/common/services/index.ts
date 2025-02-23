@@ -1,8 +1,8 @@
 // File: common/services/index.ts
 
-export { DataObserver } from './DataObserver.js';
 export { DOMStore } from './DOMStore.js';
 export { ErrorHandler } from './ErrorHandler.js';
 export { Logger } from './Logger.js';
-export { Semaphore } from './Semaphore.js';
+export { Mutex } from './Mutex.js';
+export { Observer } from './Observer.js';
 export { UserFacingError } from './ErrorClasses.js';

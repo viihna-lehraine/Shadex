@@ -9,9 +9,7 @@ import {
 	SV,
 	ValidationUtils
 } from '../../types/index.js';
-import { config, regex } from '../../config/index.js';
-
-const sets = config.sets;
+import { regex, sets } from '../../config/index.js';
 
 export function validationUtilsFactory(
 	helpers: Helpers,

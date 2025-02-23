@@ -1,4 +1,7 @@
-import { paletteConfig, domIndex } from '../../config/index.js';
+import '../../config/partials/defaults.js';
+import { domIndex } from '../../config/partials/dom.js';
+import { paletteConfig } from '../../config/partials/paletteConfig.js';
+import '../../config/partials/regex.js';
 
 // File: common/utils/palette.ts
 const ids = domIndex.ids;

@@ -1,11 +1,11 @@
 // File: storage/IDBManager.ts
 
 import { IDBManagerInterface, Services } from '../types/index.js';
-import { config } from '../config/index.js';
+import { config, env } from '../config/index.js';
 
 const dbName = config.storage.idbDBName;
 const defaultVerson = config.storage.idbDefaultVersion;
-const idbRetryDelay = config.env.idbRetryDelay;
+const idbRetryDelay = env.idb.retryDelay;
 const storeName = config.storage.idbStoreName;
 
 export class IDBManager implements IDBManagerInterface {

@@ -1,9 +1,12 @@
-import { config } from '../config/index.js';
+import { config } from '../config/partials/base.js';
+import { env } from '../config/partials/env.js';
+import '../config/partials/defaults.js';
+import '../config/partials/regex.js';
 
 // File: storage/IDBManager.ts
 const dbName = config.storage.idbDBName;
 const defaultVerson = config.storage.idbDefaultVersion;
-const idbRetryDelay = config.env.idbRetryDelay;
+const idbRetryDelay = env.idb.retryDelay;
 const storeName = config.storage.idbStoreName;
 class IDBManager {
     static #instance = null;

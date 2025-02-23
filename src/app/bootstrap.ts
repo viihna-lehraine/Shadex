@@ -1,9 +1,6 @@
 // File: app/bootstrap.ts
 
 import { Helpers, Services } from '../types/index.js';
-import { defaults } from '../config/index.js';
-
-const initialData = defaults.observerData;
 
 export async function bootstrap(): Promise<{
 	helpers: Helpers;
@@ -25,7 +22,7 @@ export async function bootstrap(): Promise<{
 		console.log('[BOOTSTRAP]: Service factory successfully imported.');
 
 		console.log(`[BOOSTRAP]: Registering services.`);
-		const services = serviceFactory(helpers, initialData);
+		const services = serviceFactory(helpers);
 
 		console.log(`[BOOTSTRAP]: Bootstrap process complete.`);
 		return { helpers, services };

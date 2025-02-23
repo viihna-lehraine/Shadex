@@ -1,9 +1,7 @@
 // File: File: common/helpers/math.ts
 
 import { MathHelpers, NumericRangeKey } from '../../types/index.js';
-import { config } from '../../config/index.js';
-
-const sets = config.sets;
+import { sets } from '../../config/index.js';
 
 export const mathHelpersFactory = (): MathHelpers =>
 	({

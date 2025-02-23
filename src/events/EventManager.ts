@@ -50,9 +50,9 @@ export class EventManager {
 				return;
 			}
 
-			console.groupCollapsed('🛠️ Active Listeners:');
+			console.groupCollapsed('Active Listeners:');
 			EventManager.#listeners.forEach(({ element, handler }, key) => {
-				EventManager.#log(`🛠️ Event: ${key.split('_')[0]}`, {
+				EventManager.#log(`Event: ${key.split('_')[0]}`, {
 					caller: '[EventManager.listAll]'
 				});
 				console.log({ element, handler });

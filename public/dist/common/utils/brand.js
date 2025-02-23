@@ -1,4 +1,5 @@
-import { regex } from '../../config/index.js';
+import '../../config/partials/defaults.js';
+import { regex } from '../../config/partials/regex.js';
 
 // File: common/utils/brand.ts
 function brandingUtilsFactory(services, validate) {

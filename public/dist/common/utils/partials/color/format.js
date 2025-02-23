@@ -1,4 +1,5 @@
-import { defaults, regex } from '../../../../config/index.js';
+import { defaults } from '../../../../config/partials/defaults.js';
+import { regex } from '../../../../config/partials/regex.js';
 
 // File: common/utils/partials/color/format.ts
 const defaultColors = defaults.colors;

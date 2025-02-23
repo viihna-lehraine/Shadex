@@ -1,5 +1,6 @@
 import { UserFacingError } from './ErrorClasses.js';
-import '../../config/index.js';
+import '../../config/partials/defaults.js';
+import '../../config/partials/regex.js';
 
 // File: common/services/ErrorHandler.ts
 class ErrorHandler {

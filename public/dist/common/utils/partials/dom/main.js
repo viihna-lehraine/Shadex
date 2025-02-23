@@ -1,4 +1,6 @@
-import { domConfig, domIndex } from '../../../../config/index.js';
+import '../../../../config/partials/defaults.js';
+import { domConfig, domIndex } from '../../../../config/partials/dom.js';
+import '../../../../config/partials/regex.js';
 
 // File: common/utils/partials/dom/main.ts
 const classes = domIndex.classes;

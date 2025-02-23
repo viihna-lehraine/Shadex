@@ -1,12 +1,12 @@
-import { DataObserver } from '../services/DataObserver.js';
 import { DOMStore } from '../services/DOMStore.js';
 import { ErrorHandler } from '../services/ErrorHandler.js';
 import { Logger } from '../services/Logger.js';
-import { Semaphore } from '../services/Semaphore.js';
-import { config } from '../../config/index.js';
+import { config } from '../../config/partials/base.js';
+import '../../config/partials/defaults.js';
+import '../../config/partials/regex.js';
 
 // File: common/factories/services.ts
-function serviceFactory(helpers, initialData) {
+function serviceFactory(helpers) {
     console.log('[SERVICE_FACTORY]: Executing createServices.');
     console.log(`[SERVICE_FACTORY]: Initializing services with empty placeholder object.`);
     const services = {};
@@ -25,18 +25,8 @@ function serviceFactory(helpers, initialData) {
         }
         if (options.level === 'error' && config.mode.showAlerts) ;
     };
-    console.log(`[SERVICE_FACTORY]: Initializing DOMStore, DataObserver, and Semaphore.`);
+    console.log(`[SERVICE_FACTORY]: Initializing DOMStore.`);
     services.domStore = DOMStore.getInstance(services.errors, helpers, services.log);
-    services.observer = new DataObserver(initialData);
-    services.setObserverData = (newData) => {
-        services.observer.setData(newData);
-        services.log(`DataObserver updated with new data: ${JSON.stringify(newData)}`, {
-            caller: '[SERVICE_FACTORY.setObserverData]',
-            level: 'debug',
-            verbosity: 2
-        });
-    };
-    services.semaphore = new Semaphore(services.errors, services.log);
     return services;
 }
 

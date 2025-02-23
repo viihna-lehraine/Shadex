@@ -9,27 +9,46 @@ import {
 	StateManagerInterface,
 	Utilities
 } from '../types/index.js';
-import { DataObserver } from '../common/services/DataObserver.js';
-import { Semaphore } from '../common/services/Semaphore.js';
+import { Mutex } from '../common/services/Mutex.js';
+import { Observer } from '../common/services/Observer.js';
 import { StorageManager } from '../storage/StorageManager.js';
-import { defaults, domConfig, domIndex } from '../config/index.js';
+import { defaults, domConfig, domIndex, env } from '../config/index.js';
 
 const defaultState = defaults.state;
-const maxStateReadyAttempts = 20;
+const maxReadyAttempts = env.state.maxReadyAttempts;
 
+/**
+ * @class StateManager
+ * @author Viihna Lehraine
+ * @description Manages the application state, including undo/redo functionality, state persistance, and state locking.
+ * @implements {StateManagerInterface}
+ * @property {Map<keyof State, Mutex>} #dataLocks - fine-grained locks per state property
+ * @property {History} #history - history of state changes
+ * @property {Observer<State>} #observer - data observer
+ * @property {(() => void) | null} #onStateLoadCallback - callback to run after state is loaded
+ * @property {State} #state - current state
+ * @property {Mutex} #stateLock - global lock for the entire state object
+ * @property {StorageManager} #storage - storage manager
+ * @property {History} #undoStack - undo stack
+ */
 export class StateManager implements StateManagerInterface {
 	static #instance: StateManager | null = null;
-	#onStateLoadCallback: (() => void) | null = null;
+
+	#dataLocks: Map<keyof State, Mutex> = new Map();
 	#history: History;
+	#observer: Observer<State>;
+	#onStateLoadCallback: (() => void) | null = null;
+	#saveThrottleTimer: NodeJS.Timeout | null = null;
 	#state: State;
+	#stateLock: Mutex;
+	#storage: StorageManager;
 	#undoStack: History;
+
 	#log: Services['log'];
 	#errors: Services['errors'];
 	#helpers: Helpers;
-	#observer: DataObserver<State>;
+	#services: Services;
 	#utils: Utilities;
-	#stateLock: Semaphore;
-	#storage: StorageManager;
 
 	private constructor(
 		helpers: Helpers,
@@ -39,30 +58,30 @@ export class StateManager implements StateManagerInterface {
 		this.#log = services.log;
 		this.#errors = services.errors;
 		this.#helpers = helpers;
+		this.#services = services;
 		this.#utils = utils;
 		this.#storage = new StorageManager(services);
 
 		this.#state = {} as State;
-		this.#observer = new DataObserver<State>(
+		this.#observer = new Observer<State>(
 			this.#state,
-			{ delay: 50 },
-			this.#helpers
+			{ delay: env.observer.debounce },
+			this.#helpers,
+			this.#services
 		);
-		this.#observer.on('paletteHistory', (newVal, oldVal) => {
-			this.#log(`paletteHistory updated.\nNew Value: ${JSON.stringify(newVal)}. `, {
-				caller: '[StateManager #observer]',
-				level: 'debug'
+
+		Object.keys(this.#state).forEach(key => {
+			this.#observer.on(key as keyof State, (newVal, oldVal) => {
+				this.#log(
+					`${key} updated. New: ${JSON.stringify(newVal)} | Old: ${JSON.stringify(oldVal)}`,
+					{ caller: '[StateManager.#observer]', level: 'debug' }
+				);
 			});
 		});
-		this.#observer.on('appMode', newVal => {
-			this.#log(`App mode canged to ${newVal}`, {
-				caller: '[StateManager]',
-				level: 'debug'
-			});
-		});
+
 		this.#state.paletteHistory = [];
 		this.#history = [this.#state];
-		this.#stateLock = new Semaphore(services.errors, services.log);
+		this.#stateLock = new Mutex(services.errors, services.log);
 		this.#undoStack = [];
 
 		this.init()
@@ -132,13 +151,46 @@ export class StateManager implements StateManagerInterface {
 		);
 	}
 
+	async atomicUpdate(callback: (state: State) => void): Promise<void> {
+		return this.#errors.handleAsync(async () => {
+			return await this.#stateLock.runExclusive(async () => {
+				callback(this.#observer['data']);
+				this.#log('Performed atomic update.', {
+					caller: '[StateManager.atomicUpdate]',
+					level: 'debug'
+				});
+				await this.#saveState();
+			});
+		}, 'Failed to perform atomic update.');
+	}
+
+	async batchUpdate(
+		callback: (state: State) => Partial<State>
+	): Promise<void> {
+		await this.#errors.handleAsync(async () => {
+			await this.#withWriteLock(async () => {
+				const partialUpdate = callback(this.#state);
+
+				this.#observer.batchUpdate(partialUpdate);
+
+				this.#log('Performed batch update.', {
+					caller: '[StateManager.batchUpdate]',
+					level: 'debug',
+					verbosity: 2
+				});
+
+				await this.#saveState();
+			});
+		}, '[STATEMANAGER]: Failed to perform batch update.');
+	}
+
 	async ensureStateReady(): Promise<void> {
 		return await this.#errors.handleAsync(
 			async () => {
 				let attempts = 0;
 
 				while (!this.#state || !this.#state.paletteContainer) {
-					if (attempts++ >= maxStateReadyAttempts) {
+					if (attempts++ >= maxReadyAttempts) {
 						this.#log('State initialization timed out.', {
 							caller: '[StateManager.ensureStateReady]',
 							level: 'error'
@@ -163,29 +215,34 @@ export class StateManager implements StateManagerInterface {
 				});
 			},
 			'Failed to ensure state readiness',
-			{ context: { maxStateReadyAttempts } }
+			{ context: { maxReadyAttempts } }
 		);
 	}
 
-	getState(): State {
-		return (
-			this.#errors.handleSync(() => {
-				if (!this.#state) {
-					throw new Error('State accessed before initialization.');
-				}
+	async getState(): Promise<State> {
+		return await (this.#errors.handleAsync(async () => {
+			return this.#withReadLock(() => {
+				if (!this.#state)
+					this.#log('State accessed before initialization.', {
+						caller: '[StateManager.getState]',
+						level: 'warn'
+					});
+
 				if (!this.#state.preferences) {
 					this.#log(
-						'State.preferences is undefined. Adding default preferences.',
+						'State.preferences is undefined. Setting as default.',
 						{
 							caller: '[StateManager.getState]',
 							level: 'warn'
 						}
 					);
+
 					this.#state.preferences = defaultState.preferences;
 				}
-				return this.#state;
-			}, 'Error retrieving state') ?? defaultState
-		);
+
+				return this.#helpers.data.clone(this.#state);
+			});
+		}, 'Error retrieving state') ?? defaultState);
 	}
 
 	async loadState(): Promise<State> {
@@ -212,6 +269,21 @@ export class StateManager implements StateManagerInterface {
 			});
 			return this.#generateInitialState();
 		}, 'Failed to load state');
+	}
+
+	logContentionStats(): void {
+		this.#errors.handleSync(() => {
+			const contentionCount = this.#stateLock.getContentionCount();
+			const contentionRate = this.#stateLock.getContentionRate();
+
+			this.#log(
+				`Current contention count: ${contentionCount}.\nCurrent contention rate: ${contentionRate}.`,
+				{
+					caller: '[StateManager.logContentionStats]',
+					level: 'debug'
+				}
+			);
+		}, 'Failed to log contention stats');
 	}
 
 	redo(): void {
@@ -266,60 +338,103 @@ export class StateManager implements StateManagerInterface {
 		}, 'Failed to set onStateLoad callback');
 	}
 
-	async setState(state: State, track: boolean): Promise<void> {
+	async setState(newState: State, track: boolean = true): Promise<void> {
 		return await this.#errors.handleAsync(
 			async () => {
-				this.#stateLock.acquire();
-				try {
+				return await this.#withWriteLock(async () => {
 					if (track) this.#trackAction();
-					this.#state = state;
-					this.#log('App state has been updated', {
+
+					this.#observer.batchUpdate(newState);
+
+					this.#state = newState;
+
+					this.#log('State updated.', {
 						caller: '[StateManager.setState]',
-						level: 'debug'
+						level: 'debug',
+						verbosity: 2
 					});
+
 					await this.#saveState();
-				} finally {
-					this.#stateLock.release();
-				}
+
+					this.logContentionStats();
+				});
 			},
 			'Failed to set state',
-			{ context: { state, track } }
+			{ context: { newState, track } }
 		);
 	}
 
 	undo(): void {
-		return this.#errors.handleSync(
-			() => {
-				if (this.#history.length < 1) {
-					throw new Error('No previous state to revert to.');
-				}
-				this.#trackAction();
-				this.#undoStack.push(this.#history.pop() as State);
-				this.#state = { ...this.#history[this.#history.length - 1] };
-				this.#log('Undo action performed.', {
+		this.#errors.handleSync(() => {
+			if (this.#history.length <= 1) {
+				this.#log('No previous state to revert to.', {
 					caller: '[StateManager.undo]',
-					level: 'debug'
+					level: 'warn'
 				});
-				this.#saveStateAndLog('undo', 3);
-			},
-			'Undo operation failed',
-			{ fallback: { undo: null } }
-		);
+				return;
+			}
+
+			const previousState = this.#history.pop();
+			if (!previousState) return;
+
+			this.#undoStack.push(this.#helpers.data.clone(this.#state)); // for redo
+
+			this.#state = previousState;
+			this.#observer.batchUpdate(previousState);
+
+			this.#log('Undo action performed.', {
+				caller: '[StateManager.undo]',
+				level: 'debug'
+			});
+			this.#saveStateAndLog('undo', 3);
+		}, 'Undo operation failed');
 	}
 
 	updateAppModeState(appMode: State['appMode'], track: boolean): void {
 		return this.#errors.handleSync(
 			() => {
 				if (track) this.#trackAction();
+
 				this.#state.appMode = appMode;
+
 				this.#log(`Updated appMode: ${appMode}`, {
 					caller: '[StateManager.updateAppModeState]',
 					level: 'debug'
 				});
+
 				this.#saveStateAndLog('appMode', 3);
 			},
 			'Failed to update app mode state',
 			{ context: { appMode, track } }
+		);
+	}
+
+	async updateLockedProperty<K extends keyof State>(
+		key: K,
+		value: State[K]
+	): Promise<void> {
+		return this.#errors.handleAsync(
+			async () => {
+				const lock = this.#getLockForKey(key);
+
+				await lock.runExclusive(async () => {
+					this.#observer.set(key, value);
+
+					this.#log(
+						`Updated ${String(this.#helpers.data.clone(key))} with locked property`,
+						{
+							caller: '[StateManager.updateLockedProperty]',
+							level: 'debug'
+						}
+					);
+
+					await this.#saveState();
+
+					this.logContentionStats();
+				});
+			},
+			'Failed to update locked property',
+			{ context: { key, value } }
 		);
 	}
 
@@ -348,12 +463,15 @@ export class StateManager implements StateManagerInterface {
 				}
 
 				if (track) this.#trackAction();
+
 				this.#state.paletteContainer.columns = columns;
+
 				this.#log(`Updated paletteContainer columns`, {
 					caller: '[StateManager.updatePaletteColumns]',
 					level: 'debug'
 				});
 				this.#saveStateAndLog('paletteColumns', verbosity);
+				this.logContentionStats();
 			},
 			'Failed to update palette columns',
 			{ context: { columns, track, verbosity } }
@@ -399,7 +517,10 @@ export class StateManager implements StateManagerInterface {
 					caller: '[StateManager.updatePaletteColumnSize]',
 					level: 'debug'
 				});
+
 				this.#saveStateAndLog('paletteColumnSize', 3);
+
+				this.logContentionStats();
 			},
 			'Failed to update palette column size',
 			{ context: { columnID, newSize } }
@@ -410,12 +531,17 @@ export class StateManager implements StateManagerInterface {
 		return this.#errors.handleSync(
 			() => {
 				this.#trackAction();
+
 				this.#state.paletteHistory = updatedHistory;
+
 				this.#saveState();
+
 				this.#log('Updated palette history', {
 					caller: '[StateManager.updatePaletteHistory]',
 					level: 'debug'
 				});
+
+				this.logContentionStats();
 			},
 			'Failed to update palette history',
 			{ context: { updatedHistory } }
@@ -429,15 +555,20 @@ export class StateManager implements StateManagerInterface {
 		return this.#errors.handleSync(
 			() => {
 				if (track) this.#trackAction();
-				this.#state.selections = {
-					...this.#state.selections,
+
+				this.#observer.set('selections', {
+					...this.#observer.get('selections'),
 					...selections
-				};
+				});
+
 				this.#log(`Updated selections`, {
 					caller: '[StateManager.updateSelections]',
 					level: 'debug'
 				});
+
 				this.#saveStateAndLog('selections', 2);
+
+				this.logContentionStats();
 			},
 			'Failed to update selections',
 			{ context: { selections, track } }
@@ -447,30 +578,30 @@ export class StateManager implements StateManagerInterface {
 	#generateInitialState(): State {
 		return (
 			this.#errors.handleSync(() => {
-				this.#log(
-					'[StateManager.#generateInitialState] Generating initial state...',
-					{
-						caller: '[StateManager.#generateInitialState]',
-						level: 'debug'
-					}
-				);
-				const columnData = this.#utils.dom.scanPaletteColumns();
-				if (!columnData || columnData.length === 0) {
+				this.#log('Generating initial state.', {
+					caller: '[StateManager.#generateInitialState]',
+					level: 'debug'
+				});
+
+				const columns = this.#utils.dom.scanPaletteColumns() ?? [];
+
+				if (!columns) {
 					this.#log('No palette columns found!', {
 						caller: '[StateManager.#generateInitialState]',
 						level: 'error'
 					});
 				}
-				this.#log(
-					`Scanned ${columnData!.length} columns in Palette Container element`,
-					{
-						caller: '[StateManager.#generateInitialState]',
-						level: 'debug'
-					}
-				);
+
+				this.#log(`Scanned palette columns.`, {
+					caller: '[StateManager.#generateInitialState]',
+					level: 'debug'
+				});
+
+				this.logContentionStats();
+
 				return {
 					appMode: 'edit',
-					paletteContainer: { columns: columnData ?? [] },
+					paletteContainer: { columns },
 					paletteHistory: [],
 					preferences: {
 						colorSpace: 'hsl',
@@ -480,14 +611,23 @@ export class StateManager implements StateManagerInterface {
 						theme: 'light'
 					},
 					selections: {
-						paletteColumnCount: columnData!.length ?? 0,
+						paletteColumnCount: columns.length,
 						paletteType: 'complementary',
 						targetedColumnPosition: 1
 					},
 					timestamp: this.#helpers.data.getFormattedTimestamp()
 				};
-			}, 'Failed to generate initial state') ?? ({} as State)
+			}, '[StateManager]: Failed to generate initial state') ??
+			({} as State)
 		);
+	}
+
+	#getLockForKey(key: keyof State): Mutex {
+		if (!this.#dataLocks.has(key)) {
+			this.#dataLocks.set(key, new Mutex(this.#errors, this.#log));
+		}
+
+		return this.#dataLocks.get(key)!;
 	}
 
 	#saveStateAndLog(property: string, verbosity?: number): void {
@@ -498,15 +638,120 @@ export class StateManager implements StateManagerInterface {
 		this.#saveState();
 	}
 
-	async #saveState(): Promise<void> {
-		return await this.#errors.handleAsync(
-			() => this.#storage.setItem('appState', this.#state),
-			'Failed to save app state.'
+	async #saveState(throttle: boolean = true): Promise<void> {
+		const saveOperation = async (attempts = 0): Promise<void> => {
+			try {
+				await this.#storage.setItem('appState', this.#state);
+				this.#log('State saved to storage.', {
+					caller: '[StateManager.#saveState]',
+					level: 'debug'
+				});
+			} catch (err) {
+				if (attempts < env.state.maxSaveRetries) {
+					this.#log(
+						`Save attempt ${attempts + 1} failed. Retrying...`,
+						{
+							caller: '[StateManager.#saveState]',
+							level: 'warn'
+						}
+					);
+					await saveOperation(attempts + 1);
+				} else {
+					this.#log('Max save attempts reached. Save failed.', {
+						caller: '[StateManager.#saveState]',
+						level: 'error'
+					});
+				}
+			}
+		};
+
+		if (throttle) {
+			if (this.#saveThrottleTimer) clearTimeout(this.#saveThrottleTimer);
+
+			this.#saveThrottleTimer = setTimeout(
+				() => saveOperation(),
+				env.state.saveThrottleDelay
+			);
+		} else {
+			await saveOperation();
+		}
+	}
+
+	// push a copy of the current state before making changes
+	#trackAction(): void {
+		return this.#errors.handleSync(() => {
+			const clonedState = this.#helpers.data.clone(this.#state);
+
+			this.#history.push(clonedState);
+
+			if (this.#history.length > env.app.historyLimit)
+				this.#history.shift();
+		}, 'Failed to track action');
+	}
+
+	async withPropertyLock<K extends keyof State, T>(
+		key: K,
+		callback: (stateProperty: State[K]) => Promise<T>
+	): Promise<T> {
+		return this.#errors.handleAsync(
+			async () => {
+				const lock = this.#getLockForKey(key);
+				const acquired = await lock.acquireWriteWithTimeout(
+					env.mutex.timeout
+				);
+
+				if (!acquired) {
+					this.#log(
+						`Lock acquisition timed out for property: ${String(key)}`,
+						{
+							caller: '[StateManager.withPropertyLock]',
+							level: 'warn'
+						}
+					);
+					throw new Error(
+						`Timeout acquiring lock for property ${String(key)}.`
+					);
+				}
+
+				try {
+					return await callback(this.#state[key]);
+				} finally {
+					await lock.release();
+				}
+			},
+			'Failed to acquire property lock',
+			{ context: { key } }
 		);
 	}
 
-	#trackAction(): void {
-		// push a copy of the current state before making changes
-		this.#history.push({ ...this.#state });
+	async #withReadLock<T>(callback: () => T): Promise<T> {
+		return this.#errors.handleAsync(async () => {
+			const acquired = await this.#stateLock.acquireReadWithTimeout(
+				env.mutex.timeout
+			);
+			if (!acquired) throw new Error('Read lock acquisition timed out.');
+
+			try {
+				return callback();
+			} finally {
+				await this.#stateLock.release();
+			}
+		}, '[StateManager]: Failed to acquire read lock');
+	}
+
+	async #withWriteLock<T>(callback: () => Promise<T>): Promise<T> {
+		return this.#errors.handleAsync(async () => {
+			const acquired = await this.#stateLock.acquireWriteWithTimeout(
+				env.mutex.timeout
+			);
+
+			if (!acquired) throw new Error('Write lock acquisition timed out.');
+
+			try {
+				return await callback();
+			} finally {
+				await this.#stateLock.release();
+			}
+		}, '[StateManager]: Failed to acquire write lock');
 	}
 }

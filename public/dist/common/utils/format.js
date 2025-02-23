@@ -1,4 +1,5 @@
-import { defaults } from '../../config/index.js';
+import { defaults } from '../../config/partials/defaults.js';
+import '../../config/partials/regex.js';
 
 // File: common/utils/formatting.ts
 const defaultColors = defaults.colors;

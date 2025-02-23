@@ -1,4 +1,6 @@
-import { config } from '../../config/index.js';
+import { config } from '../../config/partials/base.js';
+import '../../config/partials/defaults.js';
+import '../../config/partials/regex.js';
 
 // File: common/services/Logger.ts
 const mode = config.mode;

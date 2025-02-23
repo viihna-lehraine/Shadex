@@ -13,7 +13,6 @@ import {
 	ColorSpace,
 	ColorSpaceExtended,
 	ColorStringMap,
-	DefaultObserverData,
 	DOMElements,
 	Hex,
 	HexSet,
@@ -59,7 +58,6 @@ import {
 	XYZ_Y,
 	XYZ_Z
 } from './index.js';
-import { DataObserver } from '../common/services/DataObserver.js';
 import { DOMStore } from '../common/services/DOMStore.js';
 import { EventManager } from '../events/EventManager.js';
 import { PaletteEvents } from '../events/PaletteEvents.js';
@@ -70,13 +68,10 @@ import { UIEvents } from '../events/UIEvents.js';
 
 // ******** 1. SERVICES ********
 
-export interface Services<T extends DefaultObserverData = DefaultObserverData> {
+export interface Services {
 	domStore: DOMStore;
 	errors: ErrorHandlerInterface;
 	log(message: string, options: LoggerOptions): void;
-	observer: DataObserver<T>;
-	semaphore: SemaphoreInterface;
-	setObserverData(newData: T): void;
 }
 
 // ******** 2. HELPERS ********
@@ -414,13 +409,6 @@ export interface CommonFunctions {
 
 // ******** 7. CLASSES ********
 
-export interface DataObserverInterface<T extends Record<string, unknown>> {
-	get<K extends keyof T>(prop: K): T[K];
-	off<K extends keyof T>(prop: K, callback: Listener<T[K]>): void;
-	on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void;
-	set<K extends keyof T>(prop: K, value: T[K]): void;
-}
-
 export interface DOMStoreInterface {
 	getElements(): DOMElements | null;
 	setElements(elements: DOMElements): void;
@@ -473,6 +461,27 @@ export interface LoggerInterface {
 	): void;
 }
 
+export interface MutexInterface {
+	acquireRead(): Promise<void>;
+	acquireWrite(): Promise<void>;
+	getContentionCount(): number;
+	getContentionRate(): string;
+	logContentionSnapShot(): void;
+	read<T>(callback: () => T): Promise<T>;
+	release(): void;
+	resetContentionCount(): void;
+	runExclusive<T>(callback: () => Promise<T> | T): Promise<T>;
+	upgradeToWriteLock(): Promise<void>;
+}
+
+export interface ObserverInterface<T extends Record<string, unknown>> {
+	batchUpdate(updates: Partial<T>): void;
+	get<K extends keyof T>(prop: K): T[K];
+	off<K extends keyof T>(prop: K, callback: Listener<T[K]>): void;
+	on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void;
+	set<K extends keyof T>(prop: K, value: T[K]): void;
+}
+
 export interface PaletteEventsInterface {
 	attachColorCopyHandlers(): void;
 	attachDragAndDropHandlers(): void;
@@ -493,26 +502,25 @@ export interface PaletteManagerInterface {
 }
 
 export interface PaletteStateInterface {
-	updatePaletteItemColor(columnID: number, newColor: string): void;
-}
-
-export interface SemaphoreInterface {
-	acquire(): Promise<void>;
-	release(): void;
+	updatePaletteItemColor(columnID: number, newColor: string): Promise<void>;
 }
 
 export interface StateManagerInterface {
+	init(): Promise<void>;
 	addPaletteToHistory(palette: Palette): void;
 	ensureStateReady(): Promise<void>;
-	getState(): State;
-	init(): Promise<void>;
+	getState(): Promise<State>;
 	loadState(): Promise<State>;
 	redo(): void;
-	resetState(): void;
+	resetState(): Promise<void>;
 	setOnStateLoad(callback: () => void): void;
-	setState(state: State, track: boolean): void;
+	setState(newState: State, track: boolean): Promise<void>;
 	undo(): void;
 	updateAppModeState(appMode: State['appMode'], track: boolean): void;
+	updateLockedProperty<K extends keyof State>(
+		key: K,
+		value: State[K]
+	): Promise<void>;
 	updatePaletteColumns(
 		columns: State['paletteContainer']['columns'],
 		track: boolean,
@@ -640,6 +648,11 @@ export interface ErrorHandlerOptions {
 	fallback?: unknown;
 	userMessage?: string;
 }
+
+export type LockQueueEntry = {
+	isWrite: boolean;
+	resolve: () => void;
+};
 
 export interface LoggerOptions {
 	caller: string;

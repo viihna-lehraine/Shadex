@@ -8,9 +8,9 @@ class PaletteState {
         this.#errors = services.errors;
         this.#utils = utils;
     }
-    updatePaletteItemColor(columnID, newColor) {
-        return this.#errors.handleSync(() => {
-            const currentState = this.stateManager.getState();
+    async updatePaletteItemColor(columnID, newColor) {
+        return this.#errors.handleAsync(async () => {
+            const currentState = await this.stateManager.getState();
             const latestPalette = currentState.paletteHistory[0];
             if (!latestPalette)
                 return;

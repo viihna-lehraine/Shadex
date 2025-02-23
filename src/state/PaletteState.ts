@@ -22,10 +22,13 @@ export class PaletteState implements PaletteStateInterface {
 		this.#utils = utils;
 	}
 
-	updatePaletteItemColor(columnID: number, newColor: string): void {
-		return this.#errors.handleSync(
-			() => {
-				const currentState = this.stateManager.getState();
+	async updatePaletteItemColor(
+		columnID: number,
+		newColor: string
+	): Promise<void> {
+		return this.#errors.handleAsync(
+			async () => {
+				const currentState = await this.stateManager.getState();
 				const latestPalette = currentState.paletteHistory[0];
 
 				if (!latestPalette) return;

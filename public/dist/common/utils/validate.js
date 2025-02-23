@@ -1,7 +1,8 @@
-import { regex, config } from '../../config/index.js';
+import '../../config/partials/defaults.js';
+import { regex } from '../../config/partials/regex.js';
+import { sets } from '../../config/partials/sets.js';
 
 // File: common/utils/validate.ts
-const sets = config.sets;
 function validationUtilsFactory(helpers, services) {
     const { data: { clone } } = helpers;
     const { errors } = services;

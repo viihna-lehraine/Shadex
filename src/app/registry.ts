@@ -50,7 +50,7 @@ export async function registerDependencies(
 		const stateManager = await initializeStateManager(
 			helpers,
 			services,
-			utils!
+			utils
 		);
 
 		// 6. Initialize PaletteState

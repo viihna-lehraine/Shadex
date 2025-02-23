@@ -1,5 +1,7 @@
 import { EventManager } from './EventManager.js';
-import { domIndex } from '../config/index.js';
+import '../config/partials/defaults.js';
+import { domIndex } from '../config/partials/dom.js';
+import '../config/partials/regex.js';
 
 // File: events/UIEvents.ts
 const classes = domIndex.classes;

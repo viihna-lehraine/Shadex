@@ -1,29 +1,16 @@
 // File: common/factories/services.ts
 
-import {
-	DefaultObserverData,
-	Helpers,
-	LoggerOptions,
-	Services
-} from '../../types/index.js';
-import {
-	DataObserver,
-	DOMStore,
-	ErrorHandler,
-	Logger,
-	Semaphore
-} from '../services/index.js';
+import { Helpers, LoggerOptions, Services } from '../../types/index.js';
+import { DOMStore, ErrorHandler, Logger } from '../services/index.js';
 import { config } from '../../config/index.js';
 
-export function serviceFactory<
-	T extends DefaultObserverData = DefaultObserverData
->(helpers: Helpers, initialData: T): Services<T> {
+export function serviceFactory(helpers: Helpers): Services {
 	console.log('[SERVICE_FACTORY]: Executing createServices.');
 
 	console.log(
 		`[SERVICE_FACTORY]: Initializing services with empty placeholder object.`
 	);
-	const services = {} as Services<T>;
+	const services = {} as Services;
 
 	console.log(
 		`[SERVICE_FACTORY]: Initializing Logger and ErrorHandler (creating instances).`
@@ -53,29 +40,12 @@ export function serviceFactory<
 		}
 	};
 
-	console.log(
-		`[SERVICE_FACTORY]: Initializing DOMStore, DataObserver, and Semaphore.`
-	);
+	console.log(`[SERVICE_FACTORY]: Initializing DOMStore.`);
 	services.domStore = DOMStore.getInstance(
 		services.errors,
 		helpers,
 		services.log
 	);
-	services.observer = new DataObserver<T>(initialData);
-
-	services.setObserverData = (newData: T) => {
-		services.observer.setData(newData);
-		services.log(
-			`DataObserver updated with new data: ${JSON.stringify(newData)}`,
-			{
-				caller: '[SERVICE_FACTORY.setObserverData]',
-				level: 'debug',
-				verbosity: 2
-			}
-		);
-	};
-
-	services.semaphore = new Semaphore(services.errors, services.log);
 
 	return services;
 }

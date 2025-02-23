@@ -1,4 +1,6 @@
-import { defaults, config } from '../../../../config/index.js';
+import { config } from '../../../../config/partials/base.js';
+import { defaults } from '../../../../config/partials/defaults.js';
+import '../../../../config/partials/regex.js';
 
 // File: common/utils/partials/conversion.ts
 const defaultCMYK = defaults.colors.cmyk;

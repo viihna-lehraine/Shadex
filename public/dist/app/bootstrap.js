@@ -1,7 +1,4 @@
-import { defaults } from '../config/index.js';
-
 // File: app/bootstrap.ts
-const initialData = defaults.observerData;
 async function bootstrap() {
     console.log('[BOOTSTRAP]: Starting bootstrap process.');
     try {
@@ -11,7 +8,7 @@ async function bootstrap() {
         const { serviceFactory } = await import('../common/factories/services.js');
         console.log('[BOOTSTRAP]: Service factory successfully imported.');
         console.log(`[BOOSTRAP]: Registering services.`);
-        const services = serviceFactory(helpers, initialData);
+        const services = serviceFactory(helpers);
         console.log(`[BOOTSTRAP]: Bootstrap process complete.`);
         return { helpers, services };
     }

@@ -36,21 +36,11 @@ export class PaletteManager implements PaletteManagerInterface {
 		generatePaletteFns: GeneratePaletteFnGroup,
 		generatePalette: GeneratePaletteFn
 	) {
-		console.log(`[PaletteManager.constructor] Entering constructor...`);
-		console.log('[PaletteManager.constructor] stateManager', stateManager);
-		console.log(`[PaletteManager.constructor] Common Fn Group`, common);
-		console.log(
-			`[PaletteManager.constructor] Generate Hues Fn Group`,
-			generateHues
-		);
-		console.log(
-			`[PaletteManager.constructor] Generate Palette Fn Group`,
-			generatePaletteFns
-		);
-		console.log(
-			`[PaletteManager.constructor] Generate Palette Fn`,
-			generatePalette
-		);
+		common.services.log(`Constructing PaletteManager.`, {
+			caller: '[PaletteManager constructor]',
+			level: 'debug',
+			verbosity: 3
+		});
 
 		this.#log = common.services.log;
 		this.#generateHues = generateHues;
@@ -159,9 +149,9 @@ export class PaletteManager implements PaletteManagerInterface {
 		}, 'Failed to extract palette from DOM');
 	}
 
-	handleColumnLock(columnID: number): void {
-		return this.#errors.handleSync(() => {
-			const currentState = this.stateManager.getState();
+	async handleColumnLock(columnID: number): Promise<void> {
+		return this.#errors.handleAsync(async () => {
+			const currentState = await this.stateManager.getState();
 			const columns = currentState.paletteContainer.columns;
 
 			// find column by ID
@@ -182,9 +172,9 @@ export class PaletteManager implements PaletteManagerInterface {
 		}, `Failed to toggle lock for column ${columnID}`);
 	}
 
-	handleColumnResize(columnID: number, newSize: number): void {
-		return this.#errors.handleSync(() => {
-			const currentState = this.stateManager.getState();
+	async handleColumnResize(columnID: number, newSize: number): Promise<void> {
+		return this.#errors.handleAsync(async () => {
+			const currentState = await this.stateManager.getState();
 			const columns = currentState.paletteContainer.columns;
 
 			const columnIndex = columns.findIndex(col => col.id === columnID);
@@ -296,9 +286,9 @@ export class PaletteManager implements PaletteManagerInterface {
 			});
 
 			// store the old palette in history
-			const oldPalette = this.stateManager
-				.getState()
-				.paletteHistory.at(-1);
+			const oldPalette = (
+				await this.stateManager.getState()
+			).paletteHistory.at(-1);
 			if (oldPalette) this.stateManager.addPaletteToHistory(oldPalette);
 
 			// clear the existing palette
@@ -323,9 +313,9 @@ export class PaletteManager implements PaletteManagerInterface {
 			// create and append palette columns
 			const columnWidth = 100 / newPalette.items.length;
 			const validColorSpace = ['hex', 'hsl', 'rgb'].includes(
-				this.stateManager.getState().preferences.colorSpace
+				(await this.stateManager.getState()).preferences.colorSpace
 			)
-				? this.stateManager.getState().preferences.colorSpace
+				? (await this.stateManager.getState()).preferences.colorSpace
 				: 'hex';
 
 			const columns = newPalette.items.map((item, index) => {
@@ -385,7 +375,7 @@ export class PaletteManager implements PaletteManagerInterface {
 			// clear existing content
 			paletteContainer.innerHTML = '';
 			// get the most recent palette from history
-			const currentState = this.stateManager.getState();
+			const currentState = await this.stateManager.getState();
 			const latestPalette = currentState.paletteHistory.at(-1);
 			if (!latestPalette) {
 				this.#log('No saved palettes in history. Cannot render.', {
@@ -444,9 +434,9 @@ export class PaletteManager implements PaletteManagerInterface {
 		}, 'Failed to render palette from state');
 	}
 
-	swapColumns(draggedID: number, targetID: number): void {
-		return this.#errors.handleSync(() => {
-			const currentState = this.stateManager.getState();
+	async swapColumns(draggedID: number, targetID: number): Promise<void> {
+		return await this.#errors.handleAsync(async () => {
+			const currentState = await this.stateManager.getState();
 			const columns = [...currentState.paletteContainer.columns];
 
 			const draggedIndex = columns.findIndex(col => col.id === draggedID);
@@ -485,14 +475,14 @@ export class PaletteManager implements PaletteManagerInterface {
 		}, `Failed to swap columns ${draggedID} and ${targetID}`);
 	}
 
-	#createColumnInUI(
+	async #createColumnInUI(
 		column: HTMLElement,
 		columnID: number,
 		colorValue: string
-	): void {
-		return this.#errors.handleSync(
-			() => {
-				const currentState = this.stateManager.getState();
+	): Promise<void> {
+		return this.#errors.handleAsync(
+			async () => {
+				const currentState = await this.stateManager.getState();
 				const colorSpace = currentState.preferences.colorSpace;
 
 				if (!this.#utils.validate.userColorInput(colorValue)) {

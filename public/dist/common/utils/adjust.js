@@ -1,4 +1,7 @@
-import { paletteConfig, config, defaults } from '../../config/index.js';
+import { config } from '../../config/partials/base.js';
+import { defaults } from '../../config/partials/defaults.js';
+import { paletteConfig } from '../../config/partials/paletteConfig.js';
+import '../../config/partials/regex.js';
 
 // File: common/utils/adjust.ts
 const adjustments = paletteConfig.adjustment;

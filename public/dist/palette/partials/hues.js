@@ -1,4 +1,6 @@
-import { paletteConfig } from '../../config/index.js';
+import '../../config/partials/defaults.js';
+import { paletteConfig } from '../../config/partials/paletteConfig.js';
+import '../../config/partials/regex.js';
 
 // File: palette/partials/hues.js
 // TODO: These definiely need refinement

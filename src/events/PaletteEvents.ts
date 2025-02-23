@@ -141,7 +141,7 @@ export class PaletteEvents implements PaletteEventsInterface {
 		}, 'Failed to attach color copy handlers');
 	}
 
-	attachDragAndDropHandlers(): void {
+	async attachDragAndDropHandlers(): Promise<void> {
 		return this.#errors.handleSync(() => {
 			const paletteContainer = this.helpers.dom.getElement(
 				ids.divs.paletteContainer
@@ -164,17 +164,20 @@ export class PaletteEvents implements PaletteEventsInterface {
 				const dragHandle = (event.target as HTMLElement).closest(
 					classes.dragHandle
 				) as HTMLElement;
+
 				if (!dragHandle) return;
 
 				this.#draggedColumn = dragHandle.closest(
 					classes.paletteColumn
 				) as HTMLElement;
+
 				if (!this.#draggedColumn) return;
 
 				event.dataTransfer?.setData(
 					'text/plain',
 					this.#draggedColumn.id
 				);
+
 				this.#draggedColumn.classList.add('dragging');
 
 				this.services.log(
@@ -191,68 +194,74 @@ export class PaletteEvents implements PaletteEventsInterface {
 				event: DragEvent
 			) => {
 				event.preventDefault();
+
 				if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
 			}) as EventListener);
 
-			// drop (Swap columns)
-			EventManager.add(paletteContainer, 'drop', ((event: DragEvent) => {
-				event.preventDefault();
+			// drop - handles dropping columns and updates positions atomically
+			EventManager.add(paletteContainer, 'drop', (event: Event) => {
+				// call inside a non-async wrapper
+				void (async (dragEvent: DragEvent) => {
+					dragEvent.preventDefault();
 
-				const targetColumn = (event.target as HTMLElement).closest(
-					classes.paletteColumn
-				) as HTMLElement;
-				if (
-					!this.#draggedColumn ||
-					!targetColumn ||
-					this.#draggedColumn === targetColumn
-				)
-					return;
+					const targetColumn = (
+						dragEvent.target as HTMLElement
+					).closest(classes.paletteColumn) as HTMLElement;
+					if (
+						!this.#draggedColumn ||
+						!targetColumn ||
+						this.#draggedColumn === targetColumn
+					)
+						return;
 
-				const draggedID = parseInt(
-					this.#draggedColumn.id.split('-').pop()!
-				);
-				const targetID = parseInt(targetColumn.id.split('-').pop()!);
-
-				this.paletteManager.swapColumns(draggedID, targetID);
-
-				// swap positions in state
-				const updatedColumns = [
-					...this.stateManager.getState().paletteContainer.columns
-				];
-				const draggedIndex = updatedColumns.findIndex(
-					col => col.id === draggedID
-				);
-				const targetIndex = updatedColumns.findIndex(
-					col => col.id === targetID
-				);
-
-				if (draggedIndex !== -1 && targetIndex !== -1) {
-					[
-						updatedColumns[draggedIndex].position,
-						updatedColumns[targetIndex].position
-					] = [
-						updatedColumns[targetIndex].position,
-						updatedColumns[draggedIndex].position
-					];
-
-					this.stateManager.updatePaletteColumns(
-						updatedColumns,
-						false,
-						5
+					const draggedID = parseInt(
+						this.#draggedColumn.id.split('-').pop()!
 					);
-				}
+					const targetID = parseInt(
+						targetColumn.id.split('-').pop()!
+					);
 
-				this.#draggedColumn.classList.remove('dragging');
-				this.services.log(
-					`Successfully swapped columns: ${this.#draggedColumn.id} and ${targetColumn.id}`,
-					{
-						caller: '[PaletteEvents.attachDragAndDropHandlers]',
-						level: 'debug'
-					}
-				);
+					await this.stateManager.batchUpdate(state => {
+						const updatedColumns = [
+							...state.paletteContainer.columns
+						];
+						const draggedIndex = updatedColumns.findIndex(
+							col => col.id === draggedID
+						);
+						const targetIndex = updatedColumns.findIndex(
+							col => col.id === targetID
+						);
 
-				this.#draggedColumn = null;
-			}) as EventListener);
+						if (draggedIndex !== -1 && targetIndex !== -1) {
+							[
+								updatedColumns[draggedIndex].position,
+								updatedColumns[targetIndex].position
+							] = [
+								updatedColumns[targetIndex].position,
+								updatedColumns[draggedIndex].position
+							];
+						}
+
+						return {
+							paletteContainer: {
+								...state.paletteContainer,
+								columns: updatedColumns
+							}
+						};
+					});
+
+					this.#draggedColumn.classList.remove('dragging');
+					this.services.log(
+						`Swapped columns: ${draggedID} and ${targetID}`,
+						{
+							caller: '[PaletteEvents.attachDragAndDropHandlers]',
+							level: 'debug'
+						}
+					);
+
+					this.#draggedColumn = null;
+				})(event as DragEvent);
+			});
 
 			// drag end
 			EventManager.add(paletteContainer, 'dragend', () => {
@@ -274,12 +283,13 @@ export class PaletteEvents implements PaletteEventsInterface {
 	}
 
 	// initialiezs column positions on page load
-	initializeColumnPositions(): void {
-		return this.#errors.handleSync(() => {
+	async initializeColumnPositions(): Promise<void> {
+		return this.#errors.handleAsync(async () => {
 			const paletteColumns = this.helpers.dom.getAllElements(
 				classes.paletteColumn
 			);
 
+			// create updated column data based on DOM elements
 			const updatedColumns = Array.from(paletteColumns).map(
 				(column, index) => ({
 					id: parseInt(column.id.split('-').pop() || '0'),
@@ -289,22 +299,35 @@ export class PaletteEvents implements PaletteEventsInterface {
 				})
 			);
 
-			this.stateManager.updatePaletteColumns(updatedColumns, false, 4);
+			// atomically update state using batchUpdate
+			await this.stateManager.batchUpdate(state => ({
+				paletteContainer: {
+					...state.paletteContainer,
+					columns: updatedColumns
+				}
+			}));
+
+			this.services.log('Initialized column positions.', {
+				caller: '[PaletteEvents.initializeColumnPositions]',
+				level: 'debug'
+			});
 		}, 'Failed to initialize column positions');
 	}
 
 	// renders column sizes based on stored state
-	renderColumnSizeChange(): void {
-		return this.#errors.handleSync(() => {
+	async renderColumnSizeChange(): Promise<void> {
+		return this.#errors.handleAsync(async () => {
 			const paletteColumns = this.helpers.dom.getAllElements(
 				classes.paletteColumn
 			);
-			const columnsState =
-				this.stateManager.getState().paletteContainer.columns;
 
+			// safely retrieve the latest state
+			const { paletteContainer } = await this.stateManager.getState();
+
+			// update DOM based on state
 			paletteColumns.forEach(column => {
 				const columnID = parseInt(column.id.split('-').pop()!);
-				const columnData = columnsState.find(
+				const columnData = paletteContainer.columns.find(
 					col => col.id === columnID
 				);
 
@@ -312,20 +335,26 @@ export class PaletteEvents implements PaletteEventsInterface {
 					(column as HTMLElement).style.width = `${columnData.size}%`;
 				}
 			});
+
+			this.services.log('Rendered column size changes.', {
+				caller: '[PaletteEvents.renderColumnSizeChange]',
+				level: 'debug'
+			});
 		}, 'Failed to render column size changes');
 	}
 
-	syncColumnColorsWithState(): void {
-		return this.#errors.handleSync(() => {
+	async syncColumnColorsWithState(): Promise<void> {
+		return this.#errors.handleAsync(async () => {
 			const paletteColumns =
 				this.helpers.dom.getAllElements<HTMLDivElement>(
 					classes.paletteColumn
 				);
-			const currentPalette = this.stateManager
-				.getState()
-				.paletteHistory.at(-1);
 
-			if (!currentPalette || !currentPalette.items) {
+			// retrieve the most recent palette from state
+			const { paletteHistory } = await this.stateManager.getState();
+			const currentPalette = paletteHistory.at(-1);
+
+			if (!currentPalette?.items) {
 				this.services.log('No valid palette data found in history!', {
 					caller: '[PaletteEvents.syncColumnColorsWithState]',
 					level: 'warn'
@@ -341,6 +370,7 @@ export class PaletteEvents implements PaletteEventsInterface {
 				? userPreference
 				: 'hex';
 
+			// update each column's color based on state
 			paletteColumns.forEach(column => {
 				const columnID = parseInt(column.id.split('-').pop()!);
 				const paletteItem = currentPalette.items.find(
@@ -396,8 +426,8 @@ export class PaletteEvents implements PaletteEventsInterface {
 	}
 
 	// observes palette container for new elements
-	#createPaletteObserver(): void {
-		return this.#errors.handleSync(() => {
+	async #createPaletteObserver(): Promise<void> {
+		return this.#errors.handleAsync(async () => {
 			const paletteContainer = this.helpers.dom.getElement(
 				ids.divs.paletteContainer
 			);
@@ -405,29 +435,36 @@ export class PaletteEvents implements PaletteEventsInterface {
 
 			const observer = new MutationObserver(
 				(mutationsList: MutationRecord[]) => {
-					mutationsList.forEach(mutation => {
-						mutation.addedNodes.forEach(node => {
-							if (
-								node instanceof HTMLElement &&
-								node.classList.contains(classes.paletteColumn)
-							) {
+					// TODO: figure out what the hell is going on here
+					void (async () => {
+						for (const mutation of mutationsList) {
+							for (const node of mutation.addedNodes) {
 								if (
-									!this.stateManager.getState()
-										.paletteContainer
+									node instanceof HTMLElement &&
+									node.classList.contains(
+										classes.paletteColumn
+									)
 								) {
-									this.services.log(
-										'Skipping initializeColumnPositions() - State is not ready!',
-										{
-											caller: '[PaletteEvents.createPaletteObserver]',
-											level: 'warn'
-										}
-									);
-									return;
+									const state =
+										await this.stateManager.getState();
+
+									if (!state.paletteContainer) {
+										this.services.log(
+											'Skipping initializeColumnPositions() - State is not ready!',
+											{
+												caller: '[PaletteEvents.createPaletteObserver]',
+												level: 'warn'
+											}
+										);
+
+										return;
+									}
+
+									this.initializeColumnPositions();
 								}
-								this.initializeColumnPositions();
 							}
-						});
-					});
+						}
+					})();
 				}
 			);
 
@@ -517,44 +554,50 @@ export class PaletteEvents implements PaletteEventsInterface {
 	}
 
 	// handles resizing of palette columns
-	#startResize(event: MouseEvent, column: HTMLElement): void {
-		return this.#errors.handleSync(() => {
+	async #startResize(event: MouseEvent, column: HTMLElement): Promise<void> {
+		return this.#errors.handleAsync(async () => {
 			if (!column || column.classList.contains(classes.locked)) return;
 
 			const startX = event.clientX;
 			const startWidth = column.offsetWidth;
 
+			// update column size dynamically as user drags
 			const onMouseMove = (moveEvent: MouseEvent) => {
 				const diff = moveEvent.clientX - startX;
 				const newSize = startWidth + diff;
-
-				const columnID = parseInt(column.id.split('-').pop()!);
-				this.paletteManager.handleColumnResize(columnID, newSize);
+				column.style.width = `${newSize}px`; // live feedback while resizing
 			};
 
-			const onMouseUp = () => {
+			// finalize size on mouse release and update state atomically
+			const onMouseUp = async () => {
 				window.removeEventListener('mousemove', onMouseMove);
 				window.removeEventListener('mouseup', onMouseUp);
 
 				const columnID = parseInt(column.id.split('-').pop()!);
-				const updatedColumns = this.stateManager
-					.getState()
-					.paletteContainer.columns.map(col =>
-						col.id === columnID
-							? { ...col, size: column.offsetWidth }
-							: col
-					);
 
-				this.stateManager.updatePaletteColumns(
-					updatedColumns,
-					false,
-					4
+				await this.stateManager.batchUpdate(state => ({
+					paletteContainer: {
+						...state.paletteContainer,
+						columns: state.paletteContainer.columns.map(col =>
+							col.id === columnID
+								? { ...col, size: column.offsetWidth }
+								: col
+						)
+					}
+				}));
+
+				this.services.log(
+					`Resized column ${columnID} to ${column.offsetWidth}px`,
+					{
+						caller: '[PaletteEvents.#startResize]',
+						level: 'debug'
+					}
 				);
 			};
 
 			window.addEventListener('mousemove', onMouseMove);
 			window.addEventListener('mouseup', onMouseUp);
-		}, 'Failed to start column resize.');
+		}, 'Failed to start column resize');
 	}
 
 	#toggleColorModal(button: HTMLElement): void {
