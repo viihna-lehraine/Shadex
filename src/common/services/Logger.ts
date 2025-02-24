@@ -3,29 +3,51 @@
 import { Helpers, LoggerInterface, MutationLog } from '../../types/index.js';
 import { config } from '../../config/index.js';
 
+const caller = 'Logger';
 const mode = config.mode;
 const debugLevel = mode.debugLevel;
 
 export class Logger implements LoggerInterface {
 	static #instance: Logger | null = null;
+
 	#getCallerInfo: Helpers['data']['getCallerInfo'];
 
 	constructor(helpers: Helpers) {
-		this.#getCallerInfo = helpers.data.getCallerInfo;
-		console.log('[Logger] Logger class constructor executed successfully.');
+		try {
+			this.#getCallerInfo = helpers.data.getCallerInfo;
+
+			console.log(
+				`[${caller}]: Logger class constructor executed successfully.`
+			);
+		} catch (error) {
+			throw new Error(
+				`[${caller} constructor]: ${error instanceof Error ? error.message : error}`
+			);
+		}
 	}
 
 	static getInstance(helpers: Helpers): Logger {
-		console.log('[Logger] Executing getInstance().');
+		try {
+			console.log(`[${caller}]: Executing getInstance.`);
 
-		if (!Logger.#instance) {
-			console.log('[Logger] No instance found. Creating new instance.');
-			Logger.#instance = new Logger(helpers);
-			console.log('[Logger] Instance created.');
+			if (!Logger.#instance) {
+				console.log(
+					`[${caller}]: No instance found. Creating new instance.`
+				);
+
+				Logger.#instance = new Logger(helpers);
+
+				console.log(`[${caller}]: Instance created.`);
+			}
+
+			console.log(`[${caller}]: Returning existing instance.`);
+
+			return Logger.#instance;
+		} catch (error) {
+			throw new Error(
+				`[${caller}.getInstance]: ${error instanceof Error ? error.message : error}`
+			);
 		}
-
-		console.log('[Logger] Returning existing instance.');
-		return Logger.#instance;
 	}
 
 	log(
@@ -34,13 +56,14 @@ export class Logger implements LoggerInterface {
 		caller?: string
 	): void {
 		if (debugLevel >= 5) {
-			console.log(`[Logger.log] Log function CALLED with:`, {
+			console.log(`[${caller}.log] Log function CALLED with:`, {
 				message,
 				level,
 				debugLevel,
 				caller
 			});
 		}
+
 		this.#logMessage(message, level, caller);
 	}
 
@@ -73,7 +96,9 @@ export class Logger implements LoggerInterface {
 				'color: inherit'
 			);
 		} catch (error) {
-			console.error(`Logger encountered an unexpected error: ${error}`);
+			console.error(
+				`[${caller}]: Logger encountered an unexpected error: ${error}.`
+			);
 		}
 
 		if (
@@ -81,7 +106,7 @@ export class Logger implements LoggerInterface {
 			debugLevel > 1 &&
 			mode.stackTrace
 		) {
-			console.trace('Full Stack Trace:');
+			console.trace(`[${caller}]: Full Stack Trace:`);
 		}
 	}
 

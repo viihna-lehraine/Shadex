@@ -7,22 +7,9 @@ import { domIndex, domConfig } from '../config/partials/dom.js';
 import '../config/partials/regex.js';
 
 // File: state/StateManager.ts
+const caller = 'StateManager';
 const defaultState = defaults.state;
 const maxReadyAttempts = env.state.maxReadyAttempts;
-/**
- * @class StateManager
- * @author Viihna Lehraine
- * @description Manages the application state, including undo/redo functionality, state persistance, and state locking.
- * @implements {StateManagerInterface}
- * @property {Map<keyof State, Mutex>} #dataLocks - fine-grained locks per state property
- * @property {History} #history - history of state changes
- * @property {Observer<State>} #observer - data observer
- * @property {(() => void) | null} #onStateLoadCallback - callback to run after state is loaded
- * @property {State} #state - current state
- * @property {Mutex} #stateLock - global lock for the entire state object
- * @property {StorageManager} #storage - storage manager
- * @property {History} #undoStack - undo stack
- */
 class StateManager {
     static #instance = null;
     #dataLocks = new Map();
@@ -40,81 +27,99 @@ class StateManager {
     #services;
     #utils;
     constructor(helpers, services, utils) {
-        this.#log = services.log;
-        this.#errors = services.errors;
-        this.#helpers = helpers;
-        this.#services = services;
-        this.#utils = utils;
-        this.#storage = new StorageManager(services);
-        this.#state = {};
-        this.#observer = new Observer(this.#state, { delay: env.observer.debounce }, this.#helpers, this.#services);
-        Object.keys(this.#state).forEach(key => {
-            this.#observer.on(key, (newVal, oldVal) => {
-                this.#log(`${key} updated. New: ${JSON.stringify(newVal)} | Old: ${JSON.stringify(oldVal)}`, { caller: '[StateManager.#observer]', level: 'debug' });
-            });
-        });
-        this.#state.paletteHistory = [];
-        this.#history = [this.#state];
-        this.#stateLock = new Mutex(services.errors, services.log);
-        this.#undoStack = [];
-        this.init()
-            .then(() => {
-            this.#saveStateAndLog('init', 3);
-        })
-            .catch(error => {
-            this.#log('StateManager init failed.', {
-                caller: '[StateManager constructor]',
-                level: 'error'
-            });
-            console.error(error);
-        });
-    }
-    static getInstance(helpers, services, utils) {
-        if (!StateManager.#instance) {
-            services.log(`Creating new StateManager instance.`, {
-                caller: '[StateManager.getInstance]',
+        try {
+            services.log(`Constructing StateManager instance.`, {
+                caller: `${caller} constructor`,
                 level: 'debug'
             });
-            StateManager.#instance = new StateManager(helpers, services, utils);
+            this.#log = services.log;
+            this.#errors = services.errors;
+            this.#helpers = helpers;
+            this.#services = services;
+            this.#utils = utils;
+            this.#storage = new StorageManager(services);
+            this.#state = {};
+            this.#observer = new Observer(this.#state, { delay: env.observer.debounce }, this.#helpers, this.#services);
+            Object.keys(this.#state).forEach(key => {
+                this.#observer.on(key, (newVal, oldVal) => {
+                    this.#log(`${key} updated. New: ${JSON.stringify(newVal)} | Old: ${JSON.stringify(oldVal)}`, { caller: `${caller}.#observer`, level: 'debug' });
+                });
+            });
+            this.#state.paletteHistory = [];
+            this.#history = [this.#state];
+            this.#stateLock = new Mutex(services.errors, services.log);
+            this.#undoStack = [];
+            this.init()
+                .then(() => {
+                this.#saveStateAndLog('init', 3);
+            })
+                .catch(error => {
+                this.#log('StateManager init failed.', {
+                    caller: `${caller} constructor`,
+                    level: 'error'
+                });
+                console.error(error);
+            });
         }
-        services.log(`Returning StateManager instance.`, {
-            caller: '[StateManager.getInstance]',
-            level: 'debug'
-        });
-        return StateManager.#instance;
+        catch (error) {
+            throw new Error(`[${caller} constructor]: ${error instanceof Error ? error.message : error}`);
+        }
+    }
+    static getInstance(helpers, services, utils) {
+        return services.errors.handleSync(() => {
+            if (!StateManager.#instance) {
+                services.log(`Creating new StateManager instance.`, {
+                    caller: `${caller}.getInstance`,
+                    level: 'debug'
+                });
+                StateManager.#instance = new StateManager(helpers, services, utils);
+            }
+            services.log(`Returning StateManager instance.`, {
+                caller: `${caller}.getInstance`,
+                level: 'debug'
+            });
+            return StateManager.#instance;
+        }, `[${caller}]: Error getting StateManager instance.`);
     }
     async init() {
-        this.#log('Initializing State Manager', {
-            caller: '[StateManager.init]',
-            level: 'debug'
-        });
-        await this.#storage.init();
-        this.#state =
-            (await this.#errors.handleAsync(() => this.loadState(), 'Failed to load state. Generating initial state.')) ?? this.#generateInitialState();
-        this.#log('StateManager initialized successfully.', {
-            caller: '[StateManager.init]',
-            level: 'debug'
-        });
-        await this.#saveState();
+        return this.#errors.handleAsync(async () => {
+            this.#log('Initializing State Manager', {
+                caller: `${caller}.init`,
+                level: 'debug'
+            });
+            await this.#storage.init();
+            {
+                this.#log('State loading from storage is disabled via feature flag.', {
+                    caller: `${caller}.init`,
+                    level: 'warn'
+                });
+                this.#state = this.#generateInitialState();
+            }
+            this.#log('StateManager initialized successfully.', {
+                caller: `${caller}.init`,
+                level: 'debug'
+            });
+            await this.#saveState();
+        }, `[${caller}]: Failed to initialize State Manager.`);
     }
     addPaletteToHistory(palette) {
         return this.#errors.handleSync(() => {
             this.#trackAction();
             this.#state.paletteHistory.push(palette);
             this.#saveStateAndLog('paletteHistory', 3);
-        }, 'Failed to add palette to history', { context: { palette } });
+        }, `[${caller}]: Failed to add palette to history.`, { context: { palette } });
     }
     async atomicUpdate(callback) {
         return this.#errors.handleAsync(async () => {
             return await this.#stateLock.runExclusive(async () => {
                 callback(this.#observer['data']);
                 this.#log('Performed atomic update.', {
-                    caller: '[StateManager.atomicUpdate]',
+                    caller: `${caller}.atomicUpdate`,
                     level: 'debug'
                 });
                 await this.#saveState();
             });
-        }, 'Failed to perform atomic update.');
+        }, `[${caller}]: Failed to perform atomic update.`);
     }
     async batchUpdate(callback) {
         await this.#errors.handleAsync(async () => {
@@ -122,13 +127,13 @@ class StateManager {
                 const partialUpdate = callback(this.#state);
                 this.#observer.batchUpdate(partialUpdate);
                 this.#log('Performed batch update.', {
-                    caller: '[StateManager.batchUpdate]',
+                    caller: `${caller}.batchUpdate`,
                     level: 'debug',
                     verbosity: 2
                 });
                 await this.#saveState();
             });
-        }, '[STATEMANAGER]: Failed to perform batch update.');
+        }, `[${caller}]: Failed to perform batch update.`);
     }
     async ensureStateReady() {
         return await this.#errors.handleAsync(async () => {
@@ -136,74 +141,59 @@ class StateManager {
             while (!this.#state || !this.#state.paletteContainer) {
                 if (attempts++ >= maxReadyAttempts) {
                     this.#log('State initialization timed out.', {
-                        caller: '[StateManager.ensureStateReady]',
+                        caller: `${caller}.ensureStateReady`,
                         level: 'error'
                     });
                     throw new Error('State initialization timed out.');
                 }
                 this.#log(`Waiting for state to initialize... (Attempt ${attempts})`, {
-                    caller: '[StateManager.ensureStateReady]',
-                    level: 'debug',
-                    verbosity: 3
+                    caller: `${caller}.ensureStateReady`,
+                    level: 'debug'
                 });
                 await new Promise(resolve => setTimeout(resolve, 50));
             }
             this.#log('State is now initialized.', {
-                caller: '[StateManager.ensureStateReady]'
+                caller: `${caller}.ensureStateReady`,
+                level: 'debug'
             });
-        }, 'Failed to ensure state readiness', { context: { maxReadyAttempts } });
+        }, `[${caller}]: Failed to ensure state readiness.`, { context: { maxReadyAttempts } });
     }
     async getState() {
         return await (this.#errors.handleAsync(async () => {
             return this.#withReadLock(() => {
                 if (!this.#state)
                     this.#log('State accessed before initialization.', {
-                        caller: '[StateManager.getState]',
+                        caller: `${caller}.getState`,
                         level: 'warn'
                     });
                 if (!this.#state.preferences) {
-                    this.#log('State.preferences is undefined. Setting as default.', {
-                        caller: '[StateManager.getState]',
+                    this.#log('State.preferences is undefined. Setting default preferences.', {
+                        caller: `${caller}.getState`,
                         level: 'warn'
                     });
                     this.#state.preferences = defaultState.preferences;
                 }
                 return this.#helpers.data.clone(this.#state);
             });
-        }, 'Error retrieving state') ?? defaultState);
+        }, `[${caller}]: Error retrieving state`) ?? defaultState);
     }
     async loadState() {
-        return this.#errors.handleAsync(async () => {
-            this.#log('Attempting to load state...', {
-                caller: '[StateManager.loadState]',
-                level: 'debug'
-            });
-            const storedState = await this.#storage.getItem('appState');
-            if (storedState) {
-                this.#state = storedState;
-                this.#log('Loaded stored state', {
-                    caller: '[StateManager.loadState]',
-                    level: 'debug'
-                });
-                this.#onStateLoadCallback?.();
-                return storedState;
-            }
-            this.#log('No stored state found. Generating initial state.', {
-                caller: '[StateManager.loadState]',
-                level: 'warn'
+        {
+            this.#log('loadState bypassed: feature flag is disabled. Generating initial state', {
+                caller: `${caller}.loadState`
             });
             return this.#generateInitialState();
-        }, 'Failed to load state');
+        }
     }
     logContentionStats() {
         this.#errors.handleSync(() => {
             const contentionCount = this.#stateLock.getContentionCount();
             const contentionRate = this.#stateLock.getContentionRate();
             this.#log(`Current contention count: ${contentionCount}.\nCurrent contention rate: ${contentionRate}.`, {
-                caller: '[StateManager.logContentionStats]',
+                caller: `${caller}.logContentionStats`,
                 level: 'debug'
             });
-        }, 'Failed to log contention stats');
+        }, `[${caller}]: Failed to log contention stats`);
     }
     redo() {
         return this.#errors.handleSync(() => {
@@ -211,7 +201,7 @@ class StateManager {
                 const redoState = this.#undoStack.pop();
                 if (!redoState) {
                     this.#log('Cannot redo: No redoState found.', {
-                        caller: '[StateManager.redo]',
+                        caller: `${caller}.redo`,
                         level: 'warn'
                     });
                     return;
@@ -219,7 +209,7 @@ class StateManager {
                 this.#history.push(redoState);
                 this.#state = { ...redoState };
                 this.#log('Redo action performed.', {
-                    caller: '[StateManager.redo]',
+                    caller: `${caller}.redo`,
                     level: 'debug'
                 });
                 this.#saveStateAndLog('redo', 3);
@@ -227,7 +217,7 @@ class StateManager {
             else {
                 throw new Error('No state to redo.');
             }
-        }, 'Redo operation failed', { fallback: { redo: null } });
+        }, `[${caller}]: Redo operation failed`, { fallback: { redo: null } });
     }
     async resetState() {
         return await this.#errors.handleAsync(async () => {
@@ -235,15 +225,15 @@ class StateManager {
             this.#state = defaultState;
             await this.#saveState();
             this.#log('App state has been reset', {
-                caller: '[StateManager.resetState]',
+                caller: `${caller}.resetState`,
                 level: 'debug'
             });
-        }, 'Failed to reset state', { fallback: defaultState });
+        }, `[${caller}]: Failed to reset state`, { fallback: defaultState });
     }
     setOnStateLoad(callback) {
         return this.#errors.handleSync(() => {
             this.#onStateLoadCallback = callback;
-        }, 'Failed to set onStateLoad callback');
+        }, `[${caller}]: Failed to set onStateLoad callback`);
     }
     async setState(newState, track = true) {
         return await this.#errors.handleAsync(async () => {
@@ -253,21 +243,19 @@ class StateManager {
                 this.#observer.batchUpdate(newState);
                 this.#state = newState;
                 this.#log('State updated.', {
-                    caller: '[StateManager.setState]',
-                    level: 'debug',
-                    verbosity: 2
+                    caller: `${caller}.setState`,
+                    level: 'debug'
                 });
                 await this.#saveState();
                 this.logContentionStats();
             });
-        }, 'Failed to set state', { context: { newState, track } });
+        }, `[${caller}]: Failed to set state.`, { context: { newState, track } });
     }
     undo() {
         this.#errors.handleSync(() => {
             if (this.#history.length <= 1) {
                 this.#log('No previous state to revert to.', {
-                    caller: '[StateManager.undo]',
-                    level: 'warn'
+                    caller: `${caller}.undo`
                 });
                 return;
             }
@@ -278,11 +266,11 @@ class StateManager {
             this.#state = previousState;
             this.#observer.batchUpdate(previousState);
             this.#log('Undo action performed.', {
-                caller: '[StateManager.undo]',
+                caller: `${caller}.undo`,
                 level: 'debug'
             });
             this.#saveStateAndLog('undo', 3);
-        }, 'Undo operation failed');
+        }, `[${caller}]: Undo operation failed`);
     }
     updateAppModeState(appMode, track) {
         return this.#errors.handleSync(() => {
@@ -290,34 +278,34 @@ class StateManager {
                 this.#trackAction();
             this.#state.appMode = appMode;
             this.#log(`Updated appMode: ${appMode}`, {
-                caller: '[StateManager.updateAppModeState]',
+                caller: `${caller}.updateAppModeState`,
                 level: 'debug'
             });
             this.#saveStateAndLog('appMode', 3);
-        }, 'Failed to update app mode state', { context: { appMode, track } });
+        }, `[${caller}]: Failed to update app mode state`, { context: { appMode, track } });
     }
     async updateLockedProperty(key, value) {
         return this.#errors.handleAsync(async () => {
             const lock = this.#getLockForKey(key);
             await lock.runExclusive(async () => {
                 this.#observer.set(key, value);
-                this.#log(`Updated ${String(this.#helpers.data.clone(key))} with locked property`, {
-                    caller: '[StateManager.updateLockedProperty]',
+                this.#log(`Updated ${String(this.#helpers.data.clone(key))} with locked property.`, {
+                    caller: `${caller}.updateLockedProperty`,
                     level: 'debug'
                 });
                 await this.#saveState();
                 this.logContentionStats();
             });
-        }, 'Failed to update locked property', { context: { key, value } });
+        }, `[${caller}]: Failed to update locked property`, { context: { key, value } });
     }
     updatePaletteColumns(columns, track, verbosity) {
         return this.#errors.handleSync(() => {
             if (!this.#state || !this.#state.paletteContainer) {
-                throw new Error('updatePaletteColumns() called before state initialization.');
+                throw new Error(`[${caller}]: updatePaletteColumns called before state initialization.`);
             }
             if (!this.#helpers.dom.getElement(domIndex.ids.divs.paletteContainer)) {
                 this.#log('Palette Container not found in the DOM.', {
-                    caller: '[StateManager.updatePaletteColumns]',
+                    caller: `${caller}.updatePaletteColumns`,
                     level: 'warn'
                 });
             }
@@ -325,12 +313,12 @@ class StateManager {
                 this.#trackAction();
             this.#state.paletteContainer.columns = columns;
             this.#log(`Updated paletteContainer columns`, {
-                caller: '[StateManager.updatePaletteColumns]',
+                caller: `${caller}.updatePaletteColumns`,
                 level: 'debug'
             });
             this.#saveStateAndLog('paletteColumns', verbosity);
             this.logContentionStats();
-        }, 'Failed to update palette columns', { context: { columns, track, verbosity } });
+        }, `[${caller}]: Failed to update palette columns.`, { context: { columns, track, verbosity } });
     }
     updatePaletteColumnSize(columnID, newSize) {
         return this.#errors.handleSync(() => {
@@ -350,12 +338,12 @@ class StateManager {
             const correctionFactor = 100 / finalTotalSize;
             columns.forEach(col => (col.size *= correctionFactor));
             this.#log(`Updated column size`, {
-                caller: '[StateManager.updatePaletteColumnSize]',
+                caller: `${caller}}.updatePaletteColumnSize`,
                 level: 'debug'
             });
             this.#saveStateAndLog('paletteColumnSize', 3);
             this.logContentionStats();
-        }, 'Failed to update palette column size', { context: { columnID, newSize } });
+        }, `[${caller}]: Failed to update palette column size.`, { context: { columnID, newSize } });
     }
     updatePaletteHistory(updatedHistory) {
         return this.#errors.handleSync(() => {
@@ -363,11 +351,11 @@ class StateManager {
             this.#state.paletteHistory = updatedHistory;
             this.#saveState();
             this.#log('Updated palette history', {
-                caller: '[StateManager.updatePaletteHistory]',
+                caller: `${caller}.updatePaletteHistory`,
                 level: 'debug'
             });
             this.logContentionStats();
-        }, 'Failed to update palette history', { context: { updatedHistory } });
+        }, `[${caller}: Failed to update palette history.`, { context: { updatedHistory } });
     }
     updateSelections(selections, track) {
         return this.#errors.handleSync(() => {
@@ -378,28 +366,28 @@ class StateManager {
                 ...selections
             });
             this.#log(`Updated selections`, {
-                caller: '[StateManager.updateSelections]',
+                caller: `${caller}]: .updateSelections`,
                 level: 'debug'
             });
             this.#saveStateAndLog('selections', 2);
             this.logContentionStats();
-        }, 'Failed to update selections', { context: { selections, track } });
+        }, `[${caller}]: Failed to update selections.`, { context: { selections, track } });
     }
     #generateInitialState() {
         return (this.#errors.handleSync(() => {
             this.#log('Generating initial state.', {
-                caller: '[StateManager.#generateInitialState]',
+                caller: `${caller}.#generateInitialState`,
                 level: 'debug'
             });
             const columns = this.#utils.dom.scanPaletteColumns() ?? [];
             if (!columns) {
                 this.#log('No palette columns found!', {
-                    caller: '[StateManager.#generateInitialState]',
+                    caller: `${caller}.#generateInitialState`,
                     level: 'error'
                 });
             }
             this.#log(`Scanned palette columns.`, {
-                caller: '[StateManager.#generateInitialState]',
+                caller: `${caller}.#generateInitialState`,
                 level: 'debug'
             });
             this.logContentionStats();
@@ -421,8 +409,7 @@ class StateManager {
                 },
                 timestamp: this.#helpers.data.getFormattedTimestamp()
             };
-        }, '[StateManager]: Failed to generate initial state') ??
-            {});
+        }, `[${caller}]: Failed to generate initial state`) ?? {});
     }
     #getLockForKey(key) {
         if (!this.#dataLocks.has(key)) {
@@ -432,7 +419,7 @@ class StateManager {
     }
     #saveStateAndLog(property, verbosity) {
         this.#log(`StateManager Updated ${property}`, {
-            caller: '[StateManager.#saveStateAndLog]',
+            caller: `${caller}.#saveStateAndLog`,
             verbosity: verbosity ?? 0
         });
         this.#saveState();
@@ -442,29 +429,30 @@ class StateManager {
             try {
                 await this.#storage.setItem('appState', this.#state);
                 this.#log('State saved to storage.', {
-                    caller: '[StateManager.#saveState]',
+                    caller: `${caller}.#saveState`,
                     level: 'debug'
                 });
             }
             catch (err) {
                 if (attempts < env.state.maxSaveRetries) {
                     this.#log(`Save attempt ${attempts + 1} failed. Retrying...`, {
-                        caller: '[StateManager.#saveState]',
+                        caller: `${caller}.#saveState`,
                         level: 'warn'
                     });
                     await saveOperation(attempts + 1);
                 }
                 else {
                     this.#log('Max save attempts reached. Save failed.', {
-                        caller: '[StateManager.#saveState]',
+                        caller: `${caller}.#saveState`,
                         level: 'error'
                     });
                 }
             }
         };
         if (throttle) {
-            if (this.#saveThrottleTimer)
+            if (this.#saveThrottleTimer) {
                 clearTimeout(this.#saveThrottleTimer);
+            }
             this.#saveThrottleTimer = setTimeout(() => saveOperation(), env.state.saveThrottleDelay);
         }
         else {
@@ -478,7 +466,7 @@ class StateManager {
             this.#history.push(clonedState);
             if (this.#history.length > env.app.historyLimit)
                 this.#history.shift();
-        }, 'Failed to track action');
+        }, `[${caller}]: Failed to track action.`);
     }
     async withPropertyLock(key, callback) {
         return this.#errors.handleAsync(async () => {
@@ -486,7 +474,7 @@ class StateManager {
             const acquired = await lock.acquireWriteWithTimeout(env.mutex.timeout);
             if (!acquired) {
                 this.#log(`Lock acquisition timed out for property: ${String(key)}`, {
-                    caller: '[StateManager.withPropertyLock]',
+                    caller: `${caller}.withPropertyLock`,
                     level: 'warn'
                 });
                 throw new Error(`Timeout acquiring lock for property ${String(key)}.`);
@@ -497,7 +485,7 @@ class StateManager {
             finally {
                 await lock.release();
             }
-        }, 'Failed to acquire property lock', { context: { key } });
+        }, `[${caller}: Failed to acquire property lock`, { context: { key } });
     }
     async #withReadLock(callback) {
         return this.#errors.handleAsync(async () => {
@@ -510,7 +498,7 @@ class StateManager {
             finally {
                 await this.#stateLock.release();
             }
-        }, '[StateManager]: Failed to acquire read lock');
+        }, `[${caller}]: Failed to acquire read lock`);
     }
     async #withWriteLock(callback) {
         return this.#errors.handleAsync(async () => {
@@ -523,7 +511,7 @@ class StateManager {
             finally {
                 await this.#stateLock.release();
             }
-        }, '[StateManager]: Failed to acquire write lock');
+        }, `[${caller}]: Failed to acquire write lock`);
     }
 }
 

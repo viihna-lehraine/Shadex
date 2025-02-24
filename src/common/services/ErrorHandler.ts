@@ -9,6 +9,7 @@ import { UserFacingError } from './ErrorClasses.js';
 import { Logger } from './Logger.js';
 import { config } from '../../config/index.js';
 
+const caller = 'ErrorHandler';
 const mode = config.mode;
 
 export class ErrorHandler implements ErrorHandlerInterface {
@@ -17,23 +18,38 @@ export class ErrorHandler implements ErrorHandlerInterface {
 	#logger: Logger;
 
 	private constructor(helpers: Helpers, logger: Logger) {
-		this.#getCallerInfo = helpers.data.getCallerInfo;
-		this.#logger = logger;
+		try {
+			console.log(`[${caller}]: Constructing ErrorHandler instance`);
+
+			this.#getCallerInfo = helpers.data.getCallerInfo;
+
+			this.#logger = logger;
+		} catch (error) {
+			throw new Error(
+				`[${caller} constructor]: ${error instanceof Error ? error.message : error}`
+			);
+		}
 	}
 
 	static getInstance(helpers: Helpers, logger: Logger): ErrorHandler {
-		if (!ErrorHandler.#instance) {
+		try {
+			if (!ErrorHandler.#instance) {
+				console.debug(
+					`[${caller}] No ErrorHandler instance exists yet. Creating new instance.`
+				);
+				ErrorHandler.#instance = new ErrorHandler(helpers, logger);
+			}
+
 			console.debug(
-				'[ErrorHandler] No ErrorHandler instance exists yet. Creating new instance.'
+				`[${caller}] Returning existing ErrorHandler instance.`
 			);
-			ErrorHandler.#instance = new ErrorHandler(helpers, logger);
+
+			return ErrorHandler.#instance;
+		} catch (error) {
+			throw new Error(
+				`[${caller}.getInstance]: ${error instanceof Error ? error.message : error}`
+			);
 		}
-
-		console.debug(
-			'[ErrorHandler] Returning existing ErrorHandler instance.'
-		);
-
-		return ErrorHandler.#instance;
 	}
 
 	handleAndReturn<T>(
@@ -47,6 +63,7 @@ export class ErrorHandler implements ErrorHandlerInterface {
 			if (result instanceof Promise) {
 				return result.catch(error => {
 					this.#handle(error, errorMessage, options);
+
 					return (options.fallback as T) ?? Promise.reject(error);
 				});
 			}
@@ -54,6 +71,7 @@ export class ErrorHandler implements ErrorHandlerInterface {
 			return result;
 		} catch (error) {
 			this.#handle(error, errorMessage, options);
+
 			return options.fallback as T;
 		}
 	}
@@ -67,6 +85,7 @@ export class ErrorHandler implements ErrorHandlerInterface {
 			return await action();
 		} catch (error) {
 			this.#handle(error, errorMessage, options);
+
 			throw error;
 		}
 	}
@@ -80,6 +99,7 @@ export class ErrorHandler implements ErrorHandlerInterface {
 			return action();
 		} catch (error) {
 			this.#handle(error, errorMessage, options);
+
 			throw error;
 		}
 	}
@@ -89,13 +109,33 @@ export class ErrorHandler implements ErrorHandlerInterface {
 		message: string,
 		context: Record<string, unknown>
 	): string {
-		return error instanceof Error
-			? `${message}: ${error.message}. Context: ${JSON.stringify(context)}`
-			: `${message}: ${error}. Context: ${JSON.stringify(context)}`;
+		try {
+			return error instanceof Error
+				? `${message}: ${error.message}. Context: ${JSON.stringify(context)}`
+				: `${message}: ${error}. Context: ${JSON.stringify(context)}`;
+		} catch (error) {
+			throw new Error(
+				`[${caller}]: Error formatting error message: ${
+					error instanceof Error ? error.message : error
+				}`
+			);
+		}
 	}
 
 	#getStackTrace(error?: Error): string {
-		return error?.stack ?? new Error().stack ?? 'No stack trace available';
+		try {
+			return (
+				error?.stack ??
+				new Error().stack ??
+				`[${caller}]: No stack trace available.`
+			);
+		} catch (error) {
+			throw new Error(
+				`[${caller}]: Error getting stack trace: ${
+					error instanceof Error ? error.message : error
+				}`
+			);
+		}
 	}
 
 	#handle(
@@ -103,29 +143,39 @@ export class ErrorHandler implements ErrorHandlerInterface {
 		errorMessage: string,
 		options: ErrorHandlerOptions = {}
 	): void {
-		const caller = this.#getCallerInfo();
-		const formattedError = this.#formatError(
-			error,
-			errorMessage,
-			options.context ?? {}
-		);
-
-		this.#logger.log(formattedError, 'error', caller);
-
-		if (mode.stackTrace) {
-			this.#logger.log(
-				`Stack trace:\n${this.#getStackTrace(error instanceof Error ? error : undefined)}`,
-				'debug',
-				'[ErrorHandler]'
+		try {
+			const caller = this.#getCallerInfo();
+			const formattedError = this.#formatError(
+				error,
+				errorMessage,
+				options.context ?? {}
 			);
-		}
 
-		const userMessage =
-			options.userMessage ??
-			(error instanceof UserFacingError ? error.userMessage : undefined);
+			this.#logger.log(formattedError, 'error', caller);
 
-		if (userMessage) {
-			alert(userMessage);
+			if (mode.stackTrace) {
+				this.#logger.log(
+					`Stack trace:\n${this.#getStackTrace(error instanceof Error ? error : undefined)}`,
+					'debug',
+					`[${caller}]`
+				);
+			}
+
+			const userMessage =
+				options.userMessage ??
+				(error instanceof UserFacingError
+					? error.userMessage
+					: undefined);
+
+			if (userMessage) {
+				alert(userMessage);
+			}
+		} catch (error) {
+			throw new Error(
+				`[${caller}]: Error handling error: ${
+					error instanceof Error ? error.message : error
+				}`
+			);
 		}
 	}
 }

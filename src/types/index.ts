@@ -76,6 +76,7 @@ export type {
 	DOMElements,
 	DOMIndex,
 	Environment,
+	FeatureFlags,
 	Hex,
 	HexNumMap,
 	HexSet,

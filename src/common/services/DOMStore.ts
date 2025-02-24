@@ -9,18 +9,14 @@ import {
 } from '../../types/index.js';
 import { domIndex } from '../../config/index.js';
 
-const caller = '[DOMStore]';
+const caller = 'DOMStore';
 const ids = domIndex.ids;
 
-/**
- * @description Stores validation data for DOM elements
- * @export
- * @class DOMStore
- * @implements {DOMStoreInterface}
- */
 export class DOMStore implements DOMStoreInterface {
 	static #instance: DOMStore;
+
 	#elements: DOMElements | null = null;
+
 	#errors: Services['errors'];
 	#helpers: Helpers;
 	#log: Services['log'];
@@ -30,10 +26,21 @@ export class DOMStore implements DOMStoreInterface {
 		helpers: Helpers,
 		log: Services['log']
 	) {
-		this.#errors = errors;
-		this.#log = log;
-		this.#helpers = helpers;
-		this.#validateAndGetDOMElements();
+		try {
+			log(`Constructing DOMStore instance`, {
+				caller: `${caller} constructor`
+			});
+
+			this.#errors = errors;
+			this.#log = log;
+			this.#helpers = helpers;
+
+			this.#validateAndGetDOMElements();
+		} catch (error) {
+			throw new Error(
+				`[${caller} constructor]: ${error instanceof Error ? error.message : error}`
+			);
+		}
 	}
 
 	static getInstance(
@@ -54,27 +61,18 @@ export class DOMStore implements DOMStoreInterface {
 					DOMStore.#instance = new DOMStore(errors, helpers, log);
 				}
 
-				log(
-					'DOMStore instance already exists. Returning existing instance',
-					{
-						caller: `${caller}.getInstance`,
-						level: 'debug'
-					}
-				);
+				log('Returning existing instance', {
+					caller: `${caller}.getInstance`,
+					level: 'debug'
+				});
 
 				return DOMStore.#instance;
 			},
-			'Error getting DOMStore instance.',
+			`[${caller}]: Error getting DOMStore instance.`,
 			{ fallback: new DOMStore(errors, helpers, log) }
 		);
 	}
 
-	/**
-	 * @description Get a single DOM element
-	 * @param category *
-	 * @param key *
-	 * @returns {DOMElements[K][E]}
-	 */
 	getElement<K extends keyof DOMElements, E extends keyof DOMElements[K]>(
 		category: K,
 		key: E
@@ -92,22 +90,16 @@ export class DOMStore implements DOMStoreInterface {
 						}
 					);
 					throw new Error(
-						`Element ${category}.${String(key)} not found`
+						`[${caller}]: Element ${category}.${String(key)} not found`
 					);
 				}
 				return element;
 			},
-			'Error getting DOM element.',
+			`[${caller}]: Error getting DOM element.`,
 			{ fallback: null as unknown as DOMElements[K][E] }
 		);
 	}
 
-	/**
-	 * @description Get all DOM elements
-	 * @param category *
-	 * @param key *
-	 * @returns {DOMElements[K][E]}
-	 */
 	getElements(): DOMElements {
 		return this.#errors.handleSync(
 			() => {
@@ -116,20 +108,19 @@ export class DOMStore implements DOMStoreInterface {
 						caller: `${caller}.getElements`,
 						level: 'warn'
 					});
-					throw new Error('DOM elements not validated');
+
+					throw new Error(
+						`[${caller}]: DOM elements are not yet validated.`
+					);
 				}
 
 				return this.#elements;
 			},
-			'Error getting DOM elements.',
+			`[${caller}]: Error getting DOM elements.`,
 			{ fallback: {} as DOMElements }
 		);
 	}
 
-	/**
-	 * @description Sets class instance's DOM elements value
-	 * @param elements DOMElements
-	 */
 	setElements(elements: DOMElements): void {
 		return this.#errors.handleSync(() => {
 			this.#elements = elements;
@@ -138,15 +129,9 @@ export class DOMStore implements DOMStoreInterface {
 				caller: `${caller}.setElements`,
 				level: 'debug'
 			});
-		}, 'Unable to set DOM elements');
+		}, `[${caller}]: Unable to set DOM elements.`);
 	}
 
-	/**
-	 * @description Validates and retrieves DOM elements
-	 * @private
-	 * @memberof DOMStore
-	 * @returns {void}
-	 */
 	#validateAndGetDOMElements(): void {
 		const missingElements: string[] = [];
 
@@ -188,11 +173,13 @@ export class DOMStore implements DOMStoreInterface {
 							this.#helpers.dom.getElement<
 								HTMLElementTagNameMap[typeof tagName]
 							>(id);
+
 						if (!element) {
 							this.#log(`Element with ID "${id}" not found.`, {
 								caller: `${caller}.#validateAndGetDOMElements`,
 								level: 'warn'
 							});
+
 							missingElements.push(id);
 						} else {
 							(
@@ -213,13 +200,13 @@ export class DOMStore implements DOMStoreInterface {
 						}
 					);
 					throw new Error(
-						'Some DOM elements are missing. Validation failed.'
+						`[${caller}]: Some DOM elements are missing. Validation failed.`
 					);
 				}
 
 				this.#elements = elements as DOMElements;
 			},
-			'Unable to validate DOM elements',
+			`[${caller}]: Unable to validate DOM elements.`,
 			{ context: { missingElements } }
 		);
 		this.#log('All static elements are present! 🏳️‍⚧️ 🩷 🏳️‍⚧️', {

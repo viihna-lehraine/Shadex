@@ -7,9 +7,6 @@ import { config } from '../../config/index.js';
 export function serviceFactory(helpers: Helpers): Services {
 	console.log('[SERVICE_FACTORY]: Executing createServices.');
 
-	console.log(
-		`[SERVICE_FACTORY]: Initializing services with empty placeholder object.`
-	);
 	const services = {} as Services;
 
 	console.log(
@@ -41,6 +38,7 @@ export function serviceFactory(helpers: Helpers): Services {
 	};
 
 	console.log(`[SERVICE_FACTORY]: Initializing DOMStore.`);
+
 	services.domStore = DOMStore.getInstance(
 		services.errors,
 		helpers,

@@ -1,12 +1,21 @@
 // File: state/PaletteState.ts
+const caller = 'PaletteState';
 class PaletteState {
     stateManager;
     #errors;
     #utils;
     constructor(stateManager, services, utils) {
         this.stateManager = stateManager;
-        this.#errors = services.errors;
-        this.#utils = utils;
+        try {
+            services.log(`Constructing PaletteState instance`, {
+                caller: `${caller} constructor`
+            });
+            this.#errors = services.errors;
+            this.#utils = utils;
+        }
+        catch (error) {
+            throw new Error(`[${caller} constructor]: ${error instanceof Error ? error.message : error}`);
+        }
     }
     async updatePaletteItemColor(columnID, newColor) {
         return this.#errors.handleAsync(async () => {
@@ -56,7 +65,7 @@ class PaletteState {
                 { ...latestPalette, items: updatedItems },
                 ...currentState.paletteHistory.slice(1)
             ]);
-        }, 'Failed to update palette item color', { context: { columnID, newColor } });
+        }, `[${caller}]: Failed to update palette item color.`, { context: { columnID, newColor } });
     }
 }
 

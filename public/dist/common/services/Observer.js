@@ -1,4 +1,5 @@
 // File: common/services/Observer.ts
+const caller = 'Observer';
 class Observer {
     data;
     debounceOptions;
@@ -10,38 +11,41 @@ class Observer {
     constructor(data, debounceOptions = {}, helpers, services) {
         this.data = data;
         this.debounceOptions = debounceOptions;
-        this.#errors = services.errors;
-        this.#log = services.log;
-        this.#helpers = helpers;
-        this.#log('Constructing DataObserver instance.', {
-            caller: 'DataObserver constructor',
-            level: 'debug',
-            verbosity: 3
-        });
-        this.data = this.#deepObserve(this.data);
+        try {
+            services.log(`Constructing Observer instance`, {
+                caller: `${caller} constructor`,
+                level: 'debug'
+            });
+            this.#errors = services.errors;
+            this.#log = services.log;
+            this.#helpers = helpers;
+            this.data = this.#deepObserve(this.data);
+        }
+        catch (error) {
+            throw new Error(`[${caller} constructor]: ${error instanceof Error ? error.message : error}`);
+        }
     }
     batchUpdate(updates) {
         return this.#errors.handleSync(() => {
             this.#log(`Performing batch update. Updates: ${JSON.stringify(this.#helpers.data.clone(updates))}`, {
-                caller: 'DataObserver.batchUpdate',
-                level: 'debug',
-                verbosity: 2
+                caller: `${caller}.batchUpdate`,
+                level: 'debug'
             });
             Object.entries(updates).forEach(([key, value]) => {
                 this.set(key, value);
             });
-        }, '[OBSERVER]: Error performing batch update.');
+        }, `[${caller}]: Error performing batch update.`);
     }
     get(prop) {
         return this.#errors.handleSync(() => {
             return this.#helpers.data.clone(this.data[prop]);
-        }, '[OBSERVER]: Error getting data.');
+        }, `[${caller}]: Error getting data.`);
     }
     off(prop, callback) {
         return this.#errors.handleSync(() => {
             this.#listeners[prop] =
                 this.#listeners[prop]?.filter(cb => cb !== callback) ?? [];
-        }, '[OBSERVER]: Error removing listener.');
+        }, `[${caller}]: Error removing listener.`);
     }
     on(prop, callback) {
         return this.#errors.handleSync(() => {
@@ -49,14 +53,14 @@ class Observer {
                 this.#listeners[prop] = [];
             }
             this.#listeners[prop].push(callback);
-        }, '[OBSERVER]: Error adding listener.');
+        }, `[${caller}]: Error adding listener.`);
     }
     set(prop, value) {
         return this.#errors.handleSync(() => {
             const oldValue = this.#helpers.data.clone(this.data[prop]);
             this.data[prop] = this.#helpers.data.clone(value);
             this.#triggerNotify(prop, this.data[prop], oldValue);
-        }, '[OBSERVER]: Error setting data.');
+        }, `[${caller}]: Error setting data.`);
     }
     setData(newData, debounceOptions, helpers, services) {
         return new Observer(newData, debounceOptions, helpers, services);
@@ -91,12 +95,12 @@ class Observer {
                     return true;
                 }
             });
-        }, '[OBSERVER]: Error observing data.');
+        }, `[${caller}]: Error observing data.`);
     }
     #notify(prop, newValue, oldValue) {
         return this.#errors.handleSync(() => {
             this.#listeners[prop]?.forEach(callback => callback(newValue, oldValue));
-        }, '[OBSERVER]: Error notifying listeners.');
+        }, `[${caller}]: Error notifying listeners.`);
     }
     #triggerNotify(prop, newValue, oldValue) {
         return this.#errors.handleSync(() => {
@@ -110,7 +114,7 @@ class Observer {
             else {
                 this.#notify(prop, newValue, oldValue);
             }
-        }, '[OBSERVER]: Error triggering notification.');
+        }, `[${caller}]: Error triggering notification.`);
     }
 }
 

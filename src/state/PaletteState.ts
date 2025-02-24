@@ -9,6 +9,8 @@ import {
 } from '../types/index.js';
 import { StateManager } from './StateManager.js';
 
+const caller = 'PaletteState';
+
 export class PaletteState implements PaletteStateInterface {
 	#errors: Services['errors'];
 	#utils: Utilities;
@@ -18,8 +20,18 @@ export class PaletteState implements PaletteStateInterface {
 		services: Services,
 		utils: Utilities
 	) {
-		this.#errors = services.errors;
-		this.#utils = utils;
+		try {
+			services.log(`Constructing PaletteState instance`, {
+				caller: `${caller} constructor`
+			});
+
+			this.#errors = services.errors;
+			this.#utils = utils;
+		} catch (error) {
+			throw new Error(
+				`[${caller} constructor]: ${error instanceof Error ? error.message : error}`
+			);
+		}
 	}
 
 	async updatePaletteItemColor(
@@ -87,7 +99,7 @@ export class PaletteState implements PaletteStateInterface {
 					...currentState.paletteHistory.slice(1)
 				]);
 			},
-			'Failed to update palette item color',
+			`[${caller}]: Failed to update palette item color.`,
 			{ context: { columnID, newColor } }
 		);
 	}

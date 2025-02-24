@@ -5,11 +5,13 @@ import { EventManager } from './EventManager.js';
 import { PaletteManager } from '../palette/PaletteManager.js';
 import { domIndex } from '../config/index.js';
 
+const caller = 'UIEvents';
 const classes = domIndex.classes;
 
 export class UIEvents {
 	#domStore: Services['domStore'];
 	#elements: DOMElements;
+
 	#errors: Services['errors'];
 	#helpers: Helpers;
 	#log: Services['log'];
@@ -21,21 +23,33 @@ export class UIEvents {
 		private services: Services,
 		utils: Utilities
 	) {
-		this.services = services;
-		this.#domStore = services.domStore;
-		this.#errors = services.errors;
-		this.#helpers = helpers;
-		this.#log = this.services.log;
-		this.paletteManager = paletteManager;
-		this.#utils = utils;
+		try {
+			services.log(`Constructing UIEvents instance`, {
+				caller: `${caller} constructor`
+			});
 
-		const validatedElements = this.#domStore.getElements();
-		if (!validatedElements) {
+			this.services = services;
+			this.#domStore = services.domStore;
+			this.#errors = services.errors;
+			this.#helpers = helpers;
+			this.#log = this.services.log;
+			this.paletteManager = paletteManager;
+			this.#utils = utils;
+
+			const validatedElements = this.#domStore.getElements();
+
+			if (!validatedElements) {
+				throw new Error(
+					`[${caller} constructor]: Critical UI elements not found. Application cannot start!`
+				);
+			}
+
+			this.#elements = validatedElements;
+		} catch (error) {
 			throw new Error(
-				`Critical UI elements not found. Application cannot start`
+				`[${caller} constructor]: ${error instanceof Error ? error.message : error}`
 			);
 		}
-		this.#elements = validatedElements;
 	}
 
 	init(): void {
@@ -48,6 +62,7 @@ export class UIEvents {
 					const modal = this.#helpers.dom.getElement(
 						target.dataset.modalID!
 					);
+
 					modal?.classList.remove(classes.hidden);
 				}
 
@@ -65,7 +80,7 @@ export class UIEvents {
 						.forEach(modal => modal.classList.add(classes.hidden));
 				}
 			}) as EventListener);
-		}, 'Failed to initialize UI events.');
+		}, `[${caller}]: Failed to initialize UI events.`);
 	}
 
 	initButtons(): void {
@@ -79,10 +94,12 @@ export class UIEvents {
 
 				EventManager.add(button, 'click', (e: Event) => {
 					e.preventDefault();
+
 					this.#log(logMessage, {
-						caller: '[UIEvents.initButtons]',
+						caller: `${caller}.initButtons`,
 						level: 'debug'
 					});
+
 					action?.();
 				});
 			};
@@ -92,7 +109,7 @@ export class UIEvents {
 				'Desaturate button clicked',
 				() => {
 					this.#log('Desaturation logic not implemented!', {
-						caller: '[UIEvents.initButtons]',
+						caller: `${caller}.initButtons`,
 						level: 'warn'
 					});
 				}
@@ -103,7 +120,7 @@ export class UIEvents {
 				'Export button clicked',
 				() => {
 					this.#log('Export logic not implemented!', {
-						caller: '[UIEvents.initButtons]',
+						caller: `${caller}.initButtons`,
 						level: 'warn'
 					});
 				}
@@ -115,7 +132,7 @@ export class UIEvents {
 				() => {
 					this.paletteManager.renderNewPalette();
 					this.#log('New palette generated and rendered', {
-						caller: '[UIEvents.initButtons]',
+						caller: `${caller}.initButtons`,
 						level: 'debug'
 					});
 				}
@@ -126,12 +143,13 @@ export class UIEvents {
 				'click',
 				this.handleWindowClick.bind(this)
 			);
-		}, 'Failed to initialize buttons.');
+		}, `[${caller}]: Failed to initialize buttons.`);
 	}
 
 	attachTooltipListener(id: string, tooltipText: string): void {
 		return this.#errors.handleSync(() => {
 			const element = this.#helpers.dom.getElement(id);
+
 			if (!element) return;
 
 			EventManager.add(element, 'mouseenter', () =>
@@ -140,7 +158,7 @@ export class UIEvents {
 			EventManager.add(element, 'mouseleave', () =>
 				this.#utils.dom.removeTooltip(element)
 			);
-		}, `Failed to attach tooltip listener for ${id}.`);
+		}, `[${caller}]: Failed to attach tooltip listener for ${id}.`);
 	}
 
 	private handleWindowClick(event: Event): void {
@@ -154,6 +172,6 @@ export class UIEvents {
 			if (target === this.#elements.divs.historyMenu) {
 				this.#elements.divs.historyMenu.classList.add(classes.hidden);
 			}
-		}, 'Failed to handle window click.');
+		}, `[${caller}]: Failed to handle window click.`);
 	}
 }

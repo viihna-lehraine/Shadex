@@ -4,7 +4,7 @@ async function bootstrap() {
     try {
         const { helpersFactory } = await import('../common/factories/helpers.js');
         const helpers = await helpersFactory();
-        console.log('[BOOTSTRAP]: Helpers registered.', helpers);
+        console.log('[BOOTSTRAP]: Helpers registered.');
         const { serviceFactory } = await import('../common/factories/services.js');
         console.log('[BOOTSTRAP]: Service factory successfully imported.');
         console.log(`[BOOSTRAP]: Registering services.`);

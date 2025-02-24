@@ -4,7 +4,7 @@
 	"author": "Viihna Lehraine",
 	"license": "GNU GPL v3",
 	"type": "module",
-	"description": "*** Web-based color palette generator.",
+	"description": "Color palette generator",
 	"main": "./public/dist/bundle.js",
 	"scripts": {
 		"build": "npm run clean && tsc && rollup -c",

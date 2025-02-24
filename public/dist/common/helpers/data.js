@@ -22,7 +22,7 @@ const dataHelpersFactory = () => ({
         // find the first frame that isn't internal
         const callerLine = stackLines.find(line => !skipPatterns.some(pattern => line.includes(pattern)));
         if (!callerLine)
-            return '[UNKNOWN CALLER]';
+            return 'UNKNOWN CALLER';
         for (const pattern of Object.values(regex.stackTrace)) {
             const match = callerLine.match(pattern);
             if (match) {
@@ -33,7 +33,7 @@ const dataHelpersFactory = () => ({
                 return `${functionName} (${fileName}:${lineNumber}:${columnNumber})`;
             }
         }
-        return '[UNKNOWN CALLER]';
+        return 'UNKNOWN CALLER';
     },
     getFormattedTimestamp() {
         const now = new Date();

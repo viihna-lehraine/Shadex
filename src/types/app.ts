@@ -477,6 +477,7 @@ export interface MutexInterface {
 export interface ObserverInterface<T extends Record<string, unknown>> {
 	batchUpdate(updates: Partial<T>): void;
 	get<K extends keyof T>(prop: K): T[K];
+	getData(): T;
 	off<K extends keyof T>(prop: K, callback: Listener<T[K]>): void;
 	on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void;
 	set<K extends keyof T>(prop: K, value: T[K]): void;

@@ -14,7 +14,7 @@ export async function bootstrap(): Promise<{
 		);
 
 		const helpers = await helpersFactory();
-		console.log('[BOOTSTRAP]: Helpers registered.', helpers);
+		console.log('[BOOTSTRAP]: Helpers registered.');
 
 		const { serviceFactory } = await import(
 			'../common/factories/services.js'

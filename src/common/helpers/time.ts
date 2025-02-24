@@ -8,12 +8,12 @@ export const timeHelpersFactory = (): TimeHelpers =>
 			func: T,
 			delay: number
 		): (...args: Parameters<T>) => void {
-			let timeout: ReturnType<typeof setTimeout> | null = null;
+			let timer: ReturnType<typeof setTimeout> | null = null;
 
 			return (...args: Parameters<T>): void => {
-				if (timeout) clearTimeout(timeout);
+				if (timer) clearTimeout(timer);
 
-				timeout = setTimeout(() => {
+				timer = setTimeout(() => {
 					func(...args);
 				}, delay);
 			};

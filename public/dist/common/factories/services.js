@@ -8,7 +8,6 @@ import '../../config/partials/regex.js';
 // File: common/factories/services.ts
 function serviceFactory(helpers) {
     console.log('[SERVICE_FACTORY]: Executing createServices.');
-    console.log(`[SERVICE_FACTORY]: Initializing services with empty placeholder object.`);
     const services = {};
     console.log(`[SERVICE_FACTORY]: Initializing Logger and ErrorHandler (creating instances).`);
     const logger = Logger.getInstance(helpers);

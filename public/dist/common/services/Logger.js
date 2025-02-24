@@ -3,24 +3,35 @@ import '../../config/partials/defaults.js';
 import '../../config/partials/regex.js';
 
 // File: common/services/Logger.ts
+const caller = 'Logger';
 const mode = config.mode;
 const debugLevel = mode.debugLevel;
 class Logger {
     static #instance = null;
     #getCallerInfo;
     constructor(helpers) {
-        this.#getCallerInfo = helpers.data.getCallerInfo;
-        console.log('[Logger] Logger class constructor executed successfully.');
+        try {
+            this.#getCallerInfo = helpers.data.getCallerInfo;
+            console.log(`[${caller}]: Logger class constructor executed successfully.`);
+        }
+        catch (error) {
+            throw new Error(`[${caller} constructor]: ${error instanceof Error ? error.message : error}`);
+        }
     }
     static getInstance(helpers) {
-        console.log('[Logger] Executing getInstance().');
-        if (!Logger.#instance) {
-            console.log('[Logger] No instance found. Creating new instance.');
-            Logger.#instance = new Logger(helpers);
-            console.log('[Logger] Instance created.');
+        try {
+            console.log(`[${caller}]: Executing getInstance.`);
+            if (!Logger.#instance) {
+                console.log(`[${caller}]: No instance found. Creating new instance.`);
+                Logger.#instance = new Logger(helpers);
+                console.log(`[${caller}]: Instance created.`);
+            }
+            console.log(`[${caller}]: Returning existing instance.`);
+            return Logger.#instance;
         }
-        console.log('[Logger] Returning existing instance.');
-        return Logger.#instance;
+        catch (error) {
+            throw new Error(`[${caller}.getInstance]: ${error instanceof Error ? error.message : error}`);
+        }
     }
     log(message, level = 'info', caller) {
         this.#logMessage(message, level, caller);
@@ -39,12 +50,12 @@ class Logger {
             console.log(`%c[${level.toUpperCase()}]%c ${timestamp} [${callerInfo}] %c${message}`, this.#getLevelColor(level), 'color: gray', 'color: inherit');
         }
         catch (error) {
-            console.error(`Logger encountered an unexpected error: ${error}`);
+            console.error(`[${caller}]: Logger encountered an unexpected error: ${error}.`);
         }
         if (callerInfo === 'Unknown caller' &&
             debugLevel > 1 &&
             mode.stackTrace) {
-            console.trace('Full Stack Trace:');
+            console.trace(`[${caller}]: Full Stack Trace:`);
         }
     }
     #formatMutationLog(data) {

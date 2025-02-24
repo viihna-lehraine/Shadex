@@ -2,8 +2,11 @@
 
 import { Services } from '../types/index.js';
 
+const caller = 'EventManager';
+
 export class EventManager {
 	static #instance: EventManager | null = null;
+
 	static #listeners: Map<
 		string,
 		{
@@ -11,20 +14,34 @@ export class EventManager {
 			handler: EventListenerOrEventListenerObject;
 		}
 	> = new Map();
+
 	static #errors: Services['errors'];
 	static #log: Services['log'];
 
 	private constructor(services: Services) {
-		EventManager.#errors = services.errors;
-		EventManager.#log = services.log;
+		try {
+			services.log(`Constructing EventManager instance`, {
+				caller: `${caller} constructor`
+			});
+
+			EventManager.#errors = services.errors;
+
+			EventManager.#log = services.log;
+		} catch (error) {
+			throw new Error(
+				`[${caller} constructor]: ${error instanceof Error ? error.message : error}`
+			);
+		}
 	}
 
 	static getInstance(services: Services): EventManager {
-		if (!EventManager.#instance) {
-			EventManager.#instance = new EventManager(services);
-		}
+		return services.errors.handleSync(() => {
+			if (!EventManager.#instance) {
+				EventManager.#instance = new EventManager(services);
+			}
 
-		return EventManager.#instance;
+			return EventManager.#instance;
+		}, `[${caller}.getInstance]: Failed to create EventManager instance.`);
 	}
 
 	static add(
@@ -34,31 +51,35 @@ export class EventManager {
 	): void {
 		return EventManager.#errors.handleSync(() => {
 			element.addEventListener(eventType, handler);
+
 			EventManager.#listeners.set(`${eventType}_${handler}`, {
 				element,
 				handler
 			});
-		}, `Failed to add event listener for ${eventType}`);
+		}, `[${caller}]: Failed to add event listener for ${eventType}.`);
 	}
 
 	static async listAll(): Promise<void> {
 		return await EventManager.#errors.handleAsync(async () => {
 			if (!EventManager.#listeners.size) {
 				EventManager.#log('No active listeners found.', {
-					caller: '[EventManager.listAll]'
+					caller: `${caller}.listAll`
 				});
+
 				return;
 			}
 
 			console.groupCollapsed('Active Listeners:');
+
 			EventManager.#listeners.forEach(({ element, handler }, key) => {
 				EventManager.#log(`Event: ${key.split('_')[0]}`, {
-					caller: '[EventManager.listAll]'
+					caller: `${caller}.listAll`
 				});
+
 				console.log({ element, handler });
 			});
 			console.groupEnd();
-		}, 'Failed to list all event listeners');
+		}, `[${caller}]: Failed to list all event listeners.`);
 	}
 
 	static async listByType(eventType: string): Promise<void> {
@@ -70,21 +91,24 @@ export class EventManager {
 			if (listeners.length === 0) {
 				EventManager.#log(
 					`No listeners found for event type "${eventType}".`,
-					{ caller: '[EventManager.listByType]', level: 'warn' }
+					{ caller: `${caller}.listByType`, level: 'warn' }
 				);
+
 				return;
 			}
 
 			console.groupCollapsed(`🛠️ Event Listeners for: ${eventType}`);
+
 			listeners.forEach(([_, { element, handler }]) => {
 				EventManager.#log(`Listener for ${eventType}`, {
-					caller: '[EventManager.listByType]',
+					caller: `${caller}.listByType`,
 					level: 'debug'
 				});
+
 				console.log({ element, handler });
 			});
 			console.groupEnd();
-		}, `Failed to list event listeners for ${eventType}`);
+		}, `[${caller}]: Failed to list event listeners for ${eventType}.`);
 	}
 
 	static async remove(
@@ -100,43 +124,46 @@ export class EventManager {
 
 			if (wasRemoved) {
 				EventManager.#log(`Removed listener for ${eventType}`, {
-					caller: '[EventManager.remove]',
-					level: 'info'
+					caller: `${caller}.remove`
 				});
 			} else {
 				EventManager.#log(
 					`No matching listener found for ${eventType}`,
 					{
-						caller: '[EventManager.remove]',
+						caller: `${caller}.remove`,
 						level: 'warn'
 					}
 				);
 			}
-		}, `Failed to remove event listener for ${eventType}`);
+		}, `[${caller}]: Failed to remove event listener for ${eventType}.`);
 	}
 
 	static async removeAll(): Promise<void> {
 		return await EventManager.#errors.handleAsync(async () => {
 			if (EventManager.#listeners.size === 0) {
 				EventManager.#log('No active listeners to remove.', {
-					caller: '[EventManager.removeAll]'
+					caller: `${caller}.removeAll`
 				});
+
 				return;
 			}
 
 			EventManager.#listeners.forEach(({ element, handler }, key) => {
 				const [eventType] = key.split('_');
+
 				element.removeEventListener(eventType, handler);
+
 				EventManager.#log(`Removed listener: ${eventType}`, {
-					caller: '[EventManager.removeAll]',
+					caller: `${caller}.removeAll`,
 					level: 'debug'
 				});
 			});
 
 			EventManager.#listeners.clear();
+
 			EventManager.#log('All listeners have been removed.', {
-				caller: '[EventManager.removeAll]'
+				caller: `${caller}.removeAll`
 			});
-		}, 'Failed to remove all event listeners');
+		}, `[${caller}]: Failed to remove all event listeners.`);
 	}
 }

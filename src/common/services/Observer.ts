@@ -8,6 +8,8 @@ import {
 	Services
 } from '../../types/index.js';
 
+const caller = 'Observer';
+
 export class Observer<T extends Record<string, unknown>>
 	implements ObserverInterface<T>
 {
@@ -24,17 +26,22 @@ export class Observer<T extends Record<string, unknown>>
 		helpers: Helpers,
 		services: Services
 	) {
-		this.#errors = services.errors;
-		this.#log = services.log;
-		this.#helpers = helpers;
+		try {
+			services.log(`Constructing Observer instance`, {
+				caller: `${caller} constructor`,
+				level: 'debug'
+			});
 
-		this.#log('Constructing DataObserver instance.', {
-			caller: 'DataObserver constructor',
-			level: 'debug',
-			verbosity: 3
-		});
+			this.#errors = services.errors;
+			this.#log = services.log;
+			this.#helpers = helpers;
 
-		this.data = this.#deepObserve(this.data);
+			this.data = this.#deepObserve(this.data);
+		} catch (error) {
+			throw new Error(
+				`[${caller} constructor]: ${error instanceof Error ? error.message : error}`
+			);
+		}
 	}
 
 	batchUpdate(updates: Partial<T>): void {
@@ -42,29 +49,34 @@ export class Observer<T extends Record<string, unknown>>
 			this.#log(
 				`Performing batch update. Updates: ${JSON.stringify(this.#helpers.data.clone(updates))}`,
 				{
-					caller: 'DataObserver.batchUpdate',
-					level: 'debug',
-					verbosity: 2
+					caller: `${caller}.batchUpdate`,
+					level: 'debug'
 				}
 			);
 
 			Object.entries(updates).forEach(([key, value]) => {
 				this.set(key as keyof T, value as T[keyof T]);
 			});
-		}, '[OBSERVER]: Error performing batch update.');
+		}, `[${caller}]: Error performing batch update.`);
 	}
 
 	get<K extends keyof T>(prop: K): T[K] {
 		return this.#errors.handleSync(() => {
 			return this.#helpers.data.clone(this.data[prop]);
-		}, '[OBSERVER]: Error getting data.');
+		}, `[${caller}]: Error getting data.`);
+	}
+
+	getData(): T {
+		return this.#errors.handleSync(() => {
+			return this.#helpers.data.clone(this.data);
+		}, `[${caller}]: Error getting data.`);
 	}
 
 	off<K extends keyof T>(prop: K, callback: Listener<T[K]>): void {
 		return this.#errors.handleSync(() => {
 			this.#listeners[prop] =
 				this.#listeners[prop]?.filter(cb => cb !== callback) ?? [];
-		}, '[OBSERVER]: Error removing listener.');
+		}, `[${caller}]: Error removing listener.`);
 	}
 
 	on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void {
@@ -74,7 +86,7 @@ export class Observer<T extends Record<string, unknown>>
 			}
 
 			this.#listeners[prop]!.push(callback);
-		}, '[OBSERVER]: Error adding listener.');
+		}, `[${caller}]: Error adding listener.`);
 	}
 
 	set<K extends keyof T>(prop: K, value: T[K]): void {
@@ -84,7 +96,7 @@ export class Observer<T extends Record<string, unknown>>
 			this.data[prop] = this.#helpers.data.clone(value);
 
 			this.#triggerNotify(prop, this.data[prop], oldValue);
-		}, '[OBSERVER]: Error setting data.');
+		}, `[${caller}]: Error setting data.`);
 	}
 
 	setData<U extends Record<string, unknown>>(
@@ -140,7 +152,7 @@ export class Observer<T extends Record<string, unknown>>
 					return true;
 				}
 			}) as T;
-		}, '[OBSERVER]: Error observing data.');
+		}, `[${caller}]: Error observing data.`);
 	}
 
 	#notify<K extends keyof T>(prop: K, newValue: T[K], oldValue: T[K]) {
@@ -148,7 +160,7 @@ export class Observer<T extends Record<string, unknown>>
 			this.#listeners[prop]?.forEach(callback =>
 				callback(newValue, oldValue)
 			);
-		}, '[OBSERVER]: Error notifying listeners.');
+		}, `[${caller}]: Error notifying listeners.`);
 	}
 
 	#triggerNotify<K extends keyof T>(
@@ -168,6 +180,6 @@ export class Observer<T extends Record<string, unknown>>
 			} else {
 				this.#notify(prop, newValue, oldValue);
 			}
-		}, '[OBSERVER]: Error triggering notification.');
+		}, `[${caller}]: Error triggering notification.`);
 	}
 }

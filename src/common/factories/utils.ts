@@ -124,16 +124,10 @@ export async function utilitiesFactory(
 				utilities.validate
 			);
 
-			// 10. Log success
 			log('Utilities initialized successfully.', {
 				caller: '[UTILITIES_FACTORY]'
 			});
 
-			// 11. Return utilities
-			console.log(
-				'[UTILITIES_FACTORY]: Utilities value before return.',
-				utilities
-			);
 			return utilities as Required<Utilities>;
 		},
 		'Error initializing utilities',

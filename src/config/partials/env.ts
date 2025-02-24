@@ -12,7 +12,7 @@ export const env: Readonly<Environment> = {
 	},
 	mutex: {
 		contentionHistoryLimit: 100,
-		timeout: 5000
+		timeout: 200
 	},
 	observer: {
 		debounce: 50

@@ -4,6 +4,7 @@ import { domConfig, domIndex } from '../config/partials/dom.js';
 import '../config/partials/regex.js';
 
 // events/PaleteEvents.ts
+const caller = 'PaletteEvents';
 const classes = domIndex.classes;
 const ids = domIndex.ids;
 class PaletteEvents {
@@ -22,7 +23,15 @@ class PaletteEvents {
         this.services = services;
         this.stateManager = stateManager;
         this.utils = utils;
-        this.#errors = services.errors;
+        try {
+            services.log(`Constructing PaletteEvents instance`, {
+                caller: `${caller} constructor`
+            });
+            this.#errors = services.errors;
+        }
+        catch (error) {
+            throw new Error(`[${caller} constructor]: ${error instanceof Error ? error.message : error}`);
+        }
     }
     init() {
         return this.#errors.handleSync(() => {
@@ -89,7 +98,7 @@ class PaletteEvents {
             });
             // observe for new elements
             this.#createPaletteObserver();
-        }, `Failed to call init()`);
+        }, `[${caller}]: Failed to call init()`);
     }
     attachColorCopyHandlers() {
         return this.#errors.handleSync(() => {
@@ -101,14 +110,14 @@ class PaletteEvents {
                 if (target.matches(classes.colorDisplay))
                     this.#copyToClipboard(target.value, target);
             });
-        }, 'Failed to attach color copy handlers');
+        }, `[${caller}]: Failed to attach color copy handlers.`);
     }
     async attachDragAndDropHandlers() {
         return this.#errors.handleSync(() => {
             const paletteContainer = this.helpers.dom.getElement(ids.divs.paletteContainer);
             if (!paletteContainer) {
                 this.services.log(`Palette container not found! Cannot attach drag-and-drop handlers.`, {
-                    caller: '[PaletteEvents.attachDragAndDropHandlers]',
+                    caller: `${caller}.attachDragAndDropHandlers`,
                     level: 'warn'
                 });
                 return;
@@ -124,7 +133,7 @@ class PaletteEvents {
                 event.dataTransfer?.setData('text/plain', this.#draggedColumn.id);
                 this.#draggedColumn.classList.add('dragging');
                 this.services.log(`Drag started for column: ${this.#draggedColumn.id}`, {
-                    caller: '[PaletteEvents.attachDragAndDropHandlers]',
+                    caller: `${caller}.attachDragAndDropHandlers`,
                     level: 'debug'
                 });
             }));
@@ -170,7 +179,7 @@ class PaletteEvents {
                     });
                     this.#draggedColumn.classList.remove('dragging');
                     this.services.log(`Swapped columns: ${draggedID} and ${targetID}`, {
-                        caller: '[PaletteEvents.attachDragAndDropHandlers]',
+                        caller: `${caller}.attachDragAndDropHandlers`,
                         level: 'debug'
                     });
                     this.#draggedColumn = null;
@@ -181,17 +190,17 @@ class PaletteEvents {
                 if (this.#draggedColumn) {
                     this.#draggedColumn.classList.remove('dragging');
                     this.services.log('Drag ended for column.', {
-                        caller: '[PaletteEvents.attachDragAndDropHandlers]',
+                        caller: `${caller}.attachDragAndDropHandlers`,
                         level: 'debug'
                     });
                     this.#draggedColumn = null;
                 }
             });
             this.services.log(`Drag and drop event listeners attached`, {
-                caller: '[PaletteEvents.attachDragAndDropHandlers]',
+                caller: `${caller}.attachDragAndDropHandlers`,
                 level: 'debug'
             });
-        }, 'Failed to attach drag-and-drop handlers');
+        }, `[${caller}]: Failed to attach drag-and-drop handlers`);
     }
     // initialiezs column positions on page load
     async initializeColumnPositions() {
@@ -212,10 +221,10 @@ class PaletteEvents {
                 }
             }));
             this.services.log('Initialized column positions.', {
-                caller: '[PaletteEvents.initializeColumnPositions]',
+                caller: `${caller}.initializeColumnPositions`,
                 level: 'debug'
             });
-        }, 'Failed to initialize column positions');
+        }, `[${caller}]: Failed to initialize column positions.`);
     }
     // renders column sizes based on stored state
     async renderColumnSizeChange() {
@@ -232,10 +241,10 @@ class PaletteEvents {
                 }
             });
             this.services.log('Rendered column size changes.', {
-                caller: '[PaletteEvents.renderColumnSizeChange]',
+                caller: `${caller}.renderColumnSizeChange`,
                 level: 'debug'
             });
-        }, 'Failed to render column size changes');
+        }, `[${caller}]: Failed to render column size changes.`);
     }
     async syncColumnColorsWithState() {
         return this.#errors.handleAsync(async () => {
@@ -245,7 +254,7 @@ class PaletteEvents {
             const currentPalette = paletteHistory.at(-1);
             if (!currentPalette?.items) {
                 this.services.log('No valid palette data found in history!', {
-                    caller: '[PaletteEvents.syncColumnColorsWithState]',
+                    caller: `${caller}.syncColumnColorsWithState`,
                     level: 'warn'
                 });
                 return;
@@ -265,12 +274,12 @@ class PaletteEvents {
                     if (colorDisplay)
                         colorDisplay.value = colorValue;
                     this.services.log(`Updated color for column ${columnID}: ${colorValue}`, {
-                        caller: '[PaletteEvents.syncColumnColorsWithState]',
+                        caller: `${caller}.syncColumnColorsWithState`,
                         level: 'debug'
                     });
                 }
             });
-        }, 'Failed to sync column colors with state');
+        }, `[${caller}]: Failed to sync column colors with state.`);
     }
     #copyToClipboard(text, targetElement) {
         return this.#errors.handleSync(() => {
@@ -279,18 +288,18 @@ class PaletteEvents {
                 .then(() => {
                 this.#showTooltip(targetElement, 'Copied!');
                 this.services.log(`Copied color value: ${text}`, {
-                    caller: '[PaletteEvents.#copyToClipboard]',
+                    caller: `${caller}.#copyToClipboard`,
                     level: 'debug'
                 });
                 setTimeout(() => this.#removeTooltip(targetElement), domConfig.tooltipFadeOut);
             })
                 .catch(err => {
                 this.services.log(`Error copying to clipboard: ${err}`, {
-                    caller: '[PaletteEvents.#copyToClipboard]',
+                    caller: `${caller}.#copyToClipboard`,
                     level: 'error'
                 });
             });
-        }, 'Failed to copy to clipboard');
+        }, `[${caller}]: Failed to copy to clipboard.`);
     }
     // observes palette container for new elements
     async #createPaletteObserver() {
@@ -307,8 +316,8 @@ class PaletteEvents {
                                 node.classList.contains(classes.paletteColumn)) {
                                 const state = await this.stateManager.getState();
                                 if (!state.paletteContainer) {
-                                    this.services.log('Skipping initializeColumnPositions() - State is not ready!', {
-                                        caller: '[PaletteEvents.createPaletteObserver]',
+                                    this.services.log('Skipping execution of initializeColumnPositions - State is not ready!', {
+                                        caller: `${caller}.createPaletteObserver`,
                                         level: 'warn'
                                     });
                                     return;
@@ -324,15 +333,15 @@ class PaletteEvents {
                 subtree: true
             });
             this.services.log('Palette Container MutationObserver created.', {
-                caller: '[PaletteEvents.createPaletteObserver]'
+                caller: `${caller}.createPaletteObserver`
             });
-        }, 'Failed to create palette observer.');
+        }, `[${caller}]: Failed to create palette observer.`);
     }
     #getColorByPreference(colorData, preference) {
         return this.#errors.handleSync(() => {
             return (colorData[preference] ||
                 colorData.hex);
-        }, 'Failed to retrieve color by preference.');
+        }, `[${caller}]: Failed to retrieve color by preference.`);
     }
     #handleColorInputChange(event, column, columnID) {
         return this.#errors.handleSync(() => {
@@ -347,13 +356,13 @@ class PaletteEvents {
             if (!isNaN(numericColumnID)) {
                 this.paletteState.updatePaletteItemColor(numericColumnID, newColor);
             }
-        }, 'Failed to handle color input change.');
+        }, `[${caller}]: Failed to handle color input change.`);
     }
     // hides tooltip for a given element
     #hideTooltip() {
         return this.#errors.handleSync(() => {
             this.utils.dom.hideTooltip();
-        }, 'Failed to hide tooltip.');
+        }, `[${caller}]: Failed to hide tooltip.`);
     }
     #removeTooltip(element) {
         return this.#errors.handleSync(() => {
@@ -364,7 +373,7 @@ class PaletteEvents {
             if (tooltip)
                 tooltip.remove();
             delete element.dataset.tooltipId;
-        }, 'Failed to remove tooltip.');
+        }, `[${caller}]: Failed to remove tooltip.`);
     }
     #showTooltip(element, text) {
         return this.#errors.handleSync(() => {
@@ -377,7 +386,7 @@ class PaletteEvents {
             tooltip.style.left = `${rect.left + window.scrollX}px`;
             tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 5}px`;
             element.dataset.tooltipId = tooltip.id;
-        }, 'Failed to show tooltip.');
+        }, `[${caller}]: Failed to show tooltip.`);
     }
     // handles resizing of palette columns
     async #startResize(event, column) {
@@ -406,13 +415,13 @@ class PaletteEvents {
                     }
                 }));
                 this.services.log(`Resized column ${columnID} to ${column.offsetWidth}px`, {
-                    caller: '[PaletteEvents.#startResize]',
+                    caller: `${caller}.#startResize`,
                     level: 'debug'
                 });
             };
             window.addEventListener('mousemove', onMouseMove);
             window.addEventListener('mouseup', onMouseUp);
-        }, 'Failed to start column resize');
+        }, `[${caller}]: Failed to start column resize.`);
     }
     #toggleColorModal(button) {
         return this.#errors.handleSync(() => {
@@ -421,7 +430,7 @@ class PaletteEvents {
                 return;
             const modal = this.helpers.dom.getElement(modalID);
             modal?.classList.toggle(classes.hidden);
-        }, 'Failed to toggle color modal.');
+        }, `[${caller}]: Failed to toggle color modal.`);
     }
     // toggles lock state of a palette column
     #toggleLock(button) {
@@ -431,7 +440,7 @@ class PaletteEvents {
                 return;
             const columnID = parseInt(column.id.split('-').pop());
             this.paletteManager.handleColumnLock(columnID);
-        }, 'Failed to toggle lock state.');
+        }, `[${caller}]: Failed to toggle lock state.`);
     }
 }
 

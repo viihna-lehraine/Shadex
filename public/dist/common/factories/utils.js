@@ -61,12 +61,9 @@ async function utilitiesFactory(helpers, services) {
             caller: '[UTILITIES_FACTORY]'
         });
         utilities.palette = paletteUtilsFactory(utilities.brand, utilities.color, utilities.dom, helpers, services, utilities.validate);
-        // 10. Log success
         log('Utilities initialized successfully.', {
             caller: '[UTILITIES_FACTORY]'
         });
-        // 11. Return utilities
-        console.log('[UTILITIES_FACTORY]: Utilities value before return.', utilities);
         return utilities;
     }, 'Error initializing utilities', { context: { utilities } });
 }

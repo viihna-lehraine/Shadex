@@ -15,18 +15,23 @@ class Mutex {
     #errors;
     #log;
     constructor(errors, log) {
-        this.#errors = errors;
-        this.#log = log;
-        this.#timeout = env.mutex.timeout;
-        log('Constructing Mutex instance.', {
-            caller: `${caller} constructor`
-        });
+        try {
+            log('Constructing Mutex instance.', {
+                caller: `${caller} constructor`
+            });
+            this.#errors = errors;
+            this.#log = log;
+            this.#timeout = env.mutex.timeout;
+        }
+        catch (error) {
+            throw new Error(`[${caller} constructor]: ${error instanceof Error ? error.message : error}`);
+        }
     }
     async acquireRead() {
         return this.#errors.handleAsync(async () => {
             this.#lockAttempts++;
             return await this.#acquireLock(false);
-        }, 'Error acquiring read lock.');
+        }, `[${caller}]: Error acquiring read lock.`);
     }
     async acquireReadWithTimeout(timeout = this.#timeout) {
         return this.#errors.handleAsync(async () => {
@@ -39,7 +44,7 @@ class Mutex {
             }
             catch (err) {
                 this.#log(err.message, {
-                    caller: '[Mutex.acquireReadWithTimeout]',
+                    caller: `${caller}.acquireReadWithTimeout`,
                     level: 'warn'
                 });
                 return false;
@@ -50,7 +55,7 @@ class Mutex {
         return this.#errors.handleAsync(async () => {
             this.#lockAttempts++;
             return await this.#acquireLock(true);
-        }, 'Error acquiring write lock.');
+        }, `[${caller}]: Error acquiring write lock.`);
     }
     async acquireWriteWithTimeout(timeout = this.#timeout) {
         return this.#errors.handleAsync(async () => {
@@ -63,22 +68,24 @@ class Mutex {
             }
             catch (err) {
                 this.#log(err.message, {
-                    caller: '[Mutex.acquireWriteWithTimeout]',
+                    caller: `${caller}.acquireWriteWithTimeout`,
                     level: 'warn'
                 });
                 return false;
             }
-        }, 'Error acquiring write lock with timeout.');
+        }, `[${caller}]: Error acquiring write lock with timeout.`);
     }
     getContentionCount() {
-        return this.#contentionCount;
+        return this.#errors.handleSync(() => {
+            return this.#contentionCount;
+        }, `[${caller}]: Error getting contention count.`);
     }
     getContentionRate() {
         return this.#errors.handleSync(() => {
             if (this.#lockAttempts === 0)
                 return '0';
             return ((this.#contentionCount / this.#lockAttempts) * 100).toFixed(2);
-        }, 'Error getting contention rate.');
+        }, `[${caller}]: Error getting contention rate.`);
     }
     logContentionSnapShot() {
         this.#errors.handleSync(() => {
@@ -92,7 +99,7 @@ class Mutex {
                 caller: `${caller}.logContentionSnapShot`,
                 level: 'debug'
             });
-        }, 'Error logging contention snapshot.');
+        }, `[${caller}]: Error logging contention snapshot.`);
     }
     async read(callback) {
         return this.#errors.handleAsync(async () => {
@@ -107,7 +114,7 @@ class Mutex {
             finally {
                 this.release();
             }
-        }, 'Error reading from mutex.');
+        }, `[${caller}]: Error reading from mutex.`);
     }
     async release() {
         return this.#errors.handleAndReturn(() => {
@@ -138,20 +145,22 @@ class Mutex {
                     level: 'warn'
                 });
             }
-        }, 'Error releasing lock.');
+        }, `[${caller}]: Error releasing lock.`);
     }
     resetContentionCount() {
-        this.#log(`Resetting contention count to 0 from ${this.#contentionCount}.`, {
-            caller: `${caller}.resetContentionCount`,
-            level: 'debug'
-        });
-        this.#contentionCount = 0;
+        return this.#errors.handleSync(() => {
+            this.#log(`Resetting contention count to 0 from ${this.#contentionCount}.`, {
+                caller: `${caller}.resetContentionCount`,
+                level: 'debug'
+            });
+            this.#contentionCount = 0;
+        }, `[${caller}]: Error resetting contention count.`);
     }
     async runExclusive(callback) {
         return this.#errors.handleAsync(async () => {
             await this.acquireWrite();
             try {
-                this.#log('Running exclusive (write) operation.', {
+                this.#log('Running exclusive write operation.', {
                     caller: `${caller}.runExclusive`,
                     level: 'debug'
                 });
@@ -165,13 +174,13 @@ class Mutex {
             finally {
                 this.release();
             }
-        }, 'Error running exclusive operation.');
+        }, `[${caller}]: Error running exclusive operation.`);
     }
     async upgradeToWriteLock() {
         return await this.#errors.handleAsync(async () => {
             await this.release();
             await this.acquireWrite();
-        }, 'Error upgrading to write lock.');
+        }, `[${caller}]: Error upgrading to write lock.`);
     }
     async #acquireLock(isWrite) {
         return this.#errors.handleAndReturn(() => {
@@ -219,7 +228,7 @@ class Mutex {
                     this.#processQueue();
                 }
             });
-        }, 'Error acquiring lock.');
+        }, `[${caller}]: Error acquiring lock.`);
     }
     #processQueue() {
         this.#log('Processing lock queue.', {
@@ -248,7 +257,8 @@ class Mutex {
         // if no writers are queued, grant read locks to all queued readers
         if (nextWriterIndex === -1) {
             const readers = this.#lockQueue.filter(entry => !entry.isWrite);
-            this.#lockQueue = this.#lockQueue.filter(entry => entry.isWrite); // Retain writers
+            // retain writers in queue
+            this.#lockQueue = this.#lockQueue.filter(entry => entry.isWrite);
             readers.forEach(({ resolve }) => {
                 this.#readers++;
                 this.#log(`Granted read lock. Active readers: ${this.#readers}`, {
@@ -268,9 +278,11 @@ class Mutex {
         }
     }
     #timeoutPromise(ms, message) {
-        return new Promise((_, reject) => {
-            setTimeout(() => reject(new Error(message)), ms);
-        });
+        return this.#errors.handleAsync(async () => {
+            return new Promise((_, reject) => {
+                setTimeout(() => reject(new Error(message)), ms);
+            });
+        }, `[${caller}]: Error creating timeout promise.`);
     }
 }
 

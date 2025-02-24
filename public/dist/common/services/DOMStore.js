@@ -3,14 +3,8 @@ import { domIndex } from '../../config/partials/dom.js';
 import '../../config/partials/regex.js';
 
 // File: common/services/DOMStore.ts
-const caller = '[DOMStore]';
+const caller = 'DOMStore';
 const ids = domIndex.ids;
-/**
- * @description Stores validation data for DOM elements
- * @export
- * @class DOMStore
- * @implements {DOMStoreInterface}
- */
 class DOMStore {
     static #instance;
     #elements = null;
@@ -18,10 +12,18 @@ class DOMStore {
     #helpers;
     #log;
     constructor(errors, helpers, log) {
-        this.#errors = errors;
-        this.#log = log;
-        this.#helpers = helpers;
-        this.#validateAndGetDOMElements();
+        try {
+            log(`Constructing DOMStore instance`, {
+                caller: `${caller} constructor`
+            });
+            this.#errors = errors;
+            this.#log = log;
+            this.#helpers = helpers;
+            this.#validateAndGetDOMElements();
+        }
+        catch (error) {
+            throw new Error(`[${caller} constructor]: ${error instanceof Error ? error.message : error}`);
+        }
     }
     static getInstance(errors, helpers, log) {
         return errors.handleSync(() => {
@@ -32,19 +34,13 @@ class DOMStore {
                 });
                 DOMStore.#instance = new DOMStore(errors, helpers, log);
             }
-            log('DOMStore instance already exists. Returning existing instance', {
+            log('Returning existing instance', {
                 caller: `${caller}.getInstance`,
                 level: 'debug'
             });
             return DOMStore.#instance;
-        }, 'Error getting DOMStore instance.', { fallback: new DOMStore(errors, helpers, log) });
+        }, `[${caller}]: Error getting DOMStore instance.`, { fallback: new DOMStore(errors, helpers, log) });
     }
-    /**
-     * @description Get a single DOM element
-     * @param category *
-     * @param key *
-     * @returns {DOMElements[K][E]}
-     */
     getElement(category, key) {
         return this.#errors.handleSync(() => {
             const element = this.#elements?.[category]?.[key];
@@ -53,17 +49,11 @@ class DOMStore {
                     caller: `${caller}.getElement`,
                     level: 'error'
                 });
-                throw new Error(`Element ${category}.${String(key)} not found`);
+                throw new Error(`[${caller}]: Element ${category}.${String(key)} not found`);
             }
             return element;
-        }, 'Error getting DOM element.', { fallback: null });
+        }, `[${caller}]: Error getting DOM element.`, { fallback: null });
     }
-    /**
-     * @description Get all DOM elements
-     * @param category *
-     * @param key *
-     * @returns {DOMElements[K][E]}
-     */
     getElements() {
         return this.#errors.handleSync(() => {
             if (!this.#elements) {
@@ -71,15 +61,11 @@ class DOMStore {
                     caller: `${caller}.getElements`,
                     level: 'warn'
                 });
-                throw new Error('DOM elements not validated');
+                throw new Error(`[${caller}]: DOM elements are not yet validated.`);
             }
             return this.#elements;
-        }, 'Error getting DOM elements.', { fallback: {} });
+        }, `[${caller}]: Error getting DOM elements.`, { fallback: {} });
     }
-    /**
-     * @description Sets class instance's DOM elements value
-     * @param elements DOMElements
-     */
     setElements(elements) {
         return this.#errors.handleSync(() => {
             this.#elements = elements;
@@ -87,14 +73,8 @@ class DOMStore {
                 caller: `${caller}.setElements`,
                 level: 'debug'
             });
-        }, 'Unable to set DOM elements');
+        }, `[${caller}]: Unable to set DOM elements.`);
     }
-    /**
-     * @description Validates and retrieves DOM elements
-     * @private
-     * @memberof DOMStore
-     * @returns {void}
-     */
     #validateAndGetDOMElements() {
         const missingElements = [];
         this.#errors.handleSync(() => {
@@ -136,10 +116,10 @@ class DOMStore {
                     caller: `${caller}.#validateAndGetDOMElements`,
                     level: 'error'
                 });
-                throw new Error('Some DOM elements are missing. Validation failed.');
+                throw new Error(`[${caller}]: Some DOM elements are missing. Validation failed.`);
             }
             this.#elements = elements;
-        }, 'Unable to validate DOM elements', { context: { missingElements } });
+        }, `[${caller}]: Unable to validate DOM elements.`, { context: { missingElements } });
         this.#log('All static elements are present! 🏳️‍⚧️ 🩷 🏳️‍⚧️', {
             caller: `${caller}.#validateAndGetDOMElements`,
             level: 'info'

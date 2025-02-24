@@ -4,49 +4,55 @@ import { domIndex, domConfig } from '../config/partials/dom.js';
 import { regex } from '../config/partials/regex.js';
 
 // File: palette/PaletteManager.js
+const caller = 'PaletteManager';
 const ids = domIndex.ids;
 class PaletteManager {
     stateManager;
+    #common;
+    #errors;
     #generateHues;
     #generatePaletteFns;
     #generatePalette;
-    #common;
     #helpers;
-    #utils;
     #log;
-    #errors;
     #storage;
+    #utils;
     constructor(stateManager, common, generateHues, generatePaletteFns, generatePalette) {
         this.stateManager = stateManager;
-        common.services.log(`Constructing PaletteManager.`, {
-            caller: '[PaletteManager constructor]',
-            level: 'debug',
-            verbosity: 3
-        });
-        this.#log = common.services.log;
-        this.#generateHues = generateHues;
-        this.#generatePaletteFns = generatePaletteFns;
-        this.#generatePalette = generatePalette;
-        this.#common = common;
-        this.#errors = common.services.errors;
-        this.#helpers = common.helpers;
-        this.#utils = common.utils;
-        this.#storage = new StorageManager(this.#common.services);
-        this.#log('Completing Palette Manager initialization', {
-            caller: '[PaletteManager constructor]',
-            level: 'debug'
-        });
+        try {
+            common.services.log(`Constructing PaletteManager.`, {
+                caller: `${caller} constructor`,
+                level: 'debug',
+                verbosity: 3
+            });
+            this.#log = common.services.log;
+            this.#generateHues = generateHues;
+            this.#generatePaletteFns = generatePaletteFns;
+            this.#generatePalette = generatePalette;
+            this.#common = common;
+            this.#errors = common.services.errors;
+            this.#helpers = common.helpers;
+            this.#utils = common.utils;
+            this.#storage = new StorageManager(this.#common.services);
+            this.#log('Completing Palette Manager initialization', {
+                caller: `${caller} constructor`,
+                level: 'debug'
+            });
+        }
+        catch (error) {
+            throw new Error(`[${caller} constructor]: ${error instanceof Error ? error.message : error}`);
+        }
     }
     extractPaletteFromDOM() {
         return this.#errors.handleSync(() => {
             this.#log('Extracting palette from DOM', {
-                caller: '[PaletteManager.extractPaletteFromDOM]',
+                caller: `${caller}.extractPaletteFromDOM`,
                 level: 'debug'
             });
             const paletteColumns = document.querySelectorAll('.palette-column');
             if (paletteColumns.length === 0) {
                 this.#log('No palette columns found in DOM.', {
-                    caller: '[PaletteManager.extractPaletteFromDOM]',
+                    caller: `${caller}.extractPaletteFromDOM`,
                     level: 'warn'
                 });
                 return defaults.palette;
@@ -55,12 +61,12 @@ class PaletteManager {
                 const input = col.querySelector('.color-display');
                 const color = input ? input.value.trim() : '#000000';
                 this.#log(`Extracted color from column ${index + 1}: ${color}`, {
-                    caller: '[PaletteManager.extractPaletteFromDOM]',
+                    caller: `${caller}.extractPaletteFromDOM`,
                     level: 'debug'
                 });
                 if (!regex.dom.hex.test(color)) {
                     this.#log(`Invalid color format for column ${index + 1}: ${color}. Generating and using random HSL`, {
-                        caller: '[PaletteManager.extractPaletteFromDOM]',
+                        caller: `${caller}.extractPaletteFromDOM`,
                         level: 'warn'
                     });
                     const fallbackColor = this.#utils.color.generateRandomHSL();
@@ -77,7 +83,7 @@ class PaletteManager {
             });
             const options = this.#utils.palette.getPaletteOptionsFromUI();
             this.#log(`Extracted palette options: ${JSON.stringify(options)}`, {
-                caller: '[PaletteManager.extractPaletteFromDOM]',
+                caller: `${caller}.extractPaletteFromDOM`,
                 level: 'debug'
             });
             return {
@@ -93,7 +99,7 @@ class PaletteManager {
                 },
                 items: extractedItems
             };
-        }, 'Failed to extract palette from DOM');
+        }, `[${caller}: Failed to extract palette from DOM.`);
     }
     async handleColumnLock(columnID) {
         return this.#errors.handleAsync(async () => {
@@ -103,7 +109,7 @@ class PaletteManager {
             const columnIndex = columns.findIndex(col => col.id === columnID);
             if (columnIndex === -1) {
                 this.#log(`Column with ID ${columnID} not found.`, {
-                    caller: '[PaletteManager.handleColumnLock]',
+                    caller: `${caller}.handleColumnLock`,
                     level: 'warn'
                 });
                 return;
@@ -111,7 +117,7 @@ class PaletteManager {
             // toggle lock state
             columns[columnIndex].isLocked = !columns[columnIndex].isLocked;
             this.stateManager.updatePaletteColumns(columns, true, 2);
-        }, `Failed to toggle lock for column ${columnID}`);
+        }, `[${caller}]: Failed to toggle lock for column ${columnID}`);
     }
     async handleColumnResize(columnID, newSize) {
         return this.#errors.handleAsync(async () => {
@@ -120,7 +126,7 @@ class PaletteManager {
             const columnIndex = columns.findIndex(col => col.id === columnID);
             if (columnIndex === -1) {
                 this.#log(`Column with ID ${columnID} not found.`, {
-                    caller: '[PaletteManager.handleColumnResize]',
+                    caller: 'PaletteManager.handleColumnResize',
                     level: 'warn'
                 });
                 return;
@@ -140,7 +146,7 @@ class PaletteManager {
             const correctionFactor = 100 / totalSize;
             columns.forEach(col => (col.size *= correctionFactor));
             this.stateManager.updatePaletteColumns(columns, true, 2);
-        }, `Failed to resize column ${columnID}`);
+        }, `[${caller}]: Failed to resize column ${columnID}`);
     }
     async loadPalette() {
         return await this.#errors.handleAsync(async () => {
@@ -150,32 +156,32 @@ class PaletteManager {
                 this.#helpers.typeguards.isPalette(storedPalette)) {
                 this.stateManager.addPaletteToHistory(storedPalette);
                 this.#log(`Stored palette added to history`, {
-                    caller: '[PaletteManager.loadPalette]',
+                    caller: `${caller}.loadPalette`,
                     level: 'debug'
                 });
             }
             const randomOptions = this.#utils.palette.getRandomizedPaleteOptions();
             this.#log(`Generated randomized palette options: ${JSON.stringify(randomOptions)}`, {
-                caller: '[PaletteManager.loadPalette]',
+                caller: `${caller}.loadPalette`,
                 level: 'debug'
             });
             const newPalette = this.#generatePalette(randomOptions, this.#common, this.#generateHues, this.#generatePaletteFns);
             this.stateManager.addPaletteToHistory(newPalette);
             this.#log(`New palette added to history`, {
-                caller: '[PaletteManager.loadPalette]',
+                caller: `${caller}.loadPalette`,
                 level: 'debug'
             });
             await this.#storage.setItem('palette', newPalette);
             this.#log(`New palette stored`, {
-                caller: '[PaletteManager.loadPalette]',
+                caller: `${caller}.loadPalette`,
                 level: 'debug'
             });
             this.renderPaletteFromState();
             this.#log(`Palette rendered from state`, {
-                caller: '[PaletteManager.loadPalette]',
+                caller: `${caller}.loadPalette`,
                 level: 'debug'
             });
-        }, 'Failed to load palette');
+        }, `[${caller}]: Failed to load palette.`);
     }
     async renderNewPalette() {
         return await this.#errors.handleAsync(async () => {
@@ -186,7 +192,7 @@ class PaletteManager {
             // retrieve palette generation options
             const options = this.#utils.palette.getPaletteOptionsFromUI();
             this.#log(`Palette options: ${JSON.stringify(options)}`, {
-                caller: '[PaletteManager.renderNewPalette]',
+                caller: `${caller}.renderNewPalette`,
                 level: 'debug'
             });
             // store the old palette in history
@@ -233,7 +239,7 @@ class PaletteManager {
             columns.forEach(({ column }) => paletteContainer.appendChild(column));
             // update state with new columns
             this.stateManager.updatePaletteColumns(columns.map(col => col.state), true, 3);
-        }, 'Failed to render a new palette');
+        }, `[${caller}]: Failed to render a new palette.`);
     }
     async renderPaletteFromState() {
         return await this.#errors.handleAsync(async () => {
@@ -241,7 +247,7 @@ class PaletteManager {
             const paletteContainer = this.#helpers.dom.getElement(ids.divs.paletteContainer);
             if (!paletteContainer) {
                 this.#log('Palette container not found', {
-                    caller: '[PaletteManager.renderPaletteFromState]',
+                    caller: `${caller}.renderPaletteFromState`,
                     level: 'warn'
                 });
                 return;
@@ -253,7 +259,7 @@ class PaletteManager {
             const latestPalette = currentState.paletteHistory.at(-1);
             if (!latestPalette) {
                 this.#log('No saved palettes in history. Cannot render.', {
-                    caller: '[PaletteManager.renderPaletteFromState]',
+                    caller: `${caller}.renderPaletteFromState`,
                     level: 'warn'
                 });
                 return;
@@ -286,17 +292,17 @@ class PaletteManager {
                     }
                 };
             });
-            // Append new columns to the palette container
+            // append new columns to the palette container
             columns.forEach(({ column }) => paletteContainer.appendChild(column));
-            // Update state with new columns
+            // update state with new columns
             this.stateManager.updatePaletteColumns(columns.map(col => col.state), true, 3);
             this.stateManager.updatePaletteHistory([latestPalette]);
             await this.#storage.setItem('palette', latestPalette);
             this.#log(`Restored ${columns.length} columns from saved state.`, {
-                caller: '[PaletteManager.renderPaletteFromState]',
+                caller: `${caller}.renderPaletteFromState`,
                 level: 'debug'
             });
-        }, 'Failed to render palette from state');
+        }, `[${caller}]: Failed to render palette from state.`);
     }
     async swapColumns(draggedID, targetID) {
         return await this.#errors.handleAsync(async () => {
@@ -306,7 +312,7 @@ class PaletteManager {
             const targetIndex = columns.findIndex(col => col.id === targetID);
             if (draggedIndex === -1 || targetIndex === -1) {
                 this.#log(`Failed to swap columns: Column ID ${draggedID} or ${targetID} not found.`, {
-                    caller: '[PaletteManager.swapColumns]',
+                    caller: `${caller}.swapColumns`,
                     level: 'warn'
                 });
                 return;
@@ -321,7 +327,7 @@ class PaletteManager {
             // update state with new column order
             this.stateManager.updatePaletteColumns(columns, true, 3);
             this.#log(`Swapped columns ${draggedID} and ${targetID}. New order: ${columns.map(col => col.id).join(', ')}`, {
-                caller: '[PaletteManager.swapColumns]',
+                caller: `${caller}.swapColumns`,
                 level: 'debug'
             });
         }, `Failed to swap columns ${draggedID} and ${targetID}`);
@@ -332,7 +338,7 @@ class PaletteManager {
             const colorSpace = currentState.preferences.colorSpace;
             if (!this.#utils.validate.userColorInput(colorValue)) {
                 this.#log(`Invalid color value: ${colorValue}. Unable to render column UI.`, {
-                    caller: '[PaletteManager.createColumnInUI]',
+                    caller: `${caller}.createColumnInUI`,
                     level: 'warn'
                 });
                 return;
@@ -385,7 +391,7 @@ class PaletteManager {
             column.appendChild(dragHandle);
             column.appendChild(resizeHandle);
             column.appendChild(colorInputModal);
-        }, 'Failed to create column UI elements', { context: { columnID, colorValue } });
+        }, `[${caller}]: Failed to create column UI elements.`, { context: { columnID, colorValue } });
     }
 }
 

@@ -1,6 +1,11 @@
 // File: common/services/Mutex.ts
 
-import { LockQueueEntry, MutexInterface, Services } from '../../types/index.js';
+import {
+	Helpers,
+	LockQueueEntry,
+	MutexInterface,
+	Services
+} from '../../types/index.js';
 import { env } from '../../config/index.js';
 
 const caller = 'Mutex';
@@ -15,16 +20,37 @@ export class Mutex implements MutexInterface {
 	#timeout: number;
 
 	#errors: Services['errors'];
+	#helpers: Helpers;
 	#log: Services['log'];
 
-	constructor(errors: Services['errors'], log: Services['log']) {
-		this.#errors = errors;
-		this.#log = log;
-		this.#timeout = env.mutex.timeout;
+	constructor(
+		errors: Services['errors'],
+		helpers: Helpers,
+		log: Services['log']
+	) {
+		try {
+			log('Constructing Mutex instance.', {
+				caller: `${caller} constructor`
+			});
 
-		log('Constructing Mutex instance.', {
-			caller: `${caller} constructor`
-		});
+			this.#errors = errors;
+			this.#helpers = helpers;
+			this.#log = log;
+			this.#timeout = env.mutex.timeout;
+		} catch (error) {
+			throw new Error(
+				`[${caller} constructor]: ${
+					error instanceof Error ? error.message : error
+				}`
+			);
+		}
+	}
+
+	get isLocked(): boolean {
+		return this.#errors.handleSync(
+			() => this.#helpers.data.clone(this.#isLocked),
+			`[${caller}]: Error getting lock status.`
+		);
 	}
 
 	async acquireRead(): Promise<void> {
@@ -32,7 +58,7 @@ export class Mutex implements MutexInterface {
 			this.#lockAttempts++;
 
 			return await this.#acquireLock(false);
-		}, 'Error acquiring read lock.');
+		}, `[${caller}]: Error acquiring read lock.`);
 	}
 
 	async acquireReadWithTimeout(
@@ -47,12 +73,14 @@ export class Mutex implements MutexInterface {
 						'Read lock acquisition timed out.'
 					)
 				]);
+
 				return true;
 			} catch (err) {
 				this.#log((err as Error).message, {
-					caller: '[Mutex.acquireReadWithTimeout]',
+					caller: `${caller}.acquireReadWithTimeout`,
 					level: 'warn'
 				});
+
 				return false;
 			}
 		}, 'Error acquiring read lock with timeout.');
@@ -63,7 +91,7 @@ export class Mutex implements MutexInterface {
 			this.#lockAttempts++;
 
 			return await this.#acquireLock(true);
-		}, 'Error acquiring write lock.');
+		}, `[${caller}]: Error acquiring write lock.`);
 	}
 
 	async acquireWriteWithTimeout(
@@ -78,45 +106,53 @@ export class Mutex implements MutexInterface {
 						'Write lock acquisition timed out.'
 					)
 				]);
+
 				return true;
 			} catch (err) {
 				this.#log((err as Error).message, {
-					caller: '[Mutex.acquireWriteWithTimeout]',
+					caller: `${caller}.acquireWriteWithTimeout`,
 					level: 'warn'
 				});
+
 				return false;
 			}
-		}, 'Error acquiring write lock with timeout.');
+		}, `[${caller}]: Error acquiring write lock with timeout.`);
 	}
 
 	getContentionCount(): number {
-		return this.#contentionCount;
+		return this.#errors.handleSync(() => {
+			return this.#contentionCount;
+		}, `[${caller}]: Error getting contention count.`);
 	}
 
 	getContentionRate(): string {
 		return this.#errors.handleSync(() => {
 			if (this.#lockAttempts === 0) return '0';
+
 			return ((this.#contentionCount / this.#lockAttempts) * 100).toFixed(
 				2
 			);
-		}, 'Error getting contention rate.');
+		}, `[${caller}]: Error getting contention rate.`);
 	}
 
 	logContentionSnapShot(): void {
 		this.#errors.handleSync(() => {
 			const rate = Number(this.getContentionRate());
+
 			this.#contentionHistory.push(rate);
+
 			if (
 				this.#contentionHistory.length >
 				env.mutex.contentionHistoryLimit
 			) {
 				this.#contentionHistory.shift();
 			}
+
 			this.#log(`Contention snapshot recorded: ${rate}%`, {
 				caller: `${caller}.logContentionSnapShot`,
 				level: 'debug'
 			});
-		}, 'Error logging contention snapshot.');
+		}, `[${caller}]: Error logging contention snapshot.`);
 	}
 
 	async read<T>(callback: () => T): Promise<T> {
@@ -133,7 +169,7 @@ export class Mutex implements MutexInterface {
 			} finally {
 				this.release();
 			}
-		}, 'Error reading from mutex.');
+		}, `[${caller}]: Error reading from mutex.`);
 	}
 
 	async release(): Promise<void> {
@@ -145,6 +181,7 @@ export class Mutex implements MutexInterface {
 
 			if (this.#readers > 0) {
 				this.#readers--;
+
 				this.#log(
 					`Released read lock. Active readers: ${this.#readers}`,
 					{
@@ -152,13 +189,16 @@ export class Mutex implements MutexInterface {
 						level: 'debug'
 					}
 				);
+
 				if (this.#readers === 0) this.#processQueue();
 			} else if (this.#isLocked) {
 				this.#isLocked = false;
+
 				this.#log('Released write lock.', {
 					caller: `${caller}.release`,
 					level: 'debug'
 				});
+
 				this.#processQueue();
 			} else {
 				this.#log('No lock to release.', {
@@ -166,19 +206,21 @@ export class Mutex implements MutexInterface {
 					level: 'warn'
 				});
 			}
-		}, 'Error releasing lock.') as void;
+		}, `[${caller}]: Error releasing lock.`) as void;
 	}
 
 	resetContentionCount(): void {
-		this.#log(
-			`Resetting contention count to 0 from ${this.#contentionCount}.`,
-			{
-				caller: `${caller}.resetContentionCount`,
-				level: 'debug'
-			}
-		);
+		return this.#errors.handleSync(() => {
+			this.#log(
+				`Resetting contention count to 0 from ${this.#contentionCount}.`,
+				{
+					caller: `${caller}.resetContentionCount`,
+					level: 'debug'
+				}
+			);
 
-		this.#contentionCount = 0;
+			this.#contentionCount = 0;
+		}, `[${caller}]: Error resetting contention count.`);
 	}
 
 	async runExclusive<T>(callback: () => Promise<T> | T): Promise<T> {
@@ -186,7 +228,7 @@ export class Mutex implements MutexInterface {
 			await this.acquireWrite();
 
 			try {
-				this.#log('Running exclusive (write) operation.', {
+				this.#log('Running exclusive write operation.', {
 					caller: `${caller}.runExclusive`,
 					level: 'debug'
 				});
@@ -202,14 +244,14 @@ export class Mutex implements MutexInterface {
 			} finally {
 				this.release();
 			}
-		}, 'Error running exclusive operation.');
+		}, `[${caller}]: Error running exclusive operation.`);
 	}
 
 	async upgradeToWriteLock(): Promise<void> {
 		return await this.#errors.handleAsync(async () => {
 			await this.release();
 			await this.acquireWrite();
-		}, 'Error upgrading to write lock.');
+		}, `[${caller}]: Error upgrading to write lock.`);
 	}
 
 	async #acquireLock(isWrite: boolean): Promise<void> {
@@ -228,7 +270,9 @@ export class Mutex implements MutexInterface {
 				const safeResolve = () => {
 					if (!cleared.value) {
 						clearTimeout(timer);
+
 						cleared.value = true;
+
 						resolve();
 					}
 				};
@@ -242,7 +286,9 @@ export class Mutex implements MutexInterface {
 								level: 'warn'
 							}
 						);
+
 						cleared.value = true;
+
 						reject(
 							new Error(
 								`Lock acquisition timed out after ${this.#timeout} ms.`
@@ -280,7 +326,7 @@ export class Mutex implements MutexInterface {
 					this.#processQueue();
 				}
 			});
-		}, 'Error acquiring lock.');
+		}, `[${caller}]: Error acquiring lock.`);
 	}
 
 	#processQueue(): void {
@@ -294,6 +340,7 @@ export class Mutex implements MutexInterface {
 				caller: `${caller}.processQueue`,
 				level: 'debug'
 			});
+
 			return;
 		}
 
@@ -304,6 +351,7 @@ export class Mutex implements MutexInterface {
 		// if next queued lock is a writer and no readers are active, grant it
 		if (nextWriterIndex === 0 && this.#readers === 0 && !this.#isLocked) {
 			const { resolve } = this.#lockQueue.shift()!;
+
 			this.#isLocked = true;
 
 			this.#log('Granted write lock to queued writer.', {
@@ -312,16 +360,20 @@ export class Mutex implements MutexInterface {
 			});
 
 			resolve();
+
 			return;
 		}
 
 		// if no writers are queued, grant read locks to all queued readers
 		if (nextWriterIndex === -1) {
 			const readers = this.#lockQueue.filter(entry => !entry.isWrite);
-			this.#lockQueue = this.#lockQueue.filter(entry => entry.isWrite); // Retain writers
+
+			// retain writers in queue
+			this.#lockQueue = this.#lockQueue.filter(entry => entry.isWrite);
 
 			readers.forEach(({ resolve }) => {
 				this.#readers++;
+
 				this.#log(
 					`Granted read lock. Active readers: ${this.#readers}`,
 					{
@@ -329,8 +381,10 @@ export class Mutex implements MutexInterface {
 						level: 'debug'
 					}
 				);
+
 				resolve();
 			});
+
 			return;
 		}
 
@@ -347,8 +401,10 @@ export class Mutex implements MutexInterface {
 	}
 
 	#timeoutPromise(ms: number, message: string): Promise<never> {
-		return new Promise((_, reject) => {
-			setTimeout(() => reject(new Error(message)), ms);
-		});
+		return this.#errors.handleAsync(async () => {
+			return new Promise((_, reject) => {
+				setTimeout(() => reject(new Error(message)), ms);
+			});
+		}, `[${caller}]: Error creating timeout promise.`);
 	}
 }

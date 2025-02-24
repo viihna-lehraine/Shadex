@@ -1,23 +1,37 @@
 import { UserFacingError } from './ErrorClasses.js';
+import { config } from '../../config/partials/base.js';
 import '../../config/partials/defaults.js';
 import '../../config/partials/regex.js';
 
 // File: common/services/ErrorHandler.ts
+const caller = 'ErrorHandler';
+const mode = config.mode;
 class ErrorHandler {
     static #instance = null;
     #getCallerInfo;
     #logger;
     constructor(helpers, logger) {
-        this.#getCallerInfo = helpers.data.getCallerInfo;
-        this.#logger = logger;
+        try {
+            console.log(`[${caller}]: Constructing ErrorHandler instance`);
+            this.#getCallerInfo = helpers.data.getCallerInfo;
+            this.#logger = logger;
+        }
+        catch (error) {
+            throw new Error(`[${caller} constructor]: ${error instanceof Error ? error.message : error}`);
+        }
     }
     static getInstance(helpers, logger) {
-        if (!ErrorHandler.#instance) {
-            console.debug('[ErrorHandler] No ErrorHandler instance exists yet. Creating new instance.');
-            ErrorHandler.#instance = new ErrorHandler(helpers, logger);
+        try {
+            if (!ErrorHandler.#instance) {
+                console.debug(`[${caller}] No ErrorHandler instance exists yet. Creating new instance.`);
+                ErrorHandler.#instance = new ErrorHandler(helpers, logger);
+            }
+            console.debug(`[${caller}] Returning existing ErrorHandler instance.`);
+            return ErrorHandler.#instance;
         }
-        console.debug('[ErrorHandler] Returning existing ErrorHandler instance.');
-        return ErrorHandler.#instance;
+        catch (error) {
+            throw new Error(`[${caller}.getInstance]: ${error instanceof Error ? error.message : error}`);
+        }
     }
     handleAndReturn(action, errorMessage, options = {}) {
         try {
@@ -54,24 +68,43 @@ class ErrorHandler {
         }
     }
     #formatError(error, message, context) {
-        return error instanceof Error
-            ? `${message}: ${error.message}. Context: ${JSON.stringify(context)}`
-            : `${message}: ${error}. Context: ${JSON.stringify(context)}`;
+        try {
+            return error instanceof Error
+                ? `${message}: ${error.message}. Context: ${JSON.stringify(context)}`
+                : `${message}: ${error}. Context: ${JSON.stringify(context)}`;
+        }
+        catch (error) {
+            throw new Error(`[${caller}]: Error formatting error message: ${error instanceof Error ? error.message : error}`);
+        }
     }
     #getStackTrace(error) {
-        return error?.stack ?? new Error().stack ?? 'No stack trace available';
+        try {
+            return (error?.stack ??
+                new Error().stack ??
+                `[${caller}]: No stack trace available.`);
+        }
+        catch (error) {
+            throw new Error(`[${caller}]: Error getting stack trace: ${error instanceof Error ? error.message : error}`);
+        }
     }
     #handle(error, errorMessage, options = {}) {
-        const caller = this.#getCallerInfo();
-        const formattedError = this.#formatError(error, errorMessage, options.context ?? {});
-        this.#logger.log(formattedError, 'error', caller);
-        {
-            this.#logger.log(`Stack trace:\n${this.#getStackTrace(error instanceof Error ? error : undefined)}`, 'debug', '[ErrorHandler]');
+        try {
+            const caller = this.#getCallerInfo();
+            const formattedError = this.#formatError(error, errorMessage, options.context ?? {});
+            this.#logger.log(formattedError, 'error', caller);
+            if (mode.stackTrace) {
+                this.#logger.log(`Stack trace:\n${this.#getStackTrace(error instanceof Error ? error : undefined)}`, 'debug', `[${caller}]`);
+            }
+            const userMessage = options.userMessage ??
+                (error instanceof UserFacingError
+                    ? error.userMessage
+                    : undefined);
+            if (userMessage) {
+                alert(userMessage);
+            }
         }
-        const userMessage = options.userMessage ??
-            (error instanceof UserFacingError ? error.userMessage : undefined);
-        if (userMessage) {
-            alert(userMessage);
+        catch (error) {
+            throw new Error(`[${caller}]: Error handling error: ${error instanceof Error ? error.message : error}`);
         }
     }
 }

@@ -28,7 +28,7 @@ export const dataHelpersFactory = (): DataHelpers =>
 				line => !skipPatterns.some(pattern => line.includes(pattern))
 			);
 
-			if (!callerLine) return '[UNKNOWN CALLER]';
+			if (!callerLine) return 'UNKNOWN CALLER';
 
 			for (const pattern of Object.values(regex.stackTrace)) {
 				const match = callerLine.match(pattern);
@@ -42,7 +42,7 @@ export const dataHelpersFactory = (): DataHelpers =>
 				}
 			}
 
-			return '[UNKNOWN CALLER]';
+			return 'UNKNOWN CALLER';
 		},
 		getFormattedTimestamp(): string {
 			const now = new Date();
