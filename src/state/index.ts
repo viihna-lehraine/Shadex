@@ -1,8 +1,8 @@
 // File: state/index.ts
 
-export { PaletteState } from './PaletteState.js';
+export { DOMStateService } from './DOMStateService.js';
+export { PaletteStateService } from './PaletteStateService.js';
 export { StateFactory } from './StateFactory.js';
-export { StateHistory } from './StateHistory.js';
-export { StateLock } from './StateLock.js';
+export { StateHistoryService } from './StateHistoryService.js';
 export { StateManager } from './StateManager.js';
-export { StatePersistence } from './StatePersistence.js';
+export { StateStore } from './StateStore.js';

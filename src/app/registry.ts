@@ -7,9 +7,11 @@ import {
 	Services,
 	Utilities
 } from '../types/index.js';
-import { EventManager } from '../events/EventManager.js';
-import { PaletteEvents } from '../events/PaletteEvents.js';
-import { UIEvents } from '../events/UIEvents.js';
+import {
+	EventManager,
+	PaletteEventsService,
+	UIEventsService
+} from '../dom/index.js';
 
 export async function registerDependencies(
 	helpers: Helpers,
@@ -19,23 +21,27 @@ export async function registerDependencies(
 	const caller = '[REGISTER_DEPENDENCIES]';
 
 	// 1. Execute the function
-	log(`Executing registerDependencies...`, { caller });
+	log.info(`Executing registerDependencies...`, `${caller}`);
 
 	return await errors.handleAsync(async () => {
-		let events: { palette: PaletteEvents; ui: UIEvents } | null = null;
+		let events: {
+			palette: PaletteEventsService;
+			ui: UIEventsService;
+		} | null = null;
 
 		// 2. Create empty utils placeholder
 		const utils = {} as Utilities;
 
 		// 3. Initialize utilities
 		const { initializeUtilities } = await import('./init.js');
-		log('Initializing Utilities.', { caller });
+		log.info('Initializing Utilities.', `${caller}`);
 		Object.assign(utils, await initializeUtilities(helpers, services));
 
 		// 4. Initialize CommonFunctions with required properties
-		log('Initializing CommonFunctions with required properties.', {
-			caller
-		});
+		log.info(
+			'Initializing CommonFunctions with required properties.',
+			`${caller}`
+		);
 		const common: Required<CommonFunctions> = {
 			helpers,
 			services,
@@ -44,9 +50,7 @@ export async function registerDependencies(
 
 		// 5. Initialize StateManager
 		const { initializeStateManager } = await import('./init.js');
-		log('Initializing StateManager.', {
-			caller: '[REGISTER_DEPENDENCIES]'
-		});
+		log.info('Initializing StateManager.', `${caller}`);
 		const stateManager = await initializeStateManager(
 			helpers,
 			services,
@@ -54,9 +58,9 @@ export async function registerDependencies(
 		);
 
 		// 6. Initialize PaletteState
-		const { initializePaletteState } = await import('./init.js');
-		log(`Initializing PaletteState.`, { caller });
-		const paletteState = await initializePaletteState(
+		const { initializePaletteStateService } = await import('./init.js');
+		log.info(`Initializing PaletteStateService.`, `${caller}`);
+		const paletteState = await initializePaletteStateService(
 			services,
 			stateManager,
 			utils
@@ -71,7 +75,7 @@ export async function registerDependencies(
 		);
 		const { generatePalette } = await import('../palette/generate.js');
 		const { initializePaletteManager } = await import('./init.js');
-		log(`Initializing PaletteManager.`, { caller });
+		log.info(`Initializing PaletteManager.`, `${caller}`);
 		const paletteManager = await initializePaletteManager(
 			common,
 			generateHuesFnGroup,
@@ -81,13 +85,13 @@ export async function registerDependencies(
 		);
 
 		// 8. Initialize EventManager
-		log(`Initializing EventManager.`, { caller });
+		log.info(`Initializing EventManager.`, `${caller}`);
 		const eventManager = EventManager.getInstance(services);
 
 		// 9. Initialize event classes object
 		const { initializeEvents } = await import('./init.js');
 		console.log(`${caller}: initializeEvents function imported.`);
-		log(`Initializing event classes object.`, { caller });
+		log.info(`Initializing event classes object.`, `${caller}`);
 		events = (await initializeEvents(
 			helpers,
 			paletteManager,
@@ -98,16 +102,16 @@ export async function registerDependencies(
 		))!;
 
 		// 10.; Ensure state is fully initialized before rendering palette
-		log(`Calling stateManager.ensureStateReady`, { caller });
+		log.info(`Calling stateManager.ensureStateReady`, `${caller}`);
 		await stateManager.ensureStateReady();
 
 		// 11. Render initial palette
-		log(`Rendering initial palette.`, { caller });
+		log.info(`Rendering initial palette.`, `${caller}`);
 		await paletteManager!.loadPalette();
-		log(`Initial palette rendered.`, { caller });
+		log.info(`Initial palette rendered.`, `${caller}`);
 
 		// 12. Log success and return dependencies
-		log(`Dependencies registered.`, { caller });
+		log.info(`Dependencies registered.`, `${caller}`);
 		return {
 			common,
 			eventManager,

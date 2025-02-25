@@ -1,4 +1,4 @@
-// File: palette/partials/hues.js
+// File: dom/palette/partials/hues.js
 
 import {
 	CommonFunctions,
@@ -20,10 +20,10 @@ function generateAnalogousHues(
 	return errors.handleSync(
 		() => {
 			if (!common.utils.validate.colorValue(color)) {
-				log(`Invalid color value ${JSON.stringify(color)}`, {
-					caller: '[generateAnalogousHues]',
-					level: 'error'
-				});
+				log.error(
+					`Invalid color value ${JSON.stringify(color)}`,
+					`generateAnalogousHues`
+				);
 
 				return [];
 			}

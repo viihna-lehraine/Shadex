@@ -1,11 +1,11 @@
 // File: app/bootstrap.ts
-async function bootstrap() {
+export async function bootstrap() {
     console.log('[BOOTSTRAP]: Starting bootstrap process.');
     try {
-        const { helpersFactory } = await import('../common/factories/helpers.js');
+        const { helpersFactory } = await import('../core/factories/helpers.js');
         const helpers = await helpersFactory();
         console.log('[BOOTSTRAP]: Helpers registered.');
-        const { serviceFactory } = await import('../common/factories/services.js');
+        const { serviceFactory } = await import('../core/factories/services.js');
         console.log('[BOOTSTRAP]: Service factory successfully imported.');
         console.log(`[BOOSTRAP]: Registering services.`);
         const services = serviceFactory(helpers);
@@ -17,6 +17,4 @@ async function bootstrap() {
         throw error;
     }
 }
-
-export { bootstrap };
-//# sourceMappingURL=bootstrap.js.map
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYm9vdHN0cmFwLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2FwcC9ib290c3RyYXAudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEseUJBQXlCO0FBSXpCLE1BQU0sQ0FBQyxLQUFLLFVBQVUsU0FBUztJQUk5QixPQUFPLENBQUMsR0FBRyxDQUFDLDBDQUEwQyxDQUFDLENBQUM7SUFFeEQsSUFBSSxDQUFDO1FBQ0osTUFBTSxFQUFFLGNBQWMsRUFBRSxHQUFHLE1BQU0sTUFBTSxDQUFDLDhCQUE4QixDQUFDLENBQUM7UUFFeEUsTUFBTSxPQUFPLEdBQUcsTUFBTSxjQUFjLEVBQUUsQ0FBQztRQUN2QyxPQUFPLENBQUMsR0FBRyxDQUFDLGtDQUFrQyxDQUFDLENBQUM7UUFFaEQsTUFBTSxFQUFFLGNBQWMsRUFBRSxHQUFHLE1BQU0sTUFBTSxDQUN0QywrQkFBK0IsQ0FDL0IsQ0FBQztRQUNGLE9BQU8sQ0FBQyxHQUFHLENBQUMscURBQXFELENBQUMsQ0FBQztRQUVuRSxPQUFPLENBQUMsR0FBRyxDQUFDLG1DQUFtQyxDQUFDLENBQUM7UUFDakQsTUFBTSxRQUFRLEdBQUcsY0FBYyxDQUFDLE9BQU8sQ0FBQyxDQUFDO1FBRXpDLE9BQU8sQ0FBQyxHQUFHLENBQUMsMENBQTBDLENBQUMsQ0FBQztRQUN4RCxPQUFPLEVBQUUsT0FBTyxFQUFFLFFBQVEsRUFBRSxDQUFDO0lBQzlCLENBQUM7SUFBQyxPQUFPLEtBQUssRUFBRSxDQUFDO1FBQ2hCLE9BQU8sQ0FBQyxLQUFLLENBQ1osMEJBQTBCLEtBQUssWUFBWSxLQUFLLENBQUMsQ0FBQyxDQUFDLEtBQUssQ0FBQyxPQUFPLENBQUMsQ0FBQyxDQUFDLEtBQUssRUFBRSxDQUMxRSxDQUFDO1FBQ0YsTUFBTSxLQUFLLENBQUM7SUFDYixDQUFDO0FBQ0YsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEZpbGU6IGFwcC9ib290c3RyYXAudHNcblxuaW1wb3J0IHsgSGVscGVycywgU2VydmljZXMgfSBmcm9tICcuLi90eXBlcy9pbmRleC5qcyc7XG5cbmV4cG9ydCBhc3luYyBmdW5jdGlvbiBib290c3RyYXAoKTogUHJvbWlzZTx7XG5cdGhlbHBlcnM6IEhlbHBlcnM7XG5cdHNlcnZpY2VzOiBTZXJ2aWNlcztcbn0+IHtcblx0Y29uc29sZS5sb2coJ1tCT09UU1RSQVBdOiBTdGFydGluZyBib290c3RyYXAgcHJvY2Vzcy4nKTtcblxuXHR0cnkge1xuXHRcdGNvbnN0IHsgaGVscGVyc0ZhY3RvcnkgfSA9IGF3YWl0IGltcG9ydCgnLi4vY29yZS9mYWN0b3JpZXMvaGVscGVycy5qcycpO1xuXG5cdFx0Y29uc3QgaGVscGVycyA9IGF3YWl0IGhlbHBlcnNGYWN0b3J5KCk7XG5cdFx0Y29uc29sZS5sb2coJ1tCT09UU1RSQVBdOiBIZWxwZXJzIHJlZ2lzdGVyZWQuJyk7XG5cblx0XHRjb25zdCB7IHNlcnZpY2VGYWN0b3J5IH0gPSBhd2FpdCBpbXBvcnQoXG5cdFx0XHQnLi4vY29yZS9mYWN0b3JpZXMvc2VydmljZXMuanMnXG5cdFx0KTtcblx0XHRjb25zb2xlLmxvZygnW0JPT1RTVFJBUF06IFNlcnZpY2UgZmFjdG9yeSBzdWNjZXNzZnVsbHkgaW1wb3J0ZWQuJyk7XG5cblx0XHRjb25zb2xlLmxvZyhgW0JPT1NUUkFQXTogUmVnaXN0ZXJpbmcgc2VydmljZXMuYCk7XG5cdFx0Y29uc3Qgc2VydmljZXMgPSBzZXJ2aWNlRmFjdG9yeShoZWxwZXJzKTtcblxuXHRcdGNvbnNvbGUubG9nKGBbQk9PVFNUUkFQXTogQm9vdHN0cmFwIHByb2Nlc3MgY29tcGxldGUuYCk7XG5cdFx0cmV0dXJuIHsgaGVscGVycywgc2VydmljZXMgfTtcblx0fSBjYXRjaCAoZXJyb3IpIHtcblx0XHRjb25zb2xlLmVycm9yKFxuXHRcdFx0YFtCT09UU1RSQVAtRVJSXSBFcnJvcjogJHtlcnJvciBpbnN0YW5jZW9mIEVycm9yID8gZXJyb3IubWVzc2FnZSA6IGVycm9yfWBcblx0XHQpO1xuXHRcdHRocm93IGVycm9yO1xuXHR9XG59XG4iXX0=

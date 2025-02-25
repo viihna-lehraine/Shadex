@@ -20,6 +20,7 @@ export const env: Readonly<Environment> = {
 	state: {
 		maxReadyAttempts: 20,
 		maxSaveRetries: 10,
+		readyTimeout: 50,
 		saveThrottleDelay: 30
 	}
 } as const;

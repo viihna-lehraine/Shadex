@@ -1,0 +1,285 @@
+// File: state/StateLockService.ts
+
+import { Helpers, Services, State, StateLockContract } from '../types/index.js';
+import { ObserverService } from '../core/services/index.js';
+import { env } from '../config/index.js';
+
+const caller = 'StateLockService';
+
+export class StateLockService implements StateLockContract {
+	static #instance: StateLockService | null = null;
+
+	#dataLocks: Map<keyof State, MutexService> = new Map();
+	#mutex: MutexService;
+	#observer: ObserverService<State>;
+
+	#clone: Helpers['data']['clone'];
+	#errors: Services['errors'];
+	#helpers: Helpers;
+	#log: Services['log'];
+
+	private constructor(
+		helpers: Helpers,
+		mutex: MutexService,
+		observer: ObserverService<State>,
+		services: Services
+	) {
+		try {
+			services.log.debug(
+				`Constructing ${caller} instance.`,
+				`${caller} constructor`
+			);
+
+			this.#clone = helpers.data.clone;
+			this.#errors = services.errors;
+			this.#helpers = helpers;
+			this.#log = services.log;
+
+			this.#observer = observer;
+			this.#mutex = mutex;
+		} catch (error) {
+			throw new Error(
+				`[${caller} constructor]: ${
+					error instanceof Error ? error.message : error
+				}`
+			);
+		}
+	}
+
+	static getInstance(
+		helpers: Helpers,
+		mutex: MutexService,
+		observer: ObserverService<State>,
+		services: Services
+	): StateLockService {
+		return services.errors.handleSync(() => {
+			if (!StateLockService.#instance) {
+				services.log.debug(
+					`Creating ${caller} instance.`,
+					`${caller}.getInstance`
+				);
+
+				StateLockService.#instance = new StateLockService(
+					helpers,
+					mutex,
+					observer,
+					services
+				);
+			}
+
+			services.log.debug(
+				`Returning ${caller} instance.`,
+				`${caller}.getInstance`
+			);
+
+			return StateLockService.#instance;
+		}, `[${caller}.getInstance]: Error getting instance.`);
+	}
+
+	async atomicUpdate(callback: (state: State) => void): Promise<void> {
+		return this.#errors.handleAsync(async () => {
+			return await this.#mutex.runExclusive(async () => {
+				callback(this.#observer.getData());
+
+				this.#log.debug(
+					'Performed atomic update.',
+					`${caller}.atomicUpdate`
+				);
+
+				await this.#saveState();
+			});
+		}, `[${caller}]: Failed to perform atomic update.`);
+	}
+
+	getContentionStats(): { count: number; rate: string } {
+		return this.#errors.handleSync(() => {
+			return {
+				count: this.#mutex.getContentionCount(),
+				rate: this.#mutex.getContentionRate()
+			};
+		}, `[${caller}.getContentionStats]: Error getting contention stats.`);
+	}
+
+	getProperty<K extends keyof State>(key: K): State[K] {
+		return this.#errors.handleSync(() => {
+			return this.#clone(this.#observer.get(key));
+		}, `[${caller}.getProperty]: Error getting property: ${key}`);
+	}
+
+	getState(): State {
+		return this.#errors.handleSync(() => {
+			return this.#clone(this.#observer.getData());
+		}, `[${caller}.getState]: Error getting state.`);
+	}
+
+	async lockAndExecute<T, K extends keyof State = keyof State>(
+		type: 'read' | 'write',
+		callback: (stateProperty: State[K]) => Promise<T> | T,
+		key: K
+	): Promise<T>;
+	async lockAndExecute<T>(
+		type: 'read' | 'write',
+		callback: () => Promise<T> | T
+	): Promise<T>;
+	async lockAndExecute<T, K extends keyof State = keyof State>(
+		type: 'read' | 'write',
+		callback:
+			| ((stateProperty: State[K]) => Promise<T> | T)
+			| (() => Promise<T> | T),
+		key?: K
+	): Promise<T> {
+		let clonedKey = key ? this.#helpers.data.clone(key) : null;
+
+		return this.#errors.handleAsync(
+			async () => {
+				const lockType = type.toUpperCase();
+				const lock = clonedKey
+					? this.#getLockForKey(clonedKey)
+					: this.#mutex;
+
+				const acquire =
+					type === 'read'
+						? lock.acquireReadWithTimeout.bind(lock)
+						: lock.acquireWriteWithTimeout.bind(lock);
+
+				this.#log.debug(
+					`${clonedKey ? `Acquiring ${lockType} lock for ${String(clonedKey)}` : `Acquiring ${lockType} lock`}...`,
+					`${caller}.lockAndExecute`
+				);
+
+				const acquired = await acquire(env.mutex.timeout);
+
+				if (!acquired) {
+					const msg = `${lockType} lock acquisition timed out${clonedKey ? ` for ${String(clonedKey)}` : ''}.`;
+
+					this.#log.warn(msg, `${caller}.lockAndExecute`);
+
+					throw new Error(`[${caller}]: ${msg}`);
+				}
+
+				this.#log.debug(
+					`${lockType} lock acquired${clonedKey ? ` for ${String(clonedKey)}` : ''}.`,
+					`${caller}.lockAndExecute`
+				);
+
+				try {
+					return clonedKey
+						? await (
+								callback as (
+									stateProperty: State[K]
+								) => Promise<T>
+							)(this.#observer.get(clonedKey))
+						: await (callback as () => Promise<T>)();
+				} finally {
+					await lock.release();
+
+					this.#log.debug(
+						`${lockType} lock released${clonedKey ? ` for ${String(clonedKey)}` : ''}.`,
+						`${caller}.lockAndExecute`
+					);
+				}
+			},
+			`${clonedKey ? `Failed to acquire ${type} lock for property: ${String(clonedKey)}` : `Failed to acquire ${type} lock`}`
+		);
+	}
+
+	async setProperty<K extends keyof State>(
+		key: K,
+		value: State[K]
+	): Promise<void> {
+		const lock = this.#getLockForKey(key);
+
+		await lock.runExclusive(async () => {
+			this.#observer.set(key, value);
+
+			this.#log.debug(
+				`Updated property "${String(key)}"`,
+				`${caller}.setProperty`
+			);
+		});
+	}
+
+	async updateLockedProperty<K extends keyof State>(
+		key: K,
+		value: State[K],
+		saveCallback: () => Promise<void>
+	): Promise<void> {
+		return this.#errors.handleAsync(
+			async () => {
+				const lock = this.#getLockForKey(key);
+
+				await lock.runExclusive(async () => {
+					this.#observer.set(key, value);
+
+					this.#log(`Updated ${String(key)} with locked property.`, {
+						caller: `${caller}.updateLockedProperty`,
+						level: 'debug'
+					});
+
+					await saveCallback();
+				});
+			},
+			`[${caller}]: Failed to update locked property`,
+			{ context: { key, value } }
+		);
+	}
+
+	async updateSelections(
+		selections: Partial<State['selections']>,
+		track: boolean
+	): Promise<void> {
+		return this.#errors.handleAsync(
+			async () => {
+				this.#observer.set('selections', {
+					...this.#observer.get('selections'),
+					...selections
+				});
+
+				this.#log.debug(
+					'Updated selections',
+					`${caller}.updateSelections`
+				);
+
+				await this.#statePersistence.saveState(this.#state);
+				this.#stateLock.logContentionStats();
+			},
+			`[${caller}]: Failed to update selections.`,
+			{ context: { selections, track } }
+		);
+	}
+
+	async withGlobalLock<T>(callback: () => Promise<T>): Promise<T> {
+		return this.#errors.handleAsync(async () => {
+			return await this.#mutex.runExclusive(callback);
+		}, `[${caller}]: Error running callback with global lock.`);
+	}
+
+	async withPropertyLock<K extends keyof State, T>(
+		key: K,
+		callback: () => Promise<T>
+	): Promise<T> {
+		return this.#errors.handleAsync(async () => {
+			if (!this.#dataLocks.has(key)) {
+				this.#dataLocks.set(
+					key,
+					new MutexService(this.#errors, this.#helpers, this.#log)
+				);
+			}
+
+			return await this.#dataLocks.get(key)!.runExclusive(callback);
+		}, `[${caller}]: Error running callback with lock for key: ${key}`);
+	}
+
+	#getLockForKey(key: keyof State): Mutex {
+		return this.#errors.handleSync(() => {
+			if (!this.#dataLocks.has(key)) {
+				this.#dataLocks.set(
+					key,
+					new MutexService(this.#errors, this.#helpers, this.#log)
+				);
+			}
+
+			return this.#dataLocks.get(key)!;
+		}, `[${caller}]: Error getting lock for key: ${key}`);
+	}
+}

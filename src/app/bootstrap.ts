@@ -9,15 +9,13 @@ export async function bootstrap(): Promise<{
 	console.log('[BOOTSTRAP]: Starting bootstrap process.');
 
 	try {
-		const { helpersFactory } = await import(
-			'../common/factories/helpers.js'
-		);
+		const { helpersFactory } = await import('../core/factories/helpers.js');
 
 		const helpers = await helpersFactory();
 		console.log('[BOOTSTRAP]: Helpers registered.');
 
 		const { serviceFactory } = await import(
-			'../common/factories/services.js'
+			'../core/factories/services.js'
 		);
 		console.log('[BOOTSTRAP]: Service factory successfully imported.');
 

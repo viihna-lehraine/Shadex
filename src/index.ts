@@ -9,7 +9,7 @@
 
 // File: index.ts
 
-import { EventManager } from './events/EventManager.js';
+import { EventManager } from './dom/index.js';
 import { config } from './config/index.js';
 
 const mode = config.mode;
@@ -23,41 +23,40 @@ async function initializeApp() {
 	const { helpers, services } = await bootstrap();
 
 	const { errors, log } = services;
-	log('Boostrap process complete.', { caller: 'STARTUP' });
+	log.info('Boostrap process complete.', 'STARTUP');
 
-	log('Registering global error handlers...', { caller: 'STARTUP' });
+	log.info('Registering global error handlers...', 'STARTUP');
 	window.onerror = function (message, source, lineno, colno, error) {
-		log(`Unhandled error: ${message} at ${source}:${lineno}:${colno}`, {
-			caller: 'GLOBAL ERROR HANDLER'
-		});
+		log.info(
+			`Unhandled error: ${message} at ${source}:${lineno}:${colno}`,
+			'GLOBAL ERROR HANDLER'
+		);
 
 		if (error && error.stack) {
-			log(`Stack trace:\n${error.stack}`, {
-				caller: 'GLOBAL ERROR HANDLER'
-			});
+			log.info(`Stack trace:\n${error.stack}`, 'GLOBAL ERROR HANDLER');
 		}
 
 		return false;
 	};
 	window.addEventListener('unhandledrejection', function (event) {
-		log(`Unhandled promise rejection: ${event.reason}`, {
-			caller: 'GLOBAL ERROR HANDLER'
-		});
+		log.info(
+			`Unhandled promise rejection: ${event.reason}`,
+			'GLOBAL ERROR HANDLER'
+		);
 	});
 
 	const { registerDependencies } = await import('./app/registry.js');
-	log('Registering dependencies.', { caller: 'STARTUP' });
+	log.info('Registering dependencies.', 'STARTUP');
 	const deps = await registerDependencies(helpers, services);
-	log('Dependencies registered.', { caller: 'STARTUP' });
+	log.info('Dependencies registered.', 'STARTUP');
 
 	console.log(`mode.exposeClasses ${mode.exposeClasses}`);
 	if (mode.exposeClasses) {
-		log(`Exposing classes to console.`, { caller: 'STARTUP_OPTION' });
+		log.info(`Exposing classes to console.`, 'STARTUP_OPTION');
 		const { exposeClasses } = await import('./app/init.js');
 		await exposeClasses(
 			deps.eventManager,
 			deps.events.palette,
-			deps.paletteManager,
 			deps.common.services,
 			deps.stateManager,
 			deps.events.ui

@@ -1,6 +1,0 @@
-// File: src/config/initSettings.ts
-
-export const initSettings = {
-	logInitError: true,
-	printEnv: true
-};

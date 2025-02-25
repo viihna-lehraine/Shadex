@@ -1,10 +1,16 @@
 // File: state/StateFactory.ts
 
-import { Helpers, Services, State, Utilities } from '../types/index.js';
+import {
+	Helpers,
+	Services,
+	State,
+	StateFactoryContract,
+	Utilities
+} from '../types/index.js';
 
 const caller = 'StateFactory';
 
-export class StateFactory {
+export class StateFactory implements StateFactoryContract {
 	static #instance: StateFactory | null = null;
 
 	#errors: Services['errors'];
@@ -18,10 +24,10 @@ export class StateFactory {
 		utils: Utilities
 	) {
 		try {
-			services.log(`Constructing StateFactory instance.`, {
-				caller: `${caller} constructor`,
-				level: 'debug'
-			});
+			services.log.debug(
+				`Constructing StateFactory instance.`,
+				`${caller} constructor`
+			);
 
 			this.#errors = services.errors;
 			this.#helpers = helpers;
@@ -43,10 +49,10 @@ export class StateFactory {
 	): StateFactory {
 		return services.errors.handleSync(() => {
 			if (!StateFactory.#instance) {
-				services.log('Creating StateFactory instance.', {
-					caller: `${caller}.getInstance`,
-					level: 'debug'
-				});
+				services.log.debug(
+					'Creating StateFactory instance.',
+					`${caller}.getInstance`
+				);
 
 				StateFactory.#instance = new StateFactory(
 					helpers,
@@ -55,10 +61,10 @@ export class StateFactory {
 				);
 			}
 
-			services.log(`Returning StateFactory instance.`, {
-				caller: `${caller}.getInstance`,
-				level: 'debug'
-			});
+			services.log.debug(
+				`Returning StateFactory instance.`,
+				`${caller}.getInstance`
+			);
 
 			return StateFactory.#instance;
 		}, `[${caller}]: Error getting instance.`);
@@ -67,24 +73,24 @@ export class StateFactory {
 	createInitialState(): Promise<State> {
 		return (
 			this.#errors.handleAsync(async () => {
-				this.#log('Generating initial state.', {
-					caller: `${caller}.#generateInitialState`,
-					level: 'debug'
-				});
+				this.#log.debug(
+					'Generating initial state.',
+					`${caller}.#generateInitialState`
+				);
 
 				const columns = this.#utils.dom.scanPaletteColumns() ?? [];
 
 				if (!columns) {
-					this.#log('No palette columns found!', {
-						caller: `${caller}.#generateInitialState`,
-						level: 'error'
-					});
+					this.#log.error(
+						'No palette columns found!',
+						`${caller}.#generateInitialState`
+					);
 				}
 
-				this.#log(`Scanned palette columns.`, {
-					caller: `${caller}.#generateInitialState`,
-					level: 'debug'
-				});
+				this.#log.debug(
+					`Scanned palette columns.`,
+					`${caller}.#generateInitialState`
+				);
 
 				return {
 					appMode: 'edit',

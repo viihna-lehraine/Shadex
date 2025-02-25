@@ -1,63 +1,29 @@
-import { Mutex } from '../common/services/Mutex.js';
-import { Observer } from '../common/services/Observer.js';
-import { StorageManager } from '../storage/StorageManager.js';
-import { env } from '../config/partials/env.js';
-import { defaults } from '../config/partials/defaults.js';
-import { domIndex, domConfig } from '../config/partials/dom.js';
-import '../config/partials/regex.js';
-
 // File: state/StateManager.ts
+import { StateFactory, StateHistoryService, StateStore } from './index.js';
+import { StorageManager } from '../storage/StorageManager.js';
+import { env } from '../config/index.js';
 const caller = 'StateManager';
-const defaultState = defaults.state;
 const maxReadyAttempts = env.state.maxReadyAttempts;
-class StateManager {
+const stateReadyTimeout = env.state.readyTimeout;
+export class StateManager {
     static #instance = null;
-    #dataLocks = new Map();
-    #history;
-    #observer;
-    #onStateLoadCallback = null;
-    #saveThrottleTimer = null;
     #state;
-    #stateLock;
+    #stateFactory;
+    #stateHistory;
     #storage;
-    #undoStack;
+    #store;
     #log;
     #errors;
-    #helpers;
-    #services;
-    #utils;
     constructor(helpers, services, utils) {
         try {
-            services.log(`Constructing StateManager instance.`, {
-                caller: `${caller} constructor`,
-                level: 'debug'
-            });
+            services.log.debug(`Constructing ${caller} instance.`, `${caller} constructor`);
             this.#log = services.log;
             this.#errors = services.errors;
-            this.#helpers = helpers;
-            this.#services = services;
-            this.#utils = utils;
-            this.#storage = new StorageManager(services);
             this.#state = {};
-            this.#observer = new Observer(this.#state, { delay: env.observer.debounce }, this.#helpers, this.#services);
-            Object.keys(this.#state).forEach(key => {
-                this.#observer.on(key, (newVal, oldVal) => {
-                    this.#log(`${key} updated. New: ${JSON.stringify(newVal)} | Old: ${JSON.stringify(oldVal)}`, { caller: `${caller}.#observer`, level: 'debug' });
-                });
-            });
-            this.#state.paletteHistory = [];
-            this.#history = [this.#state];
-            this.#stateLock = new Mutex(services.errors, services.log);
-            this.#undoStack = [];
-            this.init()
-                .then(() => {
-                this.#saveStateAndLog('init', 3);
-            })
-                .catch(error => {
-                this.#log('StateManager init failed.', {
-                    caller: `${caller} constructor`,
-                    level: 'error'
-                });
+            this.#stateFactory = StateFactory.getInstance(helpers, services, utils);
+            this.#stateHistory = StateHistoryService.getInstance(helpers, services);
+            this.init(helpers, services).catch(error => {
+                this.#log.error('StateManager init failed.', `${caller} constructor`);
                 console.error(error);
             });
         }
@@ -65,455 +31,119 @@ class StateManager {
             throw new Error(`[${caller} constructor]: ${error instanceof Error ? error.message : error}`);
         }
     }
-    static getInstance(helpers, services, utils) {
+    static async getInstance(helpers, services, utils) {
         return services.errors.handleSync(() => {
             if (!StateManager.#instance) {
-                services.log(`Creating new StateManager instance.`, {
-                    caller: `${caller}.getInstance`,
-                    level: 'debug'
-                });
+                services.log.debug(`Creating new StateManager instance.`, `${caller}.getInstance`);
                 StateManager.#instance = new StateManager(helpers, services, utils);
             }
-            services.log(`Returning StateManager instance.`, {
-                caller: `${caller}.getInstance`,
-                level: 'debug'
-            });
+            services.log.debug(`Returning ${caller} instance.`, `${caller}.getInstance`);
             return StateManager.#instance;
         }, `[${caller}]: Error getting StateManager instance.`);
     }
-    async init() {
+    async init(helpers, services) {
         return this.#errors.handleAsync(async () => {
-            this.#log('Initializing State Manager', {
-                caller: `${caller}.init`,
-                level: 'debug'
-            });
-            await this.#storage.init();
-            {
-                this.#log('State loading from storage is disabled via feature flag.', {
-                    caller: `${caller}.init`,
-                    level: 'warn'
-                });
-                this.#state = this.#generateInitialState();
-            }
-            this.#log('StateManager initialized successfully.', {
-                caller: `${caller}.init`,
-                level: 'debug'
-            });
-            await this.#saveState();
+            this.#log.debug('Initializing State Manager.', `${caller}.init`);
+            this.#storage = await StorageManager.getInstance(services);
+            this.#store = StateStore.getInstance(this.#state, helpers, services, this.#storage);
+            this.#state = await this.loadState();
         }, `[${caller}]: Failed to initialize State Manager.`);
     }
     addPaletteToHistory(palette) {
-        return this.#errors.handleSync(() => {
-            this.#trackAction();
-            this.#state.paletteHistory.push(palette);
-            this.#saveStateAndLog('paletteHistory', 3);
-        }, `[${caller}]: Failed to add palette to history.`, { context: { palette } });
+        this.#stateHistory.addPaletteToHistory(this.#state, palette);
+        this.#log.debug(`Added palette to history.`, `${caller}.addPaletteToHistory`);
     }
-    async atomicUpdate(callback) {
-        return this.#errors.handleAsync(async () => {
-            return await this.#stateLock.runExclusive(async () => {
-                callback(this.#observer['data']);
-                this.#log('Performed atomic update.', {
-                    caller: `${caller}.atomicUpdate`,
-                    level: 'debug'
-                });
-                await this.#saveState();
-            });
-        }, `[${caller}]: Failed to perform atomic update.`);
-    }
-    async batchUpdate(callback) {
-        await this.#errors.handleAsync(async () => {
-            await this.#withWriteLock(async () => {
-                const partialUpdate = callback(this.#state);
-                this.#observer.batchUpdate(partialUpdate);
-                this.#log('Performed batch update.', {
-                    caller: `${caller}.batchUpdate`,
-                    level: 'debug',
-                    verbosity: 2
-                });
-                await this.#saveState();
-            });
-        }, `[${caller}]: Failed to perform batch update.`);
+    async batchUpdate(updates) {
+        await this.#store.batchUpdate(updates);
+        this.#log.debug('Performed batch update.', `${caller}.batchUpdate`);
     }
     async ensureStateReady() {
         return await this.#errors.handleAsync(async () => {
             let attempts = 0;
             while (!this.#state || !this.#state.paletteContainer) {
                 if (attempts++ >= maxReadyAttempts) {
-                    this.#log('State initialization timed out.', {
-                        caller: `${caller}.ensureStateReady`,
-                        level: 'error'
-                    });
+                    this.#log.error('State initialization timed out.', `${caller}.ensureStateReady`);
                     throw new Error('State initialization timed out.');
                 }
-                this.#log(`Waiting for state to initialize... (Attempt ${attempts})`, {
-                    caller: `${caller}.ensureStateReady`,
-                    level: 'debug'
-                });
-                await new Promise(resolve => setTimeout(resolve, 50));
+                this.#log.debug(`Waiting for state to initialize... (Attempt ${attempts}).`, `${caller}.ensureStateReady`);
+                await new Promise(resolve => setTimeout(resolve, stateReadyTimeout));
             }
-            this.#log('State is now initialized.', {
-                caller: `${caller}.ensureStateReady`,
-                level: 'debug'
-            });
+            this.#log.debug('State is now initialized.', `${caller}.ensureStateReady`);
         }, `[${caller}]: Failed to ensure state readiness.`, { context: { maxReadyAttempts } });
     }
     async getState() {
-        return await (this.#errors.handleAsync(async () => {
-            return this.#withReadLock(() => {
-                if (!this.#state)
-                    this.#log('State accessed before initialization.', {
-                        caller: `${caller}.getState`,
-                        level: 'warn'
-                    });
-                if (!this.#state.preferences) {
-                    this.#log('State.preferences is undefined. Setting default preferences.', {
-                        caller: `${caller}.getState`,
-                        level: 'warn'
-                    });
-                    this.#state.preferences = defaultState.preferences;
-                }
-                return this.#helpers.data.clone(this.#state);
-            });
-        }, `[${caller}]: Error retrieving state`) ?? defaultState);
+        return this.#store.getState();
     }
     async loadState() {
-        {
-            this.#log('loadState bypassed: feature flag is disabled. Generating initial state', {
-                caller: `${caller}.loadState`
-            });
-            return this.#generateInitialState();
+        const loadedState = await this.#store.loadState();
+        if (loadedState) {
+            this.#log.info('State loaded from storage.', `${caller}.loadState`);
+            return loadedState;
         }
-    }
-    logContentionStats() {
-        this.#errors.handleSync(() => {
-            const contentionCount = this.#stateLock.getContentionCount();
-            const contentionRate = this.#stateLock.getContentionRate();
-            this.#log(`Current contention count: ${contentionCount}.\nCurrent contention rate: ${contentionRate}.`, {
-                caller: `${caller}.logContentionStats`,
-                level: 'debug'
-            });
-        }, `[${caller}]: Failed to log contention stats`);
+        this.#log.info(`State not found in storage. Creating initial state via State Factory.`, `${caller}.loadState`);
+        return await this.#stateFactory.createInitialState();
     }
     redo() {
-        return this.#errors.handleSync(() => {
-            if (this.#undoStack.length > 0) {
-                const redoState = this.#undoStack.pop();
-                if (!redoState) {
-                    this.#log('Cannot redo: No redoState found.', {
-                        caller: `${caller}.redo`,
-                        level: 'warn'
-                    });
-                    return;
-                }
-                this.#history.push(redoState);
-                this.#state = { ...redoState };
-                this.#log('Redo action performed.', {
-                    caller: `${caller}.redo`,
-                    level: 'debug'
-                });
-                this.#saveStateAndLog('redo', 3);
-            }
-            else {
-                throw new Error('No state to redo.');
-            }
-        }, `[${caller}]: Redo operation failed`, { fallback: { redo: null } });
+        const nextState = this.#stateHistory.redo();
+        if (!nextState)
+            return null;
+        this.#store.batchUpdate(nextState);
+        this.#log.info('Redo performed.', `${caller}.redo`);
+        return nextState;
     }
     async resetState() {
-        return await this.#errors.handleAsync(async () => {
-            this.#trackAction();
-            this.#state = defaultState;
-            await this.#saveState();
-            this.#log('App state has been reset', {
-                caller: `${caller}.resetState`,
-                level: 'debug'
-            });
-        }, `[${caller}]: Failed to reset state`, { fallback: defaultState });
+        const initialState = await this.#stateFactory.createInitialState();
+        await this.setState(initialState, false);
+        await this.saveState();
+        this.#log.info('State has been reset.', `${caller}.resetState`);
     }
-    setOnStateLoad(callback) {
-        return this.#errors.handleSync(() => {
-            this.#onStateLoadCallback = callback;
-        }, `[${caller}]: Failed to set onStateLoad callback`);
+    async saveState() {
+        return await this.#errors.handleAsync(async () => {
+            await this.#store.saveState(this.#state);
+            this.#log.info('State saved to storage.', `${caller}.saveState`);
+        }, `[${caller}]: Failed to save state`);
     }
     async setState(newState, track = true) {
-        return await this.#errors.handleAsync(async () => {
-            return await this.#withWriteLock(async () => {
-                if (track)
-                    this.#trackAction();
-                this.#observer.batchUpdate(newState);
-                this.#state = newState;
-                this.#log('State updated.', {
-                    caller: `${caller}.setState`,
-                    level: 'debug'
-                });
-                await this.#saveState();
-                this.logContentionStats();
-            });
-        }, `[${caller}]: Failed to set state.`, { context: { newState, track } });
+        if (track)
+            this.#trackAction();
+        await this.#store.batchUpdate(newState);
+        this.#log.info('State replaced.', `${caller}.setState`);
     }
     undo() {
-        this.#errors.handleSync(() => {
-            if (this.#history.length <= 1) {
-                this.#log('No previous state to revert to.', {
-                    caller: `${caller}.undo`
-                });
-                return;
-            }
-            const previousState = this.#history.pop();
-            if (!previousState)
-                return;
-            this.#undoStack.push(this.#helpers.data.clone(this.#state)); // for redo
-            this.#state = previousState;
-            this.#observer.batchUpdate(previousState);
-            this.#log('Undo action performed.', {
-                caller: `${caller}.undo`,
-                level: 'debug'
-            });
-            this.#saveStateAndLog('undo', 3);
-        }, `[${caller}]: Undo operation failed`);
+        const previousState = this.#stateHistory.undo(this.#store.getState());
+        if (!previousState)
+            return null;
+        this.#store.batchUpdate(previousState);
+        this.#log.info('Undo performed.', `${caller}.undo`);
+        return previousState;
     }
-    updateAppModeState(appMode, track) {
-        return this.#errors.handleSync(() => {
-            if (track)
-                this.#trackAction();
-            this.#state.appMode = appMode;
-            this.#log(`Updated appMode: ${appMode}`, {
-                caller: `${caller}.updateAppModeState`,
-                level: 'debug'
-            });
-            this.#saveStateAndLog('appMode', 3);
-        }, `[${caller}]: Failed to update app mode state`, { context: { appMode, track } });
-    }
-    async updateLockedProperty(key, value) {
-        return this.#errors.handleAsync(async () => {
-            const lock = this.#getLockForKey(key);
-            await lock.runExclusive(async () => {
-                this.#observer.set(key, value);
-                this.#log(`Updated ${String(this.#helpers.data.clone(key))} with locked property.`, {
-                    caller: `${caller}.updateLockedProperty`,
-                    level: 'debug'
-                });
-                await this.#saveState();
-                this.logContentionStats();
-            });
-        }, `[${caller}]: Failed to update locked property`, { context: { key, value } });
-    }
-    updatePaletteColumns(columns, track, verbosity) {
-        return this.#errors.handleSync(() => {
-            if (!this.#state || !this.#state.paletteContainer) {
-                throw new Error(`[${caller}]: updatePaletteColumns called before state initialization.`);
-            }
-            if (!this.#helpers.dom.getElement(domIndex.ids.divs.paletteContainer)) {
-                this.#log('Palette Container not found in the DOM.', {
-                    caller: `${caller}.updatePaletteColumns`,
-                    level: 'warn'
-                });
-            }
-            if (track)
-                this.#trackAction();
-            this.#state.paletteContainer.columns = columns;
-            this.#log(`Updated paletteContainer columns`, {
-                caller: `${caller}.updatePaletteColumns`,
-                level: 'debug'
-            });
-            this.#saveStateAndLog('paletteColumns', verbosity);
-            this.logContentionStats();
-        }, `[${caller}]: Failed to update palette columns.`, { context: { columns, track, verbosity } });
-    }
-    updatePaletteColumnSize(columnID, newSize) {
-        return this.#errors.handleSync(() => {
-            const columns = this.#state.paletteContainer.columns;
-            const columnIndex = columns.findIndex(col => col.id === columnID);
-            if (columnIndex === -1)
-                return;
-            const minSize = domConfig.minColumnSize;
-            const maxSize = domConfig.maxColumnSize;
-            const adjustedSize = Math.max(minSize, Math.min(newSize, maxSize));
-            const sizeDifference = adjustedSize - columns[columnIndex].size;
-            columns[columnIndex].size = adjustedSize;
-            const unlockedColumns = columns.filter((col, index) => index !== columnIndex && !col.isLocked);
-            const distributionAmount = sizeDifference / unlockedColumns.length;
-            unlockedColumns.forEach(col => (col.size -= distributionAmount));
-            const finalTotalSize = columns.reduce((sum, col) => sum + col.size, 0);
-            const correctionFactor = 100 / finalTotalSize;
-            columns.forEach(col => (col.size *= correctionFactor));
-            this.#log(`Updated column size`, {
-                caller: `${caller}}.updatePaletteColumnSize`,
-                level: 'debug'
-            });
-            this.#saveStateAndLog('paletteColumnSize', 3);
-            this.logContentionStats();
-        }, `[${caller}]: Failed to update palette column size.`, { context: { columnID, newSize } });
-    }
-    updatePaletteHistory(updatedHistory) {
-        return this.#errors.handleSync(() => {
+    updatePaletteColumns(columns, track = true) {
+        if (track)
             this.#trackAction();
-            this.#state.paletteHistory = updatedHistory;
-            this.#saveState();
-            this.#log('Updated palette history', {
-                caller: `${caller}.updatePaletteHistory`,
-                level: 'debug'
-            });
-            this.logContentionStats();
-        }, `[${caller}: Failed to update palette history.`, { context: { updatedHistory } });
-    }
-    updateSelections(selections, track) {
-        return this.#errors.handleSync(() => {
-            if (track)
-                this.#trackAction();
-            this.#observer.set('selections', {
-                ...this.#observer.get('selections'),
-                ...selections
-            });
-            this.#log(`Updated selections`, {
-                caller: `${caller}]: .updateSelections`,
-                level: 'debug'
-            });
-            this.#saveStateAndLog('selections', 2);
-            this.logContentionStats();
-        }, `[${caller}]: Failed to update selections.`, { context: { selections, track } });
-    }
-    #generateInitialState() {
-        return (this.#errors.handleSync(() => {
-            this.#log('Generating initial state.', {
-                caller: `${caller}.#generateInitialState`,
-                level: 'debug'
-            });
-            const columns = this.#utils.dom.scanPaletteColumns() ?? [];
-            if (!columns) {
-                this.#log('No palette columns found!', {
-                    caller: `${caller}.#generateInitialState`,
-                    level: 'error'
-                });
+        this.#store.batchUpdate({
+            paletteContainer: {
+                ...this.#store.get('paletteContainer'),
+                columns
             }
-            this.#log(`Scanned palette columns.`, {
-                caller: `${caller}.#generateInitialState`,
-                level: 'debug'
-            });
-            this.logContentionStats();
-            return {
-                appMode: 'edit',
-                paletteContainer: { columns },
-                paletteHistory: [],
-                preferences: {
-                    colorSpace: 'hsl',
-                    distributionType: 'soft',
-                    maxHistory: 20,
-                    maxPaletteHistory: 10,
-                    theme: 'light'
-                },
-                selections: {
-                    paletteColumnCount: columns.length,
-                    paletteType: 'complementary',
-                    targetedColumnPosition: 1
-                },
-                timestamp: this.#helpers.data.getFormattedTimestamp()
-            };
-        }, `[${caller}]: Failed to generate initial state`) ?? {});
-    }
-    #getLockForKey(key) {
-        if (!this.#dataLocks.has(key)) {
-            this.#dataLocks.set(key, new Mutex(this.#errors, this.#log));
-        }
-        return this.#dataLocks.get(key);
-    }
-    #saveStateAndLog(property, verbosity) {
-        this.#log(`StateManager Updated ${property}`, {
-            caller: `${caller}.#saveStateAndLog`,
-            verbosity: verbosity ?? 0
         });
-        this.#saveState();
+        this.#log.debug('Palette columns updated.', `${caller}.updatePaletteColumns`);
     }
-    async #saveState(throttle = true) {
-        const saveOperation = async (attempts = 0) => {
-            try {
-                await this.#storage.setItem('appState', this.#state);
-                this.#log('State saved to storage.', {
-                    caller: `${caller}.#saveState`,
-                    level: 'debug'
-                });
-            }
-            catch (err) {
-                if (attempts < env.state.maxSaveRetries) {
-                    this.#log(`Save attempt ${attempts + 1} failed. Retrying...`, {
-                        caller: `${caller}.#saveState`,
-                        level: 'warn'
-                    });
-                    await saveOperation(attempts + 1);
-                }
-                else {
-                    this.#log('Max save attempts reached. Save failed.', {
-                        caller: `${caller}.#saveState`,
-                        level: 'error'
-                    });
-                }
-            }
-        };
-        if (throttle) {
-            if (this.#saveThrottleTimer) {
-                clearTimeout(this.#saveThrottleTimer);
-            }
-            this.#saveThrottleTimer = setTimeout(() => saveOperation(), env.state.saveThrottleDelay);
-        }
-        else {
-            await saveOperation();
-        }
+    async updatePaletteHistory(updatedHistory, track) {
+        if (track)
+            this.#trackAction();
+        await this.#store.batchUpdate({ paletteHistory: updatedHistory });
+        this.#log.debug(`Updated palette history.`, `${caller}.updatePaletteHistory`);
     }
-    // push a copy of the current state before making changes
+    async updateSelections(selections, track) {
+        if (track)
+            this.#trackAction();
+        await this.#store.batchUpdate({
+            selections: { ...this.#store.get('selections'), ...selections }
+        });
+        this.#log.debug('Selections updated.', `${caller}.updateSelections`);
+    }
     #trackAction() {
-        return this.#errors.handleSync(() => {
-            const clonedState = this.#helpers.data.clone(this.#state);
-            this.#history.push(clonedState);
-            if (this.#history.length > env.app.historyLimit)
-                this.#history.shift();
-        }, `[${caller}]: Failed to track action.`);
-    }
-    async withPropertyLock(key, callback) {
-        return this.#errors.handleAsync(async () => {
-            const lock = this.#getLockForKey(key);
-            const acquired = await lock.acquireWriteWithTimeout(env.mutex.timeout);
-            if (!acquired) {
-                this.#log(`Lock acquisition timed out for property: ${String(key)}`, {
-                    caller: `${caller}.withPropertyLock`,
-                    level: 'warn'
-                });
-                throw new Error(`Timeout acquiring lock for property ${String(key)}.`);
-            }
-            try {
-                return await callback(this.#state[key]);
-            }
-            finally {
-                await lock.release();
-            }
-        }, `[${caller}: Failed to acquire property lock`, { context: { key } });
-    }
-    async #withReadLock(callback) {
-        return this.#errors.handleAsync(async () => {
-            const acquired = await this.#stateLock.acquireReadWithTimeout(env.mutex.timeout);
-            if (!acquired)
-                throw new Error('Read lock acquisition timed out.');
-            try {
-                return callback();
-            }
-            finally {
-                await this.#stateLock.release();
-            }
-        }, `[${caller}]: Failed to acquire read lock`);
-    }
-    async #withWriteLock(callback) {
-        return this.#errors.handleAsync(async () => {
-            const acquired = await this.#stateLock.acquireWriteWithTimeout(env.mutex.timeout);
-            if (!acquired)
-                throw new Error('Write lock acquisition timed out.');
-            try {
-                return await callback();
-            }
-            finally {
-                await this.#stateLock.release();
-            }
-        }, `[${caller}]: Failed to acquire write lock`);
+        this.#stateHistory.trackAction(this.#state);
     }
 }
-
-export { StateManager };
-//# sourceMappingURL=StateManager.js.map
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiU3RhdGVNYW5hZ2VyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3N0YXRlL1N0YXRlTWFuYWdlci50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSw4QkFBOEI7QUFVOUIsT0FBTyxFQUFFLFlBQVksRUFBRSxtQkFBbUIsRUFBRSxVQUFVLEVBQUUsTUFBTSxZQUFZLENBQUM7QUFDM0UsT0FBTyxFQUFFLGNBQWMsRUFBRSxNQUFNLDhCQUE4QixDQUFDO0FBQzlELE9BQU8sRUFBRSxHQUFHLEVBQUUsTUFBTSxvQkFBb0IsQ0FBQztBQUV6QyxNQUFNLE1BQU0sR0FBRyxjQUFjLENBQUM7QUFDOUIsTUFBTSxnQkFBZ0IsR0FBRyxHQUFHLENBQUMsS0FBSyxDQUFDLGdCQUFnQixDQUFDO0FBQ3BELE1BQU0saUJBQWlCLEdBQUcsR0FBRyxDQUFDLEtBQUssQ0FBQyxZQUFZLENBQUM7QUFFakQsTUFBTSxPQUFPLFlBQVk7SUFDeEIsTUFBTSxDQUFDLFNBQVMsR0FBd0IsSUFBSSxDQUFDO0lBRTdDLE1BQU0sQ0FBUTtJQUNkLGFBQWEsQ0FBZTtJQUM1QixhQUFhLENBQXNCO0lBQ25DLFFBQVEsQ0FBa0I7SUFDMUIsTUFBTSxDQUFjO0lBRXBCLElBQUksQ0FBa0I7SUFDdEIsT0FBTyxDQUFxQjtJQUU1QixZQUNDLE9BQWdCLEVBQ2hCLFFBQWtCLEVBQ2xCLEtBQWdCO1FBRWhCLElBQUksQ0FBQztZQUNKLFFBQVEsQ0FBQyxHQUFHLENBQUMsS0FBSyxDQUNqQixnQkFBZ0IsTUFBTSxZQUFZLEVBQ2xDLEdBQUcsTUFBTSxjQUFjLENBQ3ZCLENBQUM7WUFFRixJQUFJLENBQUMsSUFBSSxHQUFHLFFBQVEsQ0FBQyxHQUFHLENBQUM7WUFDekIsSUFBSSxDQUFDLE9BQU8sR0FBRyxRQUFRLENBQUMsTUFBTSxDQUFDO1lBRS9CLElBQUksQ0FBQyxNQUFNLEdBQUcsRUFBVyxDQUFDO1lBRTFCLElBQUksQ0FBQyxhQUFhLEdBQUcsWUFBWSxD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YUFDUDtTQUNELENBQUMsQ0FBQztRQUVILElBQUksQ0FBQyxJQUFJLENBQUMsS0FBSyxDQUNkLDBCQUEwQixFQUMxQixHQUFHLE1BQU0sdUJBQXVCLENBQ2hDLENBQUM7SUFDSCxDQUFDO0lBRUQsS0FBSyxDQUFDLG9CQUFvQixDQUN6QixjQUF5QixFQUN6QixLQUFjO1FBRWQsSUFBSSxLQUFLO1lBQUUsSUFBSSxDQUFDLFlBQVksRUFBRSxDQUFDO1FBRS9CLE1BQU0sSUFBSSxDQUFDLE1BQU0sQ0FBQyxXQUFXLENBQUMsRUFBRSxjQUFjLEVBQUUsY0FBYyxFQUFFLENBQUMsQ0FBQztRQUVsRSxJQUFJLENBQUMsSUFBSSxDQUFDLEtBQUssQ0FDZCwwQkFBMEIsRUFDMUIsR0FBRyxNQUFNLHVCQUF1QixDQUNoQyxDQUFDO0lBQ0gsQ0FBQztJQUVELEtBQUssQ0FBQyxnQkFBZ0IsQ0FDckIsVUFBd0MsRUFDeEMsS0FBYztRQUVkLElBQUksS0FBSztZQUFFLElBQUksQ0FBQyxZQUFZLEVBQUUsQ0FBQztRQUUvQixNQUFNLElBQUksQ0FBQyxNQUFNLENBQUMsV0FBVyxDQUFDO1lBQzdCLFVBQVUsRUFBRSxFQUFFLEdBQUcsSUFBSSxDQUFDLE1BQU0sQ0FBQyxHQUFHLENBQUMsWUFBWSxDQUFDLEVBQUUsR0FBRyxVQUFVLEVBQUU7U0FDL0QsQ0FBQyxDQUFDO1FBRUgsSUFBSSxDQUFDLElBQUksQ0FBQyxLQUFLLENBQUMscUJBQXFCLEVBQUUsR0FBRyxNQUFNLG1CQUFtQixDQUFDLENBQUM7SUFDdEUsQ0FBQztJQUVELFlBQVk7UUFDWCxJQUFJLENBQUMsYUFBYSxDQUFDLFdBQVcsQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLENBQUM7SUFDN0MsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEZpbGU6IHN0YXRlL1N0YXRlTWFuYWdlci50c1xuXG5pbXBvcnQge1xuXHRIZWxwZXJzLFxuXHRQYWxldHRlLFxuXHRTZXJ2aWNlcyxcblx0U3RhdGUsXG5cdFN0YXRlTWFuYWdlckNvbnRyYWN0LFxuXHRVdGlsaXRpZXNcbn0gZnJvbSAnLi4vdHlwZXMvaW5kZXguanMnO1xuaW1wb3J0IHsgU3RhdGVGYWN0b3J5LCBTdGF0ZUhpc3RvcnlTZXJ2aWNlLCBTdGF0ZVN0b3JlIH0gZnJvbSAnLi9pbmRleC5qcyc7XG5pbXBvcnQgeyBTdG9yYWdlTWFuYWdlciB9IGZyb20gJy4uL3N0b3JhZ2UvU3RvcmFnZU1hbmFnZXIuanMnO1xuaW1wb3J0IHsgZW52IH0gZnJvbSAnLi4vY29uZmlnL2luZGV4LmpzJztcblxuY29uc3QgY2FsbGVyID0gJ1N0YXRlTWFuYWdlcic7XG5jb25zdCBtYXhSZWFkeUF0dGVtcHRzID0gZW52LnN0YXRlLm1heFJlYWR5QXR0ZW1wdHM7XG5jb25zdCBzdGF0ZVJlYWR5VGltZW91dCA9IGVudi5zdGF0ZS5yZWFkeVRpbWVvdXQ7XG5cbmV4cG9ydCBjbGFzcyBTdGF0ZU1hbmFnZXIgaW1wbGVtZW50cyBTdGF0ZU1hbmFnZXJDb250cmFjdCB7XG5cdHN0YXRpYyAjaW5zdGFuY2U6IFN0YXRlTWFuYWdlciB8IG51bGwgPSBudWxsO1xuXG5cdCNzdGF0ZTogU3RhdGU7XG5cdCNzdGF0ZUZhY3Rvcnk6IFN0YXRlRmFjdG9yeTtcblx0I3N0YXRlSGlzdG9yeTogU3RhdGVIaXN0b3J5U2VydmljZTtcblx0I3N0b3JhZ2UhOiBTdG9yYWdlTWFuYWdlcjtcblx0I3N0b3JlITogU3RhdGVTdG9yZTtcblxuXHQjbG9nOiBTZXJ2aWNlc1snbG9nJ107XG5cdCNlcnJvcnM6IFNlcnZpY2VzWydlcnJvcnMnXTtcblxuXHRwcml2YXRlIGNvbnN0cnVjdG9yKFxuXHRcdGhlbHBlcnM6IEhlbHBlcnMsXG5cdFx0c2VydmljZXM6IFNlcnZpY2VzLFxuXHRcdHV0aWxzOiBVdGlsaXRpZXNcblx0KSB7XG5cdFx0dHJ5IHtcblx0XHRcdHNlcnZpY2VzLmxvZy5kZWJ1Zyhcblx0XHRcdFx0YENvbnN0cnVjdGluZyAke2NhbGxlcn0gaW5zdGFuY2UuYCxcblx0XHRcdFx0YCR7Y2FsbGVyfSBjb25zdHJ1Y3RvcmBcblx0XHRcdCk7XG5cblx0XHRcdHRoaXMuI2xvZyA9IHNlcnZpY2VzLmxvZztcblx0XHRcdHRoaXMuI2Vycm9ycyA9IHNlcnZpY2VzLmVycm9ycztcblxuXHRcdFx0dGhpcy4jc3RhdGUgPSB7fSBhcyBTdGF0ZTtcblxuXHRcdFx0dGhpcy4jc3RhdGVGYWN0b3J5ID0gU3RhdGVGYWN0b3J5LmdldEluc3RhbmNlKFxuXHRcdFx0XHRoZWxwZXJzLFxuXHRcdFx0XHRzZXJ2aWNlcyxcblx0XHRcdFx0dXRpbHNcblx0XHRcdCk7XG5cdFx0XHR0aGlzLiNzdGF0ZUhpc3RvcnkgPSBTdGF0ZUhpc3RvcnlTZXJ2aWNlLmdldEluc3RhbmNlKFxuXHRcdFx0XHRoZWxwZXJzLFxuXHRcdFx0XHRzZXJ2aWNlc1xuXHRcdFx0KTtcblxuXHRcdFx0dGhpcy5pbml0KGhlbHBlcnMsIHNlcnZpY2VzKS5jYXRjaChlcnJvciA9PiB7XG5cdFx0XHRcdHRoaXMuI2xvZy5lcnJvcihcblx0XHRcdFx0XHQnU3RhdGVNYW5hZ2VyIGluaXQgZmFpbGVkLicsXG5cdFx0XHRcdFx0YCR7Y2FsbGVyfSBjb25zdHJ1Y3RvcmBcblx0XHRcdFx0KTtcblxuXHRcdFx0XHRjb25zb2xlLmVycm9yKGVycm9yKTtcblx0XHRcdH0pO1xuXHRcdH0gY2F0Y2ggKGVycm9yKSB7XG5cdFx0XHR0aHJvdyBuZXcgRXJyb3IoXG5cdFx0XHRcdGBbJHtjYWxsZXJ9IGNvbnN0cnVjdG9yXTogJHtlcnJvciBpbnN0YW5jZW9mIEVycm9yID8gZXJyb3IubWVzc2FnZSA6IGVycm9yfWBcblx0XHRcdCk7XG5cdFx0fVxuXHR9XG5cblx0c3RhdGljIGFzeW5jIGdldEluc3RhbmNlKFxuXHRcdGhlbHBlcnM6IEhlbHBlcnMsXG5cdFx0c2VydmljZXM6IFNlcnZpY2VzLFxuXHRcdHV0aWxzOiBVdGlsaXRpZXNcblx0KTogUHJvbWlzZTxTdGF0ZU1hbmFnZXI+IHtcblx0XHRyZXR1cm4gc2VydmljZXMuZXJyb3JzLmhhbmRsZVN5bmMoKCkgPT4ge1xuXHRcdFx0aWYgKCFTdGF0ZU1hbmFnZXIuI2luc3RhbmNlKSB7XG5cdFx0XHRcdHNlcnZpY2VzLmxvZy5kZWJ1Zyhcblx0XHRcdFx0XHRgQ3JlYXRpbmcgbmV3IFN0YXRlTWFuYWdlciBpbnN0YW5jZS5gLFxuXHRcdFx0XHRcdGAke2NhbGxlcn0uZ2V0SW5zdGFuY2VgXG5cdFx0XHRcdCk7XG5cblx0XHRcdFx0U3RhdGVNYW5hZ2VyLiNpbnN0YW5jZSA9IG5ldyBTdGF0ZU1hbmFnZXIoXG5cdFx0XHRcdFx0aGVscGVycyxcblx0XHRcdFx0XHRzZXJ2aWNlcyxcblx0XHRcdFx0XHR1dGlsc1xuXHRcdFx0XHQpO1xuXHRcdFx0fVxuXG5cdFx0XHRzZXJ2aWNlcy5sb2cuZGVidWcoXG5cdFx0XHRcdGBSZXR1cm5pbmcgJHtjYWxsZXJ9IGluc3RhbmNlLmAsXG5cdFx0XHRcdGAke2NhbGxlcn0uZ2V0SW5zdGFuY2VgXG5cdFx0XHQpO1xuXG5cdFx0XHRyZXR1cm4gU3RhdGVNYW5hZ2VyLiNpbnN0YW5jZTtcblx0XHR9LCBgWyR7Y2FsbGVyfV06IEVycm9yIGdldHRpbmcgU3RhdGVNYW5hZ2VyIGluc3RhbmNlLmApO1xuXHR9XG5cblx0YXN5bmMgaW5pdChoZWxwZXJzOiBIZWxwZXJzLCBzZXJ2aWNlczogU2VydmljZXMpOiBQcm9taXNlPHZvaWQ+IHtcblx0XHRyZXR1cm4gdGhpcy4jZXJyb3JzLmhhbmRsZUFzeW5jKGFzeW5jICgpID0+IHtcblx0XHRcdHRoaXMuI2xvZy5kZWJ1ZygnSW5pdGlhbGl6aW5nIFN0YXRlIE1hbmFnZXIuJywgYCR7Y2FsbGVyfS5pbml0YCk7XG5cblx0XHRcdHRoaXMuI3N0b3JhZ2UgPSBhd2FpdCBTdG9yYWdlTWFuYWdlci5nZXRJbnN0YW5jZShzZXJ2aWNlcyk7XG5cblx0XHRcdHRoaXMuI3N0b3JlID0gU3RhdGVTdG9yZS5nZXRJbnN0YW5jZShcblx0XHRcdFx0dGhpcy4jc3RhdGUsXG5cdFx0XHRcdGhlbHBlcnMsXG5cdFx0XHRcdHNlcnZpY2VzLFxuXHRcdFx0XHR0aGlzLiNzdG9yYWdlXG5cdFx0XHQpO1xuXG5cdFx0XHR0aGlzLiNzdGF0ZSA9IGF3YWl0IHRoaXMubG9hZFN0YXRlKCk7XG5cdFx0fSwgYFske2NhbGxlcn1dOiBGYWlsZWQgdG8gaW5pdGlhbGl6ZSBTdGF0ZSBNYW5hZ2VyLmApO1xuXHR9XG5cblx0YWRkUGFsZXR0ZVRvSGlzdG9yeShwYWxldHRlOiBQYWxldHRlKTogdm9pZCB7XG5cdFx0dGhpcy4jc3RhdGVIaXN0b3J5LmFkZFBhbGV0dGVUb0hpc3RvcnkodGhpcy4jc3RhdGUsIHBhbGV0dGUpO1xuXG5cdFx0dGhpcy4jbG9nLmRlYnVnKFxuXHRcdFx0YEFkZGVkIHBhbGV0dGUgdG8gaGlzdG9yeS5gLFxuXHRcdFx0YCR7Y2FsbGVyfS5hZGRQYWxldHRlVG9IaXN0b3J5YFxuXHRcdCk7XG5cdH1cblxuXHRhc3luYyBiYXRjaFVwZGF0ZSh1cGRhdGVzOiBQYXJ0aWFsPFN0YXRlPik6IFByb21pc2U8dm9pZD4ge1xuXHRcdGF3YWl0IHRoaXMuI3N0b3JlLmJhdGNoVXBkYXRlKHVwZGF0ZXMpO1xuXHRcdHRoaXMuI2xvZy5kZWJ1ZygnUGVyZm9ybWVkIGJhdGNoIHVwZGF0ZS4nLCBgJHtjYWxsZXJ9LmJhdGNoVXBkYXRlYCk7XG5cdH1cblxuXHRhc3luYyBlbnN1cmVTdGF0ZVJlYWR5KCk6IFByb21pc2U8dm9pZD4ge1xuXHRcdHJldHVybiBhd2FpdCB0aGlzLiNlcnJvcnMuaGFuZGxlQXN5bmMoXG5cdFx0XHRhc3luYyAoKSA9PiB7XG5cdFx0XHRcdGxldCBhdHRlbXB0cyA9IDA7XG5cblx0XHRcdFx0d2hpbGUgKCF0aGlzLiNzdGF0ZSB8fCAhdGhpcy4jc3RhdGUucGFsZXR0ZUNvbnRhaW5lcikge1xuXHRcdFx0XHRcdGlmIChhdHRlbXB0cysrID49IG1heFJlYWR5QXR0ZW1wdHMpIHtcblx0XHRcdFx0XHRcdHRoaXMuI2xvZy5lcnJvcihcblx0XHRcdFx0XHRcdFx0J1N0YXRlIGluaXRpYWxpemF0aW9uIHRpbWVkIG91dC4nLFxuXHRcdFx0XHRcdFx0XHRgJHtjYWxsZXJ9LmVuc3VyZVN0YXRlUmVhZHlgXG5cdFx0XHRcdFx0XHQpO1xuXG5cdFx0XHRcdFx0XHR0aHJvdyBuZXcgRXJyb3IoJ1N0YXRlIGluaXRpYWxpemF0aW9uIHRpbWVkIG91dC4nKTtcblx0XHRcdFx0XHR9XG5cblx0XHRcdFx0XHR0aGlzLiNsb2cuZGVidWcoXG5cdFx0XHRcdFx0XHRgV2FpdGluZyBmb3Igc3RhdGUgdG8gaW5pdGlhbGl6ZS4uLiAoQXR0ZW1wdCAke2F0dGVtcHRzfSkuYCxcblx0XHRcdFx0XHRcdGAke2NhbGxlcn0uZW5zdXJlU3RhdGVSZWFkeWBcblx0XHRcdFx0XHQpO1xuXG5cdFx0XHRcdFx0YXdhaXQgbmV3IFByb21pc2UocmVzb2x2ZSA9PlxuXHRcdFx0XHRcdFx0c2V0VGltZW91dChyZXNvbHZlLCBzdGF0ZVJlYWR5VGltZW91dClcblx0XHRcdFx0XHQpO1xuXHRcdFx0XHR9XG5cblx0XHRcdFx0dGhpcy4jbG9nLmRlYnVnKFxuXHRcdFx0XHRcdCdTdGF0ZSBpcyBub3cgaW5pdGlhbGl6ZWQuJyxcblx0XHRcdFx0XHRgJHtjYWxsZXJ9LmVuc3VyZVN0YXRlUmVhZHlgXG5cdFx0XHRcdCk7XG5cdFx0XHR9LFxuXHRcdFx0YFske2NhbGxlcn1dOiBGYWlsZWQgdG8gZW5zdXJlIHN0YXRlIHJlYWRpbmVzcy5gLFxuXHRcdFx0eyBjb250ZXh0OiB7IG1heFJlYWR5QXR0ZW1wdHMgfSB9XG5cdFx0KTtcblx0fVxuXG5cdGFzeW5jIGdldFN0YXRlKCk6IFByb21pc2U8U3RhdGU+IHtcblx0XHRyZXR1cm4gdGhpcy4jc3RvcmUuZ2V0U3RhdGUoKTtcblx0fVxuXG5cdGFzeW5jIGxvYWRTdGF0ZSgpOiBQcm9taXNlPFN0YXRlPiB7XG5cdFx0Y29uc3QgbG9hZGVkU3RhdGUgPSBhd2FpdCB0aGlzLiNzdG9yZS5sb2FkU3RhdGUoKTtcblxuXHRcdGlmIChsb2FkZWRTdGF0ZSkge1xuXHRcdFx0dGhpcy4jbG9nLmluZm8oJ1N0YXRlIGxvYWRlZCBmcm9tIHN0b3JhZ2UuJywgYCR7Y2FsbGVyfS5sb2FkU3RhdGVgKTtcblxuXHRcdFx0cmV0dXJuIGxvYWRlZFN0YXRlO1xuXHRcdH1cblxuXHRcdHRoaXMuI2xvZy5pbmZvKFxuXHRcdFx0YFN0YXRlIG5vdCBmb3VuZCBpbiBzdG9yYWdlLiBDcmVhdGluZyBpbml0aWFsIHN0YXRlIHZpYSBTdGF0ZSBGYWN0b3J5LmAsXG5cdFx0XHRgJHtjYWxsZXJ9LmxvYWRTdGF0ZWBcblx0XHQpO1xuXG5cdFx0cmV0dXJuIGF3YWl0IHRoaXMuI3N0YXRlRmFjdG9yeS5jcmVhdGVJbml0aWFsU3RhdGUoKTtcblx0fVxuXG5cdHJlZG8oKTogU3RhdGUgfCBudWxsIHtcblx0XHRjb25zdCBuZXh0U3RhdGUgPSB0aGlzLiNzdGF0ZUhpc3RvcnkucmVkbygpO1xuXG5cdFx0aWYgKCFuZXh0U3RhdGUpIHJldHVybiBudWxsO1xuXG5cdFx0dGhpcy4jc3RvcmUuYmF0Y2hVcGRhdGUobmV4dFN0YXRlKTtcblxuXHRcdHRoaXMuI2xvZy5pbmZvKCdSZWRvIHBlcmZvcm1lZC4nLCBgJHtjYWxsZXJ9LnJlZG9gKTtcblxuXHRcdHJldHVybiBuZXh0U3RhdGU7XG5cdH1cblxuXHRhc3luYyByZXNldFN0YXRlKCk6IFByb21pc2U8dm9pZD4ge1xuXHRcdGNvbnN0IGluaXRpYWxTdGF0ZSA9IGF3YWl0IHRoaXMuI3N0YXRlRmFjdG9yeS5jcmVhdGVJbml0aWFsU3RhdGUoKTtcblxuXHRcdGF3YWl0IHRoaXMuc2V0U3RhdGUoaW5pdGlhbFN0YXRlLCBmYWxzZSk7XG5cdFx0YXdhaXQgdGhpcy5zYXZlU3RhdGUoKTtcblxuXHRcdHRoaXMuI2xvZy5pbmZvKCdTdGF0ZSBoYXMgYmVlbiByZXNldC4nLCBgJHtjYWxsZXJ9LnJlc2V0U3RhdGVgKTtcblx0fVxuXG5cdGFzeW5jIHNhdmVTdGF0ZSgpOiBQcm9taXNlPHZvaWQ+IHtcblx0XHRyZXR1cm4gYXdhaXQgdGhpcy4jZXJyb3JzLmhhbmRsZUFzeW5jKGFzeW5jICgpID0+IHtcblx0XHRcdGF3YWl0IHRoaXMuI3N0b3JlLnNhdmVTdGF0ZSh0aGlzLiNzdGF0ZSk7XG5cblx0XHRcdHRoaXMuI2xvZy5pbmZvKCdTdGF0ZSBzYXZlZCB0byBzdG9yYWdlLicsIGAke2NhbGxlcn0uc2F2ZVN0YXRlYCk7XG5cdFx0fSwgYFske2NhbGxlcn1dOiBGYWlsZWQgdG8gc2F2ZSBzdGF0ZWApO1xuXHR9XG5cblx0YXN5bmMgc2V0U3RhdGUobmV3U3RhdGU6IFN0YXRlLCB0cmFjazogYm9vbGVhbiA9IHRydWUpOiBQcm9taXNlPHZvaWQ+IHtcblx0XHRpZiAodHJhY2spIHRoaXMuI3RyYWNrQWN0aW9uKCk7XG5cblx0XHRhd2FpdCB0aGlzLiNzdG9yZS5iYXRjaFVwZGF0ZShuZXdTdGF0ZSk7XG5cblx0XHR0aGlzLiNsb2cuaW5mbygnU3RhdGUgcmVwbGFjZWQuJywgYCR7Y2FsbGVyfS5zZXRTdGF0ZWApO1xuXHR9XG5cblx0dW5kbygpOiBTdGF0ZSB8IG51bGwge1xuXHRcdGNvbnN0IHByZXZpb3VzU3RhdGUgPSB0aGlzLiNzdGF0ZUhpc3RvcnkudW5kbyh0aGlzLiNzdG9yZS5nZXRTdGF0ZSgpKTtcblxuXHRcdGlmICghcHJldmlvdXNTdGF0ZSkgcmV0dXJuIG51bGw7XG5cblx0XHR0aGlzLiNzdG9yZS5iYXRjaFVwZGF0ZShwcmV2aW91c1N0YXRlKTtcblxuXHRcdHRoaXMuI2xvZy5pbmZvKCdVbmRvIHBlcmZvcm1lZC4nLCBgJHtjYWxsZXJ9LnVuZG9gKTtcblxuXHRcdHJldHVybiBwcmV2aW91c1N0YXRlO1xuXHR9XG5cblx0dXBkYXRlUGFsZXR0ZUNvbHVtbnMoXG5cdFx0Y29sdW1uczogU3RhdGVbJ3BhbGV0dGVDb250YWluZXInXVsnY29sdW1ucyddLFxuXHRcdHRyYWNrID0gdHJ1ZVxuXHQpOiB2b2lkIHtcblx0XHRpZiAodHJhY2spIHRoaXMuI3RyYWNrQWN0aW9uKCk7XG5cblx0XHR0aGlzLiNzdG9yZS5iYXRjaFVwZGF0ZSh7XG5cdFx0XHRwYWxldHRlQ29udGFpbmVyOiB7XG5cdFx0XHRcdC4uLnRoaXMuI3N0b3JlLmdldCgncGFsZXR0ZUNvbnRhaW5lcicpLFxuXHRcdFx0XHRjb2x1bW5zXG5cdFx0XHR9XG5cdFx0fSk7XG5cblx0XHR0aGlzLiNsb2cuZGVidWcoXG5cdFx0XHQnUGFsZXR0ZSBjb2x1bW5zIHVwZGF0ZWQuJyxcblx0XHRcdGAke2NhbGxlcn0udXBkYXRlUGFsZXR0ZUNvbHVtbnNgXG5cdFx0KTtcblx0fVxuXG5cdGFzeW5jIHVwZGF0ZVBhbGV0dGVIaXN0b3J5KFxuXHRcdHVwZGF0ZWRIaXN0b3J5OiBQYWxldHRlW10sXG5cdFx0dHJhY2s6IGJvb2xlYW5cblx0KTogUHJvbWlzZTx2b2lkPiB7XG5cdFx0aWYgKHRyYWNrKSB0aGlzLiN0cmFja0FjdGlvbigpO1xuXG5cdFx0YXdhaXQgdGhpcy4jc3RvcmUuYmF0Y2hVcGRhdGUoeyBwYWxldHRlSGlzdG9yeTogdXBkYXRlZEhpc3RvcnkgfSk7XG5cblx0XHR0aGlzLiNsb2cuZGVidWcoXG5cdFx0XHRgVXBkYXRlZCBwYWxldHRlIGhpc3RvcnkuYCxcblx0XHRcdGAke2NhbGxlcn0udXBkYXRlUGFsZXR0ZUhpc3RvcnlgXG5cdFx0KTtcblx0fVxuXG5cdGFzeW5jIHVwZGF0ZVNlbGVjdGlvbnMoXG5cdFx0c2VsZWN0aW9uczogUGFydGlhbDxTdGF0ZVsnc2VsZWN0aW9ucyddPixcblx0XHR0cmFjazogYm9vbGVhblxuXHQpOiBQcm9taXNlPHZvaWQ+IHtcblx0XHRpZiAodHJhY2spIHRoaXMuI3RyYWNrQWN0aW9uKCk7XG5cblx0XHRhd2FpdCB0aGlzLiNzdG9yZS5iYXRjaFVwZGF0ZSh7XG5cdFx0XHRzZWxlY3Rpb25zOiB7IC4uLnRoaXMuI3N0b3JlLmdldCgnc2VsZWN0aW9ucycpLCAuLi5zZWxlY3Rpb25zIH1cblx0XHR9KTtcblxuXHRcdHRoaXMuI2xvZy5kZWJ1ZygnU2VsZWN0aW9ucyB1cGRhdGVkLicsIGAke2NhbGxlcn0udXBkYXRlU2VsZWN0aW9uc2ApO1xuXHR9XG5cblx0I3RyYWNrQWN0aW9uKCk6IHZvaWQge1xuXHRcdHRoaXMuI3N0YXRlSGlzdG9yeS50cmFja0FjdGlvbih0aGlzLiNzdGF0ZSk7XG5cdH1cbn1cbiJdfQ==

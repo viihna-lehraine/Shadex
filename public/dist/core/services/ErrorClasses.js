@@ -1,0 +1,10 @@
+// File: core/services/ErrorClasses.ts
+export class UserFacingError extends Error {
+    userMessage;
+    constructor(message, userMessage) {
+        super(message);
+        this.userMessage = userMessage;
+        this.name = 'UserFacingError';
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRXJyb3JDbGFzc2VzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vc3JjL2NvcmUvc2VydmljZXMvRXJyb3JDbGFzc2VzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLHNDQUFzQztBQUV0QyxNQUFNLE9BQU8sZUFBZ0IsU0FBUSxLQUFLO0lBR2pDO0lBRlIsWUFDQyxPQUFlLEVBQ1IsV0FBb0I7UUFFM0IsS0FBSyxDQUFDLE9BQU8sQ0FBQyxDQUFDO1FBRlIsZ0JBQVcsR0FBWCxXQUFXLENBQVM7UUFHM0IsSUFBSSxDQUFDLElBQUksR0FBRyxpQkFBaUIsQ0FBQztJQUMvQixDQUFDO0NBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyIvLyBGaWxlOiBjb3JlL3NlcnZpY2VzL0Vycm9yQ2xhc3Nlcy50c1xuXG5leHBvcnQgY2xhc3MgVXNlckZhY2luZ0Vycm9yIGV4dGVuZHMgRXJyb3Ige1xuXHRjb25zdHJ1Y3Rvcihcblx0XHRtZXNzYWdlOiBzdHJpbmcsXG5cdFx0cHVibGljIHVzZXJNZXNzYWdlPzogc3RyaW5nXG5cdCkge1xuXHRcdHN1cGVyKG1lc3NhZ2UpO1xuXHRcdHRoaXMubmFtZSA9ICdVc2VyRmFjaW5nRXJyb3InO1xuXHR9XG59XG4iXX0=

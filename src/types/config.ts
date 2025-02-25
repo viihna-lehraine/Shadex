@@ -3,54 +3,54 @@
 import { sets } from '../config/index.js';
 
 export interface DOMIndex {
-	classes: {
-		colorDisplay: string;
-		colorInput: string;
-		colorInputBtn: string;
-		colorInputModal: string;
-		colorStripe: string;
-		colorSwatch: string;
-		dragHandle: string;
-		hidden: string;
-		lockBtn: string;
-		locked: string;
-		modal: string;
-		modalTrigger: string;
-		paletteColumn: string;
-		resizeHandle: string;
-		tooltipContainer: string;
-		tooltipTrigger: string;
+	readonly classes: {
+		readonly colorDisplay: string;
+		readonly colorInput: string;
+		readonly colorInputBtn: string;
+		readonly colorInputModal: string;
+		readonly colorStripe: string;
+		readonly colorSwatch: string;
+		readonly dragHandle: string;
+		readonly hidden: string;
+		readonly lockBtn: string;
+		readonly locked: string;
+		readonly modal: string;
+		readonly modalTrigger: string;
+		readonly paletteColumn: string;
+		readonly resizeHandle: string;
+		readonly tooltipContainer: string;
+		readonly tooltipTrigger: string;
 	};
-	dynamicIDs: { globalTooltipDiv: string };
-	ids: {
-		btns: {
-			desaturate: string;
-			export: string;
-			generate: string;
-			helpMenu: string;
-			historyMenu: string;
-			import: string;
-			saturate: string;
-			showAsCMYK: string;
-			showAsHex: string;
-			showAsHSL: string;
-			showAsHSV: string;
-			showAsLAB: string;
-			showAsRGB: string;
+	readonly dynamicIDs: { globalTooltipDiv: string };
+	readonly ids: {
+		readonly btns: {
+			readonly desaturate: string;
+			readonly export: string;
+			readonly generate: string;
+			readonly helpMenu: string;
+			readonly historyMenu: string;
+			readonly import: string;
+			readonly saturate: string;
+			readonly showAsCMYK: string;
+			readonly showAsHex: string;
+			readonly showAsHSL: string;
+			readonly showAsHSV: string;
+			readonly showAsLAB: string;
+			readonly showAsRGB: string;
 		};
-		divs: {
-			helpMenu: string;
-			historyMenu: string;
-			paletteContainer: string;
-			paletteHistory: string;
+		readonly divs: {
+			readonly helpMenu: string;
+			readonly historyMenu: string;
+			readonly paletteContainer: string;
+			readonly paletteHistory: string;
 		};
-		inputs: {
-			columnCount: string;
-			limitDarkChkbx: string;
-			limitGrayChkbx: string;
-			limitLightChkbx: string;
-			paletteColumn: string;
-			paletteType: string;
+		readonly inputs: {
+			readonly columnCount: string;
+			readonly limitDarkChkbx: string;
+			readonly limitGrayChkbx: string;
+			readonly limitLightChkbx: string;
+			readonly paletteColumn: string;
+			readonly paletteType: string;
 		};
 	};
 }
@@ -62,14 +62,14 @@ export interface DOMIndex {
 // ********************************************************
 
 export interface DOMConfig {
-	btnDebounce: number;
-	copyButtonTextTimeout: number;
-	inputDebounce: number;
-	minColumnSize: 5;
-	maxColumnSize: 70;
-	toastTimer: number;
-	tooltipFadeIn: number;
-	tooltipFadeOut: number;
+	readonly btnDebounce: number;
+	readonly copyButtonTextTimeout: number;
+	readonly inputDebounce: number;
+	readonly minColumnSize: 5;
+	readonly maxColumnSize: 70;
+	readonly toastTimer: number;
+	readonly tooltipFadeIn: number;
+	readonly tooltipFadeOut: number;
 }
 
 // ***********************************************************
@@ -79,31 +79,31 @@ export interface DOMConfig {
 // ***********************************************************
 
 export interface ProbabilityProperties {
-	values: readonly number[];
-	weights: readonly number[];
+	readonly values: readonly number[];
+	readonly weights: readonly number[];
 }
 
 interface PaletteShiftRange {
-	hue: number;
-	sat: number;
-	light: number;
+	readonly hue: number;
+	readonly sat: number;
+	readonly light: number;
 }
 
 export interface PaletteConfig {
-	adjustment: {
-		slaValue: number;
+	readonly adjustment: {
+		readonly slaValue: number;
 	};
-	probabilities: {
-		base: ProbabilityProperties;
-		chaotic: ProbabilityProperties;
-		soft: ProbabilityProperties;
-		strong: ProbabilityProperties;
+	readonly probabilities: {
+		readonly base: ProbabilityProperties;
+		readonly chaotic: ProbabilityProperties;
+		readonly soft: ProbabilityProperties;
+		readonly strong: ProbabilityProperties;
 	};
-	shiftRanges: Record<PaletteType, PaletteShiftRange>;
-	thresholds: {
-		dark: number;
-		gray: number;
-		light: number;
+	readonly shiftRanges: Record<PaletteType, PaletteShiftRange>;
+	readonly thresholds: {
+		readonly dark: number;
+		readonly gray: number;
+		readonly light: number;
 	};
 }
 
@@ -114,24 +114,25 @@ export interface PaletteConfig {
 // ****************************************************
 
 export interface Environment {
-	app: {
-		historyLimit: number;
-		paletteHistoryLimit: number;
+	readonly app: {
+		readonly historyLimit: number;
+		readonly paletteHistoryLimit: number;
 	};
-	idb: {
-		retryDelay: number;
+	readonly idb: {
+		readonly retryDelay: number;
 	};
-	mutex: {
-		contentionHistoryLimit: number;
-		timeout: number;
+	readonly mutex: {
+		readonly contentionHistoryLimit: number;
+		readonly timeout: number;
 	};
-	observer: {
-		debounce: number;
+	readonly observer: {
+		readonly debounce: number;
 	};
-	state: {
-		maxReadyAttempts: number;
-		maxSaveRetries: number;
-		saveThrottleDelay: number;
+	readonly state: {
+		readonly maxReadyAttempts: number;
+		readonly maxSaveRetries: number;
+		readonly readyTimeout: number;
+		readonly saveThrottleDelay: number;
 	};
 }
 
@@ -142,7 +143,7 @@ export interface Environment {
 // *******************************************************
 
 export interface FeatureFlags {
-	loadStateFromStorage: boolean;
+	readonly loadStateFromStorage: boolean;
 }
 
 // ****************************************************
@@ -152,128 +153,126 @@ export interface FeatureFlags {
 // ****************************************************
 
 export interface RegexConfig {
-	brand: {
-		hex: RegExp;
+	readonly brand: { readonly hex: RegExp };
+	readonly colors: {
+		readonly cmyk: RegExp;
+		readonly hex: RegExp;
+		readonly hsl: RegExp;
+		readonly hsv: RegExp;
+		readonly lab: RegExp;
+		readonly rgb: RegExp;
+		readonly xyz: RegExp;
 	};
-	colors: {
-		cmyk: RegExp;
-		hex: RegExp;
-		hsl: RegExp;
-		hsv: RegExp;
-		lab: RegExp;
-		rgb: RegExp;
-		xyz: RegExp;
+	readonly css: {
+		readonly cmyk: RegExp;
+		readonly hsl: RegExp;
+		readonly hsv: RegExp;
+		readonly lab: RegExp;
+		readonly rgb: RegExp;
+		readonly xyz: RegExp;
 	};
-	css: {
-		cmyk: RegExp;
-		hsl: RegExp;
-		hsv: RegExp;
-		lab: RegExp;
-		rgb: RegExp;
-		xyz: RegExp;
+	readonly dom: {
+		readonly hex: RegExp;
+		readonly hsl: RegExp;
+		readonly rgb: RegExp;
 	};
-	dom: {
-		hex: RegExp;
-		hsl: RegExp;
-		rgb: RegExp;
+	readonly stackTrace: {
+		readonly anon: RegExp;
+		readonly chrome: RegExp;
+		readonly electron: RegExp;
+		readonly fallback: RegExp;
+		readonly firefox: RegExp;
+		readonly node: RegExp;
+		readonly safari: RegExp;
+		readonly workers: RegExp;
 	};
-	stackTrace: {
-		anon: RegExp;
-		chrome: RegExp;
-		electron: RegExp;
-		fallback: RegExp;
-		firefox: RegExp;
-		node: RegExp;
-		safari: RegExp;
-		workers: RegExp;
+	readonly userInput: {
+		readonly hex: RegExp;
+		readonly hsl: RegExp;
+		readonly rgb: RegExp;
 	};
-	userInput: {
-		hex: RegExp;
-		hsl: RegExp;
-		rgb: RegExp;
-	};
-	validation: {
-		hex: RegExp;
-		hexComponent: RegExp;
+	readonly validation: {
+		readonly hex: RegExp;
+		readonly hexComponent: RegExp;
 	};
 }
 
 export interface Configuration {
-	math: {
-		epsilon: number;
-		maxXYZ_X: number;
-		maxXYZ_Y: number;
-		maxXYZ_Z: number;
-		minXYZ_X: number;
-		minXYZ_Y: number;
-		minXYZ_Z: number;
+	readonly math: {
+		readonly epsilon: number;
+		readonly maxXYZ_X: number;
+		readonly maxXYZ_Y: number;
+		readonly maxXYZ_Z: number;
+		readonly minXYZ_X: number;
+		readonly minXYZ_Y: number;
+		readonly minXYZ_Z: number;
 	};
-	mode: {
-		debugLevel: 0 | 1 | 2 | 3 | 4 | 5;
-		env: 'dev' | 'prod' | 'test';
-		exposeClasses: boolean;
-		log: {
-			debug: boolean;
-			error: boolean;
-			info: boolean;
-			verbosity: 0 | 1 | 2 | 3 | 4 | 5;
-			warn: boolean;
+	readonly mode: {
+		readonly debugLevel: 0 | 1 | 2 | 3 | 4 | 5;
+		readonly env: 'dev' | 'prod' | 'test';
+		readonly exposeClasses: boolean;
+		readonly log: {
+			readonly debug: boolean;
+			readonly error: boolean;
+			readonly info: boolean;
+			readonly verbosity: 0 | 1 | 2 | 3 | 4 | 5;
+			readonly warn: boolean;
 		};
-		showAlerts: boolean;
-		stackTrace: boolean;
+		readonly showAlerts: boolean;
+		readonly stackTrace: boolean;
 	};
-	storage: {
-		idbDBName: string;
-		idbDefaultVersion: number;
-		idbStoreName: string;
+	readonly storage: {
+		readonly idbDBName: string;
+		readonly idbDefaultVersion: number;
+		readonly idbStoreName: string;
 	};
 }
 
 export interface Defaults {
-	colors: {
-		cmyk: CMYK;
-		hex: Hex;
-		hsl: HSL;
-		hsv: HSV;
-		lab: LAB;
-		rgb: RGB;
-		sl: SL;
-		sv: SV;
-		xyz: XYZ;
-		cmykNum: CMYKNumMap;
-		hslNum: HSLNumMap;
-		hsvNum: HSVNumMap;
-		labNum: LABNumMap;
-		rgbNum: RGBNumMap;
-		slNum: SLNumMap;
-		svNum: SVNumMap;
-		xyzNum: XYZNumMap;
-		cmykString: CMYKStringMap;
-		hexString: HexStringMap;
-		hslString: HSLStringMap;
-		hsvString: HSVStringMap;
-		labString: LABStringMap;
-		rgbString: RGBStringMap;
-		slString: SLStringMap;
-		svString: SVStringMap;
-		xyzString: XYZStringMap;
-		cmykCSS: string;
-		hexCSS: string;
-		hslCSS: string;
-		hsvCSS: string;
-		labCSS: string;
-		rgbCSS: string;
-		slCSS: string;
-		svCSS: string;
-		xyzCSS: string;
+	readonly colors: {
+		readonly cmyk: CMYK;
+		readonly hex: Hex;
+		readonly hsl: HSL;
+		readonly hsv: HSV;
+		readonly lab: LAB;
+		readonly rgb: RGB;
+		readonly sl: SL;
+		readonly sv: SV;
+		readonly xyz: XYZ;
+		readonly cmykNum: CMYKNumMap;
+		readonly hslNum: HSLNumMap;
+		readonly hsvNum: HSVNumMap;
+		readonly labNum: LABNumMap;
+		readonly rgbNum: RGBNumMap;
+		readonly slNum: SLNumMap;
+		readonly svNum: SVNumMap;
+		readonly xyzNum: XYZNumMap;
+		readonly cmykString: CMYKStringMap;
+		readonly hexString: HexStringMap;
+		readonly hslString: HSLStringMap;
+		readonly hsvString: HSVStringMap;
+		readonly labString: LABStringMap;
+		readonly rgbString: RGBStringMap;
+		readonly slString: SLStringMap;
+		readonly svString: SVStringMap;
+		readonly xyzString: XYZStringMap;
+		readonly cmykCSS: string;
+		readonly hexCSS: string;
+		readonly hslCSS: string;
+		readonly hsvCSS: string;
+		readonly labCSS: string;
+		readonly rgbCSS: string;
+		readonly slCSS: string;
+		readonly svCSS: string;
+		readonly xyzCSS: string;
 	};
-	mutation: MutationLog;
-	palette: Palette;
-	paletteItem: PaletteItem;
-	paletteOptions: SelectedPaletteOptions;
-	state: State;
-	unbrandedPalette: UnbrandedPalette;
-	unbrandedPaletteItem: UnbrandedPaletteItem;
+	readonly mutation: MutationLog;
+	readonly palette: Palette;
+	readonly paletteItem: PaletteItem;
+	readonly paletteOptions: SelectedPaletteOptions;
+	readonly state: State;
+	readonly unbrandedPalette: UnbrandedPalette;
+	readonly unbrandedPaletteItem: UnbrandedPaletteItem;
 }
 
 export type MathData = Configuration['math'];
@@ -281,16 +280,16 @@ export type MathData = Configuration['math'];
 export type ModeData = Configuration['mode'];
 
 export interface SetsData {
-	ByteRange: readonly [0, 255];
-	HexSet: 'HexSet';
-	LAB_L: readonly [0, 100];
-	LAB_A: readonly [-128, 127];
-	LAB_B: readonly [-128, 127];
-	Percentile: readonly [0, 100];
-	Radial: readonly [0, 360];
-	XYZ_X: readonly [number, number];
-	XYZ_Y: readonly [number, number];
-	XYZ_Z: readonly [number, number];
+	readonly ByteRange: readonly [0, 255];
+	readonly HexSet: 'HexSet';
+	readonly LAB_L: readonly [0, 100];
+	readonly LAB_A: readonly [-128, 127];
+	readonly LAB_B: readonly [-128, 127];
+	readonly Percentile: readonly [0, 100];
+	readonly Radial: readonly [0, 360];
+	readonly XYZ_X: readonly [number, number];
+	readonly XYZ_Y: readonly [number, number];
+	readonly XYZ_Z: readonly [number, number];
 }
 
 export type StorageData = Configuration['storage'];
@@ -322,22 +321,22 @@ export type XYZ_Y = number & { __brand: 'XYZ_Y' };
 export type XYZ_Z = number & { __brand: 'XYZ_Z' };
 
 export type RangeKeyMap = {
-	ByteRange: ByteRange;
-	HexSet: HexSet;
-	LAB_L: LAB_L;
-	LAB_A: LAB_A;
-	LAB_B: LAB_B;
-	Percentile: Percentile;
-	Radial: Radial;
-	XYZ_X: XYZ_X;
-	XYZ_Y: XYZ_Y;
-	XYZ_Z: XYZ_Z;
+	readonly ByteRange: ByteRange;
+	readonly HexSet: HexSet;
+	readonly LAB_L: LAB_L;
+	readonly LAB_A: LAB_A;
+	readonly LAB_B: LAB_B;
+	readonly Percentile: Percentile;
+	readonly Radial: Radial;
+	readonly XYZ_X: XYZ_X;
+	readonly XYZ_Y: XYZ_Y;
+	readonly XYZ_Z: XYZ_Z;
 };
 
 export type ColorValueRange = RangeKeyMap[keyof RangeKeyMap];
 
 export type NumericRangeKey = {
-	[K in keyof typeof sets]: (typeof sets)[K] extends readonly [number, number]
+	[K in keyof typeof sets]: (typeof sets)[K] extends [number, number]
 		? K
 		: never;
 }[keyof typeof sets & string];
@@ -692,30 +691,30 @@ export interface SelectedPaletteOptions {
 export type AppModeData = 'dev' | 'prod';
 
 export interface State {
-	appMode: 'edit' | 'export' | 'preview';
-	paletteHistory: Palette[];
-	paletteContainer: {
-		columns: {
-			id: number;
-			isLocked: boolean;
-			position: number;
-			size: number;
+	readonly appMode: 'edit' | 'export' | 'preview';
+	readonly paletteHistory: Palette[];
+	readonly paletteContainer: {
+		readonly columns: {
+			readonly id: number;
+			readonly isLocked: boolean;
+			readonly position: number;
+			readonly size: number;
 		}[];
 	};
-	preferences: {
-		colorSpace: ColorSpace;
-		distributionType: keyof PaletteConfig['probabilities'];
-		maxHistory: number;
-		maxPaletteHistory: number;
-		theme: 'light' | 'dark';
+	readonly preferences: {
+		readonly colorSpace: ColorSpace;
+		readonly distributionType: keyof PaletteConfig['probabilities'];
+		readonly maxHistory: number;
+		readonly maxPaletteHistory: number;
+		readonly theme: 'light' | 'dark';
 	};
-	selections: {
-		paletteColumnCount: number;
-		paletteType: PaletteType;
-		targetedColumnPosition: number;
+	readonly selections: {
+		readonly paletteColumnCount: number;
+		readonly paletteType: PaletteType;
+		readonly targetedColumnPosition: number;
 	};
-	timestamp: string;
-	[key: string]: unknown;
+	readonly timestamp: string;
+	readonly [key: string]: unknown;
 }
 
 export interface UnbrandedPaletteItem {

@@ -31,7 +31,6 @@ import {
 	LAB_B,
 	LAB_L,
 	Listener,
-	MutationLog,
 	NumericBrandedType,
 	NumericRangeKey,
 	Palette,
@@ -58,20 +57,22 @@ import {
 	XYZ_Y,
 	XYZ_Z
 } from './index.js';
-import { DOMStore } from '../common/services/DOMStore.js';
-import { EventManager } from '../events/EventManager.js';
-import { PaletteEvents } from '../events/PaletteEvents.js';
-import { PaletteManager } from '../palette/PaletteManager.js';
-import { PaletteState } from '../state/PaletteState.js';
+import {
+	DOMStore,
+	EventManager,
+	PaletteEventsService,
+	UIEventsService
+} from '../dom/index.js';
+import { LoggerService } from '../core/services/index.js';
+import { PaletteStateService } from '../state/PaletteStateService.js';
 import { StateManager } from '../state/StateManager.js';
-import { UIEvents } from '../events/UIEvents.js';
 
 // ******** 1. SERVICES ********
 
 export interface Services {
 	domStore: DOMStore;
-	errors: ErrorHandlerInterface;
-	log(message: string, options: LoggerOptions): void;
+	errors: ErrorHandlerContract;
+	log: LoggerService;
 }
 
 // ******** 2. HELPERS ********
@@ -180,7 +181,7 @@ export interface Helpers {
 
 // ******** 4. UTILITIES ********
 
-export interface AdjustmentUtils {
+export interface AdjustmentUtilities {
 	applyGammaCorrection(value: number): number;
 	clampRGB(rgb: RGB): RGB;
 	clampXYZ(value: number, maxValue: number): number;
@@ -188,7 +189,7 @@ export interface AdjustmentUtils {
 	sl(color: HSL): HSL;
 }
 
-export interface BrandingUtils {
+export interface BrandingUtilities {
 	asBranded<T extends keyof RangeKeyMap>(
 		value: number,
 		rangeKey: T
@@ -216,7 +217,7 @@ export interface BrandingUtils {
 	brandPalette(data: UnbrandedPalette): Palette;
 }
 
-export interface ColorBrandUtils {
+export interface ColorBrandUtilities {
 	brandColorString(color: ColorStringMap): Color;
 	brandCMYKString(cmyk: CMYKStringMap['value']): CMYK['value'];
 	brandHexString(hex: HexStringMap['value']): Hex['value'];
@@ -227,7 +228,7 @@ export interface ColorBrandUtils {
 	brandXYZString(xyz: XYZStringMap['value']): XYZ['value'];
 }
 
-export interface ColorConversionUtils {
+export interface ColorConversionUtilities {
 	cmykToHSL(cmyk: CMYK): HSL;
 	cmykToRGB(cmyk: CMYK): RGB;
 	convertHSL(color: HSL, colorSpace: ColorSpaceExtended): Color;
@@ -258,18 +259,18 @@ export interface ColorConversionUtils {
 	xyzToRGB(xyz: XYZ): RGB;
 }
 
-export interface ColorFormatUtils {
+export interface ColorFormatUtilities {
 	formatColorAsCSS(color: Color): string;
 	formatColorAsStringMap(color: Color): ColorStringMap;
 	formatCSSAsColor(color: string): Exclude<Color, SL | SV> | null;
 }
 
-export interface ColorGenerationUtils {
+export interface ColorGenerationUtilities {
 	generateRandomHSL(): HSL;
 	generateRandomSL(): SL;
 }
 
-export interface ColorParseUtils {
+export interface ColorParsingUtilities {
 	parseHexValueAsStringMap(hex: Hex['value']): HexStringMap['value'];
 	parseHSLValueAsStringMap(hsl: HSL['value']): HSLStringMap['value'];
 	parseHSVValueAsStringMap(hsv: HSV['value']): HSVStringMap['value'];
@@ -278,10 +279,15 @@ export interface ColorParseUtils {
 	parseXYZValueAsStringMap(xyz: XYZ['value']): XYZStringMap['value'];
 }
 
-export interface DOMUtilsPartial {
+export interface DOMUtilitiesPartial {
 	createTooltip(element: HTMLElement, text: string): HTMLElement | void;
 	downloadFile(data: string, filename: string, type: string): void;
 	enforceSwatchRules(minSwatches: number, maxSwatches: number): void;
+	getUpdatedColumnSizes(
+		columns: State['paletteContainer']['columns'],
+		columnID: number,
+		newSize: number
+	): State['paletteContainer']['columns'];
 	hideTooltip(): void;
 	positionTooltip(element: HTMLElement, tooltip: HTMLElement): void;
 	readFile(file: File): Promise<string>;
@@ -292,7 +298,7 @@ export interface DOMUtilsPartial {
 	updateHistory(history: Palette[]): void;
 }
 
-export interface DOMParsingUtils {
+export interface DOMParsingUtilities {
 	parseCheckbox(id: string): boolean | void;
 	parseColorInput(input: HTMLInputElement): Hex | HSL | RGB | null;
 	parseDropdownSelection(id: string, validOptions: string[]): string | void;
@@ -304,7 +310,7 @@ export interface DOMParsingUtils {
 	parseTextInput(input: HTMLInputElement, regex?: RegExp): string | null;
 }
 
-export interface FormattingUtils {
+export interface FormattingUtilities {
 	addHashToHex(hex: Hex): Hex;
 	componentToHex(component: number): string;
 	convertShortHexToLong(hex: string): string;
@@ -326,7 +332,7 @@ export interface FormattingUtils {
 	): { [K in keyof T]: T[K] extends `${number}%` ? number : T[K] };
 }
 
-export interface PaletteUtils {
+export interface PaletteUtilities {
 	createPaletteItem(color: HSL, itemID: number): PaletteItem;
 	createPaletteItemArray(baseColor: HSL, hues: number[]): PaletteItem[];
 	createPaletteObject(
@@ -342,7 +348,7 @@ export interface PaletteUtils {
 	isHSLInBounds(hsl: HSL): boolean;
 }
 
-export interface ParsingUtils {
+export interface ParsingUtilities {
 	colorInput(input: HTMLInputElement): Hex | HSL | RGB | null;
 	dropdownSelection(id: string, validOptions: string[]): string | void;
 	numberInput(
@@ -353,7 +359,7 @@ export interface ParsingUtils {
 	textInput(input: HTMLInputElement, regex?: RegExp): string | null;
 }
 
-export interface SanitationUtils {
+export interface SanitationUtilities {
 	getSafeQueryParam(param: string): string | null;
 	lab(value: number, output: 'l' | 'a' | 'b'): LAB_L | LAB_A | LAB_B;
 	percentile(value: number): Percentile;
@@ -366,7 +372,7 @@ export interface SanitationUtils {
 	): RangeKeyMap[T];
 }
 
-export interface ValidationUtils {
+export interface ValidationUtilities {
 	colorValue(color: Color | SL | SV): boolean;
 	ensureHash(value: string): string;
 	hex(value: string, pattern: RegExp): boolean;
@@ -378,28 +384,28 @@ export interface ValidationUtils {
 
 // ******** 5. UTILITIES OBJECT ********
 
-export type ColorUtils = ColorBrandUtils &
-	ColorConversionUtils &
-	ColorGenerationUtils &
-	ColorFormatUtils &
-	ColorParseUtils;
+export type ColorUtilities = ColorBrandUtilities &
+	ColorConversionUtilities &
+	ColorGenerationUtilities &
+	ColorFormatUtilities &
+	ColorParsingUtilities;
 
-export type DOMUtils = DOMParsingUtils & DOMUtilsPartial;
+export type DOMUtilities = DOMParsingUtilities & DOMUtilitiesPartial;
 
 export interface Utilities {
-	adjust: AdjustmentUtils;
-	brand: BrandingUtils;
-	color: ColorUtils;
-	colorConversion: ColorConversionUtils;
-	dom: DOMUtils;
-	format: FormattingUtils;
-	palette: PaletteUtils;
-	parse: ParsingUtils;
-	sanitize: SanitationUtils;
-	validate: ValidationUtils;
+	adjust: AdjustmentUtilities;
+	brand: BrandingUtilities;
+	color: ColorUtilities;
+	colorConversion: ColorConversionUtilities;
+	dom: DOMUtilities;
+	format: FormattingUtilities;
+	palette: PaletteUtilities;
+	parse: ParsingUtilities;
+	sanitize: SanitationUtilities;
+	validate: ValidationUtilities;
 }
 
-// ******** 6. COMMON FUNCTIONS ********
+// ******** 6. COMMON FUNCTIONS OBJECT ********
 
 export interface CommonFunctions {
 	helpers: Helpers;
@@ -409,12 +415,12 @@ export interface CommonFunctions {
 
 // ******** 7. CLASSES ********
 
-export interface DOMStoreInterface {
+export interface DOMStoreContract {
 	getElements(): DOMElements | null;
 	setElements(elements: DOMElements): void;
 }
 
-export interface ErrorHandlerInterface {
+export interface ErrorHandlerContract {
 	handleAndReturn<T>(
 		action: () => T | Promise<T>,
 		errorMessage: string,
@@ -432,7 +438,7 @@ export interface ErrorHandlerInterface {
 	): T;
 }
 
-export interface IDBManagerInterface {
+export interface IDBStorageContract {
 	clear(): Promise<void>;
 	ensureDBReady(): Promise<void>;
 	getItem<T>(key: string): Promise<T | null>;
@@ -441,7 +447,7 @@ export interface IDBManagerInterface {
 	setItem(key: string, value: unknown): Promise<void>;
 }
 
-export interface LocalStorageManagerInterface {
+export interface LocalStorageContract {
 	clear(): Promise<void>;
 	getItem<T>(key: string): Promise<T | null>;
 	init(): Promise<boolean>;
@@ -449,32 +455,14 @@ export interface LocalStorageManagerInterface {
 	setItem(key: string, value: unknown): Promise<void>;
 }
 
-export interface LoggerInterface {
-	log(
-		message: string,
-		level: 'debug' | 'info' | 'warn' | 'error',
-		caller?: string
-	): void;
-	logMutation(
-		data: MutationLog,
-		logCallback: (data: MutationLog) => void
-	): void;
+export interface LoggerContract {
+	debug(message: string, caller?: string): void;
+	error(message: string, caller?: string): void;
+	info(message: string, caller?: string): void;
+	warn(message: string, caller?: string): void;
 }
 
-export interface MutexInterface {
-	acquireRead(): Promise<void>;
-	acquireWrite(): Promise<void>;
-	getContentionCount(): number;
-	getContentionRate(): string;
-	logContentionSnapShot(): void;
-	read<T>(callback: () => T): Promise<T>;
-	release(): void;
-	resetContentionCount(): void;
-	runExclusive<T>(callback: () => Promise<T> | T): Promise<T>;
-	upgradeToWriteLock(): Promise<void>;
-}
-
-export interface ObserverInterface<T extends Record<string, unknown>> {
+export interface ObserverContract<T extends Record<string, unknown>> {
 	batchUpdate(updates: Partial<T>): void;
 	get<K extends keyof T>(prop: K): T[K];
 	getData(): T;
@@ -483,7 +471,7 @@ export interface ObserverInterface<T extends Record<string, unknown>> {
 	set<K extends keyof T>(prop: K, value: T[K]): void;
 }
 
-export interface PaletteEventsInterface {
+export interface PaletteEventsContract {
 	attachColorCopyHandlers(): void;
 	attachDragAndDropHandlers(): void;
 	init(): void;
@@ -492,50 +480,68 @@ export interface PaletteEventsInterface {
 	syncColumnColorsWithState(): void;
 }
 
-export interface PaletteManagerInterface {
-	extractPaletteFromDOM(): Palette | void;
-	handleColumnLock(columnID: number): void;
-	handleColumnResize(columnID: number, newSize: number): void;
-	loadPalette(): Promise<void>;
-	renderNewPalette(): Promise<void>;
-	renderPaletteFromState(): Promise<void>;
-	swapColumns(draggedID: number, targetID: number): void;
+export interface PaletteStateContract {
+	handleColumnLock(columnID: number): Promise<void>;
+	handleColumnResize(columnID: number, newSize: number): Promise<void>;
+	swapColumns(draggedID: number, targetID: number): Promise<void>;
 }
 
-export interface PaletteStateInterface {
-	updatePaletteItemColor(columnID: number, newColor: string): Promise<void>;
+export interface StateFactoryContract {
+	createInitialState(): Promise<State>;
 }
 
-export interface StateManagerInterface {
-	init(): Promise<void>;
+export interface StateHistoryContract {
+	addPaletteToHistory(state: State, palette: Palette): void;
+	redo(): State | null;
+	trackAction(state: State): void;
+	undo(state: State): State | null;
+}
+
+export interface StateManagerContract {
+	init(helpers: Helpers, services: Services): Promise<void>;
 	addPaletteToHistory(palette: Palette): void;
+	batchUpdate(updates: Partial<State>): Promise<void>;
 	ensureStateReady(): Promise<void>;
 	getState(): Promise<State>;
 	loadState(): Promise<State>;
-	redo(): void;
+	redo(): State | null;
 	resetState(): Promise<void>;
-	setOnStateLoad(callback: () => void): void;
+	saveState(): Promise<void>;
 	setState(newState: State, track: boolean): Promise<void>;
-	undo(): void;
-	updateAppModeState(appMode: State['appMode'], track: boolean): void;
-	updateLockedProperty<K extends keyof State>(
-		key: K,
-		value: State[K]
-	): Promise<void>;
+	undo(): State | null;
 	updatePaletteColumns(
 		columns: State['paletteContainer']['columns'],
-		track: boolean,
-		verbosity: number
+		track: boolean
 	): void;
-	updatePaletteColumnSize(columnID: number, newSize: number): void;
-	updatePaletteHistory(updatedHistory: Palette[]): void;
+	updatePaletteHistory(
+		updatedHistory: Palette[],
+		track: boolean
+	): Promise<void>;
 	updateSelections(
 		selections: Partial<State['selections']>,
 		track: boolean
 	): void;
 }
 
-export interface StorageManagerInterface {
+export interface StateStoreContract {
+	batchUpdate(updates: Partial<State>): Promise<void>;
+	get<K extends keyof State>(key: K): State[K];
+	getState(): State;
+	init(): Promise<State | null>;
+	loadState(): Promise<State | null>;
+	off<K extends keyof State>(
+		key: K,
+		callback: (newValue: State[K], oldValue: State[K]) => void
+	): void;
+	on<K extends keyof State>(
+		key: K,
+		callback: (newValue: State[K], oldValue: State[K]) => void
+	): void;
+	saveState(state: State, options?: { throttle?: boolean }): Promise<void>;
+	set<K extends keyof State>(key: K, value: State[K]): Promise<void>;
+}
+
+export interface StorageManagerContract {
 	clear(): Promise<void>;
 	getItem<T>(key: string): Promise<T | null>;
 	init(): Promise<boolean>;
@@ -543,7 +549,7 @@ export interface StorageManagerInterface {
 	setItem(key: string, value: unknown): Promise<void>;
 }
 
-export interface UIEventsInterface {
+export interface UIEventsContract {
 	attachTooltipListener(id: string, tooltipText: string): void;
 	init(): void;
 	initButtons(): void;
@@ -634,9 +640,8 @@ export interface GeneratePaletteFnGroup {
 export interface AppDependencies {
 	common: Required<CommonFunctions>;
 	eventManager: EventManager;
-	events: { palette: PaletteEvents; ui: UIEvents };
-	paletteManager: PaletteManager;
-	paletteState: PaletteState;
+	events: { palette: PaletteEventsService; ui: UIEventsService };
+	paletteState: PaletteStateService;
 	stateManager: StateManager;
 }
 
@@ -654,9 +659,3 @@ export type LockQueueEntry = {
 	isWrite: boolean;
 	resolve: () => void;
 };
-
-export interface LoggerOptions {
-	caller: string;
-	level?: 'debug' | 'info' | 'warn' | 'error';
-	verbosity?: number;
-}

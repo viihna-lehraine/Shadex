@@ -1,5 +1,5 @@
 // File: config/partials/env.ts
-const env = {
+export const env = {
     app: {
         historyLimit: 100,
         paletteHistoryLimit: 20
@@ -9,7 +9,7 @@ const env = {
     },
     mutex: {
         contentionHistoryLimit: 100,
-        timeout: 5000
+        timeout: 200
     },
     observer: {
         debounce: 50
@@ -17,9 +17,8 @@ const env = {
     state: {
         maxReadyAttempts: 20,
         maxSaveRetries: 10,
+        readyTimeout: 50,
         saveThrottleDelay: 30
     }
 };
-
-export { env };
-//# sourceMappingURL=env.js.map
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZW52LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vc3JjL2NvbmZpZy9wYXJ0aWFscy9lbnYudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsK0JBQStCO0FBSS9CLE1BQU0sQ0FBQyxNQUFNLEdBQUcsR0FBMEI7SUFDekMsR0FBRyxFQUFFO1FBQ0osWUFBWSxFQUFFLEdBQUc7UUFDakIsbUJBQW1CLEVBQUUsRUFBRTtLQUN2QjtJQUNELEdBQUcsRUFBRTtRQUNKLFVBQVUsRUFBRSxFQUFFO0tBQ2Q7SUFDRCxLQUFLLEVBQUU7UUFDTixzQkFBc0IsRUFBRSxHQUFHO1FBQzNCLE9BQU8sRUFBRSxHQUFHO0tBQ1o7SUFDRCxRQUFRLEVBQUU7UUFDVCxRQUFRLEVBQUUsRUFBRTtLQUNaO0lBQ0QsS0FBSyxFQUFFO1FBQ04sZ0JBQWdCLEVBQUUsRUFBRTtRQUNwQixjQUFjLEVBQUUsRUFBRTtRQUNsQixZQUFZLEVBQUUsRUFBRTtRQUNoQixpQkFBaUIsRUFBRSxFQUFFO0tBQ3JCO0NBQ1EsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEZpbGU6IGNvbmZpZy9wYXJ0aWFscy9lbnYudHNcblxuaW1wb3J0IHsgRW52aXJvbm1lbnQgfSBmcm9tICcuLi8uLi90eXBlcy9pbmRleC5qcyc7XG5cbmV4cG9ydCBjb25zdCBlbnY6IFJlYWRvbmx5PEVudmlyb25tZW50PiA9IHtcblx0YXBwOiB7XG5cdFx0aGlzdG9yeUxpbWl0OiAxMDAsXG5cdFx0cGFsZXR0ZUhpc3RvcnlMaW1pdDogMjBcblx0fSxcblx0aWRiOiB7XG5cdFx0cmV0cnlEZWxheTogNTBcblx0fSxcblx0bXV0ZXg6IHtcblx0XHRjb250ZW50aW9uSGlzdG9yeUxpbWl0OiAxMDAsXG5cdFx0dGltZW91dDogMjAwXG5cdH0sXG5cdG9ic2VydmVyOiB7XG5cdFx0ZGVib3VuY2U6IDUwXG5cdH0sXG5cdHN0YXRlOiB7XG5cdFx0bWF4UmVhZHlBdHRlbXB0czogMjAsXG5cdFx0bWF4U2F2ZVJldHJpZXM6IDEwLFxuXHRcdHJlYWR5VGltZW91dDogNTAsXG5cdFx0c2F2ZVRocm90dGxlRGVsYXk6IDMwXG5cdH1cbn0gYXMgY29uc3Q7XG4iXX0=
