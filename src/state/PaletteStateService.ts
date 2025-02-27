@@ -96,9 +96,7 @@ export class PaletteStateService implements PaletteStateContract {
 				col => col.id !== columnID && !col.isLocked
 			);
 			const distributeAmount =
-				unlockedColumns.length > 0
-					? sizeDiff / unlockedColumns.length
-					: 0;
+				unlockedColumns.length > 0 ? sizeDiff / unlockedColumns.length : 0;
 
 			const resizedColumns = updatedColumns.map(col => {
 				if (col.id !== columnID && !col.isLocked) {
@@ -109,10 +107,7 @@ export class PaletteStateService implements PaletteStateContract {
 			});
 
 			// normalize sizes to total 100%
-			const totalSize = resizedColumns.reduce(
-				(sum, col) => sum + col.size,
-				0
-			);
+			const totalSize = resizedColumns.reduce((sum, col) => sum + col.size, 0);
 			const normalizedColumns = resizedColumns.map(col => ({
 				...col,
 				size: col.size * (100 / totalSize)

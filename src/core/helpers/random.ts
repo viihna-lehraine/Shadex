@@ -33,9 +33,7 @@ export const randomHelpersFactory = (): RandomHelpers => ({
 				prob => random < prob
 			);
 
-			return weights[
-				selectedIndex >= 0 ? selectedIndex : weights.length - 1
-			];
+			return weights[selectedIndex >= 0 ? selectedIndex : weights.length - 1];
 		} catch (error) {
 			throw new Error(
 				`[getWeightedRandomValue-ERR]: Error generating weighted random value: ${

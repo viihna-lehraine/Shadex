@@ -1,9 +1,14 @@
+import '../../config/partials/defaults.js';
+import '../../config/partials/regex.js';
+import { sets } from '../../config/partials/sets.js';
+
 // File: File: core/helpers/math.ts
-import { sets } from '../../config/index.js';
-export const mathHelpersFactory = () => ({
+const mathHelpersFactory = () => ({
     clampToRange(value, rangeKey) {
         const [min, max] = sets[rangeKey];
         return Math.min(Math.max(value, min), max);
     }
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWF0aC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL3NyYy9jb3JlL2hlbHBlcnMvbWF0aC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxtQ0FBbUM7QUFHbkMsT0FBTyxFQUFFLElBQUksRUFBRSxNQUFNLHVCQUF1QixDQUFDO0FBRTdDLE1BQU0sQ0FBQyxNQUFNLGtCQUFrQixHQUFHLEdBQWdCLEVBQUUsQ0FDbkQsQ0FBQztJQUNBLFlBQVksQ0FBQyxLQUFhLEVBQUUsUUFBeUI7UUFDcEQsTUFBTSxDQUFDLEdBQUcsRUFBRSxHQUFHLENBQUMsR0FBRyxJQUFJLENBQUMsUUFBUSxDQUFDLENBQUM7UUFFbEMsT0FBTyxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxHQUFHLENBQUMsS0FBSyxFQUFFLEdBQUcsQ0FBQyxFQUFFLEdBQUcsQ0FBQyxDQUFDO0lBQzVDLENBQUM7Q0FDRCxDQUFVLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvLyBGaWxlOiBGaWxlOiBjb3JlL2hlbHBlcnMvbWF0aC50c1xuXG5pbXBvcnQgeyBNYXRoSGVscGVycywgTnVtZXJpY1JhbmdlS2V5IH0gZnJvbSAnLi4vLi4vdHlwZXMvaW5kZXguanMnO1xuaW1wb3J0IHsgc2V0cyB9IGZyb20gJy4uLy4uL2NvbmZpZy9pbmRleC5qcyc7XG5cbmV4cG9ydCBjb25zdCBtYXRoSGVscGVyc0ZhY3RvcnkgPSAoKTogTWF0aEhlbHBlcnMgPT5cblx0KHtcblx0XHRjbGFtcFRvUmFuZ2UodmFsdWU6IG51bWJlciwgcmFuZ2VLZXk6IE51bWVyaWNSYW5nZUtleSk6IG51bWJlciB7XG5cdFx0XHRjb25zdCBbbWluLCBtYXhdID0gc2V0c1tyYW5nZUtleV07XG5cblx0XHRcdHJldHVybiBNYXRoLm1pbihNYXRoLm1heCh2YWx1ZSwgbWluKSwgbWF4KTtcblx0XHR9XG5cdH0pIGFzIGNvbnN0O1xuIl19
+
+export { mathHelpersFactory };
+//# sourceMappingURL=math.js.map

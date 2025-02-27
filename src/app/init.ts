@@ -1,112 +1,73 @@
 // File: app/init.ts
 
-import type {
-	CommonFunctions,
-	GenerateHuesFnGroup,
-	GeneratePaletteFn,
-	GeneratePaletteFnGroup,
-	Helpers,
-	Services,
-	Utilities
-} from '../types/index.js';
-import {
-	EventManager,
-	PaletteEventsService,
-	UIEventsService
-} from '../dom/index.js';
-import { PaletteStateService, StateManager } from '../state/index.js';
+import type { Helpers, Services, Utilities } from '../types/index.js';
+import { DOMStore } from '../dom/DOMStore.js';
+import { EventManager } from '../dom/events/EventManager.js';
+import { PaletteEventsService } from '../dom/events/PaletteEventsService.js';
+import { PaletteRendererService } from '../dom/PaletteRendererService.js';
+import { PaletteStateService } from '../state/PaletteStateService.js';
+import { StateManager } from '../state/StateManager.js';
+import { UIEventsService } from '../dom/events/UIEventsService.js';
 
-async function exposeClasses(
-	eventManager: EventManager,
-	paletteEvents: PaletteEventsService,
-	services: Services,
-	stateManager: StateManager,
-	uiEvents: UIEventsService
-): Promise<void> {
-	const { log, errors } = services;
-	log.info(`Function called.`, `[EXPOSE_CLASSES]`);
+async function initializeDOMStore(
+	helpers: Helpers,
+	services: Services
+): Promise<DOMStore> {
+	const { errors, log } = services;
 
-	return await errors.handleAndReturn(async () => {
-		log.info('Exposing functions to window.', `[EXPOSE_CLASSES]`);
-		window.eventManager = eventManager;
-		window.paletteEvents = paletteEvents;
-		window.stateManager = stateManager;
-		window.uiEvents = uiEvents;
-		window.EventManager = EventManager;
-		log.info('Functions exposed to window.', `[EXPOSE_CLASSES]`);
-	}, 'Error exposing functions to window');
+	return errors.handleAsync(async () => {
+		return DOMStore.getInstance(errors, helpers, log);
+	}, 'Error initializing DOMStore');
 }
 
-async function initializeEvents(
+async function initializeEventManager(
+	services: Services
+): Promise<EventManager> {
+	const { errors } = services;
+
+	return errors.handleAsync(async () => {
+		return EventManager.getInstance(services);
+	}, 'Error initializing EventManager');
+}
+
+async function initializePaletteEventsService(
+	domStore: DOMStore,
 	helpers: Helpers,
+	paletteRenderer: PaletteRendererService,
 	paletteState: PaletteStateService,
 	services: Services,
 	stateManager: StateManager,
 	utils: Utilities
-): Promise<{
-	palette: PaletteEventsService;
-	ui: UIEventsService;
-}> {
+): Promise<PaletteEventsService> {
 	const { errors } = services;
 
-	return await errors.handleAndReturn(async () => {
-		const paletteEvents = new PaletteEventsService(
+	return await errors.handleAsync(async () => {
+		const paletteEvents = PaletteEventsService.getInstance(
+			domStore,
 			helpers,
-			paletteManager,
+			paletteRenderer,
 			paletteState,
 			services,
 			stateManager,
 			utils
 		);
-		const uiEvents = new UIEventsService(
-			helpers,
-			paletteManager,
-			services,
-			utils
-		);
 
 		paletteEvents.init();
 
-		uiEvents.init();
-		uiEvents.initButtons();
-
-		return { palette: paletteEvents, ui: uiEvents };
+		return paletteEvents;
 	}, 'Error initializing events');
-}
-
-async function initializePaletteManager(
-	common: CommonFunctions,
-	generateHuesFnGroup: GenerateHuesFnGroup,
-	generatePaletteFnGroup: GeneratePaletteFnGroup,
-	generatePalette: GeneratePaletteFn,
-	stateManager: StateManager
-): Promise<PaletteManager> {
-	const { errors } = common.services;
-
-	return await errors.handleAndReturn(async () => {
-		const paletteManager = new PaletteManager(
-			stateManager,
-			common,
-			generateHuesFnGroup,
-			generatePaletteFnGroup,
-			generatePalette
-		);
-		return paletteManager;
-	}, 'Error initializing PaletteManager.');
 }
 
 async function initializePaletteStateService(
 	services: Services,
-	stateManager: StateManager,
-	utils: Utilities
+	stateManager: StateManager
 ): Promise<PaletteStateService> {
 	const { errors } = services;
 
-	return await errors.handleAndReturn(async () => {
-		const palettestate = new PaletteStateService(
-			stateManager,
+	return await errors.handleAsync(async () => {
+		const palettestate = PaletteStateService.getInstance(
 			services,
-			utils
+			stateManager
 		);
 
 		return palettestate;
@@ -120,11 +81,36 @@ async function initializeStateManager(
 ): Promise<StateManager> {
 	const { errors } = services;
 
-	return await errors.handleAndReturn(async () => {
+	return await errors.handleAsync(async () => {
 		const stateManager = StateManager.getInstance(helpers, services, utils);
 
 		return stateManager;
 	}, 'Error initializing StateManager');
+}
+
+async function initializeUIEventsService(
+	domStore: DOMStore,
+	helpers: Helpers,
+	paletteRenderer: PaletteRendererService,
+	services: Services,
+	utils: Utilities
+): Promise<UIEventsService> {
+	const { errors } = services;
+
+	return await errors.handleAsync(async () => {
+		const uiEvents = UIEventsService.getInstance(
+			domStore,
+			helpers,
+			paletteRenderer,
+			services,
+			utils
+		);
+
+		uiEvents.init();
+		uiEvents.initButtons();
+
+		return uiEvents;
+	}, 'Error initializing UIEventsService');
 }
 
 async function initializeUtilities(
@@ -133,7 +119,7 @@ async function initializeUtilities(
 ): Promise<Utilities> {
 	const { errors } = services;
 
-	return await errors.handleAndReturn(async () => {
+	return await errors.handleAsync(async () => {
 		const { utilitiesFactory } = await import('../core/factories/utils.js');
 
 		const utils = await utilitiesFactory(helpers, services);
@@ -143,10 +129,11 @@ async function initializeUtilities(
 }
 
 export {
-	exposeClasses,
-	initializeEvents,
-	initializePaletteManager,
+	initializeDOMStore,
+	initializeEventManager,
+	initializePaletteEventsService,
 	initializePaletteStateService,
 	initializeStateManager,
+	initializeUIEventsService,
 	initializeUtilities
 };

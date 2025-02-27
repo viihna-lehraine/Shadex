@@ -76,8 +76,6 @@ export async function colorUtilitiesFactory(
 			...colorGenerationUtils
 		};
 
-		console.log(`${caller}: Color utilities group created`, colorUtilities);
-
 		return colorUtilities;
 	}, 'Error occurred while creating color utilities group');
 }

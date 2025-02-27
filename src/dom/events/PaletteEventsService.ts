@@ -8,8 +8,11 @@ import {
 	Services,
 	Utilities
 } from '../../types/index.js';
-import { PaletteStateService, StateManager } from '../../state/index.js';
-import { DOMStore, EventManager, PaletteRendererService } from '../index.js';
+import { DOMStore } from '../DOMStore.js';
+import { EventManager } from './EventManager.js';
+import { PaletteRendererService } from '../PaletteRendererService.js';
+import { PaletteStateService } from '../../state/PaletteStateService.js';
+import { StateManager } from '../../state/StateManager.js';
 import { domConfig, domIndex } from '../../config/index.js';
 
 const caller = 'PaletteEventsService';
@@ -110,9 +113,7 @@ export class PaletteEventsService implements PaletteEventsContract {
 				const target = event.target as HTMLElement;
 
 				if (target.matches(classes.colorDisplay)) {
-					const column = target.closest(
-						classes.paletteColumn
-					) as HTMLElement;
+					const column = target.closest(classes.paletteColumn) as HTMLElement;
 					const columnID = column?.id.split('-').pop();
 
 					if (!column || !columnID) return;
@@ -137,19 +138,14 @@ export class PaletteEventsService implements PaletteEventsContract {
 				if (target.matches(classes.colorInputBtn)) {
 					this.#toggleColorModal(target);
 				} else if (target.matches(classes.colorInputModal)) {
-					if (
-						event.target !==
-						target.querySelector(classes.colorInputBtn)
-					) {
+					if (event.target !== target.querySelector(classes.colorInputBtn)) {
 						target.classList.add(classes.hidden);
 					}
 				}
 			});
 
 			// delegated event listener for resizing columns
-			EventManager.add(paletteContainer, 'mousedown', ((
-				event: MouseEvent
-			) => {
+			EventManager.add(paletteContainer, 'mousedown', ((event: MouseEvent) => {
 				const target = event.target as HTMLElement;
 
 				if (target.matches(classes.resizeHandle)) {
@@ -221,9 +217,7 @@ export class PaletteEventsService implements PaletteEventsContract {
 			}
 
 			// drag start
-			EventManager.add(paletteContainer, 'dragstart', ((
-				event: DragEvent
-			) => {
+			EventManager.add(paletteContainer, 'dragstart', ((event: DragEvent) => {
 				const dragHandle = (event.target as HTMLElement).closest(
 					classes.dragHandle
 				) as HTMLElement;
@@ -236,10 +230,7 @@ export class PaletteEventsService implements PaletteEventsContract {
 
 				if (!this.#draggedColumn) return;
 
-				event.dataTransfer?.setData(
-					'text/plain',
-					this.#draggedColumn.id
-				);
+				event.dataTransfer?.setData('text/plain', this.#draggedColumn.id);
 
 				this.#draggedColumn.classList.add('dragging');
 
@@ -250,9 +241,7 @@ export class PaletteEventsService implements PaletteEventsContract {
 			}) as EventListener);
 
 			// drag over (Allow dropping)
-			EventManager.add(paletteContainer, 'dragover', ((
-				event: DragEvent
-			) => {
+			EventManager.add(paletteContainer, 'dragover', ((event: DragEvent) => {
 				event.preventDefault();
 
 				if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
@@ -264,9 +253,9 @@ export class PaletteEventsService implements PaletteEventsContract {
 				void (async (dragEvent: DragEvent) => {
 					dragEvent.preventDefault();
 
-					const targetColumn = (
-						dragEvent.target as HTMLElement
-					).closest(classes.paletteColumn) as HTMLElement;
+					const targetColumn = (dragEvent.target as HTMLElement).closest(
+						classes.paletteColumn
+					) as HTMLElement;
 					if (
 						!this.#draggedColumn ||
 						!targetColumn ||
@@ -274,21 +263,15 @@ export class PaletteEventsService implements PaletteEventsContract {
 					)
 						return;
 
-					const draggedID = parseInt(
-						this.#draggedColumn.id.split('-').pop()!
-					);
-					const targetID = parseInt(
-						targetColumn.id.split('-').pop()!
-					);
+					const draggedID = parseInt(this.#draggedColumn.id.split('-').pop()!);
+					const targetID = parseInt(targetColumn.id.split('-').pop()!);
 
 					const currentState = await this.#stateManager.getState();
 
 					const updatedColumns = currentState.paletteContainer.columns
 						.map(col => {
-							if (col.id === draggedID)
-								return { ...col, position: targetID };
-							if (col.id === targetID)
-								return { ...col, position: draggedID };
+							if (col.id === draggedID) return { ...col, position: targetID };
+							if (col.id === targetID) return { ...col, position: draggedID };
 							return col;
 						})
 						.sort((a, b) => a.position - b.position);
@@ -396,10 +379,9 @@ export class PaletteEventsService implements PaletteEventsContract {
 
 	async syncColumnColorsWithState(): Promise<void> {
 		return this.#errors.handleAsync(async () => {
-			const paletteColumns =
-				this.#helpers.dom.getAllElements<HTMLDivElement>(
-					classes.paletteColumn
-				);
+			const paletteColumns = this.#helpers.dom.getAllElements<HTMLDivElement>(
+				classes.paletteColumn
+			);
 
 			// retrieve the most recent palette from state
 			const { paletteHistory } = await this.#stateManager.getState();
@@ -413,8 +395,7 @@ export class PaletteEventsService implements PaletteEventsContract {
 				return;
 			}
 
-			const userPreference =
-				localStorage.getItem('colorPreference') || 'hex';
+			const userPreference = localStorage.getItem('colorPreference') || 'hex';
 			const validColorSpace = this.#helpers.typeguards.isColorSpace(
 				userPreference
 			)
@@ -491,12 +472,9 @@ export class PaletteEventsService implements PaletteEventsContract {
 							for (const node of mutation.addedNodes) {
 								if (
 									node instanceof HTMLElement &&
-									node.classList.contains(
-										classes.paletteColumn
-									)
+									node.classList.contains(classes.paletteColumn)
 								) {
-									const state =
-										await this.#stateManager.getState();
+									const state = await this.#stateManager.getState();
 
 									if (!state.paletteContainer) {
 										this.#log.warn(
@@ -532,10 +510,7 @@ export class PaletteEventsService implements PaletteEventsContract {
 		preference: ColorSpace
 	): string {
 		return this.#errors.handleSync(() => {
-			return (
-				colorData[preference as keyof PaletteItem['css']] ||
-				colorData.hex
-			);
+			return colorData[preference as keyof PaletteItem['css']] || colorData.hex;
 		}, `[${caller}]: Failed to retrieve color by preference.`);
 	}
 
@@ -633,11 +608,8 @@ export class PaletteEventsService implements PaletteEventsContract {
 				await this.#stateManager.batchUpdate({
 					paletteContainer: {
 						...currentState.paletteContainer,
-						columns: currentState.paletteContainer.columns.map(
-							col =>
-								col.id === columnID
-									? { ...col, size: column.offsetWidth }
-									: col
+						columns: currentState.paletteContainer.columns.map(col =>
+							col.id === columnID ? { ...col, size: column.offsetWidth } : col
 						)
 					}
 				});

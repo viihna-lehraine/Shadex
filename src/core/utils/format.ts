@@ -40,9 +40,7 @@ export function formattingUtilitiesFactory(
 						};
 					}
 					case 'hex': {
-						const hexValue = value.startsWith('#')
-							? value
-							: `#${value}`;
+						const hexValue = value.startsWith('#') ? value : `#${value}`;
 						return {
 							value: {
 								hex: brand.asHexSet(hexValue)
@@ -89,9 +87,7 @@ export function formattingUtilitiesFactory(
 						const components = value.split(',').map(Number);
 
 						if (components.some(isNaN)) {
-							throw new Error(
-								`Invalid RGB format for value: ${value}`
-							);
+							throw new Error(`Invalid RGB format for value: ${value}`);
 						}
 
 						const [r, g, b] = components;
@@ -211,9 +207,7 @@ export function formattingUtilitiesFactory(
 			const components = value
 				.split(',')
 				.map(val =>
-					val.trim().endsWith('%')
-						? parseFloat(val)
-						: parseFloat(val) * 100
+					val.trim().endsWith('%') ? parseFloat(val) : parseFloat(val) * 100
 				);
 			if (components.length !== count) {
 				log.error(
@@ -253,17 +247,14 @@ export function formattingUtilitiesFactory(
 								? parseFloat(val.slice(0, -1))
 								: val;
 
-						acc[key as keyof T] =
-							parsedValue as T[keyof T] extends `${number}%`
-								? number
-								: T[keyof T];
+						acc[key as keyof T] = parsedValue as T[keyof T] extends `${number}%`
+							? number
+							: T[keyof T];
 
 						return acc;
 					},
 					{} as {
-						[K in keyof T]: T[K] extends `${number}%`
-							? number
-							: T[K];
+						[K in keyof T]: T[K] extends `${number}%` ? number : T[K];
 					}
 				);
 			},

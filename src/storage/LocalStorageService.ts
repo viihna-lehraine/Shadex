@@ -12,9 +12,10 @@ export class LocalStorageService implements LocalStorageContract {
 
 	private constructor(services: Services) {
 		try {
-			services.log(`Constructing ${caller} instance.`, {
-				caller: `${caller}.constructor`
-			});
+			services.log.info(
+				`Constructing ${caller} instance.`,
+				`${caller}.constructor`
+			);
 
 			this.#errors = services.errors;
 			this.#log = services.log;
@@ -28,23 +29,18 @@ export class LocalStorageService implements LocalStorageContract {
 	static getInstance(services: Services): LocalStorageService {
 		return services.errors.handleSync(() => {
 			if (!LocalStorageService.#instance) {
-				services.log(
+				services.log.debug(
 					`No ${caller} instance exists yet. Creating new instance.`,
-					{
-						caller: `${caller}.getInstance`,
-						level: 'debug'
-					}
+					`${caller}.getInstance`
 				);
 
-				LocalStorageService.#instance = new LocalStorageService(
-					services
-				);
+				LocalStorageService.#instance = new LocalStorageService(services);
 			}
 
-			services.log('Returning existing LocalStorageManager instance.', {
-				caller: `${caller}.getInstance`,
-				level: 'debug'
-			});
+			services.log.debug(
+				'Returning LocalStorageManager instance.',
+				`${caller}.getInstance`
+			);
 
 			return LocalStorageService.#instance;
 		}, `[${caller}]: Failed to create LocalStorageManager instance.`);
@@ -52,10 +48,10 @@ export class LocalStorageService implements LocalStorageContract {
 
 	async init(): Promise<boolean> {
 		return this.#errors.handleAsync(async () => {
-			this.#log('Using LocalStorage as storage fallback.', {
-				caller: `${caller}.init`,
-				level: 'warn'
-			});
+			this.#log.warn(
+				'Using LocalStorage as storage fallback.',
+				`${caller}.init`
+			);
 
 			return true;
 		}, `[${caller}.init]: Failed to initialize LocalStorage`);
@@ -87,10 +83,7 @@ export class LocalStorageService implements LocalStorageContract {
 		return await this.#errors.handleAsync(async () => {
 			localStorage.setItem(key, JSON.stringify(value));
 
-			this.#log(`Stored item: ${key}`, {
-				caller: `${caller}.setItem`,
-				level: 'debug'
-			});
+			this.#log.debug(`Stored item: ${key}`, `${caller}.setItem`);
 		}, `Failed to store item ${key} in LocalStorage`);
 	}
 }

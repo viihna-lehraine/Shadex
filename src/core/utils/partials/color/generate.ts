@@ -24,12 +24,8 @@ export function colorGenerationUtilitiesFactory(
 			const hsl: HSL = {
 				value: {
 					hue: sanitize.radial(Math.floor(Math.random() * 360)),
-					saturation: sanitize.percentile(
-						Math.floor(Math.random() * 101)
-					),
-					lightness: sanitize.percentile(
-						Math.floor(Math.random() * 101)
-					)
+					saturation: sanitize.percentile(Math.floor(Math.random() * 101)),
+					lightness: sanitize.percentile(Math.floor(Math.random() * 101))
 				},
 				format: 'hsl'
 			};

@@ -22,17 +22,13 @@ export function colorParsingUtilitiesFactory(
 ): ColorParsingUtilities {
 	const { errors } = services;
 
-	function parseHexValueAsStringMap(
-		hex: Hex['value']
-	): HexStringMap['value'] {
+	function parseHexValueAsStringMap(hex: Hex['value']): HexStringMap['value'] {
 		return errors.handleSync(() => {
 			return { hex: hex.hex };
 		}, 'Error parsing hex value as raw hex.');
 	}
 
-	function parseHSLValueAsStringMap(
-		hsl: HSL['value']
-	): HSLStringMap['value'] {
+	function parseHSLValueAsStringMap(hsl: HSL['value']): HSLStringMap['value'] {
 		return errors.handleSync(() => {
 			return {
 				hue: `${hsl.hue}°`,
@@ -42,9 +38,7 @@ export function colorParsingUtilitiesFactory(
 		}, 'Error parsing HSL value as string map.');
 	}
 
-	function parseHSVValueAsStringMap(
-		hsv: HSV['value']
-	): HSVStringMap['value'] {
+	function parseHSVValueAsStringMap(hsv: HSV['value']): HSVStringMap['value'] {
 		return errors.handleSync(() => {
 			return {
 				hue: `${hsv.hue}°`,
@@ -53,9 +47,7 @@ export function colorParsingUtilitiesFactory(
 			};
 		}, 'Error parsing HSV value as string map.');
 	}
-	function parseLABValueAsStringMap(
-		lab: LAB['value']
-	): LABStringMap['value'] {
+	function parseLABValueAsStringMap(lab: LAB['value']): LABStringMap['value'] {
 		return errors.handleSync(() => {
 			return {
 				l: `${lab.l}`,
@@ -65,9 +57,7 @@ export function colorParsingUtilitiesFactory(
 		}, 'Error parsing LAB value as string map.');
 	}
 
-	function parseRGBValueAsStringMap(
-		rgb: RGB['value']
-	): RGBStringMap['value'] {
+	function parseRGBValueAsStringMap(rgb: RGB['value']): RGBStringMap['value'] {
 		return errors.handleSync(() => {
 			return {
 				red: `${rgb.red}`,
@@ -77,9 +67,7 @@ export function colorParsingUtilitiesFactory(
 		}, 'Error parsing RGB value as string map.');
 	}
 
-	function parseXYZValueAsStringMap(
-		xyz: XYZ['value']
-	): XYZStringMap['value'] {
+	function parseXYZValueAsStringMap(xyz: XYZ['value']): XYZStringMap['value'] {
 		return errors.handleSync(() => {
 			return {
 				x: `${xyz.x}`,

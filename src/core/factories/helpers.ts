@@ -3,7 +3,7 @@
 import { Helpers } from '../../types/index.js';
 
 export async function helpersFactory(): Promise<Helpers> {
-	console.log(`[HELPERS_FACTORY-1]: Creating helpers.`);
+	console.log(`[HELPERS_FACTORY]: Creating helpers.`);
 	const helpers = {} as Helpers;
 
 	const [
@@ -31,5 +31,8 @@ export async function helpersFactory(): Promise<Helpers> {
 	helpers.time = timeHelpersFactory();
 	helpers.typeguards = typeguardsFactory();
 	helpers.color = colorHelpersFactory(helpers);
+
+	console.log(`[HELPERS_FACTORY]: Helpers creation complete.`);
+
 	return helpers;
 }

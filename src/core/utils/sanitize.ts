@@ -39,9 +39,7 @@ export function sanitationUtilitiesFactory(
 				validate.range(value, rangeKey);
 
 				return rangeKey === 'HexSet'
-					? (brand.asHexSet(
-							value as string
-						) as unknown as RangeKeyMap[T])
+					? (brand.asHexSet(value as string) as unknown as RangeKeyMap[T])
 					: brand.asBranded(value as number, rangeKey);
 			},
 			'Error occurred while validating color value range.',
@@ -49,23 +47,14 @@ export function sanitationUtilitiesFactory(
 		);
 	}
 
-	function lab(
-		value: number,
-		output: 'l' | 'a' | 'b'
-	): LAB_L | LAB_A | LAB_B {
+	function lab(value: number, output: 'l' | 'a' | 'b'): LAB_L | LAB_A | LAB_B {
 		return errors.handleSync(() => {
 			if (output === 'l') {
-				return brand.asLAB_L(
-					Math.round(Math.min(Math.max(value, 0), 100))
-				);
+				return brand.asLAB_L(Math.round(Math.min(Math.max(value, 0), 100)));
 			} else if (output === 'a') {
-				return brand.asLAB_A(
-					Math.round(Math.min(Math.max(value, -125), 125))
-				);
+				return brand.asLAB_A(Math.round(Math.min(Math.max(value, -125), 125)));
 			} else if (output === 'b') {
-				return brand.asLAB_B(
-					Math.round(Math.min(Math.max(value, -125), 125))
-				);
+				return brand.asLAB_B(Math.round(Math.min(Math.max(value, -125), 125)));
 			} else throw new Error('Unable to return LAB value');
 		}, 'Error occurred while sanitizing LAB value');
 	}
@@ -80,8 +69,7 @@ export function sanitationUtilitiesFactory(
 
 	function radial(value: number): Radial {
 		return errors.handleSync(() => {
-			const rawRadial =
-				Math.round(Math.min(Math.max(value, 0), 360)) & 360;
+			const rawRadial = Math.round(Math.min(Math.max(value, 0), 360)) & 360;
 
 			return brand.asRadial(rawRadial);
 		}, 'Error occurred while sanitizing radial value');

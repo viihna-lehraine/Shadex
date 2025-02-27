@@ -45,19 +45,13 @@ export function adjustmentUtilitiesFactory(
 			return {
 				value: {
 					red: brand.asByteRange(
-						Math.round(
-							Math.min(Math.max(0, rgb.value.red), 1) * 255
-						)
+						Math.round(Math.min(Math.max(0, rgb.value.red), 1) * 255)
 					),
 					green: brand.asByteRange(
-						Math.round(
-							Math.min(Math.max(0, rgb.value.green), 1) * 255
-						)
+						Math.round(Math.min(Math.max(0, rgb.value.green), 1) * 255)
 					),
 					blue: brand.asByteRange(
-						Math.round(
-							Math.min(Math.max(0, rgb.value.blue), 1) * 255
-						)
+						Math.round(Math.min(Math.max(0, rgb.value.blue), 1) * 255)
 					)
 				},
 				format: 'rgb'
@@ -80,10 +74,7 @@ export function adjustmentUtilitiesFactory(
 	function sl(color: HSL): HSL {
 		return errors.handleSync(() => {
 			if (!validate.colorValue(color)) {
-				log.error(
-					'Invalid color valus for adjustment.',
-					`adjustmentUtils.sl`
-				);
+				log.error('Invalid color valus for adjustment.', `adjustmentUtils.sl`);
 
 				return color;
 			}

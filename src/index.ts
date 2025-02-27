@@ -9,21 +9,15 @@
 
 // File: index.ts
 
-import { EventManager } from './dom/index.js';
+import { EventManager } from './dom/events/EventManager.js';
 import { config } from './config/index.js';
 
 const mode = config.mode;
 
 async function initializeApp() {
-	// 1. Bootstrap minimal dependencies
-	console.log('[STARTUP]: Importing bootstrap module...');
 	const { bootstrap } = await import('./app/bootstrap.js');
-
-	console.log('[STARTUP]: Executing bootstrap process.');
 	const { helpers, services } = await bootstrap();
-
 	const { errors, log } = services;
-	log.info('Boostrap process complete.', 'STARTUP');
 
 	log.info('Registering global error handlers...', 'STARTUP');
 	window.onerror = function (message, source, lineno, colno, error) {
@@ -47,20 +41,14 @@ async function initializeApp() {
 
 	const { registerDependencies } = await import('./app/registry.js');
 	log.info('Registering dependencies.', 'STARTUP');
+
 	const deps = await registerDependencies(helpers, services);
 	log.info('Dependencies registered.', 'STARTUP');
 
-	console.log(`mode.exposeClasses ${mode.exposeClasses}`);
 	if (mode.exposeClasses) {
-		log.info(`Exposing classes to console.`, 'STARTUP_OPTION');
-		const { exposeClasses } = await import('./app/init.js');
-		await exposeClasses(
-			deps.eventManager,
-			deps.events.palette,
-			deps.common.services,
-			deps.stateManager,
-			deps.events.ui
-		);
+		window.domStore = deps.domStore;
+		window.eventManager = deps.eventManager;
+		window.stateManager = deps.stateManager;
 	}
 
 	await errors.handleAsync(async () => {

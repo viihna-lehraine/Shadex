@@ -119,6 +119,7 @@ export interface Environment {
 		readonly paletteHistoryLimit: number;
 	};
 	readonly idb: {
+		readonly maxReadyAttempts: number;
 		readonly retryDelay: number;
 	};
 	readonly mutex: {

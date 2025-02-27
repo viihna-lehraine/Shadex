@@ -6,7 +6,7 @@ import { sets } from '../../config/index.js';
 export const mathHelpersFactory = (): MathHelpers =>
 	({
 		clampToRange(value: number, rangeKey: NumericRangeKey): number {
-			const [min, max] = sets[rangeKey];
+			const [min, max] = sets[rangeKey] as readonly [number, number];
 
 			return Math.min(Math.max(value, min), max);
 		}

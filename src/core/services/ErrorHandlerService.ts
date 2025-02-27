@@ -46,9 +46,7 @@ export class ErrorHandlerService implements ErrorHandlerContract {
 				);
 			}
 
-			console.debug(
-				`[${caller}] Returning existing ErrorHandler instance.`
-			);
+			console.debug(`[${caller}] Returning ErrorHandler instance.`);
 
 			return ErrorHandlerService.#instance;
 		} catch (error) {
@@ -168,9 +166,7 @@ export class ErrorHandlerService implements ErrorHandlerContract {
 
 			const userMessage =
 				options.userMessage ??
-				(error instanceof UserFacingError
-					? error.userMessage
-					: undefined);
+				(error instanceof UserFacingError ? error.userMessage : undefined);
 
 			if (userMessage) {
 				alert(userMessage);

@@ -7,6 +7,7 @@ const caller = 'IDBStorageService';
 const dbName = config.storage.idbDBName;
 const defaultVerson = config.storage.idbDefaultVersion;
 const idbRetryDelay = env.idb.retryDelay;
+const maxReadyAttempts = env.idb.maxReadyAttempts;
 const storeName = config.storage.idbStoreName;
 
 export class IDBStorageService implements IDBStorageContract {
@@ -16,14 +17,17 @@ export class IDBStorageService implements IDBStorageContract {
 	#version: number;
 	#db: IDBDatabase | null = null;
 
+	#isEnsuringDBReady: boolean = false;
+
 	#errors: Services['errors'];
 	#log: Services['log'];
 
 	private constructor(services: Services) {
 		try {
-			services.log(`Constructing ${caller} instance.`, {
-				caller: `${caller} constructor`
-			});
+			services.log.info(
+				`Constructing ${caller} instance.`,
+				`${caller} constructor`
+			);
 
 			this.#defaultVersion = defaultVerson;
 			this.#version = this.#defaultVersion;
@@ -41,21 +45,18 @@ export class IDBStorageService implements IDBStorageContract {
 	static async getInstance(services: Services): Promise<IDBStorageService> {
 		return services.errors.handleSync(() => {
 			if (!IDBStorageService.#instance) {
-				services.log(
+				services.log.debug(
 					`No ${caller} instance exists yet. Creating new instance.`,
-					{
-						caller: `${caller}.getInstance`,
-						level: 'debug'
-					}
+					`${caller}.getInstance`
 				);
 
 				IDBStorageService.#instance = new IDBStorageService(services);
 			}
 
-			services.log(`Returning existing ${caller} instance.`, {
-				caller: `${caller}.getInstance`,
-				level: 'debug'
-			});
+			services.log.debug(
+				`Returning existing ${caller} instance.`,
+				`${caller}.getInstance`
+			);
 
 			return IDBStorageService.#instance;
 		}, `[${caller}]: Failed to create IDBManager instance.`);
@@ -67,21 +68,17 @@ export class IDBStorageService implements IDBStorageContract {
 				throw new Error('IndexedDB is not supported in this browser');
 			}
 
-			this.#log(`Opening IndexedDB...`, {
-				caller: `${caller}.init`
-			});
-
-			const request = indexedDB.open(dbName, this.#version);
+			this.#log.info(`Opening IndexedDB...`, `${caller}.init`);
 
 			return await new Promise((resolve, reject) => {
-				let upgradeComplete = false;
+				const request = indexedDB.open(dbName, this.#version);
 
 				request.onupgradeneeded = event => {
 					const db = (event.target as IDBOpenDBRequest).result;
 
-					this.#log(
+					this.#log.warn(
 						`Upgrading IndexedDB to version: ${this.#version}`,
-						{ caller: `${caller}.init`, level: 'warn' }
+						`${caller}.init`
 					);
 
 					if (!db.objectStoreNames.contains(storeName)) {
@@ -89,48 +86,32 @@ export class IDBStorageService implements IDBStorageContract {
 							keyPath: 'id',
 							autoIncrement: true
 						});
-
-						this.#log(`Created object store: ${storeName}`, {
-							caller: `${caller}.init`
-						});
+						this.#log.info(
+							`Created object store: ${storeName}`,
+							`${caller}.init`
+						);
 					}
-
-					upgradeComplete = true;
 				};
 
 				request.onsuccess = event => {
-					if (
-						!upgradeComplete &&
-						request.result.version !== this.#version
-					) {
-						this.#log('Waiting for upgrade to finish.', {
-							caller: `${caller}.init`,
-							level: 'warn'
-						});
-					}
-
 					this.#db = (event.target as IDBOpenDBRequest).result;
-
 					this.#db.onversionchange = () => {
 						this.#db?.close();
-
-						this.#log(
+						this.#log.warn(
 							'IndexedDB version changed. Closing database',
-							{
-								caller: `${caller}.init`,
-								level: 'warn'
-							}
+							`${caller}.init`
 						);
 					};
 
-					this.#log(`IndexedDB opened successfully`, {
-						caller: `${caller}.init`
-					});
-
+					this.#log.info(`IndexedDB opened successfully`, `${caller}.init`);
 					resolve(true);
 				};
 
 				request.onerror = event => {
+					this.#log.error(
+						`[${caller}]: IndexedDB error: ${(event.target as IDBOpenDBRequest).error?.message || 'Unknown error'}`,
+						`${caller}.init`
+					);
 					reject(
 						(event.target as IDBOpenDBRequest).error?.message ||
 							`Unknown ${caller}.init error.`
@@ -138,14 +119,8 @@ export class IDBStorageService implements IDBStorageContract {
 				};
 
 				request.onblocked = () => {
-					this.#log(`IndexedDB upgade blocked!`, {
-						caller: `${caller}.init`,
-						level: 'warn'
-					});
-
-					reject(
-						`Upgrade blocked. Close other tabs using this database.`
-					);
+					this.#log.warn(`IndexedDB upgade blocked!`, `${caller}.init`);
+					reject(`Upgrade blocked. Close other tabs using this database.`);
 				};
 			});
 		}, `[${caller}]: Failed to initialize IndexedDB`);
@@ -153,7 +128,7 @@ export class IDBStorageService implements IDBStorageContract {
 
 	async clear(): Promise<void> {
 		return await this.#errors.handleAsync(async () => {
-			const store = this.getTransaction('readwrite');
+			const store = await this.#getTransaction('readwrite');
 
 			if (!store) throw new Error(`${caller} is not initialized.`);
 
@@ -172,17 +147,36 @@ export class IDBStorageService implements IDBStorageContract {
 	}
 
 	async ensureDBReady(): Promise<void> {
-		this.#errors.handleAsync(async () => {
-			while (!this.#db) {
-				this.#log(`Waiting for ${caller} to initialize...`, {
-					caller: `${caller}.ensureDBReady`,
-					level: 'warn'
-				});
+		return await this.#errors.handleAsync(async () => {
+			if (this.#db) return; // already initialized
 
-				// TODO: replace with a better solution??
-				await new Promise(resolve =>
-					setTimeout(resolve, idbRetryDelay)
-				);
+			if (this.#isEnsuringDBReady) {
+				// if another process is already ensuring readiness, wait for it
+				let attempts = 0;
+				while (!this.#db && attempts < maxReadyAttempts) {
+					this.#log.warn(
+						`[IDBStorageService] Waiting for DB to be ready (Attempt ${attempts + 1})`,
+						`${caller}.ensureDBReady`
+					);
+
+					await new Promise(res => setTimeout(res, idbRetryDelay));
+
+					attempts++;
+				}
+				if (!this.#db)
+					throw new Error(`[IDBStorageService]: DB never became ready.`);
+				return;
+			}
+
+			// first process to trigger ensureDBReady takes responsibility for init
+			this.#isEnsuringDBReady = true;
+
+			try {
+				await this.init();
+			} catch (error) {
+				throw new Error(`[IDBStorageService]: Failed to initialize: ${error}`);
+			} finally {
+				this.#isEnsuringDBReady = false;
 			}
 		}, `[${caller}]: Failed to ensure IndexedDB is ready`);
 	}
@@ -191,15 +185,14 @@ export class IDBStorageService implements IDBStorageContract {
 		await this.ensureDBReady();
 
 		return this.#errors.handleAsync(async () => {
-			const store = this.getTransaction('readonly');
+			const store = await this.#getTransaction('readonly');
 
 			if (!store) throw new Error(`${caller} is not initialized.`);
 
 			return await new Promise<T | null>((resolve, reject) => {
 				const request = store.get(key);
 
-				request.onsuccess = () =>
-					resolve(request.result?.value ?? null);
+				request.onsuccess = () => resolve(request.result?.value ?? null);
 
 				request.onerror = event =>
 					reject(
@@ -212,7 +205,7 @@ export class IDBStorageService implements IDBStorageContract {
 
 	async setItem(key: string, value: unknown): Promise<void> {
 		return await this.#errors.handleAsync(async () => {
-			const store = this.getTransaction('readwrite');
+			const store = await this.#getTransaction('readwrite');
 
 			if (!store) throw new Error(`${caller} is not initialized.`);
 
@@ -232,7 +225,7 @@ export class IDBStorageService implements IDBStorageContract {
 
 	async removeItem(key: string): Promise<void> {
 		return await this.#errors.handleAsync(async () => {
-			const store = this.getTransaction('readwrite');
+			const store = await this.#getTransaction('readwrite');
 
 			if (!store) throw new Error(`${caller} is not initialized.`);
 
@@ -250,13 +243,26 @@ export class IDBStorageService implements IDBStorageContract {
 		}, `[${caller}]: Failed to remove item ${key} from IndexedDB`);
 	}
 
-	private getTransaction(mode: IDBTransactionMode): IDBObjectStore | void {
-		return this.#errors.handleSync(() => {
-			if (!this.#db) throw new Error(`${caller} is not initialized.`);
+	async #getTransaction(
+		mode: IDBTransactionMode
+	): Promise<IDBObjectStore | void> {
+		return await this.#errors.handleAsync(async () => {
+			await this.ensureDBReady();
 
-			const transaction = this.#db.transaction(storeName, mode);
+			if (!this.#db) {
+				throw new Error(
+					`${caller} is still uninitialized after ensureDBReady.`
+				);
+			}
 
-			return transaction.objectStore(storeName);
+			try {
+				const transaction = this.#db.transaction(storeName, mode);
+				return transaction.objectStore(storeName);
+			} catch (error) {
+				throw new Error(
+					`[${caller}]: Failed to get IndexedDB transaction (${mode})`
+				);
+			}
 		}, `[${caller}]: Failed to get IndexedDB transaction (${mode})`);
 	}
 }

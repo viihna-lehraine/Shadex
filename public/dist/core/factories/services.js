@@ -1,14 +1,18 @@
+import { ErrorHandlerService } from '../services/ErrorHandlerService.js';
+import { LoggerService } from '../services/LoggerService.js';
+
 // File: core/factories/services.ts
-import { ErrorHandlerService, LoggerService } from '../services/index.js';
-export function serviceFactory(helpers) {
+function serviceFactory(helpers) {
     console.log('[SERVICE_FACTORY]: Executing createServices.');
     const services = {};
-    console.log(`[SERVICE_FACTORY]: Initializing Logger and ErrorHandler (creating instances).`);
+    console.log(`[SERVICE_FACTORY]: Initializing Logger and ErrorHandler services.`);
     services.log = LoggerService.getInstance();
     services.errors = ErrorHandlerService.getInstance(helpers, services.log);
     if (!services.log || !services.errors) {
-        throw new Error('[SERVICE_FACTORY]: Logger or ErrorHandler failed to initialize.');
+        throw new Error('[SERVICE_FACTORY]: Logger and/or ErrorHandler failed to initialize.');
     }
     return services;
 }
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2VydmljZXMuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi9zcmMvY29yZS9mYWN0b3JpZXMvc2VydmljZXMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsbUNBQW1DO0FBR25DLE9BQU8sRUFBRSxtQkFBbUIsRUFBRSxhQUFhLEVBQUUsTUFBTSxzQkFBc0IsQ0FBQztBQUUxRSxNQUFNLFVBQVUsY0FBYyxDQUFDLE9BQWdCO0lBQzlDLE9BQU8sQ0FBQyxHQUFHLENBQUMsOENBQThDLENBQUMsQ0FBQztJQUU1RCxNQUFNLFFBQVEsR0FBRyxFQUFjLENBQUM7SUFFaEMsT0FBTyxDQUFDLEdBQUcsQ0FDViwrRUFBK0UsQ0FDL0UsQ0FBQztJQUNGLFFBQVEsQ0FBQyxHQUFHLEdBQUcsYUFBYSxDQUFDLFdBQVcsRUFBRSxDQUFDO0lBQzNDLFFBQVEsQ0FBQyxNQUFNLEdBQUcsbUJBQW1CLENBQUMsV0FBVyxDQUFDLE9BQU8sRUFBRSxRQUFRLENBQUMsR0FBRyxDQUFDLENBQUM7SUFFekUsSUFBSSxDQUFDLFFBQVEsQ0FBQyxHQUFHLElBQUksQ0FBQyxRQUFRLENBQUMsTUFBTSxFQUFFLENBQUM7UUFDdkMsTUFBTSxJQUFJLEtBQUssQ0FDZCxpRUFBaUUsQ0FDakUsQ0FBQztJQUNILENBQUM7SUFFRCxPQUFPLFFBQVEsQ0FBQztBQUNqQixDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLy8gRmlsZTogY29yZS9mYWN0b3JpZXMvc2VydmljZXMudHNcblxuaW1wb3J0IHsgSGVscGVycywgU2VydmljZXMgfSBmcm9tICcuLi8uLi90eXBlcy9pbmRleC5qcyc7XG5pbXBvcnQgeyBFcnJvckhhbmRsZXJTZXJ2aWNlLCBMb2dnZXJTZXJ2aWNlIH0gZnJvbSAnLi4vc2VydmljZXMvaW5kZXguanMnO1xuXG5leHBvcnQgZnVuY3Rpb24gc2VydmljZUZhY3RvcnkoaGVscGVyczogSGVscGVycyk6IFNlcnZpY2VzIHtcblx0Y29uc29sZS5sb2coJ1tTRVJWSUNFX0ZBQ1RPUlldOiBFeGVjdXRpbmcgY3JlYXRlU2VydmljZXMuJyk7XG5cblx0Y29uc3Qgc2VydmljZXMgPSB7fSBhcyBTZXJ2aWNlcztcblxuXHRjb25zb2xlLmxvZyhcblx0XHRgW1NFUlZJQ0VfRkFDVE9SWV06IEluaXRpYWxpemluZyBMb2dnZXIgYW5kIEVycm9ySGFuZGxlciAoY3JlYXRpbmcgaW5zdGFuY2VzKS5gXG5cdCk7XG5cdHNlcnZpY2VzLmxvZyA9IExvZ2dlclNlcnZpY2UuZ2V0SW5zdGFuY2UoKTtcblx0c2VydmljZXMuZXJyb3JzID0gRXJyb3JIYW5kbGVyU2VydmljZS5nZXRJbnN0YW5jZShoZWxwZXJzLCBzZXJ2aWNlcy5sb2cpO1xuXG5cdGlmICghc2VydmljZXMubG9nIHx8ICFzZXJ2aWNlcy5lcnJvcnMpIHtcblx0XHR0aHJvdyBuZXcgRXJyb3IoXG5cdFx0XHQnW1NFUlZJQ0VfRkFDVE9SWV06IExvZ2dlciBvciBFcnJvckhhbmRsZXIgZmFpbGVkIHRvIGluaXRpYWxpemUuJ1xuXHRcdCk7XG5cdH1cblxuXHRyZXR1cm4gc2VydmljZXM7XG59XG4iXX0=
+
+export { serviceFactory };
+//# sourceMappingURL=services.js.map

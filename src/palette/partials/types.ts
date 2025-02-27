@@ -75,15 +75,13 @@ function generateComplementaryPalette(
 				for (let i = 0; i < extraColorsNeeded; i++) {
 					const { weights, values } =
 						paletteConfig.probabilities[options.distributionType];
-					const variationOffset =
-						helpers.random.selectRandomFromWeights({
-							weights,
-							values
-						});
+					const variationOffset = helpers.random.selectRandomFromWeights({
+						weights,
+						values
+					});
 					const direction = Math.random() < 0.5 ? 1 : -1; // randomize direction
 					const newHue =
-						(baseHue + 180 + variationOffset * direction + 360) %
-						360;
+						(baseHue + 180 + variationOffset * direction + 360) % 360;
 					hues.push(newHue);
 				}
 			}
@@ -94,13 +92,9 @@ function generateComplementaryPalette(
 
 			const paletteItems = hues.map((hue, index) => {
 				const lightnessOffset =
-					lightnessRange[
-						Math.floor(Math.random() * lightnessRange.length)
-					];
+					lightnessRange[Math.floor(Math.random() * lightnessRange.length)];
 				const saturationOffset =
-					saturationRange[
-						Math.floor(Math.random() * saturationRange.length)
-					];
+					saturationRange[Math.floor(Math.random() * saturationRange.length)];
 
 				const newColor: HSL = {
 					value: {
@@ -108,20 +102,13 @@ function generateComplementaryPalette(
 						saturation: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.saturation +
-										saturationOffset
-								)
+								Math.max(0, baseColor.value.saturation + saturationOffset)
 							)
 						),
 						lightness: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.lightness + lightnessOffset
-								)
+								Math.max(0, baseColor.value.lightness + lightnessOffset)
 							)
 						)
 					},
@@ -164,17 +151,13 @@ function generateDiadicPalette(
 				for (let i = 0; i < extraColorsNeeded; i++) {
 					const { weights, values } =
 						paletteConfig.probabilities[options.distributionType];
-					const variationOffset =
-						helpers.random.selectRandomFromWeights({
-							weights,
-							values
-						});
+					const variationOffset = helpers.random.selectRandomFromWeights({
+						weights,
+						values
+					});
 					const direction = i % 2 === 0 ? 1 : -1;
 
-					hues.push(
-						(baseColor.value.hue + variationOffset * direction) %
-							360
-					);
+					hues.push((baseColor.value.hue + variationOffset * direction) % 360);
 				}
 			}
 
@@ -192,19 +175,13 @@ function generateDiadicPalette(
 						saturation: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.saturation + saturationShift
-								)
+								Math.max(0, baseColor.value.saturation + saturationShift)
 							)
 						),
 						lightness: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.lightness + lightnessShift
-								)
+								Math.max(0, baseColor.value.lightness + lightnessShift)
 							)
 						)
 					},
@@ -256,19 +233,13 @@ function generateHexadicPalette(
 						saturation: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.saturation + saturationShift
-								)
+								Math.max(0, baseColor.value.saturation + saturationShift)
 							)
 						),
 						lightness: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.lightness + lightnessShift
-								)
+								Math.max(0, baseColor.value.lightness + lightnessShift)
 							)
 						)
 					},
@@ -303,10 +274,7 @@ function generateMonochromaticPalette(
 			const baseColor = utils.color.generateRandomHSL();
 			const paletteItems: PaletteItem[] = [];
 
-			const basePaletteItem = utils.palette.createPaletteItem(
-				baseColor,
-				1
-			);
+			const basePaletteItem = utils.palette.createPaletteItem(baseColor, 1);
 			paletteItems.push(basePaletteItem);
 
 			// generate monochromatic variations
@@ -323,28 +291,19 @@ function generateMonochromaticPalette(
 						saturation: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.saturation + saturationShift
-								)
+								Math.max(0, baseColor.value.saturation + saturationShift)
 							)
 						),
 						lightness: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.lightness + lightnessShift
-								)
+								Math.max(0, baseColor.value.lightness + lightnessShift)
 							)
 						)
 					},
 					format: 'hsl'
 				};
-				const paletteItem = utils.palette.createPaletteItem(
-					newColor,
-					i + 1
-				);
+				const paletteItem = utils.palette.createPaletteItem(newColor, i + 1);
 
 				paletteItems.push(paletteItem);
 			}
@@ -376,10 +335,7 @@ function generateRandomPalette(
 
 			const paletteItems: PaletteItem[] = [];
 
-			const basePaletteItem = utils.palette.createPaletteItem(
-				baseColor,
-				1
-			);
+			const basePaletteItem = utils.palette.createPaletteItem(baseColor, 1);
 			paletteItems.push(basePaletteItem);
 
 			for (let i = 1; i < columnCount; i++) {
@@ -421,9 +377,7 @@ function generateSplitComplementaryPalette(
 			// generate split complementary hues
 			const hues = [
 				baseHue,
-				(baseHue +
-					180 +
-					paletteConfig.shiftRanges.splitComplementary.hue) %
+				(baseHue + 180 + paletteConfig.shiftRanges.splitComplementary.hue) %
 					360,
 				(baseHue +
 					180 -
@@ -447,12 +401,10 @@ function generateSplitComplementaryPalette(
 			// create PaletteItem array with assigned itemIDs
 			const paletteItems = hues.map((hue, index) => {
 				const saturationShift =
-					Math.random() *
-						paletteConfig.shiftRanges.splitComplementary.sat -
+					Math.random() * paletteConfig.shiftRanges.splitComplementary.sat -
 					paletteConfig.shiftRanges.splitComplementary.sat / 2;
 				const lightnessShift =
-					Math.random() *
-						paletteConfig.shiftRanges.splitComplementary.light -
+					Math.random() * paletteConfig.shiftRanges.splitComplementary.light -
 					paletteConfig.shiftRanges.splitComplementary.light / 2;
 
 				const newColor: HSL = {
@@ -461,19 +413,13 @@ function generateSplitComplementaryPalette(
 						saturation: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.saturation + saturationShift
-								)
+								Math.max(0, baseColor.value.saturation + saturationShift)
 							)
 						),
 						lightness: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.lightness + lightnessShift
-								)
+								Math.max(0, baseColor.value.lightness + lightnessShift)
 							)
 						)
 					},
@@ -526,19 +472,13 @@ function generateTetradicPalette(
 						saturation: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.saturation + saturationShift
-								)
+								Math.max(0, baseColor.value.saturation + saturationShift)
 							)
 						),
 						lightness: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.lightness + lightnessShift
-								)
+								Math.max(0, baseColor.value.lightness + lightnessShift)
 							)
 						)
 					},
@@ -592,19 +532,13 @@ function generateTriadicPalette(
 						saturation: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.saturation + saturationShift
-								)
+								Math.max(0, baseColor.value.saturation + saturationShift)
 							)
 						),
 						lightness: utils.brand.asPercentile(
 							Math.min(
 								100,
-								Math.max(
-									0,
-									baseColor.value.lightness + lightnessShift
-								)
+								Math.max(0, baseColor.value.lightness + lightnessShift)
 							)
 						)
 					},

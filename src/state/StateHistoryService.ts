@@ -82,10 +82,7 @@ export class StateHistoryService implements StateHistoryContract {
 			// TODO: state update should be handled by StateStore
 			this.trackAction(state);
 
-			this.#log.debug(
-				`Added palette to history.`,
-				`${caller}.addPalette`
-			);
+			this.#log.debug(`Added palette to history.`, `${caller}.addPalette`);
 		}, `[${caller}.addPaletteToHistory]: Failed to add palette to history.`);
 	}
 
@@ -95,10 +92,7 @@ export class StateHistoryService implements StateHistoryContract {
 			this.#redoStack = [];
 			this.#undoStack = [];
 
-			this.#log.info(
-				`History and undo stack cleared.`,
-				`${caller}.clear`
-			);
+			this.#log.info(`History and undo stack cleared.`, `${caller}.clear`);
 		}, `[${caller}.clearHistory]: Failed to clear history.`);
 	}
 
@@ -142,10 +136,7 @@ export class StateHistoryService implements StateHistoryContract {
 				this.#history.shift();
 			}
 
-			this.#log.debug(
-				`Tracked new action in history.`,
-				`${caller}.track`
-			);
+			this.#log.debug(`Tracked new action in history.`, `${caller}.track`);
 		}, `[${caller}]: Failed to track action.`);
 	}
 

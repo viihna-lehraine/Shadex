@@ -14,15 +14,14 @@ export async function bootstrap(): Promise<{
 		const helpers = await helpersFactory();
 		console.log('[BOOTSTRAP]: Helpers registered.');
 
-		const { serviceFactory } = await import(
-			'../core/factories/services.js'
-		);
+		const { serviceFactory } = await import('../core/factories/services.js');
 		console.log('[BOOTSTRAP]: Service factory successfully imported.');
 
 		console.log(`[BOOSTRAP]: Registering services.`);
 		const services = serviceFactory(helpers);
 
 		console.log(`[BOOTSTRAP]: Bootstrap process complete.`);
+
 		return { helpers, services };
 	} catch (error) {
 		console.error(

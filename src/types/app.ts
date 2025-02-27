@@ -57,12 +57,10 @@ import {
 	XYZ_Y,
 	XYZ_Z
 } from './index.js';
-import {
-	DOMStore,
-	EventManager,
-	PaletteEventsService,
-	UIEventsService
-} from '../dom/index.js';
+import { DOMStore } from '../dom/DOMStore.js';
+import { EventManager } from '../dom/events/EventManager.js';
+import { PaletteEventsService } from '../dom/events/PaletteEventsService.js';
+import { UIEventsService } from '../dom/events/UIEventsService.js';
 import { LoggerService } from '../core/services/index.js';
 import { PaletteStateService } from '../state/PaletteStateService.js';
 import { StateManager } from '../state/StateManager.js';
@@ -70,7 +68,6 @@ import { StateManager } from '../state/StateManager.js';
 // ******** 1. SERVICES ********
 
 export interface Services {
-	domStore: DOMStore;
 	errors: ErrorHandlerContract;
 	log: LoggerService;
 }
@@ -84,9 +81,7 @@ export interface ColorHelpers {
 	>(
 		from: From,
 		to: To
-	):
-		| ((value: ColorDataAssertion[From]) => ColorDataAssertion[To])
-		| undefined;
+	): ((value: ColorDataAssertion[From]) => ColorDataAssertion[To]) | undefined;
 	hueToRGB(p: number, q: number, t: number): number;
 }
 
@@ -140,9 +135,7 @@ export interface Typeguards {
 	isColorSpace(value: unknown): value is ColorSpace;
 	isColorSpaceExtended(value: string): value is ColorSpaceExtended;
 	isColorStringMap(value: unknown): value is ColorStringMap;
-	isConvertibleColor(
-		color: Color
-	): color is CMYK | Hex | HSL | HSV | LAB | RGB;
+	isConvertibleColor(color: Color): color is CMYK | Hex | HSL | HSV | LAB | RGB;
 	isFormat(format: unknown): format is ColorFormat;
 	isHex(value: unknown): value is Hex;
 	isHexSet(value: unknown): value is HexSet;
@@ -314,9 +307,7 @@ export interface FormattingUtilities {
 	addHashToHex(hex: Hex): Hex;
 	componentToHex(component: number): string;
 	convertShortHexToLong(hex: string): string;
-	formatPercentageValues<
-		T extends Record<string, number | NumericBrandedType>
-	>(
+	formatPercentageValues<T extends Record<string, number | NumericBrandedType>>(
 		value: T
 	): {
 		[K in keyof T]: T[K] extends number | NumericBrandedType
@@ -639,10 +630,12 @@ export interface GeneratePaletteFnGroup {
 
 export interface AppDependencies {
 	common: Required<CommonFunctions>;
+	domStore: DOMStore;
 	eventManager: EventManager;
-	events: { palette: PaletteEventsService; ui: UIEventsService };
+	paletteEvents: PaletteEventsService;
 	paletteState: PaletteStateService;
 	stateManager: StateManager;
+	uiEvents: UIEventsService;
 }
 
 export interface DebounceOptions {

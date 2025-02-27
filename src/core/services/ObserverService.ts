@@ -101,10 +101,7 @@ export class ObserverService<T extends Record<string, unknown>>
 				const clonedOldValue = this.#helpers.data.clone(oldValue);
 
 				// notify only if values differ
-				if (
-					JSON.stringify(clonedNewValue) !==
-					JSON.stringify(clonedOldValue)
-				) {
+				if (JSON.stringify(clonedNewValue) !== JSON.stringify(clonedOldValue)) {
 					this.#triggerNotify(prop, newValue, oldValue);
 				}
 
@@ -112,11 +109,7 @@ export class ObserverService<T extends Record<string, unknown>>
 				Object.keys(oldData).forEach(key => {
 					if (!(key in newData)) {
 						const prop = key as keyof T;
-						this.#triggerNotify(
-							prop,
-							undefined as T[keyof T],
-							oldData[prop]
-						);
+						this.#triggerNotify(prop, undefined as T[keyof T], oldData[prop]);
 					}
 				});
 			});
@@ -196,9 +189,7 @@ export class ObserverService<T extends Record<string, unknown>>
 
 	#notify<K extends keyof T>(prop: K, newValue: T[K], oldValue: T[K]) {
 		return this.#errors.handleSync(() => {
-			this.#listeners[prop]?.forEach(callback =>
-				callback(newValue, oldValue)
-			);
+			this.#listeners[prop]?.forEach(callback => callback(newValue, oldValue));
 		}, `[${caller}]: Error notifying listeners.`);
 	}
 

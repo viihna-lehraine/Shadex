@@ -8,7 +8,9 @@ import {
 	StateManagerContract,
 	Utilities
 } from '../types/index.js';
-import { StateFactory, StateHistoryService, StateStore } from './index.js';
+import { StateFactory } from './StateFactory.js';
+import { StateHistoryService } from './StateHistoryService.js';
+import { StateStore } from './StateStore.js';
 import { StorageManager } from '../storage/StorageManager.js';
 import { env } from '../config/index.js';
 
@@ -28,11 +30,7 @@ export class StateManager implements StateManagerContract {
 	#log: Services['log'];
 	#errors: Services['errors'];
 
-	private constructor(
-		helpers: Helpers,
-		services: Services,
-		utils: Utilities
-	) {
+	private constructor(helpers: Helpers, services: Services, utils: Utilities) {
 		try {
 			services.log.debug(
 				`Constructing ${caller} instance.`,
@@ -44,21 +42,11 @@ export class StateManager implements StateManagerContract {
 
 			this.#state = {} as State;
 
-			this.#stateFactory = StateFactory.getInstance(
-				helpers,
-				services,
-				utils
-			);
-			this.#stateHistory = StateHistoryService.getInstance(
-				helpers,
-				services
-			);
+			this.#stateFactory = StateFactory.getInstance(helpers, services, utils);
+			this.#stateHistory = StateHistoryService.getInstance(helpers, services);
 
 			this.init(helpers, services).catch(error => {
-				this.#log.error(
-					'StateManager init failed.',
-					`${caller} constructor`
-				);
+				this.#log.error('StateManager init failed.', `${caller} constructor`);
 
 				console.error(error);
 			});
@@ -81,11 +69,7 @@ export class StateManager implements StateManagerContract {
 					`${caller}.getInstance`
 				);
 
-				StateManager.#instance = new StateManager(
-					helpers,
-					services,
-					utils
-				);
+				StateManager.#instance = new StateManager(helpers, services, utils);
 			}
 
 			services.log.debug(
@@ -148,9 +132,7 @@ export class StateManager implements StateManagerContract {
 						`${caller}.ensureStateReady`
 					);
 
-					await new Promise(resolve =>
-						setTimeout(resolve, stateReadyTimeout)
-					);
+					await new Promise(resolve => setTimeout(resolve, stateReadyTimeout));
 				}
 
 				this.#log.debug(

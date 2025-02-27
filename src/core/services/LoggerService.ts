@@ -26,13 +26,11 @@ export class LoggerService implements LoggerContract {
 				LoggerService.#instance = new LoggerService();
 
 				console.log(
-					`[${caller}]: No existing ${caller} instance found. Creating new singleton instance.`
+					`[${caller}]: No existing ${caller} instance found. Creating new instance.`
 				);
 			}
 
-			console.log(
-				`[${caller}]: Returning existing LoggerService instance.`
-			);
+			console.log(`[${caller}]: Returning LoggerService instance.`);
 
 			return LoggerService.#instance;
 		} catch (error) {
@@ -123,11 +121,7 @@ export class LoggerService implements LoggerContract {
 			);
 		}
 
-		if (
-			callerInfo === 'Unknown caller' &&
-			debugLevel > 1 &&
-			mode.stackTrace
-		) {
+		if (callerInfo === 'Unknown caller' && debugLevel > 1 && mode.stackTrace) {
 			console.trace(`[${caller}]: Full Stack Trace:`);
 		}
 	}

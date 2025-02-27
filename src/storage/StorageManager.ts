@@ -64,19 +64,17 @@ export class StorageManager implements StorageManagerContract {
 
 			const idbAvailable = await this.#idbStorageService.init();
 
-			if (idbAvailable) {
-				this.#log.info(
-					'Using IndexedDB for storage!',
+			if (!idbAvailable) {
+				this.#log.warn(
+					'IndexedDB is unavailable. Falling back to LocalStorage.',
 					`${caller}.init`
 				);
-
-				return true;
+				this.#useLocalStorage = true;
+				await this.#localStorageService.init();
+				return false;
 			}
 
-			this.#useLocalStorage = true;
-
-			await this.#localStorageService.init();
-
+			this.#log.info('Using IndexedDB for storage.', `${caller}.init`);
 			return true;
 		}, `[${caller}]: Initialization failed`);
 	}

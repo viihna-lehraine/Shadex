@@ -1,65 +1,47 @@
+import { PaletteRendererService } from '../dom/PaletteRendererService.js';
+
 // File: app/dependencyRegistry.ts
-import { EventManager } from '../dom/index.js';
-export async function registerDependencies(helpers, services) {
+async function registerDependencies(helpers, services) {
     const { errors, log } = services;
     const caller = '[REGISTER_DEPENDENCIES]';
-    // 1. Execute the function
     log.info(`Executing registerDependencies...`, `${caller}`);
     return await errors.handleAsync(async () => {
-        let events = null;
-        // 2. Create empty utils placeholder
         const utils = {};
-        // 3. Initialize utilities
         const { initializeUtilities } = await import('./init.js');
-        log.info('Initializing Utilities.', `${caller}`);
         Object.assign(utils, await initializeUtilities(helpers, services));
-        // 4. Initialize CommonFunctions with required properties
-        log.info('Initializing CommonFunctions with required properties.', `${caller}`);
         const common = {
             helpers,
             services,
             utils
         };
-        // 5. Initialize StateManager
+        const { initializeDOMStore } = await import('./init.js');
+        const domStore = await initializeDOMStore(helpers, services);
         const { initializeStateManager } = await import('./init.js');
-        log.info('Initializing StateManager.', `${caller}`);
         const stateManager = await initializeStateManager(helpers, services, utils);
-        // 6. Initialize PaletteState
         const { initializePaletteStateService } = await import('./init.js');
-        log.info(`Initializing PaletteStateService.`, `${caller}`);
-        const paletteState = await initializePaletteStateService(services, stateManager, utils);
-        // 7. Initialize PaletteManager
+        const paletteState = await initializePaletteStateService(services, stateManager);
         const { generateHuesFnGroup } = await import('../palette/partials/hues.js');
         const { generatePaletteFnGroup } = await import('../palette/partials/types.js');
         const { generatePalette } = await import('../palette/generate.js');
-        const { initializePaletteManager } = await import('./init.js');
-        log.info(`Initializing PaletteManager.`, `${caller}`);
-        const paletteManager = await initializePaletteManager(common, generateHuesFnGroup, generatePaletteFnGroup, generatePalette, stateManager);
-        // 8. Initialize EventManager
-        log.info(`Initializing EventManager.`, `${caller}`);
-        const eventManager = EventManager.getInstance(services);
-        // 9. Initialize event classes object
-        const { initializeEvents } = await import('./init.js');
-        console.log(`${caller}: initializeEvents function imported.`);
-        log.info(`Initializing event classes object.`, `${caller}`);
-        events = (await initializeEvents(helpers, paletteManager, paletteState, services, stateManager, utils));
-        // 10.; Ensure state is fully initialized before rendering palette
-        log.info(`Calling stateManager.ensureStateReady`, `${caller}`);
+        const paletteRenderer = PaletteRendererService.getInstance(common, domStore, generateHuesFnGroup, generatePaletteFnGroup, generatePalette, stateManager);
+        const { initializeEventManager } = await import('./init.js');
+        const eventManager = await initializeEventManager(services);
+        const { initializePaletteEventsService } = await import('./init.js');
+        const paletteEvents = await initializePaletteEventsService(domStore, helpers, paletteRenderer, paletteState, services, stateManager, utils);
+        const { initializeUIEventsService } = await import('./init.js');
+        const uiEvents = await initializeUIEventsService(domStore, helpers, paletteRenderer, services, utils);
         await stateManager.ensureStateReady();
-        // 11. Render initial palette
-        log.info(`Rendering initial palette.`, `${caller}`);
-        await paletteManager.loadPalette();
-        log.info(`Initial palette rendered.`, `${caller}`);
-        // 12. Log success and return dependencies
-        log.info(`Dependencies registered.`, `${caller}`);
         return {
             common,
+            domStore,
             eventManager,
-            events,
-            paletteManager: paletteManager,
-            paletteState: paletteState,
-            stateManager: stateManager
+            paletteEvents,
+            paletteState,
+            stateManager,
+            uiEvents
         };
     }, 'Error registering dependencies');
 }
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVnaXN0cnkuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvYXBwL3JlZ2lzdHJ5LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLGtDQUFrQztBQVNsQyxPQUFPLEVBQ04sWUFBWSxFQUdaLE1BQU0saUJBQWlCLENBQUM7QUFFekIsTUFBTSxDQUFDLEtBQUssVUFBVSxvQkFBb0IsQ0FDekMsT0FBZ0IsRUFDaEIsUUFBa0I7SUFFbEIsTUFBTSxFQUFFLE1BQU0sRUFBRSxHQUFHLEVBQUUsR0FBRyxRQUFRLENBQUM7SUFDakMsTUFBTSxNQUFNLEdBQUcseUJBQXlCLENBQUM7SUFFekMsMEJBQTBCO0lBQzFCLEdBQUcsQ0FBQyxJQUFJLENBQUMsbUNBQW1DLEVBQUUsR0FBRyxNQUFNLEVBQUUsQ0FBQyxDQUFDO0lBRTNELE9BQU8sTUFBTSxNQUFNLENBQUMsV0FBVyxDQUFDLEtBQUssSUFBSSxFQUFFO1FBQzFDLElBQUksTUFBTSxHQUdDLElBQUksQ0FBQztRQUVoQixvQ0FBb0M7UUFDcEMsTUFBTSxLQUFLLEdBQUcsRUFBZSxDQUFDO1FBRTlCLDBCQUEwQjtRQUMxQixNQUFNLEVBQUUsbUJBQW1CLEVBQUUsR0FBRyxNQUFNLE1BQU0sQ0FBQyxXQUFXLENBQUMsQ0FBQztRQUMxRCxHQUFHLENBQUMsSUFBSSxDQUFDLHlCQUF5QixFQUFFLEdBQUcsTUFBTSxFQUFFLENBQUMsQ0FBQztRQUNqRCxNQUFNLENBQUMsTUFBTSxDQUFDLEtBQUssRUFBRSxNQUFNLG1CQUFtQixDQUFDLE9BQU8sRUFBRSxRQUFRLENBQUMsQ0FBQyxDQUFDO1FBRW5FLHlEQUF5RDtRQUN6RCxHQUFHLENBQUMsSUFBSSxDQUNQLHdEQUF3RCxFQUN4RCxHQUFHLE1BQU0sRUFBRSxDQUNYLENBQUM7UUFDRixNQUFNLE1BQU0sR0FBOEI7WUFDekMsT0FBTztZQUNQLFFBQVE7WUFDUixLQUFLO1NBQ0wsQ0FBQztRQUVGLDZCQUE2QjtRQUM3QixNQUFNLEVB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dCI6WyIvLyBGaWxlOiBhcHAvZGVwZW5kZW5jeVJlZ2lzdHJ5LnRzXG5cbmltcG9ydCB7XG5cdEFwcERlcGVuZGVuY2llcyxcblx0Q29tbW9uRnVuY3Rpb25zLFxuXHRIZWxwZXJzLFxuXHRTZXJ2aWNlcyxcblx0VXRpbGl0aWVzXG59IGZyb20gJy4uL3R5cGVzL2luZGV4LmpzJztcbmltcG9ydCB7XG5cdEV2ZW50TWFuYWdlcixcblx0UGFsZXR0ZUV2ZW50c1NlcnZpY2UsXG5cdFVJRXZlbnRzU2VydmljZVxufSBmcm9tICcuLi9kb20vaW5kZXguanMnO1xuXG5leHBvcnQgYXN5bmMgZnVuY3Rpb24gcmVnaXN0ZXJEZXBlbmRlbmNpZXMoXG5cdGhlbHBlcnM6IEhlbHBlcnMsXG5cdHNlcnZpY2VzOiBTZXJ2aWNlc1xuKTogUHJvbWlzZTxBcHBEZXBlbmRlbmNpZXM+IHtcblx0Y29uc3QgeyBlcnJvcnMsIGxvZyB9ID0gc2VydmljZXM7XG5cdGNvbnN0IGNhbGxlciA9ICdbUkVHSVNURVJfREVQRU5ERU5DSUVTXSc7XG5cblx0Ly8gMS4gRXhlY3V0ZSB0aGUgZnVuY3Rpb25cblx0bG9nLmluZm8oYEV4ZWN1dGluZyByZWdpc3RlckRlcGVuZGVuY2llcy4uLmAsIGAke2NhbGxlcn1gKTtcblxuXHRyZXR1cm4gYXdhaXQgZXJyb3JzLmhhbmRsZUFzeW5jKGFzeW5jICgpID0+IHtcblx0XHRsZXQgZXZlbnRzOiB7XG5cdFx0XHRwYWxldHRlOiBQYWxldHRlRXZlbnRzU2VydmljZTtcblx0XHRcdHVpOiBVSUV2ZW50c1NlcnZpY2U7XG5cdFx0fSB8IG51bGwgPSBudWxsO1xuXG5cdFx0Ly8gMi4gQ3JlYXRlIGVtcHR5IHV0aWxzIHBsYWNlaG9sZGVyXG5cdFx0Y29uc3QgdXRpbHMgPSB7fSBhcyBVdGlsaXRpZXM7XG5cblx0XHQvLyAzLiBJbml0aWFsaXplIHV0aWxpdGllc1xuXHRcdGNvbnN0IHsgaW5pdGlhbGl6ZVV0aWxpdGllcyB9ID0gYXdhaXQgaW1wb3J0KCcuL2luaXQuanMnKTtcblx0XHRsb2cuaW5mbygnSW5pdGlhbGl6aW5nIFV0aWxpdGllcy4nLCBgJHtjYWxsZXJ9YCk7XG5cdFx0T2JqZWN0LmFzc2lnbih1dGlscywgYXdhaXQgaW5pdGlhbGl6ZVV0aWxpdGllcyhoZWxwZXJzLCBzZXJ2aWNlcykpO1xuXG5cdFx0Ly8gNC4gSW5pdGlhbGl6ZSBDb21tb25GdW5jdGlvbnMgd2l0aCByZXF1aXJlZCBwcm9wZXJ0aWVzXG5cdFx0bG9nLmluZm8oXG5cdFx0XHQnSW5pdGlhbGl6aW5nIENvbW1vbkZ1bmN0aW9ucyB3aXRoIHJlcXVpcmVkIHByb3BlcnRpZXMuJyxcblx0XHRcdGAke2NhbGxlcn1gXG5cdFx0KTtcblx0XHRjb25zdCBjb21tb246IFJlcXVpcmVkPENvbW1vbkZ1bmN0aW9ucz4gPSB7XG5cdFx0XHRoZWxwZXJzLFxuXHRcdFx0c2VydmljZXMsXG5cdFx0XHR1dGlsc1xuXHRcdH07XG5cblx0XHQvLyA1LiBJbml0aWFsaXplIFN0YXRlTWFuYWdlclxuXHRcdGNvbnN0IHsgaW5pdGlhbGl6ZVN0YXRlTWFuYWdlciB9ID0gYXdhaXQgaW1wb3J0KCcuL2luaXQuanMnKTtcblx0XHRsb2cuaW5mbygnSW5pdGlhbGl6aW5nIFN0YXRlTWFuYWdlci4nLCBgJHtjYWxsZXJ9YCk7XG5cdFx0Y29uc3Qgc3RhdGVNYW5hZ2VyID0gYXdhaXQgaW5pdGlhbGl6ZVN0YXRlTWFuYWdlcihcblx0XHRcdGhlbHBlcnMsXG5cdFx0XHRzZXJ2aWNlcyxcblx0XHRcdHV0aWxzXG5cdFx0KTtcblxuXHRcdC8vIDYuIEluaXRpYWxpemUgUGFsZXR0ZVN0YXRlXG5cdFx0Y29uc3QgeyBpbml0aWFsaXplUGFsZXR0ZVN0YXRlU2VydmljZSB9ID0gYXdhaXQgaW1wb3J0KCcuL2luaXQuanMnKTtcblx0XHRsb2cuaW5mbyhgSW5pdGlhbGl6aW5nIFBhbGV0dGVTdGF0ZVNlcnZpY2UuYCwgYCR7Y2FsbGVyfWApO1xuXHRcdGNvbnN0IHBhbGV0dGVTdGF0ZSA9IGF3YWl0IGluaXRpYWxpemVQYWxldHRlU3RhdGVTZXJ2aWNlKFxuXHRcdFx0c2VydmljZXMsXG5cdFx0XHRzdGF0ZU1hbmFnZXIsXG5cdFx0XHR1dGlsc1xuXHRcdCk7XG5cblx0XHQvLyA3LiBJbml0aWFsaXplIFBhbGV0dGVNYW5hZ2VyXG5cdFx0Y29uc3QgeyBnZW5lcmF0ZUh1ZXNGbkdyb3VwIH0gPSBhd2FpdCBpbXBvcnQoXG5cdFx0XHQnLi4vcGFsZXR0ZS9wYXJ0aWFscy9odWVzLmpzJ1xuXHRcdCk7XG5cdFx0Y29uc3QgeyBnZW5lcmF0ZVBhbGV0dGVGbkdyb3VwIH0gPSBhd2FpdCBpbXBvcnQoXG5cdFx0XHQnLi4vcGFsZXR0ZS9wYXJ0aWFscy90eXBlcy5qcydcblx0XHQpO1xuXHRcdGNvbnN0IHsgZ2VuZXJhdGVQYWxldHRlIH0gPSBhd2FpdCBpbXBvcnQoJy4uL3BhbGV0dGUvZ2VuZXJhdGUuanMnKTtcblx0XHRjb25zdCB7IGluaXRpYWxpemVQYWxldHRlTWFuYWdlciB9ID0gYXdhaXQgaW1wb3J0KCcuL2luaXQuanMnKTtcblx0XHRsb2cuaW5mbyhgSW5pdGlhbGl6aW5nIFBhbGV0dGVNYW5hZ2VyLmAsIGAke2NhbGxlcn1gKTtcblx0XHRjb25zdCBwYWxldHRlTWFuYWdlciA9IGF3YWl0IGluaXRpYWxpemVQYWxldHRlTWFuYWdlcihcblx0XHRcdGNvbW1vbixcblx0XHRcdGdlbmVyYXRlSHVlc0ZuR3JvdXAsXG5cdFx0XHRnZW5lcmF0ZVBhbGV0dGVGbkdyb3VwLFxuXHRcdFx0Z2VuZXJhdGVQYWxldHRlLFxuXHRcdFx0c3RhdGVNYW5hZ2VyXG5cdFx0KTtcblxuXHRcdC8vIDguIEluaXRpYWxpemUgRXZlbnRNYW5hZ2VyXG5cdFx0bG9nLmluZm8oYEluaXRpYWxpemluZyBFdmVudE1hbmFnZXIuYCwgYCR7Y2FsbGVyfWApO1xuXHRcdGNvbnN0IGV2ZW50TWFuYWdlciA9IEV2ZW50TWFuYWdlci5nZXRJbnN0YW5jZShzZXJ2aWNlcyk7XG5cblx0XHQvLyA5LiBJbml0aWFsaXplIGV2ZW50IGNsYXNzZXMgb2JqZWN0XG5cdFx0Y29uc3QgeyBpbml0aWFsaXplRXZlbnRzIH0gPSBhd2FpdCBpbXBvcnQoJy4vaW5pdC5qcycpO1xuXHRcdGNvbnNvbGUubG9nKGAke2NhbGxlcn06IGluaXRpYWxpemVFdmVudHMgZnVuY3Rpb24gaW1wb3J0ZWQuYCk7XG5cdFx0bG9nLmluZm8oYEluaXRpYWxpemluZyBldmVudCBjbGFzc2VzIG9iamVjdC5gLCBgJHtjYWxsZXJ9YCk7XG5cdFx0ZXZlbnRzID0gKGF3YWl0IGluaXRpYWxpemVFdmVudHMoXG5cdFx0XHRoZWxwZXJzLFxuXHRcdFx0cGFsZXR0ZU1hbmFnZXIsXG5cdFx0XHRwYWxldHRlU3RhdGUsXG5cdFx0XHRzZXJ2aWNlcyxcblx0XHRcdHN0YXRlTWFuYWdlcixcblx0XHRcdHV0aWxzXG5cdFx0KSkhO1xuXG5cdFx0Ly8gMTAuOyBFbnN1cmUgc3RhdGUgaXMgZnVsbHkgaW5pdGlhbGl6ZWQgYmVmb3JlIHJlbmRlcmluZyBwYWxldHRlXG5cdFx0bG9nLmluZm8oYENhbGxpbmcgc3RhdGVNYW5hZ2VyLmVuc3VyZVN0YXRlUmVhZHlgLCBgJHtjYWxsZXJ9YCk7XG5cdFx0YXdhaXQgc3RhdGVNYW5hZ2VyLmVuc3VyZVN0YXRlUmVhZHkoKTtcblxuXHRcdC8vIDExLiBSZW5kZXIgaW5pdGlhbCBwYWxldHRlXG5cdFx0bG9nLmluZm8oYFJlbmRlcmluZyBpbml0aWFsIHBhbGV0dGUuYCwgYCR7Y2FsbGVyfWApO1xuXHRcdGF3YWl0IHBhbGV0dGVNYW5hZ2VyIS5sb2FkUGFsZXR0ZSgpO1xuXHRcdGxvZy5pbmZvKGBJbml0aWFsIHBhbGV0dGUgcmVuZGVyZWQuYCwgYCR7Y2FsbGVyfWApO1xuXG5cdFx0Ly8gMTIuIExvZyBzdWNjZXNzIGFuZCByZXR1cm4gZGVwZW5kZW5jaWVzXG5cdFx0bG9nLmluZm8oYERlcGVuZGVuY2llcyByZWdpc3RlcmVkLmAsIGAke2NhbGxlcn1gKTtcblx0XHRyZXR1cm4ge1xuXHRcdFx0Y29tbW9uLFxuXHRcdFx0ZXZlbnRNYW5hZ2VyLFxuXHRcdFx0ZXZlbnRzLFxuXHRcdFx0cGFsZXR0ZU1hbmFnZXI6IHBhbGV0dGVNYW5hZ2VyLFxuXHRcdFx0cGFsZXR0ZVN0YXRlOiBwYWxldHRlU3RhdGUsXG5cdFx0XHRzdGF0ZU1hbmFnZXI6IHN0YXRlTWFuYWdlclxuXHRcdH0gYXMgQXBwRGVwZW5kZW5jaWVzO1xuXHR9LCAnRXJyb3IgcmVnaXN0ZXJpbmcgZGVwZW5kZW5jaWVzJyk7XG59XG4iXX0=
+
+export { registerDependencies };
+//# sourceMappingURL=registry.js.map

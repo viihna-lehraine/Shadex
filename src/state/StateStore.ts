@@ -105,9 +105,7 @@ export class StateStore implements StateStoreContract {
 				return;
 			}
 
-			const newState = Object.freeze(
-				this.#clone({ ...oldState, ...updates })
-			);
+			const newState = Object.freeze(this.#clone({ ...oldState, ...updates }));
 
 			this.#state = newState;
 
@@ -115,10 +113,7 @@ export class StateStore implements StateStoreContract {
 				`Batch updated state with keys: ${updatedEntries.map(([k]) => k).join(', ')}`,
 				`${caller}.batchUpdate`
 			);
-			console.debug(
-				`[${caller}.batchUpdate]: Batch Update List:`,
-				updates
-			);
+			console.debug(`[${caller}.batchUpdate]: Batch Update List:`, updates);
 
 			this.#notifyObservers(updates);
 
@@ -175,10 +170,7 @@ export class StateStore implements StateStoreContract {
 				// replace observer data with the new state
 				this.#observer.replaceData(this.#state);
 
-				this.#log.info(
-					'Loaded state from storage.',
-					`${caller}.loadState`
-				);
+				this.#log.info('Loaded state from storage.', `${caller}.loadState`);
 
 				return this.#state;
 			}
@@ -250,11 +242,7 @@ export class StateStore implements StateStoreContract {
 
 	async #saveOperation(state: State): Promise<void> {
 		return this.#errors.handleAsync(async () => {
-			for (
-				let attempt = 1;
-				attempt <= env.state.maxSaveRetries;
-				attempt++
-			) {
+			for (let attempt = 1; attempt <= env.state.maxSaveRetries; attempt++) {
 				try {
 					await this.#storage.setItem('state', state);
 

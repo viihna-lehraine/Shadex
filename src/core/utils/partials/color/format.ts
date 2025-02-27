@@ -201,9 +201,7 @@ export function colorFormattingUtilitiesFactory(
 
 			if (color.startsWith('#')) {
 				const hexValue =
-					color.length === 7
-						? color
-						: format.convertShortHexToLong(color);
+					color.length === 7 ? color : format.convertShortHexToLong(color);
 				return {
 					value: { hex: hexValue },
 					format: 'hex'

@@ -9,14 +9,14 @@ export function serviceFactory(helpers: Helpers): Services {
 	const services = {} as Services;
 
 	console.log(
-		`[SERVICE_FACTORY]: Initializing Logger and ErrorHandler (creating instances).`
+		`[SERVICE_FACTORY]: Initializing Logger and ErrorHandler services.`
 	);
 	services.log = LoggerService.getInstance();
 	services.errors = ErrorHandlerService.getInstance(helpers, services.log);
 
 	if (!services.log || !services.errors) {
 		throw new Error(
-			'[SERVICE_FACTORY]: Logger or ErrorHandler failed to initialize.'
+			'[SERVICE_FACTORY]: Logger and/or ErrorHandler failed to initialize.'
 		);
 	}
 

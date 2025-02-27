@@ -51,7 +51,7 @@ export function partialDOMUtilitiesFactory(
 				tooltip.style.opacity = '1';
 			}, domConfig.tooltipFadeOut);
 			return tooltip;
-		}, 'Error occurred while creating tooltip.');
+		}, '[domUtils > createTooltip]: Error occurred while creating tooltip.');
 	}
 
 	function downloadFile(data: string, filename: string, type: string): void {
@@ -63,13 +63,10 @@ export function partialDOMUtilitiesFactory(
 			a.download = filename;
 			a.click();
 			URL.revokeObjectURL(url);
-		}, 'Error occurred while downloading file.');
+		}, '[domUtils > downloadFile]: Error occurred while downloading file.');
 	}
 
-	function enforceSwatchRules(
-		minSwatches: number,
-		maxSwatches: number
-	): void {
+	function enforceSwatchRules(minSwatches: number, maxSwatches: number): void {
 		return errors.handleSync(() => {
 			const paletteColumnSelector = document.getElementById(
 				domIndex.ids.inputs.paletteColumn
@@ -77,7 +74,7 @@ export function partialDOMUtilitiesFactory(
 			if (!paletteColumnSelector) {
 				log.error(
 					'paletteColumnSelector not found',
-					`enforceMinimumSwatches`
+					`domUtils > enforceMinimumSwatches`
 				);
 				if (mode.stackTrace) {
 					console.trace('enforceMinimumSwatches stack trace');
@@ -89,10 +86,7 @@ export function partialDOMUtilitiesFactory(
 			// ensure the value is within the allowed range
 			if (currentValue < minSwatches) {
 				newValue = minSwatches;
-			} else if (
-				maxSwatches !== undefined &&
-				currentValue > maxSwatches
-			) {
+			} else if (maxSwatches !== undefined && currentValue > maxSwatches) {
 				newValue = maxSwatches;
 			}
 			if (newValue !== currentValue) {
@@ -105,11 +99,9 @@ export function partialDOMUtilitiesFactory(
 				} catch (error) {
 					log.error(
 						`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`,
-						`enforceMinimumSwatches`
+						`domUtils > enforceMinimumSwatches`
 					);
-					throw new Error(
-						`Failed to dispatch change event: ${error}`
-					);
+					throw new Error(`Failed to dispatch change event: ${error}`);
 				}
 			}
 		}, 'Error occurred while enforcing swatch rules.');
@@ -144,10 +136,7 @@ export function partialDOMUtilitiesFactory(
 		});
 
 		// Normalize to ensure total size is 100%
-		const totalSize = updatedColumns.reduce(
-			(sum, col) => sum + col.size,
-			0
-		);
+		const totalSize = updatedColumns.reduce((sum, col) => sum + col.size, 0);
 		return updatedColumns.map(col => ({
 			...col,
 			size: col.size * (100 / totalSize)
@@ -166,7 +155,7 @@ export function partialDOMUtilitiesFactory(
 				tooltip.style.visibility = 'hidden';
 				tooltip.remove();
 			}, domConfig.tooltipFadeOut || 500);
-		}, 'Error occurred while hiding tooltip.');
+		}, '[domUtils > hideTooltip]: Error occurred while hiding tooltip.');
 	}
 
 	function positionTooltip(element: HTMLElement, tooltip: HTMLElement): void {
@@ -179,7 +168,7 @@ export function partialDOMUtilitiesFactory(
 			tooltip.style.pointerEvents = 'none';
 			tooltip.style.opacity = '0';
 			tooltip.style.transition = 'opacity 0.2s ease-in-out';
-		}, 'Error occurred while positioning tooltip.');
+		}, '[domUtils > positionTooltip]: Error occurred while positioning tooltip.');
 	}
 
 	function removeTooltip(element: HTMLElement): void {
@@ -194,7 +183,7 @@ export function partialDOMUtilitiesFactory(
 				}, 300);
 			}
 			delete element.dataset.tooltipId;
-		}, 'Error occurred while removing tooltip.');
+		}, '[domUtils > removeTooltip]: Error occurred while removing tooltip.');
 	}
 
 	function readFile(file: File): Promise<string> {
@@ -213,7 +202,7 @@ export function partialDOMUtilitiesFactory(
 			if (document.readyState === 'loading') {
 				log.warn(
 					'Document not ready. Returning empty array.',
-					`scanPaletteColumns`
+					`domUtils > scanPaletteColumns`
 				);
 				return [];
 			}
@@ -222,15 +211,12 @@ export function partialDOMUtilitiesFactory(
 				classes.paletteColumn
 			);
 			if (!paletteColumns.length) {
-				log.warn('No palette columns found.', `scanPaletteColumns`);
+				log.warn('No palette columns found.', `domUtils > scanPaletteColumns`);
 				return [];
 			}
 
 			return Array.from(paletteColumns).map((column, index) => {
-				const id = parseInt(
-					column.id.split('-').pop() || `${index + 1}`,
-					10
-				);
+				const id = parseInt(column.id.split('-').pop() || `${index + 1}`, 10);
 				const size = column.clientWidth / paletteColumns.length;
 				const isLocked = column.classList.contains(classes.locked);
 				return { id, position: index + 1, size, isLocked };
@@ -240,17 +226,16 @@ export function partialDOMUtilitiesFactory(
 
 	function switchColorSpaceInDOM(targetFormat: ColorSpace): void {
 		return errors.handleSync(() => {
-			const colorTextOutputBoxes =
-				document.querySelectorAll<HTMLInputElement>(
-					'.color-text-output-box'
-				);
+			const colorTextOutputBoxes = document.querySelectorAll<HTMLInputElement>(
+				'.color-text-output-box'
+			);
 			for (const box of colorTextOutputBoxes) {
 				const inputBox = box as ColorInputElement;
 				const colorValues = inputBox.colorValues;
 				if (!colorValues || !validate.colorValue(colorValues)) {
 					log.error(
 						'Invalid color values. Cannot display toast.',
-						`switchColorSpaceInDOM`
+						`domUtils > switchColorSpaceInDOM`
 					);
 					continue;
 				}
@@ -259,7 +244,7 @@ export function partialDOMUtilitiesFactory(
 				) as ColorSpace;
 				log.info(
 					`Converting from ${currentFormat} to ${targetFormat}`,
-					`switchColorSpaceInDOM`
+					`domUtils > switchColorSpaceInDOM`
 				);
 				const convertFn = helpers.color.getConversionFn(
 					currentFormat,
@@ -268,14 +253,14 @@ export function partialDOMUtilitiesFactory(
 				if (!convertFn) {
 					log.error(
 						`Conversion from ${currentFormat} to ${targetFormat} is not supported.`,
-						`switchColorSpaceInDOM`
+						`domUtils > switchColorSpaceInDOM`
 					);
 					continue;
 				}
 				if (colorValues.format === 'xyz') {
 					log.error(
 						'Cannot convert from XYZ to another color space.',
-						`switchColorSpaceInDOM`
+						`domUtils > switchColorSpaceInDOM`
 					);
 					continue;
 				}
@@ -285,7 +270,7 @@ export function partialDOMUtilitiesFactory(
 				if (!helpers.typeguards.isConvertibleColor(clonedColor)) {
 					log.error(
 						'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.',
-						`switchColorSpaceInDOM`
+						`domUtils > switchColorSpaceInDOM`
 					);
 					continue;
 				}
@@ -293,31 +278,28 @@ export function partialDOMUtilitiesFactory(
 				if (!newColor) {
 					log.error(
 						`Conversion to ${targetFormat} failed.`,
-						`switchColorSpaceInDOM`
+						`domUtils > switchColorSpaceInDOM`
 					);
 					continue;
 				}
 				inputBox.value = String(newColor);
 				inputBox.setAttribute('data-format', targetFormat);
 			}
-		}, 'Error occurred while converting colors.');
+		}, '[domUtils > switchColorSpaceInDOM]: Error occurred while converting colors.');
 	}
 
 	function updateColorBox(color: HSL, boxId: string): void {
 		return errors.handleSync(() => {
 			const colorBox = document.getElementById(boxId);
 			if (colorBox) {
-				colorBox.style.backgroundColor =
-					colorUtils.formatColorAsCSS(color);
+				colorBox.style.backgroundColor = colorUtils.formatColorAsCSS(color);
 			}
-		}, 'Error occurred while updating color box.');
+		}, '[domUtils > updateColorBox]: Error occurred while updating color box.');
 	}
 
 	function updateHistory(history: Palette[]): void {
 		return errors.handleSync(() => {
-			const historyList = getElement<HTMLDivElement>(
-				ids.divs.paletteHistory
-			);
+			const historyList = getElement<HTMLDivElement>(ids.divs.paletteHistory);
 			if (!historyList) return;
 			historyList.innerHTML = '';
 			history.forEach(palette => {
@@ -338,7 +320,7 @@ export function partialDOMUtilitiesFactory(
 					});
 				historyList.appendChild(entry);
 			});
-		}, 'Error occurred while updating history.');
+		}, '[domUtils > updateHistory]: Error occurred while updating history.');
 	}
 
 	const domUtilitiesPartial: DOMUtilitiesPartial = {

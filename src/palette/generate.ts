@@ -29,46 +29,23 @@ export function generatePalette(
 
 			switch (options.paletteType) {
 				case 'analogous':
-					return generatePaletteFns.analogous(
-						options,
-						common,
-						generateHuesFns
-					);
+					return generatePaletteFns.analogous(options, common, generateHuesFns);
 				case 'complementary':
 					return generatePaletteFns.complementary(options, common);
 				case 'diadic':
-					return generatePaletteFns.diadic(
-						options,
-						common,
-						generateHuesFns
-					);
+					return generatePaletteFns.diadic(options, common, generateHuesFns);
 				case 'hexadic':
-					return generatePaletteFns.hexadic(
-						options,
-						common,
-						generateHuesFns
-					);
+					return generatePaletteFns.hexadic(options, common, generateHuesFns);
 				case 'monochromatic':
 					return generatePaletteFns.monochromatic(options, common);
 				case 'random':
 					return generatePaletteFns.random(options, common);
 				case 'splitComplementary':
-					return generatePaletteFns.splitComplementary(
-						options,
-						common
-					);
+					return generatePaletteFns.splitComplementary(options, common);
 				case 'tetradic':
-					return generatePaletteFns.tetradic(
-						options,
-						common,
-						generateHuesFns
-					);
+					return generatePaletteFns.tetradic(options, common, generateHuesFns);
 				case 'triadic':
-					return generatePaletteFns.triadic(
-						options,
-						common,
-						generateHuesFns
-					);
+					return generatePaletteFns.triadic(options, common, generateHuesFns);
 				default:
 					log.error(
 						`Invalid palette type ${options.paletteType}`,

@@ -8,6 +8,7 @@ export const env: Readonly<Environment> = {
 		paletteHistoryLimit: 20
 	},
 	idb: {
+		maxReadyAttempts: 10,
 		retryDelay: 50
 	},
 	mutex: {

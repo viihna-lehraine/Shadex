@@ -13,7 +13,7 @@ import {
 	Utilities
 } from '../types/index.js';
 import { StateManager } from '../state/StateManager.js';
-import { DOMStore } from './index.js';
+import { DOMStore } from './DOMStore.js';
 import { domConfig } from '../config/index.js';
 
 const caller = 'PaletteRendererService';
@@ -107,10 +107,7 @@ export class PaletteRendererService implements PaletteRendererContract {
 		const container = this.#domStore.getElement('divs', 'paletteContainer');
 
 		if (!container) {
-			this.#log.warn(
-				'Palette container not found.',
-				`${caller}.renderColumns`
-			);
+			this.#log.warn('Palette container not found.', `${caller}.renderColumns`);
 			return;
 		}
 
@@ -183,8 +180,7 @@ export class PaletteRendererService implements PaletteRendererContract {
 			const columns = newPalette.items.map((item, index) => {
 				const columnID = index + 1;
 				const colorValue =
-					item.css[validColorSpace as keyof PaletteItem['css']] ||
-					item.css.hex;
+					item.css[validColorSpace as keyof PaletteItem['css']] || item.css.hex;
 
 				const column = document.createElement('div');
 				column.id = `palette-column-${columnID}`;
@@ -207,9 +203,7 @@ export class PaletteRendererService implements PaletteRendererContract {
 			});
 
 			// append new columns to the palette container
-			columns.forEach(({ column }) =>
-				paletteContainer.appendChild(column)
-			);
+			columns.forEach(({ column }) => paletteContainer.appendChild(column));
 
 			// update state with new columns
 			this.#stateManager.updatePaletteColumns(
@@ -255,8 +249,7 @@ export class PaletteRendererService implements PaletteRendererContract {
 			const columns = latestPalette.items.map((item, index) => {
 				const columnID = item.itemID;
 				const colorValue =
-					item.css[validColorSpace as keyof PaletteItem['css']] ||
-					item.css.hex;
+					item.css[validColorSpace as keyof PaletteItem['css']] || item.css.hex;
 				const column = document.createElement('div');
 				column.id = `palette-column-${columnID}`;
 				column.className = 'palette-column';
@@ -275,9 +268,7 @@ export class PaletteRendererService implements PaletteRendererContract {
 				};
 			});
 			// append new columns to the palette container
-			columns.forEach(({ column }) =>
-				paletteContainer.appendChild(column)
-			);
+			columns.forEach(({ column }) => paletteContainer.appendChild(column));
 			// update state with new columns
 			this.#stateManager.updatePaletteColumns(
 				columns.map(col => col.state),
@@ -337,10 +328,7 @@ export class PaletteRendererService implements PaletteRendererContract {
 			});
 
 			// normalize sizes to ensure total is exactly 100%
-			const totalSize = updatedColumns.reduce(
-				(sum, col) => sum + col.size,
-				0
-			);
+			const totalSize = updatedColumns.reduce((sum, col) => sum + col.size, 0);
 			const normalizedColumns = updatedColumns.map(col => ({
 				...col,
 				size: col.size * (100 / totalSize)
@@ -377,8 +365,7 @@ export class PaletteRendererService implements PaletteRendererContract {
 				const updatedItems = latestPalette.items.map(item => {
 					if (item.itemID !== columnID) return item;
 
-					const parsedNewColor =
-						this.#utils.color.formatCSSAsColor(newColor);
+					const parsedNewColor = this.#utils.color.formatCSSAsColor(newColor);
 					if (!parsedNewColor) throw new Error('Invalid color value');
 
 					// ensure color is in HSL format
@@ -393,9 +380,7 @@ export class PaletteRendererService implements PaletteRendererContract {
 
 					// ensure CSS representations match expected format
 					const structuredCSS = {
-						cmyk: this.#utils.color.formatColorAsCSS(
-							allColors.cmyk
-						),
+						cmyk: this.#utils.color.formatColorAsCSS(allColors.cmyk),
 						hex: this.#utils.color.formatColorAsCSS(allColors.hex),
 						hsl: this.#utils.color.formatColorAsCSS(allColors.hsl),
 						hsv: this.#utils.color.formatColorAsCSS(allColors.hsv),
@@ -414,8 +399,7 @@ export class PaletteRendererService implements PaletteRendererContract {
 				// ensure column state is updated
 				const updatedColumns = updatedItems.map((item, index) => ({
 					id: item.itemID,
-					isLocked:
-						currentState.paletteContainer.columns[index].isLocked,
+					isLocked: currentState.paletteContainer.columns[index].isLocked,
 					position: index + 1,
 					size: currentState.paletteContainer.columns[index].size
 				}));
@@ -456,9 +440,7 @@ export class PaletteRendererService implements PaletteRendererContract {
 					return;
 				}
 
-				const validColorSpace = ['hex', 'hsl', 'rgb'].includes(
-					colorSpace
-				)
+				const validColorSpace = ['hex', 'hsl', 'rgb'].includes(colorSpace)
 					? colorSpace
 					: 'hex';
 
