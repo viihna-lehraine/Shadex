@@ -16,14 +16,30 @@ export function validationUtilitiesFactory(
 	services: Services
 ): ValidationUtilities {
 	const {
-		data: { clone }
+		data: { deepClone }
 	} = helpers;
 	const { errors } = services;
+
+	function colorInput(color: string): boolean {
+		return errors.handleSync(() => {
+			if (typeof color !== 'string' || !color.trim()) {
+				return false;
+			}
+
+			const normalizedColor = color.trim().toLowerCase();
+
+			return (
+				regex.userInput.hex.test(normalizedColor) ||
+				regex.userInput.hsl.test(normalizedColor) ||
+				regex.userInput.rgb.test(normalizedColor)
+			);
+		}, `Error occurred while validating color input from DOM: ${color}`);
+	}
 
 	function colorValue(color: Color | SL | SV): boolean {
 		return errors.handleSync(
 			() => {
-				const clonedColor = clone(color);
+				const clonedColor = deepClone(color);
 
 				const isNumericValid = (value: unknown): boolean =>
 					typeof value === 'number' && !isNaN(value);
@@ -209,24 +225,14 @@ export function validationUtilitiesFactory(
 		);
 	}
 
-	function userColorInput(color: string): boolean {
-		return errors.handleSync(() => {
-			return (
-				regex.userInput.hex.test(color) ||
-				regex.userInput.hsl.test(color) ||
-				regex.userInput.rgb.test(color)
-			);
-		}, `Error occurred while validating user color input: ${color}`);
-	}
-
 	const validationUtilities: ValidationUtilities = {
+		colorInput,
 		colorValue,
 		ensureHash,
 		hex,
 		hexComponent,
 		hexSet,
-		range,
-		userColorInput
+		range
 	};
 
 	return errors.handleSync(

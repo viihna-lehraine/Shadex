@@ -10,6 +10,7 @@
 // File: index.ts
 
 import { EventManager } from './dom/events/EventManager.js';
+import { StorageManager } from './storage/StorageManager.js';
 import { config } from './config/index.js';
 
 const mode = config.mode;
@@ -48,6 +49,7 @@ async function initializeApp() {
 	if (mode.exposeClasses) {
 		window.domStore = deps.domStore;
 		window.eventManager = deps.eventManager;
+		window.storageManager = await StorageManager.getInstance(services);
 		window.stateManager = deps.stateManager;
 	}
 

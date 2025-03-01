@@ -49,7 +49,7 @@ export function colorConversionUtilitiesFactory(
 ): ColorConversionUtilities {
 	const {
 		color: { hueToRGB },
-		data: { clone }
+		data: { deepClone }
 	} = helpers;
 	const { errors, log } = services;
 
@@ -64,7 +64,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultHSL;
 			}
 
-			return rgbToHSL(cmykToRGB(clone(cmyk)));
+			return rgbToHSL(cmykToRGB(deepClone(cmyk)));
 		}, 'Error converting CMYK to HSL');
 	}
 
@@ -79,7 +79,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultRGB;
 			}
 
-			const clonedCMYK = clone(cmyk);
+			const clonedCMYK = deepClone(cmyk);
 			const r =
 				255 *
 				(1 - clonedCMYK.value.cyan / 100) *
@@ -116,7 +116,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultHSL;
 			}
 
-			const clonedColor = clone(color) as HSL;
+			const clonedColor = deepClone(color) as HSL;
 
 			switch (colorSpace) {
 				case 'cmyk':
@@ -124,7 +124,7 @@ export function colorConversionUtilitiesFactory(
 				case 'hex':
 					return hslToHex(clonedColor);
 				case 'hsl':
-					return clone(clonedColor);
+					return deepClone(clonedColor);
 				case 'hsv':
 					return hslToHSV(clonedColor);
 				case 'lab':
@@ -154,7 +154,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultHSL;
 			}
 
-			const clonedColor = clone(color);
+			const clonedColor = deepClone(color);
 
 			switch (color.format) {
 				case 'cmyk':
@@ -162,7 +162,7 @@ export function colorConversionUtilitiesFactory(
 				case 'hex':
 					return hexToHSL(clonedColor as Hex);
 				case 'hsl':
-					return clone(clonedColor as HSL);
+					return deepClone(clonedColor as HSL);
 				case 'hsv':
 					return hsvToHSL(clonedColor as HSV);
 				case 'lab':
@@ -188,13 +188,13 @@ export function colorConversionUtilitiesFactory(
 				return defaultHSL;
 			}
 
-			return rgbToHSL(hexToRGB(clone(hex)));
+			return rgbToHSL(hexToRGB(deepClone(hex)));
 		}, 'Error converting Hex to HSL');
 	}
 
 	function hexToHSLWrapper(input: string | Hex): HSL {
 		return errors.handleSync(() => {
-			const clonedInput = clone(input);
+			const clonedInput = deepClone(input);
 
 			const hex: Hex =
 				typeof clonedInput === 'string'
@@ -225,7 +225,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultRGB;
 			}
 
-			const clonedHex = clone(hex);
+			const clonedHex = deepClone(hex);
 			const strippedHex = format.stripHashFromHex(clonedHex).value.hex;
 			const bigint = parseInt(strippedHex, 16);
 
@@ -251,7 +251,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultCMYK;
 			}
 
-			return rgbToCMYK(hslToRGB(clone(hsl)));
+			return rgbToCMYK(hslToRGB(deepClone(hsl)));
 		}, 'Error converting HSL to CMYK');
 	}
 
@@ -266,7 +266,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultHex;
 			}
 
-			return rgbToHex(hslToRGB(clone(hsl)));
+			return rgbToHex(hslToRGB(deepClone(hsl)));
 		}, 'Error converting HSL to Hex');
 	}
 
@@ -281,7 +281,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultHSV;
 			}
 
-			const clonedHSL = clone(hsl);
+			const clonedHSL = deepClone(hsl);
 			const s = clonedHSL.value.saturation / 100;
 			const l = clonedHSL.value.lightness / 100;
 			const value = l + s * Math.min(l, 1 - 1);
@@ -311,7 +311,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultLAB;
 			}
 
-			return xyzToLAB(rgbToXYZ(hslToRGB(clone(hsl))));
+			return xyzToLAB(rgbToXYZ(hslToRGB(deepClone(hsl))));
 		}, 'Error converting HSL to LAB');
 	}
 
@@ -326,7 +326,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultRGB;
 			}
 
-			const clonedHSL = clone(hsl);
+			const clonedHSL = deepClone(hsl);
 			const hue = clonedHSL.value.hue / 360;
 
 			const s = clonedHSL.value.saturation / 100;
@@ -383,7 +383,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultSV;
 			}
 
-			return hsvToSV(rgbToHSV(hslToRGB(clone(hsl))));
+			return hsvToSV(rgbToHSV(hslToRGB(deepClone(hsl))));
 		}, 'Error converting HSL to SV');
 	}
 
@@ -398,7 +398,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultXYZ;
 			}
 
-			return labToXYZ(hslToLAB(clone(hsl)));
+			return labToXYZ(hslToLAB(deepClone(hsl)));
 		}, 'Error converting HSL to XYZ');
 	}
 
@@ -413,7 +413,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultHSL;
 			}
 
-			const clonedHSV = clone(hsv);
+			const clonedHSV = deepClone(hsv);
 
 			const s = clonedHSV.value.saturation / 100;
 			const v = clonedHSV.value.value / 100;
@@ -469,7 +469,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultHSL;
 			}
 
-			return rgbToHSL(labToRGB(clone(lab)));
+			return rgbToHSL(labToRGB(deepClone(lab)));
 		}, 'Error converting LAB to HSL');
 	}
 
@@ -484,7 +484,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultRGB;
 			}
 
-			return xyzToRGB(labToXYZ(clone(lab)));
+			return xyzToRGB(labToXYZ(deepClone(lab)));
 		}, 'Error converting LAB to RGB');
 	}
 
@@ -499,7 +499,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultXYZ;
 			}
 
-			const clonedLAB = clone(lab);
+			const clonedLAB = deepClone(lab);
 			const refX = 95.047,
 				refY = 100.0,
 				refZ = 108.883;
@@ -544,30 +544,43 @@ export function colorConversionUtilitiesFactory(
 				return defaultCMYK;
 			}
 
-			const clonedRGB = clone(rgb);
+			const clonedRGB = deepClone(rgb);
 
 			const redPrime = clonedRGB.value.red / 255;
 			const greenPrime = clonedRGB.value.green / 255;
 			const bluePrime = clonedRGB.value.blue / 255;
 
-			const key = sanitize.percentile(
-				sanitize.percentile(1 - Math.max(redPrime, greenPrime, bluePrime))
-			);
-			const cyan = sanitize.percentile(
-				sanitize.percentile((1 - redPrime - key) / (1 - key) || 0)
-			);
-			const magenta = sanitize.percentile(
-				sanitize.percentile((1 - greenPrime - key) / (1 - key) || 0)
-			);
-			const yellow = sanitize.percentile(
-				sanitize.percentile((1 - bluePrime - key) / (1 - key) || 0)
-			);
-			const format: 'cmyk' = 'cmyk';
+			const key = 1 - Math.max(redPrime, greenPrime, bluePrime);
 
-			const cmyk = { value: { cyan, magenta, yellow, key }, format };
+			if (key === 1) {
+				return {
+					value: {
+						cyan: brand.asPercentile(0),
+						magenta: brand.asPercentile(0),
+						yellow: brand.asPercentile(0),
+						key: brand.asPercentile(1)
+					},
+					format: 'cmyk' as 'cmyk'
+				};
+			}
+
+			const invK = 1 - key;
+			const cyan = (1 - redPrime - key) / invK;
+			const magenta = (1 - greenPrime - key) / invK;
+			const yellow = (1 - bluePrime - key) / invK;
+
+			const cmyk = {
+				value: {
+					cyan: sanitize.percentile(brand.asPercentile(cyan)),
+					magenta: sanitize.percentile(brand.asPercentile(magenta)),
+					yellow: sanitize.percentile(brand.asPercentile(yellow)),
+					key: sanitize.percentile(brand.asPercentile(key))
+				},
+				format: 'cmyk' as 'cmyk'
+			};
 
 			log.info(
-				`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(clone(cmyk))}`,
+				`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(deepClone(cmyk))}`,
 				`utils.color.rgbToCMYK`
 			);
 
@@ -586,7 +599,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultHex;
 			}
 
-			const clonedRGB = clone(rgb);
+			const clonedRGB = deepClone(rgb);
 
 			if (
 				[clonedRGB.value.red, clonedRGB.value.green, clonedRGB.value.blue].some(
@@ -623,7 +636,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultHSL;
 			}
 
-			const clonedRGB = clone(rgb);
+			const clonedRGB = deepClone(rgb);
 
 			const red = (clonedRGB.value.red as unknown as number) / 255;
 			const green = (clonedRGB.value.green as unknown as number) / 255;
@@ -784,7 +797,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultHSL;
 			}
 
-			return rgbToHSL(xyzToRGB(clone(xyz)));
+			return rgbToHSL(xyzToRGB(deepClone(xyz)));
 		}, 'Error converting XYZ to HSL');
 	}
 
@@ -799,7 +812,7 @@ export function colorConversionUtilitiesFactory(
 				return defaultLAB;
 			}
 
-			const clonedXYZ = clone(xyz);
+			const clonedXYZ = deepClone(xyz);
 			const refX = math.maxXYZ_X,
 				refY = math.maxXYZ_Y,
 				refZ = math.maxXYZ_Z;

@@ -5,6 +5,7 @@ import { EventManager } from '../events/EventManager.js';
 import { PaletteEvents } from '../events/PaletteEvents.js';
 import { PaletteManager } from '../palette/PaletteManager.js';
 import { StateManager } from '../state/StateManager';
+import { StorageManager } from '../storage/StorageManager.js';
 import { UIEvents } from '../events/UIEvents.js';
 
 declare global {
@@ -15,6 +16,7 @@ declare global {
 		paletteEvents: PaletteEvents;
 		paletteManager: PaletteManager;
 		stateManager: StateManager;
+		storageManager: StorageManager;
 		uiEvents: UIEvents;
 	}
 }

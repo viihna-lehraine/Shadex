@@ -1,5 +1,4 @@
-// File: core/helpers/typeguards/main.ts
-function typeguardsFactory() {
+function typeGuardsFactory() {
     function hasFormat(value, expectedFormat) {
         return (isObject(value) && 'format' in value && value.format === expectedFormat);
     }
@@ -285,5 +284,5 @@ function typeguardsFactory() {
     };
 }
 
-export { typeguardsFactory };
-//# sourceMappingURL=typeguards.js.map
+export { typeGuardsFactory };
+//# sourceMappingURL=typeGuards.js.map

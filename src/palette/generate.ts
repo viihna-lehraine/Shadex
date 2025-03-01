@@ -81,7 +81,7 @@ export function generateHues(
 				return [];
 			}
 
-			const clonedColor = helpers.data.clone(color) as HSL;
+			const clonedColor = helpers.data.deepClone(color) as HSL;
 
 			switch (options.paletteType) {
 				case 'analogous':

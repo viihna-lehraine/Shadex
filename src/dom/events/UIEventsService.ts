@@ -112,7 +112,7 @@ export class UIEventsService implements UIEventsContract {
 			EventManager.add(document, 'keydown', ((event: KeyboardEvent) => {
 				if (event.key === 'Escape') {
 					this.#helpers.dom
-						.getAllElements(classes.modal)
+						.getAllElements(`.${classes.modal}`)
 						.forEach(modal => modal.classList.add(classes.hidden));
 				}
 			}) as EventListener);

@@ -26,10 +26,10 @@ async function initializePaletteEventsService(domStore, helpers, paletteRenderer
         return paletteEvents;
     }, 'Error initializing events');
 }
-async function initializePaletteStateService(services, stateManager) {
+async function initializePaletteStateService(helpers, services, stateManager, utils) {
     const { errors } = services;
     return await errors.handleAsync(async () => {
-        const palettestate = PaletteStateService.getInstance(services, stateManager);
+        const palettestate = PaletteStateService.getInstance(helpers, services, stateManager, utils);
         return palettestate;
     }, 'Error initializing PaletteState');
 }

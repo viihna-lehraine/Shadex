@@ -6,7 +6,7 @@ import '../../../../config/partials/regex.js';
 const classes = domIndex.classes;
 const ids = domIndex.ids;
 function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
-    const { data: { clone }, dom: { getElement, getAllElements } } = helpers;
+    const { data: { deepClone }, dom: { getElement, getAllElements } } = helpers;
     const { errors, log } = services;
     function createTooltip(element, text) {
         return errors.handleSync(() => {
@@ -156,7 +156,7 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
                 log.warn('Document not ready. Returning empty array.', `domUtils > scanPaletteColumns`);
                 return [];
             }
-            const paletteColumns = getAllElements(classes.paletteColumn);
+            const paletteColumns = getAllElements(`.${classes.paletteColumn}`);
             if (!paletteColumns.length) {
                 log.warn('No palette columns found.', `domUtils > scanPaletteColumns`);
                 return [];
@@ -190,8 +190,8 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
                     log.error('Cannot convert from XYZ to another color space.', `domUtils > switchColorSpaceInDOM`);
                     continue;
                 }
-                const clonedColor = clone(colorValues);
-                if (!helpers.typeguards.isConvertibleColor(clonedColor)) {
+                const clonedColor = deepClone(colorValues);
+                if (!helpers.typeGuards.isConvertibleColor(clonedColor)) {
                     log.error('Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.', `domUtils > switchColorSpaceInDOM`);
                     continue;
                 }

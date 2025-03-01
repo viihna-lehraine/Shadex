@@ -35,9 +35,9 @@ export const colorHelpersFactory = (helpers: Helpers): ColorHelpers =>
 		},
 		hueToRGB(p: number, q: number, t: number): number {
 			try {
-				const clonedP = helpers.data.clone(p);
-				const clonedQ = helpers.data.clone(q);
-				let clonedT = helpers.data.clone(t);
+				const clonedP = helpers.data.deepClone(p);
+				const clonedQ = helpers.data.deepClone(q);
+				let clonedT = helpers.data.deepClone(t);
 				if (clonedT < 0) clonedT += 1;
 				if (clonedT > 1) clonedT -= 1;
 				if (clonedT < 1 / 6) return clonedP + (clonedQ - clonedP) * 6 * clonedT;

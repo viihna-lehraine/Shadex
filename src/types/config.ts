@@ -219,6 +219,9 @@ export interface Configuration {
 			readonly verbosity: 0 | 1 | 2 | 3 | 4 | 5;
 			readonly warn: boolean;
 		};
+		readonly logExecution: {
+			readonly deepClone: boolean;
+		};
 		readonly showAlerts: boolean;
 		readonly stackTrace: boolean;
 	};
@@ -693,7 +696,6 @@ export type AppModeData = 'dev' | 'prod';
 
 export interface State {
 	readonly appMode: 'edit' | 'export' | 'preview';
-	readonly paletteHistory: Palette[];
 	readonly paletteContainer: {
 		readonly columns: {
 			readonly id: number;
@@ -759,8 +761,6 @@ export interface UnbrandedPalette {
 //// ********************* 13. GENERICS ***************************
 /// ****************************************************************
 // ******************************************************************
-
-export type Listener<T> = (newValue: T, oldValue: T) => void;
 
 // ***********************************************************
 /// *********************************************************

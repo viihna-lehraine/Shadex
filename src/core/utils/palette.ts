@@ -35,14 +35,14 @@ export function paletteUtilitiesFactory(
 	validate: ValidationUtilities
 ): PaletteUtilities {
 	const {
-		data: { clone },
+		data: { deepClone },
 		dom: { getElement }
 	} = helpers;
 	const { errors, log } = services;
 
 	function createPaletteItem(color: HSL, itemID: number): PaletteItem {
 		return errors.handleSync(() => {
-			const clonedColor = clone(color) as HSL;
+			const clonedColor = deepClone(color) as HSL;
 
 			return {
 				itemID,
@@ -141,7 +141,7 @@ export function paletteUtilitiesFactory(
 
 	function generateAllColorValues(color: HSL): AllColors {
 		return errors.handleSync(() => {
-			const clonedColor = clone(color);
+			const clonedColor = deepClone(color);
 
 			if (!validate.colorValue(clonedColor)) {
 				log.error(
@@ -205,7 +205,7 @@ export function paletteUtilitiesFactory(
 				);
 			}
 
-			if (!helpers.typeguards.isPaletteType(paletteTypeElement!.value)) {
+			if (!helpers.typeGuards.isPaletteType(paletteTypeElement!.value)) {
 				log.warn(
 					`Invalid palette type: ${paletteTypeElement!.value}.`,
 					`utils.palette.getPaletteOptionsFromUI`
@@ -300,7 +300,7 @@ export function paletteUtilitiesFactory(
 				return false;
 			}
 
-			return clone(hsl).value.lightness < paletteConfig.thresholds.dark;
+			return deepClone(hsl).value.lightness < paletteConfig.thresholds.dark;
 		}, 'Error occurred while checking if HSL is too dark');
 	}
 
@@ -315,7 +315,7 @@ export function paletteUtilitiesFactory(
 				return false;
 			}
 
-			return clone(hsl).value.saturation < paletteConfig.thresholds.gray;
+			return deepClone(hsl).value.saturation < paletteConfig.thresholds.gray;
 		}, 'Error occurred while checking if HSL is too gray');
 	}
 
@@ -330,7 +330,7 @@ export function paletteUtilitiesFactory(
 				return false;
 			}
 
-			return clone(hsl).value.lightness > paletteConfig.thresholds.light;
+			return deepClone(hsl).value.lightness > paletteConfig.thresholds.light;
 		}, 'Error occurred while checking if HSL is too light');
 	}
 

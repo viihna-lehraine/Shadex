@@ -14,9 +14,9 @@ const colorHelpersFactory = (helpers) => ({
     },
     hueToRGB(p, q, t) {
         try {
-            const clonedP = helpers.data.clone(p);
-            const clonedQ = helpers.data.clone(q);
-            let clonedT = helpers.data.clone(t);
+            const clonedP = helpers.data.deepClone(p);
+            const clonedQ = helpers.data.deepClone(q);
+            let clonedT = helpers.data.deepClone(t);
             if (clonedT < 0)
                 clonedT += 1;
             if (clonedT > 1)

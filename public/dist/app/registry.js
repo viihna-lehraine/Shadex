@@ -18,14 +18,14 @@ async function registerDependencies(helpers, services) {
         const domStore = await initializeDOMStore(helpers, services);
         const { initializeStateManager } = await import('./init.js');
         const stateManager = await initializeStateManager(helpers, services, utils);
-        const { initializePaletteStateService } = await import('./init.js');
-        const paletteState = await initializePaletteStateService(services, stateManager);
         const { generateHuesFnGroup } = await import('../palette/partials/hues.js');
         const { generatePaletteFnGroup } = await import('../palette/partials/types.js');
         const { generatePalette } = await import('../palette/generate.js');
         const paletteRenderer = PaletteRendererService.getInstance(common, domStore, generateHuesFnGroup, generatePaletteFnGroup, generatePalette, stateManager);
         const { initializeEventManager } = await import('./init.js');
         const eventManager = await initializeEventManager(services);
+        const { initializePaletteStateService } = await import('./init.js');
+        const paletteState = await initializePaletteStateService(helpers, services, stateManager, utils);
         const { initializePaletteEventsService } = await import('./init.js');
         const paletteEvents = await initializePaletteEventsService(domStore, helpers, paletteRenderer, paletteState, services, stateManager, utils);
         const { initializeUIEventsService } = await import('./init.js');

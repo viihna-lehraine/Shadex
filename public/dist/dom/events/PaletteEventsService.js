@@ -1,4 +1,5 @@
 import { EventManager } from './EventManager.js';
+import { PaletteHistoryManager } from '../../palette/PaletteHistoryManager.js';
 import '../../config/partials/defaults.js';
 import { domConfig, domIndex } from '../../config/partials/dom.js';
 import '../../config/partials/regex.js';
@@ -13,6 +14,7 @@ class PaletteEventsService {
     #errors;
     #helpers;
     #log;
+    #paletteHistory;
     #paletteRenderer;
     #paletteState;
     #stateManager;
@@ -28,6 +30,7 @@ class PaletteEventsService {
             this.#paletteRenderer = paletteRenderer;
             this.#paletteState = paletteState;
             this.#stateManager = stateManager;
+            this.#paletteHistory = PaletteHistoryManager.getInstance(helpers, services);
         }
         catch (error) {
             throw new Error(`[${caller} constructor]: ${error instanceof Error ? error.message : error}`);
@@ -155,8 +158,8 @@ class PaletteEventsService {
                         return;
                     const draggedID = parseInt(this.#draggedColumn.id.split('-').pop());
                     const targetID = parseInt(targetColumn.id.split('-').pop());
-                    const currentState = await this.#stateManager.getState();
-                    const updatedColumns = currentState.paletteContainer.columns
+                    const paletteContainer = this.#stateManager.get('paletteContainer');
+                    const updatedColumns = paletteContainer.columns
                         .map(col => {
                         if (col.id === draggedID)
                             return { ...col, position: targetID };
@@ -167,7 +170,7 @@ class PaletteEventsService {
                         .sort((a, b) => a.position - b.position);
                     await this.#stateManager.batchUpdate({
                         paletteContainer: {
-                            ...currentState.paletteContainer,
+                            ...paletteContainer,
                             columns: updatedColumns
                         }
                     });
@@ -190,7 +193,7 @@ class PaletteEventsService {
     // initialiezs column positions on page load
     async initializeColumnPositions() {
         return this.#errors.handleAsync(async () => {
-            const paletteColumns = this.#helpers.dom.getAllElements(classes.paletteColumn);
+            const paletteColumns = this.#helpers.dom.getAllElements(`.${classes.paletteColumn}`);
             // create updated column data based on DOM elements
             const updatedColumns = Array.from(paletteColumns).map((column, index) => ({
                 id: parseInt(column.id.split('-').pop() || '0'),
@@ -198,10 +201,10 @@ class PaletteEventsService {
                 position: index + 1,
                 size: column.offsetWidth
             }));
-            const currentState = await this.#stateManager.getState();
+            const paletteContainer = this.#stateManager.get('paletteContainer');
             await this.#stateManager.batchUpdate({
                 paletteContainer: {
-                    ...currentState.paletteContainer,
+                    ...paletteContainer,
                     columns: updatedColumns
                 }
             });
@@ -211,9 +214,9 @@ class PaletteEventsService {
     // renders column sizes based on stored state
     async renderColumnSizeChange() {
         return this.#errors.handleAsync(async () => {
-            const paletteColumns = this.#helpers.dom.getAllElements(classes.paletteColumn);
+            const paletteColumns = this.#helpers.dom.getAllElements(`.${classes.paletteColumn}`);
             // safely retrieve the latest state
-            const { paletteContainer } = await this.#stateManager.getState();
+            const paletteContainer = this.#stateManager.get('paletteContainer');
             // update DOM based on state
             paletteColumns.forEach(column => {
                 const columnID = parseInt(column.id.split('-').pop());
@@ -227,16 +230,15 @@ class PaletteEventsService {
     }
     async syncColumnColorsWithState() {
         return this.#errors.handleAsync(async () => {
-            const paletteColumns = this.#helpers.dom.getAllElements(classes.paletteColumn);
+            const paletteColumns = this.#helpers.dom.getAllElements(`${classes.paletteColumn}`);
             // retrieve the most recent palette from state
-            const { paletteHistory } = await this.#stateManager.getState();
-            const currentPalette = paletteHistory.at(-1);
+            const currentPalette = this.#paletteHistory.getCurrentPalette();
             if (!currentPalette?.items) {
                 this.#log.warn('No valid palette data found in history!', `${caller}.syncColumnColorsWithState`);
                 return;
             }
             const userPreference = localStorage.getItem('colorPreference') || 'hex';
-            const validColorSpace = this.#helpers.typeguards.isColorSpace(userPreference)
+            const validColorSpace = this.#helpers.typeGuards.isColorSpace(userPreference)
                 ? userPreference
                 : 'hex';
             // update each column's color based on state
@@ -281,8 +283,8 @@ class PaletteEventsService {
                         for (const node of mutation.addedNodes) {
                             if (node instanceof HTMLElement &&
                                 node.classList.contains(classes.paletteColumn)) {
-                                const state = await this.#stateManager.getState();
-                                if (!state.paletteContainer) {
+                                const paletteContainer = this.#stateManager.get('paletteContainer');
+                                if (!paletteContainer) {
                                     this.#log.warn('Skipping execution of initializeColumnPositions - State is not ready!', `${caller}.createPaletteObserver`);
                                     return;
                                 }
@@ -306,9 +308,9 @@ class PaletteEventsService {
     }
     async #handleColorInputChange(event, column, columnID) {
         return this.#errors.handleAsync(async () => {
-            const state = await this.#stateManager.getState();
+            const state = this.#stateManager.get();
             const newColor = event.target.value.trim();
-            if (!this.#utils.validate.userColorInput(newColor))
+            if (!this.#utils.validate.colorInput(newColor))
                 return;
             column.style.backgroundColor = newColor;
             const colorInput = this.#helpers.dom.getElement(`color-input-${columnID}`);
@@ -368,11 +370,11 @@ class PaletteEventsService {
                 window.removeEventListener('mousemove', onMouseMove);
                 window.removeEventListener('mouseup', onMouseUp);
                 const columnID = parseInt(column.id.split('-').pop());
-                const currentState = await this.#stateManager.getState();
+                const paletteContainer = this.#stateManager.get('paletteContainer');
                 await this.#stateManager.batchUpdate({
                     paletteContainer: {
-                        ...currentState.paletteContainer,
-                        columns: currentState.paletteContainer.columns.map(col => col.id === columnID ? { ...col, size: column.offsetWidth } : col)
+                        ...paletteContainer,
+                        columns: paletteContainer.columns.map(col => col.id === columnID ? { ...col, size: column.offsetWidth } : col)
                     }
                 });
                 this.#log.debug(`Resized column ${columnID} to ${column.offsetWidth}px`, `${caller}.#startResize`);

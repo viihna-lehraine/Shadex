@@ -2,11 +2,26 @@ import '../../config/partials/defaults.js';
 import { regex } from '../../config/partials/regex.js';
 
 // File: core/helpers/data.ts
-const dataHelpersFactory = () => ({
-    clone(value) {
+function dataHelpersFactory(typeGuards) {
+    const { isObject } = typeGuards;
+    function deepClone(value) {
+        if (!isObject(value))
+            return value;
         return structuredClone(value);
-    },
-    getCallerInfo: () => {
+    }
+    function deepFreeze(obj) {
+        if (!isObject(obj) || Object.isFrozen(obj)) {
+            return obj;
+        }
+        Object.keys(obj).forEach(key => {
+            const value = obj[key];
+            if (typeof value === 'object' && value !== null) {
+                deepFreeze(value);
+            }
+        });
+        return Object.freeze(obj);
+    }
+    function getCallerInfo() {
         const error = new Error();
         const stackLines = error.stack?.split('\n') ?? [];
         const skipPatterns = [
@@ -34,8 +49,8 @@ const dataHelpersFactory = () => ({
             }
         }
         return 'UNKNOWN CALLER';
-    },
-    getFormattedTimestamp() {
+    }
+    function getFormattedTimestamp() {
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -44,11 +59,13 @@ const dataHelpersFactory = () => ({
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    },
-    parseValue: (value) => typeof value === 'string' && value.endsWith('%')
-        ? parseFloat(value.slice(0, -1))
-        : Number(value),
-    async tracePromise(promise, label) {
+    }
+    function parseValue(value) {
+        return typeof value === 'string' && value.endsWith('%')
+            ? parseFloat(value.slice(0, -1))
+            : Number(value);
+    }
+    async function tracePromise(promise, label) {
         return promise
             .then(result => {
             console.log(`[TRACE SUCCESS] ${label}:`, result);
@@ -59,7 +76,16 @@ const dataHelpersFactory = () => ({
             throw error;
         });
     }
-});
+    const dataHelpers = {
+        deepClone,
+        deepFreeze,
+        getCallerInfo,
+        getFormattedTimestamp,
+        parseValue,
+        tracePromise
+    };
+    return dataHelpers;
+}
 
 export { dataHelpersFactory };
 //# sourceMappingURL=data.js.map

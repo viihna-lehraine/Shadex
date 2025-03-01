@@ -59,15 +59,19 @@ async function initializePaletteEventsService(
 }
 
 async function initializePaletteStateService(
+	helpers: Helpers,
 	services: Services,
-	stateManager: StateManager
+	stateManager: StateManager,
+	utils: Utilities
 ): Promise<PaletteStateService> {
 	const { errors } = services;
 
 	return await errors.handleAsync(async () => {
 		const palettestate = PaletteStateService.getInstance(
+			helpers,
 			services,
-			stateManager
+			stateManager,
+			utils
 		);
 
 		return palettestate;

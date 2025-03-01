@@ -14,7 +14,7 @@ const defaultSV = defaults.colors.sv;
 const defaultXYZ = defaults.colors.xyz;
 const math = config.math;
 function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitize, services, validate) {
-    const { color: { hueToRGB }, data: { clone } } = helpers;
+    const { color: { hueToRGB }, data: { deepClone } } = helpers;
     const { errors, log } = services;
     function cmykToHSL(cmyk) {
         return errors.handleSync(() => {
@@ -22,7 +22,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid CMYK value ${JSON.stringify(cmyk)}. Returning default HSL`, `utils.color.cmykToHSL`);
                 return defaultHSL;
             }
-            return rgbToHSL(cmykToRGB(clone(cmyk)));
+            return rgbToHSL(cmykToRGB(deepClone(cmyk)));
         }, 'Error converting CMYK to HSL');
     }
     function cmykToRGB(cmyk) {
@@ -31,7 +31,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid CMYK value ${JSON.stringify(cmyk)}. Returning default RGB.`, `utils.color.cmykToRGB`);
                 return defaultRGB;
             }
-            const clonedCMYK = clone(cmyk);
+            const clonedCMYK = deepClone(cmyk);
             const r = 255 *
                 (1 - clonedCMYK.value.cyan / 100) *
                 (1 - clonedCMYK.value.key / 100);
@@ -58,14 +58,14 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid color value ${JSON.stringify(color)}. Returning default HSL.`, `utils.color.convertHSL`);
                 return defaultHSL;
             }
-            const clonedColor = clone(color);
+            const clonedColor = deepClone(color);
             switch (colorSpace) {
                 case 'cmyk':
                     return hslToCMYK(clonedColor);
                 case 'hex':
                     return hslToHex(clonedColor);
                 case 'hsl':
-                    return clone(clonedColor);
+                    return deepClone(clonedColor);
                 case 'hsv':
                     return hslToHSV(clonedColor);
                 case 'lab':
@@ -89,14 +89,14 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid color value ${JSON.stringify(color)}. Returning default HSL`, `utils.color.convertToHSL`);
                 return defaultHSL;
             }
-            const clonedColor = clone(color);
+            const clonedColor = deepClone(color);
             switch (color.format) {
                 case 'cmyk':
                     return cmykToHSL(clonedColor);
                 case 'hex':
                     return hexToHSL(clonedColor);
                 case 'hsl':
-                    return clone(clonedColor);
+                    return deepClone(clonedColor);
                 case 'hsv':
                     return hsvToHSL(clonedColor);
                 case 'lab':
@@ -116,12 +116,12 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid Hex value ${JSON.stringify(hex)}. Returning default HSL`, `utils.color.hexToHSL`);
                 return defaultHSL;
             }
-            return rgbToHSL(hexToRGB(clone(hex)));
+            return rgbToHSL(hexToRGB(deepClone(hex)));
         }, 'Error converting Hex to HSL');
     }
     function hexToHSLWrapper(input) {
         return errors.handleSync(() => {
-            const clonedInput = clone(input);
+            const clonedInput = deepClone(input);
             const hex = typeof clonedInput === 'string'
                 ? {
                     value: {
@@ -144,7 +144,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid Hex value ${JSON.stringify(hex)}. Returning default RGB`, `utils.color.hexToRGB`);
                 return defaultRGB;
             }
-            const clonedHex = clone(hex);
+            const clonedHex = deepClone(hex);
             const strippedHex = format.stripHashFromHex(clonedHex).value.hex;
             const bigint = parseInt(strippedHex, 16);
             return {
@@ -163,7 +163,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default CMYK.`, `utils.color.hslToCMYK`);
                 return defaultCMYK;
             }
-            return rgbToCMYK(hslToRGB(clone(hsl)));
+            return rgbToCMYK(hslToRGB(deepClone(hsl)));
         }, 'Error converting HSL to CMYK');
     }
     function hslToHex(hsl) {
@@ -172,7 +172,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default Hex`, `utils.color.hslToHex`);
                 return defaultHex;
             }
-            return rgbToHex(hslToRGB(clone(hsl)));
+            return rgbToHex(hslToRGB(deepClone(hsl)));
         }, 'Error converting HSL to Hex');
     }
     function hslToHSV(hsl) {
@@ -181,7 +181,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default HSV`, `utils.color.hslToHSV`);
                 return defaultHSV;
             }
-            const clonedHSL = clone(hsl);
+            const clonedHSL = deepClone(hsl);
             const s = clonedHSL.value.saturation / 100;
             const l = clonedHSL.value.lightness / 100;
             const value = l + s * Math.min(l, 1 - 1);
@@ -202,7 +202,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default LAB`, `utils.color.hslToLAB`);
                 return defaultLAB;
             }
-            return xyzToLAB(rgbToXYZ(hslToRGB(clone(hsl))));
+            return xyzToLAB(rgbToXYZ(hslToRGB(deepClone(hsl))));
         }, 'Error converting HSL to LAB');
     }
     function hslToRGB(hsl) {
@@ -211,7 +211,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default RGB`, `utils.color.hslToRGB`);
                 return defaultRGB;
             }
-            const clonedHSL = clone(hsl);
+            const clonedHSL = deepClone(hsl);
             const hue = clonedHSL.value.hue / 360;
             const s = clonedHSL.value.saturation / 100;
             const l = clonedHSL.value.lightness / 100;
@@ -248,7 +248,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default SV`, `utils.color.hslToSV`);
                 return defaultSV;
             }
-            return hsvToSV(rgbToHSV(hslToRGB(clone(hsl))));
+            return hsvToSV(rgbToHSV(hslToRGB(deepClone(hsl))));
         }, 'Error converting HSL to SV');
     }
     function hslToXYZ(hsl) {
@@ -257,7 +257,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default HSL.`, `utils.color.hslToXYZ`);
                 return defaultXYZ;
             }
-            return labToXYZ(hslToLAB(clone(hsl)));
+            return labToXYZ(hslToLAB(deepClone(hsl)));
         }, 'Error converting HSL to XYZ');
     }
     function hsvToHSL(hsv) {
@@ -266,7 +266,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid HSV value ${JSON.stringify(hsv)}. Returning default HSL`, `utils.color.hsvToHSL`);
                 return defaultHSL;
             }
-            const clonedHSV = clone(hsv);
+            const clonedHSV = deepClone(hsv);
             const s = clonedHSV.value.saturation / 100;
             const v = clonedHSV.value.value / 100;
             const l = v * (1 - s / 2);
@@ -303,7 +303,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid LAB value ${JSON.stringify(lab)}. Returning default HSL.`, `utils.color.labToHSL`);
                 return defaultHSL;
             }
-            return rgbToHSL(labToRGB(clone(lab)));
+            return rgbToHSL(labToRGB(deepClone(lab)));
         }, 'Error converting LAB to HSL');
     }
     function labToRGB(lab) {
@@ -312,7 +312,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid LAB value ${JSON.stringify(lab)}. . Returning default RGB.`, `utils.color.labToRGB`);
                 return defaultRGB;
             }
-            return xyzToRGB(labToXYZ(clone(lab)));
+            return xyzToRGB(labToXYZ(deepClone(lab)));
         }, 'Error converting LAB to RGB');
     }
     function labToXYZ(lab) {
@@ -321,7 +321,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid LAB value ${JSON.stringify(lab)}. Returning default XYZ.`, `utils.color.labToXYZ`);
                 return defaultXYZ;
             }
-            const clonedLAB = clone(lab);
+            const clonedLAB = deepClone(lab);
             const refX = 95.047, refY = 100.0, refZ = 108.883;
             let y = (clonedLAB.value.l + 16) / 116;
             let x = clonedLAB.value.a / 500 + y;
@@ -343,17 +343,36 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid RGB value ${JSON.stringify(rgb)}.. Returning default CMYK`, `utils.color.rgbToCMYK`);
                 return defaultCMYK;
             }
-            const clonedRGB = clone(rgb);
+            const clonedRGB = deepClone(rgb);
             const redPrime = clonedRGB.value.red / 255;
             const greenPrime = clonedRGB.value.green / 255;
             const bluePrime = clonedRGB.value.blue / 255;
-            const key = sanitize.percentile(sanitize.percentile(1 - Math.max(redPrime, greenPrime, bluePrime)));
-            const cyan = sanitize.percentile(sanitize.percentile((1 - redPrime - key) / (1 - key) || 0));
-            const magenta = sanitize.percentile(sanitize.percentile((1 - greenPrime - key) / (1 - key) || 0));
-            const yellow = sanitize.percentile(sanitize.percentile((1 - bluePrime - key) / (1 - key) || 0));
-            const format = 'cmyk';
-            const cmyk = { value: { cyan, magenta, yellow, key }, format };
-            log.info(`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(clone(cmyk))}`, `utils.color.rgbToCMYK`);
+            const key = 1 - Math.max(redPrime, greenPrime, bluePrime);
+            if (key === 1) {
+                return {
+                    value: {
+                        cyan: brand.asPercentile(0),
+                        magenta: brand.asPercentile(0),
+                        yellow: brand.asPercentile(0),
+                        key: brand.asPercentile(1)
+                    },
+                    format: 'cmyk'
+                };
+            }
+            const invK = 1 - key;
+            const cyan = (1 - redPrime - key) / invK;
+            const magenta = (1 - greenPrime - key) / invK;
+            const yellow = (1 - bluePrime - key) / invK;
+            const cmyk = {
+                value: {
+                    cyan: sanitize.percentile(brand.asPercentile(cyan)),
+                    magenta: sanitize.percentile(brand.asPercentile(magenta)),
+                    yellow: sanitize.percentile(brand.asPercentile(yellow)),
+                    key: sanitize.percentile(brand.asPercentile(key))
+                },
+                format: 'cmyk'
+            };
+            log.info(`Converted RGB ${JSON.stringify(clonedRGB)} to CMYK: ${JSON.stringify(deepClone(cmyk))}`, `utils.color.rgbToCMYK`);
             return cmyk;
         }, 'Error converting RGB to CMYK');
     }
@@ -363,7 +382,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid RGB value ${JSON.stringify(rgb)}. . Returning default Hex.`, `utils.color.rgbToHex`);
                 return defaultHex;
             }
-            const clonedRGB = clone(rgb);
+            const clonedRGB = deepClone(rgb);
             if ([clonedRGB.value.red, clonedRGB.value.green, clonedRGB.value.blue].some(v => isNaN(v) || v < 0 || v > 255)) {
                 log.info(`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}\nReturning default Hex.`, `utils.color.rgbToHex`);
                 return defaultHex;
@@ -382,7 +401,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid RGB value ${JSON.stringify(rgb)}. Returning default HSL.`, `utils.color.rgbToHSL`);
                 return defaultHSL;
             }
-            const clonedRGB = clone(rgb);
+            const clonedRGB = deepClone(rgb);
             const red = clonedRGB.value.red / 255;
             const green = clonedRGB.value.green / 255;
             const blue = clonedRGB.value.blue / 255;
@@ -487,7 +506,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid XYZ value ${JSON.stringify(xyz)}. Returning default HSL.`, `utils.color.xyzToHSL`);
                 return defaultHSL;
             }
-            return rgbToHSL(xyzToRGB(clone(xyz)));
+            return rgbToHSL(xyzToRGB(deepClone(xyz)));
         }, 'Error converting XYZ to HSL');
     }
     function xyzToLAB(xyz) {
@@ -496,7 +515,7 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 log.info(`Invalid XYZ value ${JSON.stringify(xyz)}. Returning default LAB.`, `utils.color.xyzToLAB`);
                 return defaultLAB;
             }
-            const clonedXYZ = clone(xyz);
+            const clonedXYZ = deepClone(xyz);
             const refX = math.maxXYZ_X, refY = math.maxXYZ_Y, refZ = math.maxXYZ_Z;
             clonedXYZ.value.x = adjust.normalizeXYZ(clonedXYZ.value.x, refX);
             clonedXYZ.value.y = adjust.normalizeXYZ(clonedXYZ.value.y, refY);

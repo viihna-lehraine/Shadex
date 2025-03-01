@@ -30,12 +30,12 @@ class StateFactory {
     }
     createInitialState() {
         return (this.#errors.handleAsync(async () => {
-            this.#log.debug('Generating initial state.', `${caller}.#generateInitialState`);
+            this.#log.debug('Generating initial state.', `${caller}.createInitialState`);
             const columns = this.#utils.dom.scanPaletteColumns() ?? [];
             if (!columns) {
-                this.#log.error('No palette columns found!', `${caller}.#generateInitialState`);
+                this.#log.error('No palette columns found!', `${caller}.createInitialState`);
             }
-            this.#log.debug(`Scanned palette columns.`, `${caller}.#generateInitialState`);
+            this.#log.debug(`Scanned palette columns.`, `${caller}.createInitialState`);
             return {
                 appMode: 'edit',
                 paletteContainer: { columns },
@@ -54,7 +54,8 @@ class StateFactory {
                 },
                 timestamp: this.#helpers.data.getFormattedTimestamp()
             };
-        }, `[${caller}]: Failed to generate initial state`) ?? {});
+        }, `[${caller}.createInitialState]: Failed to generate initial state`) ??
+            {});
     }
 }
 

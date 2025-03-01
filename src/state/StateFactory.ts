@@ -67,7 +67,7 @@ export class StateFactory implements StateFactoryContract {
 			this.#errors.handleAsync(async () => {
 				this.#log.debug(
 					'Generating initial state.',
-					`${caller}.#generateInitialState`
+					`${caller}.createInitialState`
 				);
 
 				const columns = this.#utils.dom.scanPaletteColumns() ?? [];
@@ -75,13 +75,13 @@ export class StateFactory implements StateFactoryContract {
 				if (!columns) {
 					this.#log.error(
 						'No palette columns found!',
-						`${caller}.#generateInitialState`
+						`${caller}.createInitialState`
 					);
 				}
 
 				this.#log.debug(
 					`Scanned palette columns.`,
-					`${caller}.#generateInitialState`
+					`${caller}.createInitialState`
 				);
 
 				return {
@@ -102,7 +102,8 @@ export class StateFactory implements StateFactoryContract {
 					},
 					timestamp: this.#helpers.data.getFormattedTimestamp()
 				};
-			}, `[${caller}]: Failed to generate initial state`) ?? ({} as State)
+			}, `[${caller}.createInitialState]: Failed to generate initial state`) ??
+			({} as State)
 		);
 	}
 }

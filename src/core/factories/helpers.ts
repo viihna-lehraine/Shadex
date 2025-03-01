@@ -13,7 +13,7 @@ export async function helpersFactory(): Promise<Helpers> {
 		{ mathHelpersFactory },
 		{ randomHelpersFactory },
 		{ timeHelpersFactory },
-		{ typeguardsFactory }
+		{ typeGuardsFactory }
 	] = await Promise.all([
 		import('../helpers/color.js'),
 		import('../helpers/data.js'),
@@ -21,15 +21,17 @@ export async function helpersFactory(): Promise<Helpers> {
 		import('../helpers/math.js'),
 		import('../helpers/random.js'),
 		import('../helpers/time.js'),
-		import('../helpers/typeguards.js')
+		import('../helpers/typeGuards.js')
 	]);
 
-	helpers.data = dataHelpersFactory();
+	const typeGuards = typeGuardsFactory();
+
+	helpers.data = dataHelpersFactory(typeGuards);
 	helpers.dom = domHelpersFactory();
 	helpers.math = mathHelpersFactory();
 	helpers.random = randomHelpersFactory();
 	helpers.time = timeHelpersFactory();
-	helpers.typeguards = typeguardsFactory();
+	helpers.typeGuards = typeGuards;
 	helpers.color = colorHelpersFactory(helpers);
 
 	console.log(`[HELPERS_FACTORY]: Helpers creation complete.`);

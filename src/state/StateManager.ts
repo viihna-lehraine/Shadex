@@ -2,15 +2,13 @@
 
 import {
 	Helpers,
-	Palette,
+	History,
 	Services,
 	State,
 	StateManagerContract,
 	Utilities
 } from '../types/index.js';
 import { StateFactory } from './StateFactory.js';
-import { StateHistoryService } from './StateHistoryService.js';
-import { StateStore } from './StateStore.js';
 import { StorageManager } from '../storage/StorageManager.js';
 import { env } from '../config/index.js';
 
@@ -23,10 +21,16 @@ export class StateManager implements StateManagerContract {
 
 	#state: State;
 	#stateFactory: StateFactory;
-	#stateHistory: StateHistoryService;
 	#storage!: StorageManager;
-	#store!: StateStore;
 
+	#history: History = [];
+	#redoStack: History = [];
+	#undoStack: History = [];
+
+	#debouncedSave!: (state: State) => void;
+	#deepClone: Helpers['data']['deepClone'];
+	#deepFreeze: Helpers['data']['deepFreeze'];
+	#debounce: Helpers['time']['debounce'];
 	#log: Services['log'];
 	#errors: Services['errors'];
 
@@ -37,15 +41,16 @@ export class StateManager implements StateManagerContract {
 				`${caller} constructor`
 			);
 
+			this.#deepClone = helpers.data.deepClone;
+			this.#deepFreeze = helpers.data.deepFreeze;
+			this.#debounce = helpers.time.debounce;
 			this.#log = services.log;
 			this.#errors = services.errors;
 
 			this.#state = {} as State;
-
 			this.#stateFactory = StateFactory.getInstance(helpers, services, utils);
-			this.#stateHistory = StateHistoryService.getInstance(helpers, services);
 
-			this.init(helpers, services).catch(error => {
+			this.init(services).catch(error => {
 				this.#log.error('StateManager init failed.', `${caller} constructor`);
 
 				console.error(error);
@@ -81,35 +86,55 @@ export class StateManager implements StateManagerContract {
 		}, `[${caller}]: Error getting StateManager instance.`);
 	}
 
-	async init(helpers: Helpers, services: Services): Promise<void> {
+	async init(services: Services): Promise<void> {
 		return this.#errors.handleAsync(async () => {
 			this.#log.debug('Initializing State Manager.', `${caller}.init`);
 
 			this.#storage = await StorageManager.getInstance(services);
-
-			this.#store = StateStore.getInstance(
-				this.#state,
-				helpers,
-				services,
-				this.#storage
+			this.#debouncedSave = this.#debounce<(state: State) => void>(
+				(state: State) => this.saveState(state),
+				env.state.saveThrottleDelay
 			);
 
 			this.#state = await this.loadState();
-		}, `[${caller}]: Failed to initialize State Manager.`);
-	}
 
-	addPaletteToHistory(palette: Palette): void {
-		this.#stateHistory.addPaletteToHistory(this.#state, palette);
+			console.log(`[${caller}.init]: State after loadState():`, this.#state);
 
-		this.#log.debug(
-			`Added palette to history.`,
-			`${caller}.addPaletteToHistory`
-		);
+			this.saveState();
+		}, `[${caller}.init]: Failed to initialize State Manager.`);
 	}
 
 	async batchUpdate(updates: Partial<State>): Promise<void> {
-		await this.#store.batchUpdate(updates);
-		this.#log.debug('Performed batch update.', `${caller}.batchUpdate`);
+		this.#errors.handleSync(() => {
+			const currentState = this.#deepClone(this.get() as State);
+
+			const isShallowEqual = Object.keys(updates).every(key =>
+				Object.is(currentState[key as keyof State], updates[key as keyof State])
+			);
+
+			if (isShallowEqual) {
+				this.#log.debug(
+					'Skipping redundant batch update.',
+					`${caller}.batchUpdate`
+				);
+				return;
+			}
+
+			const newState = { ...currentState, ...updates };
+			this.#commitState(newState);
+
+			this.#log.debug(`Batch updated state.`, `${caller}.batchUpdate`);
+		}, `[${caller}.batchUpdate]: Failed to perform batch update`);
+	}
+
+	clearHistory(): void {
+		this.#errors.handleSync(() => {
+			this.#history = [];
+			this.#redoStack = [];
+			this.#undoStack = [];
+
+			this.#log.info(`History and undo stack cleared.`, `${caller}.clear`);
+		}, `[${caller}.clearHistory]: Failed to clear history.`);
 	}
 
 	async ensureStateReady(): Promise<void> {
@@ -145,123 +170,164 @@ export class StateManager implements StateManagerContract {
 		);
 	}
 
-	async getState(): Promise<State> {
-		return this.#store.getState();
+	get<K extends keyof State>(key?: K): State | State[K] {
+		return this.#errors.handleSync(
+			() => {
+				const latestState = this.#history.at(-1) ?? this.#state;
+				return key ? latestState[key] : latestState;
+			},
+			`[${caller}.get]: Failed to retrieve state key: ${String(key)}`
+		);
 	}
 
 	async loadState(): Promise<State> {
-		const loadedState = await this.#store.loadState();
-
-		if (loadedState) {
-			this.#log.info('State loaded from storage.', `${caller}.loadState`);
-
-			return loadedState;
-		}
-
-		this.#log.info(
-			`State not found in storage. Creating initial state via State Factory.`,
-			`${caller}.loadState`
-		);
-
-		return await this.#stateFactory.createInitialState();
+		return this.#errors.handleAsync(async () => {
+			const loadedState = await this.#storage.getItem<State>('state');
+			if (loadedState) {
+				this.#state = this.#deepFreeze(this.#deepClone(loadedState));
+				this.#log.info('State loaded from storage.', `${caller}.loadState`);
+				return this.#state;
+			}
+			this.#log.debug(
+				'No saved state found. Creating initial state.',
+				`${caller}.loadState`
+			);
+			return await this.#stateFactory.createInitialState();
+		}, `[${caller}.loadState]: Failed to load state.`);
 	}
 
 	redo(): State | null {
-		const nextState = this.#stateHistory.redo();
+		return this.#errors.handleSync(() => {
+			if (this.#redoStack.length === 0) {
+				this.#log.info('No redo actions available.', `StateManager.redo`);
+				return null;
+			}
 
-		if (!nextState) return null;
+			const newState = this.#redoStack.pop()!;
+			this.#commitState(newState);
 
-		this.#store.batchUpdate(nextState);
+			this.#log.debug(`Redo performed.`, `StateManager.redo`);
+			return newState;
+		}, `[${caller}.redo]: Failed to redo action.`);
+	}
 
-		this.#log.info('Redo performed.', `${caller}.redo`);
-
-		return nextState;
+	async replaceState(newState: State): Promise<void> {
+		return this.#errors.handleAsync(async () => {
+			this.#trackAction();
+			this.#commitState(newState);
+			this.#log.info('State replaced.', `${caller}.replaceState`);
+		}, `[${caller}.replaceState]: Failed to set new state.`);
 	}
 
 	async resetState(): Promise<void> {
 		const initialState = await this.#stateFactory.createInitialState();
 
-		await this.setState(initialState, false);
-		await this.saveState();
+		this.#commitState(initialState);
 
 		this.#log.info('State has been reset.', `${caller}.resetState`);
 	}
 
-	async saveState(): Promise<void> {
-		return await this.#errors.handleAsync(async () => {
-			await this.#store.saveState(this.#state);
+	async saveState(
+		state: State = this.#state,
+		options: { throttle?: boolean } = {}
+	): Promise<void> {
+		return this.#errors.handleAsync(async () => {
+			if (Object.is(this.#state, state)) {
+				this.#log.debug('Skipping redundant save.', `${caller}.saveState`);
 
-			this.#log.info('State saved to storage.', `${caller}.saveState`);
-		}, `[${caller}]: Failed to save state`);
-	}
+				return;
+			}
 
-	async setState(newState: State, track: boolean = true): Promise<void> {
-		if (track) this.#trackAction();
-
-		await this.#store.batchUpdate(newState);
-
-		this.#log.info('State replaced.', `${caller}.setState`);
+			if (options.throttle) {
+				this.#debouncedSave(state);
+			} else {
+				await this.#saveOperation(state);
+			}
+		}, `[${caller}.saveState]: Failed to save state.`);
 	}
 
 	undo(): State | null {
-		const previousState = this.#stateHistory.undo(this.#store.getState());
-
-		if (!previousState) return null;
-
-		this.#store.batchUpdate(previousState);
-
-		this.#log.info('Undo performed.', `${caller}.undo`);
-
-		return previousState;
-	}
-
-	updatePaletteColumns(
-		columns: State['paletteContainer']['columns'],
-		track = true
-	): void {
-		if (track) this.#trackAction();
-
-		this.#store.batchUpdate({
-			paletteContainer: {
-				...this.#store.get('paletteContainer'),
-				columns
+		return this.#errors.handleSync(() => {
+			if (this.#undoStack.length <= 1) {
+				this.#log.info('No undo actions available.', `StateManager.undo`);
+				return null;
 			}
-		});
 
-		this.#log.debug(
-			'Palette columns updated.',
-			`${caller}.updatePaletteColumns`
-		);
+			this.#redoStack.push(this.get() as State);
+			this.#undoStack.pop();
+
+			const newState = this.#undoStack.at(-1)!;
+			this.#commitState(newState);
+
+			this.#log.debug(`Undo performed.`, `StateManager.undo`);
+			return newState;
+		}, `[StateManager.undo]: Failed to undo action.`);
 	}
 
-	async updatePaletteHistory(
-		updatedHistory: Palette[],
-		track: boolean
-	): Promise<void> {
-		if (track) this.#trackAction();
+	#commitState(newState: State): void {
+		this.#errors.handleSync(() => {
+			const committedState = this.#deepFreeze(this.#deepClone(newState));
 
-		await this.#store.batchUpdate({ paletteHistory: updatedHistory });
+			this.#history.push(committedState);
+			if (this.#history.length > env.app.historyLimit) {
+				this.#history.shift();
+			}
 
-		this.#log.debug(
-			`Updated palette history.`,
-			`${caller}.updatePaletteHistory`
-		);
+			this.#state = committedState;
+
+			this.#log.debug(
+				`Committed new state to history.`,
+				`${caller}.commitState`
+			);
+			this.saveState();
+		}, `[${caller}.commitState]: Failed to commit new state.`);
 	}
 
-	async updateSelections(
-		selections: Partial<State['selections']>,
-		track: boolean
-	): Promise<void> {
-		if (track) this.#trackAction();
+	async #saveOperation(state: State): Promise<void> {
+		return this.#errors.handleAsync(async () => {
+			for (let attempt = 1; attempt <= env.state.maxSaveRetries; attempt++) {
+				try {
+					await this.#storage.setItem('state', state);
 
-		await this.#store.batchUpdate({
-			selections: { ...this.#store.get('selections'), ...selections }
-		});
+					this.#log.info(
+						`State saved successfully on attempt ${attempt}.`,
+						`${caller}.#saveOperation`
+					);
 
-		this.#log.debug('Selections updated.', `${caller}.updateSelections`);
+					break;
+				} catch (err) {
+					if (attempt < env.state.maxSaveRetries) {
+						this.#log.warn(
+							`Save attempt ${attempt} failed. Retrying...`,
+							`${caller}.#saveOperation`
+						);
+					} else {
+						this.#log.error(
+							'Max save attempts reached. Save failed.',
+							`${caller}.#saveOperation`
+						);
+					}
+				}
+			}
+		}, `[${caller}.#saveOperation]: Save operation failed.`);
 	}
 
 	#trackAction(): void {
-		this.#stateHistory.trackAction(this.#state);
+		this.#errors.handleSync(() => {
+			const clonedState = this.#deepFreeze(this.#deepClone(this.#state));
+
+			this.#history.push(clonedState);
+			this.#undoStack.push(clonedState);
+			this.#redoStack = [];
+
+			if (this.#history.length > env.app.historyLimit) {
+				this.#history.shift();
+			}
+
+			this.#log.debug(
+				`Tracked new action in history.`,
+				`${caller}.trackAction`
+			);
+		}, `[${caller}.trackAction]: Tracking failed.`);
 	}
 }

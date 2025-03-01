@@ -6,11 +6,11 @@ import '../../config/partials/regex.js';
 // File: core/utils/palette.ts
 const ids = domIndex.ids;
 function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, validate) {
-    const { data: { clone }, dom: { getElement } } = helpers;
+    const { data: { deepClone }, dom: { getElement } } = helpers;
     const { errors, log } = services;
     function createPaletteItem(color, itemID) {
         return errors.handleSync(() => {
-            const clonedColor = clone(color);
+            const clonedColor = deepClone(color);
             return {
                 itemID,
                 colors: {
@@ -76,7 +76,7 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
     }
     function generateAllColorValues(color) {
         return errors.handleSync(() => {
-            const clonedColor = clone(color);
+            const clonedColor = deepClone(color);
             if (!validate.colorValue(clonedColor)) {
                 log.error(`Invalid color: ${JSON.stringify(clonedColor)}`, `utils.palette.generateAllColorValues`);
                 throw new Error('Invalid HSL color provided');
@@ -111,7 +111,7 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
             if (!limitDarkChkbx || !limitGrayChkbx || !limitLightChkbx) {
                 log.warn(`One or more checkboxes not found`, `utils.palette.getPaletteOptionsFromUI`);
             }
-            if (!helpers.typeguards.isPaletteType(paletteTypeElement.value)) {
+            if (!helpers.typeGuards.isPaletteType(paletteTypeElement.value)) {
                 log.warn(`Invalid palette type: ${paletteTypeElement.value}.`, `utils.palette.getPaletteOptionsFromUI`);
             }
             return {
@@ -178,7 +178,7 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
                 log.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `utils.palette.isHSLTooDark`);
                 return false;
             }
-            return clone(hsl).value.lightness < paletteConfig.thresholds.dark;
+            return deepClone(hsl).value.lightness < paletteConfig.thresholds.dark;
         }, 'Error occurred while checking if HSL is too dark');
     }
     function isHSLTooGray(hsl) {
@@ -187,7 +187,7 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
                 log.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `utils.palette.isHSLTooGray`);
                 return false;
             }
-            return clone(hsl).value.saturation < paletteConfig.thresholds.gray;
+            return deepClone(hsl).value.saturation < paletteConfig.thresholds.gray;
         }, 'Error occurred while checking if HSL is too gray');
     }
     function isHSLTooLight(hsl) {
@@ -196,7 +196,7 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
                 log.error('Invalid HSL value ${JSON.stringify(hsl)}', `utils.palette.isHSLTooLight`);
                 return false;
             }
-            return clone(hsl).value.lightness > paletteConfig.thresholds.light;
+            return deepClone(hsl).value.lightness > paletteConfig.thresholds.light;
         }, 'Error occurred while checking if HSL is too light');
     }
     const paletteUtilities = {

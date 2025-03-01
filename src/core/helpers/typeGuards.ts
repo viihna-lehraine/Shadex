@@ -1,5 +1,3 @@
-// File: core/helpers/typeguards/main.ts
-
 import {
 	ByteRange,
 	CMYK,
@@ -24,14 +22,14 @@ import {
 	RGB,
 	SL,
 	SV,
-	Typeguards,
+	TypeGuards,
 	XYZ,
 	XYZ_X,
 	XYZ_Y,
 	XYZ_Z
 } from '../../types/index.js';
 
-export function typeguardsFactory(): Typeguards {
+export function typeGuardsFactory(): TypeGuards {
 	function hasFormat<T extends { format: string }>(
 		value: unknown,
 		expectedFormat: string

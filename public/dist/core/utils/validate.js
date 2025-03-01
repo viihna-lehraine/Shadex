@@ -4,11 +4,22 @@ import { sets } from '../../config/partials/sets.js';
 
 // File: core/utils/validate.ts
 function validationUtilitiesFactory(helpers, services) {
-    const { data: { clone } } = helpers;
+    const { data: { deepClone } } = helpers;
     const { errors } = services;
+    function colorInput(color) {
+        return errors.handleSync(() => {
+            if (typeof color !== 'string' || !color.trim()) {
+                return false;
+            }
+            const normalizedColor = color.trim().toLowerCase();
+            return (regex.userInput.hex.test(normalizedColor) ||
+                regex.userInput.hsl.test(normalizedColor) ||
+                regex.userInput.rgb.test(normalizedColor));
+        }, `Error occurred while validating color input from DOM: ${color}`);
+    }
     function colorValue(color) {
         return errors.handleSync(() => {
-            const clonedColor = clone(color);
+            const clonedColor = deepClone(color);
             const isNumericValid = (value) => typeof value === 'number' && !isNaN(value);
             const normalizePercentage = (value) => {
                 if (typeof value === 'string' && value.endsWith('%')) {
@@ -148,21 +159,14 @@ function validationUtilitiesFactory(helpers, services) {
             throw new Error(`Invalid range or value for ${String(rangeKey)}`);
         }, `Error occurred while validating range for ${String(rangeKey)}: ${value}`);
     }
-    function userColorInput(color) {
-        return errors.handleSync(() => {
-            return (regex.userInput.hex.test(color) ||
-                regex.userInput.hsl.test(color) ||
-                regex.userInput.rgb.test(color));
-        }, `Error occurred while validating user color input: ${color}`);
-    }
     const validationUtilities = {
+        colorInput,
         colorValue,
         ensureHash,
         hex,
         hexComponent,
         hexSet,
-        range,
-        userColorInput
+        range
     };
     return errors.handleSync(() => validationUtilities, 'Error occurred while creating validation utilities group.');
 }

@@ -30,7 +30,6 @@ import {
 	LAB_A,
 	LAB_B,
 	LAB_L,
-	Listener,
 	NumericBrandedType,
 	NumericRangeKey,
 	Palette,
@@ -86,7 +85,8 @@ export interface ColorHelpers {
 }
 
 export interface DataHelpers {
-	clone<T>(value: T): T;
+	deepClone<T>(value: T): T;
+	deepFreeze<T>(obj: T): T;
 	getCallerInfo: () => string;
 	getFormattedTimestamp(): string;
 	parseValue: (value: string | number) => number;
@@ -120,7 +120,7 @@ export interface TimeHelpers {
 	): (...args: Parameters<T>) => void;
 }
 
-export interface Typeguards {
+export interface TypeGuards {
 	hasFormat<T extends { format: string }>(
 		value: unknown,
 		expectedFormat: string
@@ -169,7 +169,7 @@ export interface Helpers {
 	math: MathHelpers;
 	random: RandomHelpers;
 	time: TimeHelpers;
-	typeguards: Typeguards;
+	typeGuards: TypeGuards;
 }
 
 // ******** 4. UTILITIES ********
@@ -364,13 +364,13 @@ export interface SanitationUtilities {
 }
 
 export interface ValidationUtilities {
+	colorInput(color: string): boolean;
 	colorValue(color: Color | SL | SV): boolean;
 	ensureHash(value: string): string;
 	hex(value: string, pattern: RegExp): boolean;
 	hexComponent(value: string): boolean;
 	hexSet(value: string): boolean;
 	range<T extends keyof SetsData>(value: number | string, rangeKey: T): void;
-	userColorInput(color: string): boolean;
 }
 
 // ******** 5. UTILITIES OBJECT ********
@@ -453,22 +453,23 @@ export interface LoggerContract {
 	warn(message: string, caller?: string): void;
 }
 
-export interface ObserverContract<T extends Record<string, unknown>> {
-	batchUpdate(updates: Partial<T>): void;
-	get<K extends keyof T>(prop: K): T[K];
-	getData(): T;
-	off<K extends keyof T>(prop: K, callback: Listener<T[K]>): void;
-	on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void;
-	set<K extends keyof T>(prop: K, value: T[K]): void;
-}
-
 export interface PaletteEventsContract {
+	init(): void;
 	attachColorCopyHandlers(): void;
 	attachDragAndDropHandlers(): void;
-	init(): void;
 	initializeColumnPositions(): void;
 	renderColumnSizeChange(): void;
 	syncColumnColorsWithState(): void;
+}
+
+export interface PaletteHistoryManagerContract {
+	init(services: Services): Promise<void>;
+	addPalette(palette: Palette): void;
+	clearHistory(): void;
+	getCurrentPalette(): Palette | null;
+	getHistory(): Palette[];
+	redo(): Palette | null;
+	undo(): Palette | null;
 }
 
 export interface PaletteStateContract {
@@ -481,55 +482,18 @@ export interface StateFactoryContract {
 	createInitialState(): Promise<State>;
 }
 
-export interface StateHistoryContract {
-	addPaletteToHistory(state: State, palette: Palette): void;
-	redo(): State | null;
-	trackAction(state: State): void;
-	undo(state: State): State | null;
-}
-
 export interface StateManagerContract {
-	init(helpers: Helpers, services: Services): Promise<void>;
-	addPaletteToHistory(palette: Palette): void;
+	init(services: Services): Promise<void>;
 	batchUpdate(updates: Partial<State>): Promise<void>;
+	clearHistory(): void;
 	ensureStateReady(): Promise<void>;
-	getState(): Promise<State>;
+	get<K extends keyof State>(key?: K): State | State[K];
 	loadState(): Promise<State>;
 	redo(): State | null;
+	replaceState(newState: State): Promise<void>;
 	resetState(): Promise<void>;
-	saveState(): Promise<void>;
-	setState(newState: State, track: boolean): Promise<void>;
+	saveState(state: State, options: { throttle?: boolean }): Promise<void>;
 	undo(): State | null;
-	updatePaletteColumns(
-		columns: State['paletteContainer']['columns'],
-		track: boolean
-	): void;
-	updatePaletteHistory(
-		updatedHistory: Palette[],
-		track: boolean
-	): Promise<void>;
-	updateSelections(
-		selections: Partial<State['selections']>,
-		track: boolean
-	): void;
-}
-
-export interface StateStoreContract {
-	batchUpdate(updates: Partial<State>): Promise<void>;
-	get<K extends keyof State>(key: K): State[K];
-	getState(): State;
-	init(): Promise<State | null>;
-	loadState(): Promise<State | null>;
-	off<K extends keyof State>(
-		key: K,
-		callback: (newValue: State[K], oldValue: State[K]) => void
-	): void;
-	on<K extends keyof State>(
-		key: K,
-		callback: (newValue: State[K], oldValue: State[K]) => void
-	): void;
-	saveState(state: State, options?: { throttle?: boolean }): Promise<void>;
-	set<K extends keyof State>(key: K, value: State[K]): Promise<void>;
 }
 
 export interface StorageManagerContract {

@@ -36,12 +36,6 @@ export async function registerDependencies(
 		const { initializeStateManager } = await import('./init.js');
 		const stateManager = await initializeStateManager(helpers, services, utils);
 
-		const { initializePaletteStateService } = await import('./init.js');
-		const paletteState = await initializePaletteStateService(
-			services,
-			stateManager
-		);
-
 		const { generateHuesFnGroup } = await import('../palette/partials/hues.js');
 		const { generatePaletteFnGroup } = await import(
 			'../palette/partials/types.js'
@@ -59,6 +53,14 @@ export async function registerDependencies(
 
 		const { initializeEventManager } = await import('./init.js');
 		const eventManager = await initializeEventManager(services);
+
+		const { initializePaletteStateService } = await import('./init.js');
+		const paletteState = await initializePaletteStateService(
+			helpers,
+			services,
+			stateManager,
+			utils
+		);
 
 		const { initializePaletteEventsService } = await import('./init.js');
 		const paletteEvents = await initializePaletteEventsService(

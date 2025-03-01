@@ -4,11 +4,11 @@ import '../../../../config/partials/regex.js';
 // File: core/utils/partials/color/brand.ts
 const defaultColors = defaults.colors;
 function colorBrandingUtilitiesFactory(brand, helpers, services) {
-    const { data: { clone, parseValue } } = helpers;
+    const { data: { deepClone, parseValue } } = helpers;
     const { errors, log } = services;
     function brandColorString(color) {
         return errors.handleSync(() => {
-            const clonedColor = clone(color);
+            const clonedColor = deepClone(color);
             const newValue = Object.entries(clonedColor.value).reduce((acc, [key, val]) => {
                 acc[key] =
                     parseValue(val);

@@ -31,12 +31,12 @@ const defaultColors = defaults.colors;
 export function colorBrandingUtilitiesFactory(
 	brand: BrandingUtilities, helpers: Helpers, services: Services
 ): ColorBrandUtilities {
-	const { data: { clone, parseValue } } = helpers;
+	const { data: { deepClone, parseValue } } = helpers;
 	const { errors, log } = services;
 
 	function brandColorString(color: ColorStringMap): Color {
 		return errors.handleSync(() => {
-			const clonedColor = clone(color);
+			const clonedColor = deepClone(color);
 
 			const newValue = Object.entries(clonedColor.value).reduce(
 				(acc, [key, val]) => {

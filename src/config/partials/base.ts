@@ -28,6 +28,9 @@ const mode: Readonly<ModeData> = {
 		verbosity: 3,
 		warn: true
 	},
+	logExecution: {
+		deepClone: true
+	},
 	showAlerts: false,
 	stackTrace: true
 } as const;

@@ -1,4 +1,5 @@
 import { EventManager } from './dom/events/EventManager.js';
+import { StorageManager } from './storage/StorageManager.js';
 import './config/partials/defaults.js';
 import './config/partials/regex.js';
 
@@ -30,6 +31,7 @@ async function initializeApp() {
     {
         window.domStore = deps.domStore;
         window.eventManager = deps.eventManager;
+        window.storageManager = await StorageManager.getInstance(services);
         window.stateManager = deps.stateManager;
     }
     await errors.handleAsync(async () => {

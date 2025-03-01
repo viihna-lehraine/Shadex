@@ -4,7 +4,7 @@ import { regex } from '../../../../config/partials/regex.js';
 // File: core/utils/partials/color/format.ts
 const defaultColors = defaults.colors;
 function colorFormattingUtilitiesFactory(format, helpers, services) {
-    const { data: { clone }, typeguards } = helpers;
+    const { data: { deepClone }, typeGuards } = helpers;
     const { errors, log } = services;
     function formatColorAsCSS(color) {
         errors.handleSync(() => {
@@ -34,8 +34,8 @@ function colorFormattingUtilitiesFactory(format, helpers, services) {
     }
     function formatColorAsStringMap(color) {
         errors.handleSync(() => {
-            const clonedColor = clone(color);
-            if (typeguards.isHex(clonedColor)) {
+            const clonedColor = deepClone(color);
+            if (typeGuards.isHex(clonedColor)) {
                 return {
                     format: 'hex',
                     value: {
@@ -43,11 +43,11 @@ function colorFormattingUtilitiesFactory(format, helpers, services) {
                     }
                 };
             }
-            else if (typeguards.isColorStringMap(clonedColor)) {
+            else if (typeGuards.isColorStringMap(clonedColor)) {
                 log.info(`Already formatted as color string: ${JSON.stringify(color)}`, `formatColorAsStringMap`);
                 return clonedColor;
             }
-            else if (typeguards.isCMYK(clonedColor)) {
+            else if (typeGuards.isCMYK(clonedColor)) {
                 const newValue = format.formatPercentageValues(clonedColor.value);
                 return {
                     format: 'cmyk',
@@ -59,7 +59,7 @@ function colorFormattingUtilitiesFactory(format, helpers, services) {
                     }
                 };
             }
-            else if (typeguards.isHSL(clonedColor)) {
+            else if (typeGuards.isHSL(clonedColor)) {
                 const newValue = format.formatPercentageValues(clonedColor.value);
                 return {
                     format: 'hsl',
@@ -70,7 +70,7 @@ function colorFormattingUtilitiesFactory(format, helpers, services) {
                     }
                 };
             }
-            else if (typeguards.isHSV(clonedColor)) {
+            else if (typeGuards.isHSV(clonedColor)) {
                 const newValue = format.formatPercentageValues(clonedColor.value);
                 return {
                     format: 'hsv',
@@ -81,7 +81,7 @@ function colorFormattingUtilitiesFactory(format, helpers, services) {
                     }
                 };
             }
-            else if (typeguards.isLAB(clonedColor)) {
+            else if (typeGuards.isLAB(clonedColor)) {
                 const newValue = format.formatPercentageValues(clonedColor.value);
                 return {
                     format: 'lab',
@@ -92,7 +92,7 @@ function colorFormattingUtilitiesFactory(format, helpers, services) {
                     }
                 };
             }
-            else if (typeguards.isRGB(clonedColor)) {
+            else if (typeGuards.isRGB(clonedColor)) {
                 const newValue = format.formatPercentageValues(clonedColor.value);
                 return {
                     format: 'rgb',
@@ -103,7 +103,7 @@ function colorFormattingUtilitiesFactory(format, helpers, services) {
                     }
                 };
             }
-            else if (typeguards.isXYZ(clonedColor)) {
+            else if (typeGuards.isXYZ(clonedColor)) {
                 const newValue = format.formatPercentageValues(clonedColor.value);
                 return {
                     format: 'xyz',

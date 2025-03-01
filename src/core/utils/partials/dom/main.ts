@@ -25,7 +25,7 @@ export function partialDOMUtilitiesFactory(
 	validate: ValidationUtilities
 ): DOMUtilitiesPartial {
 	const {
-		data: { clone },
+		data: { deepClone },
 		dom: { getElement, getAllElements }
 	} = helpers;
 	const { errors, log } = services;
@@ -208,7 +208,7 @@ export function partialDOMUtilitiesFactory(
 			}
 
 			const paletteColumns = getAllElements<HTMLDivElement>(
-				classes.paletteColumn
+				`.${classes.paletteColumn}`
 			);
 			if (!paletteColumns.length) {
 				log.warn('No palette columns found.', `domUtils > scanPaletteColumns`);
@@ -265,9 +265,9 @@ export function partialDOMUtilitiesFactory(
 					continue;
 				}
 
-				const clonedColor = clone(colorValues);
+				const clonedColor = deepClone(colorValues);
 
-				if (!helpers.typeguards.isConvertibleColor(clonedColor)) {
+				if (!helpers.typeGuards.isConvertibleColor(clonedColor)) {
 					log.error(
 						'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.',
 						`domUtils > switchColorSpaceInDOM`

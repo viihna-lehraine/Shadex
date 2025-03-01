@@ -19,6 +19,9 @@ const mode = {
         verbosity: 3,
         warn: true
     },
+    logExecution: {
+        deepClone: true
+    },
     showAlerts: false,
     stackTrace: true
 };

@@ -61,7 +61,7 @@ class UIEventsService {
             EventManager.add(document, 'keydown', ((event) => {
                 if (event.key === 'Escape') {
                     this.#helpers.dom
-                        .getAllElements(classes.modal)
+                        .getAllElements(`.${classes.modal}`)
                         .forEach(modal => modal.classList.add(classes.hidden));
                 }
             }));
