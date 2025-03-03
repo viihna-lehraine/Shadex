@@ -31,7 +31,7 @@ export function colorParsingUtilitiesFactory(
 	function parseHSLValueAsStringMap(hsl: HSL['value']): HSLStringMap['value'] {
 		return errors.handleSync(() => {
 			return {
-				hue: `${hsl.hue}°`,
+				hue: `${hsl.hue}`,
 				saturation: `${hsl.saturation * 100}%`,
 				lightness: `${hsl.lightness * 100}%`
 			};
@@ -41,7 +41,7 @@ export function colorParsingUtilitiesFactory(
 	function parseHSVValueAsStringMap(hsv: HSV['value']): HSVStringMap['value'] {
 		return errors.handleSync(() => {
 			return {
-				hue: `${hsv.hue}°`,
+				hue: `${hsv.hue}`,
 				saturation: `${hsv.saturation * 100}%`,
 				value: `${hsv.value * 100}%`
 			};

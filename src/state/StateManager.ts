@@ -104,9 +104,12 @@ export class StateManager implements StateManagerContract {
 		}, `[${caller}.init]: Failed to initialize State Manager.`);
 	}
 
-	async batchUpdate(updates: Partial<State>): Promise<void> {
+	async batchUpdate(
+		updater: (currentState: State) => Partial<State>
+	): Promise<void> {
 		this.#errors.handleSync(() => {
 			const currentState = this.#deepClone(this.get() as State);
+			const updates = updater(currentState);
 
 			const isShallowEqual = Object.keys(updates).every(key =>
 				Object.is(currentState[key as keyof State], updates[key as keyof State])

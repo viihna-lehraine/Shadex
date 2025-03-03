@@ -116,6 +116,7 @@ export interface PaletteConfig {
 export interface Environment {
 	readonly app: {
 		readonly historyLimit: number;
+		readonly maxColumns: number;
 		readonly paletteHistoryLimit: number;
 	};
 	readonly idb: {
@@ -126,14 +127,14 @@ export interface Environment {
 		readonly contentionHistoryLimit: number;
 		readonly timeout: number;
 	};
-	readonly observer: {
-		readonly debounce: number;
-	};
 	readonly state: {
 		readonly maxReadyAttempts: number;
 		readonly maxSaveRetries: number;
 		readonly readyTimeout: number;
 		readonly saveThrottleDelay: number;
+	};
+	readonly timers: {
+		readonly columnInitializationDebounce: number;
 	};
 }
 

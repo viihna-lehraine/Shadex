@@ -1,3 +1,4 @@
+import { env } from '../../../../config/partials/env.js';
 import '../../../../config/partials/defaults.js';
 import { domConfig, domIndex } from '../../../../config/partials/dom.js';
 import '../../../../config/partials/regex.js';
@@ -5,6 +6,7 @@ import '../../../../config/partials/regex.js';
 // File: common/utils/partials/dom/main.ts
 const classes = domIndex.classes;
 const ids = domIndex.ids;
+const maxColumns = env.app.maxColumns;
 function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
     const { data: { deepClone }, dom: { getElement, getAllElements } } = helpers;
     const { errors, log } = services;
@@ -26,7 +28,7 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
                 tooltip.style.opacity = '1';
             }, domConfig.tooltipFadeOut);
             return tooltip;
-        }, '[domUtils > createTooltip]: Error occurred while creating tooltip.');
+        }, '[utils.dom.createTooltip]: Error occurred while creating tooltip.');
     }
     function downloadFile(data, filename, type) {
         return errors.handleSync(() => {
@@ -37,13 +39,13 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
             a.download = filename;
             a.click();
             URL.revokeObjectURL(url);
-        }, '[domUtils > downloadFile]: Error occurred while downloading file.');
+        }, '[utils.dom.downloadFile]: Error occurred while downloading file.');
     }
     function enforceSwatchRules(minSwatches, maxSwatches) {
         return errors.handleSync(() => {
             const paletteColumnSelector = document.getElementById(domIndex.ids.inputs.paletteColumn);
             if (!paletteColumnSelector) {
-                log.error('paletteColumnSelector not found', `domUtils > enforceMinimumSwatches`);
+                log.error('paletteColumnSelector not found', `utils.dom.enforceMinimumSwatches`);
                 {
                     console.trace('enforceMinimumSwatches stack trace');
                 }
@@ -67,7 +69,7 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
                     paletteColumnSelector.dispatchEvent(event);
                 }
                 catch (error) {
-                    log.error(`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`, `domUtils > enforceMinimumSwatches`);
+                    log.error(`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`, `utils.dom.enforceMinimumSwatches`);
                     throw new Error(`Failed to dispatch change event: ${error}`);
                 }
             }
@@ -82,19 +84,20 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
             return columns;
         const sizeDifference = adjustedSize - columns[columnIndex].size;
         // update the target column and adjust others
-        const updatedColumns = columns.map(col => {
+        const fixedColumns = [...columns.slice(0, maxColumns)];
+        const updatedColumns = fixedColumns.map(col => {
             if (col.id === columnID) {
                 return { ...col, size: adjustedSize };
             }
             if (!col.isLocked) {
                 return {
                     ...col,
-                    size: col.size - sizeDifference / (columns.length - 1)
+                    size: col.size - sizeDifference / (fixedColumns.length - 1)
                 };
             }
             return col;
         });
-        // Normalize to ensure total size is 100%
+        // normalize sizes to ensure total is 100%
         const totalSize = updatedColumns.reduce((sum, col) => sum + col.size, 0);
         return updatedColumns.map(col => ({
             ...col,
@@ -111,7 +114,7 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
                 tooltip.style.visibility = 'hidden';
                 tooltip.remove();
             }, domConfig.tooltipFadeOut);
-        }, '[domUtils > hideTooltip]: Error occurred while hiding tooltip.');
+        }, '[utils.dom.hideTooltip]: Error occurred while hiding tooltip.');
     }
     function positionTooltip(element, tooltip) {
         return errors.handleSync(() => {
@@ -123,7 +126,7 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
             tooltip.style.pointerEvents = 'none';
             tooltip.style.opacity = '0';
             tooltip.style.transition = 'opacity 0.2s ease-in-out';
-        }, '[domUtils > positionTooltip]: Error occurred while positioning tooltip.');
+        }, '[utils.dom.positionTooltip]: Error occurred while positioning tooltip.');
     }
     function removeTooltip(element) {
         return errors.handleSync(() => {
@@ -138,7 +141,7 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
                 }, 300);
             }
             delete element.dataset.tooltipId;
-        }, '[domUtils > removeTooltip]: Error occurred while removing tooltip.');
+        }, '[utils.dom.removeTooltip]: Error occurred while removing tooltip.');
     }
     function readFile(file) {
         return errors.handleAsync(async () => {
@@ -153,20 +156,24 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
     function scanPaletteColumns() {
         return errors.handleSync(() => {
             if (document.readyState === 'loading') {
-                log.warn('Document not ready. Returning empty array.', `domUtils > scanPaletteColumns`);
+                log.warn('Document not ready. Returning empty array.', `utils.dom.scanPaletteColumns`);
                 return [];
             }
             const paletteColumns = getAllElements(`.${classes.paletteColumn}`);
-            if (!paletteColumns.length) {
-                log.warn('No palette columns found.', `domUtils > scanPaletteColumns`);
-                return [];
+            if (paletteColumns.length !== maxColumns) {
+                log.warn(`Expected ${maxColumns} columns, but found ${paletteColumns.length}`, `utils.dom.scanPaletteColumns`);
             }
-            return Array.from(paletteColumns).map((column, index) => {
-                const id = parseInt(column.id.split('-').pop() || `${index + 1}`, 10);
-                const size = column.clientWidth / paletteColumns.length;
+            // Normalize to exactly 5 columns, padding if necessary
+            const normalizedColumns = Array.from({ length: 5 }).map((_, index) => {
+                const column = paletteColumns[index] ?? document.createElement('div'); // fallback if missing
+                column.id = `palette-column-${index + 1}`;
+                column.classList.add(classes.paletteColumn);
+                const id = index + 1;
+                const size = column.clientWidth / 5;
                 const isLocked = column.classList.contains(classes.locked);
                 return { id, position: index + 1, size, isLocked };
             });
+            return normalizedColumns;
         }, 'Error occurred while scanning palette columns.');
     }
     function switchColorSpaceInDOM(targetFormat) {
@@ -176,42 +183,42 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
                 const inputBox = box;
                 const colorValues = inputBox.colorValues;
                 if (!colorValues || !validate.colorValue(colorValues)) {
-                    log.error('Invalid color values. Cannot display toast.', `domUtils > switchColorSpaceInDOM`);
+                    log.error('Invalid color values. Cannot display toast.', `utils.dom.switchColorSpaceInDOM`);
                     continue;
                 }
                 const currentFormat = inputBox.getAttribute('data-format');
-                log.info(`Converting from ${currentFormat} to ${targetFormat}`, `domUtils > switchColorSpaceInDOM`);
+                log.info(`Converting from ${currentFormat} to ${targetFormat}`, `utils.dom.switchColorSpaceInDOM`);
                 const convertFn = helpers.color.getConversionFn(currentFormat, targetFormat);
                 if (!convertFn) {
-                    log.error(`Conversion from ${currentFormat} to ${targetFormat} is not supported.`, `domUtils > switchColorSpaceInDOM`);
+                    log.error(`Conversion from ${currentFormat} to ${targetFormat} is not supported.`, `utils.dom.switchColorSpaceInDOM`);
                     continue;
                 }
                 if (colorValues.format === 'xyz') {
-                    log.error('Cannot convert from XYZ to another color space.', `domUtils > switchColorSpaceInDOM`);
+                    log.error('Cannot convert from XYZ to another color space.', `utils.dom.switchColorSpaceInDOM`);
                     continue;
                 }
                 const clonedColor = deepClone(colorValues);
                 if (!helpers.typeGuards.isConvertibleColor(clonedColor)) {
-                    log.error('Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.', `domUtils > switchColorSpaceInDOM`);
+                    log.error('Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.', `utils.dom.switchColorSpaceInDOM`);
                     continue;
                 }
                 const newColor = convertFn(clonedColor);
                 if (!newColor) {
-                    log.error(`Conversion to ${targetFormat} failed.`, `domUtils > switchColorSpaceInDOM`);
+                    log.error(`Conversion to ${targetFormat} failed.`, `utils.dom.switchColorSpaceInDOM`);
                     continue;
                 }
                 inputBox.value = String(newColor);
                 inputBox.setAttribute('data-format', targetFormat);
             }
-        }, '[domUtils > switchColorSpaceInDOM]: Error occurred while converting colors.');
+        }, '[utils.dom.switchColorSpaceInDOM]: Error occurred while converting colors.');
     }
     function updateColorBox(color, boxId) {
         return errors.handleSync(() => {
-            const colorBox = document.getElementById(boxId);
+            const colorBox = helpers.dom.getElement(boxId);
             if (colorBox) {
                 colorBox.style.backgroundColor = colorUtils.formatColorAsCSS(color);
             }
-        }, '[domUtils > updateColorBox]: Error occurred while updating color box.');
+        }, '[utils.dom.updateColorBox]: Error occurred while updating color box.');
     }
     function updateHistory(history) {
         return errors.handleSync(() => {

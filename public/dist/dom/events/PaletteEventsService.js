@@ -105,8 +105,6 @@ class PaletteEventsService {
                     this.#hideTooltip();
                 }
             });
-            // observe for new elements
-            this.#createPaletteObserver();
         }, `[${caller}]: Failed to call init()`);
     }
     attachColorCopyHandlers() {
@@ -168,12 +166,12 @@ class PaletteEventsService {
                         return col;
                     })
                         .sort((a, b) => a.position - b.position);
-                    await this.#stateManager.batchUpdate({
+                    await this.#stateManager.batchUpdate(currentState => ({
                         paletteContainer: {
-                            ...paletteContainer,
+                            ...currentState.paletteContainer,
                             columns: updatedColumns
                         }
-                    });
+                    }));
                     this.#draggedColumn.classList.remove('dragging');
                     this.#log.debug(`Swapped columns: ${draggedID} and ${targetID}`, `${caller}.attachDragAndDropHandlers`);
                     this.#draggedColumn = null;
@@ -193,21 +191,21 @@ class PaletteEventsService {
     // initialiezs column positions on page load
     async initializeColumnPositions() {
         return this.#errors.handleAsync(async () => {
+            this.#log.debug(`Initializing column positions...`, `${caller}.initializeColumnPositions`);
             const paletteColumns = this.#helpers.dom.getAllElements(`.${classes.paletteColumn}`);
             // create updated column data based on DOM elements
             const updatedColumns = Array.from(paletteColumns).map((column, index) => ({
-                id: parseInt(column.id.split('-').pop() || '0'),
+                id: index + 1,
                 isLocked: false,
                 position: index + 1,
                 size: column.offsetWidth
             }));
-            const paletteContainer = this.#stateManager.get('paletteContainer');
-            await this.#stateManager.batchUpdate({
+            await this.#stateManager.batchUpdate(currentState => ({
                 paletteContainer: {
-                    ...paletteContainer,
-                    columns: updatedColumns
+                    ...currentState.paletteContainer,
+                    columns: updatedColumns.slice(0, 5)
                 }
-            });
+            }));
             this.#log.debug('Initialized column positions.', `${caller}.initializeColumnPositions`);
         }, `[${caller}]: Failed to initialize column positions.`);
     }
@@ -218,11 +216,14 @@ class PaletteEventsService {
             // safely retrieve the latest state
             const paletteContainer = this.#stateManager.get('paletteContainer');
             // update DOM based on state
-            paletteColumns.forEach(column => {
-                const columnID = parseInt(column.id.split('-').pop());
-                const columnData = paletteContainer.columns.find(col => col.id === columnID);
+            paletteColumns.forEach((column, index) => {
+                const columnData = paletteContainer.columns[index];
                 if (columnData) {
                     column.style.width = `${columnData.size}%`;
+                    column.classList.remove('hidden');
+                }
+                else {
+                    column.classList.add('hidden');
                 }
             });
             this.#log.debug('Rendered column size changes.', `${caller}.renderColumnSizeChange`);
@@ -230,8 +231,7 @@ class PaletteEventsService {
     }
     async syncColumnColorsWithState() {
         return this.#errors.handleAsync(async () => {
-            const paletteColumns = this.#helpers.dom.getAllElements(`${classes.paletteColumn}`);
-            // retrieve the most recent palette from state
+            const paletteColumns = this.#helpers.dom.getAllElements(`.${classes.paletteColumn}`);
             const currentPalette = this.#paletteHistory.getCurrentPalette();
             if (!currentPalette?.items) {
                 this.#log.warn('No valid palette data found in history!', `${caller}.syncColumnColorsWithState`);
@@ -241,17 +241,17 @@ class PaletteEventsService {
             const validColorSpace = this.#helpers.typeGuards.isColorSpace(userPreference)
                 ? userPreference
                 : 'hex';
-            // update each column's color based on state
-            paletteColumns.forEach(column => {
-                const columnID = parseInt(column.id.split('-').pop());
-                const paletteItem = currentPalette.items.find(item => item.itemID === columnID);
+            paletteColumns.forEach((column, index) => {
+                const paletteItem = currentPalette.items[index];
                 if (paletteItem) {
                     const colorValue = this.#getColorByPreference(paletteItem.css, validColorSpace);
                     column.style.backgroundColor = colorValue;
                     const colorDisplay = column.querySelector(classes.colorDisplay);
                     if (colorDisplay)
                         colorDisplay.value = colorValue;
-                    this.#log.debug(`Updated color for column ${columnID}: ${colorValue}`, `${caller}.syncColumnColorsWithState`);
+                }
+                else {
+                    column.classList.add('hidden');
                 }
             });
         }, `[${caller}]: Failed to sync column colors with state.`);
@@ -269,37 +269,6 @@ class PaletteEventsService {
                 this.#log.error(`Error copying to clipboard: ${err}`, `${caller}.#copyToClipboard`);
             });
         }, `[${caller}]: Failed to copy to clipboard.`);
-    }
-    // observes palette container for new elements
-    async #createPaletteObserver() {
-        return this.#errors.handleAsync(async () => {
-            const paletteContainer = this.#domStore.getElement('divs', 'paletteContainer');
-            if (!paletteContainer)
-                return;
-            const observer = new MutationObserver((mutationsList) => {
-                // TODO: figure out what the hell is going on here
-                void (async () => {
-                    for (const mutation of mutationsList) {
-                        for (const node of mutation.addedNodes) {
-                            if (node instanceof HTMLElement &&
-                                node.classList.contains(classes.paletteColumn)) {
-                                const paletteContainer = this.#stateManager.get('paletteContainer');
-                                if (!paletteContainer) {
-                                    this.#log.warn('Skipping execution of initializeColumnPositions - State is not ready!', `${caller}.createPaletteObserver`);
-                                    return;
-                                }
-                                this.initializeColumnPositions();
-                            }
-                        }
-                    }
-                })();
-            });
-            observer.observe(paletteContainer, {
-                childList: true,
-                subtree: true
-            });
-            this.#log.info('Palette Container MutationObserver created.', `${caller}.#createPaletteObserver`);
-        }, `[${caller}]: Failed to create palette observer.`);
     }
     #getColorByPreference(colorData, preference) {
         return this.#errors.handleSync(() => {
@@ -359,24 +328,24 @@ class PaletteEventsService {
                 return;
             const startX = event.clientX;
             const startWidth = column.offsetWidth;
-            // update column size dynamically as user drags
             const onMouseMove = (moveEvent) => {
                 const diff = moveEvent.clientX - startX;
                 const newSize = startWidth + diff;
-                column.style.width = `${newSize}px`; // live feedback while resizing
+                column.style.width = `${newSize}px`; // live feedback
             };
-            // finalize size on mouse release and update state atomically
             const onMouseUp = async () => {
                 window.removeEventListener('mousemove', onMouseMove);
                 window.removeEventListener('mouseup', onMouseUp);
                 const columnID = parseInt(column.id.split('-').pop());
                 const paletteContainer = this.#stateManager.get('paletteContainer');
-                await this.#stateManager.batchUpdate({
+                // ensure resizing doesn't break 5-column structure
+                const updatedColumns = paletteContainer.columns.map(col => col.id === columnID ? { ...col, size: column.offsetWidth } : col);
+                await this.#stateManager.batchUpdate(currentState => ({
                     paletteContainer: {
-                        ...paletteContainer,
-                        columns: paletteContainer.columns.map(col => col.id === columnID ? { ...col, size: column.offsetWidth } : col)
+                        ...currentState.paletteContainer,
+                        columns: updatedColumns.slice(0, 5)
                     }
-                });
+                }));
                 this.#log.debug(`Resized column ${columnID} to ${column.offsetWidth}px`, `${caller}.#startResize`);
             };
             window.addEventListener('mousemove', onMouseMove);

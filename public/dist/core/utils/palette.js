@@ -1,3 +1,4 @@
+import { env } from '../../config/partials/env.js';
 import '../../config/partials/defaults.js';
 import { domIndex } from '../../config/partials/dom.js';
 import { paletteConfig } from '../../config/partials/paletteConfig.js';
@@ -5,6 +6,7 @@ import '../../config/partials/regex.js';
 
 // File: core/utils/palette.ts
 const ids = domIndex.ids;
+const maxColumns = env.app.maxColumns;
 function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, validate) {
     const { data: { deepClone }, dom: { getElement } } = helpers;
     const { errors, log } = services;
@@ -37,11 +39,8 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
     function createPaletteItemArray(baseColor, hues) {
         return errors.handleSync(() => {
             const paletteItems = [];
-            // base color always gets itemID = 1
-            paletteItems.push(createPaletteItem(baseColor, 1 // ID 1 for base color
-            ));
-            // iterate over hues and generate PaletteItems
-            for (const [i, hue] of hues.entries()) {
+            paletteItems.push(createPaletteItem(baseColor, 1));
+            for (const [i, hue] of hues.slice(0, maxColumns - 1).entries()) {
                 const newColor = {
                     value: {
                         hue: brand.asRadial(hue),
@@ -50,10 +49,12 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
                     },
                     format: 'hsl'
                 };
-                const newPaletteItem = createPaletteItem(newColor, i + 2 // IDs start at 2 for generated colors
-                );
+                const newPaletteItem = createPaletteItem(newColor, i + 2);
                 paletteItems.push(newPaletteItem);
                 dom.updateColorBox(newColor, String(i + 2));
+            }
+            while (paletteItems.length < maxColumns) {
+                paletteItems.push(createPaletteItem(baseColor, paletteItems.length + 1));
             }
             return paletteItems;
         }, 'Error occurred while creating palette item array');
@@ -199,6 +200,17 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
             return deepClone(hsl).value.lightness > paletteConfig.thresholds.light;
         }, 'Error occurred while checking if HSL is too light');
     }
+    function showPaletteColumns(count) {
+        const allColumns = helpers.dom.getAllElements(`.${domIndex.classes.paletteColumn}`);
+        allColumns.forEach((col, index) => {
+            if (index < count) {
+                col.classList.remove('hidden');
+            }
+            else {
+                col.classList.add('hidden');
+            }
+        });
+    }
     const paletteUtilities = {
         createPaletteItem,
         createPaletteItemArray,
@@ -209,7 +221,8 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
         isHSLInBounds,
         isHSLTooDark,
         isHSLTooGray,
-        isHSLTooLight
+        isHSLTooLight,
+        showPaletteColumns
     };
     return errors.handleSync(() => paletteUtilities, 'Error creating palette utilities group group.');
 }

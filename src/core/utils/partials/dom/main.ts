@@ -12,10 +12,11 @@ import {
 	State,
 	ValidationUtilities
 } from '../../../../types/index.js';
-import { config, domConfig, domIndex } from '../../../../config/index.js';
+import { config, domConfig, domIndex, env } from '../../../../config/index.js';
 
 const classes = domIndex.classes;
 const ids = domIndex.ids;
+const maxColumns = env.app.maxColumns;
 const mode = config.mode;
 
 export function partialDOMUtilitiesFactory(
@@ -51,7 +52,7 @@ export function partialDOMUtilitiesFactory(
 				tooltip.style.opacity = '1';
 			}, domConfig.tooltipFadeOut);
 			return tooltip;
-		}, '[domUtils > createTooltip]: Error occurred while creating tooltip.');
+		}, '[utils.dom.createTooltip]: Error occurred while creating tooltip.');
 	}
 
 	function downloadFile(data: string, filename: string, type: string): void {
@@ -63,7 +64,7 @@ export function partialDOMUtilitiesFactory(
 			a.download = filename;
 			a.click();
 			URL.revokeObjectURL(url);
-		}, '[domUtils > downloadFile]: Error occurred while downloading file.');
+		}, '[utils.dom.downloadFile]: Error occurred while downloading file.');
 	}
 
 	function enforceSwatchRules(minSwatches: number, maxSwatches: number): void {
@@ -74,7 +75,7 @@ export function partialDOMUtilitiesFactory(
 			if (!paletteColumnSelector) {
 				log.error(
 					'paletteColumnSelector not found',
-					`domUtils > enforceMinimumSwatches`
+					`utils.dom.enforceMinimumSwatches`
 				);
 				if (mode.stackTrace) {
 					console.trace('enforceMinimumSwatches stack trace');
@@ -99,7 +100,7 @@ export function partialDOMUtilitiesFactory(
 				} catch (error) {
 					log.error(
 						`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`,
-						`domUtils > enforceMinimumSwatches`
+						`utils.dom.enforceMinimumSwatches`
 					);
 					throw new Error(`Failed to dispatch change event: ${error}`);
 				}
@@ -122,20 +123,22 @@ export function partialDOMUtilitiesFactory(
 		const sizeDifference = adjustedSize - columns[columnIndex].size;
 
 		// update the target column and adjust others
-		const updatedColumns = columns.map(col => {
+		const fixedColumns = [...columns.slice(0, maxColumns)];
+
+		const updatedColumns = fixedColumns.map(col => {
 			if (col.id === columnID) {
 				return { ...col, size: adjustedSize };
 			}
 			if (!col.isLocked) {
 				return {
 					...col,
-					size: col.size - sizeDifference / (columns.length - 1)
+					size: col.size - sizeDifference / (fixedColumns.length - 1)
 				};
 			}
 			return col;
 		});
 
-		// Normalize to ensure total size is 100%
+		// normalize sizes to ensure total is 100%
 		const totalSize = updatedColumns.reduce((sum, col) => sum + col.size, 0);
 		return updatedColumns.map(col => ({
 			...col,
@@ -155,7 +158,7 @@ export function partialDOMUtilitiesFactory(
 				tooltip.style.visibility = 'hidden';
 				tooltip.remove();
 			}, domConfig.tooltipFadeOut || 500);
-		}, '[domUtils > hideTooltip]: Error occurred while hiding tooltip.');
+		}, '[utils.dom.hideTooltip]: Error occurred while hiding tooltip.');
 	}
 
 	function positionTooltip(element: HTMLElement, tooltip: HTMLElement): void {
@@ -168,7 +171,7 @@ export function partialDOMUtilitiesFactory(
 			tooltip.style.pointerEvents = 'none';
 			tooltip.style.opacity = '0';
 			tooltip.style.transition = 'opacity 0.2s ease-in-out';
-		}, '[domUtils > positionTooltip]: Error occurred while positioning tooltip.');
+		}, '[utils.dom.positionTooltip]: Error occurred while positioning tooltip.');
 	}
 
 	function removeTooltip(element: HTMLElement): void {
@@ -183,7 +186,7 @@ export function partialDOMUtilitiesFactory(
 				}, 300);
 			}
 			delete element.dataset.tooltipId;
-		}, '[domUtils > removeTooltip]: Error occurred while removing tooltip.');
+		}, '[utils.dom.removeTooltip]: Error occurred while removing tooltip.');
 	}
 
 	function readFile(file: File): Promise<string> {
@@ -202,7 +205,7 @@ export function partialDOMUtilitiesFactory(
 			if (document.readyState === 'loading') {
 				log.warn(
 					'Document not ready. Returning empty array.',
-					`domUtils > scanPaletteColumns`
+					`utils.dom.scanPaletteColumns`
 				);
 				return [];
 			}
@@ -210,17 +213,28 @@ export function partialDOMUtilitiesFactory(
 			const paletteColumns = getAllElements<HTMLDivElement>(
 				`.${classes.paletteColumn}`
 			);
-			if (!paletteColumns.length) {
-				log.warn('No palette columns found.', `domUtils > scanPaletteColumns`);
-				return [];
+
+			if (paletteColumns.length !== maxColumns) {
+				log.warn(
+					`Expected ${maxColumns} columns, but found ${paletteColumns.length}`,
+					`utils.dom.scanPaletteColumns`
+				);
 			}
 
-			return Array.from(paletteColumns).map((column, index) => {
-				const id = parseInt(column.id.split('-').pop() || `${index + 1}`, 10);
-				const size = column.clientWidth / paletteColumns.length;
+			// Normalize to exactly 5 columns, padding if necessary
+			const normalizedColumns = Array.from({ length: 5 }).map((_, index) => {
+				const column = paletteColumns[index] ?? document.createElement('div'); // fallback if missing
+				column.id = `palette-column-${index + 1}`;
+				column.classList.add(classes.paletteColumn);
+
+				const id = index + 1;
+				const size = column.clientWidth / 5;
 				const isLocked = column.classList.contains(classes.locked);
+
 				return { id, position: index + 1, size, isLocked };
 			});
+
+			return normalizedColumns;
 		}, 'Error occurred while scanning palette columns.');
 	}
 
@@ -235,7 +249,7 @@ export function partialDOMUtilitiesFactory(
 				if (!colorValues || !validate.colorValue(colorValues)) {
 					log.error(
 						'Invalid color values. Cannot display toast.',
-						`domUtils > switchColorSpaceInDOM`
+						`utils.dom.switchColorSpaceInDOM`
 					);
 					continue;
 				}
@@ -244,7 +258,7 @@ export function partialDOMUtilitiesFactory(
 				) as ColorSpace;
 				log.info(
 					`Converting from ${currentFormat} to ${targetFormat}`,
-					`domUtils > switchColorSpaceInDOM`
+					`utils.dom.switchColorSpaceInDOM`
 				);
 				const convertFn = helpers.color.getConversionFn(
 					currentFormat,
@@ -253,14 +267,14 @@ export function partialDOMUtilitiesFactory(
 				if (!convertFn) {
 					log.error(
 						`Conversion from ${currentFormat} to ${targetFormat} is not supported.`,
-						`domUtils > switchColorSpaceInDOM`
+						`utils.dom.switchColorSpaceInDOM`
 					);
 					continue;
 				}
 				if (colorValues.format === 'xyz') {
 					log.error(
 						'Cannot convert from XYZ to another color space.',
-						`domUtils > switchColorSpaceInDOM`
+						`utils.dom.switchColorSpaceInDOM`
 					);
 					continue;
 				}
@@ -270,7 +284,7 @@ export function partialDOMUtilitiesFactory(
 				if (!helpers.typeGuards.isConvertibleColor(clonedColor)) {
 					log.error(
 						'Cannot convert from SL, SV, or XYZ color spaces. Please convert to a supported format first.',
-						`domUtils > switchColorSpaceInDOM`
+						`utils.dom.switchColorSpaceInDOM`
 					);
 					continue;
 				}
@@ -278,23 +292,24 @@ export function partialDOMUtilitiesFactory(
 				if (!newColor) {
 					log.error(
 						`Conversion to ${targetFormat} failed.`,
-						`domUtils > switchColorSpaceInDOM`
+						`utils.dom.switchColorSpaceInDOM`
 					);
 					continue;
 				}
 				inputBox.value = String(newColor);
 				inputBox.setAttribute('data-format', targetFormat);
 			}
-		}, '[domUtils > switchColorSpaceInDOM]: Error occurred while converting colors.');
+		}, '[utils.dom.switchColorSpaceInDOM]: Error occurred while converting colors.');
 	}
 
 	function updateColorBox(color: HSL, boxId: string): void {
 		return errors.handleSync(() => {
-			const colorBox = document.getElementById(boxId);
+			const colorBox = helpers.dom.getElement(boxId);
+
 			if (colorBox) {
 				colorBox.style.backgroundColor = colorUtils.formatColorAsCSS(color);
 			}
-		}, '[domUtils > updateColorBox]: Error occurred while updating color box.');
+		}, '[utils.dom.updateColorBox]: Error occurred while updating color box.');
 	}
 
 	function updateHistory(history: Palette[]): void {

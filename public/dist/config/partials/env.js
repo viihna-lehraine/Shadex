@@ -2,6 +2,7 @@
 const env = {
     app: {
         historyLimit: 100,
+        maxColumns: 5,
         paletteHistoryLimit: 20
     },
     idb: {
@@ -12,14 +13,14 @@ const env = {
         contentionHistoryLimit: 100,
         timeout: 200
     },
-    observer: {
-        debounce: 50
-    },
     state: {
         maxReadyAttempts: 20,
         maxSaveRetries: 10,
         readyTimeout: 50,
         saveThrottleDelay: 30
+    },
+    timers: {
+        columnInitializationDebounce: 50
     }
 };
 

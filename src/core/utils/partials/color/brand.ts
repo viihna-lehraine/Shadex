@@ -34,6 +34,19 @@ export function colorBrandingUtilitiesFactory(
 	const { data: { deepClone, parseValue } } = helpers;
 	const { errors, log } = services;
 
+	function brandCMYKString(
+		cmyk: CMYKStringMap['value']
+	): CMYK['value'] {
+		return errors.handleSync(() => {
+			return {
+				cyan: brand.asPercentile(parseFloat(cmyk.cyan) / 100),
+				magenta: brand.asPercentile(parseFloat(cmyk.magenta) / 100),
+				yellow: brand.asPercentile(parseFloat(cmyk.yellow) / 100),
+				key: brand.asPercentile(parseFloat(cmyk.key) / 100)
+			};
+		}, 'Error occurred while branding CMYK string.');
+	}
+
 	function brandColorString(color: ColorStringMap): Color {
 		return errors.handleSync(() => {
 			const clonedColor = deepClone(color);
@@ -87,19 +100,6 @@ export function colorBrandingUtilitiesFactory(
 					};
 			}
 		}, 'Error occurred while branding color string map value.');
-	}
-
-	function brandCMYKString(
-		cmyk: CMYKStringMap['value']
-	): CMYK['value'] {
-		return errors.handleSync(() => {
-			return {
-				cyan: brand.asPercentile(parseFloat(cmyk.cyan) / 100),
-				magenta: brand.asPercentile(parseFloat(cmyk.magenta) / 100),
-				yellow: brand.asPercentile(parseFloat(cmyk.yellow) / 100),
-				key: brand.asPercentile(parseFloat(cmyk.key) / 100)
-			};
-		}, 'Error occurred while branding CMYK string.');
 	}
 
 	function brandHexString(hex: HexStringMap['value']): Hex['value'] {

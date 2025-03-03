@@ -61,9 +61,10 @@ class StateManager {
             this.saveState();
         }, `[${caller}.init]: Failed to initialize State Manager.`);
     }
-    async batchUpdate(updates) {
+    async batchUpdate(updater) {
         this.#errors.handleSync(() => {
             const currentState = this.#deepClone(this.get());
+            const updates = updater(currentState);
             const isShallowEqual = Object.keys(updates).every(key => Object.is(currentState[key], updates[key]));
             if (isShallowEqual) {
                 this.#log.debug('Skipping redundant batch update.', `${caller}.batchUpdate`);

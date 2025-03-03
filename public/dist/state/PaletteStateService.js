@@ -42,53 +42,57 @@ class PaletteStateService {
     async handleColumnLock(columnID) {
         return this.#errors.handleAsync(async () => {
             const paletteContainer = this.#stateManager.get('paletteContainer');
-            const updatedColumns = paletteContainer.columns.map(col => col.id === columnID ? { ...col, isLocked: !col.isLocked } : col);
-            await this.#stateManager.batchUpdate({
+            if (!paletteContainer) {
+                this.#log.warn('No palette container found in State.', `${caller}.handleColumnLock`);
+                return;
+            }
+            await this.#stateManager.batchUpdate(currentState => ({
                 paletteContainer: {
-                    ...paletteContainer,
-                    columns: updatedColumns
+                    ...currentState.paletteContainer,
+                    columns: currentState.paletteContainer.columns.map(col => col.id === columnID ? { ...col, isLocked: !col.isLocked } : col)
                 }
-            });
+            }));
         }, `[${caller}.handleColumnLock]: Failed to toggle lock for column ${columnID}`);
     }
     async handleColumnResize(columnID, newSize) {
         return this.#errors.handleAsync(async () => {
             const paletteContainer = this.#stateManager.get('paletteContainer');
+            if (!paletteContainer) {
+                this.#log.warn('No palette container found in State.', `${caller}.handleColumnResize`);
+                return;
+            }
             const columns = paletteContainer.columns;
             const columnIndex = columns.findIndex(col => col.id === columnID);
             if (columnIndex === -1) {
                 this.#log.warn(`Column with ID ${columnID} not found.`, `${caller}.handleColumnResize`);
                 return;
             }
-            const adjustedSize = Math.max(domConfig.minColumnSize, Math.min(newSize, domConfig.maxColumnSize));
-            const sizeDiff = adjustedSize - columns[columnIndex].size;
-            // created new columns array with updated columns
-            const updatedColumns = columns.map(col => {
-                if (col.id === columnID) {
-                    return { ...col, size: adjustedSize };
-                }
-                return col;
-            });
-            // distribute size difference among locked columns
-            const unlockedColumns = updatedColumns.filter(col => col.id !== columnID && !col.isLocked);
-            const distributeAmount = unlockedColumns.length > 0 ? sizeDiff / unlockedColumns.length : 0;
-            const resizedColumns = updatedColumns.map(col => {
-                if (col.id !== columnID && !col.isLocked) {
-                    return { ...col, size: col.size - distributeAmount };
-                }
-                return col;
-            });
-            // normalize sizes to total 100%
-            const totalSize = resizedColumns.reduce((sum, col) => sum + col.size, 0);
-            const normalizedColumns = resizedColumns.map(col => ({
-                ...col,
-                size: col.size * (100 / totalSize)
-            }));
-            await this.#stateManager.batchUpdate({
-                paletteContainer: {
-                    ...paletteContainer,
-                    columns: normalizedColumns
-                }
+            await this.#stateManager.batchUpdate(currentState => {
+                const columns = currentState.paletteContainer.columns;
+                const columnIndex = columns.findIndex(col => col.id === columnID);
+                if (columnIndex === -1)
+                    return {}; // no update needed if column doesn't exist
+                const adjustedSize = Math.max(domConfig.minColumnSize, Math.min(newSize, domConfig.maxColumnSize));
+                const sizeDiff = adjustedSize - columns[columnIndex].size;
+                const updatedColumns = columns.map(col => col.id === columnID ? { ...col, size: adjustedSize } : col);
+                const unlockedColumns = updatedColumns.filter(col => col.id !== columnID && !col.isLocked);
+                const distributeAmount = unlockedColumns.length > 0 ? sizeDiff / unlockedColumns.length : 0;
+                const resizedColumns = updatedColumns.map(col => col.id !== columnID && !col.isLocked
+                    ? { ...col, size: col.size - distributeAmount }
+                    : col);
+                const totalSize = resizedColumns.reduce((sum, col) => sum + col.size, 0);
+                const normalizedColumns = totalSize > 0
+                    ? resizedColumns.map(col => ({
+                        ...col,
+                        size: col.size * (100 / totalSize)
+                    }))
+                    : resizedColumns;
+                return {
+                    paletteContainer: {
+                        ...currentState.paletteContainer,
+                        columns: normalizedColumns
+                    }
+                };
             });
         }, `[${caller}.handleColumnResize]: Failed to resize column ${columnID}`);
     }
@@ -99,26 +103,26 @@ class PaletteStateService {
                 this.#log.warn(`No palette container found in State.`, `${caller}.scanPaletteColumnColors`);
                 return;
             }
+            // Convert NodeList to an array before using .map()
             const columnElements = Array.from(this.#getAllElements(domIndex.classes.paletteColumn));
             if (columnElements.length === 0) {
                 this.#log.warn('No palette columns found in the DOM.', `${caller}.scanPaletteColumnColors`);
                 return;
             }
             const extractedColumns = columnElements.map((column, index) => {
-                const columnID = index + 1; // sequential IDs based on order
-                // get the input element for the color
+                const columnID = index + 1;
                 const inputElement = column.querySelector(`input.color-display`);
                 if (!inputElement) {
                     this.#log.warn(`No color input found in column ID ${columnID}.`, `${caller}.scanPaletteColumnColors`);
                     return null;
                 }
                 const inputValue = inputElement.value.trim();
-                // validate the color
+                // validate and skip invalid colors immediately
                 if (!this.#validateColorInput(inputValue)) {
                     this.#log.warn(`Invalid color detected in column ID ${columnID}: "${inputValue}"`, `${caller}.scanPaletteColumnColors`);
                     return null;
                 }
-                // Apply background color to the column
+                // process colors only if valid
                 column.style.backgroundColor = inputValue;
                 const parsedColor = this.#utils.color.formatCSSAsColor(inputValue);
                 if (!parsedColor) {
@@ -180,11 +184,19 @@ class PaletteStateService {
                 }
             };
             // update State with scanned colors
-            await this.#stateManager.batchUpdate({
-                paletteContainer: {
-                    columns: validColumns.map(({ color, ...col }) => col)
-                },
-                paletteHistory: [newPalette]
+            await this.#stateManager.batchUpdate(currentState => {
+                const state = currentState; // Cast to State
+                // ensure paletteHistory is an array before spreading
+                const paletteHistory = Array.isArray(state.paletteHistory)
+                    ? state.paletteHistory
+                    : [];
+                return {
+                    paletteContainer: {
+                        ...state.paletteContainer,
+                        columns: validColumns.map(({ color, ...col }) => col)
+                    },
+                    paletteHistory: [...paletteHistory, newPalette]
+                };
             });
             this.#log.debug(`Scanned ${validColumns.length} colors from the DOM and updated state.`, `${caller}.scanPaletteColumnColors`);
         }, `[${caller}.scanPaletteColumnColors]: Scan failed!`);
@@ -192,31 +204,30 @@ class PaletteStateService {
     async swapColumns(draggedID, targetID) {
         return await this.#errors.handleAsync(async () => {
             const paletteContainer = this.#stateManager.get('paletteContainer');
-            const columns = paletteContainer.columns;
-            const draggedColumn = columns.find(col => col.id === draggedID);
-            const targetColumn = columns.find(col => col.id === targetID);
-            if (!draggedColumn || !targetColumn) {
-                this.#log.warn(`Failed to swap columns: Column ID ${draggedID} or ${targetID} not found.`, `${caller}.swapColumns`);
+            if (!paletteContainer) {
+                this.#log.warn('No palette container found in State.', `${caller}.swapColumns`);
                 return;
             }
-            // create updated columns with immutably swapped positions
-            const updatedColumns = columns.map(col => {
-                if (col.id === draggedID)
-                    return { ...col, position: targetColumn.position };
-                if (col.id === targetID)
-                    return { ...col, position: draggedColumn.position };
-                return col;
+            await this.#stateManager.batchUpdate(currentState => {
+                const columns = currentState.paletteContainer.columns;
+                const draggedColumn = columns.find(col => col.id === draggedID);
+                const targetColumn = columns.find(col => col.id === targetID);
+                if (!draggedColumn || !targetColumn)
+                    return {}; // No update needed
+                const updatedColumns = columns.map(col => col.id === draggedID
+                    ? { ...col, position: targetColumn.position }
+                    : col.id === targetID
+                        ? { ...col, position: draggedColumn.position }
+                        : col);
+                const sortedColumns = [...updatedColumns].sort((a, b) => a.position - b.position);
+                return {
+                    paletteContainer: {
+                        ...currentState.paletteContainer,
+                        columns: sortedColumns
+                    }
+                };
             });
-            // sort columns based on updated positions
-            const sortedColumns = [...updatedColumns].sort((a, b) => a.position - b.position);
-            // update state with the new column order
-            this.#stateManager.batchUpdate({
-                paletteContainer: {
-                    ...paletteContainer,
-                    columns: sortedColumns
-                }
-            });
-            this.#log.debug(`Swapped columns ${draggedID} and ${targetID}. New order: ${sortedColumns.map(col => col.id).join(', ')}`, `${caller}.swapColumns`);
+            this.#log.debug(`Swapped columns ${draggedID} and ${targetID}.`, `${caller}.swapColumns`);
         }, `[${caller}.swapColumns]: Failed to swap columns with IDs ${draggedID} and ${targetID}`);
     }
     async updateColumnSize(columnID, newSize) {
@@ -229,13 +240,21 @@ class PaletteStateService {
             const minSize = domConfig.minColumnSize;
             const maxSize = domConfig.maxColumnSize;
             const adjustedSize = Math.max(minSize, Math.min(newSize, maxSize));
-            const updatedColumns = columns.map(col => col.id === columnID ? { ...col, size: adjustedSize } : col);
-            await this.#stateManager.batchUpdate({
+            if (columns[columnIndex].size === adjustedSize) {
+                this.#log.info(`Column ${columnID} already has the correct size (${adjustedSize}px). Skipping update.`, `${caller}.updateColumnSize`);
+                return;
+            }
+            await this.#stateManager.batchUpdate(currentState => ({
                 paletteContainer: {
-                    ...paletteContainer,
-                    columns: updatedColumns
+                    ...currentState.paletteContainer,
+                    columns: currentState.paletteContainer.columns.map(col => col.id === columnID
+                        ? {
+                            ...col,
+                            size: Math.max(domConfig.minColumnSize, Math.min(newSize, domConfig.maxColumnSize))
+                        }
+                        : col)
                 }
-            });
+            }));
         }, `[${caller}.updateColumnSize]: Failed to update size for column ${columnID}`);
     }
 }

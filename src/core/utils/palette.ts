@@ -22,9 +22,10 @@ import {
 	ValidationUtilities,
 	XYZ
 } from '../../types/index.js';
-import { domIndex, paletteConfig } from '../../config/index.js';
+import { domIndex, env, paletteConfig } from '../../config/index.js';
 
 const ids = domIndex.ids;
+const maxColumns = env.app.maxColumns;
 
 export function paletteUtilitiesFactory(
 	brand: BrandingUtilities,
@@ -87,16 +88,9 @@ export function paletteUtilitiesFactory(
 		return errors.handleSync(() => {
 			const paletteItems: PaletteItem[] = [];
 
-			// base color always gets itemID = 1
-			paletteItems.push(
-				createPaletteItem(
-					baseColor,
-					1 // ID 1 for base color
-				)
-			);
+			paletteItems.push(createPaletteItem(baseColor, 1));
 
-			// iterate over hues and generate PaletteItems
-			for (const [i, hue] of hues.entries()) {
+			for (const [i, hue] of hues.slice(0, maxColumns - 1).entries()) {
 				const newColor: HSL = {
 					value: {
 						hue: brand.asRadial(hue),
@@ -106,13 +100,15 @@ export function paletteUtilitiesFactory(
 					format: 'hsl'
 				};
 
-				const newPaletteItem = createPaletteItem(
-					newColor,
-					i + 2 // IDs start at 2 for generated colors
-				);
-
+				const newPaletteItem = createPaletteItem(newColor, i + 2);
 				paletteItems.push(newPaletteItem);
 				dom.updateColorBox(newColor, String(i + 2));
+			}
+
+			while (paletteItems.length < maxColumns) {
+				paletteItems.push(
+					createPaletteItem(baseColor, paletteItems.length + 1)
+				);
 			}
 
 			return paletteItems;
@@ -334,6 +330,20 @@ export function paletteUtilitiesFactory(
 		}, 'Error occurred while checking if HSL is too light');
 	}
 
+	function showPaletteColumns(count: number): void {
+		const allColumns = helpers.dom.getAllElements(
+			`.${domIndex.classes.paletteColumn}`
+		);
+
+		allColumns.forEach((col, index) => {
+			if (index < count) {
+				col.classList.remove('hidden');
+			} else {
+				col.classList.add('hidden');
+			}
+		});
+	}
+
 	const paletteUtilities: PaletteUtilities = {
 		createPaletteItem,
 		createPaletteItemArray,
@@ -344,7 +354,8 @@ export function paletteUtilitiesFactory(
 		isHSLInBounds,
 		isHSLTooDark,
 		isHSLTooGray,
-		isHSLTooLight
+		isHSLTooLight,
+		showPaletteColumns
 	};
 
 	return errors.handleSync(

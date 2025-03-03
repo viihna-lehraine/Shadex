@@ -5,6 +5,7 @@ import { Environment } from '../../types/index.js';
 export const env: Readonly<Environment> = {
 	app: {
 		historyLimit: 100,
+		maxColumns: 5,
 		paletteHistoryLimit: 20
 	},
 	idb: {
@@ -15,13 +16,13 @@ export const env: Readonly<Environment> = {
 		contentionHistoryLimit: 100,
 		timeout: 200
 	},
-	observer: {
-		debounce: 50
-	},
 	state: {
 		maxReadyAttempts: 20,
 		maxSaveRetries: 10,
 		readyTimeout: 50,
 		saveThrottleDelay: 30
+	},
+	timers: {
+		columnInitializationDebounce: 50
 	}
 } as const;

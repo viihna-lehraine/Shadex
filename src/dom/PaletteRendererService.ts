@@ -7,7 +7,6 @@ import {
 	GeneratePaletteFn,
 	GeneratePaletteFnGroup,
 	Helpers,
-	PaletteItem,
 	Services,
 	State,
 	Utilities
@@ -15,7 +14,7 @@ import {
 import { PaletteHistoryManager } from '../palette/PaletteHistoryManager.js';
 import { StateManager } from '../state/StateManager.js';
 import { DOMStore } from './DOMStore.js';
-import { domConfig } from '../config/index.js';
+import { domConfig, domIndex } from '../config/index.js';
 
 const caller = 'PaletteRendererService';
 
@@ -117,17 +116,59 @@ export class PaletteRendererService implements PaletteRendererContract {
 			return;
 		}
 
-		container.innerHTML = '';
+		const allColumns = Array.from(
+			container.querySelectorAll(`.${domIndex.classes.paletteColumn}`)
+		);
 
-		columns.forEach(column => {
-			const columnDiv = document.createElement('div');
-			columnDiv.className = 'palette-column';
-			columnDiv.style.width = `${column.size}%`;
-			container.appendChild(columnDiv);
+		// ensure exactly 5 columns exist
+		if (allColumns.length !== 5) {
+			this.#log.error(
+				`Expected 5 columns, but found ${allColumns.length}`,
+				`${caller}.renderColumns`
+			);
+			return;
+		}
+
+		const latestPalette = this.#paletteHistoryManager.getCurrentPalette();
+		if (!latestPalette) {
+			this.#log.warn(
+				'No saved palettes in history. Cannot render column colors.',
+				`${caller}.renderColumns`
+			);
+			return;
+		}
+
+		// map color values to column IDs
+		const colorMap = new Map<number, string>();
+		latestPalette.items.forEach(item => {
+			colorMap.set(item.itemID, item.css.hex);
+		});
+
+		// render each column with the correct color
+		allColumns.forEach((columnElement, index) => {
+			const columnData = columns[index];
+
+			if (!columnData) {
+				this.#log.warn(
+					`No column data found for index ${index}`,
+					`${caller}.renderColumns`
+				);
+				return;
+			}
+
+			const typedColumnElement = columnElement as HTMLElement;
+
+			typedColumnElement.style.width = `${columnData.size}%`;
+
+			// retrieve color from palette history
+			const columnColor = colorMap.get(columnData.id) ?? '';
+
+			typedColumnElement.style.backgroundColor = columnColor;
+			typedColumnElement.classList.toggle('locked', columnData.isLocked);
 		});
 
 		this.#log.debug(
-			`Rendered ${columns.length} columns.c`,
+			`Rendered ${columns.length} columns with colors.`,
 			`${caller}.renderColumns`
 		);
 	}
@@ -176,55 +217,53 @@ export class PaletteRendererService implements PaletteRendererContract {
 			this.#paletteHistoryManager.addPalette(newPalette);
 			await this.#stateManager.saveState();
 
-			// create and append palette columns
+			const allColumns = paletteContainer.querySelectorAll('.palette-column');
 			const columnWidth = 100 / newPalette.items.length;
 
-			const preferences = this.#stateManager.get(
-				'preferences'
-			) as State['preferences'];
-			const validColorSpace = ['hex', 'hsl', 'rgb'].includes(
-				preferences?.colorSpace
-			)
-				? preferences.colorSpace
-				: 'hex';
+			newPalette.items.forEach((item, index) => {
+				const column = allColumns[index];
+				if (!column) return;
 
-			const columns = newPalette.items.map((item, index) => {
 				const columnID = index + 1;
-				const colorValue =
-					item.css[validColorSpace as keyof PaletteItem['css']] || item.css.hex;
+				const colorValue = item.css.hex;
 
-				const column = document.createElement('div');
-				column.id = `palette-column-${columnID}`;
-				column.className = 'palette-column';
-				column.setAttribute('draggable', 'true');
-				column.style.backgroundColor = colorValue;
+				const columnElement = column as HTMLElement;
 
-				// add UI elements inside the column
-				this.#renderPaletteColumn(column, columnID, colorValue);
+				columnElement.style.backgroundColor = colorValue;
+				columnElement.classList.remove('hidden');
+				columnElement.style.width = `${columnWidth}%`;
 
-				return {
-					column,
-					state: {
-						id: columnID,
-						isLocked: false,
-						position: columnID,
-						size: columnWidth
-					}
-				};
+				// update UI elements inside the column
+				this.#renderPaletteColumn(columnElement, columnID, colorValue);
 			});
 
-			// append new columns to the palette container
-			columns.forEach(({ column }) => paletteContainer.appendChild(column));
+			const normalizedColumns = newPalette.items.map((item, index) => ({
+				id: index + 1,
+				isLocked: false,
+				position: index + 1,
+				size: 100 / 5, // each column gets 20%
+				color: item.colors,
+				css: item.css
+			}));
 
-			// update state with new columns
-			await this.#stateManager.batchUpdate({
+			// Update DOM elements
+			allColumns.forEach((columnElement, index) => {
+				const columnData = normalizedColumns[index];
+
+				const typedColumnElement = columnElement as HTMLElement;
+
+				typedColumnElement.style.width = `${columnData.size}%`;
+				typedColumnElement.style.backgroundColor =
+					columnData.color?.hex.hex ?? '';
+			});
+
+			// Update state
+			await this.#stateManager.batchUpdate(state => ({
 				paletteContainer: {
-					...(this.#stateManager.get(
-						'paletteContainer'
-					) as State['paletteContainer']),
-					columns: columns.map(col => col.state)
+					...state.paletteContainer,
+					columns: normalizedColumns
 				}
-			});
+			}));
 		}, `[${caller}]: Failed to render a new palette.`);
 	}
 
@@ -242,10 +281,8 @@ export class PaletteRendererService implements PaletteRendererContract {
 				);
 				return;
 			}
-			// clear existing content
-			paletteContainer.innerHTML = '';
 
-			// get the most recent palette from history
+			// get latest saved palette
 			const latestPalette = this.#paletteHistoryManager.getCurrentPalette();
 			if (!latestPalette) {
 				this.#log.warn(
@@ -254,69 +291,60 @@ export class PaletteRendererService implements PaletteRendererContract {
 				);
 				return;
 			}
-			// retrieve user's preferred color format
-			const preferences = this.#stateManager.get(
-				'preferences'
-			) as State['preferences'];
-			const colorSpace =
-				typeof preferences?.colorSpace === 'string' &&
-				['hex', 'hsl', 'rgb'].includes(preferences.colorSpace)
-					? preferences.colorSpace
-					: 'hex';
-			const validColorSpace = ['hex', 'hsl', 'rgb'].includes(colorSpace)
-				? colorSpace
-				: 'hex';
+
 			const columnCount = latestPalette.metadata.columnCount;
 			const columnWidth = 100 / columnCount;
-			const columns = latestPalette.items.map((item, index) => {
+			const allColumns = paletteContainer.querySelectorAll('.palette-column');
+
+			latestPalette.items.forEach((item, index) => {
+				const column = allColumns[index];
+				if (!column) return;
+
 				const columnID = item.itemID;
-				const colorValue =
-					item.css[validColorSpace as keyof PaletteItem['css']] || item.css.hex;
-				const column = document.createElement('div');
-				column.id = `palette-column-${columnID}`;
-				column.className = 'palette-column';
-				column.setAttribute('draggable', 'true');
-				column.style.backgroundColor = colorValue;
+				const colorValue = item.css.hex;
 
-				// add UI elements inside the column
-				this.#renderPaletteColumn(column, columnID, colorValue);
-				return {
-					column,
-					state: {
-						id: columnID,
-						isLocked: false,
-						position: index + 1,
-						size: columnWidth
-					}
-				};
+				const columnElement = column as HTMLElement;
+
+				columnElement.style.backgroundColor = colorValue;
+				columnElement.classList.remove('hidden');
+				columnElement.style.width = `${columnWidth}%`;
+
+				// update column UI elements
+				this.#renderPaletteColumn(columnElement, columnID, colorValue);
 			});
 
-			// append new columns to the palette container
-			columns.forEach(({ column }) => paletteContainer.appendChild(column));
-			// update state with new columns
-			await this.#stateManager.batchUpdate({
+			// hide any extra columns
+			const normalizedColumns = latestPalette.items.map((item, index) => ({
+				id: index + 1,
+				isLocked: false,
+				position: index + 1,
+				size: 100 / 5, // Ensure each column is evenly sized
+				color: item.colors,
+				css: item.css
+			}));
+
+			// update DOM elements
+			allColumns.forEach((columnElement, index) => {
+				const columnData = normalizedColumns[index];
+
+				const typedColumnElement = columnElement as HTMLElement;
+
+				typedColumnElement.style.width = `${columnData.size}%`;
+				typedColumnElement.style.backgroundColor =
+					columnData.color?.hex.hex ?? '';
+			});
+
+			// Update state
+			await this.#stateManager.batchUpdate(state => ({
 				paletteContainer: {
-					...(this.#stateManager.get(
-						'paletteContainer'
-					) as State['paletteContainer']),
-					columns: columns.map(col => col.state)
+					...state.paletteContainer,
+					columns: normalizedColumns
 				}
-			});
-
-			await this.#stateManager.batchUpdate({
-				paletteContainer: {
-					...(this.#stateManager.get(
-						'paletteContainer'
-					) as State['paletteContainer']),
-					columns: columns.map(col => col.state)
-				},
-				paletteHistory: [latestPalette]
-			});
+			}));
 
 			await this.#stateManager.saveState();
-
 			this.#log.debug(
-				`Restored ${columns.length} columns from saved state.`,
+				`Restored ${columnCount} columns from saved state.`,
 				`${caller}.renderPaletteFromState`
 			);
 		}, `[${caller}]: Failed to render palette from state.`);
@@ -347,38 +375,23 @@ export class PaletteRendererService implements PaletteRendererContract {
 				Math.min(newSize, domConfig.maxColumnSize)
 			);
 
-			const sizeDifference = adjustedSize - columns[columnIndex].size;
+			const updatedColumns = columns.map(col =>
+				col.id === columnID ? { ...col, size: newSize } : col
+			);
 
-			// create updated column sizes
-			const updatedColumns = columns.map((col, index) => {
-				if (index === columnIndex) {
-					return { ...col, size: adjustedSize };
-				}
-				// distribute size difference among unlocked columns
-				if (!col.isLocked) {
-					return {
-						...col,
-						size: col.size - sizeDifference / (columns.length - 1)
-					};
-				}
-				// locked columns remain unchanged
-				return col;
-			});
-
-			// normalize sizes to ensure total is exactly 100%
+			// Normalize sizes to ensure 100% total
 			const totalSize = updatedColumns.reduce((sum, col) => sum + col.size, 0);
 			const normalizedColumns = updatedColumns.map(col => ({
 				...col,
 				size: col.size * (100 / totalSize)
 			}));
 
-			// update state using Partial<State>
-			await this.#stateManager.batchUpdate({
+			await this.#stateManager.batchUpdate(state => ({
 				paletteContainer: {
-					...paletteContainer,
+					...state.paletteContainer,
 					columns: normalizedColumns
 				}
-			});
+			}));
 
 			this.#log.debug(
 				`Palette column size updated (ID: ${columnID}, New Size: ${adjustedSize}).`,
@@ -443,14 +456,12 @@ export class PaletteRendererService implements PaletteRendererContract {
 				}));
 
 				// update state history with type assertions
-				await this.#stateManager.batchUpdate({
+				await this.#stateManager.batchUpdate(state => ({
 					paletteContainer: {
-						...(this.#stateManager.get(
-							'paletteContainer'
-						) as State['paletteContainer']),
+						...state.paletteContainer,
 						columns: updatedColumns
 					}
-				});
+				}));
 			},
 			`[${caller}]: Failed to update palette item color.`,
 			{ context: { columnID, newColor } }

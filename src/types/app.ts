@@ -211,8 +211,8 @@ export interface BrandingUtilities {
 }
 
 export interface ColorBrandUtilities {
-	brandColorString(color: ColorStringMap): Color;
 	brandCMYKString(cmyk: CMYKStringMap['value']): CMYK['value'];
+	brandColorString(color: ColorStringMap): Color;
 	brandHexString(hex: HexStringMap['value']): Hex['value'];
 	brandHSLString(hsl: HSLStringMap['value']): HSL['value'];
 	brandHSVString(hsv: HSVStringMap['value']): HSV['value'];
@@ -337,6 +337,7 @@ export interface PaletteUtilities {
 	isHSLTooGray(hsl: HSL): boolean;
 	isHSLTooLight(hsl: HSL): boolean;
 	isHSLInBounds(hsl: HSL): boolean;
+	showPaletteColumns(count: number): void;
 }
 
 export interface ParsingUtilities {
@@ -484,7 +485,7 @@ export interface StateFactoryContract {
 
 export interface StateManagerContract {
 	init(services: Services): Promise<void>;
-	batchUpdate(updates: Partial<State>): Promise<void>;
+	batchUpdate(updater: (currentState: State) => Partial<State>): Promise<void>;
 	clearHistory(): void;
 	ensureStateReady(): Promise<void>;
 	get<K extends keyof State>(key?: K): State | State[K];
