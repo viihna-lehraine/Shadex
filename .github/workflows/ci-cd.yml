@@ -10,7 +10,7 @@ on:
 
 jobs:
     build-and-test:
-        name: Install, Lint, and Test
+        name: Install, Lint, Type Check, Test, and Audit
         runs-on: ubuntu-latest
 
         steps:
@@ -27,9 +27,9 @@ jobs:
               uses: actions/cache@v3
               with:
                   path: ~/.npm
-                  key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+                  key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
                   restore-keys: |
-                      ${{ runner.os }}-node-
+                      ${{ runner.os }}-npm-
 
             - name: Install dependencies
               run: npm ci
@@ -37,23 +37,37 @@ jobs:
             - name: Run Linter
               run: npm run lint
 
-            - name: Run Tests
-              run: npm test
+            - name: Run TypeScript Type Check
+              run: npm run type-check
 
-    code-analysis:
-        name: CodeQL Analysis
+            - name: Run Tests with Coverage
+              run: npm test -- --coverage
+
+            - name: Run Security Audit
+              run: npm audit --audit-level=high
+
+            - name: Upload Test Coverage Report
+              uses: actions/upload-artifact@v3
+              with:
+                  name: test-coverage
+                  path: coverage/
+
+    notify:
+        name: Send Discord Notification
         runs-on: ubuntu-latest
-        permissions:
-            security-events: write
+        needs: build-and-test
+        if: always()
 
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
-
-            - name: Initialize CodeQL
-              uses: github/codeql-action/init@v2
+            - name: Send Discord Notification
+              uses: Ilshidur/action-discord@master
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_SECRET }}
               with:
-                  languages: typescript, javascript
-
-            - name: Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@v2
+                  args: |
+                      CI/CD Pipeline **${{ github.workflow }}** for **${{ github.repository }}**
+                      **Status:** ${{ job.status }}
+                      **Branch:** ${{ github.ref }}
+                      **Commit:** ${{ github.sha }}
+                      **Triggered by:** ${{ github.actor }}
+                      **Run Details:** [View Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
