@@ -1,10 +1,9 @@
 import { EventManager } from './EventManager.js';
 import { PaletteHistoryManager } from '../../palette/PaletteHistoryManager.js';
 import '../../config/partials/defaults.js';
-import { domConfig, domIndex } from '../../config/partials/dom.js';
+import { domIndex, domConfig } from '../../config/partials/dom.js';
 import '../../config/partials/regex.js';
 
-// File: dom/events/PaleteEventsService.ts
 const caller = 'PaletteEventsService';
 const classes = domIndex.classes;
 class PaletteEventsService {
@@ -76,7 +75,8 @@ class PaletteEventsService {
                     this.#toggleColorModal(target);
                 }
                 else if (target.matches(classes.colorInputModal)) {
-                    if (event.target !== target.querySelector(classes.colorInputBtn)) {
+                    if (event.target !==
+                        target.querySelector(classes.colorInputBtn)) {
                         target.classList.add(classes.hidden);
                     }
                 }
@@ -272,7 +272,8 @@ class PaletteEventsService {
     }
     #getColorByPreference(colorData, preference) {
         return this.#errors.handleSync(() => {
-            return colorData[preference] || colorData.hex;
+            return (colorData[preference] ||
+                colorData.hex);
         }, `[${caller}]: Failed to retrieve color by preference.`);
     }
     async #handleColorInputChange(event, column, columnID) {
@@ -339,7 +340,9 @@ class PaletteEventsService {
                 const columnID = parseInt(column.id.split('-').pop());
                 const paletteContainer = this.#stateManager.get('paletteContainer');
                 // ensure resizing doesn't break 5-column structure
-                const updatedColumns = paletteContainer.columns.map(col => col.id === columnID ? { ...col, size: column.offsetWidth } : col);
+                const updatedColumns = paletteContainer.columns.map(col => col.id === columnID
+                    ? { ...col, size: column.offsetWidth }
+                    : col);
                 await this.#stateManager.batchUpdate(currentState => ({
                     paletteContainer: {
                         ...currentState.paletteContainer,

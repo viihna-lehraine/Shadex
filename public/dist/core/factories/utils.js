@@ -1,4 +1,3 @@
-// File: core/factories/utils.ts
 async function utilitiesFactory(helpers, services) {
     const { errors, log } = services;
     const utilities = {};

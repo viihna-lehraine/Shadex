@@ -1,5 +1,3 @@
-// File: config/partials/paletteConfig.ts
-
 import { RegexConfig } from '../../types/index.js';
 
 const number = '\\d+';
@@ -8,7 +6,10 @@ const percent = '%?';
 const optionalAlpha = '(?:,\\s*([\\d.]+))?';
 
 const colorFunc = (name: string, args: string[]): RegExp => {
-	return new RegExp(`${name}\\(${args.join(',\\s*')}${optionalAlpha}\\)`, 'i');
+	return new RegExp(
+		`${name}\\(${args.join(',\\s*')}${optionalAlpha}\\)`,
+		'i'
+	);
 };
 
 export const regex: Readonly<RegexConfig> = {

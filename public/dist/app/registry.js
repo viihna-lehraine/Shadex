@@ -1,6 +1,5 @@
 import { PaletteRendererService } from '../dom/PaletteRendererService.js';
 
-// File: app/dependencyRegistry.ts
 async function registerDependencies(helpers, services) {
     const { errors, log } = services;
     const caller = '[REGISTER_DEPENDENCIES]';

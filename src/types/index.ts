@@ -1,5 +1,3 @@
-// File: types/index.ts
-
 export type {
 	AdjustmentUtilities,
 	AppDependencies,

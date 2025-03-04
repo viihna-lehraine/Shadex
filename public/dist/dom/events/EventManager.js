@@ -1,4 +1,3 @@
-// File: dom/events/EventManager.ts
 const caller = 'EventManager';
 class EventManager {
     static #instance = null;

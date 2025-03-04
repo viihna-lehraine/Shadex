@@ -2,7 +2,6 @@ import '../../config/partials/defaults.js';
 import { regex } from '../../config/partials/regex.js';
 import { sets } from '../../config/partials/sets.js';
 
-// File: core/utils/validate.ts
 function validationUtilitiesFactory(helpers, services) {
     const { data: { deepClone } } = helpers;
     const { errors } = services;
@@ -49,24 +48,34 @@ function validationUtilitiesFactory(helpers, services) {
                     const isValidHSLHue = isNumericValid(clonedColor.value.hue) &&
                         clonedColor.value.hue >= 0 &&
                         clonedColor.value.hue <= 360;
-                    const isValidHSLSaturation = normalizePercentage(clonedColor.value.saturation) >= 0 &&
-                        normalizePercentage(clonedColor.value.saturation) <= 100;
+                    const isValidHSLSaturation = normalizePercentage(clonedColor.value.saturation) >=
+                        0 &&
+                        normalizePercentage(clonedColor.value.saturation) <=
+                            100;
                     const isValidHSLLightness = clonedColor.value.lightness
                         ? normalizePercentage(clonedColor.value.lightness) >= 0 &&
                             normalizePercentage(clonedColor.value.lightness) <= 100
                         : true;
-                    return isValidHSLHue && isValidHSLSaturation && isValidHSLLightness;
+                    return (isValidHSLHue &&
+                        isValidHSLSaturation &&
+                        isValidHSLLightness);
                 case 'hsv':
                     const isValidHSVHue = isNumericValid(clonedColor.value.hue) &&
                         clonedColor.value.hue >= 0 &&
                         clonedColor.value.hue <= 360;
-                    const isValidHSVSaturation = normalizePercentage(clonedColor.value.saturation) >= 0 &&
-                        normalizePercentage(clonedColor.value.saturation) <= 100;
+                    const isValidHSVSaturation = normalizePercentage(clonedColor.value.saturation) >=
+                        0 &&
+                        normalizePercentage(clonedColor.value.saturation) <=
+                            100;
                     const isValidHSVValue = clonedColor.value.value
-                        ? normalizePercentage(clonedColor.value.value) >= 0 &&
-                            normalizePercentage(clonedColor.value.value) <= 100
+                        ? normalizePercentage(clonedColor.value.value) >=
+                            0 &&
+                            normalizePercentage(clonedColor.value.value) <=
+                                100
                         : true;
-                    return isValidHSVHue && isValidHSVSaturation && isValidHSVValue;
+                    return (isValidHSVHue &&
+                        isValidHSVSaturation &&
+                        isValidHSVValue);
                 case 'lab':
                     return ([
                         clonedColor.value.l,
@@ -92,13 +101,19 @@ function validationUtilitiesFactory(helpers, services) {
                         clonedColor.value.blue >= 0 &&
                         clonedColor.value.blue <= 255);
                 case 'sl':
-                    return ([clonedColor.value.saturation, clonedColor.value.lightness].every(isNumericValid) &&
+                    return ([
+                        clonedColor.value.saturation,
+                        clonedColor.value.lightness
+                    ].every(isNumericValid) &&
                         clonedColor.value.saturation >= 0 &&
                         clonedColor.value.saturation <= 100 &&
                         clonedColor.value.lightness >= 0 &&
                         clonedColor.value.lightness <= 100);
                 case 'sv':
-                    return ([clonedColor.value.saturation, clonedColor.value.value].every(isNumericValid) &&
+                    return ([
+                        clonedColor.value.saturation,
+                        clonedColor.value.value
+                    ].every(isNumericValid) &&
                         clonedColor.value.saturation >= 0 &&
                         clonedColor.value.saturation <= 100 &&
                         clonedColor.value.value >= 0 &&
@@ -149,7 +164,8 @@ function validationUtilitiesFactory(helpers, services) {
                 }
                 return;
             }
-            if (typeof value === 'number' && Array.isArray(sets[rangeKey])) {
+            if (typeof value === 'number' &&
+                Array.isArray(sets[rangeKey])) {
                 const [min, max] = sets[rangeKey];
                 if (value < min || value > max) {
                     throw new Error(`Value ${value} is out of range for ${String(rangeKey)} [${min}, ${max}]`);

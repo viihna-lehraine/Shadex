@@ -1,5 +1,3 @@
-// File: dom/events/EventManager.ts
-
 import { Services } from '../../types/index.js';
 
 const caller = 'EventManager';
@@ -87,9 +85,9 @@ export class EventManager {
 
 	static async listByType(eventType: string): Promise<void> {
 		return await EventManager.#errors.handleAsync(async () => {
-			const listeners = Array.from(EventManager.#listeners.entries()).filter(
-				([key]) => key.startsWith(`${eventType}_`)
-			);
+			const listeners = Array.from(
+				EventManager.#listeners.entries()
+			).filter(([key]) => key.startsWith(`${eventType}_`));
 
 			if (listeners.length === 0) {
 				EventManager.#log.info(

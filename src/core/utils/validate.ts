@@ -1,5 +1,3 @@
-// File: core/utils/validate.ts
-
 import {
 	Color,
 	Helpers,
@@ -43,7 +41,9 @@ export function validationUtilitiesFactory(
 
 				const isNumericValid = (value: unknown): boolean =>
 					typeof value === 'number' && !isNaN(value);
-				const normalizePercentage = (value: string | number): number => {
+				const normalizePercentage = (
+					value: string | number
+				): number => {
 					if (typeof value === 'string' && value.endsWith('%')) {
 						return parseFloat(value.slice(0, -1));
 					}
@@ -77,28 +77,46 @@ export function validationUtilitiesFactory(
 							clonedColor.value.hue >= 0 &&
 							clonedColor.value.hue <= 360;
 						const isValidHSLSaturation =
-							normalizePercentage(clonedColor.value.saturation) >= 0 &&
-							normalizePercentage(clonedColor.value.saturation) <= 100;
+							normalizePercentage(clonedColor.value.saturation) >=
+								0 &&
+							normalizePercentage(clonedColor.value.saturation) <=
+								100;
 						const isValidHSLLightness = clonedColor.value.lightness
-							? normalizePercentage(clonedColor.value.lightness) >= 0 &&
-								normalizePercentage(clonedColor.value.lightness) <= 100
+							? normalizePercentage(
+									clonedColor.value.lightness
+								) >= 0 &&
+								normalizePercentage(
+									clonedColor.value.lightness
+								) <= 100
 							: true;
 
-						return isValidHSLHue && isValidHSLSaturation && isValidHSLLightness;
+						return (
+							isValidHSLHue &&
+							isValidHSLSaturation &&
+							isValidHSLLightness
+						);
 					case 'hsv':
 						const isValidHSVHue =
 							isNumericValid(clonedColor.value.hue) &&
 							clonedColor.value.hue >= 0 &&
 							clonedColor.value.hue <= 360;
 						const isValidHSVSaturation =
-							normalizePercentage(clonedColor.value.saturation) >= 0 &&
-							normalizePercentage(clonedColor.value.saturation) <= 100;
+							normalizePercentage(clonedColor.value.saturation) >=
+								0 &&
+							normalizePercentage(clonedColor.value.saturation) <=
+								100;
 						const isValidHSVValue = clonedColor.value.value
-							? normalizePercentage(clonedColor.value.value) >= 0 &&
-								normalizePercentage(clonedColor.value.value) <= 100
+							? normalizePercentage(clonedColor.value.value) >=
+									0 &&
+								normalizePercentage(clonedColor.value.value) <=
+									100
 							: true;
 
-						return isValidHSVHue && isValidHSVSaturation && isValidHSVValue;
+						return (
+							isValidHSVHue &&
+							isValidHSVSaturation &&
+							isValidHSVValue
+						);
 					case 'lab':
 						return (
 							[
@@ -129,9 +147,10 @@ export function validationUtilitiesFactory(
 						);
 					case 'sl':
 						return (
-							[clonedColor.value.saturation, clonedColor.value.lightness].every(
-								isNumericValid
-							) &&
+							[
+								clonedColor.value.saturation,
+								clonedColor.value.lightness
+							].every(isNumericValid) &&
 							clonedColor.value.saturation >= 0 &&
 							clonedColor.value.saturation <= 100 &&
 							clonedColor.value.lightness >= 0 &&
@@ -139,9 +158,10 @@ export function validationUtilitiesFactory(
 						);
 					case 'sv':
 						return (
-							[clonedColor.value.saturation, clonedColor.value.value].every(
-								isNumericValid
-							) &&
+							[
+								clonedColor.value.saturation,
+								clonedColor.value.value
+							].every(isNumericValid) &&
 							clonedColor.value.saturation >= 0 &&
 							clonedColor.value.saturation <= 100 &&
 							clonedColor.value.value >= 0 &&
@@ -162,7 +182,9 @@ export function validationUtilitiesFactory(
 							clonedColor.value.z <= 108.883
 						);
 					default:
-						console.error(`Unsupported color format: ${color.format}`);
+						console.error(
+							`Unsupported color format: ${color.format}`
+						);
 
 						return false;
 				}
@@ -203,12 +225,17 @@ export function validationUtilitiesFactory(
 			() => {
 				if (rangeKey === 'HexSet') {
 					if (!hexSet(value as string)) {
-						throw new Error(`Invalid value for ${String(rangeKey)}: ${value}`);
+						throw new Error(
+							`Invalid value for ${String(rangeKey)}: ${value}`
+						);
 					}
 					return;
 				}
 
-				if (typeof value === 'number' && Array.isArray(sets[rangeKey])) {
+				if (
+					typeof value === 'number' &&
+					Array.isArray(sets[rangeKey])
+				) {
 					const [min, max] = sets[rangeKey] as [number, number];
 
 					if (value < min || value > max) {
@@ -219,7 +246,9 @@ export function validationUtilitiesFactory(
 					return;
 				}
 
-				throw new Error(`Invalid range or value for ${String(rangeKey)}`);
+				throw new Error(
+					`Invalid range or value for ${String(rangeKey)}`
+				);
 			},
 			`Error occurred while validating range for ${String(rangeKey)}: ${value}`
 		);

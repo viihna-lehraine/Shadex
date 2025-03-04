@@ -2,7 +2,6 @@ import '../../config/partials/defaults.js';
 import { paletteConfig } from '../../config/partials/paletteConfig.js';
 import '../../config/partials/regex.js';
 
-// File: dom/palette/partials/hues.js
 // TODO: These definiely need refinement
 function generateAnalogousHues(color, options, common) {
     const { errors, log } = common.services;
@@ -15,8 +14,7 @@ function generateAnalogousHues(color, options, common) {
         const baseHue = color.value.hue;
         const maxTotalDistance = 60;
         const minTotalDistance = Math.max(20, 10 + (options.columnCount - 2) * 12);
-        const totalIncrement = Math.floor(Math.random() * (maxTotalDistance - minTotalDistance + 1)) +
-            minTotalDistance;
+        const totalIncrement = Math.floor(Math.random() * (maxTotalDistance - minTotalDistance + 1)) + minTotalDistance;
         const increment = Math.floor(totalIncrement / (options.columnCount - 1));
         for (let i = 1; i < options.columnCount; i++) {
             analogousHues.push((baseHue + increment * i) % 360);

@@ -3,7 +3,6 @@ import { env } from '../config/partials/env.js';
 import '../config/partials/defaults.js';
 import '../config/partials/regex.js';
 
-// File: storage/IDBStorageService.ts
 const caller = 'IDBStorageService';
 const dbName = config.storage.idbDBName;
 const defaultVerson = config.storage.idbDefaultVersion;

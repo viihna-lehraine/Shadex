@@ -1,0 +1,42 @@
+import { describe, expect, it } from 'vitest';
+import { Helpers, Services } from '../../../../src/types/index.js';
+import { LoggerService } from '../../../../src/core/services/LoggerService.js';
+import { utilitiesFactory } from '../../../../src/core/factories/utils.js';
+
+describe('utilitiesFactory', () => {
+	it('should initialize all utility modules', async () => {
+		const mockTypeGuards = {
+			isObject: (value: unknown): value is object =>
+				value !== null && typeof value === 'object'
+		} as Helpers['typeGuards'];
+
+		const mockHelpers = {
+			data: {
+				deepClone: <T>(value: T): T => {
+					if (!mockTypeGuards.isObject(value)) return value;
+					return structuredClone(value) as T;
+				}
+			}
+		} as Helpers;
+
+		const mockServices = {
+			errors: {
+				handleAndReturn: async (fn: any) => fn(),
+				handleAsync: async (fn: any) => fn(),
+				handleSync: (fn: any) => fn()
+			},
+			log: LoggerService.getInstance() as LoggerService
+		} as Services;
+
+		const utilities = await utilitiesFactory(mockHelpers, mockServices);
+
+		expect(utilities).toHaveProperty('validate');
+		expect(utilities).toHaveProperty('brand');
+		expect(utilities).toHaveProperty('adjust');
+		expect(utilities).toHaveProperty('format');
+		expect(utilities).toHaveProperty('sanitize');
+		expect(utilities).toHaveProperty('color');
+		expect(utilities).toHaveProperty('dom');
+		expect(utilities).toHaveProperty('palette');
+	});
+});

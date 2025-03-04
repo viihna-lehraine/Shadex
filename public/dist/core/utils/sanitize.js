@@ -1,4 +1,3 @@
-// File: core/utilities/sanitize.ts
 function sanitationUtilitiesFactory(brand, services, validate) {
     const { errors } = services;
     function getSafeQueryParam(param) {

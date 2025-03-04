@@ -2,7 +2,6 @@ import '../config/partials/defaults.js';
 import { domIndex } from '../config/partials/dom.js';
 import '../config/partials/regex.js';
 
-// File: common/services/DOMStore.ts
 const caller = 'DOMStore';
 const ids = domIndex.ids;
 class DOMStore {

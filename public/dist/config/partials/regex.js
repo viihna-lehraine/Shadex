@@ -1,4 +1,3 @@
-// File: config/partials/paletteConfig.ts
 const number = '\\d+';
 const decimal = '[\\d.]+';
 const percent = '%?';
@@ -15,7 +14,6 @@ const regex = {
             number + percent,
             number + percent
         ]),
-        hex: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/,
         hsl: colorFunc('hsl', [decimal, decimal + percent, decimal + percent]),
         hsv: colorFunc('hsv', [decimal, decimal + percent, decimal + percent]),
         lab: colorFunc('lab', [decimal, decimal, decimal]),

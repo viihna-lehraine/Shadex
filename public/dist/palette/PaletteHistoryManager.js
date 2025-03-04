@@ -3,7 +3,6 @@ import { env } from '../config/partials/env.js';
 import '../config/partials/defaults.js';
 import '../config/partials/regex.js';
 
-// File: palette/PaletteHistoryManager.ts
 const caller = 'PaletteHistoryManager';
 const paletteHistoryLimit = env.app.paletteHistoryLimit;
 class PaletteHistoryManager {

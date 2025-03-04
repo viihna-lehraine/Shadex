@@ -1,5 +1,3 @@
-// File: config/partials/defaults.ts
-
 import {
 	ByteRange,
 	ColorSpace,

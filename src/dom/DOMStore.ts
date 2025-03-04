@@ -1,5 +1,3 @@
-// File: common/services/DOMStore.ts
-
 import {
 	DOMElements,
 	DOMStoreContract,
@@ -91,7 +89,9 @@ export class DOMStore implements DOMStoreContract {
 					`${caller}.getElements`
 				);
 
-				throw new Error(`[${caller}]: DOM elements are not yet validated.`);
+				throw new Error(
+					`[${caller}]: DOM elements are not yet validated.`
+				);
 			}
 
 			return this.#elements;
@@ -102,7 +102,10 @@ export class DOMStore implements DOMStoreContract {
 		return this.#errors.handleSync(() => {
 			this.#elements = elements;
 
-			this.#log.debug('DOM elements set successfully', `${caller}.setElements`);
+			this.#log.debug(
+				'DOM elements set successfully',
+				`${caller}.setElements`
+			);
 		}, `[${caller}]: Unable to set DOM elements.`);
 	}
 
@@ -128,7 +131,9 @@ export class DOMStore implements DOMStoreContract {
 
 				for (const [category, elementsGroup] of Object.entries(ids)) {
 					const tagName =
-						elementTypeMap[category as keyof UnvalidatedDOMElements];
+						elementTypeMap[
+							category as keyof UnvalidatedDOMElements
+						];
 					if (!tagName) {
 						this.#log.warn(
 							`No element type mapping for category "${category}". Skipping...`,
@@ -152,10 +157,9 @@ export class DOMStore implements DOMStoreContract {
 							missingElements.push(id);
 						} else {
 							(
-								elements[category as keyof DOMElements] as Record<
-									string,
-									HTMLElement
-								>
+								elements[
+									category as keyof DOMElements
+								] as Record<string, HTMLElement>
 							)[key] = element;
 						}
 					}

@@ -1,5 +1,3 @@
-// File: common/utils/partials/dom/main.ts
-
 import {
 	ColorInputElement,
 	ColorSpace,
@@ -67,7 +65,10 @@ export function partialDOMUtilitiesFactory(
 		}, '[utils.dom.downloadFile]: Error occurred while downloading file.');
 	}
 
-	function enforceSwatchRules(minSwatches: number, maxSwatches: number): void {
+	function enforceSwatchRules(
+		minSwatches: number,
+		maxSwatches: number
+	): void {
 		return errors.handleSync(() => {
 			const paletteColumnSelector = document.getElementById(
 				domIndex.ids.inputs.paletteColumn
@@ -87,7 +88,10 @@ export function partialDOMUtilitiesFactory(
 			// ensure the value is within the allowed range
 			if (currentValue < minSwatches) {
 				newValue = minSwatches;
-			} else if (maxSwatches !== undefined && currentValue > maxSwatches) {
+			} else if (
+				maxSwatches !== undefined &&
+				currentValue > maxSwatches
+			) {
 				newValue = maxSwatches;
 			}
 			if (newValue !== currentValue) {
@@ -102,7 +106,9 @@ export function partialDOMUtilitiesFactory(
 						`Failed to dispatch change event to palette-number-options dropdown menu: ${error}`,
 						`utils.dom.enforceMinimumSwatches`
 					);
-					throw new Error(`Failed to dispatch change event: ${error}`);
+					throw new Error(
+						`Failed to dispatch change event: ${error}`
+					);
 				}
 			}
 		}, 'Error occurred while enforcing swatch rules.');
@@ -139,7 +145,10 @@ export function partialDOMUtilitiesFactory(
 		});
 
 		// normalize sizes to ensure total is 100%
-		const totalSize = updatedColumns.reduce((sum, col) => sum + col.size, 0);
+		const totalSize = updatedColumns.reduce(
+			(sum, col) => sum + col.size,
+			0
+		);
 		return updatedColumns.map(col => ({
 			...col,
 			size: col.size * (100 / totalSize)
@@ -222,17 +231,20 @@ export function partialDOMUtilitiesFactory(
 			}
 
 			// Normalize to exactly 5 columns, padding if necessary
-			const normalizedColumns = Array.from({ length: 5 }).map((_, index) => {
-				const column = paletteColumns[index] ?? document.createElement('div'); // fallback if missing
-				column.id = `palette-column-${index + 1}`;
-				column.classList.add(classes.paletteColumn);
+			const normalizedColumns = Array.from({ length: 5 }).map(
+				(_, index) => {
+					const column =
+						paletteColumns[index] ?? document.createElement('div'); // fallback if missing
+					column.id = `palette-column-${index + 1}`;
+					column.classList.add(classes.paletteColumn);
 
-				const id = index + 1;
-				const size = column.clientWidth / 5;
-				const isLocked = column.classList.contains(classes.locked);
+					const id = index + 1;
+					const size = column.clientWidth / 5;
+					const isLocked = column.classList.contains(classes.locked);
 
-				return { id, position: index + 1, size, isLocked };
-			});
+					return { id, position: index + 1, size, isLocked };
+				}
+			);
 
 			return normalizedColumns;
 		}, 'Error occurred while scanning palette columns.');
@@ -240,8 +252,8 @@ export function partialDOMUtilitiesFactory(
 
 	function switchColorSpaceInDOM(targetFormat: ColorSpace): void {
 		return errors.handleSync(() => {
-			const colorTextOutputBoxes = document.querySelectorAll<HTMLInputElement>(
-				'.color-text-output-box'
+			const colorTextOutputBoxes = Array.from(
+				getAllElements<HTMLInputElement>('.color-text-output-box')
 			);
 			for (const box of colorTextOutputBoxes) {
 				const inputBox = box as ColorInputElement;
@@ -307,14 +319,17 @@ export function partialDOMUtilitiesFactory(
 			const colorBox = helpers.dom.getElement(boxId);
 
 			if (colorBox) {
-				colorBox.style.backgroundColor = colorUtils.formatColorAsCSS(color);
+				colorBox.style.backgroundColor =
+					colorUtils.formatColorAsCSS(color);
 			}
 		}, '[utils.dom.updateColorBox]: Error occurred while updating color box.');
 	}
 
 	function updateHistory(history: Palette[]): void {
 		return errors.handleSync(() => {
-			const historyList = getElement<HTMLDivElement>(ids.divs.paletteHistory);
+			const historyList = getElement<HTMLDivElement>(
+				ids.divs.paletteHistory
+			);
 			if (!historyList) return;
 			historyList.innerHTML = '';
 			history.forEach(palette => {

@@ -1,4 +1,3 @@
-// File: state/StateFactory.ts
 const caller = 'StateFactory';
 class StateFactory {
     static #instance = null;

@@ -1,9 +1,8 @@
 import { env } from '../../../../config/partials/env.js';
 import '../../../../config/partials/defaults.js';
-import { domConfig, domIndex } from '../../../../config/partials/dom.js';
+import { domIndex, domConfig } from '../../../../config/partials/dom.js';
 import '../../../../config/partials/regex.js';
 
-// File: common/utils/partials/dom/main.ts
 const classes = domIndex.classes;
 const ids = domIndex.ids;
 const maxColumns = env.app.maxColumns;
@@ -57,7 +56,8 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
             if (currentValue < minSwatches) {
                 newValue = minSwatches;
             }
-            else if (maxSwatches !== undefined && currentValue > maxSwatches) {
+            else if (maxSwatches !== undefined &&
+                currentValue > maxSwatches) {
                 newValue = maxSwatches;
             }
             if (newValue !== currentValue) {
@@ -178,7 +178,7 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
     }
     function switchColorSpaceInDOM(targetFormat) {
         return errors.handleSync(() => {
-            const colorTextOutputBoxes = document.querySelectorAll('.color-text-output-box');
+            const colorTextOutputBoxes = Array.from(getAllElements('.color-text-output-box'));
             for (const box of colorTextOutputBoxes) {
                 const inputBox = box;
                 const colorValues = inputBox.colorValues;
@@ -216,7 +216,8 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
         return errors.handleSync(() => {
             const colorBox = helpers.dom.getElement(boxId);
             if (colorBox) {
-                colorBox.style.backgroundColor = colorUtils.formatColorAsCSS(color);
+                colorBox.style.backgroundColor =
+                    colorUtils.formatColorAsCSS(color);
             }
         }, '[utils.dom.updateColorBox]: Error occurred while updating color box.');
     }

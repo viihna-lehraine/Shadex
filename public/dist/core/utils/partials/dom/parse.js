@@ -1,7 +1,6 @@
 import '../../../../config/partials/defaults.js';
 import { regex } from '../../../../config/partials/regex.js';
 
-// File: core/utils/dom/partials/parse.ts
 function domParsingUtilitiesFactory(brand, services) {
     const { errors, log } = services;
     function parseCheckbox(id) {
@@ -80,7 +79,9 @@ function domParsingUtilitiesFactory(brand, services) {
                 return;
             const selectedValue = dropdown.value;
             if (!validOptions.includes(selectedValue)) {
-                return validOptions.includes(selectedValue) ? selectedValue : undefined;
+                return validOptions.includes(selectedValue)
+                    ? selectedValue
+                    : undefined;
             }
             return;
         }, 'Error occurred while parsing dropdown selection.');

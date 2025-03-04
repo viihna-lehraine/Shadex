@@ -5,7 +5,6 @@ import { PaletteStateService } from '../state/PaletteStateService.js';
 import { StateManager } from '../state/StateManager.js';
 import { UIEventsService } from '../dom/events/UIEventsService.js';
 
-// File: app/init.ts
 async function initializeDOMStore(helpers, services) {
     const { errors, log } = services;
     return errors.handleAsync(async () => {

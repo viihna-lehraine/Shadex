@@ -3,7 +3,6 @@ import '../../config/partials/defaults.js';
 import { domIndex } from '../../config/partials/dom.js';
 import '../../config/partials/regex.js';
 
-// File: dom/events/UIEventsService.ts
 const caller = 'UIEventsService';
 const classes = domIndex.classes;
 class UIEventsService {

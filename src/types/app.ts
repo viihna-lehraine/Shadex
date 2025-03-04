@@ -1,5 +1,3 @@
-// File: types/app/app.ts
-
 import {
 	AllColors,
 	ByteRange,
@@ -80,7 +78,9 @@ export interface ColorHelpers {
 	>(
 		from: From,
 		to: To
-	): ((value: ColorDataAssertion[From]) => ColorDataAssertion[To]) | undefined;
+	):
+		| ((value: ColorDataAssertion[From]) => ColorDataAssertion[To])
+		| undefined;
 	hueToRGB(p: number, q: number, t: number): number;
 }
 
@@ -135,7 +135,9 @@ export interface TypeGuards {
 	isColorSpace(value: unknown): value is ColorSpace;
 	isColorSpaceExtended(value: string): value is ColorSpaceExtended;
 	isColorStringMap(value: unknown): value is ColorStringMap;
-	isConvertibleColor(color: Color): color is CMYK | Hex | HSL | HSV | LAB | RGB;
+	isConvertibleColor(
+		color: Color
+	): color is CMYK | Hex | HSL | HSV | LAB | RGB;
 	isFormat(format: unknown): format is ColorFormat;
 	isHex(value: unknown): value is Hex;
 	isHexSet(value: unknown): value is HexSet;
@@ -307,7 +309,9 @@ export interface FormattingUtilities {
 	addHashToHex(hex: Hex): Hex;
 	componentToHex(component: number): string;
 	convertShortHexToLong(hex: string): string;
-	formatPercentageValues<T extends Record<string, number | NumericBrandedType>>(
+	formatPercentageValues<
+		T extends Record<string, number | NumericBrandedType>
+	>(
 		value: T
 	): {
 		[K in keyof T]: T[K] extends number | NumericBrandedType
@@ -485,7 +489,9 @@ export interface StateFactoryContract {
 
 export interface StateManagerContract {
 	init(services: Services): Promise<void>;
-	batchUpdate(updater: (currentState: State) => Partial<State>): Promise<void>;
+	batchUpdate(
+		updater: (currentState: State) => Partial<State>
+	): Promise<void>;
 	clearHistory(): void;
 	ensureStateReady(): Promise<void>;
 	get<K extends keyof State>(key?: K): State | State[K];

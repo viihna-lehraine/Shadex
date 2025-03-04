@@ -1,4 +1,3 @@
-// File: config/partials/paletteConfig.ts
 const paletteConfig = {
     adjustment: { slaValue: 10 },
     probabilities: {
@@ -20,16 +19,11 @@ const paletteConfig = {
         }
     },
     shiftRanges: {
-        analogous: { hue: 30, sat: 30, light: 30 },
-        complementary: { hue: 10, sat: 0, light: 0 },
-        custom: { hue: 0, sat: 0, light: 0 },
-        diadic: { hue: 30, sat: 30, light: 30 },
-        hexadic: { hue: 0, sat: 30, light: 30 },
-        monochromatic: { hue: 0, sat: 0, light: 10 },
-        random: { hue: 0, sat: 0, light: 0 },
+        diadic: { sat: 30, light: 30 },
+        hexadic: { sat: 30, light: 30 },
         splitComplementary: { hue: 30, sat: 30, light: 30 },
-        tetradic: { hue: 0, sat: 30, light: 30 },
-        triadic: { hue: 0, sat: 30, light: 30 }
+        tetradic: { sat: 30, light: 30 },
+        triadic: { sat: 30, light: 30 }
     },
     thresholds: { dark: 25, gray: 20, light: 75 }
 };

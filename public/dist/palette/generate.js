@@ -1,7 +1,6 @@
 import { defaults } from '../config/partials/defaults.js';
 import '../config/partials/regex.js';
 
-// File: dom/palette/generate.js
 const defaultPalette = defaults.palette;
 function generatePalette(options, common, generateHuesFns, generatePaletteFns) {
     const { log, errors } = common.services;

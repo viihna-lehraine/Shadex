@@ -1,5 +1,3 @@
-// File: storage/StorageManager.ts
-
 import { Services, StorageManagerContract } from '../types/index.js';
 import { IDBStorageService } from './IDBStorageService.js';
 import { LocalStorageService } from './LocalStorageService.js';

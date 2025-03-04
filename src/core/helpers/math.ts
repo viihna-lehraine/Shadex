@@ -1,5 +1,3 @@
-// File: File: core/helpers/math.ts
-
 import { MathHelpers, NumericRangeKey } from '../../types/index.js';
 import { sets } from '../../config/index.js';
 

@@ -1,5 +1,3 @@
-// File: core/utils/brand.ts
-
 import {
 	BrandingUtilities,
 	ByteRange,

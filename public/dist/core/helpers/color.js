@@ -1,4 +1,3 @@
-// File: core/helpers/color.ts
 const colorHelpersFactory = (helpers) => ({
     getConversionFn(from, to) {
         try {
@@ -26,7 +25,7 @@ const colorHelpersFactory = (helpers) => ({
             if (clonedT < 1 / 2)
                 return clonedQ;
             if (clonedT < 2 / 3)
-                return clonedP + (clonedQ - clonedP) * (2 / 3 - clonedT) * 6;
+                return (clonedP + (clonedQ - clonedP) * (2 / 3 - clonedT) * 6);
             return clonedP;
         }
         catch (error) {

@@ -1,7 +1,6 @@
 import { ErrorHandlerService } from '../services/ErrorHandlerService.js';
 import { LoggerService } from '../services/LoggerService.js';
 
-// File: core/factories/services.ts
 function serviceFactory(helpers) {
     console.log('[SERVICE_FACTORY]: Executing createServices.');
     const services = {};

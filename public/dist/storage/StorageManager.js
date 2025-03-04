@@ -1,7 +1,6 @@
 import { IDBStorageService } from './IDBStorageService.js';
 import { LocalStorageService } from './LocalStorageService.js';
 
-// File: storage/StorageManager.ts
 const caller = 'StorageManager';
 class StorageManager {
     static #instance = null;

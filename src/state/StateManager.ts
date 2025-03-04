@@ -1,5 +1,3 @@
-// File: state/StateManager.ts
-
 import {
 	Helpers,
 	History,
@@ -34,7 +32,11 @@ export class StateManager implements StateManagerContract {
 	#log: Services['log'];
 	#errors: Services['errors'];
 
-	private constructor(helpers: Helpers, services: Services, utils: Utilities) {
+	private constructor(
+		helpers: Helpers,
+		services: Services,
+		utils: Utilities
+	) {
 		try {
 			services.log.debug(
 				`Constructing ${caller} instance.`,
@@ -48,10 +50,17 @@ export class StateManager implements StateManagerContract {
 			this.#errors = services.errors;
 
 			this.#state = {} as State;
-			this.#stateFactory = StateFactory.getInstance(helpers, services, utils);
+			this.#stateFactory = StateFactory.getInstance(
+				helpers,
+				services,
+				utils
+			);
 
 			this.init(services).catch(error => {
-				this.#log.error('StateManager init failed.', `${caller} constructor`);
+				this.#log.error(
+					'StateManager init failed.',
+					`${caller} constructor`
+				);
 
 				console.error(error);
 			});
@@ -74,7 +83,11 @@ export class StateManager implements StateManagerContract {
 					`${caller}.getInstance`
 				);
 
-				StateManager.#instance = new StateManager(helpers, services, utils);
+				StateManager.#instance = new StateManager(
+					helpers,
+					services,
+					utils
+				);
 			}
 
 			services.log.debug(
@@ -98,7 +111,10 @@ export class StateManager implements StateManagerContract {
 
 			this.#state = await this.loadState();
 
-			console.log(`[${caller}.init]: State after loadState():`, this.#state);
+			console.log(
+				`[${caller}.init]: State after loadState():`,
+				this.#state
+			);
 
 			this.saveState();
 		}, `[${caller}.init]: Failed to initialize State Manager.`);
@@ -112,7 +128,10 @@ export class StateManager implements StateManagerContract {
 			const updates = updater(currentState);
 
 			const isShallowEqual = Object.keys(updates).every(key =>
-				Object.is(currentState[key as keyof State], updates[key as keyof State])
+				Object.is(
+					currentState[key as keyof State],
+					updates[key as keyof State]
+				)
 			);
 
 			if (isShallowEqual) {
@@ -136,7 +155,10 @@ export class StateManager implements StateManagerContract {
 			this.#redoStack = [];
 			this.#undoStack = [];
 
-			this.#log.info(`History and undo stack cleared.`, `${caller}.clear`);
+			this.#log.info(
+				`History and undo stack cleared.`,
+				`${caller}.clear`
+			);
 		}, `[${caller}.clearHistory]: Failed to clear history.`);
 	}
 
@@ -160,7 +182,9 @@ export class StateManager implements StateManagerContract {
 						`${caller}.ensureStateReady`
 					);
 
-					await new Promise(resolve => setTimeout(resolve, stateReadyTimeout));
+					await new Promise(resolve =>
+						setTimeout(resolve, stateReadyTimeout)
+					);
 				}
 
 				this.#log.debug(
@@ -188,7 +212,10 @@ export class StateManager implements StateManagerContract {
 			const loadedState = await this.#storage.getItem<State>('state');
 			if (loadedState) {
 				this.#state = this.#deepFreeze(this.#deepClone(loadedState));
-				this.#log.info('State loaded from storage.', `${caller}.loadState`);
+				this.#log.info(
+					'State loaded from storage.',
+					`${caller}.loadState`
+				);
 				return this.#state;
 			}
 			this.#log.debug(
@@ -202,7 +229,10 @@ export class StateManager implements StateManagerContract {
 	redo(): State | null {
 		return this.#errors.handleSync(() => {
 			if (this.#redoStack.length === 0) {
-				this.#log.info('No redo actions available.', `StateManager.redo`);
+				this.#log.info(
+					'No redo actions available.',
+					`StateManager.redo`
+				);
 				return null;
 			}
 
@@ -236,7 +266,10 @@ export class StateManager implements StateManagerContract {
 	): Promise<void> {
 		return this.#errors.handleAsync(async () => {
 			if (Object.is(this.#state, state)) {
-				this.#log.debug('Skipping redundant save.', `${caller}.saveState`);
+				this.#log.debug(
+					'Skipping redundant save.',
+					`${caller}.saveState`
+				);
 
 				return;
 			}
@@ -252,7 +285,10 @@ export class StateManager implements StateManagerContract {
 	undo(): State | null {
 		return this.#errors.handleSync(() => {
 			if (this.#undoStack.length <= 1) {
-				this.#log.info('No undo actions available.', `StateManager.undo`);
+				this.#log.info(
+					'No undo actions available.',
+					`StateManager.undo`
+				);
 				return null;
 			}
 
@@ -288,7 +324,11 @@ export class StateManager implements StateManagerContract {
 
 	async #saveOperation(state: State): Promise<void> {
 		return this.#errors.handleAsync(async () => {
-			for (let attempt = 1; attempt <= env.state.maxSaveRetries; attempt++) {
+			for (
+				let attempt = 1;
+				attempt <= env.state.maxSaveRetries;
+				attempt++
+			) {
 				try {
 					await this.#storage.setItem('state', state);
 

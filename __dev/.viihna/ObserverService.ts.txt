@@ -1,0 +1,226 @@
+// File: core/services/ObserverService.ts
+
+import {
+	DebounceOptions,
+	Helpers,
+	Listener,
+	ObserverContract,
+	Services
+} from '../../types/index.js';
+import { PROXY_META } from '../../config/index.js';
+
+const caller = 'ObserverService';
+
+export class ObserverService<T extends Record<string, unknown>>
+	implements ObserverContract<T>
+{
+	#listeners: { [P in keyof T]?: Listener<T[P]>[] } = {};
+	#debounceTimers: Partial<Record<keyof T, NodeJS.Timeout>> = {};
+
+	#createProxy: Helpers['data']['createProxy'];
+	#deepClone: Helpers['data']['deepClone'];
+	#errors: Services['errors'];
+	#log: Services['log'];
+	#typeGuards: Helpers['typeGuards'];
+
+	constructor(
+		private data: T,
+		private debounceOptions: DebounceOptions = {},
+		helpers: Helpers,
+		services: Services
+	) {
+		try {
+			services.log.debug(
+				`Constructing Observer instance`,
+				`${caller} constructor`
+			);
+
+			this.#createProxy = helpers.data.createProxy;
+			this.#deepClone = helpers.data.deepClone;
+			this.#errors = services.errors;
+			this.#log = services.log;
+			this.#typeGuards = helpers.typeGuards;
+
+			this.data = this.#deepObserve(this.data);
+		} catch (error) {
+			throw new Error(
+				`[${caller} constructor]: ${error instanceof Error ? error.message : error}`
+			);
+		}
+	}
+
+	batchUpdate(updates: Partial<T>): void {
+		return this.#errors.handleSync(() => {
+			this.#log.debug(
+				`Performing batch update. Updates: ${JSON.stringify(this.#deepClone(updates))}`,
+				`${caller}.batchUpdate`
+			);
+
+			Object.entries(updates).forEach(([key, value]) => {
+				this.set(key as keyof T, value as T[keyof T]);
+			});
+		}, `[${caller}]: Error performing batch update.`);
+	}
+
+	get<K extends keyof T>(prop: K): T[K] {
+		return this.#errors.handleSync(() => {
+			return this.#deepClone(this.data[prop] as T[K]);
+		}, `[${caller}]: Error getting data.`);
+	}
+
+	getData(): T {
+		return this.#errors.handleSync(() => {
+			return this.#deepClone(this.data);
+		}, `[${caller}]: Error getting data.`);
+	}
+
+	off<K extends keyof T>(prop: K, callback: Listener<T[K]>): void {
+		return this.#errors.handleSync(() => {
+			this.#listeners[prop] =
+				this.#listeners[prop]?.filter(cb => cb !== callback) ?? [];
+		}, `[${caller}]: Error removing listener.`);
+	}
+
+	on<K extends keyof T>(prop: K, callback: Listener<T[K]>): void {
+		return this.#errors.handleSync(() => {
+			if (!this.#listeners[prop]) {
+				this.#listeners[prop] = [];
+			}
+
+			this.#listeners[prop]!.push(callback);
+		}, `[${caller}]: Error adding listener.`);
+	}
+
+	replaceData(newData: T): void {
+		return this.#errors.handleSync(() => {
+			const oldData = this.#deepClone(this.data);
+			const clonedNewData = this.#deepClone(newData);
+
+			// assign immutable new state
+			this.data = clonedNewData;
+
+			// notify observers only on changed properties
+			Object.keys(clonedNewData).forEach(key => {
+				const prop = key as keyof T;
+				const newValue = clonedNewData[prop];
+				const oldValue = oldData[prop];
+
+				if (!Object.is(newValue, oldValue)) {
+					this.#triggerNotify(prop, newValue, oldValue);
+				}
+			});
+
+			// notify listeners for removed properties
+			Object.keys(oldData).forEach(key => {
+				if (!(key in clonedNewData)) {
+					const prop = key as keyof T;
+					this.#triggerNotify(prop, undefined as T[keyof T], oldData[prop]);
+				}
+			});
+
+			this.#log.debug(
+				`Observer data replaced and listeners notified.`,
+				`${caller}.replaceData`
+			);
+		}, `[${caller}.replaceData]: Error replacing data.`);
+	}
+
+	set<K extends keyof T>(prop: K, value: T[K]): void {
+		return this.#errors.handleSync(() => {
+			const oldValue = this.#deepClone(this.data[prop]);
+
+			this.data[prop] = this.#deepClone(value);
+
+			this.#triggerNotify(prop, this.data[prop], oldValue);
+		}, `[${caller}]: Error setting data.`);
+	}
+
+	setData<U extends Record<string, unknown>>(
+		newData: U,
+		debounceOptions: DebounceOptions,
+		helpers: Helpers,
+		services: Services
+	): ObserverService<U> {
+		return new ObserverService(newData, debounceOptions, helpers, services);
+	}
+
+	#deepObserve(obj: T): T {
+		return this.#errors.handleSync(() => {
+			if (!this.#typeGuards.isObject(obj)) {
+				return obj;
+			}
+
+			if (Reflect.has(obj, PROXY_META)) {
+				return obj;
+			}
+
+			const handler: ProxyHandler<T> = {
+				get: (target, prop: string) => {
+					const value = target[prop as keyof T];
+
+					// only wrap in proxy if it's an object
+					if (this.#typeGuards.isObject(value)) {
+						return this.#deepObserve(value as T);
+					}
+
+					return value;
+				},
+				set: (target, prop: string, value) => {
+					if (Object.prototype.hasOwnProperty.call(target, prop)) {
+						const key = prop as keyof T;
+						const oldValue = target[key];
+
+						if (this.#typeGuards.isObject(value)) {
+							target[key] = this.#deepObserve(
+								value as T
+							) as unknown as T[keyof T];
+						} else {
+							target[key] = value;
+						}
+
+						this.#triggerNotify(key, target[key], oldValue);
+					}
+					return true;
+				},
+				deleteProperty: (target, prop: string) => {
+					if (Object.prototype.hasOwnProperty.call(target, prop)) {
+						const key = prop as keyof T;
+						const oldValue = target[key];
+
+						delete target[key];
+						this.#triggerNotify(key, undefined as T[keyof T], oldValue);
+					}
+					return true;
+				}
+			};
+
+			return this.#createProxy(obj, handler);
+		}, `[ObserverService]: Error observing data.`);
+	}
+
+	#notify<K extends keyof T>(prop: K, newValue: T[K], oldValue: T[K]) {
+		return this.#errors.handleSync(() => {
+			this.#listeners[prop]?.forEach(callback => callback(newValue, oldValue));
+		}, `[${caller}]: Error notifying listeners.`);
+	}
+
+	#triggerNotify<K extends keyof T>(
+		prop: K,
+		newValue: T[K],
+		oldValue: T[K]
+	): void {
+		return this.#errors.handleSync(() => {
+			const delay = this.debounceOptions.delay ?? 0;
+
+			if (delay > 0) {
+				clearTimeout(this.#debounceTimers[prop]);
+
+				this.#debounceTimers[prop] = setTimeout(() => {
+					this.#notify(prop, newValue, oldValue);
+				}, delay);
+			} else {
+				this.#notify(prop, newValue, oldValue);
+			}
+		}, `[${caller}]: Error triggering notification.`);
+	}
+}

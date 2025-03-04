@@ -1,5 +1,3 @@
-// File: core/factories/services.ts
-
 import { Helpers, Services } from '../../types/index.js';
 import { ErrorHandlerService, LoggerService } from '../services/index.js';
 

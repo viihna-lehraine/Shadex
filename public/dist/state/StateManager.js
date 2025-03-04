@@ -4,7 +4,6 @@ import { env } from '../config/partials/env.js';
 import '../config/partials/defaults.js';
 import '../config/partials/regex.js';
 
-// File: state/StateManager.ts
 const caller = 'StateManager';
 const maxReadyAttempts = env.state.maxReadyAttempts;
 const stateReadyTimeout = env.state.readyTimeout;

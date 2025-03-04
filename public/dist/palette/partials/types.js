@@ -2,7 +2,6 @@ import '../../config/partials/defaults.js';
 import { paletteConfig } from '../../config/partials/paletteConfig.js';
 import '../../config/partials/regex.js';
 
-// File: palette/partials/types.js
 const shiftRanges = paletteConfig.shiftRanges;
 function generateAnalogousPalette(options, common, generateHues) {
     const { services: { errors }, utils } = common;
@@ -36,7 +35,8 @@ function generateComplementaryPalette(options, common) {
                     values
                 });
                 const direction = Math.random() < 0.5 ? 1 : -1; // randomize direction
-                const newHue = (baseHue + 180 + variationOffset * direction + 360) % 360;
+                const newHue = (baseHue + 180 + variationOffset * direction + 360) %
+                    360;
                 hues.push(newHue);
             }
         }
@@ -49,7 +49,8 @@ function generateComplementaryPalette(options, common) {
             const newColor = {
                 value: {
                     hue: utils.brand.asRadial(hue),
-                    saturation: utils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation + saturationOffset))),
+                    saturation: utils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.saturation +
+                        saturationOffset))),
                     lightness: utils.brand.asPercentile(Math.min(100, Math.max(0, baseColor.value.lightness + lightnessOffset)))
                 },
                 format: 'hsl'
@@ -76,7 +77,8 @@ function generateDiadicPalette(options, common, generateHues) {
                     values
                 });
                 const direction = i % 2 === 0 ? 1 : -1;
-                hues.push((baseColor.value.hue + variationOffset * direction) % 360);
+                hues.push((baseColor.value.hue + variationOffset * direction) %
+                    360);
             }
         }
         // create PaletteItem array with incrementing itemIDs
@@ -182,7 +184,9 @@ function generateSplitComplementaryPalette(options, common) {
         // generate split complementary hues
         const hues = [
             baseHue,
-            (baseHue + 180 + paletteConfig.shiftRanges.splitComplementary.hue) %
+            (baseHue +
+                180 +
+                paletteConfig.shiftRanges.splitComplementary.hue) %
                 360,
             (baseHue +
                 180 -
@@ -202,9 +206,11 @@ function generateSplitComplementaryPalette(options, common) {
         }
         // create PaletteItem array with assigned itemIDs
         const paletteItems = hues.map((hue, index) => {
-            const saturationShift = Math.random() * paletteConfig.shiftRanges.splitComplementary.sat -
+            const saturationShift = Math.random() *
+                paletteConfig.shiftRanges.splitComplementary.sat -
                 paletteConfig.shiftRanges.splitComplementary.sat / 2;
-            const lightnessShift = Math.random() * paletteConfig.shiftRanges.splitComplementary.light -
+            const lightnessShift = Math.random() *
+                paletteConfig.shiftRanges.splitComplementary.light -
                 paletteConfig.shiftRanges.splitComplementary.light / 2;
             const newColor = {
                 value: {

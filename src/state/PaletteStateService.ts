@@ -1,5 +1,3 @@
-// File: state/PaletteState.ts
-
 import {
 	Helpers,
 	PaletteStateContract,
@@ -94,7 +92,9 @@ export class PaletteStateService implements PaletteStateContract {
 				paletteContainer: {
 					...currentState.paletteContainer,
 					columns: currentState.paletteContainer.columns.map(col =>
-						col.id === columnID ? { ...col, isLocked: !col.isLocked } : col
+						col.id === columnID
+							? { ...col, isLocked: !col.isLocked }
+							: col
 					)
 				}
 			}));
@@ -129,7 +129,9 @@ export class PaletteStateService implements PaletteStateContract {
 
 			await this.#stateManager.batchUpdate(currentState => {
 				const columns = currentState.paletteContainer.columns;
-				const columnIndex = columns.findIndex(col => col.id === columnID);
+				const columnIndex = columns.findIndex(
+					col => col.id === columnID
+				);
 
 				if (columnIndex === -1) return {}; // no update needed if column doesn't exist
 
@@ -147,7 +149,9 @@ export class PaletteStateService implements PaletteStateContract {
 					col => col.id !== columnID && !col.isLocked
 				);
 				const distributeAmount =
-					unlockedColumns.length > 0 ? sizeDiff / unlockedColumns.length : 0;
+					unlockedColumns.length > 0
+						? sizeDiff / unlockedColumns.length
+						: 0;
 
 				const resizedColumns = updatedColumns.map(col =>
 					col.id !== columnID && !col.isLocked
@@ -192,7 +196,9 @@ export class PaletteStateService implements PaletteStateContract {
 
 			// Convert NodeList to an array before using .map()
 			const columnElements = Array.from(
-				this.#getAllElements<HTMLDivElement>(domIndex.classes.paletteColumn)
+				this.#getAllElements<HTMLDivElement>(
+					domIndex.classes.paletteColumn
+				)
 			);
 
 			if (columnElements.length === 0) {
@@ -230,7 +236,8 @@ export class PaletteStateService implements PaletteStateContract {
 
 				// process colors only if valid
 				column.style.backgroundColor = inputValue;
-				const parsedColor = this.#utils.color.formatCSSAsColor(inputValue);
+				const parsedColor =
+					this.#utils.color.formatCSSAsColor(inputValue);
 				if (!parsedColor) {
 					this.#log.warn(
 						`Failed to parse color value "${inputValue}" for column ID ${columnID}.`,
@@ -244,7 +251,8 @@ export class PaletteStateService implements PaletteStateContract {
 						? parsedColor
 						: this.#utils.color.convertToHSL(parsedColor);
 
-				const allColors = this.#utils.palette.generateAllColorValues(hslColor);
+				const allColors =
+					this.#utils.palette.generateAllColorValues(hslColor);
 				const structuredColors = {
 					cmyk: allColors.cmyk.value,
 					hex: allColors.hex.value,
@@ -408,7 +416,10 @@ export class PaletteStateService implements PaletteStateContract {
 									...col,
 									size: Math.max(
 										domConfig.minColumnSize,
-										Math.min(newSize, domConfig.maxColumnSize)
+										Math.min(
+											newSize,
+											domConfig.maxColumnSize
+										)
 									)
 								}
 							: col

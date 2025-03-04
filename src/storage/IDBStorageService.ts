@@ -1,5 +1,3 @@
-// File: storage/IDBStorageService.ts
-
 import { IDBStorageContract, Services } from '../types/index.js';
 import { config, env } from '../config/index.js';
 
@@ -103,7 +101,10 @@ export class IDBStorageService implements IDBStorageContract {
 						);
 					};
 
-					this.#log.info(`IndexedDB opened successfully`, `${caller}.init`);
+					this.#log.info(
+						`IndexedDB opened successfully`,
+						`${caller}.init`
+					);
 					resolve(true);
 				};
 
@@ -119,8 +120,13 @@ export class IDBStorageService implements IDBStorageContract {
 				};
 
 				request.onblocked = () => {
-					this.#log.warn(`IndexedDB upgade blocked!`, `${caller}.init`);
-					reject(`Upgrade blocked. Close other tabs using this database.`);
+					this.#log.warn(
+						`IndexedDB upgade blocked!`,
+						`${caller}.init`
+					);
+					reject(
+						`Upgrade blocked. Close other tabs using this database.`
+					);
 				};
 			});
 		}, `[${caller}]: Failed to initialize IndexedDB`);
@@ -164,7 +170,9 @@ export class IDBStorageService implements IDBStorageContract {
 					attempts++;
 				}
 				if (!this.#db)
-					throw new Error(`[IDBStorageService]: DB never became ready.`);
+					throw new Error(
+						`[IDBStorageService]: DB never became ready.`
+					);
 				return;
 			}
 
@@ -174,7 +182,9 @@ export class IDBStorageService implements IDBStorageContract {
 			try {
 				await this.init();
 			} catch (error) {
-				throw new Error(`[IDBStorageService]: Failed to initialize: ${error}`);
+				throw new Error(
+					`[IDBStorageService]: Failed to initialize: ${error}`
+				);
 			} finally {
 				this.#isEnsuringDBReady = false;
 			}
@@ -192,7 +202,8 @@ export class IDBStorageService implements IDBStorageContract {
 			return await new Promise<T | null>((resolve, reject) => {
 				const request = store.get(key);
 
-				request.onsuccess = () => resolve(request.result?.value ?? null);
+				request.onsuccess = () =>
+					resolve(request.result?.value ?? null);
 
 				request.onerror = event =>
 					reject(

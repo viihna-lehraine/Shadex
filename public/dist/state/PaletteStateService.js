@@ -2,7 +2,6 @@ import '../config/partials/defaults.js';
 import { domIndex, domConfig } from '../config/partials/dom.js';
 import '../config/partials/regex.js';
 
-// File: state/PaletteState.ts
 const caller = 'PaletteState';
 class PaletteStateService {
     static #instance = null;
@@ -49,7 +48,9 @@ class PaletteStateService {
             await this.#stateManager.batchUpdate(currentState => ({
                 paletteContainer: {
                     ...currentState.paletteContainer,
-                    columns: currentState.paletteContainer.columns.map(col => col.id === columnID ? { ...col, isLocked: !col.isLocked } : col)
+                    columns: currentState.paletteContainer.columns.map(col => col.id === columnID
+                        ? { ...col, isLocked: !col.isLocked }
+                        : col)
                 }
             }));
         }, `[${caller}.handleColumnLock]: Failed to toggle lock for column ${columnID}`);
@@ -76,7 +77,9 @@ class PaletteStateService {
                 const sizeDiff = adjustedSize - columns[columnIndex].size;
                 const updatedColumns = columns.map(col => col.id === columnID ? { ...col, size: adjustedSize } : col);
                 const unlockedColumns = updatedColumns.filter(col => col.id !== columnID && !col.isLocked);
-                const distributeAmount = unlockedColumns.length > 0 ? sizeDiff / unlockedColumns.length : 0;
+                const distributeAmount = unlockedColumns.length > 0
+                    ? sizeDiff / unlockedColumns.length
+                    : 0;
                 const resizedColumns = updatedColumns.map(col => col.id !== columnID && !col.isLocked
                     ? { ...col, size: col.size - distributeAmount }
                     : col);

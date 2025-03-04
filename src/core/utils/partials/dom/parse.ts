@@ -1,5 +1,3 @@
-// File: core/utils/dom/partials/parse.ts
-
 import {
 	BrandingUtilities,
 	DOMParsingUtilities,
@@ -18,7 +16,9 @@ export function domParsingUtilitiesFactory(
 
 	function parseCheckbox(id: string): boolean | void {
 		return errors.handleSync(() => {
-			const checkbox = document.getElementById(id) as HTMLInputElement | null;
+			const checkbox = document.getElementById(
+				id
+			) as HTMLInputElement | null;
 
 			return checkbox ? checkbox.checked : undefined;
 		}, 'Error occurred while parsing checkbox.');
@@ -103,14 +103,18 @@ export function domParsingUtilitiesFactory(
 		validOptions: string[]
 	): string | void {
 		return errors.handleSync(() => {
-			const dropdown = document.getElementById(id) as HTMLSelectElement | null;
+			const dropdown = document.getElementById(
+				id
+			) as HTMLSelectElement | null;
 
 			if (!dropdown) return;
 
 			const selectedValue = dropdown.value;
 
 			if (!validOptions.includes(selectedValue)) {
-				return validOptions.includes(selectedValue) ? selectedValue : undefined;
+				return validOptions.includes(selectedValue)
+					? selectedValue
+					: undefined;
 			}
 
 			return;

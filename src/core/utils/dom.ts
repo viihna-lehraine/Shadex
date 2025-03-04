@@ -1,5 +1,3 @@
-// File: core/utils/dom.ts
-
 import {
 	BrandingUtilities,
 	ColorUtilities,

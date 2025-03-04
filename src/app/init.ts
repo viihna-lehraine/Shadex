@@ -1,5 +1,3 @@
-// File: app/init.ts
-
 import type { Helpers, Services, Utilities } from '../types/index.js';
 import { DOMStore } from '../dom/DOMStore.js';
 import { EventManager } from '../dom/events/EventManager.js';

@@ -1,5 +1,3 @@
-// File: common/utils/partials/conversion.ts
-
 import {
 	AdjustmentUtilities,
 	BrandingUtilities,
@@ -231,8 +229,12 @@ export function colorConversionUtilitiesFactory(
 
 			return {
 				value: {
-					red: brand.asByteRange(sanitize.percentile((bigint >> 16) & 255)),
-					green: brand.asByteRange(sanitize.percentile((bigint >> 8) & 255)),
+					red: brand.asByteRange(
+						sanitize.percentile((bigint >> 16) & 255)
+					),
+					green: brand.asByteRange(
+						sanitize.percentile((bigint >> 8) & 255)
+					),
 					blue: brand.asByteRange(sanitize.percentile(bigint & 255))
 				},
 				format: 'rgb'
@@ -289,7 +291,9 @@ export function colorConversionUtilitiesFactory(
 
 			return {
 				value: {
-					hue: brand.asRadial(sanitize.percentile(clonedHSL.value.hue)),
+					hue: brand.asRadial(
+						sanitize.percentile(clonedHSL.value.hue)
+					),
 					saturation: brand.asPercentile(
 						sanitize.percentile(newSaturation * 100)
 					),
@@ -426,11 +430,15 @@ export function colorConversionUtilitiesFactory(
 
 			return {
 				value: {
-					hue: brand.asRadial(sanitize.percentile(clonedHSV.value.hue)),
+					hue: brand.asRadial(
+						sanitize.percentile(clonedHSV.value.hue)
+					),
 					saturation: brand.asPercentile(
 						sanitize.percentile(newSaturation * 100)
 					),
-					lightness: brand.asPercentile(sanitize.percentile(lightness))
+					lightness: brand.asPercentile(
+						sanitize.percentile(lightness)
+					)
 				},
 				format: 'hsl'
 			};
@@ -514,17 +522,26 @@ export function colorConversionUtilitiesFactory(
 				value: {
 					x: brand.asXYZ_X(
 						sanitize.percentile(
-							refX * (pow(x, 3) > 0.008856 ? pow(x, 3) : (x - 16 / 116) / 7.787)
+							refX *
+								(pow(x, 3) > 0.008856
+									? pow(x, 3)
+									: (x - 16 / 116) / 7.787)
 						)
 					),
 					y: brand.asXYZ_Y(
 						sanitize.percentile(
-							refY * (pow(y, 3) > 0.008856 ? pow(y, 3) : (y - 16 / 116) / 7.787)
+							refY *
+								(pow(y, 3) > 0.008856
+									? pow(y, 3)
+									: (y - 16 / 116) / 7.787)
 						)
 					),
 					z: brand.asXYZ_Z(
 						sanitize.percentile(
-							refZ * (pow(z, 3) > 0.008856 ? pow(z, 3) : (z - 16 / 116) / 7.787)
+							refZ *
+								(pow(z, 3) > 0.008856
+									? pow(z, 3)
+									: (z - 16 / 116) / 7.787)
 						)
 					)
 				},
@@ -602,9 +619,11 @@ export function colorConversionUtilitiesFactory(
 			const clonedRGB = deepClone(rgb);
 
 			if (
-				[clonedRGB.value.red, clonedRGB.value.green, clonedRGB.value.blue].some(
-					v => isNaN(v) || v < 0 || v > 255
-				)
+				[
+					clonedRGB.value.red,
+					clonedRGB.value.green,
+					clonedRGB.value.blue
+				].some(v => isNaN(v) || v < 0 || v > 255)
 			) {
 				log.info(
 					`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}\nReturning default Hex.`,
@@ -653,7 +672,9 @@ export function colorConversionUtilitiesFactory(
 				const delta = max - min;
 
 				saturation =
-					lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+					lightness > 0.5
+						? delta / (2 - max - min)
+						: delta / (max + min);
 
 				switch (max) {
 					case red:
@@ -672,8 +693,12 @@ export function colorConversionUtilitiesFactory(
 			return {
 				value: {
 					hue: brand.asRadial(sanitize.percentile(hue)),
-					saturation: brand.asPercentile(sanitize.percentile(saturation * 100)),
-					lightness: brand.asPercentile(sanitize.percentile(lightness * 100))
+					saturation: brand.asPercentile(
+						sanitize.percentile(saturation * 100)
+					),
+					lightness: brand.asPercentile(
+						sanitize.percentile(lightness * 100)
+					)
 				},
 				format: 'hsl'
 			};
@@ -723,7 +748,9 @@ export function colorConversionUtilitiesFactory(
 			return {
 				value: {
 					hue: brand.asRadial(sanitize.percentile(hue)),
-					saturation: brand.asPercentile(sanitize.percentile(saturation * 100)),
+					saturation: brand.asPercentile(
+						sanitize.percentile(saturation * 100)
+					),
 					value: brand.asPercentile(sanitize.percentile(value * 100))
 				},
 				format: 'hsv'
@@ -748,13 +775,17 @@ export function colorConversionUtilitiesFactory(
 			const blue = (rgb.value.blue as number) / 255;
 
 			const linearRed =
-				red > 0.04045 ? Math.pow((red + 0.055) / 1.055, 2.4) : red / 12.92;
+				red > 0.04045
+					? Math.pow((red + 0.055) / 1.055, 2.4)
+					: red / 12.92;
 			const linearGreen =
 				green > 0.04045
 					? Math.pow((green + 0.055) / 1.055, 2.4)
 					: green / 12.92;
 			const linearBlue =
-				blue > 0.04045 ? Math.pow((blue + 0.055) / 1.055, 2.4) : blue / 12.92;
+				blue > 0.04045
+					? Math.pow((blue + 0.055) / 1.055, 2.4)
+					: blue / 12.92;
 
 			// scale to 100
 			const scaledRed = linearRed * 100;
@@ -763,19 +794,25 @@ export function colorConversionUtilitiesFactory(
 
 			const x = brand.asXYZ_X(
 				adjust.clampXYZ(
-					scaledRed * 0.4124 + scaledGreen * 0.3576 + scaledBlue * 0.1805,
+					scaledRed * 0.4124 +
+						scaledGreen * 0.3576 +
+						scaledBlue * 0.1805,
 					math.maxXYZ_X
 				)
 			);
 			const y = brand.asXYZ_Y(
 				adjust.clampXYZ(
-					scaledRed * 0.2126 + scaledGreen * 0.7152 + scaledBlue * 0.0722,
+					scaledRed * 0.2126 +
+						scaledGreen * 0.7152 +
+						scaledBlue * 0.0722,
 					math.maxXYZ_Y
 				)
 			);
 			const z = brand.asXYZ_Z(
 				adjust.clampXYZ(
-					scaledRed * 0.0193 + scaledGreen * 0.1192 + scaledBlue * 0.9505,
+					scaledRed * 0.0193 +
+						scaledGreen * 0.1192 +
+						scaledBlue * 0.9505,
 					math.maxXYZ_Z
 				)
 			);
@@ -817,9 +854,18 @@ export function colorConversionUtilitiesFactory(
 				refY = math.maxXYZ_Y,
 				refZ = math.maxXYZ_Z;
 
-			clonedXYZ.value.x = adjust.normalizeXYZ(clonedXYZ.value.x, refX) as XYZ_X;
-			clonedXYZ.value.y = adjust.normalizeXYZ(clonedXYZ.value.y, refY) as XYZ_Y;
-			clonedXYZ.value.z = adjust.normalizeXYZ(clonedXYZ.value.z, refZ) as XYZ_Z;
+			clonedXYZ.value.x = adjust.normalizeXYZ(
+				clonedXYZ.value.x,
+				refX
+			) as XYZ_X;
+			clonedXYZ.value.y = adjust.normalizeXYZ(
+				clonedXYZ.value.y,
+				refY
+			) as XYZ_Y;
+			clonedXYZ.value.z = adjust.normalizeXYZ(
+				clonedXYZ.value.z,
+				refZ
+			) as XYZ_Z;
 
 			clonedXYZ.value.x =
 				clonedXYZ.value.x > 0.008856
@@ -838,11 +884,15 @@ export function colorConversionUtilitiesFactory(
 				parseFloat((116 * clonedXYZ.value.y - 16).toFixed(2))
 			);
 			const a = sanitize.lab(
-				parseFloat((500 * (clonedXYZ.value.x - clonedXYZ.value.y)).toFixed(2)),
+				parseFloat(
+					(500 * (clonedXYZ.value.x - clonedXYZ.value.y)).toFixed(2)
+				),
 				'a'
 			);
 			const b = sanitize.lab(
-				parseFloat((200 * (clonedXYZ.value.y - clonedXYZ.value.z)).toFixed(2)),
+				parseFloat(
+					(200 * (clonedXYZ.value.y - clonedXYZ.value.z)).toFixed(2)
+				),
 				'b'
 			);
 

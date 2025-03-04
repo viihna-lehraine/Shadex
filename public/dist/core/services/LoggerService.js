@@ -2,7 +2,6 @@ import { config } from '../../config/partials/base.js';
 import '../../config/partials/defaults.js';
 import '../../config/partials/regex.js';
 
-// File: core/services/LoggerService.ts
 const caller = 'LoggerService';
 const mode = config.mode;
 const debugLevel = mode.debugLevel;
@@ -91,7 +90,9 @@ class LoggerService {
         catch (error) {
             console.error(`[${caller}.#logMessage]: Encountered an unexpected error: ${error}.`);
         }
-        if (callerInfo === 'Unknown caller' && debugLevel > 1 && mode.stackTrace) {
+        if (callerInfo === 'Unknown caller' &&
+            debugLevel > 1 &&
+            mode.stackTrace) {
             console.trace(`[${caller}]: Full Stack Trace:`);
         }
     }

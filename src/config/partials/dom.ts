@@ -1,5 +1,3 @@
-// File: config/dom.ts
-
 import { DOMConfig, DOMIndex } from '../../types/index.js';
 
 const classes: Readonly<DOMIndex>['classes'] = {

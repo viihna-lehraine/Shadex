@@ -1,5 +1,3 @@
-// File: app/dependencyRegistry.ts
-
 import {
 	AppDependencies,
 	CommonFunctions,
@@ -34,9 +32,15 @@ export async function registerDependencies(
 		const domStore = await initializeDOMStore(helpers, services);
 
 		const { initializeStateManager } = await import('./init.js');
-		const stateManager = await initializeStateManager(helpers, services, utils);
+		const stateManager = await initializeStateManager(
+			helpers,
+			services,
+			utils
+		);
 
-		const { generateHuesFnGroup } = await import('../palette/partials/hues.js');
+		const { generateHuesFnGroup } = await import(
+			'../palette/partials/hues.js'
+		);
 		const { generatePaletteFnGroup } = await import(
 			'../palette/partials/types.js'
 		);

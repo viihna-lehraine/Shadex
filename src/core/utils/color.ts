@@ -1,5 +1,3 @@
-// File: core/utils/color.ts
-
 import {
 	AdjustmentUtilities,
 	BrandingUtilities,

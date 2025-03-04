@@ -2,7 +2,6 @@ import { config } from '../../../../config/partials/base.js';
 import { defaults } from '../../../../config/partials/defaults.js';
 import '../../../../config/partials/regex.js';
 
-// File: common/utils/partials/conversion.ts
 const defaultCMYK = defaults.colors.cmyk;
 const defaultHex = defaults.colors.hex;
 const defaultHSL = defaults.colors.hsl;
@@ -329,9 +328,18 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
             const pow = Math.pow;
             return {
                 value: {
-                    x: brand.asXYZ_X(sanitize.percentile(refX * (pow(x, 3) > 0.008856 ? pow(x, 3) : (x - 16 / 116) / 7.787))),
-                    y: brand.asXYZ_Y(sanitize.percentile(refY * (pow(y, 3) > 0.008856 ? pow(y, 3) : (y - 16 / 116) / 7.787))),
-                    z: brand.asXYZ_Z(sanitize.percentile(refZ * (pow(z, 3) > 0.008856 ? pow(z, 3) : (z - 16 / 116) / 7.787)))
+                    x: brand.asXYZ_X(sanitize.percentile(refX *
+                        (pow(x, 3) > 0.008856
+                            ? pow(x, 3)
+                            : (x - 16 / 116) / 7.787))),
+                    y: brand.asXYZ_Y(sanitize.percentile(refY *
+                        (pow(y, 3) > 0.008856
+                            ? pow(y, 3)
+                            : (y - 16 / 116) / 7.787))),
+                    z: brand.asXYZ_Z(sanitize.percentile(refZ *
+                        (pow(z, 3) > 0.008856
+                            ? pow(z, 3)
+                            : (z - 16 / 116) / 7.787)))
                 },
                 format: 'xyz'
             };
@@ -383,7 +391,11 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 return defaultHex;
             }
             const clonedRGB = deepClone(rgb);
-            if ([clonedRGB.value.red, clonedRGB.value.green, clonedRGB.value.blue].some(v => isNaN(v) || v < 0 || v > 255)) {
+            if ([
+                clonedRGB.value.red,
+                clonedRGB.value.green,
+                clonedRGB.value.blue
+            ].some(v => isNaN(v) || v < 0 || v > 255)) {
                 log.info(`Invalid RGB values:\nR=${JSON.stringify(clonedRGB.value.red)}\nG=${JSON.stringify(clonedRGB.value.green)}\nB=${JSON.stringify(clonedRGB.value.blue)}\nReturning default Hex.`, `utils.color.rgbToHex`);
                 return defaultHex;
             }
@@ -411,7 +423,9 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
             if (max !== min) {
                 const delta = max - min;
                 saturation =
-                    lightness > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+                    lightness > 0.5
+                        ? delta / (2 - max - min)
+                        : delta / (max + min);
                 switch (max) {
                     case red:
                         hue = (green - blue) / delta + (green < blue ? 6 : 0);
@@ -484,18 +498,28 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
             const red = rgb.value.red / 255;
             const green = rgb.value.green / 255;
             const blue = rgb.value.blue / 255;
-            const linearRed = red > 0.04045 ? Math.pow((red + 0.055) / 1.055, 2.4) : red / 12.92;
+            const linearRed = red > 0.04045
+                ? Math.pow((red + 0.055) / 1.055, 2.4)
+                : red / 12.92;
             const linearGreen = green > 0.04045
                 ? Math.pow((green + 0.055) / 1.055, 2.4)
                 : green / 12.92;
-            const linearBlue = blue > 0.04045 ? Math.pow((blue + 0.055) / 1.055, 2.4) : blue / 12.92;
+            const linearBlue = blue > 0.04045
+                ? Math.pow((blue + 0.055) / 1.055, 2.4)
+                : blue / 12.92;
             // scale to 100
             const scaledRed = linearRed * 100;
             const scaledGreen = linearGreen * 100;
             const scaledBlue = linearBlue * 100;
-            const x = brand.asXYZ_X(adjust.clampXYZ(scaledRed * 0.4124 + scaledGreen * 0.3576 + scaledBlue * 0.1805, math.maxXYZ_X));
-            const y = brand.asXYZ_Y(adjust.clampXYZ(scaledRed * 0.2126 + scaledGreen * 0.7152 + scaledBlue * 0.0722, math.maxXYZ_Y));
-            const z = brand.asXYZ_Z(adjust.clampXYZ(scaledRed * 0.0193 + scaledGreen * 0.1192 + scaledBlue * 0.9505, math.maxXYZ_Z));
+            const x = brand.asXYZ_X(adjust.clampXYZ(scaledRed * 0.4124 +
+                scaledGreen * 0.3576 +
+                scaledBlue * 0.1805, math.maxXYZ_X));
+            const y = brand.asXYZ_Y(adjust.clampXYZ(scaledRed * 0.2126 +
+                scaledGreen * 0.7152 +
+                scaledBlue * 0.0722, math.maxXYZ_Y));
+            const z = brand.asXYZ_Z(adjust.clampXYZ(scaledRed * 0.0193 +
+                scaledGreen * 0.1192 +
+                scaledBlue * 0.9505, math.maxXYZ_Z));
             const xyz = { value: { x, y, z }, format: 'xyz' };
             return validate.colorValue(xyz) ? xyz : defaultXYZ;
         }, 'Error converting RGB to XYZ');

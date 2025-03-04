@@ -1,5 +1,3 @@
-// File: palette/PaletteHistoryManager.ts
-
 import {
 	Helpers,
 	Palette,
@@ -96,7 +94,10 @@ export class PaletteHistoryManager implements PaletteHistoryManagerContract {
 			this.#redoStack = [];
 			this.#savePaletteHistory();
 
-			this.#log.info(`Palette added to history.`, `[${caller}.addPalette]`);
+			this.#log.info(
+				`Palette added to history.`,
+				`[${caller}.addPalette]`
+			);
 		}, `[${caller}.addPalette]: Failed to add palette to history.`);
 	}
 
@@ -108,7 +109,10 @@ export class PaletteHistoryManager implements PaletteHistoryManagerContract {
 
 			this.#savePaletteHistory();
 
-			this.#log.info(`Palette history cleared.`, `[${caller}.clearHistory]`);
+			this.#log.info(
+				`Palette history cleared.`,
+				`[${caller}.clearHistory]`
+			);
 		}, `[${caller}.clearHistory]: Failed to clear palette history.`);
 	}
 
@@ -122,7 +126,9 @@ export class PaletteHistoryManager implements PaletteHistoryManagerContract {
 
 	getHistory(): Palette[] {
 		return this.#errors.handleSync(() => {
-			return this.#paletteHistory.map(palette => this.#deepFreeze(palette));
+			return this.#paletteHistory.map(palette =>
+				this.#deepFreeze(palette)
+			);
 		}, `[${caller}.getHistory]: Failed to retrieve palette history.`);
 	}
 

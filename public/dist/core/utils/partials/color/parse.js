@@ -1,4 +1,3 @@
-// File: core/utils/partials/color/parse.ts
 function colorParsingUtilitiesFactory(services) {
     const { errors } = services;
     function parseHexValueAsStringMap(hex) {
@@ -9,7 +8,7 @@ function colorParsingUtilitiesFactory(services) {
     function parseHSLValueAsStringMap(hsl) {
         return errors.handleSync(() => {
             return {
-                hue: `${hsl.hue}°`,
+                hue: `${hsl.hue}`,
                 saturation: `${hsl.saturation * 100}%`,
                 lightness: `${hsl.lightness * 100}%`
             };
@@ -18,7 +17,7 @@ function colorParsingUtilitiesFactory(services) {
     function parseHSVValueAsStringMap(hsv) {
         return errors.handleSync(() => {
             return {
-                hue: `${hsv.hue}°`,
+                hue: `${hsv.hue}`,
                 saturation: `${hsv.saturation * 100}%`,
                 value: `${hsv.value * 100}%`
             };

@@ -1,7 +1,6 @@
 import { defaults } from '../../../../config/partials/defaults.js';
 import '../../../../config/partials/regex.js';
 
-// File: core/utils/partials/color/generate.ts
 const defaultColors = defaults.colors;
 function colorGenerationUtilitiesFactory(sanitize, services, validate) {
     const { errors, log } = services;

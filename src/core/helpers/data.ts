@@ -1,5 +1,3 @@
-// File: core/helpers/data.ts
-
 import { DataHelpers, TypeGuards } from '../../types/index.js';
 import { regex } from '../../config/index.js';
 

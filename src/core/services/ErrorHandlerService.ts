@@ -1,5 +1,3 @@
-// File: core/services/ErrorHandlerService.ts
-
 import {
 	ErrorHandlerContract,
 	ErrorHandlerOptions,
@@ -166,7 +164,9 @@ export class ErrorHandlerService implements ErrorHandlerContract {
 
 			const userMessage =
 				options.userMessage ??
-				(error instanceof UserFacingError ? error.userMessage : undefined);
+				(error instanceof UserFacingError
+					? error.userMessage
+					: undefined);
 
 			if (userMessage) {
 				alert(userMessage);

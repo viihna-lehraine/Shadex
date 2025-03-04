@@ -1,5 +1,3 @@
-// File: storage/LocalStorageService.ts
-
 import { LocalStorageContract, Services } from '../types/index.js';
 
 const caller = 'LocalStorageService';
@@ -34,7 +32,9 @@ export class LocalStorageService implements LocalStorageContract {
 					`${caller}.getInstance`
 				);
 
-				LocalStorageService.#instance = new LocalStorageService(services);
+				LocalStorageService.#instance = new LocalStorageService(
+					services
+				);
 			}
 
 			services.log.debug(

@@ -1,5 +1,3 @@
-// File: src/config/index.ts
-
 export { config } from './partials/base.js';
 export { env } from './partials/env.js';
 export { defaults } from './partials/defaults.js';

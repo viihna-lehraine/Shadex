@@ -1,4 +1,3 @@
-// File: core/utils/dom.ts
 async function domUtilitiesFactory(brand, colorUtils, helpers, services, validate) {
     const { errors } = services;
     return errors.handleAsync(async () => {

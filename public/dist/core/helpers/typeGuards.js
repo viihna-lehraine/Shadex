@@ -1,6 +1,8 @@
 function typeGuardsFactory() {
     function hasFormat(value, expectedFormat) {
-        return (isObject(value) && 'format' in value && value.format === expectedFormat);
+        return (isObject(value) &&
+            'format' in value &&
+            value.format === expectedFormat);
     }
     function hasNumericProperties(obj, keys) {
         return keys.every(key => typeof obj[key] === 'number');
@@ -12,7 +14,8 @@ function typeGuardsFactory() {
         return isObject(value) && 'value' in value;
     }
     function isByteRange(value) {
-        return (typeof value === 'number' && value.__brand === 'ByteRange');
+        return (typeof value === 'number' &&
+            value.__brand === 'ByteRange');
     }
     function isCMYK(value) {
         if (isObject(value) &&
@@ -67,7 +70,8 @@ function typeGuardsFactory() {
     function isColorStringMap(value, format) {
         return (isObject(value) &&
             (typeof format === 'string' ||
-                (typeof value.format === 'string' && hasFormat(value, value.format))) &&
+                (typeof value.format === 'string' &&
+                    hasFormat(value, value.format))) &&
             hasValueProperty(value) &&
             isObject(value.value) &&
             hasStringProperties(value.value, Object.keys(value.value)));
@@ -82,7 +86,17 @@ function typeGuardsFactory() {
     }
     function isFormat(format) {
         return (typeof format === 'string' &&
-            ['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb', 'sl', 'sv', 'xyz'].includes(format));
+            [
+                'cmyk',
+                'hex',
+                'hsl',
+                'hsv',
+                'lab',
+                'rgb',
+                'sl',
+                'sv',
+                'xyz'
+            ].includes(format));
     }
     function isHex(value) {
         return (isObject(value) &&
@@ -94,10 +108,12 @@ function typeGuardsFactory() {
             isHexSet(value.value.hex));
     }
     function isHexSet(value) {
-        return typeof value === 'string' && value.__brand === 'HexSet';
+        return (typeof value === 'string' && value.__brand === 'HexSet');
     }
     function isHSL(value) {
-        if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'hsv')) {
+        if (isObject(value) &&
+            hasValueProperty(value) &&
+            hasFormat(value, 'hsv')) {
             const { value: hslValue } = value;
             return ('hue' in hslValue &&
                 isRadial(hslValue.hue) &&
@@ -109,7 +125,9 @@ function typeGuardsFactory() {
         return false;
     }
     function isHSV(value) {
-        if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'hsv')) {
+        if (isObject(value) &&
+            hasValueProperty(value) &&
+            hasFormat(value, 'hsv')) {
             const { value: hsvValue } = value;
             return ('hue' in hsvValue &&
                 isRadial(hsvValue.hue) &&
@@ -124,7 +142,9 @@ function typeGuardsFactory() {
         return element instanceof HTMLInputElement;
     }
     function isLAB(value) {
-        if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'lab')) {
+        if (isObject(value) &&
+            hasValueProperty(value) &&
+            hasFormat(value, 'lab')) {
             const { value: labValue } = value;
             return ('l' in labValue &&
                 isLAB_L(labValue.l) &&
@@ -136,13 +156,13 @@ function typeGuardsFactory() {
         return false;
     }
     function isLAB_A(value) {
-        return typeof value === 'number' && value.__brand === 'LAB_A';
+        return (typeof value === 'number' && value.__brand === 'LAB_A');
     }
     function isLAB_B(value) {
-        return typeof value === 'number' && value.__brand === 'LAB_B';
+        return (typeof value === 'number' && value.__brand === 'LAB_B');
     }
     function isLAB_L(value) {
-        return typeof value === 'number' && value.__brand === 'LAB_L';
+        return (typeof value === 'number' && value.__brand === 'LAB_L');
     }
     function isObject(value) {
         return typeof value === 'object' && value !== null;
@@ -191,10 +211,12 @@ function typeGuardsFactory() {
             value.__brand === 'Percentile');
     }
     function isRadial(value) {
-        return typeof value === 'number' && value.__brand === 'Radial';
+        return (typeof value === 'number' && value.__brand === 'Radial');
     }
     function isRGB(value) {
-        if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'rgb')) {
+        if (isObject(value) &&
+            hasValueProperty(value) &&
+            hasFormat(value, 'rgb')) {
             const { value: rgbValue } = value;
             return ('red' in rgbValue &&
                 isByteRange(rgbValue.red) &&
@@ -206,7 +228,9 @@ function typeGuardsFactory() {
         return false;
     }
     function isSL(value) {
-        if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'sl')) {
+        if (isObject(value) &&
+            hasValueProperty(value) &&
+            hasFormat(value, 'sl')) {
             const { value: slValue } = value;
             return ('saturation' in slValue &&
                 isPercentile(slValue.saturation) &&
@@ -216,7 +240,9 @@ function typeGuardsFactory() {
         return false;
     }
     function isSV(value) {
-        if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'sv')) {
+        if (isObject(value) &&
+            hasValueProperty(value) &&
+            hasFormat(value, 'sv')) {
             const { value: svValue } = value;
             return ('saturation' in svValue &&
                 isPercentile(svValue.saturation) &&
@@ -226,7 +252,9 @@ function typeGuardsFactory() {
         return false;
     }
     function isXYZ(value) {
-        if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'xyz')) {
+        if (isObject(value) &&
+            hasValueProperty(value) &&
+            hasFormat(value, 'xyz')) {
             const { value: xyzValue } = value;
             return ('x' in xyzValue &&
                 isXYZ_X(xyzValue.x) &&
@@ -238,13 +266,13 @@ function typeGuardsFactory() {
         return false;
     }
     function isXYZ_X(value) {
-        return typeof value === 'number' && value.__brand === 'XYZ_X';
+        return (typeof value === 'number' && value.__brand === 'XYZ_X');
     }
     function isXYZ_Y(value) {
-        return typeof value === 'number' && value.__brand === 'XYZ_Y';
+        return (typeof value === 'number' && value.__brand === 'XYZ_Y');
     }
     function isXYZ_Z(value) {
-        return typeof value === 'number' && value.__brand === 'XYZ_Z';
+        return (typeof value === 'number' && value.__brand === 'XYZ_Z');
     }
     return {
         hasFormat,

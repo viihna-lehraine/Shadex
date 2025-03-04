@@ -1,5 +1,3 @@
-// File: core/factories/utils.ts
-
 import { Helpers, Services, Utilities } from '../../types/index.js';
 
 export async function utilitiesFactory(
@@ -34,7 +32,10 @@ export async function utilitiesFactory(
 			]);
 
 			utilities.validate = validationUtilitiesFactory(helpers, services);
-			utilities.brand = brandingUtilitiesFactory(services, utilities.validate);
+			utilities.brand = brandingUtilitiesFactory(
+				services,
+				utilities.validate
+			);
 			utilities.adjust = adjustmentUtilitiesFactory(
 				utilities.brand,
 				services,

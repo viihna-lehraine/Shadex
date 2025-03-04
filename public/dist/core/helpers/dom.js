@@ -1,4 +1,3 @@
-// File: core/helpers/dom.ts
 const domHelpersFactory = () => ({
     getAllElements(selector) {
         console.log(`[domHelpers > getAllElements]: Looking for elements with selector: ${selector}.`);

@@ -1,5 +1,3 @@
-// File: core/helpers/dom.ts
-
 import { DOMHelpers } from '../../types/index.js';
 
 export const domHelpersFactory = (): DOMHelpers =>

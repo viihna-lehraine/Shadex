@@ -1,5 +1,3 @@
-// File: core/utils/partials/color/brand.ts
-
 import {
 	BrandingUtilities,
 	CMYK,

@@ -1,5 +1,3 @@
-// File: state/StateFactory.ts
-
 import {
 	Helpers,
 	Services,
@@ -18,7 +16,11 @@ export class StateFactory implements StateFactoryContract {
 	#log: Services['log'];
 	#utils: Utilities;
 
-	private constructor(helpers: Helpers, services: Services, utils: Utilities) {
+	private constructor(
+		helpers: Helpers,
+		services: Services,
+		utils: Utilities
+	) {
 		try {
 			services.log.debug(
 				`Constructing StateFactory instance.`,
@@ -50,7 +52,11 @@ export class StateFactory implements StateFactoryContract {
 					`${caller}.getInstance`
 				);
 
-				StateFactory.#instance = new StateFactory(helpers, services, utils);
+				StateFactory.#instance = new StateFactory(
+					helpers,
+					services,
+					utils
+				);
 			}
 
 			services.log.debug(

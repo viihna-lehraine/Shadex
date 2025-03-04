@@ -1,7 +1,6 @@
 import { defaults } from '../../../../config/partials/defaults.js';
 import { regex } from '../../../../config/partials/regex.js';
 
-// File: core/utils/partials/color/format.ts
 const defaultColors = defaults.colors;
 function colorFormattingUtilitiesFactory(format, helpers, services) {
     const { data: { deepClone }, typeGuards } = helpers;
@@ -142,7 +141,9 @@ function colorFormattingUtilitiesFactory(format, helpers, services) {
                 };
             }
             if (color.startsWith('#')) {
-                const hexValue = color.length === 7 ? color : format.convertShortHexToLong(color);
+                const hexValue = color.length === 7
+                    ? color
+                    : format.convertShortHexToLong(color);
                 return {
                     value: { hex: hexValue },
                     format: 'hex'

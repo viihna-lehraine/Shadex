@@ -1,4 +1,3 @@
-// File: core/factories/helpers.ts
 async function helpersFactory() {
     console.log(`[HELPERS_FACTORY]: Creating helpers.`);
     const helpers = {};

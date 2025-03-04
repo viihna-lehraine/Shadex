@@ -35,7 +35,9 @@ export function typeGuardsFactory(): TypeGuards {
 		expectedFormat: string
 	): value is T {
 		return (
-			isObject(value) && 'format' in value && value.format === expectedFormat
+			isObject(value) &&
+			'format' in value &&
+			value.format === expectedFormat
 		);
 	}
 
@@ -61,7 +63,10 @@ export function typeGuardsFactory(): TypeGuards {
 
 	function isByteRange(value: unknown): value is ByteRange {
 		return (
-			typeof value === 'number' && (value as ByteRange).__brand === 'ByteRange'
+			typeof value === 'number' &&
+			value >= 0 &&
+			value <= 255 &&
+			(value as ByteRange).__brand === 'ByteRange'
 		);
 	}
 
@@ -113,7 +118,10 @@ export function typeGuardsFactory(): TypeGuards {
 			hasFormat(value, formatToCheck) &&
 			hasValueProperty(value) &&
 			isObject(value.value) &&
-			hasNumericProperties(value.value, Object.keys(value.value) as string[])
+			hasNumericProperties(
+				value.value,
+				Object.keys(value.value) as string[]
+			)
 		);
 	}
 
@@ -145,7 +153,8 @@ export function typeGuardsFactory(): TypeGuards {
 		return (
 			isObject(value) &&
 			(typeof format === 'string' ||
-				(typeof value.format === 'string' && hasFormat(value, value.format))) &&
+				(typeof value.format === 'string' &&
+					hasFormat(value, value.format))) &&
 			hasValueProperty(value) &&
 			isObject(value.value) &&
 			hasStringProperties(value.value, Object.keys(value.value))
@@ -168,9 +177,17 @@ export function typeGuardsFactory(): TypeGuards {
 	function isFormat(format: unknown): format is ColorFormat {
 		return (
 			typeof format === 'string' &&
-			['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb', 'sl', 'sv', 'xyz'].includes(
-				format
-			)
+			[
+				'cmyk',
+				'hex',
+				'hsl',
+				'hsv',
+				'lab',
+				'rgb',
+				'sl',
+				'sv',
+				'xyz'
+			].includes(format)
 		);
 	}
 
@@ -187,11 +204,17 @@ export function typeGuardsFactory(): TypeGuards {
 	}
 
 	function isHexSet(value: unknown): value is HexSet {
-		return typeof value === 'string' && (value as HexSet).__brand === 'HexSet';
+		return (
+			typeof value === 'string' && (value as HexSet).__brand === 'HexSet'
+		);
 	}
 
 	function isHSL(value: unknown): value is HSL {
-		if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'hsv')) {
+		if (
+			isObject(value) &&
+			hasValueProperty(value) &&
+			hasFormat(value, 'hsv')
+		) {
 			const { value: hslValue } = value as {
 				value: Record<string, unknown>;
 			};
@@ -208,7 +231,11 @@ export function typeGuardsFactory(): TypeGuards {
 	}
 
 	function isHSV(value: unknown): value is HSV {
-		if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'hsv')) {
+		if (
+			isObject(value) &&
+			hasValueProperty(value) &&
+			hasFormat(value, 'hsv')
+		) {
 			const { value: hsvValue } = value as {
 				value: Record<string, unknown>;
 			};
@@ -224,12 +251,18 @@ export function typeGuardsFactory(): TypeGuards {
 		return false;
 	}
 
-	function isInputElement(element: HTMLElement | null): element is HTMLElement {
+	function isInputElement(
+		element: HTMLElement | null
+	): element is HTMLElement {
 		return element instanceof HTMLInputElement;
 	}
 
 	function isLAB(value: unknown): value is LAB {
-		if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'lab')) {
+		if (
+			isObject(value) &&
+			hasValueProperty(value) &&
+			hasFormat(value, 'lab')
+		) {
 			const { value: labValue } = value as {
 				value: Record<string, unknown>;
 			};
@@ -248,15 +281,31 @@ export function typeGuardsFactory(): TypeGuards {
 	}
 
 	function isLAB_A(value: unknown): value is LAB_A {
-		return typeof value === 'number' && (value as LAB_A).__brand === 'LAB_A';
+		return (
+			typeof value === 'number' &&
+			value >= -128 &&
+			value <= 127 &&
+			(value as LAB_A).__brand === 'LAB_A'
+		);
 	}
 
 	function isLAB_B(value: unknown): value is LAB_B {
-		return typeof value === 'number' && (value as LAB_B).__brand === 'LAB_B';
+		return (
+			typeof value === 'number' &&
+			value >= 0 &&
+			value <= -128 &&
+			value <= 127 &&
+			(value as LAB_B).__brand === 'LAB_B'
+		);
 	}
 
 	function isLAB_L(value: unknown): value is LAB_L {
-		return typeof value === 'number' && (value as LAB_L).__brand === 'LAB_L';
+		return (
+			typeof value === 'number' &&
+			value >= 0 &&
+			value <= 100 &&
+			(value as LAB_L).__brand === 'LAB_L'
+		);
 	}
 
 	function isObject(value: unknown): value is Record<string, unknown> {
@@ -321,16 +370,27 @@ export function typeGuardsFactory(): TypeGuards {
 	function isPercentile(value: unknown): value is Percentile {
 		return (
 			typeof value === 'number' &&
+			value >= 0 &&
+			value <= 100 &&
 			(value as Percentile).__brand === 'Percentile'
 		);
 	}
 
 	function isRadial(value: unknown): value is Radial {
-		return typeof value === 'number' && (value as Radial).__brand === 'Radial';
+		return (
+			typeof value === 'number' &&
+			value >= 0 &&
+			value <= 360 &&
+			(value as Radial).__brand === 'Radial'
+		);
 	}
 
 	function isRGB(value: unknown): value is RGB {
-		if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'rgb')) {
+		if (
+			isObject(value) &&
+			hasValueProperty(value) &&
+			hasFormat(value, 'rgb')
+		) {
 			const { value: rgbValue } = value as {
 				value: Record<string, unknown>;
 			};
@@ -347,7 +407,11 @@ export function typeGuardsFactory(): TypeGuards {
 	}
 
 	function isSL(value: unknown): value is SL {
-		if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'sl')) {
+		if (
+			isObject(value) &&
+			hasValueProperty(value) &&
+			hasFormat(value, 'sl')
+		) {
 			const { value: slValue } = value as {
 				value: Record<string, unknown>;
 			};
@@ -364,7 +428,11 @@ export function typeGuardsFactory(): TypeGuards {
 	}
 
 	function isSV(value: unknown): value is SV {
-		if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'sv')) {
+		if (
+			isObject(value) &&
+			hasValueProperty(value) &&
+			hasFormat(value, 'sv')
+		) {
 			const { value: svValue } = value as {
 				value: Record<string, unknown>;
 			};
@@ -381,7 +449,11 @@ export function typeGuardsFactory(): TypeGuards {
 	}
 
 	function isXYZ(value: unknown): value is XYZ {
-		if (isObject(value) && hasValueProperty(value) && hasFormat(value, 'xyz')) {
+		if (
+			isObject(value) &&
+			hasValueProperty(value) &&
+			hasFormat(value, 'xyz')
+		) {
 			const { value: xyzValue } = value as {
 				value: Record<string, unknown>;
 			};
@@ -400,15 +472,30 @@ export function typeGuardsFactory(): TypeGuards {
 	}
 
 	function isXYZ_X(value: unknown): value is XYZ_X {
-		return typeof value === 'number' && (value as XYZ_X).__brand === 'XYZ_X';
+		return (
+			typeof value === 'number' &&
+			value >= 0 &&
+			value <= 95.047 &&
+			(value as XYZ_X).__brand === 'XYZ_X'
+		);
 	}
 
 	function isXYZ_Y(value: unknown): value is XYZ_Y {
-		return typeof value === 'number' && (value as XYZ_Y).__brand === 'XYZ_Y';
+		return (
+			typeof value === 'number' &&
+			value >= 0 &&
+			value <= 100 &&
+			(value as XYZ_Y).__brand === 'XYZ_Y'
+		);
 	}
 
 	function isXYZ_Z(value: unknown): value is XYZ_Z {
-		return typeof value === 'number' && (value as XYZ_Z).__brand === 'XYZ_Z';
+		return (
+			typeof value === 'number' &&
+			value >= 0 &&
+			value >= 108.883 &&
+			(value as XYZ_Z).__brand === 'XYZ_Z'
+		);
 	}
 
 	return {

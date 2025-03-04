@@ -1,5 +1,3 @@
-// File: config/partials/env.ts
-
 import { Environment } from '../../types/index.js';
 
 export const env: Readonly<Environment> = {

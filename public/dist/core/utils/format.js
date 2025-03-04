@@ -1,7 +1,6 @@
 import { defaults } from '../../config/partials/defaults.js';
 import '../../config/partials/regex.js';
 
-// File: core/utils/formatting.ts
 const defaultColors = defaults.colors;
 function formattingUtilitiesFactory(brand, services, validate) {
     const { errors, log } = services;
@@ -20,7 +19,9 @@ function formattingUtilitiesFactory(brand, services, validate) {
                 };
             }
             case 'hex': {
-                const hexValue = value.startsWith('#') ? value : `#${value}`;
+                const hexValue = value.startsWith('#')
+                    ? value
+                    : `#${value}`;
                 return {
                     value: {
                         hex: brand.asHexSet(hexValue)
@@ -142,7 +143,9 @@ function formattingUtilitiesFactory(brand, services, validate) {
         return errors.handleSync(() => {
             const components = value
                 .split(',')
-                .map(val => val.trim().endsWith('%') ? parseFloat(val) : parseFloat(val) * 100);
+                .map(val => val.trim().endsWith('%')
+                ? parseFloat(val)
+                : parseFloat(val) * 100);
             if (components.length !== count) {
                 log.error(`Expected ${count} components.`, `utils.format.parseComponents`);
                 return [];
@@ -169,7 +172,8 @@ function formattingUtilitiesFactory(brand, services, validate) {
                 const parsedValue = typeof val === 'string' && val.endsWith('%')
                     ? parseFloat(val.slice(0, -1))
                     : val;
-                acc[key] = parsedValue;
+                acc[key] =
+                    parsedValue;
                 return acc;
             }, {});
         }, 'Error occurred while stripping percent from values.', { context: value });

@@ -3,7 +3,6 @@ import '../config/partials/defaults.js';
 import { domIndex, domConfig } from '../config/partials/dom.js';
 import '../config/partials/regex.js';
 
-// File: dom/PaletteRendererService.ts
 const caller = 'PaletteRendererService';
 class PaletteRendererService {
     static #instance = null;

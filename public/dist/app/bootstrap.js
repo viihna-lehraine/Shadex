@@ -1,4 +1,3 @@
-// File: app/bootstrap.ts
 async function bootstrap() {
     console.log('[BOOTSTRAP]: Starting bootstrap process.');
     try {

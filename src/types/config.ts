@@ -1,5 +1,3 @@
-// File: types/config.ts
-
 import { sets } from '../config/index.js';
 
 export interface DOMIndex {

@@ -1,5 +1,3 @@
-// File: config/partials/base.ts
-
 import {
 	Configuration,
 	MathData,

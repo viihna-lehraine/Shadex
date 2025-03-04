@@ -1,5 +1,3 @@
-// File: dom/PaletteRendererService.ts
-
 import {
 	AllColors,
 	CommonFunctions,
@@ -112,7 +110,10 @@ export class PaletteRendererService implements PaletteRendererContract {
 		const container = this.#domStore.getElement('divs', 'paletteContainer');
 
 		if (!container) {
-			this.#log.warn('Palette container not found.', `${caller}.renderColumns`);
+			this.#log.warn(
+				'Palette container not found.',
+				`${caller}.renderColumns`
+			);
 			return;
 		}
 
@@ -192,7 +193,8 @@ export class PaletteRendererService implements PaletteRendererContract {
 			);
 
 			// store the old palette in history
-			const paletteHistory = this.#paletteHistoryManager.getCurrentPalette();
+			const paletteHistory =
+				this.#paletteHistoryManager.getCurrentPalette();
 			const oldPalette = (
 				Array.isArray(paletteHistory) ? paletteHistory : []
 			).at(-1);
@@ -217,7 +219,8 @@ export class PaletteRendererService implements PaletteRendererContract {
 			this.#paletteHistoryManager.addPalette(newPalette);
 			await this.#stateManager.saveState();
 
-			const allColumns = paletteContainer.querySelectorAll('.palette-column');
+			const allColumns =
+				paletteContainer.querySelectorAll('.palette-column');
 			const columnWidth = 100 / newPalette.items.length;
 
 			newPalette.items.forEach((item, index) => {
@@ -283,7 +286,8 @@ export class PaletteRendererService implements PaletteRendererContract {
 			}
 
 			// get latest saved palette
-			const latestPalette = this.#paletteHistoryManager.getCurrentPalette();
+			const latestPalette =
+				this.#paletteHistoryManager.getCurrentPalette();
 			if (!latestPalette) {
 				this.#log.warn(
 					'No saved palettes in history. Cannot render.',
@@ -294,7 +298,8 @@ export class PaletteRendererService implements PaletteRendererContract {
 
 			const columnCount = latestPalette.metadata.columnCount;
 			const columnWidth = 100 / columnCount;
-			const allColumns = paletteContainer.querySelectorAll('.palette-column');
+			const allColumns =
+				paletteContainer.querySelectorAll('.palette-column');
 
 			latestPalette.items.forEach((item, index) => {
 				const column = allColumns[index];
@@ -314,14 +319,16 @@ export class PaletteRendererService implements PaletteRendererContract {
 			});
 
 			// hide any extra columns
-			const normalizedColumns = latestPalette.items.map((item, index) => ({
-				id: index + 1,
-				isLocked: false,
-				position: index + 1,
-				size: 100 / 5, // Ensure each column is evenly sized
-				color: item.colors,
-				css: item.css
-			}));
+			const normalizedColumns = latestPalette.items.map(
+				(item, index) => ({
+					id: index + 1,
+					isLocked: false,
+					position: index + 1,
+					size: 100 / 5, // Ensure each column is evenly sized
+					color: item.colors,
+					css: item.css
+				})
+			);
 
 			// update DOM elements
 			allColumns.forEach((columnElement, index) => {
@@ -380,7 +387,10 @@ export class PaletteRendererService implements PaletteRendererContract {
 			);
 
 			// Normalize sizes to ensure 100% total
-			const totalSize = updatedColumns.reduce((sum, col) => sum + col.size, 0);
+			const totalSize = updatedColumns.reduce(
+				(sum, col) => sum + col.size,
+				0
+			);
 			const normalizedColumns = updatedColumns.map(col => ({
 				...col,
 				size: col.size * (100 / totalSize)
@@ -408,7 +418,8 @@ export class PaletteRendererService implements PaletteRendererContract {
 		return this.#errors.handleAsync(
 			async () => {
 				const currentState = this.#helpers.data.deepClone(state);
-				const latestPalette = this.#paletteHistoryManager.getCurrentPalette();
+				const latestPalette =
+					this.#paletteHistoryManager.getCurrentPalette();
 
 				if (!latestPalette) return;
 
@@ -416,7 +427,8 @@ export class PaletteRendererService implements PaletteRendererContract {
 				const updatedItems = latestPalette.items.map(item => {
 					if (item.itemID !== columnID) return item;
 
-					const parsedNewColor = this.#utils.color.formatCSSAsColor(newColor);
+					const parsedNewColor =
+						this.#utils.color.formatCSSAsColor(newColor);
 					if (!parsedNewColor) throw new Error('Invalid color value');
 
 					// ensure color is in HSL format
@@ -431,7 +443,9 @@ export class PaletteRendererService implements PaletteRendererContract {
 
 					// ensure CSS representations match expected format
 					const structuredCSS = {
-						cmyk: this.#utils.color.formatColorAsCSS(allColors.cmyk),
+						cmyk: this.#utils.color.formatColorAsCSS(
+							allColors.cmyk
+						),
 						hex: this.#utils.color.formatColorAsCSS(allColors.hex),
 						hsl: this.#utils.color.formatColorAsCSS(allColors.hsl),
 						hsv: this.#utils.color.formatColorAsCSS(allColors.hsv),
@@ -450,7 +464,8 @@ export class PaletteRendererService implements PaletteRendererContract {
 				// ensure column state is updated
 				const updatedColumns = updatedItems.map((item, index) => ({
 					id: item.itemID,
-					isLocked: currentState.paletteContainer.columns[index].isLocked,
+					isLocked:
+						currentState.paletteContainer.columns[index].isLocked,
 					position: index + 1,
 					size: currentState.paletteContainer.columns[index].size
 				}));
@@ -488,7 +503,9 @@ export class PaletteRendererService implements PaletteRendererContract {
 					return;
 				}
 
-				const validColorSpace = ['hex', 'hsl', 'rgb'].includes(colorSpace)
+				const validColorSpace = ['hex', 'hsl', 'rgb'].includes(
+					colorSpace
+				)
 					? colorSpace
 					: 'hex';
 

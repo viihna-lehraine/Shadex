@@ -1,5 +1,3 @@
-// File: config/partials/paletteConfig.ts
-
 import { PaletteConfig } from '../../types/index.js';
 
 export const paletteConfig: PaletteConfig = {

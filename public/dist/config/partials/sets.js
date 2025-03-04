@@ -1,4 +1,3 @@
-// File: config/partials/sets.ts
 const sets = {
     ByteRange: [0, 255],
     HexSet: 'HexSet',

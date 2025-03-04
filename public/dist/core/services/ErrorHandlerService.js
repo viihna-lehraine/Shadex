@@ -3,7 +3,6 @@ import { config } from '../../config/partials/base.js';
 import '../../config/partials/defaults.js';
 import '../../config/partials/regex.js';
 
-// File: core/services/ErrorHandlerService.ts
 const caller = 'ErrorHandlerService';
 const mode = config.mode;
 class ErrorHandlerService {
@@ -96,7 +95,9 @@ class ErrorHandlerService {
                 this.#logger.debug(`Stack trace:\n${this.#getStackTrace(error instanceof Error ? error : undefined)}`, `${caller}`);
             }
             const userMessage = options.userMessage ??
-                (error instanceof UserFacingError ? error.userMessage : undefined);
+                (error instanceof UserFacingError
+                    ? error.userMessage
+                    : undefined);
             if (userMessage) {
                 alert(userMessage);
             }

@@ -1,4 +1,3 @@
-// File: core/helpers/time.ts
 const timeHelpersFactory = () => ({
     debounce(func, delay) {
         let timer = null;

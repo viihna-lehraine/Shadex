@@ -1,4 +1,3 @@
-// File: core/utils/color.ts
 async function colorUtilitiesFactory(adjust, brand, format, helpers, sanitize, services, validate) {
     const { errors, log } = services;
     const caller = '[COLOR_UTILS_FACTORY]';

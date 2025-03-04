@@ -4,7 +4,6 @@ import { domIndex } from '../../config/partials/dom.js';
 import { paletteConfig } from '../../config/partials/paletteConfig.js';
 import '../../config/partials/regex.js';
 
-// File: core/utils/palette.ts
 const ids = domIndex.ids;
 const maxColumns = env.app.maxColumns;
 function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, validate) {
@@ -16,13 +15,19 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
             return {
                 itemID,
                 colors: {
-                    cmyk: colorUtils.convertHSL(clonedColor, 'cmyk').value,
-                    hex: colorUtils.convertHSL(clonedColor, 'hex').value,
+                    cmyk: colorUtils.convertHSL(clonedColor, 'cmyk')
+                        .value,
+                    hex: colorUtils.convertHSL(clonedColor, 'hex')
+                        .value,
                     hsl: clonedColor.value,
-                    hsv: colorUtils.convertHSL(clonedColor, 'hsv').value,
-                    lab: colorUtils.convertHSL(clonedColor, 'lab').value,
-                    rgb: colorUtils.convertHSL(clonedColor, 'rgb').value,
-                    xyz: colorUtils.convertHSL(clonedColor, 'xyz').value
+                    hsv: colorUtils.convertHSL(clonedColor, 'hsv')
+                        .value,
+                    lab: colorUtils.convertHSL(clonedColor, 'lab')
+                        .value,
+                    rgb: colorUtils.convertHSL(clonedColor, 'rgb')
+                        .value,
+                    xyz: colorUtils.convertHSL(clonedColor, 'xyz')
+                        .value
                 },
                 css: {
                     cmyk: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'cmyk')),
@@ -179,7 +184,7 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
                 log.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `utils.palette.isHSLTooDark`);
                 return false;
             }
-            return deepClone(hsl).value.lightness < paletteConfig.thresholds.dark;
+            return (deepClone(hsl).value.lightness < paletteConfig.thresholds.dark);
         }, 'Error occurred while checking if HSL is too dark');
     }
     function isHSLTooGray(hsl) {
@@ -188,7 +193,7 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
                 log.error(`Invalid HSL value ${JSON.stringify(hsl)}`, `utils.palette.isHSLTooGray`);
                 return false;
             }
-            return deepClone(hsl).value.saturation < paletteConfig.thresholds.gray;
+            return (deepClone(hsl).value.saturation < paletteConfig.thresholds.gray);
         }, 'Error occurred while checking if HSL is too gray');
     }
     function isHSLTooLight(hsl) {
@@ -197,7 +202,7 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
                 log.error('Invalid HSL value ${JSON.stringify(hsl)}', `utils.palette.isHSLTooLight`);
                 return false;
             }
-            return deepClone(hsl).value.lightness > paletteConfig.thresholds.light;
+            return (deepClone(hsl).value.lightness > paletteConfig.thresholds.light);
         }, 'Error occurred while checking if HSL is too light');
     }
     function showPaletteColumns(count) {

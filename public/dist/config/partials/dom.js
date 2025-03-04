@@ -1,11 +1,7 @@
-// File: config/dom.ts
 const classes = {
     colorDisplay: 'color-display',
-    colorInput: 'color-input',
     colorInputBtn: 'color-input-btn',
     colorInputModal: 'color-input-modal',
-    colorStripe: 'color-stripe',
-    colorSwatch: 'color-swatch',
     dragHandle: 'drag-handle',
     hidden: 'hidden',
     lockBtn: 'lock-btn',
@@ -14,7 +10,6 @@ const classes = {
     modalTrigger: 'modal-trigger',
     paletteColumn: 'palette-column',
     resizeHandle: 'resize-handle',
-    tooltipContainer: 'tooltip-container',
     tooltipTrigger: 'tooltip-trigger'
 };
 const ids = {
@@ -48,22 +43,13 @@ const ids = {
         paletteType: 'palette-type-selector'
     }
 };
-const dynamicIDs = {
-    globalTooltipDiv: 'global-tooltip'
-};
 const domConfig = {
-    btnDebounce: 300,
-    inputDebounce: 200,
-    copyButtonTextTimeout: 1000,
     maxColumnSize: 70,
     minColumnSize: 5,
-    toastTimer: 3000,
-    tooltipFadeIn: 50,
     tooltipFadeOut: 50
 };
 const domIndex = {
     classes,
-    dynamicIDs,
     ids
 };
 

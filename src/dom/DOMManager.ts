@@ -1,5 +1,3 @@
-// File: dom/DOMManager.ts
-
 import { CommonFunctions, Services, State } from '../types/index.js';
 import { PaletteRendererService } from './PaletteRendererService.js';
 

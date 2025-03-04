@@ -1,5 +1,3 @@
-// File: core/helpers/time.ts
-
 import { TimeHelpers } from '../../types/index.js';
 
 export const timeHelpersFactory = (): TimeHelpers =>

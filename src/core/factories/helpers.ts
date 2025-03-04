@@ -1,5 +1,3 @@
-// File: core/factories/helpers.ts
-
 import { Helpers } from '../../types/index.js';
 
 export async function helpersFactory(): Promise<Helpers> {

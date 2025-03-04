@@ -1,4 +1,3 @@
-// File: core/services/ErrorClasses.ts
 class UserFacingError extends Error {
     userMessage;
     constructor(message, userMessage) {

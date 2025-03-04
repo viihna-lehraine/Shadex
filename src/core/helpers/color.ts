@@ -1,5 +1,3 @@
-// File: core/helpers/color.ts
-
 import {
 	ColorDataAssertion,
 	ColorHelpers,
@@ -24,7 +22,9 @@ export const colorHelpersFactory = (helpers: Helpers): ColorHelpers =>
 				const conversionFn = helpers.color[fnName] as unknown as (
 					input: ColorDataAssertion[From]
 				) => ColorDataAssertion[To];
-				return (value: ColorDataAssertion[From]): ColorDataAssertion[To] =>
+				return (
+					value: ColorDataAssertion[From]
+				): ColorDataAssertion[To] =>
 					structuredClone(conversionFn(value));
 			} catch (error) {
 				throw new Error(
@@ -40,10 +40,13 @@ export const colorHelpersFactory = (helpers: Helpers): ColorHelpers =>
 				let clonedT = helpers.data.deepClone(t);
 				if (clonedT < 0) clonedT += 1;
 				if (clonedT > 1) clonedT -= 1;
-				if (clonedT < 1 / 6) return clonedP + (clonedQ - clonedP) * 6 * clonedT;
+				if (clonedT < 1 / 6)
+					return clonedP + (clonedQ - clonedP) * 6 * clonedT;
 				if (clonedT < 1 / 2) return clonedQ;
 				if (clonedT < 2 / 3)
-					return clonedP + (clonedQ - clonedP) * (2 / 3 - clonedT) * 6;
+					return (
+						clonedP + (clonedQ - clonedP) * (2 / 3 - clonedT) * 6
+					);
 				return clonedP;
 			} catch (error) {
 				throw new Error(

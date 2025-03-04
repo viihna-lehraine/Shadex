@@ -1,4 +1,3 @@
-// File: core/helpers/random.ts
 const randomHelpersFactory = () => ({
     selectRandomFromWeights(obj) {
         return this.selectWeightedRandom(obj.weights, obj.values);

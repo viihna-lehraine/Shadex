@@ -1,7 +1,6 @@
 import '../../config/partials/defaults.js';
 import { regex } from '../../config/partials/regex.js';
 
-// File: core/helpers/data.ts
 function dataHelpersFactory(typeGuards) {
     const { isObject } = typeGuards;
     function deepClone(value) {

@@ -1,7 +1,6 @@
 import '../../config/partials/defaults.js';
 import { regex } from '../../config/partials/regex.js';
 
-// File: core/utils/brand.ts
 function brandingUtilitiesFactory(services, validate) {
     const { errors } = services;
     function asBranded(value, rangeKey) {

@@ -3,7 +3,6 @@ import { defaults } from '../../config/partials/defaults.js';
 import { paletteConfig } from '../../config/partials/paletteConfig.js';
 import '../../config/partials/regex.js';
 
-// File: core/utils/adjust.ts
 const adjustments = paletteConfig.adjustment;
 const defaultColors = defaults.colors;
 const math = config.math;

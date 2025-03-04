@@ -1,5 +1,3 @@
-// File: dom/events/UIEventsService.ts
-
 import {
 	DOMElements,
 	Helpers,
@@ -97,7 +95,9 @@ export class UIEventsService implements UIEventsContract {
 
 				// open modal
 				if (target.matches(classes.modalTrigger)) {
-					const modal = this.#helpers.dom.getElement(target.dataset.modalID!);
+					const modal = this.#helpers.dom.getElement(
+						target.dataset.modalID!
+					);
 
 					modal?.classList.remove(classes.hidden);
 				}
@@ -171,7 +171,11 @@ export class UIEventsService implements UIEventsContract {
 				}
 			);
 
-			EventManager.add(document, 'click', this.handleWindowClick.bind(this));
+			EventManager.add(
+				document,
+				'click',
+				this.handleWindowClick.bind(this)
+			);
 		}, `[${caller}]: Failed to initialize buttons.`);
 	}
 

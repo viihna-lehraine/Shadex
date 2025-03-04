@@ -1,5 +1,3 @@
-// File: core/services/LoggerService.ts
-
 import { LoggerContract } from '../../types/index.js';
 import { config } from '../../config/index.js';
 
@@ -121,7 +119,11 @@ export class LoggerService implements LoggerContract {
 			);
 		}
 
-		if (callerInfo === 'Unknown caller' && debugLevel > 1 && mode.stackTrace) {
+		if (
+			callerInfo === 'Unknown caller' &&
+			debugLevel > 1 &&
+			mode.stackTrace
+		) {
 			console.trace(`[${caller}]: Full Stack Trace:`);
 		}
 	}

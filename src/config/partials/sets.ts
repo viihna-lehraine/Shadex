@@ -1,5 +1,3 @@
-// File: config/partials/sets.ts
-
 import { SetsData } from '../../types/index.js';
 
 export const sets: Readonly<SetsData> = {

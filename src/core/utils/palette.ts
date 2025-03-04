@@ -1,5 +1,3 @@
-// File: core/utils/palette.ts
-
 import {
 	AllColors,
 	BrandingUtilities,
@@ -48,13 +46,19 @@ export function paletteUtilitiesFactory(
 			return {
 				itemID,
 				colors: {
-					cmyk: (colorUtils.convertHSL(clonedColor, 'cmyk') as CMYK).value,
-					hex: (colorUtils.convertHSL(clonedColor, 'hex') as Hex).value,
+					cmyk: (colorUtils.convertHSL(clonedColor, 'cmyk') as CMYK)
+						.value,
+					hex: (colorUtils.convertHSL(clonedColor, 'hex') as Hex)
+						.value,
 					hsl: clonedColor.value,
-					hsv: (colorUtils.convertHSL(clonedColor, 'hsv') as HSV).value,
-					lab: (colorUtils.convertHSL(clonedColor, 'lab') as LAB).value,
-					rgb: (colorUtils.convertHSL(clonedColor, 'rgb') as RGB).value,
-					xyz: (colorUtils.convertHSL(clonedColor, 'xyz') as XYZ).value
+					hsv: (colorUtils.convertHSL(clonedColor, 'hsv') as HSV)
+						.value,
+					lab: (colorUtils.convertHSL(clonedColor, 'lab') as LAB)
+						.value,
+					rgb: (colorUtils.convertHSL(clonedColor, 'rgb') as RGB)
+						.value,
+					xyz: (colorUtils.convertHSL(clonedColor, 'xyz') as XYZ)
+						.value
 				},
 				css: {
 					cmyk: colorUtils.formatColorAsCSS(
@@ -147,7 +151,9 @@ export function paletteUtilitiesFactory(
 				throw new Error('Invalid HSL color provided');
 			}
 
-			const convert = <T extends keyof AllColors>(target: T): AllColors[T] =>
+			const convert = <T extends keyof AllColors>(
+				target: T
+			): AllColors[T] =>
 				colorUtils.convertHSL(clonedColor, target) as AllColors[T];
 
 			return {
@@ -250,7 +256,9 @@ export function paletteUtilitiesFactory(
 				Math.random() * Object.values(distributionTypeMap).length
 			);
 			const paletteType =
-				paletteTypeMap[randomPaletteTypeIndex as keyof typeof paletteTypeMap];
+				paletteTypeMap[
+					randomPaletteTypeIndex as keyof typeof paletteTypeMap
+				];
 			const distributionType =
 				distributionTypeMap[
 					randomDistributionTypeIndex as keyof typeof distributionTypeMap
@@ -296,7 +304,9 @@ export function paletteUtilitiesFactory(
 				return false;
 			}
 
-			return deepClone(hsl).value.lightness < paletteConfig.thresholds.dark;
+			return (
+				deepClone(hsl).value.lightness < paletteConfig.thresholds.dark
+			);
 		}, 'Error occurred while checking if HSL is too dark');
 	}
 
@@ -311,7 +321,9 @@ export function paletteUtilitiesFactory(
 				return false;
 			}
 
-			return deepClone(hsl).value.saturation < paletteConfig.thresholds.gray;
+			return (
+				deepClone(hsl).value.saturation < paletteConfig.thresholds.gray
+			);
 		}, 'Error occurred while checking if HSL is too gray');
 	}
 
@@ -326,7 +338,9 @@ export function paletteUtilitiesFactory(
 				return false;
 			}
 
-			return deepClone(hsl).value.lightness > paletteConfig.thresholds.light;
+			return (
+				deepClone(hsl).value.lightness > paletteConfig.thresholds.light
+			);
 		}, 'Error occurred while checking if HSL is too light');
 	}
 

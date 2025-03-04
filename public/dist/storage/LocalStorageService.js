@@ -1,4 +1,3 @@
-// File: storage/LocalStorageService.ts
 const caller = 'LocalStorageService';
 class LocalStorageService {
     static #instance = null;
