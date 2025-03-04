@@ -11,7 +11,7 @@ on:
 jobs:
     build-and-test:
         name: Install, Lint, and Test
-        runs-on: fedora-41
+        runs-on: ubuntu-latest
 
         steps:
             - name: Checkout code
@@ -42,7 +42,7 @@ jobs:
 
     code-analysis:
         name: CodeQL Analysis
-        runs-on: fedora-41
+        runs-on: ubuntu-latest
         permissions:
             security-events: write
 
@@ -53,7 +53,7 @@ jobs:
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v2
               with:
-                  languages: javascript
+                  languages: typescript, javascript
 
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v2
