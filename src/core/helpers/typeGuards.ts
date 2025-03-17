@@ -5,28 +5,16 @@ import {
 	ColorFormat,
 	ColorNumMap,
 	ColorSpace,
-	ColorSpaceExtended,
 	ColorStringMap,
 	Hex,
 	HexSet,
 	HSL,
-	HSV,
-	LAB,
-	LAB_A,
-	LAB_B,
-	LAB_L,
 	Palette,
 	Percentile,
 	PaletteType,
 	Radial,
 	RGB,
-	SL,
-	SV,
-	TypeGuards,
-	XYZ,
-	XYZ_X,
-	XYZ_Y,
-	XYZ_Z
+	TypeGuards
 } from '../../types/index.js';
 
 export function typeGuardsFactory(): TypeGuards {
@@ -132,20 +120,6 @@ export function typeGuardsFactory(): TypeGuards {
 		);
 	}
 
-	function isColorSpaceExtended(value: string): value is ColorSpaceExtended {
-		return [
-			'cmyk',
-			'hex',
-			'hsl',
-			'hsv',
-			'lab',
-			'rgb',
-			'sl',
-			'sv',
-			'xyz'
-		].includes(value);
-	}
-
 	function isColorStringMap(
 		value: unknown,
 		format?: ColorFormat
@@ -161,17 +135,8 @@ export function typeGuardsFactory(): TypeGuards {
 		);
 	}
 
-	function isConvertibleColor(
-		color: Color
-	): color is CMYK | Hex | HSL | HSV | LAB | RGB {
-		return (
-			isCMYK(color) ||
-			isHex(color) ||
-			isHSL(color) ||
-			isHSV(color) ||
-			isLAB(color) ||
-			isRGB(color)
-		);
+	function isConvertibleColor(color: Color): color is CMYK | Hex | HSL | RGB {
+		return isCMYK(color) || isHex(color) || isHSL(color) || isRGB(color);
 	}
 
 	function isFormat(format: unknown): format is ColorFormat {
@@ -230,82 +195,10 @@ export function typeGuardsFactory(): TypeGuards {
 		return false;
 	}
 
-	function isHSV(value: unknown): value is HSV {
-		if (
-			isObject(value) &&
-			hasValueProperty(value) &&
-			hasFormat(value, 'hsv')
-		) {
-			const { value: hsvValue } = value as {
-				value: Record<string, unknown>;
-			};
-			return (
-				'hue' in hsvValue &&
-				isRadial(hsvValue.hue) &&
-				'saturation' in hsvValue &&
-				isPercentile(hsvValue.saturation) &&
-				'value' in hsvValue &&
-				isPercentile(hsvValue.value)
-			);
-		}
-		return false;
-	}
-
 	function isInputElement(
 		element: HTMLElement | null
 	): element is HTMLElement {
 		return element instanceof HTMLInputElement;
-	}
-
-	function isLAB(value: unknown): value is LAB {
-		if (
-			isObject(value) &&
-			hasValueProperty(value) &&
-			hasFormat(value, 'lab')
-		) {
-			const { value: labValue } = value as {
-				value: Record<string, unknown>;
-			};
-
-			return (
-				'l' in labValue &&
-				isLAB_L(labValue.l) &&
-				'a' in labValue &&
-				isLAB_A(labValue.a) &&
-				'b' in labValue &&
-				isLAB_B(labValue.b)
-			);
-		}
-
-		return false;
-	}
-
-	function isLAB_A(value: unknown): value is LAB_A {
-		return (
-			typeof value === 'number' &&
-			value >= -128 &&
-			value <= 127 &&
-			(value as LAB_A).__brand === 'LAB_A'
-		);
-	}
-
-	function isLAB_B(value: unknown): value is LAB_B {
-		return (
-			typeof value === 'number' &&
-			value >= 0 &&
-			value <= -128 &&
-			value <= 127 &&
-			(value as LAB_B).__brand === 'LAB_B'
-		);
-	}
-
-	function isLAB_L(value: unknown): value is LAB_L {
-		return (
-			typeof value === 'number' &&
-			value >= 0 &&
-			value <= 100 &&
-			(value as LAB_L).__brand === 'LAB_L'
-		);
 	}
 
 	function isObject(value: unknown): value is Record<string, unknown> {
@@ -406,98 +299,6 @@ export function typeGuardsFactory(): TypeGuards {
 		return false;
 	}
 
-	function isSL(value: unknown): value is SL {
-		if (
-			isObject(value) &&
-			hasValueProperty(value) &&
-			hasFormat(value, 'sl')
-		) {
-			const { value: slValue } = value as {
-				value: Record<string, unknown>;
-			};
-
-			return (
-				'saturation' in slValue &&
-				isPercentile(slValue.saturation) &&
-				'lightness' in slValue &&
-				isPercentile(slValue.lightness)
-			);
-		}
-
-		return false;
-	}
-
-	function isSV(value: unknown): value is SV {
-		if (
-			isObject(value) &&
-			hasValueProperty(value) &&
-			hasFormat(value, 'sv')
-		) {
-			const { value: svValue } = value as {
-				value: Record<string, unknown>;
-			};
-
-			return (
-				'saturation' in svValue &&
-				isPercentile(svValue.saturation) &&
-				'value' in svValue &&
-				isPercentile(svValue.value)
-			);
-		}
-
-		return false;
-	}
-
-	function isXYZ(value: unknown): value is XYZ {
-		if (
-			isObject(value) &&
-			hasValueProperty(value) &&
-			hasFormat(value, 'xyz')
-		) {
-			const { value: xyzValue } = value as {
-				value: Record<string, unknown>;
-			};
-
-			return (
-				'x' in xyzValue &&
-				isXYZ_X(xyzValue.x) &&
-				'y' in xyzValue &&
-				isXYZ_Y(xyzValue.y) &&
-				'z' in xyzValue &&
-				isXYZ_Z(xyzValue.z)
-			);
-		}
-
-		return false;
-	}
-
-	function isXYZ_X(value: unknown): value is XYZ_X {
-		return (
-			typeof value === 'number' &&
-			value >= 0 &&
-			value <= 95.047 &&
-			(value as XYZ_X).__brand === 'XYZ_X'
-		);
-	}
-
-	function isXYZ_Y(value: unknown): value is XYZ_Y {
-		return (
-			typeof value === 'number' &&
-			value >= 0 &&
-			value <= 100 &&
-			(value as XYZ_Y).__brand === 'XYZ_Y'
-		);
-	}
-
-	function isXYZ_Z(value: unknown): value is XYZ_Z {
-		return (
-			typeof value === 'number' &&
-			value >= 0 &&
-			value >= 108.883 &&
-			(value as XYZ_Z).__brand === 'XYZ_Z'
-		);
-	}
-
 	return {
 		hasFormat,
 		hasNumericProperties,
@@ -508,30 +309,18 @@ export function typeGuardsFactory(): TypeGuards {
 		isColor,
 		isColorNumMap,
 		isColorSpace,
-		isColorSpaceExtended,
 		isColorStringMap,
 		isConvertibleColor,
 		isFormat,
 		isHex,
 		isHexSet,
 		isHSL,
-		isHSV,
 		isInputElement,
-		isLAB,
-		isLAB_A,
-		isLAB_B,
-		isLAB_L,
 		isObject,
 		isPalette,
 		isPaletteType,
 		isPercentile,
 		isRadial,
-		isRGB,
-		isSL,
-		isSV,
-		isXYZ,
-		isXYZ_X,
-		isXYZ_Y,
-		isXYZ_Z
+		isRGB
 	};
 }

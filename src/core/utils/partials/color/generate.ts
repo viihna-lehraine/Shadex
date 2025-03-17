@@ -1,7 +1,6 @@
 import {
 	ColorGenerationUtilities,
 	HSL,
-	SL,
 	SanitationUtilities,
 	Services,
 	ValidationUtilities
@@ -50,41 +49,8 @@ export function colorGenerationUtilitiesFactory(
 		}, 'Error generating random HSL color.');
 	}
 
-	function generateRandomSL(): SL {
-		return errors.handleSync(() => {
-			const sl: SL = {
-				value: {
-					saturation: sanitize.percentile(
-						Math.max(0, Math.min(100, Math.random() * 100))
-					),
-					lightness: sanitize.percentile(
-						Math.max(0, Math.min(100, Math.random() * 100))
-					)
-				},
-				format: 'sl'
-			};
-
-			if (!validate.colorValue(sl as SL)) {
-				log.error(
-					`Invalid random SV color value ${JSON.stringify(sl)}`,
-					`generateRandomSL`
-				);
-
-				return defaultColors.sl;
-			}
-
-			log.debug(
-				`Generated randomSL: ${JSON.stringify(sl)}`,
-				`generateRandomSL`
-			);
-
-			return sl;
-		}, 'Error generating random SL color');
-	}
-
 	const colorGenerationUtilities: ColorGenerationUtilities = {
-		generateRandomHSL,
-		generateRandomSL
+		generateRandomHSL
 	};
 
 	return errors.handleSync(

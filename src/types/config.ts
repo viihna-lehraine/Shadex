@@ -32,8 +32,6 @@ export interface DOMIndex {
 			readonly showAsCMYK: string;
 			readonly showAsHex: string;
 			readonly showAsHSL: string;
-			readonly showAsHSV: string;
-			readonly showAsLAB: string;
 			readonly showAsRGB: string;
 		};
 		readonly divs: {
@@ -158,18 +156,12 @@ export interface RegexConfig {
 		readonly cmyk: RegExp;
 		readonly hex: RegExp;
 		readonly hsl: RegExp;
-		readonly hsv: RegExp;
-		readonly lab: RegExp;
 		readonly rgb: RegExp;
-		readonly xyz: RegExp;
 	};
 	readonly css: {
 		readonly cmyk: RegExp;
 		readonly hsl: RegExp;
-		readonly hsv: RegExp;
-		readonly lab: RegExp;
 		readonly rgb: RegExp;
-		readonly xyz: RegExp;
 	};
 	readonly dom: {
 		readonly hex: RegExp;
@@ -200,12 +192,6 @@ export interface RegexConfig {
 export interface Configuration {
 	readonly math: {
 		readonly epsilon: number;
-		readonly maxXYZ_X: number;
-		readonly maxXYZ_Y: number;
-		readonly maxXYZ_Z: number;
-		readonly minXYZ_X: number;
-		readonly minXYZ_Y: number;
-		readonly minXYZ_Z: number;
 	};
 	readonly mode: {
 		readonly debugLevel: 0 | 1 | 2 | 3 | 4 | 5;
@@ -236,44 +222,23 @@ export interface Defaults {
 		readonly cmyk: CMYK;
 		readonly hex: Hex;
 		readonly hsl: HSL;
-		readonly hsv: HSV;
-		readonly lab: LAB;
 		readonly rgb: RGB;
-		readonly sl: SL;
-		readonly sv: SV;
-		readonly xyz: XYZ;
 		readonly cmykNum: CMYKNumMap;
 		readonly hslNum: HSLNumMap;
-		readonly hsvNum: HSVNumMap;
-		readonly labNum: LABNumMap;
 		readonly rgbNum: RGBNumMap;
-		readonly slNum: SLNumMap;
-		readonly svNum: SVNumMap;
-		readonly xyzNum: XYZNumMap;
 		readonly cmykString: CMYKStringMap;
 		readonly hexString: HexStringMap;
 		readonly hslString: HSLStringMap;
-		readonly hsvString: HSVStringMap;
-		readonly labString: LABStringMap;
 		readonly rgbString: RGBStringMap;
-		readonly slString: SLStringMap;
-		readonly svString: SVStringMap;
-		readonly xyzString: XYZStringMap;
 		readonly cmykCSS: string;
 		readonly hexCSS: string;
 		readonly hslCSS: string;
-		readonly hsvCSS: string;
-		readonly labCSS: string;
 		readonly rgbCSS: string;
-		readonly slCSS: string;
-		readonly svCSS: string;
-		readonly xyzCSS: string;
 	};
 	readonly mutation: MutationLog;
 	readonly palette: Palette;
 	readonly paletteItem: PaletteItem;
 	readonly paletteOptions: SelectedPaletteOptions;
-	readonly state: State;
 	readonly unbrandedPalette: UnbrandedPalette;
 	readonly unbrandedPaletteItem: UnbrandedPaletteItem;
 }
@@ -285,14 +250,8 @@ export type ModeData = Configuration['mode'];
 export interface SetsData {
 	readonly ByteRange: readonly [0, 255];
 	readonly HexSet: 'HexSet';
-	readonly LAB_L: readonly [0, 100];
-	readonly LAB_A: readonly [-128, 127];
-	readonly LAB_B: readonly [-128, 127];
 	readonly Percentile: readonly [0, 100];
 	readonly Radial: readonly [0, 360];
-	readonly XYZ_X: readonly [number, number];
-	readonly XYZ_Y: readonly [number, number];
-	readonly XYZ_Z: readonly [number, number];
 }
 
 export type StorageData = Configuration['storage'];
@@ -307,33 +266,15 @@ export type ByteRange = number & { __brand: 'ByteRange' };
 
 export type HexSet = string & { __brand: 'HexSet' };
 
-export type LAB_L = number & { __brand: 'LAB_L' };
-
-export type LAB_A = number & { __brand: 'LAB_A' };
-
-export type LAB_B = number & { __brand: 'LAB_B' };
-
 export type Percentile = number & { __brand: 'Percentile' };
 
 export type Radial = number & { __brand: 'Radial' };
 
-export type XYZ_X = number & { __brand: 'XYZ_X' };
-
-export type XYZ_Y = number & { __brand: 'XYZ_Y' };
-
-export type XYZ_Z = number & { __brand: 'XYZ_Z' };
-
 export type RangeKeyMap = {
 	readonly ByteRange: ByteRange;
 	readonly HexSet: HexSet;
-	readonly LAB_L: LAB_L;
-	readonly LAB_A: LAB_A;
-	readonly LAB_B: LAB_B;
 	readonly Percentile: Percentile;
 	readonly Radial: Radial;
-	readonly XYZ_X: XYZ_X;
-	readonly XYZ_Y: XYZ_Y;
-	readonly XYZ_Z: XYZ_Z;
 };
 
 export type ColorValueRange = RangeKeyMap[keyof RangeKeyMap];
@@ -344,16 +285,7 @@ export type NumericRangeKey = {
 		: never;
 }[keyof typeof sets & string];
 
-export type NumericBrandedType =
-	| ByteRange
-	| LAB_A
-	| LAB_B
-	| LAB_L
-	| Percentile
-	| Radial
-	| XYZ_X
-	| XYZ_Y
-	| XYZ_Z;
+export type NumericBrandedType = ByteRange | Percentile | Radial;
 
 export type Sets = typeof sets;
 
@@ -383,34 +315,9 @@ export type HSL = {
 	format: 'hsl';
 };
 
-export type HSV = {
-	value: { hue: Radial; saturation: Percentile; value: Percentile };
-	format: 'hsv';
-};
-
-export type LAB = {
-	value: { l: LAB_L; a: LAB_A; b: LAB_B };
-	format: 'lab';
-};
-
 export type RGB = {
 	value: { red: ByteRange; green: ByteRange; blue: ByteRange };
 	format: 'rgb';
-};
-
-export type SL = {
-	value: { saturation: Percentile; lightness: Percentile };
-	format: 'sl';
-};
-
-export type SV = {
-	value: { saturation: Percentile; value: Percentile };
-	format: 'sv';
-};
-
-export type XYZ = {
-	value: { x: XYZ_X; y: XYZ_Y; z: XYZ_Z };
-	format: 'xyz';
 };
 
 // *********************************************************************
@@ -434,34 +341,9 @@ export type HSLStringMap = {
 	format: 'hsl';
 };
 
-export type HSVStringMap = {
-	value: { hue: string; saturation: string; value: string };
-	format: 'hsv';
-};
-
-export type LABStringMap = {
-	value: { l: string; a: string; b: string };
-	format: 'lab';
-};
-
 export type RGBStringMap = {
 	value: { red: string; green: string; blue: string };
 	format: 'rgb';
-};
-
-export type SLStringMap = {
-	value: { saturation: string; lightness: string };
-	format: 'sl';
-};
-
-export type SVStringMap = {
-	value: { saturation: string; value: string };
-	format: 'sv';
-};
-
-export type XYZStringMap = {
-	value: { x: string; y: string; z: string };
-	format: 'xyz';
 };
 
 // **********************************************************************
@@ -485,38 +367,9 @@ export type HSLNumMap = {
 	format: 'hsl';
 };
 
-export type HSVNumMap = {
-	value: { hue: number; saturation: number; value: number };
-	format: 'hsv';
-};
-
-export type LABNumMap = {
-	value: { l: number; a: number; b: number };
-	format: 'lab';
-};
-
 export type RGBNumMap = {
 	value: { red: number; green: number; blue: number };
 	format: 'rgb';
-};
-
-export type SLNumMap = {
-	value: { saturation: number; lightness: number };
-	format: 'sl';
-};
-
-export type SVNumMap = {
-	value: { saturation: number; value: number };
-	format: 'sv';
-};
-
-export type XYZNumMap = {
-	value: {
-		x: number;
-		y: number;
-		z: number;
-	};
-	format: 'xyz';
 };
 
 // ***********************************************************************
@@ -529,89 +382,43 @@ export interface AllColors {
 	cmyk: CMYK;
 	hex: Hex;
 	hsl: HSL;
-	hsv: HSV;
-	lab: LAB;
 	rgb: RGB;
-	sl: SL;
-	sv: SV;
-	xyz: XYZ;
 }
 
-export type Color = CMYK | Hex | HSL | HSV | LAB | RGB | SL | SV | XYZ;
+export type Color = CMYK | Hex | HSL | RGB;
 
 export interface ColorData {
 	cmyk?: CMYK;
 	hex?: Hex;
 	hsl?: HSL;
-	hsv?: HSV;
-	lab?: LAB;
 	rgb?: RGB;
-	xyz?: XYZ;
 }
 
 export interface ColorDataAssertion {
 	cmyk: CMYK;
 	hex: Hex;
 	hsl: HSL;
-	hsv: HSV;
-	lab: LAB;
 	rgb: RGB;
-	xyz: XYZ;
 }
 
-export interface ColorDataExtended extends ColorData {
-	sl?: SL;
-	sv?: SV;
-}
-
-export type ColorFormat =
-	| 'cmyk'
-	| 'hex'
-	| 'hsl'
-	| 'hsv'
-	| 'lab'
-	| 'rgb'
-	| 'sl'
-	| 'sv'
-	| 'xyz';
+export type ColorFormat = 'cmyk' | 'hex' | 'hsl' | 'rgb';
 
 export type ColorFormatMap = {
 	cmyk: CMYK;
 	hex: Hex;
 	hsl: HSL;
-	hsv: HSV;
-	lab: LAB;
 	rgb: RGB;
-	sl: SL;
-	sv: SV;
-	xyz: XYZ;
 };
 
-export type ColorSpace = 'cmyk' | 'hex' | 'hsl' | 'hsv' | 'lab' | 'rgb' | 'xyz';
-
-export type ColorSpaceExtended = ColorSpace | 'sl' | 'sv';
+export type ColorSpace = 'cmyk' | 'hex' | 'hsl' | 'rgb';
 
 export type ColorStringMap =
 	| CMYKStringMap
 	| HexStringMap
 	| HSLStringMap
-	| HSVStringMap
-	| LABStringMap
-	| RGBStringMap
-	| SLStringMap
-	| SVStringMap
-	| XYZStringMap;
+	| RGBStringMap;
 
-export type ColorNumMap =
-	| CMYKNumMap
-	| HexNumMap
-	| HSLNumMap
-	| HSVNumMap
-	| LABNumMap
-	| RGBNumMap
-	| SLNumMap
-	| SVNumMap
-	| XYZNumMap;
+export type ColorNumMap = CMYKNumMap | HexNumMap | HSLNumMap | RGBNumMap;
 
 // *****************************************************************
 /// ***************************************************************
@@ -622,8 +429,6 @@ export type ColorNumMap =
 export interface ColorInputElement extends HTMLInputElement {
 	colorValues?: Color;
 }
-
-export type History = State[];
 
 export interface MutationLog {
 	timestamp: string;
@@ -666,19 +471,13 @@ export interface PaletteItem {
 		cmyk: CMYK['value'];
 		hex: Hex['value'];
 		hsl: HSL['value'];
-		hsv: HSV['value'];
-		lab: LAB['value'];
 		rgb: RGB['value'];
-		xyz: XYZ['value'];
 	};
 	css: {
 		cmyk: string;
 		hex: string;
 		hsl: string;
-		hsv: string;
-		lab: string;
 		rgb: string;
-		xyz: string;
 	};
 }
 
@@ -693,51 +492,19 @@ export interface SelectedPaletteOptions {
 
 export type AppModeData = 'dev' | 'prod';
 
-export interface State {
-	readonly appMode: 'edit' | 'export' | 'preview';
-	readonly paletteContainer: {
-		readonly columns: {
-			readonly id: number;
-			readonly isLocked: boolean;
-			readonly position: number;
-			readonly size: number;
-		}[];
-	};
-	readonly preferences: {
-		readonly colorSpace: ColorSpace;
-		readonly distributionType: keyof PaletteConfig['probabilities'];
-		readonly maxHistory: number;
-		readonly maxPaletteHistory: number;
-		readonly theme: 'light' | 'dark';
-	};
-	readonly selections: {
-		readonly paletteColumnCount: number;
-		readonly paletteType: PaletteType;
-		readonly targetedColumnPosition: number;
-	};
-	readonly timestamp: string;
-	readonly [key: string]: unknown;
-}
-
 export interface UnbrandedPaletteItem {
 	itemID: number;
 	colors: {
 		cmyk: CMYKNumMap['value'];
 		hex: HexNumMap['value'];
 		hsl: HSLNumMap['value'];
-		hsv: HSVNumMap['value'];
-		lab: LABNumMap['value'];
 		rgb: RGBNumMap['value'];
-		xyz: XYZNumMap['value'];
 	};
 	css: {
 		cmyk: string;
 		hex: string;
 		hsl: string;
-		hsv: string;
-		lab: string;
 		rgb: string;
-		xyz: string;
 	};
 }
 
@@ -779,8 +546,6 @@ export interface UnvalidatedDOMElements {
 		showAsCMYK: HTMLButtonElement | null;
 		showAsHex: HTMLButtonElement | null;
 		showAsHSL: HTMLButtonElement | null;
-		showAsHSV: HTMLButtonElement | null;
-		showAsLAB: HTMLButtonElement | null;
 		showAsRGB: HTMLButtonElement | null;
 	};
 	divs: {
@@ -811,8 +576,6 @@ export interface DOMElements {
 		showAsCMYK: HTMLButtonElement;
 		showAsHex: HTMLButtonElement;
 		showAsHSL: HTMLButtonElement;
-		showAsHSV: HTMLButtonElement;
-		showAsLAB: HTMLButtonElement;
 		showAsRGB: HTMLButtonElement;
 	};
 	divs: {

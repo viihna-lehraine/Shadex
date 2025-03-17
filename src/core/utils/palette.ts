@@ -7,8 +7,6 @@ import {
 	Helpers,
 	Hex,
 	HSL,
-	HSV,
-	LAB,
 	Palette,
 	PaletteConfig,
 	PaletteItem,
@@ -17,8 +15,7 @@ import {
 	RGB,
 	SelectedPaletteOptions,
 	Services,
-	ValidationUtilities,
-	XYZ
+	ValidationUtilities
 } from '../../types/index.js';
 import { domIndex, env, paletteConfig } from '../../config/index.js';
 
@@ -51,13 +48,7 @@ export function paletteUtilitiesFactory(
 					hex: (colorUtils.convertHSL(clonedColor, 'hex') as Hex)
 						.value,
 					hsl: clonedColor.value,
-					hsv: (colorUtils.convertHSL(clonedColor, 'hsv') as HSV)
-						.value,
-					lab: (colorUtils.convertHSL(clonedColor, 'lab') as LAB)
-						.value,
 					rgb: (colorUtils.convertHSL(clonedColor, 'rgb') as RGB)
-						.value,
-					xyz: (colorUtils.convertHSL(clonedColor, 'xyz') as XYZ)
 						.value
 				},
 				css: {
@@ -68,17 +59,8 @@ export function paletteUtilitiesFactory(
 						colorUtils.convertHSL(clonedColor, 'hex')
 					),
 					hsl: colorUtils.formatColorAsCSS(clonedColor),
-					hsv: colorUtils.formatColorAsCSS(
-						colorUtils.convertHSL(clonedColor, 'hsv')
-					),
-					lab: colorUtils.formatColorAsCSS(
-						colorUtils.convertHSL(clonedColor, 'lab')
-					),
 					rgb: colorUtils.formatColorAsCSS(
 						colorUtils.convertHSL(clonedColor, 'rgb')
-					),
-					xyz: colorUtils.formatColorAsCSS(
-						colorUtils.convertHSL(clonedColor, 'xyz')
 					)
 				}
 			};
@@ -160,12 +142,7 @@ export function paletteUtilitiesFactory(
 				cmyk: convert('cmyk'),
 				hex: convert('hex'),
 				hsl: clonedColor,
-				hsv: convert('hsv'),
-				lab: convert('lab'),
-				rgb: convert('rgb'),
-				sl: convert('sl'),
-				sv: convert('sv'),
-				xyz: convert('xyz')
+				rgb: convert('rgb')
 			};
 		}, 'Error occurred while generating all color values');
 	}

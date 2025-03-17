@@ -3,8 +3,6 @@ import {
 	Helpers,
 	SetsData,
 	Services,
-	SL,
-	SV,
 	ValidationUtilities
 } from '../../types/index.js';
 import { regex, sets } from '../../config/index.js';
@@ -34,7 +32,7 @@ export function validationUtilitiesFactory(
 		}, `Error occurred while validating color input from DOM: ${color}`);
 	}
 
-	function colorValue(color: Color | SL | SV): boolean {
+	function colorValue(color: Color): boolean {
 		return errors.handleSync(
 			() => {
 				const clonedColor = deepClone(color);
@@ -95,42 +93,6 @@ export function validationUtilitiesFactory(
 							isValidHSLSaturation &&
 							isValidHSLLightness
 						);
-					case 'hsv':
-						const isValidHSVHue =
-							isNumericValid(clonedColor.value.hue) &&
-							clonedColor.value.hue >= 0 &&
-							clonedColor.value.hue <= 360;
-						const isValidHSVSaturation =
-							normalizePercentage(clonedColor.value.saturation) >=
-								0 &&
-							normalizePercentage(clonedColor.value.saturation) <=
-								100;
-						const isValidHSVValue = clonedColor.value.value
-							? normalizePercentage(clonedColor.value.value) >=
-									0 &&
-								normalizePercentage(clonedColor.value.value) <=
-									100
-							: true;
-
-						return (
-							isValidHSVHue &&
-							isValidHSVSaturation &&
-							isValidHSVValue
-						);
-					case 'lab':
-						return (
-							[
-								clonedColor.value.l,
-								clonedColor.value.a,
-								clonedColor.value.b
-							].every(isNumericValid) &&
-							clonedColor.value.l >= 0 &&
-							clonedColor.value.l <= 100 &&
-							clonedColor.value.a >= -125 &&
-							clonedColor.value.a <= 125 &&
-							clonedColor.value.b >= -125 &&
-							clonedColor.value.b <= 125
-						);
 					case 'rgb':
 						return (
 							[
@@ -144,42 +106,6 @@ export function validationUtilitiesFactory(
 							clonedColor.value.green <= 255 &&
 							clonedColor.value.blue >= 0 &&
 							clonedColor.value.blue <= 255
-						);
-					case 'sl':
-						return (
-							[
-								clonedColor.value.saturation,
-								clonedColor.value.lightness
-							].every(isNumericValid) &&
-							clonedColor.value.saturation >= 0 &&
-							clonedColor.value.saturation <= 100 &&
-							clonedColor.value.lightness >= 0 &&
-							clonedColor.value.lightness <= 100
-						);
-					case 'sv':
-						return (
-							[
-								clonedColor.value.saturation,
-								clonedColor.value.value
-							].every(isNumericValid) &&
-							clonedColor.value.saturation >= 0 &&
-							clonedColor.value.saturation <= 100 &&
-							clonedColor.value.value >= 0 &&
-							clonedColor.value.value <= 100
-						);
-					case 'xyz':
-						return (
-							[
-								clonedColor.value.x,
-								clonedColor.value.y,
-								clonedColor.value.z
-							].every(isNumericValid) &&
-							clonedColor.value.x >= 0 &&
-							clonedColor.value.x <= 95.047 &&
-							clonedColor.value.y >= 0 &&
-							clonedColor.value.y <= 100.0 &&
-							clonedColor.value.z >= 0 &&
-							clonedColor.value.z <= 108.883
 						);
 					default:
 						console.error(

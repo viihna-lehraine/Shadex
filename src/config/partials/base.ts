@@ -6,13 +6,7 @@ import {
 } from '../../types/index.js';
 
 const math: Readonly<MathData> = {
-	epsilon: 0.00001,
-	maxXYZ_X: 95.047,
-	maxXYZ_Y: 100,
-	maxXYZ_Z: 108.883,
-	minXYZ_X: 0,
-	minXYZ_Y: 0,
-	minXYZ_Z: 0
+	epsilon: 0.00001
 } as const;
 
 const mode: Readonly<ModeData> = {

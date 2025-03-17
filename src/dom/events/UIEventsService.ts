@@ -5,7 +5,6 @@ import {
 	UIEventsContract,
 	Utilities
 } from '../../types/index.js';
-import { DOMStore } from '../DOMStore.js';
 import { EventManager } from './EventManager.js';
 import { PaletteRendererService } from '../PaletteRendererService.js';
 import { domIndex } from '../../config/index.js';
@@ -16,7 +15,6 @@ const classes = domIndex.classes;
 export class UIEventsService implements UIEventsContract {
 	static #instance: UIEventsService | null = null;
 
-	#domStore: DOMStore;
 	#elements: DOMElements;
 	#paletteRenderer: PaletteRendererService;
 
@@ -26,7 +24,6 @@ export class UIEventsService implements UIEventsContract {
 	#utils: Utilities;
 
 	private constructor(
-		domStore: DOMStore,
 		helpers: Helpers,
 		paletteRenderer: PaletteRendererService,
 		services: Services,
@@ -38,7 +35,6 @@ export class UIEventsService implements UIEventsContract {
 				`${caller} constructor`
 			);
 
-			this.#domStore = domStore;
 			this.#errors = services.errors;
 			this.#helpers = helpers;
 			this.#log = services.log;
@@ -62,7 +58,6 @@ export class UIEventsService implements UIEventsContract {
 	}
 
 	static getInstance(
-		domStore: DOMStore,
 		helpers: Helpers,
 		paletteRenderer: PaletteRendererService,
 		services: Services,
@@ -76,7 +71,6 @@ export class UIEventsService implements UIEventsContract {
 				);
 
 				UIEventsService.#instance = new UIEventsService(
-					domStore,
 					helpers,
 					paletteRenderer,
 					services,

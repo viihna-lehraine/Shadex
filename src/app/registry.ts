@@ -28,16 +28,6 @@ export async function registerDependencies(
 			utils
 		};
 
-		const { initializeDOMStore } = await import('./init.js');
-		const domStore = await initializeDOMStore(helpers, services);
-
-		const { initializeStateManager } = await import('./init.js');
-		const stateManager = await initializeStateManager(
-			helpers,
-			services,
-			utils
-		);
-
 		const { generateHuesFnGroup } = await import(
 			'../palette/partials/hues.js'
 		);
@@ -48,53 +38,34 @@ export async function registerDependencies(
 
 		const paletteRenderer = PaletteRendererService.getInstance(
 			common,
-			domStore,
 			generateHuesFnGroup,
 			generatePaletteFnGroup,
-			generatePalette,
-			stateManager
+			generatePalette
 		);
 
 		const { initializeEventManager } = await import('./init.js');
 		const eventManager = await initializeEventManager(services);
 
-		const { initializePaletteStateService } = await import('./init.js');
-		const paletteState = await initializePaletteStateService(
-			helpers,
-			services,
-			stateManager,
-			utils
-		);
-
 		const { initializePaletteEventsService } = await import('./init.js');
 		const paletteEvents = await initializePaletteEventsService(
-			domStore,
 			helpers,
 			paletteRenderer,
-			paletteState,
 			services,
-			stateManager,
 			utils
 		);
 
 		const { initializeUIEventsService } = await import('./init.js');
 		const uiEvents = await initializeUIEventsService(
-			domStore,
 			helpers,
 			paletteRenderer,
 			services,
 			utils
 		);
 
-		await stateManager.ensureStateReady();
-
 		return {
 			common,
-			domStore,
 			eventManager,
 			paletteEvents,
-			paletteState,
-			stateManager,
 			uiEvents
 		} as AppDependencies;
 	}, 'Error registering dependencies');

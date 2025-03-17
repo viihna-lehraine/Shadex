@@ -10,17 +10,9 @@ import {
 	HexStringMap,
 	HSL,
 	HSLStringMap,
-	HSV,
-	HSVStringMap,
-	LAB,
-	LABStringMap,
 	RGB,
 	RGBStringMap,
-	Services,
-	SL,
-	SV,
-	XYZ,
-	XYZStringMap
+	Services
 } from '../../../../types/index.js';
 import { defaults } from '../../../../config/index.js';
 
@@ -64,12 +56,6 @@ export function colorBrandingUtilitiesFactory(
 					return { format: 'cmyk', value: newValue as CMYK['value'] };
 				case 'hsl':
 					return { format: 'hsl', value: newValue as HSL['value'] };
-				case 'hsv':
-					return { format: 'hsv', value: newValue as HSV['value'] };
-				case 'sl':
-					return { format: 'sl', value: newValue as SL['value'] };
-				case 'sv':
-					return { format: 'sv', value: newValue as SV['value'] };
 				default:
 					log.error(
 						'Unsupported format for colorStringToColor',
@@ -122,32 +108,6 @@ export function colorBrandingUtilitiesFactory(
 		}, 'Error occurred while branding HSL string.');
 	}
 
-	function brandHSVString(
-		hsv: HSVStringMap['value']
-	): HSV['value'] {
-		return errors.handleSync(() => {
-			return {
-				hue: brand.asRadial(parseFloat(hsv.hue)),
-				saturation: brand.asPercentile(
-					parseFloat(hsv.saturation) / 100
-				),
-				value: brand.asPercentile(parseFloat(hsv.value) / 100)
-			};
-		}, 'Error occurred while branding HSV string.');
-	}
-
-	function brandLABString(
-		lab: LABStringMap['value']
-	): LAB['value'] {
-		return errors.handleSync(() => {
-			return {
-				l: brand.asLAB_L(parseFloat(lab.l)),
-				a: brand.asLAB_A(parseFloat(lab.a)),
-				b: brand.asLAB_B(parseFloat(lab.b))
-			};
-		}, 'Error occurred while branding LAB string.');
-	}
-
 	function brandRGBString(
 		rgb: RGBStringMap['value']
 	): RGB['value'] {
@@ -160,25 +120,12 @@ export function colorBrandingUtilitiesFactory(
 		}, 'Error occurred while branding RGB string.');
 	}
 
-	function brandXYZString(xyz: XYZStringMap['value']): XYZ['value'] {
-		return errors.handleSync(() => {
-			return {
-				x: brand.asXYZ_X(parseFloat(xyz.x)),
-				y: brand.asXYZ_Y(parseFloat(xyz.y)),
-				z: brand.asXYZ_Z(parseFloat(xyz.z))
-			};
-		}, 'Error occurred while branding XYZ string.');
-	}
-
 	const colorBrandingUtilities: ColorBrandUtilities = {
 		brandCMYKString,
 		brandColorString,
 		brandHexString,
 		brandHSLString,
-		brandHSVString,
-		brandLABString,
-		brandRGBString,
-		brandXYZString
+		brandRGBString
 	};
 
 	return errors.handleSync(() => colorBrandingUtilities, 'Error creating color branding utilities sub-group.');

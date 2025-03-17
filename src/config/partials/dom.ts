@@ -31,8 +31,6 @@ const ids: Readonly<DOMIndex>['ids'] = {
 		showAsCMYK: 'show-as-cmyk-btn',
 		showAsHex: 'show-as-hex-btn',
 		showAsHSL: 'show-as-hsl-btn',
-		showAsHSV: 'show-as-hsv-btn',
-		showAsLAB: 'show-as-lab-btn',
 		showAsRGB: 'show-as-rgb-btn'
 	},
 	divs: {

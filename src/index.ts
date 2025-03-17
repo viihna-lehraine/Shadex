@@ -47,10 +47,8 @@ async function initializeApp() {
 	log.info('Dependencies registered.', 'STARTUP');
 
 	if (mode.exposeClasses) {
-		window.domStore = deps.domStore;
 		window.eventManager = deps.eventManager;
 		window.storageManager = await StorageManager.getInstance(services);
-		window.stateManager = deps.stateManager;
 	}
 
 	await errors.handleAsync(async () => {

@@ -10,17 +10,9 @@ import {
 	HexStringMap,
 	HSL,
 	HSLStringMap,
-	HSV,
-	HSVStringMap,
-	LAB,
-	LABStringMap,
 	RGB,
 	RGBStringMap,
-	Services,
-	SL,
-	SV,
-	XYZ,
-	XYZStringMap
+	Services
 } from '../../../../types/index.js';
 import { defaults, regex } from '../../../../config/index.js';
 
@@ -48,16 +40,10 @@ export function colorFormattingUtilitiesFactory(
 					return `hsl(${Math.round(color.value.hue)},
 								${Math.round(color.value.saturation)}%,
 								${Math.round(color.value.lightness)}%)`;
-				case 'hsv':
-					return `hsv(${color.value.hue}, ${color.value.saturation}%, ${color.value.value}%)`;
-				case 'lab':
-					return `lab(${color.value.l}, ${color.value.a}, ${color.value.b})`;
 				case 'rgb':
 					return `rgb(${color.value.red}, ${color.value.green}, ${color.value.blue})`;
-				case 'xyz':
-					return `xyz(${color.value.x}, ${color.value.y}, ${color.value.z})`;
 				default:
-					console.error(`Unexpected color format: ${color.format}`);
+					console.error(`Unexpected color format`);
 
 					return defaults.colors.hexCSS;
 			}
@@ -110,32 +96,6 @@ export function colorFormattingUtilitiesFactory(
 						lightness: `${newValue.lightness}%`
 					} as HSLStringMap['value']
 				};
-			} else if (typeGuards.isHSV(clonedColor)) {
-				const newValue = format.formatPercentageValues(
-					clonedColor.value
-				) as HSV['value'];
-
-				return {
-					format: 'hsv',
-					value: {
-						hue: `${newValue.hue}`,
-						saturation: `${newValue.saturation}%`,
-						value: `${newValue.value}%`
-					} as HSVStringMap['value']
-				};
-			} else if (typeGuards.isLAB(clonedColor)) {
-				const newValue = format.formatPercentageValues(
-					clonedColor.value
-				) as LAB['value'];
-
-				return {
-					format: 'lab',
-					value: {
-						l: `${newValue.l}`,
-						a: `${newValue.a}`,
-						b: `${newValue.b}`
-					} as LABStringMap['value']
-				};
 			} else if (typeGuards.isRGB(clonedColor)) {
 				const newValue = format.formatPercentageValues(
 					clonedColor.value
@@ -149,22 +109,9 @@ export function colorFormattingUtilitiesFactory(
 						blue: `${newValue.blue}`
 					} as RGBStringMap['value']
 				};
-			} else if (typeGuards.isXYZ(clonedColor)) {
-				const newValue = format.formatPercentageValues(
-					clonedColor.value
-				) as XYZ['value'];
-
-				return {
-					format: 'xyz',
-					value: {
-						x: `${newValue.x}`,
-						y: `${newValue.y}`,
-						z: `${newValue.z}`
-					} as XYZStringMap['value']
-				};
 			} else {
 				log.warn(
-					`Unsupported format: ${clonedColor.format}`,
+					`Unsupported format: ${clonedColor}`,
 					`formatColorAsStringMap`
 				);
 
@@ -174,16 +121,13 @@ export function colorFormattingUtilitiesFactory(
 		return defaults.colors.hexString;
 	}
 
-	function formatCSSAsColor(color: string): Exclude<Color, SL | SV> | null {
+	function formatCSSAsColor(color: string): Color | null {
 		errors.handleSync(() => {
 			color = color.trim().toLowerCase();
 
 			const cmykMatch = color.match(regex.css.cmyk);
 			const hslMatch = color.match(regex.css.hsl);
-			const hsvMatch = color.match(regex.css.hsv);
-			const labMatch = color.match(regex.css.lab);
 			const rgbMatch = color.match(regex.css.rgb);
-			const xyzMatch = color.match(regex.css.xyz);
 
 			if (cmykMatch) {
 				return {
@@ -219,28 +163,6 @@ export function colorFormattingUtilitiesFactory(
 				} as HSL;
 			}
 
-			if (hsvMatch) {
-				return {
-					value: {
-						hue: parseInt(hsvMatch[1], 10),
-						saturation: parseInt(hsvMatch[2], 10),
-						value: parseInt(hsvMatch[3], 10)
-					},
-					format: 'hsv'
-				} as HSV;
-			}
-
-			if (labMatch) {
-				return {
-					value: {
-						l: parseFloat(labMatch[1]),
-						a: parseFloat(labMatch[2]),
-						b: parseFloat(labMatch[3])
-					},
-					format: 'lab'
-				} as LAB;
-			}
-
 			if (rgbMatch) {
 				return {
 					value: {
@@ -250,17 +172,6 @@ export function colorFormattingUtilitiesFactory(
 					},
 					format: 'rgb'
 				} as RGB;
-			}
-
-			if (xyzMatch) {
-				return {
-					value: {
-						x: parseFloat(xyzMatch[1]),
-						y: parseFloat(xyzMatch[2]),
-						z: parseFloat(xyzMatch[3])
-					},
-					format: 'xyz'
-				} as XYZ;
 			}
 
 			return null;

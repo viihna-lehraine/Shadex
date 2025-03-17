@@ -1,9 +1,6 @@
 import {
 	BrandingUtilities,
 	ByteRange,
-	LAB_A,
-	LAB_B,
-	LAB_L,
 	Percentile,
 	Radial,
 	RangeKeyMap,
@@ -45,27 +42,6 @@ export function sanitationUtilitiesFactory(
 			'Error occurred while validating color value range.',
 			{ context: { rangeKey } }
 		);
-	}
-
-	function lab(
-		value: number,
-		output: 'l' | 'a' | 'b'
-	): LAB_L | LAB_A | LAB_B {
-		return errors.handleSync(() => {
-			if (output === 'l') {
-				return brand.asLAB_L(
-					Math.round(Math.min(Math.max(value, 0), 100))
-				);
-			} else if (output === 'a') {
-				return brand.asLAB_A(
-					Math.round(Math.min(Math.max(value, -125), 125))
-				);
-			} else if (output === 'b') {
-				return brand.asLAB_B(
-					Math.round(Math.min(Math.max(value, -125), 125))
-				);
-			} else throw new Error('Unable to return LAB value');
-		}, 'Error occurred while sanitizing LAB value');
 	}
 
 	function percentile(value: number): Percentile {
@@ -117,7 +93,6 @@ export function sanitationUtilitiesFactory(
 
 	const sanitationUtilities: SanitationUtilities = {
 		getSafeQueryParam,
-		lab,
 		percentile,
 		radial,
 		rgb,

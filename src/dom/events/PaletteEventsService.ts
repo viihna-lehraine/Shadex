@@ -4,15 +4,10 @@ import {
 	PaletteEventsContract,
 	PaletteItem,
 	Services,
-	State,
 	Utilities
 } from '../../types/index.js';
-import { DOMStore } from '../DOMStore.js';
 import { EventManager } from './EventManager.js';
-import { PaletteHistoryManager } from '../../palette/PaletteHistoryManager.js';
 import { PaletteRendererService } from '../PaletteRendererService.js';
-import { PaletteStateService } from '../../state/PaletteStateService.js';
-import { StateManager } from '../../state/StateManager.js';
 import { domConfig, domIndex } from '../../config/index.js';
 
 const caller = 'PaletteEventsService';
@@ -23,23 +18,16 @@ export class PaletteEventsService implements PaletteEventsContract {
 
 	#draggedColumn: HTMLElement | null = null;
 
-	#domStore: DOMStore;
 	#errors: Services['errors'];
 	#helpers: Helpers;
 	#log: Services['log'];
-	#paletteHistory: PaletteHistoryManager;
 	#paletteRenderer: PaletteRendererService;
-	#paletteState: PaletteStateService;
-	#stateManager: StateManager;
 	#utils: Utilities;
 
 	private constructor(
-		domStore: DOMStore,
 		helpers: Helpers,
 		paletteRenderer: PaletteRendererService,
-		paletteState: PaletteStateService,
 		services: Services,
-		stateManager: StateManager,
 		utils: Utilities
 	) {
 		try {
@@ -53,15 +41,7 @@ export class PaletteEventsService implements PaletteEventsContract {
 			this.#log = services.log;
 			this.#utils = utils;
 
-			this.#domStore = domStore;
 			this.#paletteRenderer = paletteRenderer;
-			this.#paletteState = paletteState;
-			this.#stateManager = stateManager;
-
-			this.#paletteHistory = PaletteHistoryManager.getInstance(
-				helpers,
-				services
-			);
 		} catch (error) {
 			throw new Error(
 				`[${caller} constructor]: ${error instanceof Error ? error.message : error}`
@@ -70,12 +50,9 @@ export class PaletteEventsService implements PaletteEventsContract {
 	}
 
 	static getInstance(
-		domStore: DOMStore,
 		helpers: Helpers,
 		paletteRenderer: PaletteRendererService,
-		paletteState: PaletteStateService,
 		services: Services,
-		stateManager: StateManager,
 		utils: Utilities
 	): PaletteEventsService {
 		return services.errors.handleSync(() => {
@@ -86,12 +63,9 @@ export class PaletteEventsService implements PaletteEventsContract {
 				);
 
 				PaletteEventsService.#instance = new PaletteEventsService(
-					domStore,
 					helpers,
 					paletteRenderer,
-					paletteState,
 					services,
-					stateManager,
 					utils
 				);
 			}

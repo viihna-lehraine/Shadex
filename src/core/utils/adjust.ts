@@ -6,11 +6,10 @@ import {
 	Services,
 	ValidationUtilities
 } from '../../types/index.js';
-import { config, defaults, paletteConfig } from '../../config/index.js';
+import { defaults, paletteConfig } from '../../config/index.js';
 
 const adjustments = paletteConfig.adjustment;
 const defaultColors = defaults.colors;
-const math = config.math;
 
 export function adjustmentUtilitiesFactory(
 	brand: BrandingUtilities,
@@ -63,18 +62,6 @@ export function adjustmentUtilitiesFactory(
 		}, 'Error occurred while clamping RGB value.');
 	}
 
-	function clampXYZ(value: number, maxValue: number): number {
-		return errors.handleSync(() => {
-			return Math.max(0, Math.min(maxValue + math.epsilon, value));
-		}, 'Error occurred while clamping XYZ value.');
-	}
-
-	function normalizeXYZ(value: number, reference: number): number {
-		return errors.handleSync(() => {
-			return value / reference;
-		}, 'Error occurred while normalizing XYZ value.');
-	}
-
 	function sl(color: HSL): HSL {
 		return errors.handleSync(() => {
 			if (!validate.colorValue(color)) {
@@ -106,8 +93,6 @@ export function adjustmentUtilitiesFactory(
 	const adjustmentUtilities: AdjustmentUtilities = {
 		applyGammaCorrection,
 		clampRGB,
-		clampXYZ,
-		normalizeXYZ,
 		sl
 	};
 
