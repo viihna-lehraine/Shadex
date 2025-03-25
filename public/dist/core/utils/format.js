@@ -40,28 +40,6 @@ function formattingUtilitiesFactory(brand, services, validate) {
                     format: 'hsl'
                 };
             }
-            case 'hsv': {
-                const [h, s, v] = parseComponents(value, 4);
-                return {
-                    value: {
-                        hue: brand.asRadial(h),
-                        saturation: brand.asPercentile(s),
-                        value: brand.asPercentile(v)
-                    },
-                    format: 'hsv'
-                };
-            }
-            case 'lab': {
-                const [l, a, b] = parseComponents(value, 4);
-                return {
-                    value: {
-                        l: brand.asLAB_L(l),
-                        a: brand.asLAB_A(a),
-                        b: brand.asLAB_B(b)
-                    },
-                    format: 'lab'
-                };
-            }
             case 'rgb': {
                 const components = value.split(',').map(Number);
                 if (components.some(isNaN)) {

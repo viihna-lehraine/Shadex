@@ -20,23 +20,14 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
                     hex: colorUtils.convertHSL(clonedColor, 'hex')
                         .value,
                     hsl: clonedColor.value,
-                    hsv: colorUtils.convertHSL(clonedColor, 'hsv')
-                        .value,
-                    lab: colorUtils.convertHSL(clonedColor, 'lab')
-                        .value,
                     rgb: colorUtils.convertHSL(clonedColor, 'rgb')
-                        .value,
-                    xyz: colorUtils.convertHSL(clonedColor, 'xyz')
                         .value
                 },
                 css: {
                     cmyk: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'cmyk')),
                     hex: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'hex')),
                     hsl: colorUtils.formatColorAsCSS(clonedColor),
-                    hsv: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'hsv')),
-                    lab: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'lab')),
-                    rgb: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'rgb')),
-                    xyz: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'xyz'))
+                    rgb: colorUtils.formatColorAsCSS(colorUtils.convertHSL(clonedColor, 'rgb'))
                 }
             };
         }, 'Error occurred while creating palette item');
@@ -92,12 +83,7 @@ function paletteUtilitiesFactory(brand, colorUtils, dom, helpers, services, vali
                 cmyk: convert('cmyk'),
                 hex: convert('hex'),
                 hsl: clonedColor,
-                hsv: convert('hsv'),
-                lab: convert('lab'),
-                rgb: convert('rgb'),
-                sl: convert('sl'),
-                sv: convert('sv'),
-                xyz: convert('xyz')
+                rgb: convert('rgb')
             };
         }, 'Error occurred while generating all color values');
     }

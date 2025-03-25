@@ -14,24 +14,6 @@ function colorParsingUtilitiesFactory(services) {
             };
         }, 'Error parsing HSL value as string map.');
     }
-    function parseHSVValueAsStringMap(hsv) {
-        return errors.handleSync(() => {
-            return {
-                hue: `${hsv.hue}`,
-                saturation: `${hsv.saturation * 100}%`,
-                value: `${hsv.value * 100}%`
-            };
-        }, 'Error parsing HSV value as string map.');
-    }
-    function parseLABValueAsStringMap(lab) {
-        return errors.handleSync(() => {
-            return {
-                l: `${lab.l}`,
-                a: `${lab.a}`,
-                b: `${lab.b}`
-            };
-        }, 'Error parsing LAB value as string map.');
-    }
     function parseRGBValueAsStringMap(rgb) {
         return errors.handleSync(() => {
             return {
@@ -41,22 +23,10 @@ function colorParsingUtilitiesFactory(services) {
             };
         }, 'Error parsing RGB value as string map.');
     }
-    function parseXYZValueAsStringMap(xyz) {
-        return errors.handleSync(() => {
-            return {
-                x: `${xyz.x}`,
-                y: `${xyz.y}`,
-                z: `${xyz.z}`
-            };
-        }, 'Error parsing XYZ value as string map.');
-    }
     const colorParsingUtilities = {
         parseHexValueAsStringMap,
         parseHSLValueAsStringMap,
-        parseHSVValueAsStringMap,
-        parseLABValueAsStringMap,
-        parseRGBValueAsStringMap,
-        parseXYZValueAsStringMap
+        parseRGBValueAsStringMap
     };
     return errors.handleSync(() => colorParsingUtilities, 'Error occurred while creating color parsing utilities group.');
 }

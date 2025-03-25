@@ -5,10 +5,12 @@
         "esModuleInterop": true,
         "exactOptionalPropertyTypes": true,
         "forceConsistentCasingInFileNames": true,
+		"importHelpers": true,
         "inlineSourceMap": true,
         "inlineSources": true,
         "isolatedModules": true,
 		"lib": ["DOM", "ES2022"],
+		"jsx": "react-jsx",
         "module": "ES2022",
         "moduleResolution": "bundler",
         "noFallthroughCasesInSwitch": true,
@@ -26,6 +28,6 @@
         "useDefineForClassFields": true,
         "useUnknownInCatchVariables": true
     },
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
     "exclude": ["node_modules", "public/js", "__tests"]
 }

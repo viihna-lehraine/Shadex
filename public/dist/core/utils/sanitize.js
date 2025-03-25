@@ -15,21 +15,6 @@ function sanitationUtilitiesFactory(brand, services, validate) {
                 : brand.asBranded(value, rangeKey);
         }, 'Error occurred while validating color value range.', { context: { rangeKey } });
     }
-    function lab(value, output) {
-        return errors.handleSync(() => {
-            if (output === 'l') {
-                return brand.asLAB_L(Math.round(Math.min(Math.max(value, 0), 100)));
-            }
-            else if (output === 'a') {
-                return brand.asLAB_A(Math.round(Math.min(Math.max(value, -125), 125)));
-            }
-            else if (output === 'b') {
-                return brand.asLAB_B(Math.round(Math.min(Math.max(value, -125), 125)));
-            }
-            else
-                throw new Error('Unable to return LAB value');
-        }, 'Error occurred while sanitizing LAB value');
-    }
     function percentile(value) {
         return errors.handleSync(() => {
             const rawPercentile = Math.round(Math.min(Math.max(value, 0), 100));
@@ -67,7 +52,6 @@ function sanitationUtilitiesFactory(brand, services, validate) {
     }
     const sanitationUtilities = {
         getSafeQueryParam,
-        lab,
         percentile,
         radial,
         rgb,

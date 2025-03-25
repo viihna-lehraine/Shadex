@@ -9,7 +9,6 @@
 
 // File: index.ts
 
-import { EventManager } from './dom/events/EventManager.js';
 import { StorageManager } from './storage/StorageManager.js';
 import { config } from './config/index.js';
 
@@ -44,20 +43,17 @@ async function initializeApp() {
 	log.info('Registering dependencies.', 'STARTUP');
 
 	const deps = await registerDependencies(helpers, services);
+	console.log(`${deps}`);
 	log.info('Dependencies registered.', 'STARTUP');
 
 	if (mode.exposeClasses) {
-		window.eventManager = deps.eventManager;
 		window.storageManager = await StorageManager.getInstance(services);
 	}
 
-	await errors.handleAsync(async () => {
-		if (mode.debugLevel >= 3) {
-			setTimeout(() => {
-				EventManager.listAll();
-			}, 100);
-		}
-	}, `[initializeApp]: Application startup failed.`);
+	await errors.handleAsync(
+		async () => {},
+		`[initializeApp]: Application startup failed.`
+	);
 }
 
 if (document.readyState === 'loading') {

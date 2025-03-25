@@ -1,16 +1,3 @@
-const palette = {
-    id: `default-palette-${Date.now()}`,
-    items: [],
-    metadata: {
-        name: 'DEFAULT PALETTE',
-        columnCount: 5,
-        limitDark: false,
-        limitGray: false,
-        limitLight: false,
-        type: 'random',
-        timestamp: `${Date.now()}`
-    }
-};
 const colors = {
     cmyk: {
         value: {
@@ -33,18 +20,6 @@ const colors = {
         },
         format: 'hsl'
     },
-    hsv: {
-        value: {
-            hue: 0,
-            saturation: 0,
-            value: 0
-        },
-        format: 'hsv'
-    },
-    lab: {
-        value: { l: 0, a: 0, b: 0 },
-        format: 'lab'
-    },
     rgb: {
         value: {
             red: 0,
@@ -52,18 +27,6 @@ const colors = {
             blue: 0
         },
         format: 'rgb'
-    },
-    sl: {
-        value: { saturation: 0, lightness: 0 },
-        format: 'sl'
-    },
-    sv: {
-        value: { saturation: 0, value: 0 },
-        format: 'sv'
-    },
-    xyz: {
-        value: { x: 0, y: 0, z: 0 },
-        format: 'xyz'
     },
     hexString: { value: { hex: '#000000' }, format: 'hex' },
     hslString: {
@@ -78,8 +41,7 @@ const colors = {
  * @exports defaults
  */
 const defaults = {
-    colors,
-    palette};
+    colors};
 
 export { defaults };
 //# sourceMappingURL=defaults.js.map

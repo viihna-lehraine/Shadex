@@ -1,8 +1,3 @@
-const math = {
-    epsilon: 0.00001,
-    maxXYZ_X: 95.047,
-    maxXYZ_Y: 100,
-    maxXYZ_Z: 108.883};
 const mode = {
     env: 'dev',
     debugLevel: 3,
@@ -26,7 +21,6 @@ const storage = {
     idbStoreName: 'AppStorage'
 };
 const config = {
-    math,
     mode,
     storage
 };

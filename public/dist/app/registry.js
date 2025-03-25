@@ -1,5 +1,3 @@
-import { PaletteRendererService } from '../dom/PaletteRendererService.js';
-
 async function registerDependencies(helpers, services) {
     const { errors, log } = services;
     const caller = '[REGISTER_DEPENDENCIES]';
@@ -13,31 +11,8 @@ async function registerDependencies(helpers, services) {
             services,
             utils
         };
-        const { initializeDOMStore } = await import('./init.js');
-        const domStore = await initializeDOMStore(helpers, services);
-        const { initializeStateManager } = await import('./init.js');
-        const stateManager = await initializeStateManager(helpers, services, utils);
-        const { generateHuesFnGroup } = await import('../palette/partials/hues.js');
-        const { generatePaletteFnGroup } = await import('../palette/partials/types.js');
-        const { generatePalette } = await import('../palette/generate.js');
-        const paletteRenderer = PaletteRendererService.getInstance(common, domStore, generateHuesFnGroup, generatePaletteFnGroup, generatePalette, stateManager);
-        const { initializeEventManager } = await import('./init.js');
-        const eventManager = await initializeEventManager(services);
-        const { initializePaletteStateService } = await import('./init.js');
-        const paletteState = await initializePaletteStateService(helpers, services, stateManager, utils);
-        const { initializePaletteEventsService } = await import('./init.js');
-        const paletteEvents = await initializePaletteEventsService(domStore, helpers, paletteRenderer, paletteState, services, stateManager, utils);
-        const { initializeUIEventsService } = await import('./init.js');
-        const uiEvents = await initializeUIEventsService(domStore, helpers, paletteRenderer, services, utils);
-        await stateManager.ensureStateReady();
         return {
-            common,
-            domStore,
-            eventManager,
-            paletteEvents,
-            paletteState,
-            stateManager,
-            uiEvents
+            common
         };
     }, 'Error registering dependencies');
 }

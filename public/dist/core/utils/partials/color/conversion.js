@@ -1,17 +1,10 @@
-import { config } from '../../../../config/partials/base.js';
 import { defaults } from '../../../../config/partials/defaults.js';
 import '../../../../config/partials/regex.js';
 
 const defaultCMYK = defaults.colors.cmyk;
 const defaultHex = defaults.colors.hex;
 const defaultHSL = defaults.colors.hsl;
-const defaultHSV = defaults.colors.hsv;
-const defaultLAB = defaults.colors.lab;
 const defaultRGB = defaults.colors.rgb;
-const defaultSL = defaults.colors.sl;
-const defaultSV = defaults.colors.sv;
-const defaultXYZ = defaults.colors.xyz;
-const math = config.math;
 function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitize, services, validate) {
     const { color: { hueToRGB }, data: { deepClone } } = helpers;
     const { errors, log } = services;
@@ -65,18 +58,8 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                     return hslToHex(clonedColor);
                 case 'hsl':
                     return deepClone(clonedColor);
-                case 'hsv':
-                    return hslToHSV(clonedColor);
-                case 'lab':
-                    return hslToLAB(clonedColor);
                 case 'rgb':
                     return hslToRGB(clonedColor);
-                case 'sl':
-                    return hslToSL(clonedColor);
-                case 'sv':
-                    return hslToSV(clonedColor);
-                case 'xyz':
-                    return hslToXYZ(clonedColor);
                 default:
                     throw new Error('Invalid color format');
             }
@@ -96,14 +79,8 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                     return hexToHSL(clonedColor);
                 case 'hsl':
                     return deepClone(clonedColor);
-                case 'hsv':
-                    return hsvToHSL(clonedColor);
-                case 'lab':
-                    return labToHSL(clonedColor);
                 case 'rgb':
                     return rgbToHSL(clonedColor);
-                case 'xyz':
-                    return xyzToHSL(clonedColor);
                 default:
                     throw new Error('Invalid color format');
             }
@@ -174,36 +151,6 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
             return rgbToHex(hslToRGB(deepClone(hsl)));
         }, 'Error converting HSL to Hex');
     }
-    function hslToHSV(hsl) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(hsl)) {
-                log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default HSV`, `utils.color.hslToHSV`);
-                return defaultHSV;
-            }
-            const clonedHSL = deepClone(hsl);
-            const s = clonedHSL.value.saturation / 100;
-            const l = clonedHSL.value.lightness / 100;
-            const value = l + s * Math.min(l, 1 - 1);
-            const newSaturation = value === 0 ? 0 : 2 * (1 - l / value);
-            return {
-                value: {
-                    hue: brand.asRadial(sanitize.percentile(clonedHSL.value.hue)),
-                    saturation: brand.asPercentile(sanitize.percentile(newSaturation * 100)),
-                    value: brand.asPercentile(sanitize.percentile(value * 100))
-                },
-                format: 'hsv'
-            };
-        }, 'Error converting HSL to HSV');
-    }
-    function hslToLAB(hsl) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(hsl)) {
-                log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default LAB`, `utils.color.hslToLAB`);
-                return defaultLAB;
-            }
-            return xyzToLAB(rgbToXYZ(hslToRGB(deepClone(hsl))));
-        }, 'Error converting HSL to LAB');
-    }
     function hslToRGB(hsl) {
         return errors.handleSync(() => {
             if (!validate.colorValue(hsl)) {
@@ -225,125 +172,6 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
                 format: 'rgb'
             };
         }, 'Error converting HSL to RGB');
-    }
-    function hslToSL(hsl) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(hsl)) {
-                log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default SL`, `utils.color.hslToSL`);
-                return defaultSL;
-            }
-            return {
-                value: {
-                    saturation: hsl.value.saturation,
-                    lightness: hsl.value.lightness
-                },
-                format: 'sl'
-            };
-        }, 'Error converting HSL to SL');
-    }
-    function hslToSV(hsl) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(hsl)) {
-                log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default SV`, `utils.color.hslToSV`);
-                return defaultSV;
-            }
-            return hsvToSV(rgbToHSV(hslToRGB(deepClone(hsl))));
-        }, 'Error converting HSL to SV');
-    }
-    function hslToXYZ(hsl) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(hsl)) {
-                log.info(`Invalid HSL value ${JSON.stringify(hsl)}. Returning default HSL.`, `utils.color.hslToXYZ`);
-                return defaultXYZ;
-            }
-            return labToXYZ(hslToLAB(deepClone(hsl)));
-        }, 'Error converting HSL to XYZ');
-    }
-    function hsvToHSL(hsv) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(hsv)) {
-                log.info(`Invalid HSV value ${JSON.stringify(hsv)}. Returning default HSL`, `utils.color.hsvToHSL`);
-                return defaultHSL;
-            }
-            const clonedHSV = deepClone(hsv);
-            const s = clonedHSV.value.saturation / 100;
-            const v = clonedHSV.value.value / 100;
-            const l = v * (1 - s / 2);
-            const newSaturation = l === 0 || l === 1 ? 0 : (v - l) / Math.min(l, 1 - l);
-            const lightness = clonedHSV.value.value * (1 - clonedHSV.value.saturation / 200);
-            return {
-                value: {
-                    hue: brand.asRadial(sanitize.percentile(clonedHSV.value.hue)),
-                    saturation: brand.asPercentile(sanitize.percentile(newSaturation * 100)),
-                    lightness: brand.asPercentile(sanitize.percentile(lightness))
-                },
-                format: 'hsl'
-            };
-        }, 'Error converting HSV to HSL');
-    }
-    function hsvToSV(hsv) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(hsv)) {
-                log.info(`Invalid HSV value ${JSON.stringify(hsv)}. Returning default SV`, `utils.color.hsvToSV`);
-                return defaultSV;
-            }
-            return {
-                value: {
-                    saturation: hsv.value.saturation,
-                    value: hsv.value.value
-                },
-                format: 'sv'
-            };
-        }, 'Error converting HSV to SV');
-    }
-    function labToHSL(lab) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(lab)) {
-                log.info(`Invalid LAB value ${JSON.stringify(lab)}. Returning default HSL.`, `utils.color.labToHSL`);
-                return defaultHSL;
-            }
-            return rgbToHSL(labToRGB(deepClone(lab)));
-        }, 'Error converting LAB to HSL');
-    }
-    function labToRGB(lab) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(lab)) {
-                log.info(`Invalid LAB value ${JSON.stringify(lab)}. . Returning default RGB.`, `utils.color.labToRGB`);
-                return defaultRGB;
-            }
-            return xyzToRGB(labToXYZ(deepClone(lab)));
-        }, 'Error converting LAB to RGB');
-    }
-    function labToXYZ(lab) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(lab)) {
-                log.info(`Invalid LAB value ${JSON.stringify(lab)}. Returning default XYZ.`, `utils.color.labToXYZ`);
-                return defaultXYZ;
-            }
-            const clonedLAB = deepClone(lab);
-            const refX = 95.047, refY = 100.0, refZ = 108.883;
-            let y = (clonedLAB.value.l + 16) / 116;
-            let x = clonedLAB.value.a / 500 + y;
-            let z = y - clonedLAB.value.b / 200;
-            const pow = Math.pow;
-            return {
-                value: {
-                    x: brand.asXYZ_X(sanitize.percentile(refX *
-                        (pow(x, 3) > 0.008856
-                            ? pow(x, 3)
-                            : (x - 16 / 116) / 7.787))),
-                    y: brand.asXYZ_Y(sanitize.percentile(refY *
-                        (pow(y, 3) > 0.008856
-                            ? pow(y, 3)
-                            : (y - 16 / 116) / 7.787))),
-                    z: brand.asXYZ_Z(sanitize.percentile(refZ *
-                        (pow(z, 3) > 0.008856
-                            ? pow(z, 3)
-                            : (z - 16 / 116) / 7.787)))
-                },
-                format: 'xyz'
-            };
-        }, 'Error converting LAB to XYZ');
     }
     function rgbToCMYK(rgb) {
         return errors.handleSync(() => {
@@ -449,157 +277,6 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
             };
         }, 'Error converting RGB to HSL');
     }
-    function rgbToHSV(rgb) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(rgb)) {
-                log.info(`Invalid RGB value ${JSON.stringify(rgb)}. Returning default HSV.`, `utils.color.rgbToHSV`);
-                return defaultHSV;
-            }
-            const red = rgb.value.red / 255;
-            const green = rgb.value.green / 255;
-            const blue = rgb.value.blue / 255;
-            const max = Math.max(red, green, blue);
-            const min = Math.min(red, green, blue);
-            const delta = max - min;
-            let hue = 0;
-            const value = max;
-            const saturation = max === 0 ? 0 : delta / max;
-            if (max !== min) {
-                switch (max) {
-                    case red:
-                        hue = (green - blue) / delta + (green < blue ? 6 : 0);
-                        break;
-                    case green:
-                        hue = (blue - red) / delta + 2;
-                        break;
-                    case blue:
-                        hue = (red - green) / delta + 4;
-                        break;
-                }
-                hue *= 60;
-            }
-            return {
-                value: {
-                    hue: brand.asRadial(sanitize.percentile(hue)),
-                    saturation: brand.asPercentile(sanitize.percentile(saturation * 100)),
-                    value: brand.asPercentile(sanitize.percentile(value * 100))
-                },
-                format: 'hsv'
-            };
-        }, 'Error converting RGB to HSV');
-    }
-    function rgbToXYZ(rgb) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(rgb)) {
-                log.info(`Invalid RGB value ${JSON.stringify(rgb)}. Returning default XYZ`, `utils.color.rgbToXYZ`);
-                return defaultXYZ;
-            }
-            // convert RGB values to linear space
-            const red = rgb.value.red / 255;
-            const green = rgb.value.green / 255;
-            const blue = rgb.value.blue / 255;
-            const linearRed = red > 0.04045
-                ? Math.pow((red + 0.055) / 1.055, 2.4)
-                : red / 12.92;
-            const linearGreen = green > 0.04045
-                ? Math.pow((green + 0.055) / 1.055, 2.4)
-                : green / 12.92;
-            const linearBlue = blue > 0.04045
-                ? Math.pow((blue + 0.055) / 1.055, 2.4)
-                : blue / 12.92;
-            // scale to 100
-            const scaledRed = linearRed * 100;
-            const scaledGreen = linearGreen * 100;
-            const scaledBlue = linearBlue * 100;
-            const x = brand.asXYZ_X(adjust.clampXYZ(scaledRed * 0.4124 +
-                scaledGreen * 0.3576 +
-                scaledBlue * 0.1805, math.maxXYZ_X));
-            const y = brand.asXYZ_Y(adjust.clampXYZ(scaledRed * 0.2126 +
-                scaledGreen * 0.7152 +
-                scaledBlue * 0.0722, math.maxXYZ_Y));
-            const z = brand.asXYZ_Z(adjust.clampXYZ(scaledRed * 0.0193 +
-                scaledGreen * 0.1192 +
-                scaledBlue * 0.9505, math.maxXYZ_Z));
-            const xyz = { value: { x, y, z }, format: 'xyz' };
-            return validate.colorValue(xyz) ? xyz : defaultXYZ;
-        }, 'Error converting RGB to XYZ');
-    }
-    function xyzToHSL(xyz) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(xyz)) {
-                log.info(`Invalid XYZ value ${JSON.stringify(xyz)}. Returning default HSL.`, `utils.color.xyzToHSL`);
-                return defaultHSL;
-            }
-            return rgbToHSL(xyzToRGB(deepClone(xyz)));
-        }, 'Error converting XYZ to HSL');
-    }
-    function xyzToLAB(xyz) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(xyz)) {
-                log.info(`Invalid XYZ value ${JSON.stringify(xyz)}. Returning default LAB.`, `utils.color.xyzToLAB`);
-                return defaultLAB;
-            }
-            const clonedXYZ = deepClone(xyz);
-            const refX = math.maxXYZ_X, refY = math.maxXYZ_Y, refZ = math.maxXYZ_Z;
-            clonedXYZ.value.x = adjust.normalizeXYZ(clonedXYZ.value.x, refX);
-            clonedXYZ.value.y = adjust.normalizeXYZ(clonedXYZ.value.y, refY);
-            clonedXYZ.value.z = adjust.normalizeXYZ(clonedXYZ.value.z, refZ);
-            clonedXYZ.value.x =
-                clonedXYZ.value.x > 0.008856
-                    ? Math.pow(clonedXYZ.value.x, 1 / 3)
-                    : (7.787 * clonedXYZ.value.x + 16 / 116);
-            clonedXYZ.value.y =
-                clonedXYZ.value.y > 0.008856
-                    ? Math.pow(clonedXYZ.value.y, 1 / 3)
-                    : (7.787 * clonedXYZ.value.y + 16 / 116);
-            clonedXYZ.value.z =
-                clonedXYZ.value.z > 0.008856
-                    ? Math.pow(clonedXYZ.value.z, 1 / 3)
-                    : (7.787 * clonedXYZ.value.z + 16 / 116);
-            const l = sanitize.percentile(parseFloat((116 * clonedXYZ.value.y - 16).toFixed(2)));
-            const a = sanitize.lab(parseFloat((500 * (clonedXYZ.value.x - clonedXYZ.value.y)).toFixed(2)), 'a');
-            const b = sanitize.lab(parseFloat((200 * (clonedXYZ.value.y - clonedXYZ.value.z)).toFixed(2)), 'b');
-            const lab = {
-                value: {
-                    l: brand.asLAB_L(sanitize.percentile(l)),
-                    a: brand.asLAB_A(sanitize.percentile(a)),
-                    b: brand.asLAB_B(sanitize.percentile(b))
-                },
-                format: 'lab'
-            };
-            if (!validate.colorValue(lab)) {
-                log.info(`Invalid LAB value ${JSON.stringify(lab)}. Returning default LAB.`, `utils.color.xyzToLAB`);
-                return defaultLAB;
-            }
-            return lab;
-        }, 'Error converting XYZ to LAB');
-    }
-    function xyzToRGB(xyz) {
-        return errors.handleSync(() => {
-            if (!validate.colorValue(xyz)) {
-                log.info(`Invalid XYZ value ${JSON.stringify(xyz)}. Returning default RGB.`, `utils.color.xyzToRGB`);
-                return defaultRGB;
-            }
-            const x = xyz.value.x / 100;
-            const y = xyz.value.y / 100;
-            const z = xyz.value.z / 100;
-            let red = x * 3.2406 + y * -1.5372 + z * -0.4986;
-            let green = x * -0.9689 + y * 1.8758 + z * 0.0415;
-            let blue = x * 0.0557 + y * -0.204 + z * 1.057;
-            red = adjust.applyGammaCorrection(red);
-            green = adjust.applyGammaCorrection(green);
-            blue = adjust.applyGammaCorrection(blue);
-            const rgb = adjust.clampRGB({
-                value: {
-                    red: brand.asByteRange(sanitize.percentile(red)),
-                    green: brand.asByteRange(sanitize.percentile(green)),
-                    blue: brand.asByteRange(sanitize.percentile(blue))
-                },
-                format: 'rgb'
-            });
-            return rgb;
-        }, 'Error converting XYZ to RGB');
-    }
     const colorConversionUtilities = {
         cmykToHSL,
         cmykToRGB,
@@ -610,25 +287,10 @@ function colorConversionUtilitiesFactory(adjust, brand, format, helpers, sanitiz
         hexToRGB,
         hslToCMYK,
         hslToHex,
-        hslToHSV,
-        hslToLAB,
         hslToRGB,
-        hslToSL,
-        hslToSV,
-        hslToXYZ,
-        hsvToHSL,
-        hsvToSV,
-        labToHSL,
-        labToRGB,
-        labToXYZ,
         rgbToCMYK,
         rgbToHex,
-        rgbToHSL,
-        rgbToHSV,
-        rgbToXYZ,
-        xyzToHSL,
-        xyzToLAB,
-        xyzToRGB
+        rgbToHSL
     };
     return errors.handleSync(() => {
         return colorConversionUtilities;

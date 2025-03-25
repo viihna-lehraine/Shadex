@@ -22,26 +22,8 @@ function colorGenerationUtilitiesFactory(sanitize, services, validate) {
             return hsl;
         }, 'Error generating random HSL color.');
     }
-    function generateRandomSL() {
-        return errors.handleSync(() => {
-            const sl = {
-                value: {
-                    saturation: sanitize.percentile(Math.max(0, Math.min(100, Math.random() * 100))),
-                    lightness: sanitize.percentile(Math.max(0, Math.min(100, Math.random() * 100)))
-                },
-                format: 'sl'
-            };
-            if (!validate.colorValue(sl)) {
-                log.error(`Invalid random SV color value ${JSON.stringify(sl)}`, `generateRandomSL`);
-                return defaultColors.sl;
-            }
-            log.debug(`Generated randomSL: ${JSON.stringify(sl)}`, `generateRandomSL`);
-            return sl;
-        }, 'Error generating random SL color');
-    }
     const colorGenerationUtilities = {
-        generateRandomHSL,
-        generateRandomSL
+        generateRandomHSL
     };
     return errors.handleSync(() => colorGenerationUtilities, 'Error creating color generation sub-utilities group.');
 }

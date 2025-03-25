@@ -1,11 +1,9 @@
-import { config } from '../../config/partials/base.js';
 import { defaults } from '../../config/partials/defaults.js';
 import { paletteConfig } from '../../config/partials/paletteConfig.js';
 import '../../config/partials/regex.js';
 
 const adjustments = paletteConfig.adjustment;
 const defaultColors = defaults.colors;
-const math = config.math;
 function adjustmentUtilitiesFactory(brand, services, validate) {
     const { errors, log } = services;
     function applyGammaCorrection(value) {
@@ -32,16 +30,6 @@ function adjustmentUtilitiesFactory(brand, services, validate) {
             };
         }, 'Error occurred while clamping RGB value.');
     }
-    function clampXYZ(value, maxValue) {
-        return errors.handleSync(() => {
-            return Math.max(0, Math.min(maxValue + math.epsilon, value));
-        }, 'Error occurred while clamping XYZ value.');
-    }
-    function normalizeXYZ(value, reference) {
-        return errors.handleSync(() => {
-            return value / reference;
-        }, 'Error occurred while normalizing XYZ value.');
-    }
     function sl(color) {
         return errors.handleSync(() => {
             if (!validate.colorValue(color)) {
@@ -63,8 +51,6 @@ function adjustmentUtilitiesFactory(brand, services, validate) {
     const adjustmentUtilities = {
         applyGammaCorrection,
         clampRGB,
-        clampXYZ,
-        normalizeXYZ,
         sl
     };
     return errors.handleSync(() => {

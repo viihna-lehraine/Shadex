@@ -32,9 +32,6 @@ import {
 	SetsData,
 	UnbrandedPalette
 } from './index.js';
-import { EventManager } from '../dom/events/EventManager.js';
-import { PaletteEventsService } from '../dom/events/PaletteEventsService.js';
-import { UIEventsService } from '../dom/events/UIEventsService.js';
 import { LoggerService } from '../core/services/index.js';
 
 // ******** 1. SERVICES ********
@@ -479,9 +476,6 @@ export interface GeneratePaletteFnGroup {
 
 export interface AppDependencies {
 	common: Required<CommonFunctions>;
-	eventManager: EventManager;
-	paletteEvents: PaletteEventsService;
-	uiEvents: UIEventsService;
 }
 
 export interface DebounceOptions {

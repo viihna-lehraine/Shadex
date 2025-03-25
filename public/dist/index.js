@@ -1,4 +1,3 @@
-import { EventManager } from './dom/events/EventManager.js';
 import { StorageManager } from './storage/StorageManager.js';
 import './config/partials/defaults.js';
 import './config/partials/regex.js';
@@ -27,20 +26,12 @@ async function initializeApp() {
     const { registerDependencies } = await import('./app/registry.js');
     log.info('Registering dependencies.', 'STARTUP');
     const deps = await registerDependencies(helpers, services);
+    console.log(`${deps}`);
     log.info('Dependencies registered.', 'STARTUP');
     {
-        window.domStore = deps.domStore;
-        window.eventManager = deps.eventManager;
         window.storageManager = await StorageManager.getInstance(services);
-        window.stateManager = deps.stateManager;
     }
-    await errors.handleAsync(async () => {
-        {
-            setTimeout(() => {
-                EventManager.listAll();
-            }, 100);
-        }
-    }, `[initializeApp]: Application startup failed.`);
+    await errors.handleAsync(async () => { }, `[initializeApp]: Application startup failed.`);
 }
 if (document.readyState === 'loading') {
     console.log('[anon@index.ts]: DOM content not yet loaded. Adding DOMContentLoaded event listener and awaiting...');

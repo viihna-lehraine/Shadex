@@ -15,6 +15,8 @@ function typeGuardsFactory() {
     }
     function isByteRange(value) {
         return (typeof value === 'number' &&
+            value >= 0 &&
+            value <= 255 &&
             value.__brand === 'ByteRange');
     }
     function isCMYK(value) {
@@ -54,19 +56,6 @@ function typeGuardsFactory() {
         return (typeof value === 'string' &&
             ['cmyk', 'hex', 'hsl', 'hsv', 'lab', 'rgb', 'xyz'].includes(value));
     }
-    function isColorSpaceExtended(value) {
-        return [
-            'cmyk',
-            'hex',
-            'hsl',
-            'hsv',
-            'lab',
-            'rgb',
-            'sl',
-            'sv',
-            'xyz'
-        ].includes(value);
-    }
     function isColorStringMap(value, format) {
         return (isObject(value) &&
             (typeof format === 'string' ||
@@ -77,12 +66,7 @@ function typeGuardsFactory() {
             hasStringProperties(value.value, Object.keys(value.value)));
     }
     function isConvertibleColor(color) {
-        return (isCMYK(color) ||
-            isHex(color) ||
-            isHSL(color) ||
-            isHSV(color) ||
-            isLAB(color) ||
-            isRGB(color));
+        return isCMYK(color) || isHex(color) || isHSL(color) || isRGB(color);
     }
     function isFormat(format) {
         return (typeof format === 'string' &&
@@ -124,45 +108,8 @@ function typeGuardsFactory() {
         }
         return false;
     }
-    function isHSV(value) {
-        if (isObject(value) &&
-            hasValueProperty(value) &&
-            hasFormat(value, 'hsv')) {
-            const { value: hsvValue } = value;
-            return ('hue' in hsvValue &&
-                isRadial(hsvValue.hue) &&
-                'saturation' in hsvValue &&
-                isPercentile(hsvValue.saturation) &&
-                'value' in hsvValue &&
-                isPercentile(hsvValue.value));
-        }
-        return false;
-    }
     function isInputElement(element) {
         return element instanceof HTMLInputElement;
-    }
-    function isLAB(value) {
-        if (isObject(value) &&
-            hasValueProperty(value) &&
-            hasFormat(value, 'lab')) {
-            const { value: labValue } = value;
-            return ('l' in labValue &&
-                isLAB_L(labValue.l) &&
-                'a' in labValue &&
-                isLAB_A(labValue.a) &&
-                'b' in labValue &&
-                isLAB_B(labValue.b));
-        }
-        return false;
-    }
-    function isLAB_A(value) {
-        return (typeof value === 'number' && value.__brand === 'LAB_A');
-    }
-    function isLAB_B(value) {
-        return (typeof value === 'number' && value.__brand === 'LAB_B');
-    }
-    function isLAB_L(value) {
-        return (typeof value === 'number' && value.__brand === 'LAB_L');
     }
     function isObject(value) {
         return typeof value === 'object' && value !== null;
@@ -208,10 +155,15 @@ function typeGuardsFactory() {
     }
     function isPercentile(value) {
         return (typeof value === 'number' &&
+            value >= 0 &&
+            value <= 100 &&
             value.__brand === 'Percentile');
     }
     function isRadial(value) {
-        return (typeof value === 'number' && value.__brand === 'Radial');
+        return (typeof value === 'number' &&
+            value >= 0 &&
+            value <= 360 &&
+            value.__brand === 'Radial');
     }
     function isRGB(value) {
         if (isObject(value) &&
@@ -227,53 +179,6 @@ function typeGuardsFactory() {
         }
         return false;
     }
-    function isSL(value) {
-        if (isObject(value) &&
-            hasValueProperty(value) &&
-            hasFormat(value, 'sl')) {
-            const { value: slValue } = value;
-            return ('saturation' in slValue &&
-                isPercentile(slValue.saturation) &&
-                'lightness' in slValue &&
-                isPercentile(slValue.lightness));
-        }
-        return false;
-    }
-    function isSV(value) {
-        if (isObject(value) &&
-            hasValueProperty(value) &&
-            hasFormat(value, 'sv')) {
-            const { value: svValue } = value;
-            return ('saturation' in svValue &&
-                isPercentile(svValue.saturation) &&
-                'value' in svValue &&
-                isPercentile(svValue.value));
-        }
-        return false;
-    }
-    function isXYZ(value) {
-        if (isObject(value) &&
-            hasValueProperty(value) &&
-            hasFormat(value, 'xyz')) {
-            const { value: xyzValue } = value;
-            return ('x' in xyzValue &&
-                isXYZ_X(xyzValue.x) &&
-                'y' in xyzValue &&
-                isXYZ_Y(xyzValue.y) &&
-                'z' in xyzValue &&
-                isXYZ_Z(xyzValue.z));
-        }
-        return false;
-    }
-    function isXYZ_X(value) {
-        return (typeof value === 'number' && value.__brand === 'XYZ_X');
-    }
-    function isXYZ_Y(value) {
-        return (typeof value === 'number' && value.__brand === 'XYZ_Y');
-    }
-    function isXYZ_Z(value) {
-        return (typeof value === 'number' && value.__brand === 'XYZ_Z');
-    }
     return {
         hasFormat,
         hasNumericProperties,
@@ -284,31 +189,19 @@ function typeGuardsFactory() {
         isColor,
         isColorNumMap,
         isColorSpace,
-        isColorSpaceExtended,
         isColorStringMap,
         isConvertibleColor,
         isFormat,
         isHex,
         isHexSet,
         isHSL,
-        isHSV,
         isInputElement,
-        isLAB,
-        isLAB_A,
-        isLAB_B,
-        isLAB_L,
         isObject,
         isPalette,
         isPaletteType,
         isPercentile,
         isRadial,
-        isRGB,
-        isSL,
-        isSV,
-        isXYZ,
-        isXYZ_X,
-        isXYZ_Y,
-        isXYZ_Z
+        isRGB
     };
 }
 

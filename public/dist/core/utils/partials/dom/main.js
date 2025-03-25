@@ -1,11 +1,8 @@
-import { env } from '../../../../config/partials/env.js';
 import '../../../../config/partials/defaults.js';
 import { domIndex, domConfig } from '../../../../config/partials/dom.js';
 import '../../../../config/partials/regex.js';
 
-const classes = domIndex.classes;
 const ids = domIndex.ids;
-const maxColumns = env.app.maxColumns;
 function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
     const { data: { deepClone }, dom: { getElement, getAllElements } } = helpers;
     const { errors, log } = services;
@@ -75,35 +72,6 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
             }
         }, 'Error occurred while enforcing swatch rules.');
     }
-    function getUpdatedColumnSizes(columns, columnID, newSize) {
-        const minSize = domConfig.minColumnSize;
-        const maxSize = domConfig.maxColumnSize;
-        const adjustedSize = Math.max(minSize, Math.min(newSize, maxSize));
-        const columnIndex = columns.findIndex(col => col.id === columnID);
-        if (columnIndex === -1)
-            return columns;
-        const sizeDifference = adjustedSize - columns[columnIndex].size;
-        // update the target column and adjust others
-        const fixedColumns = [...columns.slice(0, maxColumns)];
-        const updatedColumns = fixedColumns.map(col => {
-            if (col.id === columnID) {
-                return { ...col, size: adjustedSize };
-            }
-            if (!col.isLocked) {
-                return {
-                    ...col,
-                    size: col.size - sizeDifference / (fixedColumns.length - 1)
-                };
-            }
-            return col;
-        });
-        // normalize sizes to ensure total is 100%
-        const totalSize = updatedColumns.reduce((sum, col) => sum + col.size, 0);
-        return updatedColumns.map(col => ({
-            ...col,
-            size: col.size * (100 / totalSize)
-        }));
-    }
     function hideTooltip() {
         return errors.handleSync(() => {
             const tooltip = getElement('.tooltip');
@@ -153,29 +121,6 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
             });
         }, 'Error occurred while reading file.');
     }
-    function scanPaletteColumns() {
-        return errors.handleSync(() => {
-            if (document.readyState === 'loading') {
-                log.warn('Document not ready. Returning empty array.', `utils.dom.scanPaletteColumns`);
-                return [];
-            }
-            const paletteColumns = getAllElements(`.${classes.paletteColumn}`);
-            if (paletteColumns.length !== maxColumns) {
-                log.warn(`Expected ${maxColumns} columns, but found ${paletteColumns.length}`, `utils.dom.scanPaletteColumns`);
-            }
-            // Normalize to exactly 5 columns, padding if necessary
-            const normalizedColumns = Array.from({ length: 5 }).map((_, index) => {
-                const column = paletteColumns[index] ?? document.createElement('div'); // fallback if missing
-                column.id = `palette-column-${index + 1}`;
-                column.classList.add(classes.paletteColumn);
-                const id = index + 1;
-                const size = column.clientWidth / 5;
-                const isLocked = column.classList.contains(classes.locked);
-                return { id, position: index + 1, size, isLocked };
-            });
-            return normalizedColumns;
-        }, 'Error occurred while scanning palette columns.');
-    }
     function switchColorSpaceInDOM(targetFormat) {
         return errors.handleSync(() => {
             const colorTextOutputBoxes = Array.from(getAllElements('.color-text-output-box'));
@@ -191,10 +136,6 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
                 const convertFn = helpers.color.getConversionFn(currentFormat, targetFormat);
                 if (!convertFn) {
                     log.error(`Conversion from ${currentFormat} to ${targetFormat} is not supported.`, `utils.dom.switchColorSpaceInDOM`);
-                    continue;
-                }
-                if (colorValues.format === 'xyz') {
-                    log.error('Cannot convert from XYZ to another color space.', `utils.dom.switchColorSpaceInDOM`);
                     continue;
                 }
                 const clonedColor = deepClone(colorValues);
@@ -251,12 +192,10 @@ function partialDOMUtilitiesFactory(colorUtils, helpers, services, validate) {
         createTooltip,
         downloadFile,
         enforceSwatchRules,
-        getUpdatedColumnSizes,
         hideTooltip,
         positionTooltip,
         removeTooltip,
         readFile,
-        scanPaletteColumns,
         switchColorSpaceInDOM,
         updateColorBox,
         updateHistory

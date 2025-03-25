@@ -15,10 +15,7 @@ const regex = {
             number + percent
         ]),
         hsl: colorFunc('hsl', [decimal, decimal + percent, decimal + percent]),
-        hsv: colorFunc('hsv', [decimal, decimal + percent, decimal + percent]),
-        lab: colorFunc('lab', [decimal, decimal, decimal]),
-        rgb: colorFunc('rgb', [decimal, decimal, decimal]),
-        xyz: colorFunc('xyz', [decimal, decimal, decimal])
+        rgb: colorFunc('rgb', [decimal, decimal, decimal])
     },
     css: {
         cmyk: colorFunc('cmyk', [
@@ -28,10 +25,7 @@ const regex = {
             number + percent
         ]),
         hsl: colorFunc('hsl', [number, number + percent, number + percent]),
-        hsv: colorFunc('hsv', [number, number + percent, number + percent]),
-        lab: colorFunc('lab', [decimal, decimal, decimal]),
-        rgb: colorFunc('rgb', [number, number, number]),
-        xyz: colorFunc('xyz', [decimal, decimal, decimal])
+        rgb: colorFunc('rgb', [number, number, number])
     },
     dom: {
         hex: /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/i,
