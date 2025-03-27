@@ -1,0 +1,1 @@
+const t=()=>({getAllElements(e){console.log(`[domHelpers > getAllElements]: Looking for elements with selector: ${e}.`);const l=document.querySelectorAll(e);return console.log(`[getAllElements]: Found ${l.length} elements.`),l},getElement(e){return document.getElementById(e)}});export{t as domHelpersFactory};

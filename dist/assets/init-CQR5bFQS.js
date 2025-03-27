@@ -1,0 +1,2 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/utils-CR9Y32DS.js","assets/index-Bu01b8jX.js","assets/index-BwwiTJqK.css"])))=>i.map(i=>d[i]);
+import{_ as o}from"./index-Bu01b8jX.js";async function c(i,t){const{errors:r}=t;return await r.handleAsync(async()=>{const{utilitiesFactory:a}=await o(async()=>{const{utilitiesFactory:n}=await import("./utils-CR9Y32DS.js");return{utilitiesFactory:n}},__vite__mapDeps([0,1,2]));return await a(i,t)},"Error initializing utils")}export{c as initializeUtilities};

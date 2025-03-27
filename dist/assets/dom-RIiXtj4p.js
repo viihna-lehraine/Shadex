@@ -1,0 +1,1 @@
+const t={paletteColumn:"palette-column"},e={divs:{paletteHistory:"palette-history"},inputs:{columnCount:"palette-column-count-selector",limitDarkChkbx:"limit-dark-chkbx",limitGrayChkbx:"limit-gray-chkbx",limitLightChkbx:"limit-light-chkbx",paletteColumn:"palette-column-selector",paletteType:"palette-type-selector"}},l={tooltipFadeOut:50},o={classes:t,ids:e};export{l as a,o as d};

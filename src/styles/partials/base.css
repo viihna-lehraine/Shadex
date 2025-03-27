@@ -1,0 +1,171 @@
+/* File: src/styles/partials/base.css */
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100vh;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	font-family: Arial, sans-serif;
+	background: #ddd;
+}
+
+.app {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	max-width: 900px;
+	height: 100%;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+/* Top Bar */
+.top-bar {
+	display: flex;
+	margin-top: 0;
+	width: 100%;
+	min-height: 8vh;
+}
+
+.logo-field {
+	flex: 1;
+	font-size: clamp(12px, 2vw, 16px);
+	font-weight: bold;
+	padding: 3px;
+	background: #222;
+	color: white;
+	text-align: center;
+}
+
+.controls {
+	flex: 2;
+	display: flex;
+	gap: 5px;
+	align-items: center;
+	justify-content: center;
+}
+
+select {
+	padding: 2px;
+	font-size: clamp(10px, 2vw, 14px);
+}
+
+/* Palette */
+.palette-container {
+	display: flex;
+	justify-content: space-evenly;
+	height: 70vh;
+	width: 100%;
+	padding: 2px;
+	flex-wrap: nowrap;
+}
+
+.palette-column {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background: #ccc;
+	height: 90%;
+	padding: 2px;
+	border-radius: 5px;
+	border: 1px solid black;
+}
+
+.palette-column input {
+	width: 80%;
+	text-align: center;
+	font-size: clamp(10px, 1.5vw, 14px);
+}
+
+.color-input-modal {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: white;
+	padding: 10px;
+	border: 1px solid black;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+	z-index: 100;
+}
+
+/* Adjustments */
+.adjustment-buttons {
+	display: flex;
+	gap: 3px;
+}
+
+/* Options */
+.conversion-buttons {
+	display: flex;
+	gap: 3px;
+}
+
+/* Buttons */
+button {
+	padding: 3px;
+	font-size: clamp(10px, 1.8vw, 14px);
+	border: none;
+	background: #444;
+	color: white;
+	cursor: pointer;
+	border-radius: 3px;
+}
+
+button:hover {
+	background: #666;
+}
+
+/* Footer */
+footer {
+	font-size: clamp(10px, 1.5vw, 12px);
+	padding: 3px;
+	text-align: center;
+}
+
+.hidden {
+	display: none;
+}
+
+.tooltip {
+	position: absolute;
+	background: rgba(0, 0, 0, 0.8);
+	color: white;
+	padding: 6px 10px;
+	border-radius: 4px;
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
+}
+
+.tooltip-container {
+	position: absolute;
+	background-color: rgba(0, 0, 0, 0.8);
+	color: white;
+	padding: 5px 10px;
+	border-radius: 4px;
+	font-size: 14px;
+	white-space: nowrap;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.15s ease-in-out;
+	pointer-events: none;
+	z-index: 1000;
+}
+
+/* TEMPORARY STYLES - REMOVE LATER */
+
+#palette-history {
+	display: none;
+}
